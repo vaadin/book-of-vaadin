@@ -2,202 +2,209 @@
 
 <project name="IT Mill Toolkit Documentation" basedir="../" default="package-all">
 
-	<target name="package-all" depends="clean-all, init, docs"/>
+    <target name="package-all" depends="clean-all, init, docs"/>
 
-	<!-- Clean results - - - - - - - - - - - - - - - - - - - - - - - - - -->
-	<target name="clean-all" depends="">
-		<property file="build/build.properties" />
-		<delete dir="${result-path}" includes="**/*" followsymlinks="false" defaultexcludes="false" includeemptydirs="true" failonerror="false">
-		</delete>
-	</target>
+    <!-- Ant contrib required for flow control (for loop, if, property override) -->
+    <taskdef resource="net/sf/antcontrib/antlib.xml">
+        <classpath>
+            <pathelement location="build/lib/ant-contrib-1.0b3.jar" />
+        </classpath>
+    </taskdef>
 
     <!-- ================================================================== -->
-	<!-- Initialization - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+    <!-- Clean results                                                      -->
+    <!-- ================================================================== -->
+    <target name="clean-all" depends="">
+        <property file="build/build.properties" />
+        <delete dir="${result-path}" includes="**/*" followsymlinks="false" defaultexcludes="false" includeemptydirs="true" failonerror="false">
+        </delete>
+    </target>
+
+    <!-- ================================================================== -->
+    <!-- Initialization - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <!-- ================================================================== -->
 
-	<target name="init" depends="">
+    <target name="init">
 
-		<property file="build/build.properties" />
-		<property file="build/VERSION.properties" />
-		<property file="build/html-style.properties" />
+        <property file="build/build.properties" />
+        <property file="build/VERSION.properties" />
+        <property file="build/html-style.properties" />
 
-        <echo>Toolkit package is: ${toolkit-package}</echo>
+        <!-- Can run XEP only if license is available. -->
+        <available file="build/lib/XEP/license.xml" property="xep.license.available" />
 
-		<!-- Can run XEP only if license is available. -->
-		<available file="build/lib/XEP/license.xml" property="xep.license.available" />
+        <!-- Create result dir unless already exists -->
+        <mkdir dir="${result-path}" />
 
-		<!-- Create result dir unless already exists -->
-		<mkdir dir="${result-path}" />
+        <echo message="Prepared to build documentation for ${product-file} version ${version}" />
 
-		<echo>We are on ${platform} platform (${os.name} ${os.version}), using ${gwt-dir}/${platform}/${lib-gwt-dev}.</echo>
+        <!-- Output directory -->
+        <property name="output-dir" value="${result-path}/package" />
+        <mkdir dir="${output-dir}" />
 
-		<echo message="Prepared to build ${product-file} version ${version} packages" />
+        <!-- Create Output Directory Hierarchy -->
+        <mkdir dir="${output-dir}/WebContent" />
+        <mkdir dir="${output-dir}/WebContent/doc" />
+        <mkdir dir="${output-dir}/WebContent/doc/manual" />
 
-		<!-- Output directory -->
-		<property name="output-dir" value="${result-path}/package" />
-		<mkdir dir="${output-dir}" />
-
-		<!-- Create Output Directory Hierarchy -->
-		<mkdir dir="${output-dir}/WebContent" />
-		<mkdir dir="${output-dir}/WebContent/doc" />
-		<mkdir dir="${output-dir}/WebContent/doc/manual" />
-		<mkdir dir="${output-dir}/WebContent/doc/api" />
-
-	</target>
+    </target>
 
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-	<!-- Copy and preprocess sources for packaging                           -->
+    <!-- Copy and preprocess sources for packaging                           -->
     <!-- NOTE: Replaces <version></version> tags with build version tag for  -->
     <!-- some "textual" files                                                -->
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-	<target name="preprocess-src"/>
-	<target name="preprocess-src-obsolete">
-		<loadfile property="ITMillApache2LicenseForJavaFiles" srcFile="build/ITMillApache2LicenseForJavaFiles.txt" />
-		<mkdir dir="${result-path}/src" />
-		<echo>Copying src directory and processing copied files.</echo>
-		<echo>Replacing &lt;version&gt; tag with build version for html/css/xml files.</echo>
-		<copy todir="${result-path}/src">
-			<filterset>
-				<filter token="ITMillApache2LicenseForJavaFiles" value="${ITMillApache2LicenseForJavaFiles}" />
-				<filter token="VERSION" value="${version}" />
-			</filterset>
-			<fileset dir="src">
-				<patternset>
-					<include name="**/*.html" />
-					<include name="**/*.css" />
-					<include name="**/*.xml" />
-				</patternset>
-			</fileset>
-		</copy>
+    <target name="preprocess-src"/>
+    <target name="preprocess-src-obsolete">
+        <loadfile property="ITMillApache2LicenseForJavaFiles" srcFile="build/ITMillApache2LicenseForJavaFiles.txt" />
+        <mkdir dir="${result-path}/src" />
+        <echo>Copying src directory and processing copied files.</echo>
+        <echo>Replacing &lt;version&gt; tag with build version for html/css/xml files.</echo>
+        <copy todir="${result-path}/src">
+            <filterset>
+                <filter token="ITMillApache2LicenseForJavaFiles" value="${ITMillApache2LicenseForJavaFiles}" />
+                <filter token="VERSION" value="${version}" />
+            </filterset>
+            <fileset dir="src">
+                <patternset>
+                    <include name="**/*.html" />
+                    <include name="**/*.css" />
+                    <include name="**/*.xml" />
+                </patternset>
+            </fileset>
+        </copy>
 
-		<!-- Unify mix usage of mac/Linux/Win characters -->
-		<echo>Unifying mix usage of Mac/Linux/Win linefeeds for java/html/css/xml files.</echo>
-		<fixcrlf srcdir="${result-path}/src" eol="crlf" tablength="4" tab="asis" includes="**/*.html **/*.css **/*.xml" />
+        <!-- Unify mix usage of mac/Linux/Win characters -->
+        <echo>Unifying mix usage of Mac/Linux/Win linefeeds for java/html/css/xml files.</echo>
+        <fixcrlf srcdir="${result-path}/src" eol="crlf" tablength="4" tab="asis" includes="**/*.html **/*.css **/*.xml" />
 
-		<!-- Add other files such as images, these are not filtered or processed by fixcrlf task -->
-		<echo>Copying non java/html/css/xml files such as images.</echo>
-		<copy todir="${result-path}/src">
-			<fileset dir="src">
-				<patternset>
-					<exclude name="**/.svn" />
-					<exclude name="**/*.html" />
-					<exclude name="**/*.css" />
-					<exclude name="**/*.xml" />
-				</patternset>
-			</fileset>
-		</copy>
+        <!-- Add other files such as images, these are not filtered or processed by fixcrlf task -->
+        <echo>Copying non java/html/css/xml files such as images.</echo>
+        <copy todir="${result-path}/src">
+            <fileset dir="src">
+                <patternset>
+                    <exclude name="**/.svn" />
+                    <exclude name="**/*.html" />
+                    <exclude name="**/*.css" />
+                    <exclude name="**/*.xml" />
+                </patternset>
+            </fileset>
+        </copy>
 
-	</target>
+    </target>
 
     <!-- ================================================================== -->
     <!-- Build Documentation.                                               -->
     <!-- ================================================================== -->
-	<target name="docs" depends="manual-pdf,manual-html">
-	</target>
+    <target name="docs" depends="manual-html">
+    </target>
 
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <!-- Package Documentation: Add documentation including style files      -->
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-	<target name="package-docs">
-		<copy todir="${output-dir}/WebContent/doc/manual/html-style">
-			<fileset dir="manual/html-style">
-				<exclude name="**/.svn" />
-				<exclude name="**/test.html" />
-			</fileset>
-		</copy>
-		<copy todir="${output-dir}/WebContent/doc">
-			<fileset dir="/">
-				<exclude name="**/.svn" />
-				<include name="dtd/**/*.dtd" />
-			</fileset>
-		</copy>
-	</target>
+    <target name="package-docs">
+        <copy todir="${output-dir}/WebContent/doc/manual/html-style">
+            <fileset dir="manual/html-style">
+                <exclude name="**/.svn" />
+                <exclude name="**/test.html" />
+            </fileset>
+        </copy>
+        <copy todir="${output-dir}/WebContent/doc">
+            <fileset dir="/">
+                <exclude name="**/.svn" />
+                <include name="dtd/**/*.dtd" />
+            </fileset>
+        </copy>
+    </target>
 
     <!-- ================================================================== -->
     <!-- Build Reference Manual.                                            -->
     <!-- ================================================================== -->
 
     <!-- Initialize properties especially for the Reference Manual. -->
-	<target name="init-manual" depends="">
+    <target name="init-manual" depends="">
         <!-- Sets the current date as the publication date of the Manual. -->
         <tstamp>
             <format property="manual.pubdate" pattern="yyyy-MM-dd"/>
         </tstamp>
 
         <!-- Classpath for running the XSLT processor. -->
-		<path id="docbook-xsl.classpath">
-			<pathelement path="build/lib/fserializer.jar" />
-			<pathelement path="build/lib/xalan.jar" />
-			<pathelement path="build/lib/xercesImpl.jar" />
-			<pathelement path="build/lib/xml-apis.jar" />
-		</path>
-	</target>
-
-	<!-- Build PDF manual from sources or just copy it. -->
-	<target name="manual-pdf" depends="init, init-manual, build-manual-pdf, copy-manual-pdf">
-	</target>
-
-	<!-- Just copy a prebuilt PDF manual. -->
-	<target name="copy-manual-pdf" unless="xep.license.available">
-		<echo>PDF Manual: No XEP license available, just copy a prebuilt PDF.</echo>
-		<copy file="manual/book.pdf" tofile="${output-dir}/WebContent/doc/manual.pdf" />
-	</target>
+        <path id="docbook-xsl.classpath">
+            <pathelement path="build/lib/fserializer.jar" />
+            <pathelement path="build/lib/xalan.jar" />
+            <pathelement path="build/lib/xercesImpl.jar" />
+            <pathelement path="build/lib/xml-apis.jar" />
+        </path>
+    </target>
 
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-	<!-- Build PDF manual with XEP FO processor                              -->
+    <!-- Build PDF manual                                                    -->
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-	<target name="build-manual-pdf" if="xep.license.available">
-		<echo>PDF Manual: processing images (TBD)</echo>
-		<!-- TBD -->
-		<echo>PDF Manual: converting xml to fo</echo>
+
+    <!-- Build PDF manual from sources or just copy it. -->
+    <target name="manual-pdf" depends="init, init-manual, build-manual-pdf, copy-manual-pdf">
+    </target>
+
+    <!-- Just copy a prebuilt PDF manual. -->
+    <target name="copy-manual-pdf" unless="xep.license.available">
+        <echo>PDF Manual: No XEP license available, just copy a prebuilt PDF.</echo>
+        <copy file="manual/book.pdf" tofile="${output-dir}/WebContent/doc/manual.pdf" />
+    </target>
+
+    <!-- Build PDF manual with XEP FO processor. -->
+    <target name="build-manual-pdf" if="xep.license.available">
+        <echo>PDF Manual: processing images (TBD)</echo>
+        <!-- TBD -->
+        <echo>PDF Manual: converting xml to fo</echo>
 
         <echo>Publication date is ${manual.pubdate}</echo>
 
-		<java classname="org.apache.xalan.xslt.Process" failonerror="yes" fork="yes" maxmemory="512m">
-			<arg value="-xsl" />
-			<arg value="build/docbook/conf/custom-fo-docbook.xsl" />
-			<arg value="-in" />
-			<arg value="manual/book.xml" />
-			<arg value="-out" />
-			<arg value="${result-path}/book.fo" />
-			<arg value="-param" />
-			<arg value="section.autolabel" />
-			<arg value="1" />
-			<arg value="-param" />
-			<arg value="section.label.includes.component.label" />
-			<arg value="1" />
-			<arg value="-param" />
-			<arg value="section.autolabel.max.depth" />
-			<arg value="2" />
-			<arg value="-param" />
-			<arg value="draft.watermark.image" />
-			<arg value="''" />
-			<arg value="-param" />
-			<arg value="draft.mode" />
-			<arg value="'no'" />
-			<arg value="-param" />
-			<arg value="double.sided" />
-			<arg value="1" />
-			<arg value="-param" />
-			<arg value="manual.pubdate" />
-			<arg value="${manual.pubdate}" />
-			<arg value="-param" />
-			<arg value="manual.version" />
-			<arg value="${version}" />
-			<classpath refid="docbook-xsl.classpath" />
-		</java>
-		<echo>PDF Manual: converting fo to pdf</echo>
-		<!-- Run XEP FO processor to convert FO to PDF -->
-		<java classname="com.renderx.xep.XSLDriver" error="${result-path}/xep-error.log" failonerror="yes" fork="yes" maxmemory="512m" input="${result-path}/book.fo" output="${output-dir}/WebContent/doc/manual.pdf">
-			<arg value="-Dcom.renderx.xep.CONFIG=build/lib/XEP/xep.xml" />
-			<classpath>
-				<pathelement location="build/lib/XEP/lib/tools.jar" />
-				<pathelement location="build/lib/XEP/lib/xep.jar" />
-				<pathelement location="build/lib/XEP/lib/saxon.jar" />
-				<pathelement location="build/lib/XEP/lib/xt.jar" />
-			</classpath>
-		</java>
-	</target>
+        <java classname="org.apache.xalan.xslt.Process" failonerror="yes" fork="yes" maxmemory="512m">
+            <arg value="-xsl" />
+            <arg value="build/docbook/conf/custom-fo-docbook.xsl" />
+            <arg value="-in" />
+            <arg value="manual/book.xml" />
+            <arg value="-out" />
+            <arg value="${result-path}/book.fo" />
+            <arg value="-param" />
+            <arg value="section.autolabel" />
+            <arg value="1" />
+            <arg value="-param" />
+            <arg value="section.label.includes.component.label" />
+            <arg value="1" />
+            <arg value="-param" />
+            <arg value="section.autolabel.max.depth" />
+            <arg value="2" />
+            <arg value="-param" />
+            <arg value="draft.watermark.image" />
+            <arg value="''" />
+            <arg value="-param" />
+            <arg value="draft.mode" />
+            <arg value="'no'" />
+            <arg value="-param" />
+            <arg value="double.sided" />
+            <arg value="1" />
+            <arg value="-param" />
+            <arg value="manual.pubdate" />
+            <arg value="${manual.pubdate}" />
+            <arg value="-param" />
+            <arg value="manual.version" />
+            <arg value="${version}" />
+            <classpath refid="docbook-xsl.classpath" />
+        </java>
+
+        <echo>PDF Manual: converting fo to pdf</echo>
+        <!-- Run XEP FO processor to convert FO to PDF -->
+        <java classname="com.renderx.xep.XSLDriver" error="${result-path}/xep-error.log" failonerror="yes" fork="yes" maxmemory="512m" input="${result-path}/book.fo" output="${output-dir}/WebContent/doc/manual.pdf">
+            <arg value="-Dcom.renderx.xep.CONFIG=build/lib/XEP/xep.xml" />
+            <classpath>
+                <pathelement location="build/lib/XEP/lib/tools.jar" />
+                <pathelement location="build/lib/XEP/lib/xep.jar" />
+                <pathelement location="build/lib/XEP/lib/saxon.jar" />
+                <pathelement location="build/lib/XEP/lib/xt.jar" />
+            </classpath>
+        </java>
+    </target>
 
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <!-- HTML Manual                                                         -->
@@ -205,7 +212,7 @@
 
     <!-- Common initialization tasks for a HTML manual.                                   -->
     <!-- Some properties must be defined in the more specific HTML manual initialization. -->
-	<target name="init-manual-html-common" depends="preprocess-src">
+    <target name="init-manual-html-common" depends="preprocess-src">
         <!-- Create the manual output directory if it doesn't already exist. -->
         <mkdir dir="${manual.html.output.dir}"/>
 
@@ -213,89 +220,91 @@
         <property name="manual.html.xsl.processed" value="build/docbook/conf/custom-html-processed.xsl"/>
 
         <!-- Replace tags in the HTML stylesheet template. -->
-		<delete file="${manual.html.xsl.processed}" />
-		<copy file="${manual.html.xsl.template}" tofile="${manual.html.xsl.processed}">
-			<filterchain>
-				<replacetokens>
-					<token key="BODYHEADER" value="${html.body.start1}${docbook.head.title}${html.body.start2}" />
-					<token key="BODYFOOTER" value="${html.body.end}" />
-				</replacetokens>
-			</filterchain>
-		</copy>
+        <delete file="${manual.html.xsl.processed}" />
+        <copy file="${manual.html.xsl.template}" tofile="${manual.html.xsl.processed}">
+            <filterchain>
+                <replacetokens>
+                    <token key="BODYHEADER" value="${html.body.start1}${docbook.head.title}${html.body.start2}" />
+                    <token key="BODYFOOTER" value="${html.body.end}" />
+                </replacetokens>
+            </filterchain>
+        </copy>
     </target>
 
-	<target name="manual-html-build" depends="init-manual-html, init-manual-html-common">
-		<java classname="org.apache.xalan.xslt.Process" failonerror="yes" fork="yes" maxmemory="512m">
-			<arg value="-in" />
-			<arg value="manual/book.xml" />
-			<arg value="-xsl" />
-			<arg value="${manual.html.xsl}" />
+    <target name="manual-html-build" depends="init-manual-html, init-manual-html-common">
+        <java classname="org.apache.xalan.xslt.Process" failonerror="yes" fork="yes" maxmemory="512m">
+            <arg value="-in" />
+            <arg value="manual/book.xml" />
+            <arg value="-xsl" />
+            <arg value="${manual.html.xsl}" />
             <!-- The output file will be empty for eclipse plugin. -->
-			<arg value="-out" />
-			<arg value="${manual.html.output.index}" />
-			<arg value="-param" />
-			<arg value="section.autolabel" />
-			<arg value="1" />
-			<arg value="-param" />
-			<arg value="section.label.includes.component.label" />
-			<arg value="1" />
-			<arg value="-param" />
-			<arg value="section.autolabel.max.depth" />
-			<arg value="2" />
-			<arg value="-param" />
-			<arg value="use.extensions" />
-			<arg value="1" />
-			<arg value="-param" />
-			<arg value="manual.pubdate" />
-			<arg value="${manual.pubdate}" />
-			<arg value="-param" />
-			<arg value="manual.version" />
-			<arg value="${version}" />
+            <arg value="-out" />
+            <arg value="${manual.html.output.index}" />
+            <arg value="-param" />
+            <arg value="section.autolabel" />
+            <arg value="1" />
+            <arg value="-param" />
+            <arg value="section.label.includes.component.label" />
+            <arg value="1" />
+            <arg value="-param" />
+            <arg value="section.autolabel.max.depth" />
+            <arg value="2" />
+            <arg value="-param" />
+            <arg value="use.extensions" />
+            <arg value="1" />
+            <arg value="-param" />
+            <arg value="manual.pubdate" />
+            <arg value="${manual.pubdate}" />
+            <arg value="-param" />
+            <arg value="manual.version" />
+            <arg value="${version}" />
             <!-- This is needed only for the Eclipse Help plugin. -->
-			<arg value="-param" />
-			<arg value="eclipse.plugin.version" />
-			<arg value="${eclipse.plugin.manual.version}" />
-			<classpath refid="docbook-xsl.classpath" />
-		</java>
+            <arg value="-param" />
+            <arg value="eclipse.plugin.version" />
+            <arg value="${eclipse.plugin.manual.version}" />
+            <classpath refid="docbook-xsl.classpath" />
+        </java>
 
-		<delete file="${manual.html.xsl.processed}" />
-		<copy todir="${output-dir}/WebContent/doc/eclipse/img">
-			<fileset dir="manual/img">
-				<exclude name="**/.svn" />
-			</fileset>
-		</copy>
+        <delete file="${manual.html.xsl.processed}" />
+
+        <!-- Copy images to output directory. -->
+        <copy todir="${manual.html.output.dir}/img">
+            <fileset dir="manual/img">
+                <exclude name="**/.svn" />
+            </fileset>
+        </copy>
     </target>
 
     <!-- Configuration for building the regular HTML manual. -->
-	<target name="init-manual-html" depends="init, init-manual">
+    <target name="init-manual-html" depends="init, init-manual">
         <property name="manual.html.xsl" value="build/docbook/conf/manual-html.xsl"/>
         <property name="manual.html.output.dir" value="${output-dir}/WebContent/doc/manual"/>
         <property name="manual.html.output.index" value="${manual.html.output.dir}/index.html"/>
 
         <property name="output-dir-manual" value="${output-dir}/WebContent/doc/manual" />
 
-		<echo>Manual: HTML</echo>
-		<echo>Published: ${manual.pubdate}</echo>
+        <echo>Manual: HTML</echo>
+        <echo>Published: ${manual.pubdate}</echo>
     </target>
 
-	<target name="manual-html" depends="init, init-manual, init-manual-html, init-manual-html-common, manual-html-build">
-	</target>
+    <target name="manual-html" depends="init, init-manual, init-manual-html, init-manual-html-common, manual-html-build">
+    </target>
 
-	<!-- ant contrib required for flow control (for loop, if, property override) -->
-	<taskdef resource="net/sf/antcontrib/antlib.xml">
-		<classpath>
-			<pathelement location="build/lib/ant-contrib-1.0b3.jar" />
-		</classpath>
-	</taskdef>
+    <!-- ant contrib required for flow control (for loop, if, property override) -->
+    <taskdef resource="net/sf/antcontrib/antlib.xml">
+        <classpath>
+            <pathelement location="build/lib/ant-contrib-1.0b3.jar" />
+        </classpath>
+    </taskdef>
 
-	<target name="init-manual-eclipse" depends="">
+    <target name="init-manual-eclipse" depends="">
         <!-- Timestamp in YYYYMMDDHHMM format for plugin version number. -->
         <tstamp>
             <format property="eclipse.plugin.manual.pubtime" pattern="yyyyMMddkkmm"/>
         </tstamp>
 
         <property name="eclipse.plugin.manual.version" value="${version}.v${eclipse.plugin.manual.pubtime}" />
-		<echo>Manual: Eclipse Help Plugin (version ${eclipse.plugin.manual.version})</echo>
+        <echo>Manual: Eclipse Help Plugin (version ${eclipse.plugin.manual.version})</echo>
 
         <property name="manual.html.xsl" value="build/docbook/conf/manual-eclipse-plugin.xsl"/>
         <property name="manual.html.output.dir" value="${output-dir}/WebContent/doc/eclipse"/>
@@ -310,9 +319,9 @@
 
     <!-- Builds Eclipse Help plugin. Uses the manual-html-build target  -->
     <!-- to build the HTML content of the manual.                       -->
-	<target name="manual-eclipse" depends="init, init-manual, init-manual-eclipse, init-manual-html-common, manual-html-build">
+    <target name="manual-eclipse" depends="init, init-manual, init-manual-eclipse, init-manual-html-common, manual-html-build">
         <!-- The index-eclipse.html file is empty. -->
-		<delete file="${manual.html.output.index}" />
+        <delete file="${manual.html.output.index}" />
 
         <!-- Plugin JAR filename -->
         <property name="eclipse.plugin.manual.jar-name"
@@ -321,9 +330,9 @@
         <!-- Package the JAR. -->
         <jar jarfile="${output-dir}/${eclipse.plugin.manual.jar-name}" compress="true">
             <fileset dir="${manual.html.output.dir}">
-				<patternset>
-					<include name="**/*" />
-				</patternset>
+                <patternset>
+                    <include name="**/*" />
+                </patternset>
             </fileset>
             <manifest>
                 <attribute name="Built-By" value="${user.name}"/>
@@ -333,154 +342,165 @@
                 <attribute name="Bundle-Vendor" value="IT Mill Inc."/>
             </manifest>
         </jar>
-	</target>
+    </target>
 
     <!-- ================================================================== -->
     <!-- Application Tutorial.                                              -->
     <!-- ================================================================== -->
 
     <!-- Initialize properties especially for the Reference Tutorial. -->
-	<target name="init-tutorial" depends="">
+    <target name="init-tutorial" depends="">
         <!-- Sets the current date as the publication date of the Tutorial. -->
         <tstamp>
             <format property="tutorial.pubdate" pattern="yyyy-MM-dd"/>
         </tstamp>
 
-		<mkdir dir="${output-dir}/WebContent/doc/tutorial" />
-	</target>
+        <mkdir dir="${output-dir}/WebContent/doc/tutorial" />
+    </target>
 
-	<!-- Build PDF tutorial from sources or just copy it. -->
-	<target name="tutorial-pdf" depends="init, init-tutorial, build-tutorial-pdf, copy-tutorial-pdf">
-	</target>
+    <!-- Build PDF tutorial from sources or just copy it. -->
+    <target name="tutorial-pdf" depends="init, init-tutorial, build-tutorial-pdf, copy-tutorial-pdf">
+    </target>
 
-	<!-- Just copy a prebuilt PDF tutorial. -->
-	<target name="copy-tutorial-pdf" unless="xep.license.available">
-		<echo>PDF Tutorial: No XEP license available, just copy a prebuilt PDF.</echo>
-		<copy file="tutorial/itmill-toolkit-tutorial.pdf" tofile="${output-dir}/WebContent/doc/itmill-toolkit-tutorial.pdf" />
-	</target>
+    <!-- Just copy a prebuilt PDF tutorial. -->
+    <target name="copy-tutorial-pdf" unless="xep.license.available">
+        <echo>PDF Tutorial: No XEP license available, just copy a prebuilt PDF.</echo>
+        <copy file="tutorial/itmill-toolkit-tutorial.pdf" tofile="${output-dir}/WebContent/doc/itmill-toolkit-tutorial.pdf" />
+    </target>
 
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-	<!-- Build PDF tutorial with XEP FO processor                            -->
+    <!-- Build PDF tutorial with XEP FO processor                            -->
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-	<target name="build-tutorial-pdf" if="xep.license.available">
-		<echo>PDF Tutorial: processing images (TBD)</echo>
-		<!-- TBD -->
-		<echo>PDF Tutorial: converting xml to fo</echo>
+    <target name="build-tutorial-pdf" if="xep.license.available">
+        <echo>PDF Tutorial: processing images (TBD)</echo>
+        <!-- TBD -->
+        <echo>PDF Tutorial: converting xml to fo</echo>
 
         <echo>Publication date is ${tutorial.pubdate}</echo>
 
-		<java classname="org.apache.xalan.xslt.Process" failonerror="yes" fork="yes" maxmemory="512m">
-			<arg value="-xsl" />
-			<arg value="build/docbook/conf/custom-fo-docbook.xsl" />
-			<arg value="-in" />
-			<arg value="tutorial/tutorial.xml" />
-			<arg value="-out" />
-			<arg value="${result-path}/itmill-toolkit-tutorial.fo" />
-			<arg value="-param" />
-			<arg value="section.autolabel" />
-			<arg value="1" />
-			<arg value="-param" />
-			<arg value="section.label.includes.component.label" />
-			<arg value="1" />
-			<arg value="-param" />
-			<arg value="section.autolabel.max.depth" />
-			<arg value="2" />
-			<arg value="-param" />
-			<arg value="draft.watermark.image" />
-			<arg value="''" />
-			<arg value="-param" />
-			<arg value="draft.mode" />
-			<arg value="'no'" />
-			<arg value="-param" />
-			<arg value="double.sided" />
-			<arg value="1" />
-			<arg value="-param" />
-			<arg value="manual.pubdate" />
-			<arg value="${tutorial.pubdate}" />
-			<arg value="-param" />
-			<arg value="manual.version" />
-			<arg value="${version}" />
-			<classpath>
-				<pathelement location="build/lib/xalan.jar" />
-				<pathelement location="build/lib/xercesImpl.jar" />
-				<pathelement location="build/lib/xml-apis.jar" />
-			</classpath>
-		</java>
-		<echo>PDF Tutorial: converting fo to pdf</echo>
-		<!-- Run XEP FO processor to convert FO to PDF -->
-		<java classname="com.renderx.xep.XSLDriver" error="${result-path}/xep-error.log" failonerror="yes" fork="yes" maxmemory="512m" input="${result-path}/itmill-toolkit-tutorial.fo" output="${output-dir}/WebContent/doc/itmill-toolkit-tutorial.pdf">
-			<arg value="-Dcom.renderx.xep.CONFIG=build/lib/XEP/xep.xml" />
-			<classpath>
-				<pathelement location="build/lib/XEP/lib/tools.jar" />
-				<pathelement location="build/lib/XEP/lib/xep.jar" />
-				<pathelement location="build/lib/XEP/lib/saxon.jar" />
-				<pathelement location="build/lib/XEP/lib/xt.jar" />
-			</classpath>
-		</java>
-	</target>
+        <java classname="org.apache.xalan.xslt.Process" failonerror="yes" fork="yes" maxmemory="512m">
+            <arg value="-xsl" />
+            <arg value="build/docbook/conf/custom-fo-docbook.xsl" />
+            <arg value="-in" />
+            <arg value="tutorial/tutorial.xml" />
+            <arg value="-out" />
+            <arg value="${result-path}/itmill-toolkit-tutorial.fo" />
+            <arg value="-param" />
+            <arg value="section.autolabel" />
+            <arg value="1" />
+            <arg value="-param" />
+            <arg value="section.label.includes.component.label" />
+            <arg value="1" />
+            <arg value="-param" />
+            <arg value="section.autolabel.max.depth" />
+            <arg value="2" />
+            <arg value="-param" />
+            <arg value="draft.watermark.image" />
+            <arg value="''" />
+            <arg value="-param" />
+            <arg value="draft.mode" />
+            <arg value="'no'" />
+            <arg value="-param" />
+            <arg value="double.sided" />
+            <arg value="1" />
+            <arg value="-param" />
+            <arg value="manual.pubdate" />
+            <arg value="${tutorial.pubdate}" />
+            <arg value="-param" />
+            <arg value="manual.version" />
+            <arg value="${version}" />
+            <classpath>
+                <pathelement location="build/lib/xalan.jar" />
+                <pathelement location="build/lib/xercesImpl.jar" />
+                <pathelement location="build/lib/xml-apis.jar" />
+            </classpath>
+        </java>
+        <echo>PDF Tutorial: converting fo to pdf</echo>
+        <!-- Run XEP FO processor to convert FO to PDF -->
+        <java classname="com.renderx.xep.XSLDriver" error="${result-path}/xep-error.log" failonerror="yes" fork="yes" maxmemory="512m" input="${result-path}/itmill-toolkit-tutorial.fo" output="${output-dir}/WebContent/doc/itmill-toolkit-tutorial.pdf">
+            <arg value="-Dcom.renderx.xep.CONFIG=build/lib/XEP/xep.xml" />
+            <classpath>
+                <pathelement location="build/lib/XEP/lib/tools.jar" />
+                <pathelement location="build/lib/XEP/lib/xep.jar" />
+                <pathelement location="build/lib/XEP/lib/saxon.jar" />
+                <pathelement location="build/lib/XEP/lib/xt.jar" />
+            </classpath>
+        </java>
+    </target>
 
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <!-- HTML Tutorial                                                       -->
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-	<target name="tutorial-html" depends="init, init-tutorial, preprocess-src">
-		<echo>Tutorial: HTML</echo>
+    <target name="tutorial-html" depends="init, init-tutorial, preprocess-src">
+        <echo>Tutorial: HTML</echo>
         <echo>Publication date is ${tutorial.pubdate}</echo>
 
-		<delete file="build/docbook/conf/temp.xsl" />
-		<copy file="build/docbook/conf/custom-html-docbook.xsl" tofile="build/docbook/conf/temp.xsl">
-			<filterchain>
-				<replacetokens>
-					<token key="BODYHEADER" value="${html.body.start1}${docbook.head.title}${html.body.start2}" />
-					<token key="BODYFOOTER" value="${html.body.end}" />
-				</replacetokens>
-			</filterchain>
-		</copy>
-		<path id="docbook-xsl.classpath">
-			<pathelement path="build/lib/fserializer.jar" />
-			<pathelement path="build/lib/xalan.jar" />
-			<pathelement path="build/lib/xercesImpl.jar" />
-			<pathelement path="build/lib/xml-apis.jar" />
-		</path>
-		<java classname="org.apache.xalan.xslt.Process" failonerror="yes" fork="yes" maxmemory="512m">
-			<arg value="-in" />
-			<arg value="tutorial/tutorial.xml" />
-			<arg value="-xsl" />
-			<arg value="build/docbook/conf/temp.xsl" />
-			<arg value="-out" />
-			<arg value="${output-dir}/WebContent/doc/tutorial/index.html" />
-			<arg value="-param" />
-			<arg value="section.autolabel" />
-			<arg value="1" />
-			<arg value="-param" />
-			<arg value="section.label.includes.component.label" />
-			<arg value="1" />
-			<arg value="-param" />
-			<arg value="section.autolabel.max.depth" />
-			<arg value="2" />
-			<arg value="-param" />
-			<arg value="use.extensions" />
-			<arg value="1" />
-			<arg value="-param" />
-			<arg value="manual.pubdate" />
-			<arg value="${tutorial.pubdate}" />
-			<arg value="-param" />
-			<arg value="manual.version" />
-			<arg value="${version}" />
-			<classpath refid="docbook-xsl.classpath" />
-		</java>
-		<delete file="build/docbook/conf/temp.xsl" />
-		<copy todir="${output-dir}/WebContent/doc/tutorial/img">
-			<fileset dir="tutorial/img">
-				<exclude name="**/.svn" />
-			</fileset>
-		</copy>
-	</target>
-
-	<!-- ant contrib required for flow control (for loop, if, property override) -->
-	<taskdef resource="net/sf/antcontrib/antlib.xml">
-		<classpath>
-			<pathelement location="build/lib/ant-contrib-1.0b3.jar" />
-		</classpath>
-	</taskdef>
+        <delete file="build/docbook/conf/temp.xsl" />
+        <copy file="build/docbook/conf/custom-html-docbook.xsl" tofile="build/docbook/conf/temp.xsl">
+            <filterchain>
+                <replacetokens>
+                    <token key="BODYHEADER" value="${html.body.start1}${docbook.head.title}${html.body.start2}" />
+                    <token key="BODYFOOTER" value="${html.body.end}" />
+                </replacetokens>
+            </filterchain>
+        </copy>
+        <path id="docbook-xsl.classpath">
+            <pathelement path="build/lib/fserializer.jar" />
+            <pathelement path="build/lib/xalan.jar" />
+            <pathelement path="build/lib/xercesImpl.jar" />
+            <pathelement path="build/lib/xml-apis.jar" />
+        </path>
+        <java classname="org.apache.xalan.xslt.Process" failonerror="yes" fork="yes" maxmemory="512m">
+            <arg value="-in" />
+            <arg value="tutorial/tutorial.xml" />
+            <arg value="-xsl" />
+            <arg value="build/docbook/conf/temp.xsl" />
+            <arg value="-out" />
+            <arg value="${output-dir}/WebContent/doc/tutorial/index.html" />
+            <arg value="-param" />
+            <arg value="section.autolabel" />
+            <arg value="1" />
+            <arg value="-param" />
+            <arg value="section.label.includes.component.label" />
+            <arg value="1" />
+            <arg value="-param" />
+            <arg value="section.autolabel.max.depth" />
+            <arg value="2" />
+            <arg value="-param" />
+            <arg value="use.extensions" />
+            <arg value="1" />
+            <arg value="-param" />
+            <arg value="manual.pubdate" />
+            <arg value="${tutorial.pubdate}" />
+            <arg value="-param" />
+            <arg value="manual.version" />
+            <arg value="${version}" />
+            <classpath refid="docbook-xsl.classpath" />
+        </java>
+        <delete file="build/docbook/conf/temp.xsl" />
+        <copy todir="${output-dir}/WebContent/doc/tutorial/img">
+            <fileset dir="tutorial/img">
+                <exclude name="**/.svn" />
+            </fileset>
+        </copy>
+    </target>
 
 </project>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: xml
+sgml-omittag:nil
+sgml-shorttag:nil
+sgml-namecase-general:nil
+sgml-general-insert-case:lower
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:4
+sgml-indent-data:t
+sgml-parent-document:nil
+sgml-exposed-tags:nil
+sgml-local-catalogs:("/etc/sgml/catalog" "/usr/share/xemacs21/xemacs-packages/etc/psgml-dtds/CATALOG")
+sgml-local-ecat-files:("ECAT" "~/sgml/ECAT" "/usr/share/sgml/ECAT" "/usr/local/share/sgml/ECAT" "/usr/local/lib/sgml/ECAT")
+End:
+-->
