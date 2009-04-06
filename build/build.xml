@@ -2,8 +2,7 @@
 
 <project name="IT Mill Toolkit Documentation" basedir="../" default="package-all">
 
-	<target name="package-all" depends="clean-all, package-init, init, build, docs, internal-package-mac, internal-package-windows, internal-package-linux, internal-package-war" description="Build public packages for Windows, Linux and Mac platforms.">
-	</target>
+	<target name="package-all" depends="clean-all, init, docs"/>
 
 	<!-- Clean results - - - - - - - - - - - - - - - - - - - - - - - - - -->
 	<target name="clean-all" depends="">
@@ -35,7 +34,7 @@
 		<echo message="Prepared to build ${product-file} version ${version} packages" />
 
 		<!-- Output directory -->
-		<property name="output-dir" value="${result-path}/${product-file}-${version}" />
+		<property name="output-dir" value="${result-path}/package" />
 		<mkdir dir="${output-dir}" />
 
 		<!-- Create Output Directory Hierarchy -->
@@ -46,25 +45,68 @@
 
 	</target>
 
-	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  Documentation 
-   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+	<!-- Copy and preprocess sources for packaging                           -->
+    <!-- NOTE: Replaces <version></version> tags with build version tag for  -->
+    <!-- some "textual" files                                                -->
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+	<target name="preprocess-src"/>
+	<target name="preprocess-src-obsolete">
+		<loadfile property="ITMillApache2LicenseForJavaFiles" srcFile="build/ITMillApache2LicenseForJavaFiles.txt" />
+		<mkdir dir="${result-path}/src" />
+		<echo>Copying src directory and processing copied files.</echo>
+		<echo>Replacing &lt;version&gt; tag with build version for html/css/xml files.</echo>
+		<copy todir="${result-path}/src">
+			<filterset>
+				<filter token="ITMillApache2LicenseForJavaFiles" value="${ITMillApache2LicenseForJavaFiles}" />
+				<filter token="VERSION" value="${version}" />
+			</filterset>
+			<fileset dir="src">
+				<patternset>
+					<include name="**/*.html" />
+					<include name="**/*.css" />
+					<include name="**/*.xml" />
+				</patternset>
+			</fileset>
+		</copy>
+
+		<!-- Unify mix usage of mac/Linux/Win characters -->
+		<echo>Unifying mix usage of Mac/Linux/Win linefeeds for java/html/css/xml files.</echo>
+		<fixcrlf srcdir="${result-path}/src" eol="crlf" tablength="4" tab="asis" includes="**/*.html **/*.css **/*.xml" />
+
+		<!-- Add other files such as images, these are not filtered or processed by fixcrlf task -->
+		<echo>Copying non java/html/css/xml files such as images.</echo>
+		<copy todir="${result-path}/src">
+			<fileset dir="src">
+				<patternset>
+					<exclude name="**/.svn" />
+					<exclude name="**/*.html" />
+					<exclude name="**/*.css" />
+					<exclude name="**/*.xml" />
+				</patternset>
+			</fileset>
+		</copy>
+
+	</target>
+
+    <!-- ================================================================== -->
+    <!-- Build Documentation.                                               -->
+    <!-- ================================================================== -->
 	<target name="docs" depends="manual-pdf,manual-html">
 	</target>
 
-
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-    <!-- Documentation: Add documentation including style files              -->
+    <!-- Package Documentation: Add documentation including style files      -->
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 	<target name="package-docs">
 		<copy todir="${output-dir}/WebContent/doc/manual/html-style">
-			<fileset dir="doc/manual/html-style">
+			<fileset dir="manual/html-style">
 				<exclude name="**/.svn" />
 				<exclude name="**/test.html" />
 			</fileset>
 		</copy>
 		<copy todir="${output-dir}/WebContent/doc">
-			<fileset dir="doc">
+			<fileset dir="/">
 				<exclude name="**/.svn" />
 				<include name="dtd/**/*.dtd" />
 			</fileset>
@@ -98,7 +140,7 @@
 	<!-- Just copy a prebuilt PDF manual. -->
 	<target name="copy-manual-pdf" unless="xep.license.available">
 		<echo>PDF Manual: No XEP license available, just copy a prebuilt PDF.</echo>
-		<copy file="doc/manual/book.pdf" tofile="${output-dir}/WebContent/doc/manual.pdf" />
+		<copy file="manual/book.pdf" tofile="${output-dir}/WebContent/doc/manual.pdf" />
 	</target>
 
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
@@ -115,7 +157,7 @@
 			<arg value="-xsl" />
 			<arg value="build/docbook/conf/custom-fo-docbook.xsl" />
 			<arg value="-in" />
-			<arg value="doc/manual/book.xml" />
+			<arg value="manual/book.xml" />
 			<arg value="-out" />
 			<arg value="${result-path}/book.fo" />
 			<arg value="-param" />
@@ -185,7 +227,7 @@
 	<target name="manual-html-build" depends="init-manual-html, init-manual-html-common">
 		<java classname="org.apache.xalan.xslt.Process" failonerror="yes" fork="yes" maxmemory="512m">
 			<arg value="-in" />
-			<arg value="doc/manual/book.xml" />
+			<arg value="manual/book.xml" />
 			<arg value="-xsl" />
 			<arg value="${manual.html.xsl}" />
             <!-- The output file will be empty for eclipse plugin. -->
@@ -218,7 +260,7 @@
 
 		<delete file="${manual.html.xsl.processed}" />
 		<copy todir="${output-dir}/WebContent/doc/eclipse/img">
-			<fileset dir="doc/manual/img">
+			<fileset dir="manual/img">
 				<exclude name="**/.svn" />
 			</fileset>
 		</copy>
@@ -245,9 +287,6 @@
 			<pathelement location="build/lib/ant-contrib-1.0b3.jar" />
 		</classpath>
 	</taskdef>
-
-	<!-- java2html converter -->
-	<taskdef name="java2html" classname="de.java2html.anttasks.Java2HtmlTask" classpath="build/lib/java2html.jar" />
 
 	<target name="init-manual-eclipse" depends="">
         <!-- Timestamp in YYYYMMDDHHMM format for plugin version number. -->
@@ -317,7 +356,7 @@
 	<!-- Just copy a prebuilt PDF tutorial. -->
 	<target name="copy-tutorial-pdf" unless="xep.license.available">
 		<echo>PDF Tutorial: No XEP license available, just copy a prebuilt PDF.</echo>
-		<copy file="doc/tutorial/itmill-toolkit-tutorial.pdf" tofile="${output-dir}/WebContent/doc/itmill-toolkit-tutorial.pdf" />
+		<copy file="tutorial/itmill-toolkit-tutorial.pdf" tofile="${output-dir}/WebContent/doc/itmill-toolkit-tutorial.pdf" />
 	</target>
 
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
@@ -334,7 +373,7 @@
 			<arg value="-xsl" />
 			<arg value="build/docbook/conf/custom-fo-docbook.xsl" />
 			<arg value="-in" />
-			<arg value="doc/tutorial/tutorial.xml" />
+			<arg value="tutorial/tutorial.xml" />
 			<arg value="-out" />
 			<arg value="${result-path}/itmill-toolkit-tutorial.fo" />
 			<arg value="-param" />
@@ -404,7 +443,7 @@
 		</path>
 		<java classname="org.apache.xalan.xslt.Process" failonerror="yes" fork="yes" maxmemory="512m">
 			<arg value="-in" />
-			<arg value="doc/tutorial/tutorial.xml" />
+			<arg value="tutorial/tutorial.xml" />
 			<arg value="-xsl" />
 			<arg value="build/docbook/conf/temp.xsl" />
 			<arg value="-out" />
@@ -431,7 +470,7 @@
 		</java>
 		<delete file="build/docbook/conf/temp.xsl" />
 		<copy todir="${output-dir}/WebContent/doc/tutorial/img">
-			<fileset dir="doc/tutorial/img">
+			<fileset dir="tutorial/img">
 				<exclude name="**/.svn" />
 			</fileset>
 		</copy>
@@ -443,8 +482,5 @@
 			<pathelement location="build/lib/ant-contrib-1.0b3.jar" />
 		</classpath>
 	</taskdef>
-
-	<!-- java2html converter -->
-	<taskdef name="java2html" classname="de.java2html.anttasks.Java2HtmlTask" classpath="build/lib/java2html.jar" />
 
 </project>
