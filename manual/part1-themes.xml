@@ -1,0 +1,989 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<chapter xml:id="themes">
+	<title>Themes</title>
+
+	<para>
+		This chapter provides details about using and creating <emphasis>themes</emphasis>
+		that control the visual look of web applications using Cascading Style Sheets
+		(CSS) and other theme resources. We provide an introduction to CSS, especially
+		concerning the styling of HTML by element classes.
+	</para>
+
+	<section xml:id="themes.overview">
+		<title>Overview</title>
+
+		<para>
+			IT Mill Toolkit separates the appearance of the user interface from its logic
+			using <emphasis>themes</emphasis>. Themes can include CSS style sheets, custom
+			HTML layouts, and any necessary graphics used by them. Theme resources can
+			also be accessed from an application with <classname>ThemeResource</classname>
+			objects.
+		</para>
+
+		<para>
+			You place custom themes under the
+			<filename>WebContents/ITMILL/themes/</filename> folder of the web application.
+			This location is fixed -- the folder "ITMILL" specifies that these are (static)
+			resources specific to IT Mill Toolkit. The folder should normally contain also
+			the built-in default theme, although you can let it be loaded dynamically from
+			the Toolkit JAR (even though that is somewhat inefficient).  <xref
+			linkend="figure.themes.theme-contents"/> illustrates the contents of a theme.
+		</para>
+
+		<figure xml:id="figure.themes.theme-contents">
+			<title>Theme Contents</title>
+			<mediaobject>
+				<imageobject role="fo">
+					<imagedata scale="60" align="center" fileref="img/themes/theme-contents-hi.png"/>
+				</imageobject>
+				<imageobject role="html">
+					<imagedata align="center" fileref="img/themes/theme-contents-lo.png"/>
+				</imageobject>
+			</mediaobject>
+		</figure>
+
+		<para>
+			The name of a theme folder defines the name of the theme. The name is used in
+			the <methodname>setTheme()</methodname> call. A theme must contain the
+			<filename>styles.css</filename> stylesheet, but other contents have free
+			naming. We suggest a convention for naming the folders as
+			<filename>img</filename> for images, <filename>layouts</filename> for custom
+			layouts, and <filename>css</filename> for additional stylesheets.
+		</para>
+
+		<para>
+			Custom themes must inherit the default theme (unless you just copy the default
+			theme and use it as a template for efficiency reasons). See <xref
+			linkend="section.themes.default"/> and <xref
+			linkend="themes.creating.inheritance"/> for details on inheriting the default
+			theme.
+		</para>
+
+		<para>
+			You use a theme with a simple <methodname>setTheme()</methodname> method call
+			for the <classname>Application</classname> object as follows:
+		</para>
+
+		<programlisting><![CDATA[public class MyApplication extends com.itmill.toolkit.Application {
+    public void init() {
+        setTheme("demo");
+        ...
+    }
+}]]></programlisting>
+
+		<para>
+			An application can use different themes for different users and switch between
+			themes during execution. For smaller changes, a theme can contain alternate
+			styles for user interface components, which can be changed as needed.
+		</para>
+
+		<para>
+			In addition to style sheets, a theme can contain HTML templates for custom
+			layouts used with <classname>CustomLayout</classname>. See <xref
+			linkend="layout.customlayout"/> for details.
+		</para>
+
+		<para>
+			Resources provided in a theme can also be accessed using the
+			<classname>ThemeResource</classname> class, as described in <xref
+			linkend="application.resources.theme"/>. This allows using theme resources, such
+			as images, for example in <classname>Embedded</classname> objects and other
+			objects that allow inclusion of images using resources.
+		</para>
+
+		<programlisting><![CDATA[]]></programlisting>
+	</section>
+
+	<section xml:id="themes.css">
+		<title>Introduction to Cascading Style Sheets</title>
+		
+		<para>
+			Cascading Style Sheets or CSS is a technique to separate the appearance of a
+			web page from the content represented in HTML or XHTML. Let us give a short
+			introduction to Cascading Style Sheets and look how they are relevant to
+			software development with IT Mill Toolkit.
+		</para>
+
+		<section>
+			<title>Basic CSS Rules</title>
+
+			<para>
+				A style sheet is a file that contains a set of
+				<emphasis>rules</emphasis>. Each rule consists of one or more
+				<emphasis>selectors</emphasis>, separated with commas, and a
+				<emphasis>declaration block</emphasis> enclosed in curly braces. A
+				declaration block contains a list of <emphasis>property</emphasis>
+				statements. Each property has a label and a value, separated with a
+				colon. A property statement ends with a semicolon.
+			</para>
+
+			<para>
+				Let us look at an example:
+			</para>
+
+			<programlisting><![CDATA[p, td { 
+  color: blue;
+}
+
+td { 
+  background: yellow;
+  font-weight: bold;
+}]]></programlisting>
+
+			<para>
+				In the example above, <literal>p</literal> and <literal>td</literal> are
+				element type selectors that match with <literal>&lt;p&gt;</literal> and
+				<literal>&lt;td&gt;</literal> elements in HTML, respectively. The first
+				rule matches with both elements, while the second matches only with
+				<literal>&lt;td&gt;</literal> elements. Let us assume that you have saved
+				the above style sheet with the name <filename>mystylesheet.css</filename> and
+				consider the following HTML file located in the same folder.
+			</para>
+
+			<programlisting>&lt;html&gt;
+    &lt;head&gt;
+          &lt;link rel="stylesheet" href="mystylesheet.css" type="text/css" /&gt;
+    &lt;/head&gt;
+    &lt;body&gt;
+        <emphasis role="strong">&lt;p&gt;</emphasis>This is a paragraph<emphasis role="strong">&lt;/p&gt;</emphasis>
+        <emphasis role="strong">&lt;p&gt;</emphasis>This is another paragraph<emphasis role="strong">&lt;/p&gt;</emphasis>
+        &lt;table&gt;
+            &lt;tr&gt;
+                <emphasis role="strong">&lt;td&gt;</emphasis>This is a table cell<emphasis role="strong">&lt;/td&gt;</emphasis>
+                <emphasis role="strong">&lt;td&gt;</emphasis>This is another table cell<emphasis role="strong">&lt;/td&gt;</emphasis>
+            &lt;/tr&gt;
+        &lt;/table&gt;
+    &lt;/body&gt;
+&lt;/html&gt;</programlisting>
+
+			<para>
+				The <literal>&lt;link&gt;</literal> element defines the style sheet to
+				use. The HTML elements that match the above rules are emphasized. When the
+				page is displayed in the browser, it will look as shown in the figure
+				below.
+			</para>
+
+			<figure xml:id="figure.themes.basic.1">
+				<title>Simple Styling by Element Type</title>
+				<mediaobject>
+					<imageobject>
+						<imagedata align="center" fileref="img/themes/themes-css-match-1.png"/>
+					</imageobject>
+				</mediaobject>
+			</figure>
+				
+			<para>
+				CSS has an <emphasis>inheritance</emphasis> mechanism where contained
+				elements inherit the properties of their parent elements. For example, let
+				us change the above example and define it instead as follows:
+			</para>
+
+			<programlisting><![CDATA[table {
+    color: blue;
+    background: yellow;
+}]]></programlisting>
+
+			<para>
+				All elements contained in the <literal>&lt;table&gt;</literal> element
+				would have the same properties. For example, the text in the contained
+				<literal>&lt;td&gt;</literal> elements would be in blue color.
+			</para>
+
+			<para>
+				Each HTML element type accepts a certain set of properties. The
+				<literal>&lt;div&gt;</literal> elements are generic elements that can be
+				used to create almost any layout and formatting that can be created with a
+				specific HTML element type. IT Mill Toolkit uses
+				<literal>&lt;div&gt;</literal> elements extensively, especially for
+				layouts.
+			</para>
+
+			<para>
+				Matching elements by their type is, however, rarely if ever used in style
+				sheets for IT Mill Toolkit components or Google Web Toolkit widgets.
+			</para>
+		</section>
+
+		<section>
+			<title>Matching by Element Class</title>
+
+			<para>
+				Matching HTML elements by the <emphasis>class</emphasis> attribute of the
+				elements is the most relevant form of matching with IT Mill Toolkit. It is
+				also possible to match with the <emphasis>identifier</emphasis> of a HTML
+				element.
+			</para>
+
+			<para>
+				The class of an HTML element is defined with the
+				<parameter>class</parameter> attribute as follows:
+			</para>
+
+<programlisting>&lt;html&gt;
+    &lt;body&gt;
+        <emphasis role="strong">&lt;p class="normal"&gt;</emphasis>This is the first paragraph<emphasis role="strong">&lt;/p&gt;</emphasis>
+
+        <emphasis role="strong">&lt;p class="another"&gt;</emphasis>This is the second paragraph<emphasis role="strong">&lt;/p&gt;</emphasis>
+
+        &lt;table&gt;
+            &lt;tr&gt;
+                <emphasis role="strong">&lt;td class="normal"&gt;</emphasis>This is a table cell<emphasis role="strong">&lt;/td&gt;</emphasis>
+                <emphasis role="strong">&lt;td class="another"&gt;</emphasis>This is another table cell<emphasis role="strong">&lt;/td&gt;</emphasis>
+            &lt;/tr&gt;
+        &lt;/table&gt;
+    &lt;/body&gt;
+&lt;/html&gt;</programlisting>
+
+			<para>
+				The class attributes of HTML elements can be matched in CSS rules with a
+				selector notation where the class name is written after a period following
+				the element name. This gives us full control of matching elements by their
+				type and class.
+			</para>
+
+			<programlisting><![CDATA[p.normal   {color: red;}
+p.another  {color: blue;}
+td.normal  {background: pink;}
+td.another {background: yellow;}]]></programlisting>
+
+			<para>
+				The page would look as shown below:
+			</para>
+
+			<figure>
+				<title>Matching HTML Element Type and Class</title>
+				<mediaobject>
+					<imageobject role="html">
+						<imagedata align="center" fileref="img/themes/themes-css-match-class-2.png"/>
+					</imageobject>
+					<imageobject role="fo">
+						<imagedata scale="75" align="center" fileref="img/themes/themes-css-match-class-2.png"/>
+					</imageobject>
+				</mediaobject>
+			</figure>
+
+			<para>
+				We can also match solely by the class by using the universal selector
+				<literal>*</literal> for the element name, for example
+				<literal>*.normal</literal>. The universal selector can also be left out
+				altogether so that we use just the class name following the period, for
+				example <literal>.normal</literal>.
+			</para>
+
+			<programlisting><![CDATA[.normal {
+    color: red;
+}
+
+.another {
+    blackground: yellow;
+}]]></programlisting>
+
+			<para>
+				In this case, the rule will match with all elements of the same class
+				regardless of the element type. The result is shown in <xref
+				linkend="figure.themes.match.class"/>.  This example illustrates a
+				technique to make style sheets compatible regardless of the exact HTML
+				element used in drawing a component.
+			</para>
+
+			<figure xml:id="figure.themes.match.class">
+				<title>Matching Only HTML Element Class</title>
+				<mediaobject>
+					<imageobject role="html">
+						<imagedata align="center" fileref="img/themes/themes-css-match-class-3.png"/>
+					</imageobject>
+					<imageobject role="fo">
+						<imagedata scale="65" align="center" fileref="img/themes/themes-css-match-class-3.png"/>
+					</imageobject>
+				</mediaobject>
+			</figure>
+
+			<para>
+				To assure compatibility, we recommend that you use only matching based on
+				the element classes and <emphasis>do not</emphasis> match for specific
+				HTML element types in CSS rules, because either IT Mill Toolkit or GWT
+				may use different HTML elements to render some components in the
+				future. For example, IT Mill Toolkit Release 4 used
+				<literal>&lt;div&gt;</literal> elements extensively for layout
+				components. However, Release 5 uses GWT to render the components, and GWT
+				uses the <literal>&lt;table&gt;</literal> element to implement most
+				layouts. Similarly, Release 4 used <literal>&lt;div&gt;</literal> element
+				also for buttons, but in Release 5 GWT uses the
+				<literal>&lt;button&gt;</literal> element. IT Mill has little control over
+				how GWT renders its components, so we can not guarantee compatibility in
+				different versions of GWT. However, both <literal>&lt;div&gt;</literal>
+				and <literal>&lt;table&gt;</literal> as well as
+				<literal>&lt;tr&gt;</literal> and <literal>&lt;td&gt;</literal> elements
+				accept most of the same properties, so matching only the class hierarchy
+				of the elements should be compatible in most cases.
+			</para>
+		</section>
+
+		<section>
+			<title>Matching by Descendant Relationship</title>
+
+			<para>
+				CSS allows matching HTML by their containment relationship. For example,
+				consider the following HTML fragment:
+			</para>
+
+			<programlisting>&lt;body&gt;
+    &lt;p class="mytext"&gt;Here is some text inside a div element&lt;/p&gt;
+    &lt;table class="<emphasis role="strong">mytable</emphasis>"&gt;
+        &lt;tr&gt;
+            &lt;td class="<emphasis role="strong">mytext</emphasis>"&gt;Here is text inside a table and inside a div element.&lt;/td&gt;
+        &lt;/tr&gt;
+    &lt;/table&gt;
+&lt;/body&gt;</programlisting>
+
+			<para>
+				Matching by the class name <literal>.mytext</literal> alone would match
+				both the <literal>&lt;p&gt;</literal> and <literal>&lt;td&gt;</literal>
+				elements. If we want to match only the table cell, we could use the following selector:
+			</para>
+
+			<programlisting><![CDATA[.mytable .mytext {color: blue;}]]></programlisting>
+
+			<para>
+				To match, a class listed in a rule does not have to be an immediate
+				descendant of the previous class, but just a descedant. For example, the
+				selector "<literal>.i-panel .i-button</literal>" would match all elements
+				with class <literal>.i-button</literal> somewhere inside an element with
+				class <literal>.i-panel</literal>.
+			</para>
+
+			<para>
+				Let us give an example with a real case. Consider the following IT
+				Mill Toolkit component.
+			</para>
+
+			<programlisting><![CDATA[public class LoginBox extends CustomComponent {
+    Panel         panel  = new Panel("Log In");
+
+    public LoginBox () {
+        setCompositionRoot(panel);
+        
+        panel.addComponent(new TextField("Username:"));
+        panel.addComponent(new TextField("Password:"));
+        panel.addComponent(new Button("Login"));
+    }
+}]]></programlisting>
+			
+			<para>
+				The component will look by default as shown in the following figure.
+			</para>
+
+			<figure xml:id="figure.themes.example.login.1">
+				<title>Themeing Login Box Example with Default Theme</title>
+				<mediaobject>
+					<imageobject>
+						<imagedata align="center" fileref="img/themes/example-login-default.png"/>
+					</imageobject>
+				</mediaobject>
+			</figure>
+
+			<para>
+					Now, let us look at the HTML structure of the component. The following
+					listing assumes that the application contains only the above component
+					in the main window of the application.
+				</para>
+
+			<programlisting> &lt;body&gt;
+    &lt;div id="itmtk-ajax-window"&gt;
+     &lt;div&gt;
+        &lt;div class="<emphasis role="strong">i-orderedlayout</emphasis>"&gt;
+         &lt;div&gt;
+            &lt;div class="<emphasis role="strong">i-panel</emphasis>"&gt;
+             &lt;div class="<emphasis role="strong">i-panel-caption</emphasis>"&gt;<emphasis>Log In</emphasis>&lt;/div&gt;
+             &lt;div class="<emphasis role="strong">i-panel-content</emphasis>"&gt;
+                &lt;div class="<emphasis role="strong">i-orderedlayout</emphasis>"&gt;
+                 &lt;div&gt;
+                    &lt;div&gt;
+                     &lt;div class="<emphasis role="strong">i-caption</emphasis>"&gt;&lt;span&gt;<emphasis>Username:</emphasis>&lt;/span&gt;&lt;/div&gt;
+                    &lt;/div&gt;
+                    &lt;input type="text" <emphasis role="strong">class="i-textfield</emphasis>"/&gt;
+                 &lt;/div&gt;
+                 &lt;div&gt;
+                    &lt;div&gt;
+                     &lt;div class="<emphasis role="strong">i-caption</emphasis>"&gt;&lt;span&gt;<emphasis>Password:</emphasis>&lt;/span&gt;&lt;/div&gt;
+                    &lt;/div&gt;
+                    &lt;input type="password" class="i-textfield"/&gt;
+                 &lt;/div&gt;
+                 &lt;div&gt;&lt;button type="button" class="<emphasis role="strong">i-button</emphasis>"&gt;<emphasis>Login</emphasis>&lt;/button&gt;&lt;/div&gt;
+                &lt;/div&gt;
+             &lt;/div&gt;
+             &lt;div class="<emphasis role="strong">i-panel-deco</emphasis>"/&gt;
+             &lt;/div&gt;
+            &lt;/div&gt;
+         &lt;/div&gt;
+        &lt;/div&gt;
+     &lt;/div&gt;
+ &lt;/body&gt;</programlisting>
+
+				<para>
+					Now, consider the following theme where we set the backgrounds of
+					various elements.
+				</para>
+
+		<programlisting><![CDATA[.i-panel .i-panel-caption {
+	background: #80ff80; /* pale green */
+}
+
+.i-panel .i-panel-content {
+	background: yellow;
+}
+
+.i-panel .i-textfield {
+	background: #e0e0ff; /* pale blue */
+}
+
+.i-panel .i-button {
+	background: pink;
+}]]></programlisting>
+
+			<para>
+				The coloring has changed as shown in the following figure.
+			</para>
+			
+			<figure xml:id="figure.themes.example.mytheme.1">
+				<title>Themeing Login Box Example with Custom Theme</title>
+				<mediaobject>
+					<imageobject>
+						<imagedata align="center" fileref="img/themes/example-login-mytheme.png"/>
+					</imageobject>
+				</mediaobject>
+			</figure>
+			
+			<para>
+				An element can have multiple classes separated with a space. With multiple
+				classes, a CSS rule matches an element if any of the classes match. This
+				feature is used in many IT Mill Toolkit components to allow matching based
+				on the state of the component. For example, when the mouse is over a
+				<classname>Link</classname> component, <literal>over</literal> class is
+				added to the component. Most of such styling is a feature of Google Web
+				Toolkit.
+				</para>
+		</section>
+			
+		<section>
+			<title>Notes on Compatibility</title>
+
+			<para>
+				CSS was first proposed in 1994. The specification of CSS is maintained by
+				the CSS Working Group of World Wide Web Consortium (W3C). Its versions are
+				specified as <emphasis>levels</emphasis> that build upon the earlier
+				version. CSS Level 1 was published in 1996, Level 2 in 1998. Development
+				of CSS Level 3 was started in 1998 and is still under way.
+			</para>
+
+			<para>
+				While the support for CSS has been universal in all graphical web browsers
+				since at least 1995, the support has been very incomplete at times and
+				there still exists an unfortunate number of incompatibilities between
+				browsers. While we have tried to take these incompatibilities into account
+				in the default themes in IT Mill Toolkit, you need to consider them while
+				developing custom themes.
+			</para>
+
+			<para>
+				Compatibility issues are detailed in various CSS handbooks.
+			</para>
+		</section>
+		
+		<programlisting><![CDATA[]]></programlisting>
+	</section>
+	
+	<section xml:id="themes.creating">
+		<title>Creating and Using Themes</title>
+
+		<para>
+			Custom themes are placed in <filename>ITMILL/themes</filename> folder of the
+			web application (in the <filename>WebContent</filename> directory) as
+			illustrated in <xref linkend="figure.themes.theme-contents"/>. This location
+			is fixed. You need to have a theme folder for each theme you use in your
+			application, although applications rarely need more than a single theme. For
+			example, if you want to define a theme with the name <varname>mytheme</varname>,
+			you will place it in folder <filename>ITMILL/themes/mytheme</filename>.
+		</para>
+
+		<para>
+			A custom theme must also inherit the default theme, as shown in the example
+			below:
+		</para>
+
+		<programlisting><![CDATA[@import "../default/styles.css";
+
+body {
+    background: yellow;
+}]]></programlisting>
+
+		<para>
+			See <xref linkend="section.themes.default"/> and <xref
+			linkend="themes.creating.inheritance"/> below for details on inheriting the
+			default theme and theme inheritance generally.
+		</para>
+
+		<section>
+			<title>Styling Standard Components</title>
+
+			<para>
+				Each user interface component in IT Mill Toolkit has a set of style
+				classes that you can use to control the appearance of the component. Some
+				components have additional elements that also allow styling.
+			</para>
+
+			<para>
+				The following table lists the style classes of all client-side components
+				of IT Mill Toolkit. Notice that a single server-side component can have
+				multiple client-side implementations. For example, a
+				<classname>Button</classname> can be rendered on the client side either as
+				a regular button or a check box, depending on the
+				<parameter>switchMode</parameter> attribute of the button. For details
+				regarding the mapping to client-side components, see <xref
+				linkend="gwt.widgetset"/>. Each client-side component type has its own style class
+				and a number of additional classes that depend on the client-side state of
+				the component. For example, a text field will have
+				<literal>i-textfield-focus</literal> class when mouse pointer hovers over
+				the component. This state is purely on the client-side and is not passed
+				to the server.
+			</para>
+
+			<para>
+				Some client-side components can be shared by different server-side
+				components. There is also the
+				<classname>IUnknownComponent</classname>, which is a component that
+				indicates an internal error in a situation where the server asked to
+				render a component which is not available on the client-side.
+			</para>
+
+				<table>
+					<title>Default CSS Style Names of IT Mill Toolkit Components</title>
+					<tgroup cols="4" align="left">
+						<thead>
+							<row valign="top">
+								<entry>Server-Side Component</entry>
+								<entry>Client-Side Widget</entry>
+								<entry>CSS Class Name</entry>
+								<entry>State Indicators</entry>
+							</row>
+						</thead>
+						<tbody>
+							<row valign="top">
+								<entry morerows="1">Button</entry>
+								<entry>IButton</entry>
+								<entry>i-button</entry>
+								<entry></entry>
+							</row>
+							<row valign="top">
+								<entry>ICheckBox</entry>
+								<entry></entry>
+								<entry></entry>
+							</row>
+							<row valign="top">
+								<entry>CustomComponent</entry>
+								<entry>ICustomComponent</entry>
+								<entry>i-customcomponent</entry>
+								<entry></entry>
+							</row>
+							<row valign="top">
+								<entry>CustomLayout</entry>
+								<entry>ICustomLayout</entry>
+								<entry></entry>
+								<entry></entry>
+							</row>
+							<row valign="top">
+								<entry morerows="4">DateField</entry>
+								<entry>IDateField</entry>
+								<entry>i-datefield</entry>
+								<entry></entry>
+							</row>
+							<row valign="top">
+								<entry>ICalendar</entry>
+								<entry>i-datefield-entrycalendar</entry>
+								<entry></entry>
+							</row>
+							<row valign="top">
+								<entry>IDateFieldCalendar</entry>
+								<entry>i-datefield-calendar</entry>
+								<entry></entry>
+							</row>
+							<row valign="top">
+								<entry>IPopupCalendar</entry>
+								<entry>i-datefield-calendar</entry>
+								<entry></entry>
+							</row>
+							<row valign="top">
+								<entry>ITextualDate</entry>
+								<entry></entry>
+								<entry>i-readonly, i-textfield-error</entry>
+							</row>
+							<row valign="top">
+								<entry>Embedded</entry>
+								<entry>IEmbedded</entry>
+								<entry>-</entry>
+								<entry></entry>
+							</row>
+							<row valign="top">
+								<entry>Form</entry>
+								<entry>IForm</entry>
+								<entry>i-form</entry>
+								<entry></entry>
+							</row>
+							<row valign="top">
+								<entry>FormLayout</entry>
+								<entry>IFormLayout</entry>
+								<entry>-</entry>
+								<entry></entry>
+							</row>
+							<row valign="top">
+								<entry>GridLayout</entry>
+								<entry>IGridLayout</entry>
+								<entry>-</entry>
+								<entry></entry>
+							</row>
+							<row valign="top">
+								<entry>Label</entry>
+								<entry>ILabel</entry>
+								<entry>i-label</entry>
+								<entry></entry>
+							</row>
+							<row valign="top">
+								<entry>Link</entry>
+								<entry>ILink</entry>
+								<entry>i-link</entry>
+								<entry>readonly, enabled</entry>
+							</row>
+							<row valign="top">
+								<entry>OptionGroup</entry>
+								<entry>IOptionGroup</entry>
+								<entry>i-select-optiongroup</entry>
+								<entry></entry>
+							</row>
+							<row valign="top">
+								<entry>HorizontalLayout</entry>
+								<entry>IHorizontalLayout</entry>
+								<entry>i-horizontallayout</entry>
+								<entry></entry>
+							</row>
+							<row valign="top">
+								<entry>VerticalLayout</entry>
+								<entry>IVerticalLayout</entry>
+								<entry>i-verticallayout</entry>
+								<entry></entry>
+							</row>
+							<row valign="top">
+								<entry>Panel</entry>
+								<entry>IPanel</entry>
+								<entry>i-panel (i-panel-caption, i-panel-content, i-panel-deco)</entry>
+								<entry></entry>
+							</row>
+							<row valign="top">
+								<entry morerows="2">Select</entry>
+								<entry></entry>
+								<entry></entry>
+								<entry></entry>
+							</row>
+							<row valign="top">
+								<entry>IListSelect</entry>
+								<entry>i-listselect</entry>
+								<entry></entry>
+							</row>
+							<row valign="top">
+								<entry>IFilterSelect</entry>
+								<entry>i-filterselect</entry>
+								<entry></entry>
+							</row>
+							<row valign="top">
+								<entry>Slider</entry>
+								<entry>ISlider</entry>
+								<entry>i-slider</entry>
+								<entry></entry>
+							</row>
+							<row valign="top">
+								<entry morerows="2">SplitPanel</entry>
+								<entry>ISplitPanel</entry>
+								<entry>-</entry>
+								<entry></entry>
+							</row>
+							<row valign="top">
+								<entry>ISplitPanelHorizontal</entry>
+								<entry>-</entry>
+								<entry></entry>
+							</row>
+							<row valign="top">
+								<entry>ISplitPanelVertical</entry>
+								<entry>-</entry>
+								<entry></entry>
+							</row>
+							<row valign="top">
+								<entry morerows="1">Table</entry>
+								<entry>IScrollTable</entry>
+								<entry>i-table</entry>
+								<entry></entry>
+							</row>
+							<row valign="top">
+								<entry>ITablePaging</entry>
+								<entry>i-table (i-table-tbody)</entry>
+								<entry></entry>
+							</row>
+							<row valign="top">
+								<entry>TabSheet</entry>
+								<entry>ITabSheet</entry>
+								<entry>i-tabsheet (i-tabsheet-content, i-tablsheet-tabs)</entry>
+								<entry></entry>
+							</row>
+							<row valign="top">
+								<entry morerows="2">TextField</entry>
+								<entry>ITextField</entry>
+								<entry>i-textfield</entry>
+								<entry>i-textfield-focus</entry>
+							</row>
+							<row valign="top">
+								<entry>ITextArea</entry>
+								<entry></entry>
+								<entry></entry>
+							</row>
+							<row valign="top">
+								<entry>IPasswordField</entry>
+								<entry></entry>
+								<entry></entry>
+							</row>
+							<row valign="top">
+								<entry>Tree</entry>
+								<entry>ITree</entry>
+								<entry>i-tree (i-tree-node-selected)</entry>
+								<entry></entry>
+							</row>
+							<row valign="top">
+								<entry>TwinColSelect</entry>
+								<entry>ITwinColSelect</entry>
+								<entry>i-select-twincol (i-select-twincol-selections, i-select-twincol-buttons, i-select-twincol-deco)</entry>
+								<entry></entry>
+							</row>
+							<row valign="top">
+								<entry>Upload</entry>
+								<entry>IUpload</entry>
+								<entry>-</entry>
+								<entry></entry>
+							</row>
+							<row valign="top">
+								<entry>Window</entry>
+								<entry>IWindow</entry>
+								<entry>i-window</entry>
+								<entry></entry>
+							</row>
+							<row valign="top">
+								<entry>-</entry>
+								<entry>CalendarEntry</entry>
+								<entry>-</entry>
+								<entry></entry>
+							</row>
+							<row valign="top">
+								<entry>-</entry>
+								<entry>CalendarPanel</entry>
+								<entry>i-datefield-calendarpanel</entry>
+								<entry></entry>
+							</row>
+							<row valign="top">
+								<entry>-</entry>
+								<entry>ContextMenu</entry>
+								<entry>i-contextmenu</entry>
+								<entry></entry>
+							</row>
+							<row valign="top">
+								<entry>-</entry>
+								<entry>IUnknownComponent</entry>
+								<entry>itmtk-unknown (itmtk-unknown-caption)</entry>
+								<entry></entry>
+							</row>
+							<row valign="top">
+								<entry>-</entry>
+								<entry>IView</entry>
+								<entry>-</entry>
+								<entry></entry>
+							</row>
+							<row valign="top">
+								<entry>-</entry>
+								<entry>Menubar</entry>
+								<entry>gwt-MenuBar</entry>
+								<entry></entry>
+							</row>
+							<row valign="top">
+								<entry>-</entry>
+								<entry>MenuItem</entry>
+								<entry>gwt-MenuItem</entry>
+								<entry></entry>
+							</row>
+							<row valign="top">
+								<entry>-</entry>
+								<entry>Time</entry>
+								<entry>i-datefield-time (i-select)</entry>
+								<entry></entry>
+							</row>
+						</tbody>
+				</tgroup>
+			</table>
+			
+			<para>
+				Style names of sub-components are shown in parentheses.
+			</para>
+
+			<section>
+				<section xml:id="section.themes.default">
+					<title>Default Theme</title>
+					
+					<para>
+						The default theme is provided in the
+						<filename>ITMILL/themes/default/styles.css</filename> stylesheet
+						in the IT Mill Toolkit library JAR. This stylesheet is a
+						compilation of the separate stylesheets for each component in the
+						corresponding subdirectory.
+					</para>
+					
+					<para>
+						Notice that the default theme included in the IT Mill Toolkit
+						library JAR is served dynamically from the JAR by the
+						servlet. Serving the theme statically by the web server is much
+						more efficient. You only need to extract the
+						<filename>ITMILL/</filename> directory from the JAR under your
+						<filename>WebContent</filename> directory. Just make sure to
+						update it if you upgrade to a newer version of IT Mill Toolkit.
+					</para>
+
+					<para>
+						Creation of a default theme of custom GWT widgets is detailed in
+						<xref linkend="gwt.widgets.styling"/>.
+					</para>
+				</section>
+			</section>
+		</section>
+
+		<section xml:id="themes.creating.using">
+			<title>Using Themes</title>
+
+			<para>
+				Using a theme is simple, you only need to set the theme with
+				<methodname>setTheme()</methodname>.
+			</para>
+
+			<para>
+				Defining the appearance of a user interface component is fairly
+				simple. First, you create a component and add a custom style name for it
+				with <methodname>addStyleName()</methodname>. Then you write the CSS
+				element that defines the formatting for the component.
+			</para>
+		</section>
+
+		<section xml:id="themes.creating.inheritance">
+			<title>Theme Inheritance</title>
+
+			<para>
+				When you define your own theme, you will need to inherit the default theme
+				(unless you just copy the default theme).
+			</para>
+
+			<para>
+				Inheritance in CSS is done with the <literal>@import</literal>
+				statement. In the typical case where you define your own theme, you
+				inherit the default theme as follows:
+			</para>
+
+			<programlisting><![CDATA[@import "../default/styles.css";
+
+body {
+    background: yellow;
+}]]></programlisting>
+
+			<para>
+				You can even create a deep hierarchy of themes by inheritance. Such a
+				solution is often useful if you have some overall theme for your
+				application and a slightly modified theme for different user classes. You
+				can even make it possible for each user to have his or her own theme.
+			</para>
+
+			<para>
+				For example, let us assume that we have the base theme of an application
+				with the name <classname>myapp</classname> and a specific
+				<classname>myapp-student</classname> theme for users with the student
+				role. The stylesheet of the base theme would be located in
+				<filename>themes/myapp/styles.css</filename>. We can then "inherit" it in
+				<filename>themes/myapp-student/styles.css</filename> with a simple
+				<literal>@import</literal> statement:
+			</para>
+
+			<programlisting><![CDATA[@import "../myapp/styles.css";
+
+body {
+    background: green;
+}]]></programlisting>
+
+			<para>
+				This would make the page look just as with the base theme, except for the
+				green background. You could use the theme inheritance as follows:
+			</para>
+
+		<programlisting><![CDATA[public class MyApplication extends com.itmill.toolkit.Application {
+    
+    public void init() {
+        setTheme("myapp");
+        ...
+    }
+
+    public void login(User user) {
+        if (user.role == User.ROLE_STUDENT)
+            setTheme("myapp-student");
+        ...
+    }
+
+    public void logout() {
+        setTheme("myapp");
+        ...
+    }
+}]]></programlisting>
+
+		</section>
+	</section>
+
+<!--
+	<section>
+		<title>Theme structure</title>
+		<para></para>
+	</section>
+	<section>
+		<title>Custom layouts</title>
+		<para></para>
+	</section>
+	<section>
+		<title>Variable handling</title>
+		<para></para>
+	</section>
+	<section>
+		<title>AJAX Themes</title>
+		<para></para>
+	</section>
+	<section>
+		<title>AJAX Adapter</title>
+		<para></para>
+	</section>
+-->
+</chapter>
+	
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: xml
+sgml-omittag:nil
+sgml-shorttag:nil
+sgml-namecase-general:nil
+sgml-general-insert-case:lower
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:4
+sgml-indent-data:t
+sgml-parent-document:nil
+sgml-exposed-tags:nil
+sgml-local-catalogs:("/etc/sgml/catalog" "/usr/share/xemacs21/xemacs-packages/etc/psgml-dtds/CATALOG")
+sgml-local-ecat-files:("ECAT" "~/sgml/ECAT" "/usr/share/sgml/ECAT" "/usr/local/share/sgml/ECAT" "/usr/local/lib/sgml/ECAT")
+End:
+-->
+

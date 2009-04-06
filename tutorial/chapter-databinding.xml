@@ -1,0 +1,299 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<chapter xml:id="databinding">
+	<title>Data Binding Basics</title>
+
+	<para>
+		We have now created the basic interface for our address book application and a
+		table (<classname>PersonList</classname>) where all the contacts should be
+		displayed. The next step is to bind data to the <classname>PersonList</classname>
+		to make it show something more than the two "Mark Smith" test rows we added in the
+		previous step.
+	</para>
+	
+	<section xml:id="databinding.creating">
+		<title>Creating an Object</title>
+
+		<para>
+			We want to base our table data on a simple <classname>Person</classname> java
+			object containing fields such as <varname>firstName</varname>,
+			<varname>lastName</varname>, <varname>email</varname>, etc. We do not want to
+			populate the table by hand - instead we want to use Person instances for
+			populating the table. The actual <classname>Person</classname> instances can come
+			from anywhere, in a real case they would probably be fetched from a database but
+			this is out of scope for this tutorial. We will instead generate random
+			<classname>Person</classname>-objects and use them for demonstrating the data
+			binding features.
+		</para>
+
+		<para>
+			The <classname>Person</classname> class we are using looks like:
+		</para>
+
+		<programlisting><![CDATA[package com.itmill.dev.addressbooktutorial.data;
+
+public class Person {
+          private String firstName = "";
+          private String lastName = "";
+          private String email = "";
+          private String phoneNumber = "";
+          private String streetAddress = "";
+          private Integer postalCode = null;
+          private String city = "";
+ 
+// + setters and getters for all fields
+}]]></programlisting>
+
+		<tip>
+			<title>Hint!</title>
+			<para>
+				The getters and setters can be generated automatically by Eclipse: press
+				<keycombo><keysym>Alt</keysym><keysym>Shift</keysym><keysym>S</keysym></keycombo>
+				and choose <guimenuitem>Generate Getters and Setters</guimenuitem>.
+			</para>
+		</tip>
+	</section>
+
+		<!-- Voisi avata vähän enemmän container+item+properties käsitteitä. Yritin itse
+		alla mutta tarkastakaa! -->
+
+	<section xml:id="databinding.datamodel">
+		<title>Basics of the Data Model</title>
+
+		<para>
+			When populating a table there are a few terms that must be understood. Each
+			component that includes data (e.g. a <classname>Table</classname>) has a
+			<classname>Container</classname>. The container includes all the
+			<classname>Item</classname>s in the component. An <classname>Item</classname>
+			corresponds to a row in the table. An <classname>Item</classname> has
+			<emphasis>properties</emphasis> (<classname>Property</classname>) which in a
+			table correspond to the columns in a row.
+		</para>
+ 
+		<para>
+			In simple applications we can use the
+			<methodname>addItem()</methodname>-methods in the <classname>Table</classname>
+			to populate it with data. The <methodname>addItem()</methodname>-methods add
+			items (rows), which then in turn can be populated by adding properties and
+			setting values for them - much like you would populate a traditional HTML
+			table by creating <markup>&lt;TR&gt;</markup> and <markup>&lt;TD&gt;</markup>
+			tags.
+		</para>
+		
+		<para>
+			The data model in IT Mill toolkit also contains much more powerful features
+			than this. Each table is connected to a data source which actually contains
+			all the data displayed in the table. A data source can actually supply data
+			for any type of component like a <classname>Table</classname>,
+			<classname>Select</classname>, <classname>Tree</classname>, etc. The data
+			source does not necessarily contain all the items for the table but can
+			dynamically supply the table with data from another source when the
+			<classname>Table</classname> needs it (for instance from a database). The data
+			source is what we in IT Mill toolkit call a <classname>Container</classname>.
+		</para>
+
+		<para>
+			In this case we want to use a <classname>BeanItemContainer</classname> as the
+			container for the data shown in the table. It can maintain a list of our
+			<classname>Person</classname> objects and supply the table with information
+			directly from the objects when needed.
+		</para>
+	
+		<para>
+			The nice thing with this container is that we can simply
+		</para>
+
+		<itemizedlist>
+			<listitem>Instantiate the container</listitem>
+			<listitem>Add a number of <classname>Person</classname> objects to it</listitem>
+			<listitem>Assign the container to a table as a data source</listitem>
+			<listitem>VOILA, the information is displayed in the table</listitem>
+		</itemizedlist>
+
+		<para>
+			There are also other <classname>Container</classname>s already in the official
+			distribution, but nothing as powerful as the
+			<classname>BeanItemContainer</classname>.
+		</para>
+
+	</section>
+
+	<section xml:id="databinding.container">
+		<title>Creating a Custom Container</title>
+
+		<para>
+			For this tutorial we will extend the <classname>BeanItemContainer</classname>
+			and create a <classname>PersonContainer</classname> which contains randomly
+			generated data:
+		</para>
+
+		<programlisting><![CDATA[package com.itmill.dev.addressbooktutorial.data;
+import com.itmill.toolkit.data.util.BeanItemContainer;
+
+public class PersonContainer extends BeanItemContainer<Person> {
+ 
+      public PersonContainer() throws InstantiationException,
+      IllegalAccessException {
+            super(Person.class);
+      }
+}]]></programlisting>
+
+		<para>
+			In addition to this the <classname>PersonContainer</classname> contains a
+			static method (<methodname>createWithTestData()</methodname>) for creating a
+			container with test data. This consists of a loop where
+			<classname>Person</classname> objects with random names and other data is
+			generated and then added to the container using the
+			<methodname>addItem(Person)</methodname>-method. The generation will not be
+			described further in this tutorial and the
+			<filename>PersonContainer.java</filename> can be downloaded from <link
+			xlink:href="http://dev.itmill.com/export/6618/incubator/examples/addressbook/src/com/itmill/dev/addressbooktutorial/data/PersonContainer.java"/>. For
+			a real world application connected to a database we would simply replace this
+			random data generation with a database query that fetches real objects. An
+			example of how to do this with Hibernate can be found at <link
+			xlink:href="http://dev.itmill.com/wiki/Articles/UsingHibernateWithToolkit"/>.
+		</para>
+	</section>
+		
+	<section xml:id="databinding.binding">
+		<title>Binding Table to a Container</title>
+
+		<para>
+			To use this container in our application we add a new field to our
+			<classname>AddressBookApplication</classname> together with a getter:
+		</para>
+
+		<programlisting><![CDATA[      private PersonContainer dataSource = PersonContainer.createWithTestData();
+ 
+      public PersonContainer getDataSource() {
+           return dataSource;
+      }]]></programlisting>
+	 
+		<para>
+			In addition to this we need to change the <classname>PersonList</classname>
+			constructor so we pass the application instance to it (so it can acquire its
+			data source). In addition we can remove the dummy test data creation from the
+			previous step, leaving the <classname>PersonList</classname> class as:
+		</para>
+
+		<programlisting><![CDATA[public class PersonList extends Table {
+      public PersonList(AddressBookApplication app) {
+            setSizeFull();
+            setContainerDataSource(app.getDataSource());
+      }
+}]]></programlisting>
+	 
+		<para>
+			The <methodname>setContainerDataSource()</methodname> sets the data source for
+			the table to our own <classname>PersonContainer</classname>.
+		</para>
+	
+		<para>
+			We now have a data source connected to the table and running the application
+			will show that the <classname>PersonList</classname> contains 100 rows of
+			data, based on 100 <classname>Person</classname>-objects which were randomly
+			generated.
+		</para>
+
+		<figure xml:id="figure.databinding.table">
+			<title>Connected Table</title>
+			<mediaobject>
+				<imageobject role="html">
+					<imagedata align="center" fileref="img/databinding-1.png"/>
+				</imageobject>
+				<imageobject role="fo">
+					<imagedata scale="50" align="center" fileref="img/databinding-1.png"/>
+				</imageobject>
+			</mediaobject>
+		</figure>
+
+		<para>
+			The order of the columns is still wrong, we want name to come first at
+			least. Additionally the field names from the <classname>Person</classname>
+			class aren't really human-friendly. We can handle this by adding two static
+			arrays to the <classname>PersonContainer</classname> class (these will already
+			be there if you downloaded the class).
+		</para>
+
+		<programlisting><![CDATA[    public static final Object[] NATURAL_COL_ORDER = new Object[] {
+             "firstName", "lastName", "email", "phoneNumber", "streetAddress",
+             "postalCode", "city" };
+     public static final String[] COL_HEADERS_ENGLISH = new String[] {
+             "First name", "Last name", "Email", "Phone number",
+             "Street Address", "Postal Code", "City" };]]></programlisting>
+
+		<para>
+			Additionally we add the following two rows to the
+			<classname>PersonList</classname> class to sort the columns and make the
+			headers nicer
+		</para>
+
+		<programlisting><![CDATA[setVisibleColumns(PersonContainer.NATURAL_COL_ORDER);
+setColumnHeaders(PersonContainer.COL_HEADERS_ENGLISH);]]></programlisting>
+ 	
+		
+		<para>
+			The table will now look nicer:
+		</para>
+
+		<figure xml:id="figure.databinding.columnnames">
+			<title>Table Column Names</title>
+			<mediaobject>
+				<imageobject role="html">
+					<imagedata align="center" fileref="img/databinding-2.png"/>
+				</imageobject>
+				<imageobject role="fo">
+					<imagedata scale="50" align="center" fileref="img/databinding-2.png"/>
+				</imageobject>
+			</mediaobject>
+		</figure>
+	</section>
+
+	<!-- Summary myös tästä - please read through. -->
+
+	<section xml:id="databinding.summary">
+		<title>Summary</title>
+
+		<para>
+			In this step we first created a <classname>Person</classname> class for the
+			items that will be shown in the address book. Next we discussed
+			<classname>Container</classname>s, <classname>Item</classname>s and
+			<classname>Property</classname>-values - the central parts of databinding in
+			Toolkit applications. We also introduced the
+			<classname>BeanItemContainer</classname> and extended it for our own
+			purposes. We created some dummy data and added it to the table by the methods
+			discussed above. This is exactly the way you would bind e.g. data from a
+			database or your system backend to the UI layer. Finally we also made table
+			more readable and better looking. Next we will look at how the application
+			starts to respond to user interactions.
+		</para>
+
+		<para>
+			You can download the Eclipse project package for the end of this step from:
+		</para>
+		
+		<itemizedlist>
+			<listitem><link href="http://www.itmill.com/download/doc/tutorial/itmill-toolkit-5-tutorial/ab-ch4-data.zip"/></listitem>
+		</itemizedlist>
+	</section>
+</chapter>
+
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: xml
+sgml-omittag:nil
+sgml-shorttag:nil
+sgml-namecase-general:nil
+sgml-general-insert-case:lower
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:4
+sgml-indent-data:t
+sgml-parent-document:nil
+sgml-exposed-tags:nil
+sgml-local-catalogs:("/etc/sgml/catalog" "/usr/share/xemacs21/xemacs-packages/etc/psgml-dtds/CATALOG")
+sgml-local-ecat-files:("ECAT" "~/sgml/ECAT" "/usr/share/sgml/ECAT" "/usr/local/share/sgml/ECAT" "/usr/local/lib/sgml/ECAT")
+End:
+-->
+

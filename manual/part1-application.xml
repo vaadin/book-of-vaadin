@@ -1,0 +1,1709 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<chapter xml:id="application">
+	<title>Writing a Web Application</title>
+
+        <!-- TODO: Too much stuff in the chapter intro - move to overview. -->
+
+	<para>
+        This chapter gives the fundamentals of web application development with IT Mill
+        Toolkit, concentrating on the basic elements of an application from a practical
+        point-of-view.
+	</para>
+
+	<para>
+		If you are a newcomer to AJAX development, you may want to read <xref
+		linkend="advanced.application.pages"/> to gain more insight about application
+		design with IT Mill Toolkit. It explains the role of pages in AJAX web
+		applications, and provides some basic design patterns for applications.
+	</para>
+
+	<section xml:id="application.overview">
+		<title>Overview</title>
+
+		<para>
+			An application made with IT Mill Toolkit runs as a Java Servlet in a Servlet
+			container. The entry-point is the application class, which needs to create and
+			manage all necessary user interface components, including windows. User
+			interaction is handled with event listeners, simplified by binding user
+			interface components directly to data. Visual appearance is defined in themes
+			as CSS files. Icons, other images, and downloadable files are handled as
+			<emphasis>resources</emphasis>, which can be external or served by the
+			application server or the application itself.
+		</para>
+		
+		<figure xml:id="figure.application.architecture">
+			<title>Application Architecture</title>
+			<mediaobject>
+				<imageobject role="html">
+					<imagedata align="center" fileref="img/application/application-architecture-lo.png"/>
+				</imageobject>
+				<imageobject role="fo">
+					<imagedata scale="70" align="center" fileref="img/application/application-architecture-hi.png"/>
+				</imageobject>
+			</mediaobject>
+		</figure>
+
+		<para>
+			<xref linkend="figure.application.architecture"/> above gives the basic
+			architecture of an application made with the IT Mill Toolkit framework, with
+			all the major elements, which are introduced below and discussed in detail in
+			this chapter.
+		</para>
+
+		<para>
+			First of all, an application that uses IT Mill Toolkit must define an
+			application class that inherits the abstract
+			<classname>com.itmill.toolkit.Application</classname> class.  The application
+			class must implement the <methodname>init()</methodname> method.
+		</para>
+		
+		<programlisting><![CDATA[public class MyApplication extends com.itmill.toolkit.Application {
+
+    public void init() { 
+        ... initialization code goes here ...
+    }
+}]]></programlisting>
+
+		<para>
+			Besides acting as the entry-point in the servlet, the
+			<classname>Application</classname> class provides facilities for window
+			access, execution control, and theme selection. The application API may seem
+			similar to Java Servlet API, but that is only superficial. IT Mill Toolkit
+			framework associates requests with sessions so that an application class
+			instance is really a session object.  Because of this, you can develop web
+			applications much like you would develop desktop applications.
+		</para>
+		
+		<para>
+			The most important thing in the initialization is the creation of the main
+			window (see below), which any application has. This, and the deployment of the
+			application as a Java Servlet in the Servlet container, as described in <xref
+			linkend="application.environment"/>, are the minimal requirements for an
+			application.
+		</para>
+
+		<para>
+			Below is a short overview of the basic elements of an application:
+		</para>
+
+		<variablelist>
+			<varlistentry>
+				<term>Windows</term>
+				<listitem>
+					<para>
+						An application always has a <emphasis>main window</emphasis>, as
+						described in <xref linkend="application.main-window"/>. An
+						application can actually have a number of such application-level
+						windows, all bound to the same application session, as described
+						in <xref linkend="application.windows"/>. Application-level
+						windows can contain non-native sub-windows, which are essentially
+						floating layout components handled inside the browser.
+					</para>
+				</listitem>
+			</varlistentry>
+
+			<varlistentry>
+				<term>User Interface Components</term>
+				<listitem>
+					<para>
+						The user interface consists of UI components that are created and
+						laid out by the application. User interaction with the components
+						causes events (see below) related to the component, which the
+						application must handle. Most components are bound to some data
+						using the Data Model (see below). You can make your own UI
+						components through either inheritance or composition. For a
+						thorough reference of UI components, see <xref
+						linkend="components"/>, for layout components, see <xref
+						linkend="layout"/>, and for composing components, see <xref
+						linkend="components.custom"/>.
+					</para>
+				</listitem>
+			</varlistentry>
+
+			<varlistentry>
+				<term>Events and Listeners</term>
+				<listitem>
+					<para>
+                        Events, and listeners that handle events, are the basis of
+                        handling user interaction in an application. <xref
+                        linkend="architecture.events"/> gave an introduction to events and
+                        listeners from an architectural point-of-view, while <xref
+                        linkend="application.events"/> later in this chapter takes a more
+                        practical view.
+                    </para>
+                </listitem>
+            </varlistentry>
+
+			<varlistentry>
+				<term>Resources</term>
+				<listitem>
+					<para>
+						A user interface can display images or have links to web pages or
+						downloadable documents. These are <emphasis>resources</emphasis>,
+						which can be external or provided by the web server or the
+						application itself. <xref linkend="application.resources"/> gives
+						a practical overview of the different types of resources.
+					</para>
+				</listitem>
+			</varlistentry>
+
+			<varlistentry>
+				<term>Themes</term>
+				<listitem>
+					<para>
+						The presentation and logic of the user interface are
+						separated. While the UI logic is handled as Java code, the
+						presentation is defined in <emphasis>themes</emphasis> as CSS. IT
+						Mill Toolkit provides a default theme. User-defined themes can, in
+						addition to style sheets, include HTML templates that define
+						custom layouts and other theme resources, such as images. Themes
+						are discussed in detail in <xref linkend="themes"/>, custom
+						layouts in <xref linkend="layout.customlayout"/>, and theme
+						resources in <xref linkend="application.resources.theme"/>.
+					</para>
+				</listitem>
+			</varlistentry>
+
+			<varlistentry>
+				<term>Data Binding</term>
+				<listitem>
+					<para>
+						Field components are essentially views to data, represented in a
+						<emphasis>data model</emphasis>. Using the data model, the
+						components can update the application data directly, without the
+						need for any control code. A field component model is always bound
+						to a <emphasis>property</emphasis>, an <emphasis>item</emphasis>, or
+						a <emphasis>container</emphasis>, depending on the field type.
+						While all the components have a default data model, they can be
+						bound to a user-defined data source. For example, you can bind a
+						table component to an SQL query response. For a complete overview
+						of data binding in IT Mill Toolkit, please refer to <xref
+						linkend="datamodel"/>.
+					</para>
+				</listitem>
+			</varlistentry>
+        </variablelist>
+	</section>
+		
+	<section xml:id="application.main-window">
+		<title>Managing the Main Window</title>
+
+		<para>
+			As explained in <xref linkend="advanced.application.pages"/>, an AJAX web
+			application usually runs in a single "web page" in a browser window. The page
+			is generally not reloaded after it is opened initially, but it communicates
+			user interaction with the server through AJAX communications. A window in an
+			AJAX application is therefore more like a window in a desktop application and
+			less like a web page.
+		</para>
+
+		<para>
+			A <classname>Window</classname> is the top-level container of a user interface
+			displayed in a browser window. As an AJAX application typically runs on a
+			single "page" (URL), there is usually just one window -- the main window. The
+			main window can be accessed using the URL of the application. You set the main
+			window with the <methodname>setMainWindow()</methodname> method of the
+			<classname>Application</classname> class.
+		</para>
+
+		<programlisting>import com.itmill.toolkit.ui.*;
+
+public class HelloWorld extends com.itmill.toolkit.Application {
+    public void init() { 
+        Window main = new Window("The Main Window"); 
+        setMainWindow(main);
+
+        <emphasis>... fill the main window with components ...</emphasis>
+    }
+}</programlisting>
+		
+		<para>
+			IT Mill Toolkit has two basic kinds of windows: application-level windows,
+			such as the main window, and child windows inside the application-level
+			windows. The child windows are covered in the next section, while
+			application-level windows are covered in <xref
+			linkend="application.windows"/>.
+		</para>
+	</section>
+
+	<section xml:id="application.child-windows">
+		<title>Child Windows</title>
+		
+		<para>
+			An application-level window can have a number of floating child
+			windows. They are managed by the client-side JavaScript runtime of IT Mill
+			Toolkit using HTML features. IT Mill Toolkit allows opening and
+			closing child windows, refreshing one window from another, resizing
+			windows, and scrolling the window content. Child windows are typically
+			used for <firstterm>Dialog Windows</firstterm> and <firstterm>Multiple
+				Document Interface</firstterm> applications. Child windows are by default
+			not modal; you can set them modal as described in <xref
+				linkend="application.child-windows.modal"/>.
+		</para>
+
+		<para>
+			As with all user interface components, the appearance of a window and its
+			contents is defined with themes.
+		</para>
+
+		<para>
+			User control of a child window is limited to moving, resizing, and closing
+			the window. Maximizing or minimizing are not yet supported.
+		</para>
+
+		<section xml:id="application.child-window.openclose">
+			<title>Opening and Closing a Child Window</title>
+			
+			<para>
+				You can open a new window by creating a new
+				<classname>Window</classname> object and adding it to the
+				main window with <methodname>addWindow()</methodname> method of
+				the <classname>Application</classname> class.
+			</para>
+
+			<programlisting><![CDATA[mywindow = new Window("My Window");
+mainwindow.addWindow(mywindow);]]></programlisting>
+
+			<para>
+				You close the window in a similar fashion, by calling the
+				<methodname>removeWindow()</methodname> of the
+				<classname>Application</classname> class:
+			</para>
+
+			<programlisting><![CDATA[myapplication.removeWindow (mywindow);]]></programlisting>
+
+			<para>
+				The user can, by default, close a child window by clicking the close
+				button in the upper-right corner of the window. You can disable the button
+				by setting the window as <emphasis>read-only</emphasis> with
+				<methodname>setReadOnly(true)</methodname>. Notice that you could disable
+				the button also by making it invisible in CSS with a "<parameter>display:
+				none</parameter>" formatting. The problem with such a cosmetic disabling
+				is that a malicious user might re-enable the button and close the window,
+				which might cause problems and possibly be a security hole. Setting
+				the window as read-only not only disables the close button on the client
+				side, but also prevents processing the close event on the server side.
+			</para>
+	
+			<para>
+				The following example demonstrates the use of a child window in an
+				application. The example manages the window using a custom component that
+				contains a button for opening and closing the window.
+			</para>
+
+			<programlisting><![CDATA[/** Component contains a button that allows opening a window. */
+public class WindowOpener extends CustomComponent
+                          implements Window.CloseListener {
+    Window mainwindow;  // Reference to main window
+    Window mywindow;    // The window to be opened
+    Button openbutton;  // Button for opening the window
+    Button closebutton; // A button in the window
+    Label  explanation; // A descriptive text
+
+    public WindowOpener(String label, Window main) {
+        mainwindow = main;
+
+        /* The component consists of a button that opens the window. */
+        final VerticalLayout layout = new VerticalLayout();
+        
+        openbutton = new Button("Open Window", this, "openButtonClick");
+        explanation = new Label("Explanation");
+        layout.addComponent(openbutton);
+        layout.addComponent(explanation);
+        
+        setCompositionRoot(layout);
+    }
+
+    /** Handle the clicks for the two buttons. */
+    public void openButtonClick(Button.ClickEvent event) {
+        /* Create a new window. */
+        mywindow = new Window("My Dialog");
+        mywindow.setPositionX(200);
+        mywindow.setPositionY(100);
+
+        /* Add the window inside the main window. */
+        mainwindow.addWindow(mywindow);
+
+        /* Listen for close events for the window. */
+        mywindow.addListener(this);
+
+        /* Add components in the window. */
+        mywindow.addComponent(new Label("A text label in the window."));
+        closebutton = new Button("Close", this, "closeButtonClick");
+        mywindow.addComponent(closebutton);
+
+        /* Allow opening only one window at a time. */
+        openbutton.setEnabled(false);
+
+        explanation.setValue("Window opened");
+    }
+
+    /** Handle Close button click and close the window. */
+    public void closeButtonClick(Button.ClickEvent event) {
+        /* Windows are managed by the application object. */
+        mainwindow.removeWindow(mywindow);
+
+        /* Return to initial state. */
+        openbutton.setEnabled(true);
+
+        explanation.setValue("Closed with button");
+    }
+
+    /** In case the window is closed otherwise. */
+    public void windowClose(CloseEvent e) {
+        /* Return to initial state. */
+        openbutton.setEnabled(true);
+
+        explanation.setValue("Closed with window controls");
+    }
+}]]></programlisting>
+
+			<para>
+				You can use the above custom component in the application class with:
+			</para>
+
+			<programlisting>    public void init() { 
+        Window main = new Window("The Main Window"); 
+        setMainWindow(main);
+
+        addComponent(new WindowOpener("Window Opener", main));
+    }</programlisting>
+
+			<para>
+				The example implements a custom component that inherits the
+				<classname>CustomComponent</classname> class. It consists of a
+				<classname>Button</classname> that it uses to open a window and a
+				<classname>Label</classname> to describe the state of the window. When the
+				window is open, the button is disabled. When the window is closed, the
+				button is enabled again. <!-- TODO: Notice that pushing the
+				<guibutton>Close</guibutton> button removes the window, but the close
+				event will not be called so after removal we have to disable the ... -->
+			</para>
+
+			<para>
+				When added to an application, the screen will look as illustrated
+				in the following screenshot:
+			</para>
+
+			<figure xml:id="figure.window.open.example">
+				<title>Opening a Child Window</title>
+				<mediaobject>
+					<imageobject>
+						<imagedata align="center" fileref="img/layout/window_openexample.png"/>
+					</imageobject>
+				</mediaobject>
+			</figure>
+
+		</section>
+
+		<section xml:id="application.child-window.position">
+			<title>Window Positioning</title>
+
+			<para>
+				When created, a window will have a default size and
+				position. You can specify the size of a window with
+				<methodname>setHeight()</methodname> and
+				<methodname>setWidth()</methodname> methods. You can set the
+				position of the window with <methodname>setPositionX()</methodname>
+				and <methodname>setPositionY()</methodname> methods.
+			</para>
+
+			<programlisting><![CDATA[/* Create a new window. */
+mywindow = new Window("My Dialog");
+
+/* Set window size. */
+mywindow.setHeight("200px");
+mywindow.setWidth("400px");
+
+/* Set window position. */
+mywindow.setPositionX(200);
+mywindow.setPositionY(50);]]></programlisting>
+
+			<para>
+				Notice that the size of the main window is unknown and the
+				<methodname>getHeight</methodname> and
+				<methodname>getWidth</methodname> methods will return
+				<returnvalue>-1</returnvalue>.
+			</para>
+
+		</section>
+
+		<!-- section xml:id="section.window.native">
+			<title>Native Child Windows</title>
+
+			<note>
+				<title>Not Yet Supported</title>
+
+				Support for native child windows is not yet available in IT Mill Toolkit
+				Release 5. The Release 5 allows you, however, to access the application
+				from multiple root windows. 
+			</note>
+
+			<para>
+				Native windows are managed by the operating system or its
+				windowing system and window manager. This is the common type of
+				windows on a desktop. As IT Mill Toolkit applications run on a
+				web browser, the native windows are browser windows, often called
+				<emphasis>popup windows</emphasis>, which can be separate windows
+				or managed as tabs by the browser.
+			</para>
+
+			<para>
+				You can define a window to be a native (popup) window by setting
+				its style with <methodname>setStyle("native")</methodname>. The
+				following screenshot is taken from the above example in <xref
+				linkend="section.window.openclose"/> with the style set to
+				native.
+			</para>
+
+			<figure xml:id="figure.window.native">
+				<title>Screenshot of a native child window</title>
+				<mediaobject>
+					<imageobject role="html">
+						<imagedata align="center" fileref="img/layout/window_native.png"/>
+					</imageobject>
+					<imageobject role="fo">
+						<imagedata scale="60" align="center" fileref="img/layout/window_native.png"/>
+					</imageobject>
+				</mediaobject>
+			</figure>
+
+			<para>
+				While IT Mill Toolkit 4.x supports native windows, they are
+				generally not recommended because of various problems they
+				create. For one, the browser will not tell when a window is
+				closed, so there will be no
+				<methodname>windowClose()</methodname> event. You will never know
+				if a certain window really is open or not. It also means that the
+				window object can be left hanging. You should never trust that a
+				window still exists or prevent the user from opening a new window
+				to replace a closed window. Many browsers also prevent opening
+				popup windows by default, and may do so invisibly, so the user
+				might be left wondering why pushing a button did not do anything.
+			</para>
+
+			<para>
+				For example, consider the above example in <xref
+				linkend="section.window.openclose"/>. Notice that since the main
+				window depends on the state of the child window: the opening
+				button is grayed when the child window is open. If the child
+				window was a native window and the user clicked on the close
+				button available on all native windows, the browser would not
+				tell the application about the event. The opening button in the
+				main window would be left grayed for all eternity.
+			</para>
+
+	        </section -->
+
+		<section xml:id="application.child-windows.modal">
+			<title>Modal Windows</title>
+
+			<para>
+				A modal window is a child window that has to be closed by the
+				user before the use of the parent window can continue. Dialog windows
+				are typically modal. The advantage of modal windows is the
+				simplification of user interaction, which may contribute to the
+				clarity of the user interface. Modal windows are also easy to use
+				from a development perspective, because as user interaction is
+				isolated to them, changes in application state are more limited
+				while the modal window is open. The disadvantage of modal windows
+				is that they can restrict workflow too much.
+			</para>
+
+			<figure xml:id="figure.window.modal">
+				<title>Screenshot of the Modal Window Demo Application</title>
+				<mediaobject>
+					<imageobject role="html">
+						<imagedata align="center" fileref="img/layout/window_modal.png"/>
+					</imageobject>
+					<imageobject role="fo">
+						<imagedata scale="90" align="center" fileref="img/layout/window_modal.png"/>
+					</imageobject>
+				</mediaobject>
+			</figure>
+			
+			<para>
+				Depending on theme settings, the parent window may be grayed
+				while the modal window is open.
+			</para>
+
+			<para>
+				The demo application of IT Mill Toolkit includes an example of
+				using modal windows. <xref linkend="figure.window.modal"/> above
+				is from the demo application. The example includes the source
+				code.
+			</para>
+
+			<warning>
+				<title>Security Warning</title>
+				<para>
+					Modality of child windows is purely a client-side feature and can be
+					circumvented with client-side attack code. You should not trust in the
+					modality of child windows in security-critical situations such as
+					login windows.
+				</para>
+			</warning>
+		</section>
+	</section> <!-- Child windows -->
+		
+    <section xml:id="application.events">
+        <title>Handling Events with Listeners</title>
+
+        <para>
+            Let us put into practice what we learned of event handling in <xref
+            linkend="architecture.events"/>. You can handle events in three basic ways, as
+            shown below.
+        </para>
+
+		<para>
+			The following example follows a typical pattern where you have a
+			<classname>Button</classname> component and a listener that handles user
+			interaction (clicks) communicated to the application as events. Here we define
+			a class that listens click events.
+		</para>
+
+		<programlisting><![CDATA[public class TheButton implements Button.ClickListener {
+    Button thebutton;
+
+    /** Creates button into given container. */
+    public TheButton(AbstractComponentContainer container) {
+        thebutton = new Button ("Do not push this button");
+        thebutton.addListener(this);
+        container.addComponent(thebutton);
+    }
+    
+    /** Handle button click events from the button. */
+    public void buttonClick (Button.ClickEvent event) {
+        thebutton.setCaption ("Do not push this button again");
+    }
+}]]></programlisting>
+
+		<para>
+			As an application often receives events for several components of the
+			same class, such as multiple buttons, it has to be able to
+			distinguish between the individual components. There are several
+			techniques to do this, but probably the easiest is to use the
+			property of the received event, which is set to the object sending
+			the event. This requires keeping at hand a reference to every object that
+			emits events.
+		</para>
+
+		<programlisting><![CDATA[public class TheButtons implements Button.ClickListener {
+    Button thebutton;
+    Button secondbutton;
+
+    /** Creates two buttons in given container. */
+    public TheButtons(AbstractComponentContainer container) {
+        thebutton = new Button ("Do not push this button");
+        thebutton.addListener(this);
+        container.addComponent(thebutton);
+        
+        secondbutton = new Button ("I am a button too");
+        secondbutton.addListener(this);
+        container.addComponent (secondbutton);
+    }
+    
+    /** Handle button click events from the two buttons. */
+    public void buttonClick (Button.ClickEvent event) {
+        if (event.getButton() == thebutton)
+            thebutton.setCaption ("Do not push this button again");
+        else if (event.getButton() == secondbutton)
+            secondbutton.setCaption ("I am not a number");
+    }
+}]]></programlisting>
+
+		<para>
+			Another solution to handling multiple events of the same class
+			involves attaching an event source to a listener method instead of
+			the class. An event can be attached to a method using another version of
+			the <methodname>addListener()</methodname> method, which takes the
+			event handler method as a parameter either as a name of the method
+			name as a string or as a <classname>Method</classname> object. In the
+			example below, we use the name of the method as a string.
+		</para>
+
+		<programlisting><![CDATA[public class TheButtons2 {
+    Button thebutton;
+    Button secondbutton;
+
+    /** Creates two buttons in given container. */
+    public TheButtons2(AbstractComponentContainer container) {
+        thebutton = new Button ("Do not push this button");
+        thebutton.addListener(Button.ClickEvent.class, this, "theButtonClick");
+        container.addComponent(thebutton);
+        
+        secondbutton = new Button ("I am a button too");
+        secondbutton.addListener(Button.ClickEvent.class, this, "secondButtonClick");
+        container.addComponent (secondbutton);
+    }
+    
+    public void theButtonClick (Button.ClickEvent event) {
+        thebutton.setCaption ("Do not push this button again");
+    }
+
+    public void secondButtonClick (Button.ClickEvent event) {
+        secondbutton.setCaption ("I am not a number!");
+    }
+}]]></programlisting>
+
+		<para>
+			Adding a listener method with <methodname>addListener()</methodname> is
+			really just a wrapper that creates a
+			<classname>com.itmill.toolkit.event.ListenerMethod</classname>
+			listener object, which is an adapter from a listener class to a
+			method. It implements the
+			<classname>java.util.EventListener</classname> interface and can
+			therefore work for any event source using the interface. Notice that
+			not all listener classes necessarily inherit the
+			<classname>EventListener</classname> interface.
+		</para>
+
+		<para>
+			The third way, which uses anonymous local class definitions, is often the
+			easiest as it does not require cumbering the managing class with new
+			interfaces or methods. The following example defines an anonymous class that
+			inherits the <classname>Button.ClickListener</classname> interface and
+			implements the <methodname>buttonClick()</methodname> method.
+		</para>
+
+		<programlisting><![CDATA[public class TheButtons3 {
+    Button thebutton;
+    Button secondbutton;
+
+    /** Creates two buttons in given container. */
+    public TheButtons3(AbstractComponentContainer container) {
+        thebutton = new Button ("Do not push this button");
+        thebutton.addListener(new Button.ClickListener() {
+            /* Define the method in the anonymous class to handle the click. */
+            public void buttonClick(ClickEvent event) {
+                thebutton.setCaption ("Do not push this button again");
+            }
+        });
+        container.addComponent(thebutton);
+        
+        secondbutton = new Button ("I am a button too");
+        secondbutton.addListener(new Button.ClickListener() {
+            /* Define the method in the anonymous class to handle the click. */
+            public void buttonClick(ClickEvent event) {
+                secondbutton.setCaption ("I am not a number!");            
+            }
+        });
+        container.addComponent (secondbutton);
+    }
+}]]></programlisting>
+
+		<para>
+			Other techniques for separating between different sources also exist. They include
+			using object properties, names, or captions to separate between
+			them. Using captions or any other visible text is generally
+			discouraged, as it may create problems for
+			internationalization. Using other symbolic strings can also be
+			dangerous, because the syntax of such strings is checked only
+			runtime.
+		</para>
+
+		<para>
+			Events are usually emitted by the framework, but applications may
+			need to emit them too in some situations, such as when updating some
+			part of the UI is required. Events can be emitted using the
+			<methodname>fireEvent(Component.Event)</methodname> method of
+			<classname>AbstractComponent</classname>. The event is then relayed
+			to all the listeners of the particular event class for the
+			object. Some components have a default event type, for example, a
+			<classname>Button</classname> has a nested
+			<classname>Button.ClickEvent</classname> class and a corresponding
+			<classname>Button.ClickListener</classname> interface. These events
+			can be triggered with <methodname>fireComponentEvent()</methodname>.
+		</para>
+    </section>
+
+	<section xml:id="application.resources">
+		<title>Referencing Resources</title>
+
+		<para>
+			Web applications work over the web and have various resources, such
+			as images or downloadable files, that the web browser has to get from
+			the server. These resources are typically used in
+			<classname>Embedded</classname> (images) or
+			<classname>Link</classname> (downloadable files) user interface
+			components. Various components, such as
+			<classname>TabSheet</classname>, can also include icons, which are
+			also handled as resources.
+		</para>
+
+		<para>
+			A web server can handle many of such requests for static resources without
+			having to ask them from the application, or the
+			<classname>Application</classname> object can provide them. For dynamic
+			resources, the user application must be able to create them dynamically. IT
+			Mill Toolkit provides resource request interfaces for applications so that
+			they can return various kinds of resources, such as files or dynamically
+			created resources. These include the <classname>StreamResource</classname>
+			class and URI and parameter handlers described in <xref
+			linkend="section.application.resources.uri"/> and <xref
+			linkend="section.application.resources.parameters"/>, respectively.
+		</para>
+
+		<para>
+			IT Mill Toolkit provides also low-level facilities for retrieving the
+			URI and other parameters of a HTTP request. We will first look into
+			how applications can provide various kinds of resources and then look
+			into low-level interfaces for handling URIs and parameters to provide
+			resources and functionalities.
+		</para>
+
+		<para>
+			Notice that using URI or parameter handlers to create "pages" is not
+			meaningful in IT Mill Toolkit or in AJAX applications
+			generally. Please see <xref linkend="advanced.application.pages"/> for
+			a detailed explanation.
+		</para>
+
+		<section xml:id="application.resources.api">
+			<title>Resource Interfaces and Classes</title>
+		
+			<para>
+				IT Mill Toolkit has two interfaces for resources: a generic
+				<classname>Resource</classname> interface and a more specific
+				<classname>ApplicationResource</classname> interface for resources
+				provided by the application.
+			</para>
+
+			<figure xml:id="figure.resource.classdiagram">
+				<title>Resource Interface and Class Diagram</title>
+				<mediaobject>
+					<imageobject role="html">
+						<imagedata align="center" fileref="img/application/resource_classdiagram-lo.png"/>
+					</imageobject>
+					<imageobject role="fo">
+						<imagedata scale="70" align="center" fileref="img/application/resource_classdiagram-hi.png"/>
+					</imageobject>
+				</mediaobject>
+			</figure>
+
+			<para>
+				<classname>ApplicationResource</classname> resources are managed
+				by the <classname>Application</classname> class. When you create
+				such a resource, you give the application object to the
+				constructor. The constructor registers the resource in the
+				application using the <classname>addResource</classname>
+				method.
+			</para>
+
+			<para>
+				<classname>Application</classname> manages requests for the
+				resources and allows accessing resources using a URI. The URI
+				consists of the base name of the application and a relative name
+				of the resource. The relative name is
+				<literal>"APP/"+resourceid+"/"+filename</literal>, for example
+				<literal>"APP/1/myimage.png"</literal>. The
+				<varname>resourceid</varname> is a generated numeric identifier
+				to make resources unique, and <varname>filename</varname> is the
+				file name of the resource given in the constructor of its
+				class. However, the application using a resource does not usually
+				need to consider its URI. It only needs to give the resource to
+				an appropriate <classname>Embedded</classname> or
+				<classname>Link</classname> or some other user interface
+				component, which manages the rendering of the URI.
+			</para>
+
+			<para>
+			</para>
+		</section>
+
+		<section>
+			<title>File Resources</title>
+
+			<para>
+				File resources are files stored anywhere in the file system. The
+				use of file resources falls into two main categories:
+				downloadable files and embedded images.
+			</para>
+
+			<para>
+				The file that can be retrieved using a file resource is defined
+				with standard <classname>java.io.File</classname> class. You can
+				create the file either with an absolute or relative path, but the
+				base path of the relative path depends on the installation of the
+				web server. For example, in Tomcat, the default current directory
+				is the installation path of Tomcat.
+			</para>
+
+			<!-- programlisting><![CDATA[]]></programlisting -->
+		</section>
+
+		<section>
+			<title>Class Loader Resources</title>
+
+			<para>
+				The <classname>ClassResource</classname> allows resources to be loaded
+				from the deployed package of the application using Java Class Loader. <!-- If you
+				are using Eclipse, you just need to import the resources, such as images,
+				under a package. --> The one-line example below loads an image resource from
+				the application package and displays it in an
+				<classname>Embedded</classname> component.
+			</para>
+
+			<programlisting><![CDATA[mainwindow.addComponent(new Embedded ("", new ClassResource("smiley.jpg", mainwindow.getApplication())));]]></programlisting>
+		</section>
+
+		<section xml:id="application.resources.theme">
+			<title>Theme Resources</title>
+
+			<para>
+				Theme resources are files included in a theme, typically images. See <xref
+				linkend="themes"/> for more information on themes.
+			</para>
+		</section>
+
+		<section xml:id="application.resources.stream">
+			<title>Stream Resources</title>
+		
+			<para>
+				Stream resources are application resources that allow creating
+				dynamic resource content. Charts are typical examples of dynamic
+				images. To define a stream resource, you need to implement the
+				<classname>StreamResource.StreamSource</classname> interface and
+				its <methodname>getStream</methodname> method. The method needs
+				to return an <classname>InputStream</classname> from which the
+				stream can be read.
+			</para>
+
+			<para>
+				The following example demonstrates the creation of a simple
+				image in PNG image format. 
+			</para>
+
+			<programlisting><![CDATA[import java.awt.image.*;
+
+public class MyImageSource implements StreamResource.StreamSource {
+    ByteArrayOutputStream imagebuffer = null;
+    int reloads = 0;
+    
+    /* Must implement this method that returns the resource as a stream.*/
+    public InputStream getStream () {
+        /* Create an image and draw something on it. */
+        BufferedImage image = new BufferedImage (200, 200, BufferedImage.TYPE_INT_RGB);
+        Graphics drawable = image.getGraphics();
+        drawable.setColor(Color.lightGray);
+        drawable.fillRect(0,0,200,200);
+        drawable.setColor(Color.yellow);
+        drawable.fillOval(25,25,150,150);
+        drawable.setColor(Color.blue);
+        drawable.drawRect(0,0,199,199);
+        drawable.setColor(Color.black);
+        drawable.drawString("Reloads="+reloads, 75, 100);
+        reloads++;
+
+        try {
+            /* Write the image to a buffer. */
+            imagebuffer = new ByteArrayOutputStream();
+            ImageIO.write(image, "png", imagebuffer);
+            
+            /* Return a stream from the buffer. */
+            return new ByteArrayInputStream(imagebuffer.toByteArray());
+        } catch (IOException e) {
+            return null;
+        }
+    }
+}]]></programlisting>
+
+			<para>
+				The content of the generated image is dynamic, as it updates the
+				reloads counter with every call. The
+				<classname>ImageIO</classname>.<methodname>write()</methodname>
+				method writes the image to an output stream, while we had to
+				return an input stream, so we stored the image contents to a
+				temporary buffer.
+			</para>
+
+			<para>
+				You can use resources in various ways. Some user interface components, such as
+				<classname>Link</classname> and <classname>Embedded</classname>,
+				take their parameters as a resource.
+			</para>
+
+			<para>
+				Below we display the image with the
+				<classname>Embedded</classname> component.  The
+				<classname>StreamResource</classname> constructor gets a
+				reference to the application and registers itself in the
+				application's resources. Assume that <varname>main</varname> is a
+				reference to the main window and <varname>this</varname> is the
+				application object.
+			</para>
+
+			<programlisting><![CDATA[/* Create an instance of our stream source. */
+StreamResource.StreamSource imagesource = new MyImageSource ();
+	
+/* Create a resource that uses the stream source and give it a name. The
+ * constructor will automatically register the resource in the application. */
+StreamResource imageresource = new StreamResource(imagesource, "myimage.png", this);
+	
+/* Create an embedded component that gets its contents from the resource. */
+main.addComponent(new Embedded("Image title", imageresource));]]></programlisting>
+
+			<para>
+				The image will look as follows:
+			</para>
+
+			<figure xml:id="figure.resource.streamresource">
+				<title>Screenshot of the stream resource example with an embedded image</title>
+				<mediaobject>
+					<imageobject>
+						<imagedata align="center" fileref="img/application/application_streamresource.png"/>
+					</imageobject>
+				</mediaobject>
+			</figure>
+
+			<para>
+				We named the resource as <filename>myimage.png</filename>. The
+				application adds a resource key to the file name of the resource
+				to make it unique.  The full URI will be like
+				<uri>http://localhost:8080/testbench/APP/1/myimage.png</uri>. The
+				end <uri>APP/1/myimage.png</uri> is the
+				<emphasis>relative</emphasis> part of the URI. You can get the
+				relative part of a resource's URI from the application with
+				<methodname>Application.getRelativeLocation()</methodname>.
+			</para>
+
+			<para>
+				Another solution for creating dynamic content is an URI handler, possibly
+				together with a parameter handler. See <xref
+				linkend="section.application.resources.uri"/> and <xref
+				linkend="section.application.resources.parameters"/>.
+			</para>
+
+		</section>
+
+	</section>
+
+	<!-- section>
+		<title>Application Life-Cycle</title>
+		<para>
+		</para>
+	</section -->
+
+	<section xml:id="application.close">
+		<title>Shutting Down an Application</title>
+
+		<para>
+			A user can log out or close the web page or browser, so a session and the
+			associated application instance can end. Ending an application can be
+			initiated by the application logic. Otherwise, it will be ended automatically
+			when the Servlet session times out.
+		</para>
+
+		<section>
+			<title>Closing an Application</title>
+
+			<para>
+				If the user quits the application through the user interface, an event handler
+				should call the <methodname>close()</methodname> method in the
+				<classname>Application</classname> class to shutdown the session.
+			</para>
+
+			<para>
+				In the following example, we have a <guibutton>Logout</guibutton> button,
+				which ends the user session.
+			</para>
+
+			<programlisting><![CDATA[Button closeButton = new Button("Logout");
+
+closeButton.addListener(new Button.ClickListener() {
+    @Override
+    public void buttonClick(ClickEvent event) {
+        getMainWindow().getApplication().close();
+    } 
+});
+
+main.addComponent(closeButton);]]></programlisting>
+
+			<para>
+				You will soon notice that closing the application simply reloads the
+				application with a new <classname>Application</classname> instance. You
+				can set the window to redirect to a different URL (that does not reload
+				the application) with <methodname>setLogoutURL</methodname>. In your
+				application class, write:
+			</para>
+
+			<programlisting><![CDATA[setLogoutURL("/logout.html");]]></programlisting>
+
+			<!-- TODO: Update if #2752 is fixed. -->
+		</section>
+
+		<section>
+			<title>Handling the Closing of a Window</title>
+
+			<para>
+				Closing the main window (or all application-level windows) does not close
+				session and the application instance will be left hanging. You need to
+				program such behaviour by handling the close events of the windows.
+			</para>
+
+			<para>
+				If the user closes a browser window, such as the main window or any other
+				application-level window, the window will send a final AJAX request to the
+				server, which will fire a <classname>Window.CloseEvent</classname> for the
+				closed window. You can handle the event with a
+				<classname>Window.CloseListener</classname>. In case the user closes the
+				browser, the event is fired for every open window.
+			</para>
+
+			<programlisting><![CDATA[// Close the application if the main window is closed.
+main.addListener(new Window.CloseListener(){
+   @Override
+    public void windowClose(CloseEvent e) {
+       System.out.println("Main window closed - closing the application");
+       getMainWindow().getApplication().close();
+    } 
+});]]></programlisting>
+
+			<para>
+				Notice that <emphasis>refreshing a window means closing and reopening
+				it</emphasis>. Therefore, if you have a close handler as above, the user
+				loses the possibility to refresh the browser window.
+			</para>
+
+			<para>
+				In the likely case that the browser crashes, no close event is communicated to
+				the server. As the server has no way of knowing about the problem, and the
+				session will be left hanging until the session timeout expires. During this
+				time, the user can restart the browser, open the application URL, and the main
+				window will be rendered where the user left off. This can be desired behaviour
+				in many cases, but sometimes it is not and can create a security problem.
+			</para>
+		</section>
+	</section>
+	
+	<section xml:id="application.errors">
+		<title>Handling Errors</title>
+
+		<section xml:id="application.errors.error-indicator">
+			<title>Error Indicator and message</title>
+
+			<para>
+				All components have a built-in error indicator that can be set explicitly
+				with <methodname>setComponentError()</methodname> or can be turned on
+				implicitly if validating the component fails. As with component caption,
+				the placement of the indicator is managed by the layout in which the
+				component is contained. Usually, the error indicator is placed right of
+				the caption text. Hovering the mouse pointer over the field displays the
+				error message.
+			</para>
+
+			<para>
+				The following example shows how you can set the component error
+				explicitly. The example essentially validates field value without using an
+				actual validator.
+			</para>
+
+			<programlisting><![CDATA[// Create a field.
+final TextField textfield = new TextField("Enter code");
+main.addComponent(textfield);
+
+// Let the component error be initially clear. (It actually is by default.)
+textfield.setComponentError(null);
+
+// Have a button right of the field (and align it properly).
+final Button button = new Button("Ok!");
+main.addComponent(button);
+((VerticalLayout)main.getLayout()).setComponentAlignment(button, Alignment.BOTTOM_LEFT);
+
+// Handle button clicks
+button.addListener(new Button.ClickListener() {
+    public void buttonClick(ClickEvent event) {
+        // If the field value is bad, set its error.
+        // (Here the content must be only alphanumeric characters.)
+        if (! ((String) textfield.getValue()).matches("^\\w*$")) {
+            // Put the component in error state and set the error message.
+            textfield.setComponentError(new UserError("Must be letters and numbers"));
+        } else {
+            // Otherwise clear it.
+            textfield.setComponentError(null);
+        }
+    }
+});]]></programlisting>
+
+			<figure xml:id="figure.error-indicator.example1">
+				<title>Error indicator active</title>
+				<mediaobject>
+					<imageobject role="html">
+						<imagedata align="center" fileref="img/application/errorindicator-example2.png"/>
+					</imageobject>
+					<imageobject role="fo">
+						<imagedata scale="70" align="center" fileref="img/application/errorindicator-example2.png"/>
+					</imageobject>
+				</mediaobject>
+			</figure>
+
+			<para>
+				The <classname>Form</classname> component handles and displays also the
+				errors of its contained fields so that it displays both the error
+				indicator and the message in a special error indicator area. See <xref
+				linkend="components.form"/> and <xref
+				linkend="components.form.validation"/> for details on the
+				<classname>Form</classname> component and validation of form input.
+			</para>
+		</section>
+
+		<section xml:id="application.errors.notifications">
+			<title>Notifications</title>
+
+			<para>
+				Notifications are error or information boxes that appear typically at the
+				center of the screen. A notification box has a caption and optional
+				description and icon. The box stays on the screen either for a defined
+				time or until the user clicks it. The notification type defines the
+				default appearance and behaviour of a notification.
+			</para>
+
+			<para>
+				Notifications are always associated with a window object, which can be a
+				child window (the positioning is always relative to the entire browser
+				view). The <classname>Window</classname> class provides a
+				<methodname>showNotification()</methodname> method for displaying
+				notifications. The method takes the caption and an optional description
+				and notification type as parameters. The method also accepts a
+				notification object of type <classname>Window.Notification</classname>, as
+				described further below.
+			</para>
+
+			<programlisting><![CDATA[mainwindow.showNotification("This is the caption",
+                            "This is the description");]]></programlisting>
+
+			<figure xml:id="figure.notification.example1">
+				<title>Notification</title>
+				<mediaobject>
+					<imageobject role="html">
+						<imagedata align="center" fileref="img/application/notification-example2.png"/>
+					</imageobject>
+					<imageobject role="fo">
+						<imagedata scale="70" align="center" fileref="img/application/notification-example2.png"/>
+					</imageobject>
+				</mediaobject>
+			</figure>
+
+			<para>
+				The caption and description are, by default, written on the same line. If
+				you want to have a line break between them, use the XHTML line break markup
+				"<literal>&lt;br/&gt;</literal>". You can use any XHTML markup in the
+				caption and description of a notification.
+			</para>
+
+			<programlisting><![CDATA[main.showNotification("This is a warning",
+                            "<br/>This is the <i>last</i> warning",
+                            Window.Notification.TYPE_WARNING_MESSAGE);]]></programlisting>
+
+			<figure xml:id="figure.notification.example2">
+				<title>Notification with Formatting</title>
+				<mediaobject>
+					<imageobject role="html">
+						<imagedata align="center" fileref="img/application/notification-example3.png"/>
+					</imageobject>
+					<imageobject role="fo">
+						<imagedata scale="70" align="center" fileref="img/application/notification-example3.png"/>
+					</imageobject>
+				</mediaobject>
+			</figure>
+
+			<para>
+				The notification type defines the overall default style and behaviour of a
+				notification. If no notification type is given, the "humanized" type is
+				used as the default. The notification types, listed below, are defined in
+				the <classname>Window.Notification</classname> class.
+			</para>
+
+			<table>
+				<title>Types of Notifications</title>
+				<tgroup cols="2" align="left">
+					<tbody>
+						<row valign="top">
+							<entry>
+								<mediaobject>
+									<imageobject role="html">
+										<imagedata align="center" fileref="img/application/notification-humanized.png"/>
+									</imageobject>
+									<imageobject role="fo">
+										<imagedata scale="70" align="center" fileref="img/application/notification-humanized.png"/>
+									</imageobject>
+								</mediaobject>
+							</entry>
+
+							<entry>TYPE_HUMANIZED_MESSAGE</entry>
+							
+							<entry>A user-friendly message that does not annoy too much:
+							it does not require confirmation by clicking and disappears
+							very quickly. It is centered and has a neutral gray color.</entry>
+						</row>
+						<row valign="top">
+							<entry>
+								<mediaobject>
+									<imageobject role="html">
+										<imagedata align="center" fileref="img/application/notification-warning.png"/>
+									</imageobject>
+									<imageobject role="fo">
+										<imagedata scale="70" align="center" fileref="img/application/notification-warning.png"/>
+									</imageobject>
+								</mediaobject>
+							</entry>
+
+							<entry>TYPE_WARNING_MESSAGE</entry>
+							
+							<entry>Warnings are messages of medium importance. They are
+							displayed with colors that are neither neutral nor too
+							distractive. A warning is displayed for 1.5 seconds,
+							but the user can click the message box to dismiss it. The user
+							can continue to interact with the application while the
+							warning is displayed.</entry>
+						</row>
+						<row valign="top">
+							<entry>
+								<mediaobject>
+									<imageobject role="html">
+										<imagedata align="center" fileref="img/application/notification-error.png"/>
+									</imageobject>
+									<imageobject role="fo">
+										<imagedata scale="70" align="center" fileref="img/application/notification-error.png"/>
+									</imageobject>
+								</mediaobject>
+							</entry>
+
+							<entry>TYPE_ERROR_MESSAGE</entry>
+							
+							<entry>Error messages are notifications that require the highest
+							user attention, with alert colors and by requiring the user to
+							click the message to dismiss it. The error message box does not itself include an
+							instruction to click the message, although the close box in
+							the upper right corner indicates it visually. Unlike with
+							other notifications, the user can not interact with the
+							application while the error message is displayed.</entry>
+						</row>
+						<row valign="top">
+							<entry>
+								<mediaobject>
+									<imageobject role="html">
+										<imagedata align="center" fileref="img/application/notification-tray.png"/>
+									</imageobject>
+									<imageobject role="fo">
+										<imagedata scale="70" align="center" fileref="img/application/notification-tray.png"/>
+									</imageobject>
+								</mediaobject>
+							</entry>
+
+							<entry>TYPE_TRAY_NOTIFICATION</entry>
+							
+							<entry>Tray notifications are displayed in the "system tray"
+							area, that is, in the lower-right corner of the browser
+							view. As they do not usually obsure any user interface, they
+							are displayed longer than humanized or warning messages, 3
+							seconds by default. The user can continue to interact with the
+							application normally while the tray notification is
+							displayed.</entry>
+						</row>
+					</tbody>
+				</tgroup>
+			</table>
+
+			<para>
+				All of the features of specific notification types can be controlled with
+				the attributes of <classname>Window.Notification</classname>. You can pass
+				an explicitly created notification object to the
+				<methodname>showNotification()</methodname> method.
+			</para>
+
+			<programlisting><![CDATA[// Create a notification with the default settings for a warning.
+Window.Notification notif = new Window.Notification(
+        "Be warned!", "This message lurks in the top-left corner!",
+        Window.Notification.TYPE_WARNING_MESSAGE);
+
+// Set the position.
+notif.setPosition(Window.Notification.POSITION_TOP_LEFT);
+
+// Let it stay there until the user clicks it
+notif.setDelayMsec(-1);
+
+// Show it in the main window.
+main.showNotification(notif);]]></programlisting>
+
+			<para>
+				The <methodname>setPosition()</methodname> method allows setting the
+				positioning of the notification. The method takes as its parameter any of
+				the constants:
+			</para>
+
+			<informaltable frame="none">
+				<tgroup cols="2" align="left">
+					<tbody>
+						<row valign="top" rowsep="0"><entry colsep="0"><parameter>Window.Notification.POSITION_CENTERED</parameter></entry></row>
+						<row valign="top" rowsep="0"><entry colsep="0"><parameter>Window.Notification.POSITION_CENTERED_TOP</parameter></entry></row>
+						<row valign="top" rowsep="0"><entry colsep="0"><parameter>Window.Notification.POSITION_CENTERED_BOTTOM</parameter></entry></row>
+						<row valign="top" rowsep="0"><entry colsep="0"><parameter>Window.Notification.POSITION_TOP_LEFT</parameter></entry></row>
+						<row valign="top" rowsep="0"><entry colsep="0"><parameter>Window.Notification.POSITION_TOP_RIGHT</parameter></entry></row>
+						<row valign="top" rowsep="0"><entry colsep="0"><parameter>Window.Notification.POSITION_BOTTOM_LEFT</parameter></entry></row>
+						<row valign="top" rowsep="0"><entry colsep="0"><parameter>Window.Notification.POSITION_BOTTOM_RIGHT</parameter></entry></row>
+					</tbody>
+				</tgroup>
+			</informaltable>
+
+			<para>
+				The <methodname>setDelayMSec()</methodname> allows you to set the time in
+				milliseconds for how long the notification is displayed. Parameter value
+				<literal>-1</literal> means that the message is displayed until the user
+				clicks the message box. It also prevents interaction with other parts of
+				the application window, as is default behaviour for error messages. It
+				does not, however, add a close box that the error notification has.
+			</para>
+			
+		</section>
+		
+		<section xml:id="application.errors.unchecked-exceptions">
+			<title>Handling unchecked exceptions </title>
+			<para>
+				Most of the actual application logic is event driven. Mouse and
+				keyboard events in client initiates event listeners on server side and
+				that is how most of application logic gets run. Unchecked exceptions in
+				Toolkit applications usually happen on these client initiated events.
+				<classname>RuntimeException</classname>s that happen in those call chains
+				are caught by terminal and passed to the error listener of
+				<classname>Application</classname> instance. These exceptions can happen 
+				in the actual framework code or the application logic. Application by 
+				default does not throw them forward. This is because we want 
+				to handle all variable changes in the request. Without this somewhat
+				awkward behavior, it would be very common to get client and server side 
+				component states inconsistent with each other and that way put the entire
+				application into a non-functional state.
+			</para>
+			
+			<para>
+				The default
+				<classname>Terminal.ErrorListener</classname>
+				in Application prints the error to console. It also tries to find out a
+				related component where the error happened. This is most commonly the
+				component where the event listener was attached to. If the related
+				component is found, the error handler puts a component error to it. In
+				UI the component error is shown with a small red "!" -sign (in default
+				theme).
+			</para>
+
+			<para>
+				The behavior of terminal error handling can be changed easily by
+				overriding the	<methodname>terminalError(Terminal.ErrorEvent
+				event)</methodname>	method in <classname>Application</classname>
+				or by setting a custom error listener with 
+				<methodname>setErrorHandler</methodname> method. You can safely 
+				discard the default handling or extend its usage with your 
+				custom error handling or logging system. In the example code 
+				below the exceptions are also reported as notifications on main 
+				window.
+			</para>
+			
+			<programlisting><![CDATA[    @Override
+    public void terminalError(
+            com.itmill.toolkit.terminal.Terminal.ErrorEvent event) {
+        super.terminalError(event);
+        if (getMainWindow() != null) {
+            getMainWindow().showNotification("An unchecked exception occured!",
+                    event.getThrowable().toString(),
+                    Notification.TYPE_ERROR_MESSAGE);
+        }
+    }]]></programlisting>
+			
+
+			<para>
+				Other exception handling works as it commonly does in Servlets. 
+				Unchecked exceptions are finally caught and handled by server.
+			</para>
+
+		</section>
+
+	</section>
+
+	<section xml:id="application.environment">
+		<title>Setting Up the Application Environment</title>
+		
+		<para>
+			While more and more server based frameworks,
+			libraries, standards, and architectures for Java are
+			invented to make the programmer's life easier, software
+			deployment seems to get harder and harder. For
+			example, Java Enterprise Beans tried to make the creation
+			of persistent and networked objects easy and somewhat
+			automatic, but the number of deployment descriptions
+			got enormous. As IT Mill Toolkit lives in a Java
+			Servlet container, it must follow the rules, but it
+			tries to avoid adding extra complexity.
+		</para>
+		
+		<para>
+			All IT Mill Toolkit applications are deployed as Java web
+			applications, which can be packaged as WAR files. For a detailed
+			tutorial on how web applications are packaged, please refer to any Java
+			book that discusses Servlets. Sun has an excellent reference online on
+			<link
+				xlink:href="http://java.sun.com/j2ee/tutorial/1_3-fcs/doc/WCC3.html">
+				http://java.sun.com/j2ee/tutorial/1_3-fcs/doc/WCC3.html
+			</link>
+			.
+		</para>
+		
+		
+		<section>
+			<title>Creating Deployable WAR in Eclipse</title>
+
+			<para>
+				To deploy the created application to a web server, you need to
+				create a WAR package. Here we give the instructions for Eclipse.
+			</para>
+			
+			<para>
+				Open project properties and first set the name and destination of
+				the WAR file in Tomcat <guimenuitem>Export to WAR
+				settings</guimenuitem> tab. Exporting to WAR is done by selecting
+				<guimenuitem>Export to WAR</guimenuitem> from <guimenuitem>Tomcat
+				Project</guimenuitem> in project context menu (just click calc
+				with the right mouse button on <guimenuitem>Package contents
+				tree</guimenuitem>).
+			</para>
+		</section>
+		
+		<section>
+			<title>Web Application Contents</title>
+
+			<para>
+				The following files are required in a web application in order to
+				run it.
+			</para>
+
+			<variablelist>
+				<title>Web application organization</title>
+
+				<varlistentry>
+					<term>
+						<filename>WEB-INF/web.xml</filename>
+					</term>
+					<listitem>
+						<para>
+							This is the standard web application
+							descriptor that defines how the
+							application is organized. You can refer
+							to any Java book about the contents of
+							this file. Also see an example in
+							<xref linkend="ex.web.xml" />.
+						</para>
+					</listitem>
+				</varlistentry>
+
+				<varlistentry>
+					<term>
+						<filename>
+							WEB-INF/lib/itmill-toolkit-5.0.0.jar
+						</filename>
+					</term>
+					<listitem>
+						<para>
+							This is the IT Mill Toolkit library. It
+							is included in the product package in
+							<filename>lib</filename>
+							directory.
+						</para>
+					</listitem>
+				</varlistentry>
+
+				<varlistentry>
+					<term>Your application classes</term>
+					<listitem>
+						<para>
+							You must include your application
+							classes either in a JAR file in
+							<filename>WEB-INF/lib</filename>
+							or as classes in
+							<filename>WEB-INF/classes</filename>
+						</para>
+					</listitem>
+				</varlistentry>
+
+				<varlistentry>
+					<term>Your own theme files (OPTIONAL)</term>
+					<listitem>
+						<para>
+							If your application uses a special theme
+							(look and feel), you must include it in
+							<filename>WEB-INF/lib/themes/themename</filename>
+							directory.
+						</para>
+					</listitem>
+				</varlistentry>
+
+			</variablelist>
+		</section>
+
+		<section xml:id="section.web.web-xml">
+			<title>Deployment Descriptor <filename>web.xml</filename></title>
+
+			<para>
+				The deployment descriptor is an XML file with the name
+				<filename>web.xml</filename> in the <filename>WEB-INF</filename> directory of
+				a web application. It is a standard component in Java EE describing
+				how a web application should be deployed. The structure of the deployment
+				descriptor is illustrated by the following example. You simply deploy
+				applications as servlets implemented by the special
+				<methodname>com.itmill.toolkit.terminal.gwt.server.ApplicationServlet</methodname>
+				wrapper class. The class of the actual application is specified by giving
+				the <parameter>application</parameter> parameter with the name of the
+				specific application class to the servlet. The servlet is then connected
+				to a URL in a standard way for Java Servlets.
+			</para>
+
+			<example xml:id="ex.web.xml">
+				<title>web.xml</title>
+				<programlisting>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;web-app id="WebApp_ID" version="2.4" xmlns="http://java.sun.com/xml/ns/j2ee" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee
+                        http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd"&gt;
+
+    &lt;servlet&gt;
+        &lt;servlet-name&gt;<emphasis role="strong">myservlet</emphasis>&lt;/servlet-name&gt;
+        &lt;servlet-class&gt;com.itmill.toolkit.terminal.gwt.server.ApplicationServlet
+        &lt;/servlet-class&gt;
+        &lt;init-param&gt;
+            &lt;param-name&gt;application&lt;/param-name&gt;
+            &lt;param-value&gt;<emphasis role="strong">MyApplicationClass</emphasis>&lt;/param-value&gt;
+        &lt;/init-param&gt;
+    &lt;/servlet&gt;
+    &lt;servlet-mapping&gt;
+        &lt;servlet-name&gt;<emphasis role="strong">myservlet</emphasis>&lt;/servlet-name&gt;
+        &lt;url-pattern&gt;/*&lt;/url-pattern&gt;
+    &lt;/servlet-mapping&gt;
+&lt;/web-app&gt;</programlisting>
+			</example>
+
+			<para>
+				The descriptor defines a servlet with name
+				<filename>myservlet</filename>. The servlet class,
+				<classname>com.itmill.toolkit.terminal.gwt.server.ApplicationServlet</classname>,
+				is provided by IT Mill Toolkit framework and it should be the same for all
+				IT Mill Toolkit projects. The servlet takes the class name
+				<classname>Calc</classname> of the user application class as a parameter,
+				including the full package path to the class. If the class is in the
+				default package the package path is obviously not used.
+			</para>
+
+			<para>
+				The <literal>url-pattern</literal> is defined above as
+				<literal>/*</literal>. This matches to any URL under the project
+				context. We defined above the project context as
+				<literal>myproject</literal> so the application URL will be
+				<uri>http://localhost:8080/myproject/</uri>. If the project were to have
+				multiple applications or servlets, they would have to be given different names to distinguish them.
+				For example, <literal>url-pattern</literal>
+				<literal>/myapp/*</literal> would match a URL such as
+				<uri>http://localhost:8080/myproject/myapp/</uri>. Notice that the slash
+				and the asterisk <emphasis>must</emphasis> be included at the end of the
+				pattern.
+			</para>
+
+			<para>
+				Notice also that if the URL pattern is other than root
+				<literal>/*</literal> (such as <literal>/myapp/*</literal>), you will also
+				need to make a servlet mapping to <literal>/ITMILL/*</literal> (unless you
+				are serving it statically as noted below). For example:
+			</para>
+
+			<programlisting>    ...
+    &lt;servlet-mapping&gt;
+        &lt;servlet-name&gt;<emphasis role="strong">myservlet</emphasis>&lt;/servlet-name&gt;
+        &lt;url-pattern&gt;/myurl/*&lt;/url-pattern&gt;
+    &lt;/servlet-mapping&gt;
+
+    &lt;servlet-mapping&gt;
+        &lt;servlet-name&gt;<emphasis role="strong">myservlet</emphasis>&lt;/servlet-name&gt;
+        &lt;url-pattern&gt;/ITMILL/*&lt;/url-pattern&gt;
+    &lt;/servlet-mapping&gt;</programlisting>
+
+			<para>
+				You do not have to provide the above <literal>/ITMILL/*</literal> mapping
+				if you serve both the widget sets and (custom and default) themes
+				statically in <filename>WebContent/ITMILL/</filename> directory. The
+				mapping simply allows serving them dynamically from the IT Mill Toolkit
+				JAR. Serving them statically is recommended for production environments as
+				it is much faster.
+			</para>
+
+			<para>
+				For a complete example on how to deploy applications, see the demos
+				included in the IT Mill Toolkit installation package, especially the
+				<filename>WebContent/WEB-INF</filename> directory.
+			</para>
+
+			<section>
+				<title>Deployment Descriptor Parameters</title>
+
+				<para>
+					Deployment descriptor can have many parameters and options that
+					control the execution of a servlet. You can find a complete
+					documentation of the deployment descriptor in Java Servlet
+					Specification at
+					<uri>http://java.sun.com/products/servlet/</uri>.
+				</para>
+
+				<para>
+					By default, IT Mill Toolkit applications run in <emphasis>debug
+					mode</emphasis>, which should be used during development. This enables
+					various debugging features. For production use, you should have put in
+					your <filename>web.xml</filename> the following parameter:
+				</para>
+
+				<programlisting><![CDATA[<context-param>
+  <param-name>productionMode</param-name>
+  <param-value>true</param-value>
+  <description>IT Mill Toolkit production mode</description>
+</context-param>]]>
+				</programlisting>
+				
+				<para>
+					The parameter and the debug and production modes are described in
+					detail in <xref linkend="advanced.debug-production-modes"/>.
+				</para>
+
+				<para>
+					One often needed option is the session timeout. Different servlet
+					containers use varying defaults for timeouts, such as 30 minutes for
+					Apache Tomcat. You can set the timeout with:
+				</para>
+
+				<programlisting><![CDATA[<session-config>
+    <session-timeout>30</session-timeout>
+</session-config>]]></programlisting>
+
+				<para>
+					After the timeout expires, the <methodname>close()</methodname>
+					method of the <classname>Application</classname> class will be
+					called. You should implement it if you wish to handle timeout
+					situations.
+				</para>
+			</section>
+		</section>
+	</section>
+
+</chapter>
+	
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: xml
+sgml-omittag:nil
+sgml-shorttag:nil
+sgml-namecase-general:nil
+sgml-general-insert-case:lower
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:4
+sgml-indent-data:t
+sgml-parent-document:nil
+sgml-exposed-tags:nil
+sgml-local-catalogs:("/etc/sgml/catalog" "/usr/share/xemacs21/xemacs-packages/etc/psgml-dtds/CATALOG")
+sgml-local-ecat-files:("ECAT" "~/sgml/ECAT" "/usr/share/sgml/ECAT" "/usr/local/share/sgml/ECAT" "/usr/local/lib/sgml/ECAT")
+End:
+-->

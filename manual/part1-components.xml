@@ -1,0 +1,3681 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<chapter xml:id="components">
+	<title>User Interface Components</title>
+	
+	<para>
+		This chapter provides an overview and a detailed description of all
+		non-layout components in IT Mill Toolkit. Many features of the components
+		are designed for various use cases and design patterns, which are
+		mentioned below.
+	</para>
+	
+	<para>
+		As most components are used inside a layout, you should familiarize
+		yourself with the layout components in <xref linkend="layout"/>.
+	</para>
+	
+	<section xml:id="components.overview">
+		<title>Overview</title>
+
+		<para>
+			IT Mill Toolkit provides a comprehensive set of user interface
+			components and allows you to define custom components. <xref
+			linkend="figure.uicomponents"/> illustrates the inheritance hierarchy
+			of the UI component classes and interfaces.
+		</para>
+
+		<figure xml:id="figure.uicomponents">
+			<title>UI Component Inheritance Diagram</title>
+			<mediaobject>
+				<imageobject role="html">
+					<imagedata align="center" fileref="img/intro/uicomponents-sml.png"/>
+				</imageobject>
+				<imageobject role="fo">
+					<imagedata scale="30" align="center" fileref="img/intro/uicomponents-whitebg.png"/>
+				</imageobject>
+			</mediaobject>
+		</figure>
+
+		<para>
+			Interfaces are displayed in yellow, abstract classes in red, and
+			regular classes in blue. At the bottom of the interface hierarchy, we
+			have the <classname>Component</classname> interface. At the bottom of the
+			class hierarchy, we have the <classname>AbstractComponent</classname>
+			class. It is inherited by two other abstract classes:
+			<classname>AbstractField</classname>, inherited further by field
+			components and <classname>AbstractComponentContainer</classname>,
+			inherited by various container components. Some miscellaneous
+			components, such as labels and links, inherit this base class
+			directly.
+		</para>
+
+		<para>
+			The layout of the various components in a window is controlled,
+			logically, by layout components, just like in conventional Java UI
+			toolkits for desktop applications. In addition, with the <classname>CustomLayout</classname>
+			component, you can write a custom layout as an XHTML template that
+			includes the locations of any contained components. Looking at the
+			inheritance diagram, we can see that layout components inherit the
+			<classname>AbstractComponentContainer</classname> and the
+			<classname>Layout</classname> interface. Layout components are
+			described in detail in <xref linkend="layout"/>.
+		</para>
+
+		<para>
+			Looking at it from the perspective of an object hierarchy, we would
+			have a <classname>Window</classname> object, which contains a hierachy of
+			layout components, which again contain other layout components, field
+			components, and other visible components.
+		</para>
+
+		<para>
+			You can browse the available UI components in the <application>Feature
+			Browser</application> of the <application>IT Mill Toolkit Demo
+			Application</application>. The Feature Browser shows a description, a list of
+			properties, JavaDoc documentation, and a code sample for each of the components. On
+			the right side of the screen, you can find the Properties panel, which you can use
+			to edit the properties of the displayed component.
+		</para>
+
+		<!-- section>
+			<title>Component Model</title>
+			<para>
+				<classname>Component</classname> provides the top-level interface
+				for all user interface components.
+			</para>
+				
+			<para>
+				At the top of the user interface component class hierarchy is the
+				<classname>AbstractComponent</classname> class that defines the
+				default implementation for the <classname>Component</classname>
+				interface.
+			</para>
+				
+		</section -->
+
+		<!-- section>
+			<title>Custom Components</title>
+			<para></para>
+		</section -->
+	</section>
+
+	<section xml:id="components.features">
+		<title>Abstract Classes and Interfaces</title>
+
+        <!-- UNFINISHED -->
+    </section>
+
+	<section xml:id="components.features">
+		<title>Common Component Features</title>
+
+		<section xml:id="components.features.sizeable">
+			<title>Sizing Components through <classname>Sizeable</classname>
+			interface</title>
+
+			<para>
+				IT Mill Toolkit components are sizeable; not in the sense that they were
+				fairly large or that the number of the components and their features are
+				sizeable, but in the sense that you can make them fairly large on the
+				screen if you like. Or small, or whatever size.
+			</para>
+
+			<para>
+				The <classname>Sizeable</classname> interface, shared by all components,
+				provides a number of manipulation methods and constants for setting the
+				height and width of a component in absolute or relative units, or for
+				leaving the size undefined.
+			</para>
+
+			<para>
+				The size of a component can be set with
+				<methodname>setWidth()</methodname> and
+				<methodname>setHeight()</methodname> methods. The methods take the size as
+				a floating-point value. You need to give the unit of the measure as the
+				second parameter for the above methods. The available units are listed in
+				<xref linkend="components.features.sizeable.units.table"/> below.
+			</para>
+
+			<programlisting><![CDATA[mycomponent.setWidth(100, Sizeable.UNITS_PERCENTAGE);
+mycomponent.setWidth(400, Sizeable.UNITS_PIXELS);]]></programlisting>
+
+			<para>
+				Alternatively, you can speficy the size as a string. The format of such a
+				string must follow the HTML/CSS standards for specifying measures.
+			</para>
+
+			<programlisting><![CDATA[mycomponent.setWidth("100%");
+mycomponent.setHeight("400px");]]></programlisting>
+
+			<para>
+				The "<literal>100%</literal>" percentage value makes the component take
+				all available size in the particular direction (see the description of
+				<parameter>Sizeable.UNITS_PERCENTAGE</parameter> in the table below). You
+				can also use the shorthand method <methodname>setSizeFull()</methodname>
+				to set the size to 100% in both directions.
+			</para>
+
+			<para>
+				The size can be <emphasis>undefined</emphasis> in either or both
+				dimensions, which means that the component will take the minimum necessary
+				space. Most components have undefined size by default, but some layouts
+				have full size in horizontal direction. You can set the height or width as
+				undefined with <parameter>Sizeable.SIZE_UNDEFINED</parameter> parameter
+				for <methodname>setWidth()</methodname> and
+				<methodname>setHeight()</methodname>.
+			</para>
+
+			<para>
+				You always need to keep in mind that <emphasis>a layout with undefined
+				size may not contain components with defined relative size</emphasis>,
+				such as "full size". See <xref linkend="layout.settings.size"/> for
+				details.
+			</para>
+
+			<para>
+				The following table lists the available units and their codes.
+			</para>
+
+			<table xml:id="components.features.sizeable.units.table">
+				<title>Size Units</title>
+				<tgroup cols="3" align="left">
+					<tbody>
+						<row valign="top">
+							<entry><parameter>Sizeable.UNITS_PIXELS</parameter></entry>
+							<entry>px</entry>
+
+							<entry>The <emphasis>pixel</emphasis> is the basic
+							hardware-specific measure of one physical display
+							pixel.</entry>
+						</row>
+						<row valign="top">
+							<entry><parameter>Sizeable.UNITS_POINTS</parameter></entry>
+							<entry>pt</entry>
+
+							<entry>The <emphasis>point</emphasis> is a typographical unit,
+							which is usually defined as 1/72 inches or about 0.35
+							mm. However, on displays the size can vary significantly
+							depending on display metrics.</entry>
+						</row>
+						<row valign="top">
+							<entry><parameter>Sizeable.UNITS_PICAS</parameter></entry>
+							<entry>pc</entry>
+
+							<entry>The <emphasis>pica</emphasis> is a typographical unit,
+							defined as 12 points, or 1/7 inches or about 4.233 mm. On
+							displays, the size can vary depending on display
+							metrics.</entry>
+						</row>
+						<row valign="top">
+							<entry><parameter>Sizeable.UNITS_EM</parameter></entry>
+							<entry>em</entry>
+
+							<entry>A unit relative to the used font, the width of the
+							upper-case "M" letter.</entry>
+						</row>
+						<row valign="top">
+							<entry><parameter>Sizeable.UNITS_EX</parameter></entry>
+							<entry>ex</entry>
+
+							<entry>A unit relative to the used font, the height of the
+							lower-case "x" letter.</entry>
+						</row>
+						<row valign="top">
+							<entry><parameter>Sizeable.UNITS_MM</parameter></entry>
+							<entry>mm</entry>
+
+							<entry>A physical length unit, millimeters on the surface of a
+							display device. However, the actual size depends on the
+							display, its metrics in the operating system, and the
+							browser.</entry>
+						</row>
+						<row valign="top">
+							<entry><parameter>Sizeable.UNITS_CM</parameter></entry>
+							<entry>cm</entry>
+
+							<entry>A physical length unit,
+							<emphasis>centimeters</emphasis> on the surface of a display
+							device. However, the actual size depends on the display, its
+							metrics in the operating system, and the browser.</entry>
+						</row>
+						<row valign="top">
+							<entry><parameter>Sizeable.UNITS_INCH</parameter></entry>
+							<entry>in</entry>
+
+							<entry>A physical length unit, <emphasis>inches</emphasis> on the surface of a
+							display device. However, the actual size depends on the
+							display, its metrics in the operating system, and the
+							browser.</entry>
+						</row>
+						<row valign="top">
+							<entry><parameter>Sizeable.UNITS_PERCENTAGE</parameter></entry>
+							<entry>%</entry>
+
+							<entry>A relative percentage of the available size. For
+							example, for the top-level layout <parameter>100%</parameter>
+							would be the full width or height of the browser window. The
+							percentage value must be between 0 and 100.</entry>
+						</row>
+					</tbody>
+				</tgroup>
+			</table>
+
+			<para>
+				If a component inside <classname>HorizontalLayout</classname> or
+				<classname>VerticalLayout</classname> has full size in the namesake
+				direction of the layout, the component will expand to take all available
+				space not needed by the other components. See <xref
+				linkend="layout.settings.size"/> for details.
+			</para>
+		</section>
+	</section>
+
+	<section xml:id="components.label">
+		<title>Label</title>
+
+		<para>
+			<classname>Label</classname> is a text component that you can use to
+			display non-editable text. The text will wrap
+			around if the width of the containing component limits the length of the
+			lines, except for the preformatted text.
+		</para>
+		
+		<programlisting><![CDATA[/* Some container for the Label. */
+Panel panel = new Panel("Panel Containing a Label");
+main.addComponent(panel);
+
+panel.addComponent(new Label("This is a Label inside a Panel. There is enough " +
+                             "text in the label to make the text wrap if it " +
+                             "exceeds the width of the panel."));]]></programlisting>
+
+		<figure>
+			<title>The Label Component</title>
+			<mediaobject>
+				<imageobject role="html">
+					<imagedata align="center" fileref="img/components/label-example1.png"/>
+				</imageobject>
+				<imageobject role="fo">
+					<imagedata scale="80" align="center" fileref="img/components/label-example1.png"/>
+				</imageobject>
+			</mediaobject>
+		</figure>
+
+		<para>
+			The contents of a label are formatted depending on the content mode. By
+			default, the text is assumed to be plain text and any contained XML-specific
+			characters will be quoted appropriately to allow rendering the contents of a
+			label in XHTML in a web browser. The content mode can be set in the constructor
+			or with <methodname>setContentMode()</methodname>, and can have the following
+			values:
+		</para>
+
+		<table>
+			<title>Content Modes for Label</title>
+			<tgroup cols="2" align="left">
+				<tbody>
+					<row valign="top">
+						<entry><constant>CONTENT_DEFAULT</constant></entry>
+						<entry>
+							The default content mode is
+							<varname>CONTENT_TEXT</varname> (see below).
+						</entry>
+					</row>
+					
+					<row valign="top">
+						<entry><constant>CONTENT_PREFORMATTED</constant></entry>
+						<entry>
+							Content mode, where the label contains preformatted
+							text. It will be, by default, rendered with a
+							fixed-width typewriter font. Preformatted text can
+							contain line breaks, written in Java with the
+							<literal>\n</literal> escape sequence for a newline
+							character (ASCII 0x0a), or tabulator characters
+							written with <literal>\t</literal> (ASCII 0x08).
+						</entry>
+					</row>
+
+					<row valign="top">
+						<entry><constant>CONTENT_RAW</constant></entry>
+						<entry>
+							Content mode, where the label contains raw
+							text. Output is not required to be valid XML. It can
+							be, for example, HTML, which can be unbalanced or
+							otherwise invalid XML. The example below uses the
+							&lt;br&gt; tag in HTML. While XHTML should be
+							preferred in most cases, this can be useful for some
+							specific purposes where you may need to display
+							loosely formatted HTML content. The raw mode also
+							preserves character entities, some of which might
+							otherwise be interpreted incorrectly.
+						</entry>
+					</row>
+
+					<row valign="top">
+						<entry><constant>CONTENT_TEXT</constant></entry>
+						<entry>
+							Content mode, where the label contains only plain
+							text. All characters are allowed, including the
+							special <literal>&lt;</literal>,
+							<literal>&gt;</literal>, and <literal>&amp;</literal>
+							characters in XML or HTML, which are quoted properly
+							in XHTML while rendering the component. This is the
+							default mode.
+						</entry>
+					</row>
+
+					<row valign="top">
+						<entry><constant>CONTENT_XHTML</constant></entry>
+						<entry>
+							Content mode, where the label contains XHTML. The
+							content will be enclosed in a DIV element having the
+							namespace
+							"<uri>http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd</uri>".
+						</entry>
+					</row>
+
+					<row valign="top">
+						<entry><constant>CONTENT_XML</constant></entry>
+						<entry>
+							Content mode, where the label contains
+							well-formed and well-balanced XML. Each of the
+							root elements must have their default namespace
+							specified.
+						</entry>
+					</row>
+
+					<row valign="top">
+						<entry><constant>CONTENT_UIDL</constant></entry>
+						<entry>
+							Formatted content mode, where the contents are XML
+							that is restricted to UIDL 1.0, the internal language
+							of IT Mill Toolkit for AJAX communications between
+							the server and the browser. Obsolete since IT Mill
+							Toolkit 5.0.
+						</entry>
+					</row>
+				</tbody>
+			</tgroup>
+		</table>
+
+		<warning>
+			<para>
+				Notice that the validity of XML or XHTML in a Label is not
+				checked in the server during rendering of the component and any
+				errors can result in an error in the browser! You should
+				validate the content before displaying it in the component,
+				especially if it comes from an uncertain source.
+			</para>
+		</warning>
+
+		<para>
+			The following example demonstrates the use of
+			<classname>Label</classname> in different modes.
+		</para>
+
+			<programlisting><?db-font-size 60% ?><![CDATA[GridLayout labelgrid = new GridLayout (2,1);
+labelgrid.addComponent (new Label ("CONTENT_DEFAULT"));
+labelgrid.addComponent (new Label ("This is a label in default mode: <plain text>",
+                                   Label.CONTENT_DEFAULT));
+labelgrid.addComponent (new Label ("CONTENT_PREFORMATTED"));
+labelgrid.addComponent (new Label ("This is a preformatted label.\n"+
+                                   "The newline character \\n breaks the line.",
+                                   Label.CONTENT_PREFORMATTED));
+labelgrid.addComponent (new Label ("CONTENT_RAW"));
+labelgrid.addComponent (new Label ("This is a label in raw mode.<br>It can contain, "+
+                                   "for example, unbalanced markup.",
+                                   Label.CONTENT_RAW));
+labelgrid.addComponent (new Label ("CONTENT_TEXT"));
+labelgrid.addComponent (new Label ("This is a label in (plain) text mode",
+                                   Label.CONTENT_TEXT));
+labelgrid.addComponent (new Label ("CONTENT_XHTML"));
+labelgrid.addComponent (new Label ("<i>This</i> is an <b>XHTML</b> formatted label",
+                                   Label.CONTENT_XHTML));
+labelgrid.addComponent (new Label ("CONTENT_XML"));
+labelgrid.addComponent (new Label ("This is an <myelement>XML</myelement> formatted "+
+                                   "label",
+                                   Label.CONTENT_XML));
+main.addComponent(labelgrid);]]></programlisting>
+
+		<para>
+			The rendering will look as follows:
+		</para>
+
+		<figure>
+			<title>Label Modes Rendered on Screen</title>
+			<mediaobject>
+				<imageobject role="html">
+					<imagedata align="center" fileref="img/components/label-modes.png"/>
+				</imageobject>
+				<imageobject role="fo">
+					<imagedata scale="60" align="center" fileref="img/components/label-modes.png"/>
+				</imageobject>
+			</mediaobject>
+		</figure>
+
+		<para>
+			Using the XHTML, XML, or raw modes allow inclusion of, for example,
+			images within the text flow, which is not possible with any regular
+			layout components.  The following example includes an image within
+			the text flow, with the image coming from a class loader resource.
+		</para>
+
+			<programlisting><![CDATA[ClassResource labelimage = new ClassResource ("labelimage.jpg", this);
+main.addComponent(new Label("Here we have an image <img src=\"" +
+                            this.getRelativeLocation(labelimage) + "\"/> within text.",
+                            Label.CONTENT_XHTML));]]></programlisting>
+
+		<para>
+			When you use a class loader resource, the image has to be included in
+			the JAR of the web application. In this case, the
+			<filename>labelimage.jpg</filename> needs to be in the default
+			package. When rendered in a web browser, the output will look as
+			follows:
+		</para>
+
+		<figure>
+			<title>Referencing An Image Resource in Label</title>
+			<mediaobject>
+				<imageobject>
+					<imagedata align="center" fileref="img/components/label-withimage.png"/>
+				</imageobject>
+			</mediaobject>
+		</figure>
+
+		<para>
+			Another solution would be to use the
+			<classname>CustomLayout</classname> component, where you can write
+			the component content as an XHTML fragment in a theme, but such a
+			solution may be too heavy for most cases, and not flexible enough if
+			the content needs to be dynamically generated.
+		</para>
+
+		<para>
+			Notice that the rendering of XHTML depends on the assumption that the
+			client software and the terminal adapter are XHTML based. It is
+			possible to write a terminal adapter for a custom thin client
+			application, which may not be able to render XHTML at all. There are
+			also differences between web browsers in their support of XHTML.
+		</para>
+	</section>
+
+	<section xml:id="components.link">
+		<title>Link</title>
+
+		<para>
+			The <classname>Link</classname> component allows making references to
+			resources that are either external or provided by the web server or by the
+			application itself. While a <classname>Link</classname> appears like a
+			hyperlink, it is not handled in the web browser. When a user clicks a link,
+			the server receives an event and typically opens the referenced resource in
+			the target window of the link. Resources are explained in <xref
+			linkend="application.resources"/>.
+		</para>
+
+		<para>
+			Links to external resources can be made by using a URI as follows:
+		</para>
+
+		<programlisting><![CDATA[main.addComponent(new Link ("link to a resource",
+                            new ExternalResource("http://www.itmill.com/")));]]></programlisting>
+
+		<para>
+			With the simple contructor used in the above example, the link is
+			opened in the current window. Using the constructor that takes the
+			target window as a parameter, or by setting the window with
+			<methodname>setWindow</methodname>, you can open the resource in
+			another window, such as a native popup window or a
+			<classname>FrameWindow</classname>. As the target window can be
+			defined as a target string managed by the browser, the target can be
+			any window, including windows not managed by the application itself.
+		</para>
+
+		<para>
+			When the user clicks the link, the application will receive an event
+			regarding the click and handle it to provide the resource. The link
+			is therefore not an <literal>&lt;a href&gt;</literal> element in HTML
+			and it does not have an URI. This has some additional consequences,
+			such as that a link can not be marked as "visited" by the browser,
+			unlike normal hyperlinks. If you wish to have an actual HTML anchor
+			element, you need to customize the rendering of the component or use
+			a <classname>Label</classname> with XHTML content mode and write the
+			anchor element by yourself.
+		</para>
+
+		<note>
+			<title>CSS Style Rules</title>
+
+			<para>
+				The <classname>Link</classname> component has
+				<parameter>i-link</parameter> style by default.
+			</para>
+			
+			<programlisting><![CDATA[.i-link { }]]></programlisting>
+
+			<para>
+				When the mouse pointer hovers over the link, it will also have the
+				<varname>over</varname> style.
+			</para>
+		</note>
+	</section>
+
+	<section xml:id="components.textfield">
+		<title>TextField</title>
+
+		<para>
+			<classname>TextField</classname> is one of the most common user
+			interface components and is highly versatile. It supports both
+			single- and multi-line editing, password input, and buffering.
+		</para>
+
+		<para>
+			The following example creates two simple text fields: a single-line
+			and a multi-line <classname>TextField</classname>.
+		</para>
+
+		<programlisting><![CDATA[/* Add a single-line text field. */
+TextField subject = new TextField("Subject");
+subject.setColumns(40);
+main.addComponent(subject);
+
+/* Add a multi-line text field. */
+TextField message = new TextField("Message");
+message.setRows(7);
+message.setColumns(40);
+main.addComponent(message);]]></programlisting>
+
+		<figure>
+			<title>Single- and Multi-Line Text Field Example</title>
+			<mediaobject>
+				<imageobject>
+					<imagedata align="center" fileref="img/components/textfield-example.png"/>
+				</imageobject>
+			</mediaobject>
+		</figure>
+
+		<para>
+			Notice how font size affects the width of the text fields even though
+			the width was set with the same number of columns. This is a feature
+			of HTML.
+		</para>
+
+	</section>
+
+	<section xml:id="components.richtextarea">
+		<title>Rich Text Area</title>
+
+		<para>
+			The <classname>RichTextArea</classname> field allows entering or editing
+			formatted text. The toolbar provides all basic editing functionalities. The
+			text content of <classname>RichTextArea</classname> is represented in HTML
+			format. <classname>RichTextArea</classname> inherits
+			<classname>TextField</classname> and does not add any API functionality over
+			it. You can add new functionality by extending the client-side components
+			<classname>IRichTextArea</classname> and
+			<classname>IRichTextToolbar</classname>.
+		</para>
+
+		<para>
+			As with <classname>TextField</classname>, the textual content of the rich text
+			area is the <classname>Property</classname> of the field and can be set with
+			<methodname>setValue()</methodname> and read with
+			<methodname>getValue()</methodname>.
+		</para>
+
+		<programlisting><![CDATA[// Create a rich text area
+final RichTextArea rtarea = new RichTextArea();
+rtarea.setCaption("My Rich Text Area");
+
+// Set initial content as HTML
+rtarea.setValue("<h1>Hello</h1>\n<p>This rich text area contains some text.</p>");]]></programlisting>
+			
+		<figure>
+			<title>Rich Text Area Component</title>
+			<mediaobject>
+				<imageobject>
+					<imagedata align="center" fileref="img/components/richtextarea-example1.png"/>
+				</imageobject>
+			</mediaobject>
+		</figure>
+
+		<para>
+			Above, we used context-specific tags such as <literal>&lt;h1&gt;</literal> in
+			the initial HTML content. The rich text area component does not allow creating
+			such tags, only formatting tags, but it does preserve them unless the user
+			edits them away. Any non-visible whitespace such as the new line character
+			(<literal>\n</literal>) are removed from the content. For example, the value
+			set above will be as follows when read from the field with
+			<methodname>getValue()</methodname>:
+		</para>
+		
+		<programlisting><![CDATA[<h1>Hello</h1> <p>This rich text area contains some text.</p>]]></programlisting>
+
+		<para>
+			The rich text area is one of the few components in IT Mill Toolkit that
+			contain textual labels. The selection boxes in the toolbar are in English, and
+			not be localized currently otherwise but by inheriting or reimplementing the
+			client-side <classname>IRichTextToolbar</classname> widget. The buttons can be
+			localized simply with CSS by downloading a copy of the toolbar background
+			image, editing it, and replacing the default toolbar. The toolbar is a single
+			image file from which the individual button icons are picked, so the order of
+			the icons is different from the rendered. The image file depends on the
+			client-side implementation of the toolbar.
+		</para>
+
+		<programlisting><![CDATA[.i-richtextarea-richtextexample .gwt-ToggleButton .gwt-Image {
+  background-image: url(img/richtextarea-toolbar-fi.png) !important;
+}]]></programlisting>
+
+		<figure>
+			<title>Regular English and a Localized Rich Text Area Toolbar</title>
+			<mediaobject>
+				<imageobject>
+					<imagedata align="center" fileref="img/components/richtextarea-toolbar-whitebg.png"/>
+				</imageobject>
+			</mediaobject>
+			<mediaobject>
+				<imageobject>
+					<imagedata align="center" fileref="img/components/richtextarea-toolbar-mod-whitebg.png"/>
+				</imageobject>
+			</mediaobject>
+		</figure>
+
+		<note>
+			<title>CSS Style Rules</title>
+			
+			<programlisting><![CDATA[.i-richtextarea { }
+.i-richtextarea .gwt-RichTextToolbar { }
+.i-richtextarea .gwt-RichTextArea { }]]></programlisting>
+
+			<para>
+				The rich text area consists of two main parts: the toolbar with overall
+				style <literal>.gwt-RichTextToolbar</literal> and the editor area with
+				style <literal>.gwt-RichTextArea</literal>. The editor area obviously
+				contains all the elements and their styles that the HTML content
+				contains. The toolbar contains buttons and drop-down list boxes with the
+				following respective style names:
+			</para>
+
+			<programlisting><![CDATA[.gwt-ToggleButton { }
+.gwt-ListBox { }]]></programlisting>
+
+		</note>
+		
+	</section>
+
+	<section xml:id="components.datefield">
+		<title>Date and Time Input</title>
+		<para>
+			The <classname>DateField</classname> component provides the means to display
+			and input date and time. The field comes in two variations:
+			<classname>PopupDateField</classname> with numeric input fields and a popup
+			calendar view and <classname>InlineDateField</classname> with the calendar
+			view always visible and the numeric input fields only for time. The
+			<classname>DateField</classname> base class defaults to the popup variation.
+		</para>
+
+		<para>
+			The example below illustrates the use of the
+			<classname>DateField</classname> with the default style. We set the
+			time of the <classname>DateField</classname> to current time with the
+			default constructor of the <classname>java.util.Date</classname>
+			class.
+		</para>
+
+		<programlisting><![CDATA[/* Create a DateField with the default style. */
+DateField date = new DateField();
+	
+/* Set the date and time to present. */
+date.setValue(new java.util.Date());]]></programlisting>
+
+		<figure>
+			<title>Example of the Date Field with Default Style</title>
+			<mediaobject>
+				<imageobject>
+					<imagedata align="center" fileref="img/components/datefield-example1.png"/>
+				</imageobject>
+			</mediaobject>
+		</figure>
+
+		<para>
+			The default style provides date input using a text box for the date
+			and combo boxes for the time, down to milliseconds. Pressing the
+			"..." button right of the date opens a month view for selecting the
+			date.
+		</para>
+
+		<para>
+			You probably will not need milliseconds in most applications, and
+			might not even need the time, but just the date. The visibility of
+			the input components is controlled by <emphasis>resolution</emphasis>
+			of the field which can be set with
+			<methodname>setResolution()</methodname> method. The method takes as
+			its parameters the lowest visible component, typically
+			<parameter>RESOLUTION_DAY</parameter> for just dates and
+			<parameter>RESOLUTION_MIN</parameter> for dates with time in hours
+			and minutes. Please see the API Reference for a complete list of resolution parameters.
+		</para>
+
+		<section xml:id="components.datefield.calendar">
+			<title>Calendar</title>
+
+			<!-- UNFINISHED -->
+
+			<para>
+				The <parameter>calendar</parameter> style of the
+				<classname>DateField</classname> provides a date picker component
+				with a month view, just like the one in the default style that opens
+				by clicking the "..." button. The user can navigate months and years by
+				clicking the appropriate arrows.
+			</para>
+
+		<programlisting><![CDATA[/* Create a DateField with the calendar style. */
+DateField date = new DateField("Here is a calendar field");
+date.setStyle("calendar");
+	
+/* Set the date and time to present. */
+date.setValue(new java.util.Date());
+
+main.addComponent(date);]]></programlisting>
+
+		<figure>
+			<title>Example of the Date Field with Calendar Style</title>
+			<mediaobject>
+				<imageobject>
+					<imagedata align="center" fileref="img/components/datefield-example2.png"/>
+				</imageobject>
+			</mediaobject>
+		</figure>
+		</section>
+		
+		<section>
+			<title>DateField Locale</title>
+
+			<para>
+				The date fields use the locale set for the component, which defaults to
+				the system locale. You can set a custom locale with the
+				<methodname>setLocale()</methodname> method of
+				<classname>AbstractComponent</classname>.
+			</para>
+		</section>
+	</section>
+
+	<section xml:id="components.button">
+		<title>Button</title>
+
+		<para>
+			The <classname>Button</classname> is the primary user interface
+			component that is normally used for finalizing input and initiating
+			some action. When the user clicks a button, a
+			<classname>Button.ClickEvent</classname> is emitted. A listener that
+			inherits the <classname>Button.ClickListener</classname> interface
+			can handle clicks with the <methodname>buttonClick()</methodname> method.
+		</para>
+
+		<programlisting><![CDATA[public class TheButton extends CustomComponent implements Button.ClickListener {
+    Button thebutton;
+
+    public TheButton() {
+        /* Create a Button with the given caption. */
+        thebutton = new Button ("Do not push this button");
+        
+        /* Listen for ClickEvents. */
+        thebutton.addListener(this);
+
+        setCompositionRoot(thebutton);
+    }
+    
+    /** Handle button click events from the button. */
+    public void buttonClick (Button.ClickEvent event) {
+        thebutton.setCaption ("Do not push this button again");
+    }
+}]]></programlisting>
+
+		<figure>
+			<title>An Example of a Button</title>
+			<mediaobject>
+				<imageobject>
+					<imagedata align="center" fileref="img/components/button-example1.png"/>
+				</imageobject>
+			</mediaobject>
+		</figure>
+
+		<para>
+			As a user interface often has several buttons, you can differentiate
+			between them either by comparing the <classname>Button</classname>
+			object reference returned by the <methodname>getButton()</methodname>
+			method of <classname>Button.ClickEvent</classname> to a kept
+			reference or by using a separate listener method for each button. The
+			listening object and method can be given to the constructor. For a
+			detailed description of these patterns together with some examples,
+			please see <xref linkend="architecture.events"/>.
+		</para>
+
+		<note>
+			<title>CSS Style Rules</title>
+
+			<programlisting><![CDATA[.i-button { }]]></programlisting>
+
+			<para>
+				The exact CSS style name can be different if a <classname>Button</classname>
+				has the <parameter>switchMode</parameter> attribute enabled. See the
+				alternative CSS styles below.
+			</para>
+		</note>
+	</section>
+
+	<section xml:id="components.checkbox">
+		<title>Check Box</title>
+
+		<para>
+			Check box is a two-state selection component that can be either checked or
+			unchecked. The caption of the check box will be placed right of the actual
+			check box. IT Mill Toolkit provides two ways to create check boxes:
+			individual check boxes with the <classname>CheckBox</classname> component
+			described in this section and check box groups with the
+			<classname>OptionGroup</classname> component in multiple selection mode, as
+			described in <xref linkend="components.selecting.optiongroup"/>.
+		</para>
+
+		<para>
+			Clicking on a check box will change its state. The state is the
+			<classname>Boolean</classname> property of the <classname>Button</classname>,
+			and can be set with <methodname>setValue()</methodname> and obtained with
+			<methodname>getValue()</methodname> method of the
+			<classname>Property</classname> interface.  Changing the value of a check box
+			will cause a <classname>ValueChangeEvent</classname>, which can be handled by
+			a <classname>ValueChangeListener</classname>.
+		</para>
+
+		<programlisting><![CDATA[/* A check box with default state (not checked, i.e., false). */ 
+final CheckBox checkbox1 = new CheckBox("My CheckBox");
+main.addComponent(checkbox1);
+
+/* Another check box with explicitly set checked state. */ 
+final CheckBox checkbox2 = new CheckBox("Checked CheckBox");
+checkbox2.setValue(true);
+main.addComponent(checkbox2);
+
+/* Make some application logic. We use anynymous listener classes here.
+ * The above references were defined as "final" to allow accessing them
+ * from inside anonymous classes. */
+checkbox1.addListener(new ValueChangeListener() {
+    public void valueChange(ValueChangeEvent event) {
+        /* Copy the value to the other checkbox. */
+        checkbox2.setValue(checkbox1.getValue());
+    }
+});
+checkbox2.addListener(new ValueChangeListener() {
+    public void valueChange(ValueChangeEvent event) {
+        /* Copy the value to the other checkbox. */
+        checkbox1.setValue(checkbox2.getValue());
+    }
+});]]></programlisting>
+
+		<figure>
+			<title>An Example of a Check Box</title>
+			<mediaobject>
+				<imageobject>
+					<imagedata align="center" fileref="img/components/checkbox-example1.png"/>
+				</imageobject>
+			</mediaobject>
+		</figure>
+
+		<para>
+			For an example on the use of check boxes in a table, see <xref
+			linkend="components.table"/>.
+		</para>
+
+		<note>
+			<title>CSS Style Rules</title>
+			
+			<programlisting><![CDATA[.i-checkbox { }]]></programlisting>
+			
+		</note>
+		
+	</section>
+
+	<section xml:id="components.selecting">
+		<title>Selecting Items</title>
+
+		<para>
+			IT Mill Toolkit provides several alternative choices for selecting one or more
+			items from a list. The selection components allow selecting one or more items
+			from a list of items. The items are <classname>Item</classname> objects
+			contained in a <classname>Container</classname>. The choices are based on the
+			<classname>AbstractSelect</classname> base class.
+		</para>
+
+		<para>
+			The following selection classes are available:
+		</para>
+
+		<table>
+			<title>Selection Components</title>
+			<tgroup cols="2" align="left">
+				<tbody>
+					<row valign="top">
+						<entry><classname>Select</classname></entry>
+						<entry>
+							Provides a drop-down list for single selection and a
+							multi-line list in multiselect mode.
+						</entry>
+					</row>
+					<row valign="top">
+						<entry><classname>NativeSelect</classname></entry>
+						<entry>
+							Provides selection using the native selection component in the
+							browser, typically a drop-down list for single selection and a
+							multi-line list in multiselect mode. This uses the
+							<literal>&lt;select&gt;</literal> element in HTML.
+						</entry>
+					</row>
+					<row valign="top">
+						<entry><classname>OptionGroup</classname></entry>
+						<entry>
+							Shows the items as a vertically arranged group of radio
+							buttons in the single selection mode and of check boxes in
+							multiple selection mode.
+						</entry>
+					</row>
+					<row valign="top">
+						<entry><classname>TwinColSelect</classname></entry>
+						<entry>
+							Shows two list boxes side by side where the user can select
+							items from a list of available items and move them to a list
+							of selected items using control buttons.
+						</entry>
+					</row>
+				</tbody>
+			</tgroup>
+		</table>
+
+		<para>
+			In addition, the <classname>Tree</classname> and <classname>Table</classname>
+			components allow special forms of selection. They also inherit the
+			<classname>AbstractSelect</classname>.
+		</para>
+
+		<para>
+			The selection components provide the current selection as an item identifier
+			from the <classname>Property</classname> interface of the component, that is,
+			as the value of the component. You can get the value, which is an item
+			identifier object, with <methodname>getValue()</methodname> of the
+			<classname>Property</classname> interface. In multiselect mode, the property
+			will be an unmodifiable set of item identifiers. If no item is selected, the
+			property will be <parameter>null</parameter> in single selection mode or an
+			empty collection in multiselect mode.
+		</para>
+
+		<para>
+			New items are added with the <methodname>addItem()</methodname>
+			method, implemented for the <classname>Container</classname>
+			interface. The method takes the <emphasis>item identifier</emphasis>
+			(IID) object as a parameter, and by default uses the identifier also
+			as the caption of the item. The identifier is typically a
+			<classname>String</classname>. The <methodname>addItem()</methodname>
+			method also creates an empty <classname>Item</classname>, which
+			itself has little relevance in the <classname>Select</classname>
+			component, as the properties of an item are not used in any way by
+			the component.
+		</para>
+
+		<programlisting><![CDATA[/* Create a Select component and add it to a layout. */
+Select select = new Select ("Select something here");
+main.addComponent(select);
+	
+/* Fill the component with some items. */
+final String[] planets = new String[] {"Mercury", "Venus", "Earth", "Mars",
+                                       "Jupiter", "Saturn", "Uranus", "Neptune"};
+for (int i=0; i<planets.length; i++)
+    select.addItem(planets[i]);]]></programlisting>
+
+		<para>
+			We could as well have added the item identifiers as integers, for
+			example, and set the captions explicitly.
+		</para>
+
+		<para>
+			The <classname>Select</classname> and <classname>NativeSelect</classname>
+			components will show "-" selection when no actual item is selected. This is
+			the <emphasis>null selection item identifier</emphasis>. You can set an
+			alternative ID with <methodname>setNullSelectionItemId()</methodname>. Setting
+			the alternative null ID is merely a visual text; the
+			<methodname>getValue()</methodname> will still return
+			<parameter>null</parameter> value if no item is selected, or an empty set in
+			multiselect mode.
+		</para>
+
+		<para>
+			The item identifier of the currently selected item will be set as the
+			property of the <classname>Select</classname> object. You can
+			access it with the <methodname>getValue</methodname> method of the
+			<classname>Property</classname> interface of the component. Also,
+			when handling changes in a <classname>Select</classname> component
+			with the <classname>Property.ValueChangeListener</classname>
+			interface, the <classname>Property.ValueChangeEvent</classname> will
+			have the selected item as the property of the event, accessible with the
+			<methodname>getProperty</methodname> method.
+		</para>
+
+		<figure>
+			<title>Retrieval of the Currently Selected Item</title>
+			<mediaobject>
+				<imageobject>
+					<imagedata align="center" fileref="img/components/select-selected1.png"/>
+				</imageobject>
+			</mediaobject>
+		</figure>
+
+		<para>
+			The item and its identifier can be of any object type.  The caption
+			of the items can be retrieved from various sources, as defined with
+			the caption mode of the component, which you can set with the
+			<methodname>setItemCaptionMode()</methodname> method. The default
+			mode is
+			<parameter>ITEM_CAPTION_MODE_EXPLICIT_DEFAULTS_ID</parameter>.  In
+			addition to a caption, an item can have an icon. The icon of an item
+			is set with <methodname>setItemIcon()</methodname>.
+		</para>
+
+		<table>
+			<title>Caption Modes for Selection Components</title>
+			<tgroup cols="2" align="left">
+
+				<tbody>
+					<row valign="top">
+						<entry><constant>ITEM_CAPTION_MODE_EXPLICIT_DEFAULTS_ID</constant></entry>
+						
+						<entry>
+							This is the default caption mode and its flexibility
+							allows using it in most cases. By default, the item
+							identifier will be used as the caption. The caption
+							is retrieved with <methodname>toString()</methodname>
+							method of the item identifier object. If the caption
+							is specified explicitly with
+							<methodname>setItemCaption()</methodname>, it
+							overrides the item identifier.
+						</entry>
+					</row>
+
+					<row valign="top">
+						<entry><constant>ITEM_CAPTION_MODE_EXPLICIT</constant></entry>
+						
+						<entry>
+							Captions must be explicitly specified with
+							<methodname>setItemCaption()</methodname>. If they are
+							not, the caption will be empty. Such items with empty
+							captions will nevertheless be displayed in the
+							<classname>Select</classname> component as empty
+							rows. If they have an icon, they will be visible.
+						</entry>
+					</row>
+
+					<row valign="top">
+						<entry><constant>ITEM_CAPTION_MODE_ICON_ONLY</constant></entry>
+						
+						<entry>
+							Only icons are shown, captions are hidden. Notice
+							that icons are not supported in the themes in IT Mill
+							Toolkit version 4 (see below).
+						</entry>
+					</row>
+
+					<row valign="top">
+						<entry><constant>ITEM_CAPTION_MODE_ID</constant></entry>
+						
+						<entry>
+							<para>
+								String representation of the item identifier
+								object is used as caption. This is useful when
+								the identifier is actually an application
+								specific object. For example:
+							</para>
+
+							<programlisting><![CDATA[class Planet extends Object {
+        String planetName;
+        Planet (String name) {
+            planetName = name;
+        }
+        public String toString () {
+            return "The Planet " + planetName;
+        }
+        /* equals() and hashCode() implementations here */
+    }
+    ...
+    SelectExample (Application application) {
+        ...
+        for (int i=0; i<planets.length; i++)
+            select.addItem(new Planet(planets[i]));
+        ...
+    }]]></programlisting>
+						</entry>
+					</row>
+
+					<row valign="top">
+						<entry><constant>ITEM_CAPTION_MODE_INDEX </constant></entry>
+						
+						<entry>
+							Index number of item is used as caption. This caption
+							mode is applicable only to data sources that
+							implement the
+							<classname>Container.Indexed</classname>
+							interface. If the interface is not available, the
+							component will throw a
+							<classname>ClassCastException</classname>. The
+							<classname>Select</classname> component itself does
+							not implement this interface, so the mode is not
+							usable without a separate data source. An
+							<classname>IndexedContainer</classname>, for example,
+							would work.
+						</entry>
+					</row>
+
+					<row valign="top">
+						<entry><constant>ITEM_CAPTION_MODE_ITEM</constant></entry>
+						
+						<entry>
+							<classname>String</classname> representation of item,
+							acquired with <methodname>toString()</methodname>, is
+							used as the caption. This is applicable mainly when
+							using a custom <classname>Item</classname> class,
+							which also requires using a custom
+							<classname>Container</classname> that is used as a
+							data source for the <classname>Select</classname>
+							component.
+						</entry>
+					</row>
+
+					<row valign="top">
+						<entry><constant>ITEM_CAPTION_MODE_PROPERTY</constant></entry>
+						
+						<entry>
+							Item captions are read from the
+							<classname>String</classname> representation of the
+							property with the identifier specified with
+							<methodname>setItemCaptionPropertyId()</methodname>. This
+							is useful, for example, when you have a
+							<classname>Table</classname> component that you use
+							as the data source for the
+							<classname>Select</classname>, and you want to use a
+							specific table column for captions.
+						</entry>
+					</row>
+				</tbody>
+			</tgroup>
+		</table>
+
+		<!-- <para>
+		While the default caption mode is flexible enough for most
+		cases where the appearance of a <classname>Select</classname>
+		component is fixed, the other modes may be useful for cases where the
+		user can configure what type of information is shown in the
+		component. Typical situation is allowing the user to choose between
+		"Show text only", "Show icons only", and "Show both icons and text".
+		</para>-->
+
+		<para>
+			Notice that while the <classname>Select</classname> component allows
+			associating an icon with each item with
+			<methodname>setItemIcon()</methodname>, the icons are not supported
+			in the themes in IT Mill Toolkit version 4. This is because HTML does
+			not support images inside <literal>select</literal> elements. Icons
+			are also not really visually applicable for
+			<parameter>optiongroup</parameter> and <parameter>twincol</parameter>
+			styles.
+		</para>
+
+		<section xml:id="components.selecting.select">
+			<title>Basic <classname>Select</classname> Component</title>
+
+			<para>
+				The <classname>Select</classname> component allows, in single selection
+				mode, selecting an item from a drop-down list, or in multiple selection
+				mode, from a list box that shows multiple items.
+			</para>
+
+			<figure>
+				<title>The Select Component</title>
+				<mediaobject>
+					<imageobject>
+						<imagedata align="center" fileref="img/components/select-select.png"/>
+					</imageobject>
+				</mediaobject>
+			</figure>
+
+			<section>
+				<title>Combo Box Behaviour</title>
+
+				<para>
+					The <classname>Select</classname> component will act as a combo box in
+					single selection mode, allowing either to choose the value from the
+					drop-down list or to write the value in the text field part of the
+					component.
+				</para>
+			</section>
+
+			<section>
+				<title>Filtered Selection</title>
+				
+				<para>
+					The <classname>Select</classname> component allows filtering the items
+					available for selection. The component shows as an input box
+					for entering text. The text entered in the input box is used for
+					filtering the available items shown in a drop-down list. Pressing
+					<keycap>Enter</keycap> will complete the item in the input
+					box. Pressing <keycap>Up</keycap>- and <keycap>Down</keycap>-arrows
+					can be used for selecting an item from the drop-down list. The
+					drop-down list is paged and clicking on the scroll buttons will change to the next or previous page. The list selection can also be done with the arrow keys on the keyboard. The shown
+					items are loaded from the server as needed, so the number of items
+					held in the component can be quite large.
+				</para>
+			
+				<para>
+					IT Mill Toolkit provides two filtering modes:
+					<parameter>FILTERINGMODE_CONTAINS</parameter> matches any item that
+					contains the string given in the text field part of the component and
+					<parameter>FILTERINGMODE_STARTSWITH</parameter> matches only items
+					that begin with the given string. The filtering mode is set with
+					<methodname>setFilteringMode()</methodname>. Setting the filtering
+					mode to the default value <parameter>FILTERINGMODE_OFF</parameter>
+					disables filtering.
+				</para>
+
+			<programlisting><![CDATA[Select select = new Select("Enter containing substring");
+
+select.setFilteringMode(AbstractSelect.Filtering.FILTERINGMODE_CONTAINS);
+
+/* Fill the component with some items. */
+final String[] planets = new String[] {"Mercury", "Venus", "Earth",
+        "Mars", "Jupiter", "Saturn", "Uranus", "Neptune" };
+
+for (int i = 0; i < planets.length; i++)
+    for (int j = 0; j < planets.length; j++) {
+        select.addItem(planets[j] + " to " + planets[i]);]]></programlisting>
+
+				<para>
+					The above example uses the containment filter that matches to all
+					items containing the input string. As shown in <xref
+					linkend="figure.select.filter"/> below, when we type some text in the
+					input area, the drop-down list will show all the matching items.
+				</para>
+
+				<figure xml:id="figure.select.filter">
+					<title>Filtered Selection</title>
+					<mediaobject>
+						<imageobject>
+							<imagedata align="center" fileref="img/components/select-filter1+2.png"/>
+						</imageobject>
+					</mediaobject>
+				</figure>
+
+				<para>
+					The FilterSelect demo in the IT Mill Toolkit Demo Application provides
+					an example of filtering items in a <classname>Select</classname>
+					component.
+				</para>
+					
+				<note>
+					<title>CSS Style Rules</title>
+					
+					<programlisting><![CDATA[.i-filterselect { }
+.i-filterselect-input { }
+.i-filterselect-button { }
+.i-filterselect-suggestpopup { }
+.i-filterselect-prefpage-off { }
+.i-filterselect-suggestmenu { }
+.i-filterselect-status { }]]></programlisting>
+					
+					<para>
+						In its default state, only the input field of the
+						<classname>Select</classname> component is visible. The entire
+						component is enclosed in <literal>i-filterselect</literal> style,
+						the input field has <literal>i-filterselect-input</literal> style
+						and the button in the right end that opens and closes the
+						drop-down result list has <literal>i-filterselect-button</literal>
+						style.
+					</para>
+
+					<para>
+						The drop-down result list has an overall
+						<literal>i-filterselect-suggestpopup</literal> style. It contains
+						the list of suggestions with
+						<literal>i-filterselect-suggestmenu</literal> style and a status
+						bar in the bottom with <literal>i-filterselect-status</literal>
+						style. The list of suggestions is padded with an area with
+						<literal>i-filterselect-prefpage-off</literal> style above and
+						below the list.
+					</para>
+				</note>
+
+			</section>
+		</section>
+
+		<section xml:id="components.selecting.nativeselect">
+			<title>Native Selection Component <classname>NativeSelect</classname></title>
+			
+			<para>
+				<classname>NativeSelect</classname> offers the native selection
+				component in web browsers, using an HTML <literal>&lt;select&gt;</literal>
+				element. In single selection mode, the component is shown as a drop-down
+				list, and in multiple selection mode as a list box.
+			</para>
+
+			<note>
+				<title>CSS Style Rules</title>
+				
+				<programlisting><![CDATA[.i-select-optiongroup {}
+.i-checkbox, .i-select-option {}
+.i-radiobutton, .i-select-option {}]]></programlisting>
+
+				<para>
+					The <literal>i-select-optiongroup</literal> is the overall style for
+					the component. Each check box will have the
+					<literal>i-checkbox</literal> style and each radio button the
+					<literal>i-radiobutton</literal> style. Both the radio buttons and
+					check boxes will also have the <literal>i-select-option</literal>
+					style that allows styling regardless of the option type.
+				</para>
+			</note>
+		</section>
+
+		<section xml:id="components.selecting.optiongroup">
+			<title>Radio Button and Check Box Groups with <classname>OptionGroup</classname></title>
+			<para>
+				The <classname>OptionGroup</classname> class provides selection from
+				alternatives using a group of radio buttons in single selection mode. In
+				multiple selection mode, the items show up as check boxes.
+			</para>
+
+			<programlisting><![CDATA[OptionGroup optiongroup = new OptionGroup("My Option Group");
+
+/* Use multiple selection mode. */
+myselect.setMultiSelect(true);
+
+/* See the previous example for adding items to the Select */
+]]></programlisting>
+
+			<figure>
+				<title>Radio Button Group</title>
+				<mediaobject>
+					<imageobject>
+						<imagedata align="center" fileref="img/components/select-optiongroup.png"/>
+					</imageobject>
+				</mediaobject>
+			</figure>
+
+			<para>
+				It is also possible to create the check boxes individually using the
+				<classname>CheckBox</classname> class, as described in <xref
+				linkend="components.checkbox"/>. The advantages of the
+				<classname>OptionGroup</classname> component are that as it maintains the
+				individual check box objects, you can get the array of all currently
+				selected items easily, and that you can easily change the appearance of
+				the component to another style.
+			</para>
+
+			<note>
+				<title>CSS Style Rules</title>
+				
+				<programlisting><![CDATA[.i-select-optiongroup {}
+.i-checkbox, .i-select-option {}
+.i-radiobutton, .i-select-option {}]]></programlisting>
+
+				<para>
+					The <literal>i-select-optiongroup</literal> is the overall style for
+					the component. Each check box will have the
+					<literal>i-checkbox</literal> style and each radio button the
+					<literal>i-radiobutton</literal> style. Both the radio buttons and
+					check boxes will also have the <literal>i-select-option</literal>
+					style that allows styling regardless of the option type.
+				</para>
+			</note>
+		</section>
+
+		<section xml:id="components.selecting.twincolselect">
+			<title>Twin Column Selection with <classname>TwinColSelect</classname></title>
+			<para>
+				The <classname>TwinColSelect</classname> class provides a multiple
+				selection component that shows two lists side by side. The user can select
+				items from the list on the left and click on the "&gt;&gt;" button to move
+				them to the list on the right. Items can be moved back by selecting them
+				and clicking on the "&lt;&lt;" button.
+			</para>
+
+			<figure>
+				<title>Twin Column Selection</title>
+				<mediaobject>
+					<imageobject>
+						<imagedata align="center" fileref="img/components/select-twincol.png"/>
+					</imageobject>
+				</mediaobject>
+			</figure>
+
+			<note>
+				<title>CSS Style Rules</title>
+				
+				<programlisting><![CDATA[.i-select-twincol {}
+.i-select-twincol-options {}
+.i-select-twincol-selections {}
+.i-select-twincol-buttons {}
+.i-select-twincol-deco {}]]></programlisting>
+			</note>
+		</section>
+
+
+		<section xml:id="components.selecting.newitems">
+			<title>Allowing Adding New Items</title>
+
+			<para>
+				The selection components allow the user to add new items, with a user
+				interface similar to combo boxes in desktop user interfaces. If the
+				<parameter>newItemsAllowed</parameter> mode is enabled with the
+				<methodname>setNewItemsAllowed()</methodname> method, a text box for
+				entering new items will be displayed beside the selection
+				component. Clicking on the "+" button adds the item to the component.
+			</para>
+
+			<figure>
+				<title>Select Component with Adding New Items Allowed</title>
+				<mediaobject>
+					<imageobject>
+						<imagedata align="center" fileref="img/components/select-addnewitems.png"/>
+					</imageobject>
+				</mediaobject>
+			</figure>
+
+			<para>
+				The identifier of an item added by the user will be a
+				<classname>String</classname> object identical to the caption of
+				the item. You should take this into account if the item
+				identifier of automatically filled items is some other type or
+				otherwise not identical to the caption.
+			</para>
+
+			<para>
+				Adding new items is possible in both single and multiple
+				selection modes and in all styles. Adding new items may not be
+				possible if the <classname>Select</classname> is bound to an
+				external <classname>Container</classname> that does not allow
+				adding new items.
+			</para>
+		</section>
+
+		<section xml:id="components.selecting.multiple">
+			<title>Multiple Selection Mode</title>
+
+			<!-- UNFINISHED: Check if outdated. -->
+			
+			<para>
+				Setting the <classname>Select</classname>,
+				<classname>NativeSelect</classname>, or <classname>OptionGroup</classname>
+				components to multiple selection mode with the
+				<methodname>setMultiSelect()</methodname> method changes their appearance
+				to allow selecting multiple items. By holding the <keycap>Ctrl</keycap> or
+				<keycap>Shift</keycap> key pressed, the user can select multiple items.
+			</para>
+
+			<para>
+				See also the behaviour of the component in
+				<parameter>multiSelect</parameter> mode with other styles
+				below. With the <parameter>twincol</parameter> style,
+				the selection is done by moving items from a list to a list of
+				selected items. With the <parameter>optiongroup</parameter>
+				style, the items are displayed as check boxes.
+			</para>
+
+			<programlisting><![CDATA[myselect.setMultiSelect(true);]]></programlisting>
+
+			<para>
+				In multiple selection mode, the property of a
+				<classname>Select</classname> object will be a
+				<classname>Collection</classname> of currently selected
+				items.
+			</para>
+
+		</section>
+
+		<programlisting><![CDATA[/* Let us add an implementation of the ValueChangeListener interface. */
+public class SelectExample extends CustomComponent implements Property.ValueChangeListener {
+    /* Create a Select object with a caption. */
+    Select select = new Select("This is a Select component");
+
+    VerticalLayout layout = new VerticalLayout();
+    Label status = new Label("-");
+    
+    SelectExample () {
+        setCompositionRoot (layout);
+        layout.addComponent(select);
+
+        /* Fill the component with some items. */
+        final String[] planets = new String[] {"Mercury", "Venus", "Earth", "Mars",
+                                               "Jupiter", "Saturn", "Uranus", "Neptune"};
+        for (int i=0; i<planets.length; i++)
+            select.addItem(planets[i]);
+
+        /* By default, the change event is not triggered immediately
+         * when the selection changes. This enables it. */
+        select.setImmediate(true);
+        
+        /* Listen for changes in the selection. */
+        select.addListener(this);
+
+        layout.addComponent(status);
+    }
+
+    /* Respond to change in the selection. */
+    public void valueChange(Property.ValueChangeEvent event) {
+        /* The event.getProperty() returns the Item ID (IID) of the
+         * currently selected item in the component. */
+        status.setValue("Currently selected item ID: " + event.getProperty());
+    }
+}]]></programlisting>
+
+		<programlisting><![CDATA[]]></programlisting>
+
+	</section>
+
+	<section xml:id="components.table">
+		<title><classname>Table</classname></title>
+
+		<para>
+			The <classname>Table</classname> component is intended for presenting tabular
+			data organized in rows and columns. The <classname>Table</classname> is one of
+			the most versatile components in IT Mill Toolkit. Table cells can include text
+			or arbitrary UI components. You can easily implement editing of the table data,
+			for example clicking on a cell could change it to a text field for editing.
+		</para>
+
+		<para>
+			The data contained in a <classname>Table</classname> is managed using the Data
+			Model of IT Mill Toolkit (see <xref linkend="datamodel"/>), through
+			the <classname>Container</classname> interface of the
+			<classname>Table</classname>. This makes it possible to bind a table directly
+			to a data souce such as a database query. Only the visible part of the table
+			is loaded into the browser and moving the visible window with the scrollbar loads
+			content from the server. While the data is being loaded, a tooltip will be
+			displayed that shows the current range and total number of items in the
+			table. The rows of the table are <emphasis>items</emphasis> in the container
+			and the columns are <emphasis>properties</emphasis>. Each table row (item) is
+			identified with an <emphasis>item identifier</emphasis> (IID), and each column
+			(property) with a <emphasis>property identifier</emphasis> (PID).
+		</para>
+
+		<para>
+			When creating a table, you first need to define columns with
+			<methodname>addContainerProperty()</methodname>. This method comes in two
+			flavours. The simpler one takes the property ID of the column and uses it also
+			as the caption of the column. The more complex one allows differing PID and
+			header for the column. This may make, for example, internationalization of
+			table headers easier, because if a PID is internationalized, the
+			internationalization has to be used everywhere where the PID is used. The
+			complex form of the method also allows defining an icon for the column from a
+			resource. The "default value" parameter is used when new properties (columns)
+			are added to the table, to fill in the missing values. (This default has no
+			meaning in the usual case, such as below, where we add items after defining
+			the properties.)
+		</para>
+
+            <programlisting><![CDATA[/* Create the table with a caption. */
+Table table = new Table("This is my Table");
+
+/* Define the names and data types of columns.
+ * The "default value" parameter is meaningless here. */
+table.addContainerProperty("First Name", String.class,  null);
+table.addContainerProperty("Last Name",  String.class,  null);
+table.addContainerProperty("Year",       Integer.class, null);
+
+/* Add a few items in the table. */
+table.addItem(new Object[] {"Nicolaus","Copernicus",new Integer(1473)}, new Integer(1));
+table.addItem(new Object[] {"Tycho",   "Brahe",     new Integer(1546)}, new Integer(2));
+table.addItem(new Object[] {"Giordano","Bruno",     new Integer(1548)}, new Integer(3));
+table.addItem(new Object[] {"Galileo", "Galilei",   new Integer(1564)}, new Integer(4));
+table.addItem(new Object[] {"Johannes","Kepler",    new Integer(1571)}, new Integer(5));
+table.addItem(new Object[] {"Isaac",   "Newton",    new Integer(1643)}, new Integer(6));]]></programlisting>
+
+		<para>
+			In this example, we used an increasing <classname>Integer</classname> object
+			as the Item Identifier, given as the second parameter to
+			<methodname>addItem()</methodname>. The actual rows are given simply as object
+			arrays, in the same order in which the properties were added. The objects must
+			be of the correct class, as defined in the
+			<methodname>addContainerProperty()</methodname> calls.
+		</para>
+
+		<figure>
+			<title>Basic Table Example</title>
+			<mediaobject>
+				<imageobject>
+					<imagedata align="center" fileref="img/components/table-example1.png"/>
+				</imageobject>
+			</mediaobject>
+		</figure>
+
+		<para>
+			Scalability of the <classname>Table</classname> is largely dictated by
+			the container. The default <classname>IndexedContainer</classname> is
+			relatively heavy and can cause scalability problems, for example, when
+			updating the values. Use of an optimized application-specific
+			container is recommended. Table does not have a limit for the number
+			of items and is just as fast with hundreds of thousands of items as
+			with just a few. With the current implementation of scrolling, there
+			is a limit of around 500 000 rows, depending on the browser and the pixel
+			height of rows.
+		</para>
+
+		<section xml:id="components.table.selecting">
+			<title>Selecting Items in a Table</title>
+
+			<para>
+				The <classname>Table</classname> allows selecting one or more items by
+				clicking them with the mouse. When the user selects an item, the IID of the
+				item will be set as the property of the table and a
+				<classname>ValueChangeEvent</classname> is triggered. To enable selection,
+				you need to set the table <emphasis>selectable</emphasis>. You will also
+				need to set it as <emphasis>immediate</emphasis> in most cases, as we do
+				below, because without it, the change in the property will not be
+				communicated immediately to the server.
+			</para>
+
+			<para>
+				The following example shows how to enable the selection of items in a
+				<classname>Table</classname> and how to handle
+				<classname>ValueChangeEvent</classname> events that are caused by changes
+				in selection. You need to handle the event with the
+				<methodname>valueChange()</methodname> method of the
+				<classname>Property.ValueChangeListener</classname> interface.
+			</para>
+
+			<programlisting><![CDATA[/* Allow selecting items from the table. */
+table.setSelectable(true);
+
+/* When an item is selected, the selection is sent immediately to server. */
+table.setImmediate(true);
+
+/* Feedback from selection. */
+final Label current = new Label("Selected: -");
+
+/* Handle selection change. */
+table.addListener(new Property.ValueChangeListener() {
+    public void valueChange(ValueChangeEvent event) {
+        current.setValue("Selected: " + table.getValue());
+    }
+});]]></programlisting>
+
+			<figure>
+				<title>Table Selection Example</title>
+				<mediaobject>
+					<imageobject>
+						<imagedata align="center" fileref="img/components/table-example2.png"/>
+					</imageobject>
+				</mediaobject>
+			</figure>
+
+			<para>
+				If the user clicks on an already selected item, the selection will
+				deselected and the table property will have <parameter>null</parameter>
+				value. You can disable this behaviour by setting
+				<methodname>setNullSelectionAllowed(false)</methodname> for the table.
+			</para>
+
+			<para>
+				A table can also be in <emphasis>multiselect</emphasis> mode, where a user
+				can select and unselect any item by clicking on it. The mode is enabled
+				with the <methodname>setMultiSelect()</methodname> method of the
+				<classname>Select</classname> interface of
+				<classname>Table</classname>. Selecting an item triggers a
+				<classname>ValueChangeEvent</classname>, which will have as its parameter
+				an array of item identifiers.
+			</para>
+		</section>
+		
+		<section xml:id="components.table.css">
+			<title>CSS Style Rules</title>
+
+			<programlisting><![CDATA[.i-table {}
+  .i-table-header-wrap {}
+    .i-table-header {}
+      .i-table-header-cell {}
+        .i-table-resizer {}             /* Column resizer handle. */
+        .i-table-caption-container {}
+  .i-table-body {}
+    .i-table-row-spacer {}
+    .i-table-table {}
+      .i-table-row {}
+        .i-table-cell-content {}]]></programlisting>
+
+			<para>
+				Notice that some of the widths and heights in a table are calculated
+				dynamically and can not be set in CSS.
+			</para>
+
+			<section>
+				<title>Setting Individual Cell Styles</title>
+
+				<para>
+					The <classname>Table.CellStyleGenerator</classname> interface allows
+					you to set the CSS style for each individual cell in a table. You need
+					to implement the <methodname>getStyle()</methodname>, which gets the
+					row (item) and column (property) identifiers as parameters and can
+					return a style name for the cell. The returned style name will be
+					concatenated to prefix "<literal>i-table-cell-content-</literal>".
+				<para>
+
+				</para>
+					Alternatively, you
+					can use a <classname>Table.ColumnGenerator</classname> (see <xref
+					linkend="components.table.columngenerator"/>) to generate the actual UI
+					components of the cells and add style names to them. A cell style
+					generator is not used for the cells in generated columns.
+				</para>
+			
+				<programlisting><![CDATA[Table table = new Table("Table with Cell Styles");
+table.addStyleName("checkerboard");
+
+// Add some columns in the table. In this example, the property IDs
+// of the container are integers so we can determine the column number
+// easily.
+table.addContainerProperty("0", String.class, null, "", null, null); // Row header
+for (int i=0; i<8; i++)
+    table.addContainerProperty(""+(i+1), String.class, null,
+                               String.valueOf((char) (65+i)), null, null);
+
+// Add some items in the table.
+table.addItem(new Object[]{"1", "R", "N", "B", "Q", "K", "B", "N", "R"}, new Integer(0));
+table.addItem(new Object[]{"2", "P", "P", "P", "P", "P", "P", "P", "P"}, new Integer(1));
+for (int i=2; i<6; i++)
+    table.addItem(new Object[]{String.valueOf(i+1), "", "", "", "", "", "", "", ""}, new Integer(i));
+table.addItem(new Object[]{"7", "P", "P", "P", "P", "P", "P", "P", "P"}, new Integer(6));
+table.addItem(new Object[]{"8", "R", "N", "B", "Q", "K", "B", "N", "R"}, new Integer(7));
+table.setPageLength(8);
+
+// Set cell style generator
+table.setCellStyleGenerator(new Table.CellStyleGenerator() {
+    public String getStyle(Object itemId, Object propertyId) {
+        int row = ((Integer)itemId).intValue();
+        int col = Integer.parseInt((String)propertyId);
+        
+        // The first column.
+        if (col == 0)
+            return "rowheader";
+        
+        // Other cells.
+        if ((row+col)%2 == 0)
+            return "black";
+        else
+            return "white";
+    }
+});]]></programlisting>
+				
+				<para>
+					You can then style the cells, for example, as follows:
+				</para>
+
+				<programlisting><![CDATA[/* Center the text in header. */
+.i-table-header-cell {
+    text-align: center;
+}
+
+/* Basic style for all cells. */
+.i-table-checkerboard .i-table-cell-content {
+    text-align: center;
+    vertical-align: middle;
+    padding-top: 12px;
+    width: 20px;
+    height: 28px;
+}
+
+/* Style specifically for the row header cells. */
+.i-table-cell-content-rowheader {
+	background: #E7EDF3 url(../default/table/img/header-bg.png) repeat-x scroll 0 0;
+}
+
+/* Style specifically for the "white" cells. */
+.i-table-cell-content-white {
+    background: white;
+    color: black;
+}
+
+/* Style specifically for the "black" cells. */
+.i-table-cell-content-black {
+    background: black;
+    color: white;
+}]]></programlisting>
+
+				<para>
+					The table will look as shown in the figure below.
+				</para>
+
+				<figure>
+					<title>Cell Style Generator for a Table</title>
+					<mediaobject>
+						<imageobject role="fo">
+							<imagedata align="center" scale="75" fileref="img/components/table-cellstylegenerator1.png"/>
+						</imageobject>
+						<imageobject role="html">
+							<imagedata align="center" fileref="img/components/table-cellstylegenerator1.png"/>
+						</imageobject>
+					</mediaobject>
+				</figure>
+			</section>
+		</section>
+
+		<section xml:id="components.table.features">
+			<title>Table Features</title>
+			
+			<section>
+				<title>Page Length and Scrollbar</title>
+
+				<para>
+					The default style for <classname>Table</classname> provides a table
+					with a scrollbar. The scrollbar is located at the right side of the
+					table and becomes visible when the number of items in the table
+					exceeds the page length, that is, the number of visible items. You can
+					set the page length with <methodname>setPageLength()</methodname>.
+				</para>
+
+				<para>
+					Setting the page length to zero makes all the rows in a table visible,
+					no matter how many rows there are. Notice that this also effectively
+					disables buffering, as all the entire table is loaded to the browser
+					at once. Using such tables to generate reports does not scale up very
+					well, as there is some inevitable overhead in rendering a table with
+					Ajax. For very large reports, generating HTML directly is a more
+					scalable solution.
+				</para>
+			</section>
+
+			<section>
+				<title>Organizing Columns</title>
+			
+				<para>
+					The default scrollable style supports most of the table features. User
+					can resize the columns by dragging their borders, change the sorting
+					by clicking on the column headers, collapse the columns if
+					<parameter>columnCollapsingAllowed</parameter> is
+					<parameter>true</parameter>, and reorder them if
+					<parameter>columnReorderingAllowed</parameter> is
+					<parameter>true</parameter>. You can set the column width of
+					individual columns with <methodname>setColumnWidth()</methodname>.
+				</para>
+			</section>
+
+			<section>
+				<title>Components Inside a Table</title>
+
+				<para>
+					The cells of a <classname>Table</classname> can contain any user
+					interface components, not just strings. If the rows are higher than
+					the row height defined in the default theme, you have to define the
+					proper row height in a custom theme.
+				</para>
+
+				<para>
+					When handling events for components inside a
+					<classname>Table</classname>, such as for the
+					<classname>Button</classname> in the example below, you usually need
+					to know the item the component belongs to. Components do not
+					themselves know about the table or the specific item in which a
+					component is contained.  Therefore, the handling method must use some
+					other means for finding out the Item ID of the item. There are a few
+					possibilities. Usually the easiest way is to use the
+					<methodname>setData()</methodname> method to attach an arbitrary
+					object to a component. You can subclass the component and include the
+					identity information there. You can also simply search the entire
+					table for the item with the component, although that solution may not
+					be so scalable.
+				</para>
+
+				<para>
+					The example below includes table rows with a
+					<classname>Label</classname> in XHTML formatting mode, a multiline
+					<classname>TextField</classname>, a <classname>CheckBox</classname>,
+					and a <classname>Button</classname> that shows as a link.
+				</para>
+
+				<programlisting><![CDATA[// Create a table and add a style to allow setting the row height in theme.
+final Table table = new Table();
+table.addStyleName("components-inside");
+
+/* Define the names and data types of columns.
+ * The "default value" parameter is meaningless here. */
+table.addContainerProperty("Sum",            Label.class,     null);
+table.addContainerProperty("Is Transferred", CheckBox.class,  null);
+table.addContainerProperty("Comments",       TextField.class, null);
+table.addContainerProperty("Details",        Button.class,    null);
+
+/* Add a few items in the table. */
+for (int i=0; i<100; i++) {
+    // Create the fields for the current table row
+    Label sumField = new Label(String.format("Sum is <b>$%04.2f</b><br/><i>(VAT incl.)</i>",
+                          new Object[] {new Double(Math.random()*1000)}),
+                          Label.CONTENT_XHTML);
+    CheckBox transferredField = new CheckBox("is transferred");
+    
+    // Multiline text field. This required modifying the height of the
+    // table row.
+    TextField commentsField = new TextField();
+    commentsField.setRows(3);
+    
+    // The Table item identifier for the row.
+    Integer itemId = new Integer(i);
+    
+    // Create a button and handle its click. A Button does not know
+    // the item it is contained in, so we have to store the item
+    // ID as user-defined data.
+    Button detailsField = new Button("show details");
+    detailsField.setData(itemId);
+    detailsField.addListener(new Button.ClickListener() {
+        public void buttonClick(ClickEvent event) {
+            // Get the item identifier from the user-defined data.
+            Integer itemId = (Integer)event.getButton().getData();
+            getWindow().showNotification("Link "+itemId.intValue()+" clicked.");
+        } 
+    });
+    detailsField.addStyleName("link");
+    
+    // Create the table row.
+    table.addItem(new Object[] {sumField, transferredField,
+                                commentsField, detailsField},
+                  itemId);
+}
+
+/* Show just three rows because they are so high. */
+table.setPageLength(3);]]></programlisting>
+
+				<para>
+					The row height has to be set higher than the default with a style rule
+					such as the following:
+				</para>
+
+				<programlisting><![CDATA[/* Table rows contain three-row TextField components. */
+.i-table-components-inside .i-table-cell-content {
+	height: 54px;
+}]]></programlisting>
+
+				<para>
+					The table will look as shown in the figure below.
+				</para>
+
+				<figure>
+					<title>Components in a Table</title>
+					<mediaobject>
+						<imageobject>
+							<imagedata align="center" fileref="img/components/table-components.png"/>
+						</imageobject>
+					</mediaobject>
+				</figure>
+			</section>
+
+			<section>
+				<title>Editing the Values of a Table</title>
+
+				<para>
+					Normally, a <classname>Table</classname> simply displays the items and
+					their fields as text. If you want to allow the user to edit the
+					values, you can either put them inside components as we did above, or
+					you can simply call <methodname>setEditable(true)</methodname> and the
+					cells are automatically turned into editable fields.
+				</para>
+
+				<para>
+					Let us begin with a regular table with a some columns with usual Java
+					types, namely a <classname>Date</classname>,
+					<classname>Boolean</classname>, and a <classname>String</classname>.
+				</para>
+
+				<programlisting><![CDATA[// Create a table. It is by default not editable.
+final Table table = new Table();
+
+// Define the names and data types of columns.
+table.addContainerProperty("Date",     Date.class,  null);
+table.addContainerProperty("Work",     Boolean.class, null);
+table.addContainerProperty("Comments", String.class,  null);
+
+// Add a few items in the table.
+for (int i=0; i<100; i++) {
+    Calendar calendar = new GregorianCalendar(2008,0,1);
+    calendar.add(Calendar.DAY_OF_YEAR, i);
+    
+    // Create the table row.
+    table.addItem(new Object[] {calendar.getTime(),
+                                new Boolean(false),
+                                ""},
+                  new Integer(i)); // Item identifier
+}
+
+table.setPageLength(8);
+layout.addComponent(table);]]></programlisting>
+
+				<para>
+					You could put the table in editable mode right away if you need
+					to. We'll continue the example by adding a mechanism to switch the
+					<classname>Table</classname> from and to the editable mode.
+				</para>
+
+				<programlisting><![CDATA[final CheckBox switchEditable = new CheckBox("Editable");
+switchEditable.addListener(new Property.ValueChangeListener() {
+    public void valueChange(ValueChangeEvent event) {
+        table.setEditable(((Boolean)event.getProperty().getValue()).booleanValue());
+    }
+});
+switchEditable.setImmediate(true);
+layout.addComponent(switchEditable);]]></programlisting>
+
+				<para>
+					Now, when you check to checkbox, the components in the table turn into
+					editable fields, as shown in <xref
+					linkend="figure.component.table.editable"/> below.
+				</para>
+
+				<figure xml:id="figure.component.table.editable">
+					<title>A Table in Normal and Editable Mode</title>
+					<mediaobject>
+						<imageobject role="html">
+							<imagedata align="center" fileref="img/components/table-editable1+2.png"/>
+						</imageobject>
+						<imageobject role="fo">
+							<imagedata scale="45" align="center" fileref="img/components/table-editable1+2.png"/>
+						</imageobject>
+					</mediaobject>
+				</figure>
+
+				<para>
+					The field components that allow editing the values of particular types
+					are defined in a field factory that implements the
+					<classname>FieldFactory</classname> interface. The default
+					implementation is <classname>BaseFieldFactory</classname>, which
+					offers the following crude mappings:
+				</para>
+
+				<table>
+					<title>Type to Field Mappings in <classname>BaseFieldFactory</classname></title>
+					<tgroup cols="2" align="left">
+						<thead>
+							<row valign="top">
+								<entry>Property Type</entry>
+								<entry>Mapped to Field Class</entry>
+							</row>
+						</thead>
+						<tbody>
+							<row valign="top">
+								<entry><classname>Date</classname></entry>
+								<entry>A <classname>DateField</classname>. </entry>
+							</row>
+							<row valign="top">
+								<entry><classname>Boolean</classname></entry>
+								<entry>A <classname>CheckBox</classname>.</entry>
+							</row>
+							<row valign="top">
+								<entry><classname>Item</classname></entry>
+
+								<entry>A <classname>Form</classname>. The fields of the
+								form are automatically created from the item's properties
+								using the default field factory, that is,
+								<classname>BaseFieldFactory</classname>. The normal use
+								for this property type is inside a
+								<classname>Form</classname> and is less useful inside a
+								<classname>Table</classname>.</entry>
+							</row>
+							<row valign="top">
+								<entry><emphasis>others</emphasis></entry>
+
+								<entry>A <classname>TextField</classname>. The text field
+								manages conversions from the basic types, if
+								possible.</entry>
+							</row>
+						</tbody>
+					</tgroup>
+				</table>
+
+				<para>
+					Field factories are covered with more detail in <xref
+					linkend="components.form.binding"/>. In the default
+					<classname>BaseFieldFactory</classname> (you might want to look the
+					source code), the mappings are defined in
+					<methodname>createField(<classname>Class</classname> type,
+					<classname>Component</classname> uiContext)</methodname> method, but
+					you can implement any other of the abstract
+					<classname>FieldFactory</classname> methods, depending on your
+					needs. You could just implement the
+					<classname>FieldFactory</classname> interface, but We recommend that
+					you extend the <classname>BaseFieldFactory</classname> according to
+					your needs.
+				</para>
+
+			</section>
+
+			<section>
+				<title>Iterating Over a Table</title>
+
+				<para>
+					As the items in a <classname>Table</classname> are not indexed, iterating
+					over the items has to be done using an iterator. The
+					<methodname>getItemIds()</methodname> method of the
+					<classname>Container</classname> interface of <classname>Table</classname>
+					returns a <classname>Collection</classname> of item identifiers over which
+					you can iterate using an <classname>Iterator</classname>. For an example
+					about iterating over a <classname>Table</classname>, please see <xref
+						linkend="datamodel.container"/>. Notice that you may not modify the
+					<classname>Table</classname> during iteration, that is, add or remove
+					items. Changing the data is allowed.
+				</para>
+			</section>
+		</section>
+
+		<section xml:id="components.table.columngenerator">
+			<title>Generated Table Columns</title>
+
+			<para>
+				You might want to have a column that has values calculated from other
+				columns. Or you might want to format table columns in some way, for
+				example if you have columns that display currencies. The
+				<classname>ColumnGenerator</classname> interface allows defining custom
+				generators for such columns.
+			</para>
+
+			<para>
+				You add new generated columns to a <classname>Table</classname> with
+				<methodname>addGeneratedColumn()</methodname>. It takes the column
+				identifier as its parameters. Usually you want to have a more
+				user-friendly and possibly internationalized column header. You can set
+				the header and a possible icon by calling
+				<methodname>addContainerProperty()</methodname>
+				<emphasis>before</emphasis> adding the generated column.
+			</para>
+
+			<programlisting><![CDATA[// Define table columns. 
+table.addContainerProperty("date",        Date.class,   null, "Date",                null, null);
+table.addContainerProperty("quantity",    Double.class, null, "Quantity (l)",        null, null);
+table.addContainerProperty("price",       Double.class, null, "Price (e/l)",         null, null);
+table.addContainerProperty("total",       Double.class, null, "Total (e)",           null, null);
+
+// Define the generated columns and their generators.
+table.addGeneratedColumn("date",        new DateColumnGenerator());
+table.addGeneratedColumn("quantity",    new ValueColumnGenerator("%.2f l"));
+table.addGeneratedColumn("price",       new PriceColumnGenerator());
+table.addGeneratedColumn("total",       new ValueColumnGenerator("%.2f e"));]]></programlisting>
+
+			<para>
+				Notice that the <methodname>addGeneratedColumn()</methodname> always
+				places the generated columns as the last column, even if you defined some
+				other order previously. You will have to set the proper order with
+				<methodname>setVisibleColumns()</methodname>.
+			</para>
+
+			<programlisting><![CDATA[table.setVisibleColumns(new Object[] { "date", "quantity", "price", "total"});]]></programlisting>
+
+			<para>
+				The generators are objects that implement the
+				<classname>Table.ColumnGenerator</classname> interface and its
+				<methodname>generateCell()</methodname> method. The method gets the
+				identity of the item and column as its parameters, in addition to the
+				table object. It has to return a component object.
+			</para>
+				
+			<para>
+				The following example defines a generator for formatting
+				<classname>Double</classname> valued fields according to a format string
+				(as in <classname>java.util.Formatter</classname>).
+			</para>
+
+			<programlisting><![CDATA[/** Formats the value in a column containing Double objects. */
+class ValueColumnGenerator implements Table.ColumnGenerator {
+    String format; /* Format string for the Double values. */
+
+    /** Creates double value column formatter with the given format string. */
+    public ValueColumnGenerator(String format) {
+        this.format = format;
+    }
+
+    /**
+     * Generates the cell containing the Double value. The column is
+     * irrelevant in this use case.
+     */
+    public Component generateCell(Table source, Object itemId, Object columnId) {
+        Property prop = source.getItem(itemId).getItemProperty(columnId);
+        if (prop.getType().equals(Double.class)) {
+            Label label = new Label(String.format(format,
+                    new Object[] { (Double) prop.getValue() }));
+            
+            // Set styles for the column: one indicating that it's a value and a more
+            // specific one with the column name in it. This assumes that the column
+            // name is proper for CSS.
+            label.addStyleName("column-type-value");
+            label.addStyleName("column-" + (String) columnId);
+            return label;
+        }
+        return null;
+    }
+}]]></programlisting>
+
+			<para>
+				If you wish to have a custom style for the cells, you have to set it in
+				the generator. A <classname>CellStyleGenerator</classname> defined for a
+				table will not be called for the cells of generated columns.
+			</para>
+
+			<para>
+				The generator is called for all the visible (or more accurately cached)
+				items in a table. If the user scrolls the table to another position in the
+				table, the columns of the new visible rows are generated dynamically. The
+				columns in the visible (cached) rows are also generated always when an
+				item has a value change. It is therefore usually safe to calculate the
+				value of generated cells from the values of different rows (items).
+			</para>
+
+			<para>
+				When you set a table as <parameter>editable</parameter>, regular fields
+				will change to editing fields. When the user changes the values in the
+				fields, the generated columns will be updated automatically. Putting a
+				table with generated columns in editable mode has a few quirks. The
+				editable mode of <classname>Table</classname> does not affect generated
+				columns. You have two alternatives: either you generate the editing fields
+				in the generator or, in case of formatter generators, remove the generator
+				in the editable mode. The example below uses the latter approach.
+			</para>
+
+			<programlisting><![CDATA[// Have a check box that allows the user to make the quantity
+// and total columns editable.
+final CheckBox editable = new CheckBox("Edit the input values - calculated columns are regenerated");
+editable.setImmediate(true);
+editable.addListener(new ClickListener() {
+    public void buttonClick(ClickEvent event) {
+        table.setEditable(editable.booleanValue());
+        
+        // The columns may not be generated when we want to have them
+        // editable.
+        if (editable.booleanValue()) {
+            table.removeGeneratedColumn("quantity");
+            table.removeGeneratedColumn("total");
+        } else {
+            // In non-editable mode we want to show the formatted values.
+            table.addGeneratedColumn("quantity", new ValueColumnGenerator("%.2f l"));
+            table.addGeneratedColumn("total",    new ValueColumnGenerator("%.2f e"));
+        }
+        // The visible columns are affected by removal and addition of
+        // generated columns so we have to redefine them.
+        table.setVisibleColumns(
+                new Object[] { "date","quantity","price","total","consumption", "dailycost" });
+    }
+});]]></programlisting>
+
+				<para>
+					You will also have to set the editing fields in
+					<parameter>immediate</parameter> mode to have the update occur
+					immediately when an edit field loses the focus. You can set the fields
+					in <parameter>immediate</parameter> mode with the a custom
+					<classname>FieldFactory</classname>, such as the one given below:
+				</para>
+
+			<programlisting><![CDATA[public class ImmediateFieldFactory extends BaseFieldFactory {
+    public Field createField(Class type, Component uiContext) {
+        // Let the BaseFieldFactory create the fields
+        Field field = super.createField(type, uiContext);
+        
+        // ...and just set them as immediate
+        ((AbstractField)field).setImmediate(true);
+        
+        return field;
+    }
+}
+...
+table.setFieldFactory(new ImmediateFieldFactory());]]></programlisting>
+
+			<para>
+				If you generate the editing fields with the column generator, you avoid
+				having to use such a field factory, but of course have to generate the
+				fields for both normal and editable modes.
+			</para>
+
+			<para>
+				<xref linkend="figure.ui.table.generated"/> below shows a table with
+				columns calculated (blue) and simply formatted (black) with column
+				generators.
+			</para>
+
+			<figure xml:id="figure.ui.table.generated">
+				<title>Table with Generated Columns in Normal and Editable Mode</title>
+				<mediaobject>
+					<imageobject>
+						<imagedata align="center" fileref="img/components/table-generatedcolumns1.png"/>
+					</imageobject>
+				</mediaobject>
+				<mediaobject>
+					<imageobject>
+						<imagedata align="center" fileref="img/components/table-generatedcolumns2.png"/>
+					</imageobject>
+				</mediaobject>
+			</figure>
+
+			<para>
+				You can find the complete generated columns example in the Feature Browser
+				demo application in the installation package, in
+				<classname>com.itmill.toolkit.demo.featurebrowser.GeneratedColumnExample.java</classname>.
+			</para>
+
+		</section>
+
+		<!-- programlisting><![CDATA[]]></programlisting -->
+	</section>
+
+	<section xml:id="components.tree">
+		<title><classname>Tree</classname></title>
+
+		<para>
+			The <classname>Tree</classname> component allows a natural way to represent
+			data that has hierarchical relationships, such as filesystems or message
+			threads. The <classname>Tree</classname> component in IT Mill Toolkit works
+			much like the tree components of most modern desktop user interface toolkits,
+			for example in directory browsing.
+		</para>
+
+		<para>
+			The typical use of the <classname>Tree</classname> component is for displaying
+			a hierachical menu, like a menu on the left side of the screen, as in <xref
+			linkend="figure.components.tree"/> below, or for displaying filesystems or
+			other hierarchical datasets. The <parameter>menu</parameter> style makes the
+			appearance of the tree more suitable for this purpose.
+		</para>
+
+		<programlisting><![CDATA[final Object[][] planets = new Object[][]{
+        new Object[]{"Mercury"}, 
+        new Object[]{"Venus"},
+        new Object[]{"Earth", "The Moon"},    
+        new Object[]{"Mars", "Phobos", "Deimos"},
+        new Object[]{"Jupiter", "Io", "Europa", "Ganymedes", "Callisto"},
+        new Object[]{"Saturn", "Titan", "Tethys", "Dione", "Rhea", "Iapetus"},
+        new Object[]{"Uranus", "Miranda", "Ariel", "Umbriel", "Titania", "Oberon"},
+        new Object[]{"Neptune", "Triton", "Proteus", "Nereid", "Larissa"}};
+        
+Tree tree = new Tree("The Planets and Major Moons");
+
+/* Add planets as root items in the tree. */
+for (int i=0; i<planets.length; i++) {
+    String planet = (String) (planets[i][0]);
+    tree.addItem(planet);
+    
+    if (planets[i].length == 1) {
+        /* The planet has no moons so make it a leaf. */
+        tree.setChildrenAllowed(planet, false);
+    } else {
+        /* Add children (moons) under the planets. */
+        for (int j=1; j<planets[i].length; j++) {
+            String moon = (String) planets[i][j];
+            
+            /* Add the item as a regular item. */
+            tree.addItem(moon);
+            
+            /* Set it to be a child. */
+            tree.setParent(moon, planet);
+            
+            /* Make the moons look like leaves. */
+            tree.setChildrenAllowed(moon, false);
+        }
+
+        /* Expand the subtree. */
+        tree.expandItemsRecursively(planet);
+    }
+}
+
+main.addComponent(tree);]]></programlisting>
+
+		<para>
+			<xref linkend="figure.components.tree"/> below shows the tree from the code
+			example in a practical situation.
+		</para>
+
+		<figure xml:id="figure.components.tree">
+			<title>A <classname>Tree</classname> Component as a Menu</title>
+			<mediaobject>
+				<imageobject role="html">
+					<imagedata align="center" fileref="img/components/tree-example1.png"/>
+				</imageobject>
+				<imageobject role="fo">
+					<imagedata scale="75" align="center" fileref="img/components/tree-example1.png"/>
+				</imageobject>
+			</mediaobject>
+		</figure>
+
+		<para>
+			You can read or set the currently selected item by the value property of the
+			<classname>Tree</classname> component, that is, with
+			<methodname>getValue()</methodname> and
+			<methodname>setValue()</methodname>. When the user clicks an item on a tree,
+			the tree will receive an <classname>ValueChangeEvent</classname>, which you
+			can catch with a <classname>ValueChangeListener</classname>. To receive the
+			event immediately after the click, you need to set the tree as
+			<classname>setImmediate(true)</classname>.
+		</para>
+
+		<para>
+			The <classname>Tree</classname> component uses
+			<classname>Container</classname> data sources much like the
+			<classname>Table</classname> component, with the addition that it also
+			utilizes hierarchy information maintained by a
+			<classname>HierarchicalContainer</classname>. The contained items can be of
+			any item type supported by the container. The default container and its
+			<methodname>addItem()</methodname> assume that the items are strings and the
+			string value is used as the item ID.
+		</para>
+	</section>
+
+	<section xml:id="components.menubar">
+		<title><classname>MenuBar</classname></title>
+
+		<para>
+			The <classname>MenuBar</classname> component allows creating horizontal
+			dropdown menus, much like the main menu in desktop applications.
+		</para>
+
+		<programlisting><![CDATA[// Create a menu bar
+final MenuBar menubar = new MenuBar();
+main.addComponent(menubar);]]></programlisting>
+
+		<para>
+			You insert the top-level menu items to a <classname>MenuBar</classname> object
+			with the <methodname>addItem()</methodname> method. It takes a string label,
+			an icon resource, and a command as its parameters. The icon and command are
+			not required and can be <parameter>null</parameter>.
+		</para>
+
+		<programlisting><![CDATA[MenuBar.MenuItem beverages = menubar.addItem("Beverages", null, null);]]></programlisting>
+
+		<para>
+			The command is called when the user clicks the item. A menu command is a class
+			that implements the <classname>MenuBar.Command</classname> interface.
+		</para>
+
+		<programlisting><![CDATA[// A feedback component
+final Label selection = new Label("-");
+main.addComponent(selection);
+
+// Define a common menu command for all the menu items.
+MenuBar.Command mycommand = new MenuBar.Command() {
+    public void menuSelected(MenuItem selectedItem) {
+        selection.setValue("Ordered a " + selectedItem.getText() + " from menu.");
+    }  
+};]]></programlisting>
+
+		<para>
+			The <methodname>addItem()</methodname> method returns a
+			<classname>MenuBar.MenuItem</classname> object, which you can use to add
+			sub-menu items. The <classname>MenuItem</classname> has an identical
+			<methodname>addItem()</methodname> method.
+		</para>
+
+		<programlisting><![CDATA[// Put some items in the menu hierarchically
+MenuBar.MenuItem beverages = menubar.addItem("Beverages", null, null);
+MenuBar.MenuItem hot_beverages = beverages.addItem("Hot", null, null);
+hot_beverages.addItem("Tea", null, mycommand);
+hot_beverages.addItem("Coffee", null, mycommand);
+MenuBar.MenuItem cold_beverages = beverages.addItem("Cold", null, null);
+cold_beverages.addItem("Milk", null, mycommand);
+
+// Another top-level item
+MenuBar.MenuItem snacks = menubar.addItem("Snacks", null, null);
+snacks.addItem("Weisswurst", null, mycommand);
+snacks.addItem("Salami", null, mycommand);
+
+// Yet another top-level item
+MenuBar.MenuItem services = menubar.addItem("Services", null, null);
+services.addItem("Car Service", null, mycommand);]]></programlisting>
+
+		<para>
+			The menu will look as follows:
+		</para>
+
+		<figure>
+			<title>Menu Bar</title>
+			<mediaobject>
+				<imageobject role="html">
+					<imagedata align="center" fileref="img/components/menubar-example1.png"/>
+				</imageobject>
+				<imageobject role="fo">
+					<imagedata scale="85" align="center" fileref="img/components/menubar-example1.png"/>
+				</imageobject>
+			</mediaobject>
+		</figure>
+
+		<note>
+			<title>CSS Style Rules</title>
+			
+			<programlisting><![CDATA[.i-menubar { }
+.gwt-MenuItem {}
+.gwt-MenuItem-selected {}]]></programlisting>
+			
+			<para>
+				The menu bar has the overall style name
+				<literal>.i-menubar</literal>. Each menu item has
+				<literal>.gwt-MenuItem</literal> style normally and
+				<literal>.gwt-MenuItem-selected</literal> when the item is selected.
+			</para>
+			
+		</note>
+	</section>
+
+	<section xml:id="components.embedded">
+		<title><classname>Embedded</classname></title>
+
+		<para>
+			The <classname>Embedded</classname> component allows displaying embedded media
+			objects, such as images, animations, or any embeddable media type supported by
+			the browser. The contents of an <classname>Embedded</classname> component are
+			managed as <emphasis>resources</emphasis>. For documentation on resources, see
+			<xref linkend="application.resources"/>.
+		</para>
+
+		<para>
+			The following example displays an image from the same Java package as the
+			class itself using the class loader.
+		</para>
+
+		<programlisting><![CDATA[Embedded image = new Embedded("Yes, logo:", new ClassResource("toolkit-logo.png", this));
+main.addComponent(image);]]></programlisting>
+
+		<figure>
+			<title>Embedded Image</title>
+			<mediaobject>
+				<imageobject role="html">
+					<imagedata align="center" fileref="img/components/embedded-example1.png"/>
+				</imageobject>
+				<imageobject role="fo">
+					<imagedata scale="75" align="center" fileref="img/components/embedded-example1.png"/>
+				</imageobject>
+			</mediaobject>
+		</figure>
+
+		<para>
+			The <classname>Embedded</classname> component supports several different
+			content types, which are rendered differently in HTML. You can set the content
+			type with <methodname>setType()</methodname>, although for images, as in the
+			above example, the type is determined automatically.
+		</para>
+
+		<table>
+			<title>Embedded Object Types</title>
+			<tgroup cols="2" align="left">
+				<tbody>
+					<row valign="top">
+						<entry><parameter>Embedded.TYPE_OBJECT</parameter></entry>
+						
+						<entry>The default embedded type, allows embedding certain file
+						types inside HTML <tag>&lt;object&gt;</tag> and
+						<tag>&lt;embed&gt;</tag> elements.</entry>
+					</row>
+					<row valign="top">
+						<entry><parameter>Embedded.TYPE_IMAGE</parameter></entry>
+						
+						<entry>Embeds an image inside a HTML <tag>&lt;img&gt;</tag>
+						element.</entry>
+					</row>
+					<row valign="top">
+						<entry><parameter>Embedded.TYPE_BROWSER</parameter></entry>
+
+						<entry>Embeds a browser frame inside a HTML
+						<tag>&lt;iframe&gt;</tag> element.</entry>
+					</row>
+				</tbody>
+			</tgroup>
+		</table>
+
+		<section>
+			<title>Embedded Objects</title>
+
+			<para>
+				The <parameter>Embedded.TYPE_OBJECT</parameter> is the default and most
+				generic embedded type, which allows embedding media objects inside HTML
+				<tag>&lt;object&gt;</tag> and <tag>&lt;embed&gt;</tag> elements. You need
+				define the MIME type for the object type.
+			</para>
+
+			<para>
+				Currently, only Shockwave Flash animations are supported (MIME type
+				<literal>application/x-shockwave-flash</literal>).
+			</para>
+
+			<programlisting><![CDATA[final ClassResource flashResource = new ClassResource("itmill_spin.swf", getApplication());
+final Embedded embedded = new Embedded("Embedded Caption", flashResource);
+embedded.setType(Embedded.TYPE_OBJECT);
+embedded.setMimeType("application/x-shockwave-flash");]]></programlisting>
+
+			<para>
+				You can set object parameters with
+				<methodname>setParameter()</methodname>, which takes a parameter's name
+				and value as strings. The object parameters are included in the HTML as
+				<tag>&lt;param&gt;</tag> elements.
+			</para>
+		</section>
+		
+		<section>
+			<title>Embedded Images</title>
+
+			<para>
+				Images are embedded with the type
+				<parameter>Embedded.TYPE_IMAGE</parameter>, although you do not normally
+				need to set the type explicitly, as it is recognized automatically from
+				the MIME type of the resource, as in the example above.
+			</para>
+
+			<para>
+				You can find another example of displaying an image from
+				<classname>FileResource</classname> in <xref
+				linkend="components.upload"/>. Another example, in <xref
+				linkend="application.resources.stream"/>, shows how you can generate the
+				content of an <classname>Embedded</classname> component dynamically using
+				a <classname>StreamResource</classname>.
+			</para>
+			
+			<para>
+				If you have a dynamically generated image, for example with a
+				<classname>StreamResource</classname>, and the data changes, you need to
+				reload the image in the browser. Because of how caching is handled in some
+				browsers, you are best off by renaming the filename of the resource with a
+				unique name, such as one including a timestamp. You should set cache time
+				to zero with <methodname>setCacheTime()</methodname> for the resource
+				object when you create it.
+
+				<!-- BUG #2470. -->
+			</para>
+
+			<programlisting><![CDATA[// Create the stream resource with some initial filename.
+StreamResource imageResource = new StreamResource(imageSource, "initial-filename.png",
+                                                  getApplication());
+
+imageResource.setCacheTime(0);
+
+Embedded embedded = new Embedded("", imageResource);]]></programlisting>
+
+			<para>
+				When refreshing, you also need to call
+				<methodname>requestRepaint()</methodname> for the
+				<classname>Embedded</classname> object.
+			</para>
+
+			<programlisting><![CDATA[// This needs to be done, but is not sufficient.
+embedded.requestRepaint();
+
+// Generate a filename with a timestamp.
+SimpleDateFormat df = new SimpleDateFormat("yyyyMMddHHmmssSSS");
+String filename = "myfilename-" + df.format(new Date()) + ".png";
+
+// Replace the filename in the resource.
+imageResource.setFilename(makeImageFilename());]]></programlisting>
+
+			<para>
+				You can find more detailed information about the
+				<classname>StreamResource</classname> in <xref
+				linkend="application.resources.stream"/>.
+			</para>
+			
+		</section>
+		
+		<section>
+			<title>Browser Frames</title>
+
+			<para>
+				The browser frame type allows you to embed external content inside an HTML
+				<tag>&lt;iframe&gt;</tag> element. You can refer to a URL with an
+				<classname>ExternalResource</classname> object. URLs are given with the
+				standard Java <classname>URL</classname> class.
+			</para>
+
+			<programlisting><![CDATA[URL url = new URL("http://dev.itmill.com/");
+Embedded browser = new Embedded("", new ExternalResource(url));
+browser.setType(Embedded.TYPE_BROWSER);
+main.addComponent(browser);]]></programlisting>
+
+		</section>
+		
+	</section>
+
+	<section xml:id="components.upload">
+		<title><classname>Upload</classname></title>
+		
+		<para>
+			The <classname>Upload</classname> component allows a user to upload
+			files to the server. It displays a file name entry box, a file
+			selection button, and an upload submit button. The user can either
+			write the filename in the text area or click the <guibutton>Browse</guibutton> button to
+			select a file. After the file is selected, the user sends the file by
+			pressing the upload submit button.
+		</para>
+
+		<programlisting><![CDATA[// Create the Upload component.
+final Upload upload = new Upload("Upload the file here", this);]]></programlisting>
+
+		<figure xml:id="figure.ui.upload">
+			<title>Upload Component</title>
+			<mediaobject>
+				<imageobject>
+					<imagedata align="center" fileref="img/components/upload.png"/>
+				</imageobject>
+			</mediaobject>
+		</figure>
+
+		<para>
+			You can set the text of the upload button with
+			<methodname>setButtonCaption()</methodname>, as in the example above, but it
+			is difficult to change the look of the <guibutton>Browse</guibutton>
+			button. This is a security feature of web browsers. The language of the
+			<guibutton>Browse</guibutton> button is determined by the browser, so if you
+			wish to have the language of the <classname>Upload</classname> component
+			consistent, you will have to use the same language in your application.
+		</para>
+
+		<programlisting><![CDATA[upload.setButtonCaption("Upload Now");]]></programlisting>
+
+		<para>
+			The uploaded files are typically stored as files in a file system, in
+			a database, or as temporary objects in memory. The upload component
+			writes the received data to an
+			<classname>java.io.OutputStream</classname> so you have plenty of
+			freedom in how you can process the upload content.
+		</para>
+		
+		<para>
+			To use the <classname>Upload</classname> component, you need to
+			define a class that implements the
+			<classname>Upload.Receiver</classname> interface. The
+			<methodname>receiveUpload()</methodname> method is called when the
+			user clicks the submit button. The method must return an
+			<classname>OutputStream</classname>. To do this, it typically creates
+			a <classname>File</classname> or a memory buffer where the stream is
+			written. The method gets the file name and MIME type of the file, as
+			reported by the browser.
+		</para>
+
+		<para>
+			When an upload is finished, successfully or unsuccessfully, the
+			<classname>Upload</classname> component will emit the
+			<classname>Upload.FinishedEvent</classname> event. To receive it, you
+			need to implement the <classname>Upload.FinishedListener</classname>
+			interface, and register the listening object in the
+			<classname>Upload</classname> component. The event object will also
+			include the file name, MIME type, and length of the file. Notice that
+			the more specific <classname>Upload.FailedEvent</classname> and
+			<classname>Upload.SucceededEvent</classname> events will be called in
+			the cases where the upload failed or succeeded, respectively.
+		</para>
+
+		<para>
+			The following example allows uploading images to
+			<filename>/tmp/uploads</filename> directory in (UNIX) filesystem (the
+			directory must exist or the upload fails). The component displays the last
+			uploaded image in an <classname>Embedded</classname> component.
+		</para>
+
+		<programlisting><![CDATA[import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
+import com.itmill.toolkit.terminal.FileResource;
+import com.itmill.toolkit.ui.*;
+
+public class MyUploader extends CustomComponent
+implements Upload.SucceededListener, Upload.FailedListener, Upload.Receiver {
+    Panel root;         // Root element for contained components.
+    Panel imagePanel;   // Panel that contains the uploaded image.
+    File  file;         // File to write to.
+
+    MyUploader() {
+        root = new Panel("My Upload Component");
+        setCompositionRoot(root);
+
+        // Create the Upload component.
+        final Upload upload = new Upload("Upload the file here", this);
+        upload.setButtonCaption("Upload Now");
+
+        // Listen for Upload.SucceededEvent and FailedEvent events.
+        upload.addListener((Upload.SucceededListener) this);
+        upload.addListener((Upload.FailedListener) this);
+
+        root.addComponent(upload);
+        root.addComponent(new Label("Click 'Browse' to select a file and then click 'Upload'."));
+
+        // Create a panel for displaying the uploaded file (image).
+        imagePanel = new Panel("Uploaded image");
+        imagePanel.addComponent(new Label("No image uploaded yet"));
+        root.addComponent(imagePanel);
+    }
+
+    // Callback method to begin receiving the upload.
+    public OutputStream receiveUpload(String filename, String MIMEType) {
+        FileOutputStream fos = null; // Output stream to write to.
+        file = new File("/tmp/uploads/" + filename);
+        try {
+            // Open the file for writing.
+            fos = new FileOutputStream(file);
+        } catch (final java.io.FileNotFoundException e) {
+            // Error while opening the file. Not reported here.
+            e.printStackTrace();
+            return null;
+        }
+
+        return fos; // Return the output stream to write to
+    }
+
+    // This is called if the upload is finished.
+    public void uploadSucceeded(Upload.SucceededEvent event) {
+        // Log the upload on screen.
+        root.addComponent(new Label("File " + event.getFilename()
+                + " of type '" + event.getMIMEType() + "' uploaded."));
+        
+        // Display the uploaded file in the image panel.
+        final FileResource imageResource = new FileResource(file, getApplication());
+        imagePanel.removeAllComponents();
+        imagePanel.addComponent(new Embedded("", imageResource));
+    }
+
+    // This is called if the upload fails.
+    public void uploadFailed(Upload.FailedEvent event) {
+        // Log the failure on screen.
+        root.addComponent(new Label("Uploading " + event.getFilename()
+                + " of type '" + event.getMIMEType() + "' failed."));
+    }
+}]]></programlisting>
+
+		<para>
+			The example does not check the type of the uploaded files in any way, which
+			will cause an error if the content is anything else but an image. The program
+			also assumes that the MIME type of the file is resolved correctly based on the
+			file name extension. After uploading an image, the component will look as show
+			in <xref linkend="figure.ui.upload.example"/> below. The browser shows the
+			<guibutton>Browse</guibutton> button localized.
+		</para>
+
+		<figure xml:id="figure.ui.upload.example">
+			<title>Image Upload Example</title>
+			<mediaobject>
+				<imageobject>
+					<imagedata align="center" fileref="img/components/upload-example.png"/>
+				</imageobject>
+			</mediaobject>
+		</figure>
+
+	</section>
+
+	<section xml:id="components.form">
+		<title><classname>Form</classname></title>
+
+		<para>
+			Most web applications need forms. The <classname>Form</classname> component in
+			IT Mill Toolkit offers an easy way to create forms where the fields can be
+			automatically generated from a data source that is bound to the form. The
+			<classname>BeanItem</classname> adapter allows the data sources to be just
+			JavaBeans or Plain Old Java Objects (POJOs) with just the setter and getter
+			methods. <classname>Form</classname> manages buffering so that the form
+			contents can be committed to the data source only when filling the form is
+			complete, and before that, the user can discard any changes.
+		</para>
+
+		<para>
+			The <classname>Form</classname> component is also a layout, with a bounding
+			box, a caption, a description field, and a special error indicator. As such,
+			it can also be used within logical forms to group input fields.
+		</para>
+
+		<section xml:id="components.form.layout">
+			<title>Form as a User Interface Component</title>
+
+			<para>To begin with the <classname>Form</classname>, it is a UI component with
+			a layout suitable for its purpose. A <classname>Form</classname> has a
+			caption, a description, a layout that contains the fields, an error indicator,
+			and a footer, as illustrated in <xref linkend="figure.ui.form.layout"/>
+			below. Unlike with other components, the caption is shown within the
+			border. (See the details below on how to enable the border with CSS, as it may
+			not be enabled in the default style.)</para>
+
+			<figure xml:id="figure.ui.form.layout">
+				<title>Layout of the Form Component</title>
+				<mediaobject>
+					<imageobject>
+						<imagedata align="center" fileref="img/components/form-example3.png"/>
+					</imageobject>
+				</mediaobject>
+			</figure>
+
+			<para>
+				Unlike most components, <classname>Form</classname> does not accept the
+				caption in the constructor, as forms are often captionless, but you can
+				give the caption with the <methodname>setCaption()</methodname>. While the
+				description text, which you can set with
+				<classname>setDescription()</classname>, is shown as a tooltip in most
+				other components, a <classname>Form</classname> displays it in top of the
+				form box as shown in the figure above.
+			</para>
+
+			<programlisting><classname>Form</classname> form = new <classname>Form</classname>();
+form.setCaption("Form Caption");
+form.setDescription("This is a description of the Form that is " +
+        "displayed in the upper part of the form. You normally enter some " +
+        "descriptive text about the form and its use here.");
+</programlisting>
+
+			<para>
+				<classname>Form</classname> has <classname>FormLayout</classname>
+				as its default layout, but you can set any other layout with
+				<methodname>setLayout()</methodname>. See
+				<xref linkend="layout.components.formlayout"/> for more information.
+				Note that the <classname>Form</classname> itself handles layout for
+				the description, the footer and other common elements of the form.
+				The user-set layout only manages the contained fields and their
+				captions.
+			</para>
+
+			<para>
+				The <classname>Form</classname> is most of all a container for fields so
+				it offers many kinds of automation for creating and managing fields. You
+				can, of course, create fields directly in the layout, but it is usually
+				more desirable to bind the fields to the connected data source.
+			</para>
+
+			<programlisting><emphasis>// Add a field directly to the layout. This field will not be bound to
+// the data source Item of the form. </emphasis>
+form.getLayout().addComponent(new TextField("A Field"));
+
+<emphasis>// Add a field and bind it to an named item property.</emphasis>
+form.addField("another", new TextField("Another Field"));</programlisting>
+
+			<para>
+				Binding forms and their fields to data objects is described further in
+				<xref linkend="components.form.binding"/> below.
+			</para>
+
+			<para>
+				The <classname>Form</classname> has a special error indicator inside the
+				form. The indicator can show the following types of error messages:
+			</para>
+
+			<itemizedlist>
+				<listitem>Errors set with the <methodname>setComponentError()</methodname>
+				method of the form. For example:
+				<programlisting>form.setComponentError(new UserError("This is the error indicator of the Form."));</programlisting>
+				</listitem>
+
+				<listitem>Errors caused by a validator attached to the
+				<classname>Form</classname> with
+				<methodname>addValidator()</methodname>.</listitem>
+
+				<listitem>Errors caused by validators attached to the fields inside forms,
+				if <methodname>setValidationVisible(true)</methodname> is set for the
+				form. This type of validation is explained futher in <xref
+				linkend="components.form.validation"/> below.</listitem>
+
+				<listitem>Errors from automatic validation of fields set as
+				<emphasis>required</emphasis> with
+				<methodname>setRequired(true)</methodname> if an error message has also been
+				set with <methodname>setRequiredError()</methodname>.</listitem>
+			</itemizedlist>
+
+			<para>
+				Only a single error is displayed in the error indicator at a time.
+			</para>
+
+			<para>
+				Finally, <classname>Form</classname> has a footer area. The footer is a
+				<classname>HorizontalLayout</classname> by default, but you can
+				change it with <methodname>setFooter()</methodname>.
+			</para>
+
+			<programlisting><emphasis>// Set the footer layout and add some text.</emphasis>
+form.setFooter(new VerticalLayout());
+form.getFooter().addComponent(new Label("This is the footer area of the Form. "+
+                                        "You can use any layout here. This is nice for buttons."));
+
+<emphasis>// Add an Ok (commit), Reset (discard), and Cancel buttons for the form.</emphasis>
+<classname>HorizontalLayout</classname> okbar = new <classname>HorizontalLayout</classname>();
+okbar.setHeight("25px");
+<classname>Button</classname> okbutton = new <classname>Button</classname>("OK", form, "commit");
+okbar.addComponent(okbutton);
+okbar.setComponentAlignment(okbutton, Alignment.TOP_RIGHT);
+okbar.addComponent(new <classname>Button</classname>("Reset", form, "discard"));
+okbar.addComponent(new <classname>Button</classname>("Cancel"));
+form.getFooter().addComponent(okbar);</programlisting>
+
+			<section xml:id="components.form.layout.css">
+				<title>CSS Style Rules</title>
+
+				<programlisting>.i-form {}
+.i-form legend
+.i-form fieldset {}
+.i-form-error {}
+.i-form-errormessage {}
+.i-form-description {}</programlisting>
+
+				<para>
+					The top-level style name of a <classname>Form</classname> component is
+					<literal>i-form</literal>. It is important to notice that the form is
+					implemented as a HTML <literal>&lt;fieldset&gt;</literal>, which
+					allows placing the caption (or "legend") inside the border. It would
+					not be so meaningful to set a border for the top-level form
+					element. The following example sets a border around the form, as is
+					done in <xref linkend="figure.ui.form.layout"/> above.
+				</para>
+
+				<programlisting>.i-form fieldset {
+    border: thin solid;
+}</programlisting>
+
+				<para>
+					The whole form has the style name <literal>i-form-error</literal> if
+					a component error has been set for the form.
+				</para>
+
+			</section>
+
+		</section>
+
+		<section xml:id="components.form.binding">
+			<title>Binding Form to Data</title>
+
+			<para>
+				The main purpose of the <classname>Form</classname> component is that you
+				can bind it to a data source and let the <classname>Form</classname>
+				generate and manage fields automatically. The data source can be any class
+				that implements the <classname>Item</classname> interface, which is part
+				of the IT Mill Toolkit Data Model, as described in <xref
+				linkend="datamodel"/>. You can either implement the
+				<classname>Item</classname> interface yourself, which can be overly
+				complicated, or use the ready <classname>BeanItem</classname> adapter to
+				bind the form to any JavaBean object. You can also use
+				<classname>PropertysetItem</classname> to bind the form to an ad hoc set
+				of <classname>Property</classname> objects, resembling a 
+				<classname>Map</classname>.
+			</para>
+
+			<para>
+				Let us consider the following simple JavaBean with proper setter and
+				getter methods for the member variables.
+			</para>
+
+			<programlisting><![CDATA[/** A simple JavaBean. */
+public class PersonBean {
+    String name;
+    String city;
+    
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public String getCity() {
+        return city;
+    }
+}]]></programlisting>
+
+			<para>
+				We can now bind this bean to a <classname>Form</classname> using the
+				<classname>BeanItem</classname> adapter as follows.
+			</para>
+
+			<programlisting><emphasis>// Create a form and use FormLayout as its layout.</emphasis>
+final <classname>Form</classname> form = new <classname>Form</classname>();
+
+<emphasis>// Set form caption and description texts</emphasis>
+form.setCaption("Contact Information");
+form.setDescription("Please specify name of the person and the city where the person lives in.");
+
+<emphasis>// Create the custom bean.</emphasis>
+<classname>PersonBean</classname> bean = new <classname>PersonBean</classname>();
+
+<emphasis>// Create a bean item that is bound to the bean.</emphasis>
+<classname>BeanItem</classname> item = new <classname>BeanItem</classname>(bean);
+
+<emphasis>// Bind the bean item as the data source for the form.</emphasis>
+form.setItemDataSource(item);</programlisting>
+
+			<para>
+				The <classname>Form</classname> uses <classname>FormLayout</classname>
+				layout by default and automatically generates the fields for each of the
+				bean properties, as shown in <xref linkend="figure.ui.form.binding.bean"/>
+				below.
+			</para>
+
+			<figure xml:id="figure.ui.form.binding.bean">
+				<title>Form Automatically Generated from a Bean</title>
+				<mediaobject>
+					<imageobject>
+						<imagedata align="center" fileref="img/components/form-example1.png"/>
+					</imageobject>
+				</mediaobject>
+			</figure>
+
+			<para>
+				The automatically determined order of the fields can be undesirable. To
+				set the order properly, you can use the
+				<methodname>setVisibleItemProperties()</methodname> method of the
+				<classname>Form</classname>, which takes an ordered collection as its
+				parameter. Fields that are not listed in the collection are not included
+				in the form.
+			</para>
+
+			<programlisting><emphasis>// Set the order of the items in the form.</emphasis>
+<classname>Vector</classname> order = new <classname>Vector</classname>();
+order.add("city");
+order.add("name");
+form.setVisibleItemProperties(order);</programlisting>
+
+			<para>
+				The form uses the property identifiers as the captions of the fields by
+				default. If you want to have more proper captions for the fields, which is
+				often the case, you need to use a <classname>FieldFactory</classname> to
+				create the fields, as is shown in the section below.
+			</para>
+
+			<section xml:id="components.form.binding.fieldfactory">
+				<title>Generating Proper Fields with a <classname>FieldFactory</classname></title>
+
+				<para>
+					The form generates the fields automatically using very coarse logic. A
+					<classname>String</classname>, <classname>int</classname>, or
+					<classname>double</classname> will result in a
+					<classname>TextField</classname> alike, regardless of the meaning of
+					the field. You might want to have a city name to be input with a combo
+					box, for example. You can create such custom fields by implementing
+					the proper methods in the <classname>FieldFactory</classname>
+					interface.
+				</para>
+
+				<para>
+					The <classname>FieldFactory</classname> interface has four different
+					<classname>createField()</classname> methods for creating the fields,
+					each with a slightly different set of parameters. Each of the methods
+					is used in different situations; please use debugger to find which one
+					is used in your case.
+				</para>
+
+				<!-- NOTE: This may change when #2499 is done. -->
+
+				<para>
+					The <parameter>type</parameter> is the class of the item property:
+					<classname>String</classname> for both of the bean properties in our
+					example. The <parameter>uiContext</parameter> is reference to UI
+					component that will contain the fields, in this case the
+					<classname>Form</classname> component. The
+					<parameter>propertyId</parameter> is the identifier of the property,
+					usually a <classname>String</classname>. In our example, it can be
+					either the "<literal>name</literal>" or "<literal>city</literal>"
+					property of the bean. The <parameter>item</parameter> is a reference
+					to the <classname>Item</classname> implementation instance, which is
+					in the above example a <classname>BeanItem</classname> bound to a bean
+					object. The <parameter>property</parameter> parameter is a plain
+					property (object-type pair). You can use these parameters in the logic
+					for creating the proper field object.
+				</para>
+
+				<para>
+					The easiest and safest way to make a custom field factory is to extend
+					the default <classname>BaseFieldFactory</classname> implementation, as
+					we don in the example below:
+				</para>
+
+			<programlisting>class MyFieldFactory extends BaseFieldFactory {
+    @Override
+    public Field createField(Item item, Object propertyId,
+                             Component uiContext) {
+        
+        // Identify the fields by their Property ID.
+        String pid = (String) propertyId;
+        if (pid.equals("name")) {
+            return new TextField("Name");
+        } else if (pid.equals("city")) {
+            Select select = new Select("City");
+            select.addItem("Berlin");
+            select.addItem("Helsinki");
+            select.addItem("London");
+            select.addItem("New York");
+            select.addItem("Turku");
+            select.setNewItemsAllowed(true);
+            return select;
+        }
+        
+        // Let BaseFieldFactory create other possible fields.
+        return super.createField(item, propertyId, uiContext);
+    }
+}</programlisting>
+
+				<para>
+					You set the custom field factory as the field factory of the
+					<classname>Form</classname> with
+					<methodname>setFieldFactory()</methodname>:
+				</para>
+
+				<programlisting>form.setFieldFactory(new MyFieldFactory());</programlisting>
+				<para>
+					Our example will now look as shown below:
+				</para>
+
+				<figure xml:id="figure.ui.form.binding.fieldfactory">
+					<title>Form Fields Generated with a <classname>FieldFactory</classname></title>
+					<mediaobject>
+						<imageobject>
+							<imagedata align="center" fileref="img/components/form-example2.png"/>
+						</imageobject>
+					</mediaobject>
+				</figure>
+			</section>
+		</section>
+		<section xml:id="components.form.validation">
+			<title>Validating Form Input</title>
+
+			<para>
+				Validation of the form input is one of the most important tasks in
+				handling forms. The fields in IT Mill Toolkit can be bound to
+				validators. The validation provides feedback about bad input and the forms
+				can also manage validation results and accept the input only if all
+				validations are successful. Fields can also be set as
+				<emphasis>required</emphasis>, which is a special built-in validator. The
+				validators work on the server-side.
+			</para>
+
+			<section>
+				<title>Using Validators in Forms</title>
+
+				<para>
+					Validators check the validity of input and, if the input is invalid,
+					can provide an error message through an exception. Validators are classes
+					that implement the <classname>Validator</classname> interface. The
+					interface has two methods that you must implement:
+					<methodname>isValid()</methodname> that returns the success or failure
+					as a truth value, and <methodname>validate()</methodname>, which
+					reports a failure with an exception. The exception can be associated
+					with an error message describing the details of the error.
+				</para>
+
+				<para>
+					Simple validators that only need to produce a single error message
+					in case the validation fails can inherit from
+					<classname>AbstractValidator</classname> or
+					<classname>AbstractStringValidator</classname>.
+					The IT Mill Toolkit also provides a number of standard validators,
+					including <classname>IntegerValidator</classname> and
+					<classname>DoubleValidator</classname> for validating numerical
+					input, <classname>StringLengthValidator</classname>,
+					<classname>EmailValidator</classname> and the more general
+					<classname>RegexpValidator</classname> for checking that a string
+					matches a Java regular expression:  
+				</para>
+				
+				<programlisting>// Postal code that must be 5 digits (10000-99999).
+TextField field = new TextField("Postal Code");
+field.setColumns(5);
+
+// Create the validator
+Validator postalCodeValidator = new RegexpValidator(
+    "[1-9][0-9]{4}", "Postal code must be a number 10000-99999.");
+field.addValidator(postalCodeValidator);</programlisting>
+
+				<para>
+					If you are using a custom <classname>FieldFactory</classname> to
+					generate the fields, you may want to set the validators for fields
+					there. It is useful to have the form in <emphasis>immediate</emphasis>
+					mode:
+				</para>
+
+				<programlisting>// Set the form to act immediately on user input. This is
+// necessary for the validation of the fields to occur immediately when
+// the input focus changes and not just on commit.
+form.setImmediate(true);</programlisting>
+
+				<para>
+					Validation is done always when you call the
+					<methodname>commit()</methodname> method of the
+					<classname>Form</classname>.
+				</para>
+
+				<programlisting>// The Commit button calls form.commit().
+Button commit = new Button("Commit", form, "commit");</programlisting>
+
+				<para>
+					If any of the validators in the form fail, the commit will fail and a
+					validation exception message is displayed in the error indicator of
+					the form. If the commit is successful, the input data is written to
+					the data source. Notice that <methodname>commit()</methodname> also
+					implicitly sets <methodname>setValidationVisible(true)</methodname> (if
+					<methodname>setValidationVisibleOnCommit()</methodname> is
+					<parameter>true</parameter>, as is the default). This makes the error
+					indicators visible even if they were previously not visible.
+				</para>
+
+				<figure>
+					<title>Form Validation in Action</title>
+					<mediaobject>
+						<imageobject>
+							<imagedata align="center" fileref="img/components/form-validation-1.png"/>
+						</imageobject>
+					</mediaobject>
+				</figure>
+
+				<para>
+					For cases in which more complex error handling is required, the
+					validator can also implement the <classname>Validator</classname>
+					interface directly:
+				</para>
+				
+				<programlisting><![CDATA[// Create the validator
+Validator postalCodeValidator = new Validator() {
+
+    // The isValid() method returns simply a boolean value, so
+    // it can not return an error message.
+    public boolean isValid(Object value) {
+        if (value == null || !(value instanceof String)) {
+            return false;
+        }
+
+        return ((String) value).matches("[1-9][0-9]{4}");
+    }
+
+    // Upon failure, the validate() method throws an exception with an error message.
+    public void validate(Object value) throws InvalidValueException {
+        if (!isValid(value)) {
+            if (value != null && value.toString().startsWith("0")) {
+                throw new InvalidValueException("Postal code must not start with a zero.");
+            } else {
+                throw new InvalidValueException("Postal code must be a number 10000-99999.");
+            }
+        }
+    }
+};]]></programlisting>
+
+			</section>
+
+			<section>
+				<title>Required Fields in Forms</title>
+
+				<para>
+					Setting a field as <parameter>required</parameter> outside a form is
+					usually just a visual clue to the user. Leaving a required field empty
+					does not display any error indicator in the empty field as a failed
+					validation does. However, if you set a form field as required with
+					<methodname>setRequired(true)</methodname> and give an error message
+					with <methodname>setRequiredError()</methodname> and the user leaves
+					the required field empty, the form will display the error message in
+					its error indicator.
+				</para>
+
+				<programlisting>form.getField("name").setRequired(true);
+form.getField("name").setRequiredError("Name is missing");
+form.getField("address").setRequired(true); // No error message</programlisting>
+
+				<para>
+					To have the validation done immediately when the fields lose focus,
+					you should set the form as <emphasis>immediate</emphasis>, as was done
+					in the section above.
+				</para>
+				
+				<figure>
+					<title>Empty Required Field After Clicking Commit</title>
+					<mediaobject>
+						<imageobject>
+							<imagedata align="center" fileref="img/components/form-required-example1.png"/>
+						</imageobject>
+					</mediaobject>
+				</figure>
+
+				<para>
+					<emphasis>It is important that you provide the user with feedback from
+					failed validation of required fields either by setting an error
+					message or by providing the feedback by other means.</emphasis>
+					Otherwise, when a user clicks the <guibutton>Ok</guibutton> button
+					(commits the form), the button does not appear to work and the form
+					does not indicate any reason. As an alternative to setting the error
+					message, you can handle the validation error and provide the feedback
+					about the problem with a different mechanism.
+				</para>
+			</section>
+
+		</section>
+		<section xml:id="components.form.buffering">
+			<title>Buffering Form Data</title>
+
+			<para>
+                Buffering means keeping the edited data in a buffer and writing it to the data
+                source only when the <methodname>commit()</methodname> method is called for the
+                component. If the user has made changes to a buffer, calling
+                <methodname>discard()</methodname> restores the buffer from the data
+                source. Buffering is actually a feature of all <classname>Field</classname>
+                components and <classname>Form</classname> is a
+                <classname>Field</classname>. <classname>Form</classname> manages the buffering of
+                its contained fields so that if <methodname>commit()</methodname> or
+                <methodname>discard()</methodname> is called for the <classname>Form</classname>, it
+                calls the respective method for all of its managed fields.
+			</para>
+
+            <programlisting>final Form form = new Form();
+...add components...
+
+// Enable buffering.
+form.setWriteThrough(false);
+
+// The Ok button calls form.commit().
+Button commit = new Button("Ok", form, "commit");
+
+// The Restore button calls form.discard().
+Button restore = new Button("Restore", form, "discard");</programlisting>
+
+            <para>
+                The Form example in the Feature Browser of IT Mill Toolkit demonstrates buffering in
+                forms. The <emphasis>Widget caching demo</emphasis> in Additional demos demonstrates
+                buffering in other <classname>Field</classname> components, its source code is
+                available in <filename>BufferedComponents.java</filename>.
+            </para>
+
+		</section>
+	</section>
+
+	<section xml:id="components.progressindicator">
+		<title><classname>ProgressIndicator</classname></title>
+
+		<para>
+			The <classname>ProgressIndicator</classname> component allows displaying the
+			progress of a task graphically. The progress is given as a floating-point
+			value between 0.0 and 1.0.
+		</para>
+
+		<figure>
+			<title>The Progress Indicator Component</title>
+			<mediaobject>
+				<imageobject>
+					<imagedata align="center" fileref="img/components/progressindicator-example1.png"/>
+				</imageobject>
+			</mediaobject>
+		</figure>
+
+		<para>
+			The progress indicator polls the server for updates for its value. If the
+			value has changed, the progress is updated. Notice that the user application
+			does not have to handle any polling event, but updating the component is done
+			automatically.
+		</para>
+
+		<para>
+			Creating a progress indicator is just like with any other component. You
+			can give the initial progress value as a parameter for the constructor. The default
+			polling frequency is 1000 milliseconds (one second), but you can set some
+			other interval with the <methodname>setPollingInterval()</methodname> method.
+		</para>
+
+		<programlisting><![CDATA[// Create the indicator
+final ProgressIndicator indicator = new ProgressIndicator(new Float(0.0));
+main.addComponent(indicator);
+
+// Set polling frequency to 0.5 seconds.
+indicator.setPollingInterval(500);]]></programlisting>
+
+		<para>
+		</para>
+
+		<note>
+			<title>CSS Style Rules</title>
+				
+			<programlisting><![CDATA[.i-progressindicator {} /* Base element */
+.i-progressindicator div {} /* Progress indication element */]]></programlisting>
+
+			<para>
+				The default style for the progress indicator uses an animated GIF image
+				(<filename>img/base.gif</filename>) as the base background for the
+				component. The progress is a <literal>&lt;div&gt;</literal> element inside
+				the base. When the progress element grows, it covers more and more of the
+				base background. By default, the graphic of the progress element is
+				defined in <filename>img/progress.png</filename> under the default style
+				directory. See
+				<filename>com.itmill.toolkit.terminal.gwt/public/default/progressindicator/progressindicator.css</filename>.
+			</para>
+		</note>
+
+		<section>
+			<title>Doing Heavy Computation</title>
+
+			<para>
+				The progress indicator is often used to display the progress of a heavy
+				server-side computation task. In the following example, we create a thread
+				in the server to do some "heavy work". All the thread needs to do is to
+				set the value of the progress indicator with
+				<methodname>setValue()</methodname> and the current progress is displayed
+				automatically when the browser polls the server.
+			</para>
+
+			<programlisting><![CDATA[// Create an indicator that makes you look busy
+final ProgressIndicator indicator = new ProgressIndicator(new Float(0.0));
+main.addComponent(indicator);
+
+// Set polling frequency to 0.5 seconds.
+indicator.setPollingInterval(500);
+
+// Add a button to start working
+final Button button = new Button("Click to start");
+main.addComponent(button);
+
+// Another thread to do some work
+class WorkThread extends Thread {
+    public void run () {
+        double current = 0.0;
+        while (true) {
+            // Do some "heavy work"
+            try {
+                sleep(50); // Sleep for 50 milliseconds
+            } catch (InterruptedException) {}
+            
+            // Show that you have made some progress:
+            // grow the progress value until it reaches 1.0.
+            current += 0.01;
+            if (current>1.0)
+                indicator.setValue(new Float(1.0));
+            else 
+                indicator.setValue(new Float(current));
+            
+            // After all the "work" has been done for a while, take a break.
+            if (current > 1.2) {
+                // Restore the state to initial.
+                indicator.setValue(new Float(0.0));
+                button.setVisible(true);
+                break;
+            }
+        }
+    }
+}
+
+// Clicking the button creates and runs a work thread
+button.addListener(new Button.ClickListener() {
+    public void buttonClick(ClickEvent event) {
+        final WorkThread thread = new WorkThread();
+        thread.start();
+        
+        // The button hides until the work is done.
+        button.setVisible(false);
+    }
+});]]></programlisting>
+
+			<figure>
+				<title>Starting Heavy Work</title>
+				<mediaobject>
+					<imageobject>
+						<imagedata align="center" fileref="img/components/progressindicator-example2.png"/>
+					</imageobject>
+				</mediaobject>
+			</figure>
+			
+		</section>
+
+	</section>
+
+	<section xml:id="components.custom">
+		<title>Custom Composite Components</title>
+
+		<!-- UNFINISHED: Check that this is up-to-date. Probably is. -->
+
+		<para>
+			The ease of making custom user interface components is one of the core
+			features of IT Mill Toolkit. Custom components can be created at several
+			levels. Typically, you simply combine existing built-in components to produce
+			composite components. In many applications, such composite components
+			make up the majority of the user interface. You can also create your own
+			low-level components, for example existing GWT components. It is also possible
+			to extend the functionality of existing components.
+		</para>
+
+		<para>
+			The architecture of user interface components is described in <xref
+			linkend="components"/>. For more information about the overall
+			architecture of IT Mill Toolkit, please see <xref
+			linkend="architecture"/>. Use of custom GWT components is covered in
+			<xref linkend="gwt"/>.
+		</para>
+
+		<para>
+			The easiest way of creating new components is combining existing
+			components. This can be done in two basic ways: inheritance and
+			management. With inheritance, you inherit some containing class, typically
+			<classname>CustomComponent</classname> or some abstract class such as
+			<classname>AbstractComponent</classname>,
+			<classname>AbstractField</classname>, or
+			<classname>AbstractComponentContainer</classname>. With management, you create
+			a class that creates the needed components under some layout and handles their
+			events. Both of these patterns are used extensively in the examples in <xref
+			linkend="components"/> and elsewhere.
+		</para>
+
+		<section xml:id="section.custom.customcomponent">
+			<title><classname>CustomComponent</classname></title>
+
+			<para>
+				The <classname>CustomComponent</classname> class is a simple
+				implementation of the <classname>Component</classname> interface that
+				provides a simple way for creating new user interface components by the
+				composition of existing components.
+			</para>
+
+			<para>
+				Composition is done by inheriting the
+				<classname>CustomComponent</classname> class and setting the
+				<emphasis>composite root</emphasis> inside the component with
+				<methodname>setCompositionRoot()</methodname>. The composite root is
+				typically a layout component that contains multiple components.
+			</para>
+		</section>
+	</section>
+</chapter>
+	
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: xml
+sgml-omittag:nil
+sgml-shorttag:nil
+sgml-namecase-general:nil
+sgml-general-insert-case:lower
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:4
+sgml-indent-data:t
+sgml-parent-document:nil
+sgml-exposed-tags:nil
+sgml-local-catalogs:("/etc/sgml/catalog" "/usr/share/xemacs21/xemacs-packages/etc/psgml-dtds/CATALOG")
+sgml-local-ecat-files:("ECAT" "~/sgml/ECAT" "/usr/share/sgml/ECAT" "/usr/local/share/sgml/ECAT" "/usr/local/lib/sgml/ECAT")
+End:
+-->

@@ -1,0 +1,331 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<chapter xml:id="datamodel">
+	<title>Binding Components to Data</title>
+
+	<section xml:id="datamodel.overview">
+		<title>Overview</title>
+
+		<para>
+			<!-- TODO repetitive paragraph, simplify? -->
+			The IT Mill Toolkit Data Model is one of the core concepts of the library. To
+			allow the view (user interface components) to access the application data directly,
+			we have introduced a standard data interface. Application data needs a common
+			interface so that the data can be accessed by the view and the controller alike.
+			In the Toolkit, we have solved this with the Data Model.
+		</para>
+
+		<figure>
+			<title>IT Mill Toolkit Data Model</title>
+			<mediaobject>
+				<imageobject role="html">
+					<imagedata align="center" fileref="img/arch/datamodel-sml.png"/>
+				</imageobject>
+				<imageobject role="fo">
+					<imagedata scale="20" align="center" fileref="img/arch/datamodel-whitebg.png"/>
+				</imageobject>
+			</mediaobject>
+		</figure>
+		
+		<para>
+			The IT Mill Toolkit Data Model allows binding user interface components directly
+			to the data they show and modify. There are three nested levels of hierarchy in
+			the data model: <emphasis>property</emphasis>, <emphasis>item</emphasis> and
+			<emphasis>container</emphasis>. Using a spreadsheet application as an analogy,
+			these would correspond to the data underlying a cell, a row and a table,
+			respectively. The components would display the data in these and optionally
+			allow direct editing of the corresponding entities.
+		</para>
+
+		<para>
+			The Data Model is realized as a set of interface classes in the fittingly named
+			package <classname>com.itmill.toolkit.data</classname>. The package contains
+			the interfaces <classname>Property</classname>, <classname>Item</classname>, and
+			<classname>Container</classname>, along with a number of more specialized interfaces
+			and classes.
+		</para>
+
+		<para>
+			Notice that the Data Model does not define data representation, but only
+			interfaces. This leaves the representation fully to the implementation of the
+			containers. The representation can be almost anything, such as a Java object
+			structure, a filesystem, or a database query.
+		</para>
+
+		<para>
+			The Data Model is used heavily in UI components of the Toolkit.  A key feature of
+			all UI components is that they can either maintain their data by themselves or be
+			bound to an external data source. Various components also implement some of these
+			interfaces themselves as so can e.g. be used directly as data sources for other
+			components.
+		</para>
+		
+		<para>
+			The Data Model has several important features, such as
+			support for change notification, transactions,
+			validation, and lazy loading. These features are
+			discussed in detail below.
+			<!-- TODO should actually cover these -->
+		</para>
+	</section>
+
+	<section xml:id="datamodel.properties">
+		<title>Properties</title>
+
+		<para>
+			IT Mill Toolkit data model is one of the core concepts in the library and the
+			<classname>Property</classname>-interface is the base of that model. Property
+			provides a standardized API for a single data object that can be read (get) and
+			written (set). A property is always typed, but can optionally support data type
+			conversions. The type of a property can be any Java class. Optionally,
+			properties can provide value change events for following their changes.
+		</para>
+
+		<!-- TODO this might not be the best place to explain this - maybe split the paragraph? -->
+		<para>
+			Properties are in themselves unnamed objects.  Properties are
+			collected in an <emphasis>item</emphasis>, which associates the properties with
+			names, the <emphasis>Property Identifiers</emphasis> or <emphasis>PID</emphasis>s.
+			Items can be contained in containers and are identified with <emphasis>Item
+			Identifiers</emphasis> or <emphasis>IID</emphasis>s. In the spreadsheet analogy,
+			<emphasis>Property Identifiers</emphasis> would correspond to column names and
+			<emphasis>Item Identifiers</emphasis> to row names. The identifiers can be arbitrary
+			objects, but should implement the <methodname>equals(Object)</methodname> and
+			<methodname>hashCode()</methodname> methods so that they can be used in any
+			standard Java <classname>Collection</classname>.
+		</para>
+
+		<para>
+			The most important function of the Property as well as other data models is to
+			connect classes implementing the interface directly to editor and viewer
+			classes. Typically this is used to connect different data sources to UI components
+			for editing and viewing their contents.
+		</para>
+
+		<para>
+			Properties can be utilized either by implementing the interface or by using some of
+			the existing property implementations. IT Mill Toolkit includes
+			<classname>Property</classname> interface implementations for arbitrary function
+			pairs or Bean-properties as well as simple object properties.
+		</para>
+
+		<para>
+			Many of the UI components also implement Property interface and allow setting of
+			other components as their data-source. Simple UI-components that control a single
+			property (their displayed value or state) include various
+			<classname>Field</classname> implementations such as
+			<classname>TextField</classname>, <classname>DateField</classname> and
+			<classname>Button</classname> as well as the <classname>Label</classname>. You
+			can access this property through the <classname>Property</classname> interface
+			inherited by the components.
+		</para>
+
+		<para>
+			In addition to the simple components, a variety of selectable components such as
+			Select, Table and Tree have a property that contains their current selection
+			(the identifier of the selected item or a set of item identifiers).
+		</para>
+		
+		<para>
+			Components manage their <emphasis>property</emphasis> by default using an internal
+			data source object, in which case the property is contained within the component,
+			but you can bind the the components to external data sources with the
+			<methodname>setPropertyDataSource()</methodname> method of the
+			<classname>com.itmill.toolkit.ui.AbstractField</classname> class inherited by such
+			components.
+		</para>
+
+	</section>
+
+	<section xml:id="datamodel.items">
+		<title>Holding properties in Items</title>
+
+		<para>
+			<classname>Item</classname> is an object that contains a set of named
+			properties. Each property is identified by a property identifier (PID) and a
+			reference to the property can be queried from the
+			<classname>Item</classname>. <classname>Item</classname> defines inner interfaces
+			for maintaining the item property set and listening changes in the item property
+			set. Concrete examples or items include a row in a table (with its properties
+			corresponding to cells on the row), the data underlying a form (with properties
+			corresponding to individual fields) or a node in a filesystem tree.
+		</para>
+		
+		<para>
+			In addition to being used indirectly by many user interface components, items
+			provide the basic data model underlying <classname>Form</classname> components.
+			In simple cases, forms can even be generated automatically from items.
+			The properties of the item correspond to the fields of the form.
+		</para>
+
+		<para>
+			Items generally represent objects in the object-oriented model, but with the
+			exception that they are configurable and provide an event mechanism. The simplest
+			way of utilizing <classname>Item</classname> interface is to use existing Item
+			implementations. Provided utility classes include a configurable property set
+			(<classname>PropertySetItem</classname>) and a bean-to-item adapter
+			(<classname>BeanItem</classname>), in addition to which a
+			<classname>Form</classname> can also be used directly as an item.
+		</para>
+	</section>
+
+	<section xml:id="datamodel.container">
+		<title>Collecting items in Containers</title>
+
+		<para>
+			Container is the most advanced of the data model supported by IT Mill Toolkit. It
+			provides a very flexible way of managing a set of items that share common
+			properties. Each item is identified by an item id. Properties can be requested from
+			container with item and property ids. Another way of accessing properties is to first
+			request an item from container and then request its properties from it.
+		</para>
+
+		<para>
+			By implementing a container interface, you can bind UI components directly
+			to data. As containers can be unordered, ordered, indexed, or hierarchical,
+			they can interface practically any kind of data representation. The Toolkit
+			includes data connectors for some common data sources, such as the simple data
+			tables and filesystem.
+		</para>
+
+		<para>
+			The <classname>Container</classname> interface was designed with flexibility and
+			efficiency in mind. It contains inner interfaces that containers can optionally
+			implement for ordering the items sequentially, indexing the items and accessing
+			them hierarchically. Those ordering models provide the basis for the
+			<classname>Table</classname>, <classname>Tree</classname>, and
+			<classname>Select</classname> UI components. As with other data models, the
+			containers support events for notifying about changes made to their contents.
+		</para>
+
+		<para>
+			In addition to separate container objects, also many UI components are
+			containers in addition to being properties. This is especially true for
+			selectable components (that implement <classname>Select</classname>),
+			because they are containers that contain selectable items. Their property
+			is the currently selected item.
+			This is useful as it enables binding components to view and update each
+			others' data directly, and makes it easy to reuse already constructed data
+			models - e.g. a form could edit a row (item) of a table directly, and the
+			table could use a database container as its underlying container. The
+			fields of the form would correspond to the properties of the item, i.e.
+			the cells of the table row.
+			For more details on components, see <xref linkend="components"/>.
+		</para>
+
+		<para>
+			A set of utilities exist for converting between container models by adding external
+			ordering or hierarchy into existing containers. In-memory containers implementing
+			indexed and hierarchical models provide easy to use tools for setting up in memory
+			data storages. Such default container implementations include
+			<classname>IndexedContainer</classname>, which can be thought of as a generalization
+			of a two-dimensional data table, and <classname>BeanItemContainer</classname> which
+			maps standard Java objects (beans) to items of an indexed container. In addition,
+			the default containers include a hierarchical container for direct file system
+			browsing.
+		</para>
+
+		<para>
+			As the items in a <classname>Container</classname> are not necessarily indexed,
+			iterating over the items has to be done using an
+			<classname>Iterator</classname>. The
+			<methodname>getItemIds()</methodname> method of
+			<classname>Container</classname> returns a
+			<classname>Collection</classname> of item identifiers over which you
+			can iterate. The following example demonstrates a typical case where
+			you iterate over the values of check boxes in a column of a
+			<classname>Table</classname> component. The context of the example is
+			the example used in <xref linkend="components.table"/>.
+		</para>
+
+		<programlisting><![CDATA[/* Collect the results of the iteration into this string. */
+String items = "";
+
+/* Iterate over the item identifiers of the table. */
+for (Iterator i = table.getItemIds().iterator(); i.hasNext();) {
+    /* Get the current item identifier, which is an integer. */
+    int iid = (Integer) i.next();
+    
+    /* Now get the actual item from the table. */
+    Item item = table.getItem(iid);
+    
+    /* And now we can get to the actual checkbox object. */
+    Button button = (Button) (item.getItemProperty("ismember").getValue());
+    
+    /* If the checkbox is selected. */
+    if ((Boolean)button.getValue() == true) {
+        /* Do something with the selected item; collect the first names in a string. */
+        items += item.getItemProperty("First Name").getValue() + " ";
+    }
+}
+
+/* Do something with the results; display the selected items. */
+layout.addComponent (new Label("Selected items: " + items));]]></programlisting>
+
+		<para>
+			Notice that the <methodname>getItemIds()</methodname> returns an
+			<emphasis>unmodifiable collection</emphasis>, so the
+			<classname>Container</classname> may not be modified during
+			iteration. You can not, for example, remove items from the
+			<classname>Container</classname> during iteration. The modification
+			includes modification in another thread. If the
+			<classname>Container</classname> is modified during iteration, a
+			<classname>ConcurrentModificationException</classname> is thrown and
+			the iterator may be left in an undefined state.
+		</para>
+
+	</section>
+
+<!-- TODO more/examples on IndexedContainer and BeanItemContainer? -->
+
+<!--
+    <section xml:id="datamodel.querycontainer">
+        <title>QueryContainer for Database Queries</title>
+
+        <para>
+            The <classname>QueryContainer</classname> allows you to
+            bind UI components, such as <classname>Table</classname>
+            and <classname>Select</classname> directly to database
+            queries.
+        </para>
+
+
+        <section>
+            <title>QueryContainer with Select</title>
+
+            <para>
+            </para>
+
+            <programlisting><![CDATA[]]></programlisting>
+
+            <programlisting><![CDATA[]]></programlisting>
+
+        </section>
+    </section>
+-->
+	<!-- section>
+		<title>Change notification</title>
+
+		<para>
+		</para>
+	</section -->
+</chapter>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: xml
+sgml-omittag:nil
+sgml-shorttag:nil
+sgml-namecase-general:nil
+sgml-general-insert-case:lower
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:4
+sgml-indent-data:t
+sgml-parent-document:nil
+sgml-exposed-tags:nil
+sgml-local-catalogs:("/etc/sgml/catalog" "/usr/share/xemacs21/xemacs-packages/etc/psgml-dtds/CATALOG")
+sgml-local-ecat-files:("ECAT" "~/sgml/ECAT" "/usr/share/sgml/ECAT" "/usr/local/share/sgml/ECAT" "/usr/local/lib/sgml/ECAT")
+End:
+-->
+

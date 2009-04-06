@@ -1,0 +1,404 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<chapter xml:id="intro">
+	<title>Introduction</title>
+
+	<para>
+		This chapter provides an introduction to software development with IT Mill
+		Toolkit, including installation of the Toolkit, the Eclipse development
+		environment, and any other necessary or useful utilities. We look into the design
+		philosophy behind the Toolkit and at the changes in IT Mill Toolkit Release 5.
+	</para>
+
+	<section xml:id="intro.overview">
+		<title>Overview</title>
+
+		<para>
+			The core piece of IT Mill Toolkit is the Java library that is designed to make
+			creation and maintenance of high quality web-based user interfaces easy. The
+			key idea is that the Toolkit allows you to forget the web and lets you program
+			user interfaces much like you would program any Java desktop application with
+			conventional toolkits such as AWT, Swing, or SWT. But easier.
+		</para>
+		
+		<para>
+			While traditional web programming is a fun way to spend your time learning new
+			web technologies and debugging them, you probably want to be productive and
+			concentrate on the application logic. The library takes care of user interface
+			rendering in the browser and <firstterm>AJAX</firstterm> communications between
+			the browser and the server. With Toolkit's approach, you do not need to learn
+			and debug browser technologies, such as HTML or JavaScript.
+		</para>
+
+		<figure xml:id="figure.intro.architecture">
+			<title>General Architecture of IT Mill Toolkit</title>
+			<mediaobject>
+				<imageobject role="html">
+					<imagedata align="center" fileref="img/intro/architecture-lo.png"/>
+				</imageobject>
+				<imageobject role="fo">
+					<imagedata scale="75" align="center" fileref="img/intro/architecture-hi.png"/>
+				</imageobject>
+			</mediaobject>
+		</figure>
+
+		<para>
+			<xref linkend="figure.intro.architecture"/> illustrates the basic architecture
+			of web applications made with IT Mill Toolkit. The Toolkit consists of the
+			<emphasis>server-side framework</emphasis> and a <emphasis>client-side
+			engine</emphasis> that runs in the browser as a JavaScript program, rendering
+			the user interface and delivering user interaction to the server. As the
+			application runs as a persistent Java Servlet session in an application
+			server, you can easily bind to data or logic tiers.
+		</para>
+
+		<para>
+			Because HTML, JavaScript, and other browser technologies are essentially
+			invisible to the application logic, you can think of
+			the web browser as only a thin client platform. A thin
+			client displays the user interface and communicates
+			user events to the server at a low
+			level. The control logic of the user interface runs on
+			a Java-based web server, together with your business
+			logic. By contrast, a normal client-server
+			architecture with a dedicated client application would
+			include a lot of application specific communications
+			between the client and the server. Essentially
+			removing the user interface tier from the application architecture makes our approach a
+			very effective one.
+		</para>
+
+		<para>
+			IT Mill Toolkit makes the best use of AJAX (<firstterm>Asynchronous JavaScript
+			and XML</firstterm>) techniques that enable the creation of web applications as
+			responsive and interactive as desktop applications. If you're a newcomer to
+			AJAX, see <xref linkend="architecture.technology.ajax"/> to find out what it
+			really is.
+		</para>
+
+		<para>
+			Hidden well under the hood, IT Mill Toolkit uses <firstterm>GWT</firstterm>, the
+			<firstterm>Google Web Toolkit</firstterm>, for rendering the user interface in
+			the browser. GWT programs are written in Java, but compiled into JavaScript,
+			thus freeing the developer from learning JavaScript and other browser
+			technologies. GWT is ideal for implementing advanced user interface components
+			(or widgets in GWT terminology) and interaction logic in the browser, while IT
+			Mill Toolkit handles the actual application logic in the server. IT Mill
+			Toolkit is designed to be extensible, and you can indeed use any 3rd-party GWT
+			components easily, in addition to the component repertoire offered in IT Mill
+			Toolkit. The use of GWT also means that all the code you need to write is pure
+			Java.
+		</para>
+
+		<informalfigure floatstyle="right">
+			<mediaobject>
+				<imageobject role="html">
+					<imagedata fileref="img/intro/intro-themes-faded-lo.png"/>
+				</imageobject>
+				<imageobject role="fo">
+					<imagedata scale="50" fileref="img/intro/intro-themes-faded-hi.png"/>
+				</imageobject>
+			</mediaobject>
+		</informalfigure>
+		
+		<para>
+			The Toolkit library defines a clear separation between user interface
+			presentation and logic and allows you to develop them separately. Our
+			approach to this is <firstterm>themes</firstterm>, which dictate the visual
+			appearance of applications. Themes control the appearance of the user
+			interfaces using CSS and (optional) HTML page templates. As the Toolkit
+			provides excellent default themes, you do not usually need to make much
+			customization, but you can if you need to. For more about themes, see
+			<xref linkend="themes"/>.
+		</para>
+
+		<para>
+			We hope that this is enough about the basic architecture and features of IT
+			Mill Toolkit for now. You can read more about it later in <xref
+			linkend="architecture"/>, or jump straight to more practical things in <xref
+			linkend="application"/>.
+        </para>
+    </section>
+
+	<section xml:id="intro.walkthrough">
+		<title>Example Application Walkthrough</title>
+
+		<para>
+			Let us follow the long tradition of first saying
+			"Hello World!" when learning a new programming
+			environment. After that, we can go through a more
+			detailed example that implements the
+			model-view-controller architecture. The two examples
+			given are really simple, but this is mostly because IT
+			Mill Toolkit is designed to make things simple.
+		</para>
+
+		<example xml:id="ex.helloworld">
+			<title>HelloWorld.java</title>
+			<programlisting><![CDATA[import com.itmill.toolkit.ui.*;
+
+public class HelloWorld extends com.itmill.toolkit.Application {
+
+    public void init() { 
+        Window main = new Window("Hello window"); 
+        setMainWindow(main);
+        main.addComponent(new Label("Hello World!")); 
+    }
+}]]></programlisting>
+		</example>
+		
+		<para>
+			The first thing to note is that the example application extends
+			<classname>com.itmill.toolkit.Application</classname> class. The
+			<classname>Application</classname> class is used as the base class for all
+			user applications. Instances of the <classname>Application</classname> are
+			essentially user sessions, and one is created for each user using the
+			application. In the context of our HelloWorld application, it is
+			sufficient to know that the application is started when the user first
+			accesses it and at that time <methodname>init</methodname> method is
+			invoked.
+		</para>
+
+		<para>
+			Initialization of the application first creates a new window object and sets
+			"Hello window" as its caption. The window is then set as the main window of
+			the application; an application can actually have many windows. This means
+			that when a user launches the application, the contents of the "main window"
+			are shown to the user in the web page. The caption is shown as the title of
+			the (browser) window.
+		</para>
+
+		<para>
+			A new user interface component of class
+			<classname>com.itmill.toolkit.ui.Label</classname> is created. The label is
+			set to draw the text "Hello World!". Finally, the label is added to the main
+			window. And here we are, when the application is started, it draws the text
+			"Hello World!" to the browser window.
+		</para>
+		
+		<para>
+			The following screenshot shows what the "Hello World!" program will look like
+			in a web browser.
+		</para>
+
+		<screenshot>
+			<mediaobject>
+				<imageobject>
+					<imagedata align="center" fileref="img/intro/HelloWorld.png"/>
+				</imageobject>
+			</mediaobject>
+		</screenshot>
+
+		<para>
+			Before going into details, we should note that this example source code is
+			complete and does not need any additional declaratively defined template files
+			to be run. To run the program, you can just add it to your web application, as
+			explained in <xref linkend="application.environment" />.
+		</para>
+    </section>
+
+    <section xml:id="intro.overview.goals">
+        <title>Goals and Philosophy</title>
+
+        <para>
+            Simply put, as its name implies, the Toolkit's ambition is to be the best
+            possible tool when it comes to creating web user interfaces for business
+            applications. It is easy to adopt, as it is designed to support both
+            entry-level and advanced programmers, as well as usability experts and
+            graphical designers.
+        </para>
+
+        <para>
+            When designing the Toolkit, we have followed the philosophy inscribed in
+            the following rules.
+        </para>
+
+        <simplesect>
+            <title>Right tool for the right purpose</title>
+
+            <para>
+                Because our goals are high, the focus must be clear. This toolkit is
+                designed for creating web applications. It is not designed for
+                creating websites or advertisements demos. For such purposes, you 
+                might find (for instance) JSP/JSF or Flash more suitable.
+            </para>
+        </simplesect>
+
+        <simplesect>
+            <title>Simplicity and maintainability</title>
+
+            <para>
+                We have chosen to emphasize robustness, simplicity, and
+                maintainability. This involves following the well-established best
+                practices in user interface frameworks and ensuring that our
+                implementation represents an ideal solution for its purpose without
+                clutter or bloat.
+			</para>
+        </simplesect>
+
+        <simplesect>
+            <title>XML is not designed for programming</title>
+            <para>
+                The Web is inherently document-centered and very much bound to the
+                declarative presentation of user interfaces. Toolkit's framework frees the
+                programmer from these limitations. It is far more natural to create user
+                interfaces by programming them than by defining them in declarative
+                templates, which are not flexible enough for complex and dynamic user
+                interaction.
+            </para>
+        </simplesect>
+
+        <simplesect>
+            <title>Tools should not limit your work</title>
+            <para>
+                There should not be any limits on what you can do with the framework:
+                if for some reason the user interface components do not support what
+                you need to achieve, it must be easy to add new ones to your
+                application. When you need to create new components, the role of the
+                framework is critical: it makes it easy to create re-usable components
+                that are easy to maintain.
+            </para>
+        </simplesect>
+    </section>
+
+    <section xml:id="intro.overview.background">
+        <title>Background</title>
+
+        <para>
+            The library was not written overnight. After working with web user
+            interfaces since the beginning of the Web, a group of developers got
+            together in 2000 to form IT Mill. The team had a desire to develop a new
+            programming paradigm that would support the creation of real user
+            interfaces for real applications using a real programming language.
+        </para>
+        
+        <para>
+            The library was originally called Millstone Library. The first version was
+            used in a large production application that IT Mill designed and
+            implemented for an international pharmaceutical company. IT Mill made the
+            application already in the year 2001 and it is still in use. Since then,
+            the company has produced dozens of large business applications with the
+            library and it has proven its ability to solve hard problems easily.
+        </para>
+        
+        <para>
+            The next generation of the library, IT Mill Toolkit Release 4, was
+            released in 2006. It introduced an entirely new AJAX-based presentation
+            engine. This allowed the development of AJAX applications without the need
+            to worry about communications between the client and the server.
+        </para>
+        
+        <para>
+            The latest generation, IT Mill Toolkit Release 5, takes a significant step
+            further into AJAX. The client-side rendering of the user interface has
+            been rewritten using GWT, the Google Web Toolkit. This allows the use of
+            Java for developing all aspects of the framework. It also allows easy
+            integration of existing GWT components with IT Mill Toolkit.
+        </para>
+
+        <para>
+            IT Mill Toolkit Release 5 was released under the Apache open source
+            license and the development of the toolkit .
+        </para>
+    </section>
+
+    <section xml:id="intro.overview.changes.toolkit-5">
+        <title>Changes in IT Mill Toolkit Release 5</title>
+
+        <para>
+            Release 5 of IT Mill Toolkit introduces a number of changes in the API,
+            the client-side customization layer, and themes. See the Release Notes in
+            the installation package of IT Mill Toolkit for a more detailed listing of
+            changes.
+        </para>
+
+        <para>
+            Many of the user interface components in Release 4 and before were
+            available as styles for a basic set of components. For example, the
+            <classname>Select</classname> class allowed selection of items from a
+            list. Normally, it would show as a dropdown list, but setting
+            <literal>setStyle("optiongroup")</literal> would change it to a radio
+            button group. In Release 5, we have obsoleted the
+            <methodname>setStyle()</methodname> method and provided distinct classes
+            for such variations. For example, we now have
+            <classname>OptionGroup</classname> that inherits the
+            <classname>AbstractSelect</classname> component. In a similar fashion, the
+            <classname>Button</classname> component had a
+            <parameter>switchMode</parameter> attribute, set with
+            <methodname>setSwitchMode()</methodname>, that would turn the button into
+            a check box. Release 5 introduces a separate
+            <classname>CheckBox</classname> component. The
+            <methodname>setStyle()</methodname> method actually had a dual function,
+            as it was also used to set the HTML element <parameter>class</parameter>
+            attribute for the components to allow styling in CSS. This functionality
+            has been changed to <methodname>addStyle()</methodname> and
+            <methodname>removeStyle()</methodname> methods.
+        </para>
+
+        <para>
+            The <classname>OrderedLayout</classname> is replaced (since the first
+            stable version 5.3.0) with specific <classname>VerticalLayout</classname>
+            and <classname>HorizontalLayout</classname> classes.
+        </para>
+
+        <para>
+            Release 5 introduces <emphasis>expansion ratio</emphasis> for applicable
+            layout components. It allows you to designate one or more components as expanding
+            and set their relative expansion ratios. The layout will then distribute
+            the left-over space between the expanded components according to the ratios.
+            The release also introduces a number of new user interface components:
+            <classname>SplitPanel</classname>, <classname>Slider</classname>,
+            <classname>Notification</classname>, <classname>LoginForm</classname>,
+            <classname>MenuBar</classname>, <classname>UriFragmentUtility</classname>
+            and <classname>RichTextEditor</classname>.
+        </para>
+
+        <para>
+            The Client-Side Engine of IT Mill Toolkit has been entirely rewritten with
+            Google Web Toolkit. This does not, by itself, cause any changes in the API
+            of IT Mill Toolkit, because GWT is a browser technology that is well
+            hidden behind the IT Mill Toolkit API. The transition from JavaScript to GWT
+            makes the development and integration of custom components and
+            customization of existing components much easier than before. It does,
+            however, require reimplementation of any existing custom client-side code
+            with GWT. See <xref linkend="architecture"/> for more information on the
+            impact of GWT on the architecture and <xref linkend="gwt"/> for details
+            regarding creation or integration of custom client-side components with
+            GWT.
+        </para>
+
+        <para>
+            IT Mill Toolkit Release 5 introduces an entirely new, simplified architecture for
+            themes. Themes control the appearance of web applications with CSS and can
+            include images, HTML templates for custom layouts, and other related
+            resources. The old themeing architecture in Release 4 required use of some
+            JavaScript even in the simplest themes, and definition of a theme XML
+            descriptor. In Release 5, you simply include the CSS file for the theme
+            and any necessary graphics and HTML templates for custom layouts. For more
+            details on the revised theme architecture, see <xref
+				linkend="themes"/>. Old CSS files are not compatible with Release 5, as
+            the HTML class style names of components have changed. As GWT implements
+            many components with somewhat different HTML elements than what IT Mill
+            Toolkit Release 4 used, styles may need to be updated also in that
+            respect.
+        </para>
+    </section>
+</chapter>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: xml
+sgml-omittag:nil
+sgml-shorttag:nil
+sgml-namecase-general:nil
+sgml-general-insert-case:lower
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:4
+sgml-indent-data:t
+sgml-parent-document:nil
+sgml-exposed-tags:nil
+sgml-local-catalogs:("/etc/sgml/catalog" "/usr/share/xemacs21/xemacs-packages/etc/psgml-dtds/CATALOG")
+sgml-local-ecat-files:("ECAT" "~/sgml/ECAT" "/usr/share/sgml/ECAT" "/usr/local/share/sgml/ECAT" "/usr/local/lib/sgml/ECAT")
+End:
+-->

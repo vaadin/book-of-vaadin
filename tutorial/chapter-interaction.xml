@@ -1,0 +1,980 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<chapter xml:id="interaction">
+	<title>Creating user interactions</title>
+
+	<para>
+		At this point we have quite a lot of components on the screen and even a data
+		source filled with test data attached to our table. It is time to start creating
+		some real logic in our application. We'll start with a simple view navigation
+		originating from user clicking on tool bar buttons, in the navigation tree or
+		selecting an item in the table. We will then continue with some more advanced
+		stuff in the form and the search view. But first of all we need to create a
+		search view so we have something to navigate to. We will only create an empty view
+		at this point to demonstrate navigation, the search components are added later.
+	</para>
+
+	<programlisting><![CDATA[package com.itmill.dev.addressbooktutorial.ui;
+
+import com.itmill.dev.addressbooktutorial.AddressBookApplication;
+ import com.itmill.toolkit.ui.Panel;
+
+public class SearchView extends Panel {
+     public SearchView(final AddressBookApplication app) {
+         setCaption("Search contacts");
+         setSizeFull();
+     }
+ }]]></programlisting>
+
+
+	<para>
+		We use the same kind of lazy initialization for this view as we did for the
+		<classname>ListView</classname>.
+	</para>
+	
+	<programlisting><![CDATA[    private SearchView searchView = null;
+
+    private SearchView getSearchView() {
+         if (searchView == null) {
+             searchView = new SearchView(this);
+         }
+         return searchView;
+     }]]></programlisting>
+
+	<section xml:id="interaction.navigation">
+		<title>View navigation</title>
+
+		<para>
+			In our application most of the event handling is done by the main application
+			class. This is a working and a clean approach to hook control logic into
+			applications of this size. There are several other methods to implement event
+			handling like using inline listeners or separate listener classes. Patterns
+			used in other GUI frameworks like Swing can easily be applied to an IT Mill
+			Toolkit application so you can take advantage of your previous experiences in
+			GUI programming.
+		</para>
+
+		<para>
+			The first step is to make navigation between the main view and the search
+			work. To navigate to the search view we have a button in the toolbar. We'll
+			start from there. Go to the <methodname>createToolbar()</methodname> method in
+			the <classname>AddressBookApplication</classname> and add the following line
+			close to the place you are adding the button to the layout.
+		</para>
+
+		<programlisting><![CDATA[search.addListener((Button.ClickListener) this);]]></programlisting>
+
+		<para>
+			Make <classname>AddressBookApplication</classname> implement
+			<classname>Button.ClickListener</classname> and add the required
+			<methodname>buttonClickMethod()</methodname> to the
+			<classname>AddressBookApplication</classname> class. (Hint: you'll make this
+			in about 2 seconds with Eclipse's quick fix feature, use
+			<keycombo><keysym>Ctrl</keysym><keysym>1</keysym></keycombo> (cmd-1 on mac) a
+			few times).
+		</para>
+
+		<para>
+			Now that the application can listen to button click events, add listeners to
+			all the other buttons created in <methodname>createToolbar()</methodname> as
+			well. We'll later on use the same listener to handle their clicks too.  Type
+			in the following event handling code to the
+			<methodname>buttonClick()</methodname> method:
+		</para>
+
+		<programlisting><![CDATA[final Button source = event.getButton();
+if (source == search) {
+    showSearchView();
+}]]></programlisting>
+ 
+		<para>
+			Create the missing <methodname>showSearchView()</methodname> method (or let
+			Eclipse create it for you). We want to keep the code clean so we keep the
+			event handlers as small as possible and pass logic forward. This is essential
+			especially if you are using listeners that will end up receiving events from
+			multiple components.
+		</para>
+
+		<para>
+			The <methodname>showSearchView()</methodname> method contains the real logic
+			which is extremely simple in this particular case: we'll just call the
+			<methodname>setMainComponent()</methodname> method with
+			<methodname>getSearchView()</methodname>. The
+			<methodname>getSearchView()</methodname> method will do the lazy instantiation
+			of the search view if necessary and
+			<methodname>setMainComponent()</methodname> will replace the current view with
+			the search view. When you have added the
+			<methodname>showSearchView()</methodname> as below you are ready to test your
+			program. Run it and click the search view to see that it works!
+		</para>
+
+		<programlisting><![CDATA[private void showSearchView() {
+    setMainComponent(getSearchView());
+}]]></programlisting>
+ 
+		<para>
+			Quite simple wasn't it? Enhance your skills by adding similar listener for
+			<guibutton>Share</guibutton> and <guibutton>Help</guibutton>. You have learned
+			to add sub windows in <xref linkend="skeleton.subwindows"/>.
+		</para>
+
+		<!-- Please comment on this:
+
+		Do we want our users to use this kind of event listeners our would it be better to suggest inline listeners which call the correct method, e.g.:
+        search.addListener(new ClickListener() {
+             public void buttonClick(ClickEvent event) {
+                 showSearchView();
+             }
+         });
+ - This removes the need of application implementing ClickListener and moves the method call to the same place where the component is created.
+
+ - It would also make the casting problems which appear later on (when adding a valuechange listener) disappear.
+
+I would prefer the non-inline listeners because, at least to me, they are easier to undestand... -->
+
+	</section>
+
+	<section xml:id="interaction.selection">
+		<title>Person selection</title>
+
+		<para>
+			Now lets concentrate on selecting a row in the table. First of all we need to
+			set the table in selectable mode so the user can select rows. The value of a
+			Table corresponds to the row that is currently selected which means that when
+			a row is selected, a value change event is sent. A value change listener is
+			thus a good place to react to user interaction. Add a value change listener to
+			the table by adding the following code to the
+			<classname>PersonList</classname> constructor:
+		</para>
+
+		<programlisting><![CDATA[        /*
+          * Make table selectable, react immediatedly to user events, and pass events to the
+          * controller (our main application)
+          */
+         setSelectable(true);
+         setImmediate(true);
+         addListener((Property.ValueChangeListener) app);
+         /* We don't want to allow users to de-select a row */
+         setNullSelectionAllowed(false);]]></programlisting>
+
+
+		<para>
+			Now go back to <classname>AddressBookApplication</classname> class. Make it
+			implement <classname>Property.ValueChangeListener</classname> and add the
+			required method <methodname>valueChange()</methodname>.
+		</para>
+
+		<para>
+			(Note that at this point you may have to add casts to your click listeners so
+			that the <methodname>addListener()</methodname> method can decide which
+			listener to add).
+		</para>
+
+		<para>
+			Now lets create or value change handler for the table. Our handler should
+			simply retrieve the selected item from the table and pass it on to the
+			<classname>PersonForm</classname> as a data source for it. If the datasource
+			for the form already is this item we do not need to do anything. The
+			<methodname>valueChange()</methodname> method should look like this:
+		</para>
+
+		<programlisting><![CDATA[    public void valueChange(ValueChangeEvent event) {
+         Property property = event.getProperty();
+         if (property == personList) {
+             Item item = personList.getItem(personList.getValue());
+             if (item != personForm.getItemDataSource()) {
+                 personForm.setItemDataSource(item);
+            }
+         }
+     }]]></programlisting>
+
+		<!--
+			At this stage it is good to point out the heavy inheritance used in the
+			components in IT Mill Toolkit. <methodname>Table</methodname> is actually a
+			sub class of <methodname>Select</methodname>. <methodname>Select</methodname>
+			is a <methodname>Property</methodname> whose value is the identifier of the
+			item selected in its data source. This previous sentence completely
+			confuses me... so a Table is in itself also a Property that includes Items
+			that have Properties??? Maybe this explanation could be left to the manual? 
+			(OR put it as a WARNING HardCore info - do not mind! :D) For our table
+			this means that the value for the table is the same as the value for the
+			datasource (the PersonContainer), which in our case is a Person bean.
+		-->
+
+		<para>
+			Now try it out! When clicking on a table row you ought to get the information
+			for the selected <classname>Person</classname> displayed in the form
+			below. The <classname>Form</classname> does not work correctly yet, but we'll
+			get back to that later. The next step is to add listeners for our navigation
+			tree.
+		</para>
+
+		<!-- screenshot maybe of the person being selected with a form? Just to keep
+			interest up after so much text... -->
+
+	</section>
+
+	<section xml:id="interaction.tree">
+		<title>Navigation tree</title>
+
+		<para>
+			With our navigation tree we could do exactly the same kind of value change
+			listener as we did for table. <classname>Tree</classname> is also a sub class
+			of <classname>Select</classname>. For a tree used for navigation the value
+			change event, however, is not the ideal event. Clicking on an already selected
+			item in the tree will not fire a value change event but often it is necessary
+			to react also to clicks on an already selected item. As this cannot be
+			accomplished with a value change listener we use another kind of listener:
+			<classname>ItemClickListener</classname>. <classname>ItemClickListener</classname>s
+			are notified each time an item is clicked independent of the current
+			selection.
+		</para>
+
+		<para>
+			Listening to item clicks is similar to listening to button clicks. We add a
+			hook to the item container (<classname>NavigationTree</classname> in this
+			case) and in the listener we can determine the item that was clicked on using
+			the <classname>ItemClickEvent</classname> event. Steps to do:
+		</para>
+
+		<itemizedlist>
+			<listitem>Let <classname>AddressBookApplication</classname> implement
+			<classname>ItemClickListener</classname> and add the required
+			method.</listitem>
+
+			<listitem>Add <classname>AddressBookApplication</classname> as a constructor
+			parameter to <classname>NavigationTree</classname> and add it as a
+			<classname>ItemClickListener</classname> in the
+			<classname>NavigationTree</classname> constructor. Although we are not
+			interested in selections in a tree, make tree selectable also so the user gets
+			some feedback when clicking on an item.</listitem>
+
+			<listitem>Add logic to the the item click handler
+			(<methodname>itemClick()</methodname>) to react to <guibutton>Show
+			all</guibutton> and <guibutton>Search</guibutton></listitem>
+		</itemizedlist>
+
+		<para>
+			After the changes the <classname>NavigationTree</classname> should look like
+			this...
+		</para>
+
+		<programlisting><![CDATA[package com.itmill.dev.addressbooktutorial.ui;
+
+import com.itmill.dev.addressbooktutorial.AddressBookApplication;
+ import com.itmill.toolkit.event.ItemClickEvent.ItemClickListener;
+ import com.itmill.toolkit.ui.Tree;
+
+public class NavigationTree extends Tree {
+     public static final Object SHOW_ALL = "Show all";
+     public static final Object SEARCH = "Search";
+
+    public NavigationTree(AddressBookApplication app) {
+         addItem(SHOW_ALL);
+         addItem(SEARCH);
+
+        /*
+          * We want items to be selectable but do not want the user to be able to
+          * de-select an item.
+          */
+         setSelectable(true);
+         setNullSelectionAllowed(false);
+
+        // Make application handle item click events
+         addListener((ItemClickListener) app);
+
+    }
+ }]]></programlisting>
+
+		<para>
+			...and the <methodname>itemClick()</methodname> handler in
+			<classname>AddressBookApplication</classname> should look like this:
+		</para>
+
+		<programlisting><![CDATA[    public void itemClick(ItemClickEvent event) {
+         if(event.getSource() == tree) {
+             Object itemId = event.getItemId();
+             if (itemId != null) {
+                 if (itemId == NavigationTree.SHOW_ALL) {
+                     showListView();
+                 } else if (itemId == NavigationTree.SEARCH) {
+                     showSearchView();
+                 }
+             }
+         }
+     }]]></programlisting>
+
+		<para>
+			The new <methodname>showListView()</methodname> simply calls
+			<methodname>setMainComponent()</methodname> with
+			<methodname>getListView()</methodname>. Try it out!
+		</para>
+
+		<para>
+			Got a <classname>ClassCastException</classname>? Remember that
+			<classname>AddressBookApplication</classname> must implement
+			<classname>ItemClickListener</classname>.
+		</para>
+	</section>
+
+	<section xml:id="interaction.form">
+		<title>Improving the form</title>
+
+		<para>
+			Next we'll concentrate on the <classname>Form</classname>. We want to edit the
+			existing details. The value change listener in the table already puts the
+			selected <classname>Person</classname> into the form. The values also get
+			updated on the server. What we want to do is some usability improvements:
+		</para>
+
+		<itemizedlist>
+			<listitem>Use the form as a detailed viewer (read only) in the first place and
+			have an <guibutton>Edit</guibutton> button to enable editing.</listitem>
+
+			<listitem>Put the form into a "buffered" mode so the form data gets submitted
+			to data model only if <guibutton>Save</guibutton> is clicked. A
+			<guibutton>Cancel</guibutton> button should return the form to the read-only
+			state with the old values.</listitem>
+
+			<listitem>Make the form fields appear in the same order as in the table.</listitem>
+		</itemizedlist>
+
+		<para>
+			The first step is to change the order of the fields so that it is the same as
+			in the table. This makes it more natural to fill out the form. We can use the
+			same method as with the table for ordering the fields:
+		</para>
+
+		<!-- Do you mean setVisibleColumns()? -->
+
+		<para>
+			Let's start from the <classname>PersonForm</classname> constructor and do the
+			following modifications:
+		</para>
+
+		<itemizedlist>
+			<listitem>remove dummy fields.</listitem>
+
+			<listitem>add a main application reference via the constructor.</listitem>
+
+			<listitem>call setWriteThrough(false) to enable buffering.</listitem>
+
+			<listitem>make the form footer invisible by default (we don't want to show the
+			footer when the form is missing its datasource i.e. not showing any Person).</listitem>
+
+			<listitem>let the Form implement ClickListener and make it listen to the
+			buttons in the footer.</listitem>
+
+			<listitem>add one more button to the footer: "Edit". This will be visible when
+			in read-only state.</listitem>
+		</itemizedlist>
+
+		<para>
+			After these modifications the <classname>PersonForm</classname> looks like the
+			following. Note that you must also modify the main application class to pass
+			itself in the <classname>PersonForm</classname> constructor call.
+		</para>
+
+		<programlisting><![CDATA[package com.itmill.dev.addressbooktutorial.ui;
+
+import com.itmill.dev.addressbooktutorial.AddressBookApplication;
+ import com.itmill.toolkit.ui.Button;
+ import com.itmill.toolkit.ui.Form;
+ import com.itmill.toolkit.ui.HorizontalLayout;
+ import com.itmill.toolkit.ui.Button.ClickEvent;
+ import com.itmill.toolkit.ui.Button.ClickListener;
+
+ public class PersonForm extends Form implements ClickListener {
+
+    private Button save = new Button("Save", (ClickListener) this);
+     private Button cancel = new Button("Cancel", (ClickListener) this);
+     private Button edit = new Button("Edit", (ClickListener) this);
+     private AddressBookApplication app;
+
+    public PersonForm(AddressBookApplication app) {
+         this.app = app;
+
+        // Enable buffering so that commit() must be called for the form
+         // before input is written to the data. (Form input is not written
+         // immediately through to the underlying object.)
+         setWriteThrough(false);
+        
+         HorizontalLayout footer = new HorizontalLayout();
+         footer.setSpacing(true);
+         footer.addComponent(save);
+         footer.addComponent(cancel);
+         footer.addComponent(edit);
+         footer.setVisible(false);
+         
+         setFooter(footer);
+     }
+    
+     public void buttonClick(ClickEvent event) {
+       
+    }
+
+}]]></programlisting>
+
+		<para>
+			Setting the form to buffering mode
+			(<methodname>setWriteThrough(false)</methodname>) means that changes made by
+			the user do not immediately update the datasource. Instead the datasource is
+			updated when <methodname>commit()</methodname> is called for the form. We can
+			then easily revert the data and get the old status back by calling
+			<methodname>discard()</methodname>. This needs to be implemented in the button
+			click handler:
+		</para>
+
+		<programlisting><![CDATA[    public void buttonClick(ClickEvent event) {
+         Button source = event.getButton();
+
+        if (source == save) {
+             /* If the given input is not valid there is no point in continuing */
+             if (!isValid()) {
+                 return;
+             }
+             commit();
+             setReadOnly(true);
+         } else if (source == cancel) {
+             discard();
+             setReadOnly(true);
+         } else if (source == edit) {
+             setReadOnly(false);
+         }
+     }]]></programlisting>
+
+
+		<para>
+			We can still not test our form as we have made the footer hidden so the form
+			by default will be empty. Next we'll override two methods:
+			<methodname>setItemDataSource()</methodname> and
+			<methodname>setReadOnly()</methodname> to make the form work as we want
+			it. The default implementations work just fine but we want to add some
+			additional tasks to them.
+		</para>
+
+		<para>
+			The <methodname>setItemDataSource()</methodname> method is called when the
+			datasource is changed, e.g. when the user selects a person in the table. At
+			this point we want to do three things:
+		</para>
+
+		<itemizedlist>
+			<listitem>set the form to a read-only state by calling
+			<methodname>setReadOnly(true)</methodname>. This is the initial
+			state.</listitem>
+
+			<listitem>ensure that the form footer is visible.</listitem>
+
+			<listitem>make sure the fields are rendered in the order we want (consistent
+			with the table)</listitem>
+		</itemizedlist>
+
+		<para>
+			In the <methodname>setReadOnly()</methodname> method we want to control which
+			buttons are shown in the footer. <guibutton>Save</guibutton> and
+			<guibutton>Cancel</guibutton> need to be visible when the form is in edit mode
+			and the <guibutton>Edit</guibutton> button when the form is in read-only
+			mode. Calling <methodname>setItemDataSource()</methodname> will regenerate all
+			fields inside the form so this is a good place to tell the form in which order
+			we want the fields to be rendered.
+		</para>
+
+		<para>
+			Our overridden methods look like the following:
+		</para>
+
+		<programlisting><![CDATA[    @Override
+     public void setItemDataSource(Item newDataSource) {
+         if (newDataSource != null) {
+             List<Object> orderedProperties = Arrays
+                     .asList(PersonContainer.NATURAL_COL_ORDER);
+             super.setItemDataSource(newDataSource, orderedProperties);
+
+            setReadOnly(true);
+             getFooter().setVisible(true);
+         } else {
+             super.setItemDataSource(null);
+             getFooter().setVisible(false);
+         }
+     }
+
+    @Override
+     public void setReadOnly(boolean readOnly) {
+         super.setReadOnly(readOnly);
+         save.setVisible(!readOnly);
+         cancel.setVisible(!readOnly);
+         edit.setVisible(readOnly);
+     }]]></programlisting>
+
+
+		<para>
+			Try it out and ensure that changing mode (<emphasis>read only</emphasis> /
+			<emphasis>editable</emphasis>) mode works correctly and that the values in the
+			<classname>PersonTable</classname> are not updated until
+			<guibutton>Save</guibutton> is clicked (when not using the buffering mode they
+			are immediately updated). Remember to run <guimenuitem>Organize
+			Imports</guimenuitem> in Eclipse after copy/paste editing.
+		</para>
+
+	</section>
+
+	<section xml:id="interaction.new-contacts">
+		<title>Implement logic to add new contacts</title>
+
+		<para>
+			Next we want to create new contacts. Most of this logic will go in to
+			<classname>PersonForm</classname> but we must first create some logic in the
+			main application class. Before passing control to the
+			<classname>PersonForm</classname> for the actual addition we want to make sure
+			the <classname>ListView</classname> is being shown and we also want to clear
+			any possible selections from the table.
+		</para>
+
+		<para>
+			Add more logic to the click handler in
+			<classname>AddressBookApplication</classname> and make a click on the
+			<guibutton>Add contact</guibutton> button pass control to the
+			<methodname>addNewContact()</methodname> method. Implement it as follows:
+		</para>
+
+		<programlisting><![CDATA[    private void addNewContanct() {
+         showListView();
+         personForm.addContact();
+     }]]></programlisting>
+
+		<para>
+			Next we create the <methodname>addContact()</methodname> method in
+			<classname>PersonForm</classname>. Now the problem is that we do not have an
+			existing <classname>Person</classname> object to edit but need to create a
+			temporary one. We also need a flag that tells we are in
+			"<emphasis>newContactMode</emphasis>" so we can add the
+			<classname>Person</classname> to the datasource when the user clicks
+			<guibutton>Save</guibutton> (we do not want to add it immediately as it would
+			then show up in the <classname>PersonTable</classname> and additionally we
+			would have to remove it if the user clicks <guibutton>Cancel</guibutton>). We
+			add two fields to accomplish this (could be combined but kept separate here
+			for clarity):
+		</para>
+
+		<programlisting><![CDATA[    private boolean newContactMode = false;
+     private Person newPerson = null;]]></programlisting>
+
+		<para>
+			So we instantiate a new, temporary <classname>Person</classname> and put it
+			into the form without affecting the datasource in the main application. This
+			is done easily by wrapping the <classname>Person</classname> in a
+			<classname>BeanItem</classname> and setting that as the data source for the
+			form. We do not want a read only view when adding a contact so our
+			<methodname>addContact()</methodname> method will look like this:
+		</para>
+
+		<programlisting><![CDATA[    public void addContact() {
+         // Create a temporary item for the form
+         newPerson = new Person();
+         setItemDataSource(new BeanItem(newPerson));
+         newContactMode = true;
+         setReadOnly(false);
+     }]]></programlisting>
+
+		<para>
+			Now try clicking on the <guibutton>Add contact</guibutton> button to ensure
+			everything works this far. We are still lacking proper logic for handling
+			<guibutton>Save</guibutton> and <guibutton>Cancel</guibutton> events for a new
+			contact. When saving a new contact the temporary <classname>Person</classname>
+			object, or actually the <classname>BeanItem</classname> wrapping it, must be
+			added to our main data source, the
+			<classname>PersonContainer</classname>. This will make the new contact show up
+			in the table automatically. If the user clicks <guibutton>Cancel</guibutton>
+			when adding a contact we must empty the form instead of setting it to
+			read-only mode. With these changes our click listener in the form looks like
+			this:
+		</para>
+
+		<programlisting><![CDATA[    public void buttonClick(ClickEvent event) {
+         Button source = event.getButton();
+
+        if (source == save) {
+             /* If the given input is not valid there is no point in continuing */
+             if (!isValid()) {
+                 return;
+             }
+
+            commit();
+             if (newContactMode) {
+                 /* We need to add the new person to the container */
+                 Item addedItem = app.getDataSource().addItem(newPerson);
+                 /*
+                  * We must update the form to use the Item from our datasource
+                  * as we are now in edit mode
+                  */
+                 setItemDataSource(addedItem);
+
+                newContactMode = false;
+             }
+             setReadOnly(true);
+         } else if (source == cancel) {
+             if (newContactMode) {
+                 newContactMode = false;
+                 setItemDataSource(null);
+             } else {
+                 discard();
+             }
+             setReadOnly(true);
+         } else if (source == edit) {
+             setReadOnly(false);
+         }
+     }]]></programlisting>
+
+		<para>
+			Finally, "<emphasis>newContactMode</emphasis>" should also be cleared when
+			selecting a new row in the table without clicking on <guibutton>Save</guibutton>
+			or <guibutton>Cancel</guibutton>:
+		</para>
+
+		<programlisting><![CDATA[    public void setItemDataSource(Item newDataSource) {
+         newContactMode = false;
+         ...
+     }]]></programlisting>
+
+		<para>
+			Try it out and check that both creation of new contacts and editing of old
+			ones works correctly.
+		</para>
+
+	</section>
+
+	<section xml:id="interaction.search">
+		<title>Implementing the search functionality</title>
+
+		<para>
+			We have previously added logic for the search button so a search view is
+			displayed when the button in the toolbar is clicked but the view is still
+			empty. We want to create a simple view where you can enter a search term,
+			select what field to match the term to and optionally save the search for
+			later usage. The finished view should look like the following.
+		</para>
+
+		<figure xml:id="figure.interaction.search">
+			<title>Search User Interface</title>
+			<mediaobject>
+				<imageobject role="html">
+					<imagedata align="center" fileref="img/interaction-search.png"/>
+				</imageobject>
+				<imageobject role="fo">
+					<imagedata scale="75" align="center" fileref="img/interaction-search.png"/>
+				</imageobject>
+			</mediaobject>
+		</figure>
+
+		<para>
+			We implement this using a <guibutton>FormLayout</guibutton> which will cause
+			the captions to be rendered to the left of the fields instead of above (as the
+			case is with a <guibutton>VerticalLayout</guibutton>). In addition to the
+			layout we need a couple of <guibutton>TextFields</guibutton>, a
+			<guibutton>NativeSelect</guibutton>, a <guibutton>CheckBox</guibutton> and a
+			<guibutton>Search</guibutton> button. The following code is used for creating
+			the layout.
+		</para>
+
+		<programlisting><![CDATA[package com.itmill.dev.addressbooktutorial.ui;
+
+import com.itmill.dev.addressbooktutorial.AddressBookApplication;
+import com.itmill.dev.addressbooktutorial.data.PersonContainer;
+import com.itmill.toolkit.ui.Button;
+import com.itmill.toolkit.ui.CheckBox;
+import com.itmill.toolkit.ui.FormLayout;
+import com.itmill.toolkit.ui.NativeSelect;
+import com.itmill.toolkit.ui.Panel;
+import com.itmill.toolkit.ui.TextField;
+import com.itmill.toolkit.ui.Button.ClickEvent;
+import com.itmill.toolkit.ui.Button.ClickListener;
+
+public class SearchView extends Panel {
+
+    private TextField tf;
+     private NativeSelect fieldToSearch;
+     private CheckBox saveSearch;
+     private TextField searchName;
+     private AddressBookApplication app;
+
+    public SearchView(final AddressBookApplication app) {
+         this.app = app;
+        
+         setCaption("Search contacts");
+         setSizeFull();
+
+        /* Use a FormLayout as main layout for this Panel */
+         FormLayout formLayout = new FormLayout();
+         setLayout(formLayout);
+
+        /* Create UI components */
+         tf = new TextField("Search term");
+         fieldToSearch = new NativeSelect("Field to search");
+         saveSearch = new CheckBox("Save search");
+         searchName = new TextField("Search name");
+         Button search = new Button("Search");
+
+        /* Initialize fieldToSearch */
+         for (int i = 0; i < PersonContainer.NATURAL_COL_ORDER.length; i++) {
+             fieldToSearch.addItem(PersonContainer.NATURAL_COL_ORDER[i]);
+             fieldToSearch.setItemCaption(PersonContainer.NATURAL_COL_ORDER[i],
+                     PersonContainer.COL_HEADERS_ENGLISH[i]);
+         }
+
+        fieldToSearch.setValue("lastName");
+         fieldToSearch.setNullSelectionAllowed(false);
+
+        /* Initialize save checkbox */
+         saveSearch.setValue(true);
+
+        /* Add all the created components to the form */
+         addComponent(tf);
+         addComponent(fieldToSearch);
+         addComponent(saveSearch);
+         addComponent(searchName);
+         addComponent(search);
+     }
+}]]></programlisting>
+	 
+		<para>
+			All available property ids from the <classname>PersonContainer</classname> are
+			added to the field select in the for-loop. We cannot use the
+			<classname>PersonContainer</classname> as a data source for the field as this
+			would add all <classname>Persons</classname> to the drop-down instead of the
+			properties (headers in the table). The
+			<methodname>setItemCaption()</methodname> sets what is being displayed to more
+			human-readable form, like the headers in the table.
+		</para>
+
+		<para>
+			We want to force the user to select a field to search from so we set
+			<emphasis>nullSelectionAllowed</emphasis> to false, otherwise an empty value
+			would be added to the select (and this would be selected by default also). We
+			also make the assumption that the user most of the time wants to save his
+			search so the <varname>saveSearch</varname> checkbox is checked by default
+			(value=true).
+		</para>
+
+		<para>
+			Now we can run the program and the layout should appear when clicking on the
+			<guibutton>Search</guibutton> button. There is one small problem though,
+			nothing happens when you click on <guibutton>Search</guibutton>. So we need to
+			add some logic to the view.
+		</para>
+
+		<para>
+			We want to add two things: unchecking the <varname>saveSearch</varname>
+			checkbox should hide the <varname>searchName</varname>-field and clicking on
+			the <guibutton>Search</guibutton> button should perform a search.
+		</para>
+
+		<para>
+			Hiding the <varname>searchName</varname> field when un-checking the
+			<varname>saveSearch</varname> checkbox requires only a few lines of code:
+		</para>
+
+		<programlisting><![CDATA[saveSearch.setImmediate(true);
+ saveSearch.addListener(new ClickListener() {
+     public void buttonClick(ClickEvent event) {
+         searchName.setVisible(event.getButton().booleanValue());
+     }
+ });]]></programlisting>
+
+		<para>
+			First we need to set the <varname>saveSearch</varname> checkbox to immediate
+			mode so we get an event every time the user interacts with it. We then attach
+			a click listener to it so we can react to user checking or un-checking the
+			checkbox. We react to the click event simply by setting the visibility of the
+			<varname>searchName</varname> field to the checkbox status (true if checked,
+			false if unchecked).
+		</para>
+
+		<para>
+			Performing the search requires a little more effort. We need to pass the input
+			from the user to the <guibutton>PersonList</guibutton> (table) so it can
+			filter the result set and only show matching rows. Additionally we need to
+			store the search if the user has checked the <varname>saveSearch</varname>
+			checkbox.
+		</para>
+
+		<para>
+			First we create a simple data class, <guibutton>SearchFilter</guibutton>,
+			where we can store the input from the user.
+		</para>
+ 
+		<programlisting><![CDATA[package com.itmill.dev.addressbooktutorial.data;
+
+public class SearchFilter {
+ 
+      private final String term;
+      private final Object propertyId;
+      private String searchName;
+ 
+      public SearchFilter(Object propertyId, String searchTerm, String name) {
+            this.propertyId = propertyId;
+            this.term = searchTerm;
+            this.searchName = name;
+      }
+ 
+      // + getters
+}]]></programlisting>
+
+		<para>
+			We then add a click listener to the save button which will fetch the value of
+			the search field and term, create a <guibutton>SearchFilter</guibutton> and
+			pass it on to the main application. If <varname>saveSearch</varname> has been
+			checked we also tell the application to save the search.
+		</para>
+
+		<programlisting><![CDATA[search.addListener(new Button.ClickListener() {
+      public void buttonClick(ClickEvent event) {
+                performSearch();
+      }
+
+});]]></programlisting>
+	
+		<para>
+			As the code is more than a few lines we add it as a separate method:
+		</para>
+
+		<programlisting><![CDATA[    private void performSearch() {
+         String searchTerm = (String) tf.getValue();
+         SearchFilter searchFilter = new SearchFilter(fieldToSearch.getValue(),
+                 searchTerm, (String) searchName.getValue());
+         if (saveSearch.booleanValue()) {
+             app.saveSearch(searchFilter);
+         }
+         app.search(searchFilter);
+     }]]></programlisting>
+ 
+		<para>
+			Now we need to add the search and <varname>saveSearch</varname> logic to the
+			application class.
+		</para>
+
+		<programlisting><![CDATA[public void search(SearchFilter searchFilter) {
+      // clear previous filters
+      getDataSource().removeAllContainerFilters();
+      // filter contacts with given filter
+      getDataSource().addContainerFilter(searchFilter.getPropertyId(),
+                  searchFilter.getTerm(), true, false);
+      showListView();
+}]]></programlisting> 
+	 
+		<para>
+			The search method simply removes any previous filters and then adds a
+			container filter to the table data source using the data from the
+			<varname>searchFilter</varname> argument. The true and false parameters to the
+			<methodname>addContainerFilter()</methodname> call turns on
+			<varname>ignoreCase</varname> and makes it match the term as a sub string
+			(not only as prefix, i.e. it will search for "<literal>*term*</literal>", not
+			"<literal>term*</literal>").
+		</para>
+		
+		<para>
+			The filter also needs to be cleared when the user selects "Show All" in the
+			tree. This can be done in <methodname>itemClick()</methodname>:
+		</para>
+		
+		<programlisting><![CDATA[public void itemClick(ItemClickEvent event) {
+        if (event.getSource() == tree) {
+            Object itemId = event.getItemId();
+            if (itemId != null) {
+                if (itemId == NavigationTree.SHOW_ALL) {
+                    // clear previous filters
+                    getDataSource().removeAllContainerFilters();
+                    showListView();
+                } else if (itemId == NavigationTree.SEARCH) {
+                    showSearchView();
+                } else if (itemId instanceof SearchFilter) {
+                    search((SearchFilter) itemId);
+                }
+            }
+        }
+}]]></programlisting> 
+
+		<para>
+			The <methodname>saveSearch()</methodname> method adds a new item to the tree,
+			under the <guilabel>Search</guilabel> node and then selects that node:
+		</para>
+
+		<programlisting><![CDATA[    public void saveSearch(SearchFilter searchFilter) {
+         tree.addItem(searchFilter);
+         tree.setParent(searchFilter, NavigationTree.SEARCH);
+         // mark the saved search as a leaf (cannot have children)
+         tree.setChildrenAllowed(searchFilter, false);
+         // make sure "Search" is expanded
+         tree.expandItem(NavigationTree.SEARCH);
+         // select the saved search
+         tree.setValue(searchFilter);
+     }]]></programlisting>
+ 
+	 
+		<para>
+			The <varname>searchFilter</varname> is used as the <varname>itemId</varname>
+			for the tree node. A tree uses the <methodname>toString()</methodname> method
+			of the <varname>itemId</varname> to determine what to display to the user by
+			default (this can be changed by
+			<methodname>setItemCaptionMode()</methodname>). We thus need to implement a
+			<methodname>toString()</methodname> method in our
+			<classname>SearchFilter</classname> class which returns what we want to display
+			to the user:
+		</para>
+
+		<programlisting><![CDATA[    @Override
+     public String toString() {
+         return getSearchName();
+     }]]></programlisting>
+
+		<para>
+			Using the <varname>searchFilter</varname> object as the itemId in the tree
+			makes it easy to add a case to the <methodname>itemClick()</methodname>
+			handler for the tree so the search is performed every time the saved search is
+			clicked. Make the following addition to <methodname>itemClick()</methodname>
+			handler in <classname>AddressBookApplication</classname>:
+		</para>
+
+		<programlisting><![CDATA[public void itemClick(ItemClickEvent event) {
+            if(event.getSource() == tree) {
+[...]
+      } else if (itemId instanceof SearchFilter) {
+                              search((SearchFilter) itemId);
+      }
+[...]
+}]]></programlisting>
+	 
+		<para>
+			Now we have created a search view, implemented the search functionality and also support for saving searches. 
+		</para>
+
+		<para>
+			You can download the Eclipse project package for the end of this step from:
+		</para>
+		
+		<itemizedlist>
+			<listitem><link href="http://www.itmill.com/download/doc/tutorial/itmill-toolkit-5-tutorial/ab-ch5-ui.zip"/></listitem>
+		</itemizedlist>
+
+	</section>
+</chapter>
+
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: xml
+sgml-omittag:nil
+sgml-shorttag:nil
+sgml-namecase-general:nil
+sgml-general-insert-case:lower
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:4
+sgml-indent-data:t
+sgml-parent-document:nil
+sgml-exposed-tags:nil
+sgml-local-catalogs:("/etc/sgml/catalog" "/usr/share/xemacs21/xemacs-packages/etc/psgml-dtds/CATALOG")
+sgml-local-ecat-files:("ECAT" "~/sgml/ECAT" "/usr/share/sgml/ECAT" "/usr/local/share/sgml/ECAT" "/usr/local/lib/sgml/ECAT")
+End:
+-->
+

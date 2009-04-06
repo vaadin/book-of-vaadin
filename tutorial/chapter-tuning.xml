@@ -1,0 +1,416 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<chapter xml:id="tuning">
+	<title>Tuning the user experience</title>
+
+	<para>
+		The application we have built so far is a fully functional application, but
+		lacking some of the nice stuff which would make it easier to use. For example
+		emails in table could be links that open the user's default email
+		application. Other examples discussed here are validation of user input in forms
+		and giving proper feedback to users.
+	</para>
+
+	<section xml:id="tuning.addresses">
+		<title>Turning email addresses into links</title>
+
+		<para>
+			The email addresses should be links for directly sending an email and we
+			should validate the data entered to avoid unintentional mistakes.
+		</para>
+		
+		<figure xml:id="figure.tuning.email.adresses">
+			<title>Email Adresses as Text</title>
+			<mediaobject>
+				<imageobject role="html">
+					<imagedata align="center" fileref="img/tuning-email-addresses.png"/>
+				</imageobject>
+				<imageobject role="fo">
+					<imagedata scale="60" align="center" fileref="img/tuning-email-addresses.png"/>
+				</imageobject>
+			</mediaobject>
+		</figure>
+
+		<para>
+			The table we have created and populated so far only lists data directly from
+			the datasource. We would, however, want to turn the email addresses into links
+			so the user can directly click on them to send email. We can accomplish this
+			by using the generated column feature of the Table as shown in the code
+			below. By adding a generated column with the same id as an existing column
+			("<literal>email</literal>") we override the existing column and display the
+			generated column instead. Using a different id would result in both the plain
+			and the linked email column being shown. The following code should be added to
+			the PersonList constructor before setting the data source.
+		</para>
+
+		<programlisting><![CDATA[    // customize email column to have mailto: links using column generator
+         addGeneratedColumn("email", new ColumnGenerator() {
+             public Component generateCell(Table source, Object itemId,
+                     Object columnId) {
+                 Person p = (Person) itemId;
+                 Link l = new Link();
+                 l.setResource(new ExternalResource("mailto:" + p.getEmail()));
+                 l.setCaption(p.getEmail());
+                 return l;
+             }
+         });]]></programlisting>
+
+		<para>
+			The <classname>ColumnGenerator</classname> uses a simple interface with only
+			one method, <methodname>generateCell()</methodname> which is called every time
+			a value for the column is needed. Passed to this method is the
+			<parameter>itemId</parameter> for the row which in our example is the same as
+			the <classname>Person</classname>. We acquire the email address from the
+			<classname>Person</classname> object and generate a
+			<classname>Link</classname> component with the standard HTML
+			"<literal>mailto:&lt;address&gt;</literal>" target. Returning the
+			<classname>Link</classname> component from the generator will make the
+			<classname>Table</classname> automatically insert it in the correct position
+			(in place of the original, plain text email address).
+		</para>
+
+		<para>
+			The table now contains clickable email links:
+		</para>
+
+		<figure xml:id="figure.tuning.email.adresses">
+			<title>Email Adresses as Links</title>
+			<mediaobject>
+				<imageobject role="html">
+					<imagedata align="center" fileref="img/tuning-email-links.png"/>
+				</imageobject>
+				<imageobject role="fo">
+					<imagedata scale="60" align="center" fileref="img/tuning-email-links.png"/>
+				</imageobject>
+			</mediaobject>
+		</figure>
+
+	</section>
+	
+	<section xml:id="tuning.notifications">
+		<title>Notifications</title>
+
+		<para>
+			Notifications are a nice way of informing the user what is happening without
+			adding e.g. a Label which requires some space in the view. Let's test the
+			notifications by adding a notification when searching, so the user sees what
+			he searched for. This will be displayed at the same time as the results are
+			displayed. We will add the notification for both normal and saved searches so
+			the correct place for the code is the search method in the application class.
+		</para>
+
+		<programlisting><![CDATA[getMainWindow().showNotification(
+         "Searched for " + searchFilter.getPropertyId() + "=*"
+         + searchFilter.getTerm() + "*, found "
+         + getDataSource().size() + " item(s).",
+         Notification.TYPE_TRAY_NOTIFICATION);]]></programlisting>
+ 	
+		<para>
+			Now the user gets a nice little popup in the bottom right corner of the screen
+			which tells what the search criteria was and how many rows
+			matched. <parameter>Notification.TYPE_TRAY_NOTIFICATION</parameter> places the
+			notification in the lower right corner, feel free to experiment with other
+			types to see what happens.
+		</para>
+
+		<figure xml:id="figure.tuning.notifications">
+			<title>Tray Notification</title>
+			<mediaobject>
+				<imageobject role="html">
+					<imagedata align="center" fileref="img/tuning-notifications.png"/>
+				</imageobject>
+				<imageobject role="fo">
+					<imagedata scale="50" align="center" fileref="img/tuning-notifications.png"/>
+				</imageobject>
+			</mediaobject>
+		</figure>
+	</section>
+
+	<section xml:id="tuning.combobox">
+		<title>Using a combo box for fluent city selection</title>
+
+		<para>
+			If you have tried the final version, you have probably noted the
+			<classname>ComboBox</classname> component used for selecting a city. Using it
+			for selecting an existing city becomes much more efficient. Replacing the
+			normal text field with a combo box will introduce you to the system used in IT
+			Mill Toolkit for populating a form. The same mechanism can be used in tables
+			if you put the table into "editable" mode . Fields are generated using the
+			strategy pattern by a class implementing the
+			<classname>FieldFactory</classname> interface.
+		</para>
+
+		<!-- Is a combobox the same as a dropdown menu? Why do we call it a combobox
+			anyway? Combobox sounds like it's a selection of two items (sort of like a
+			checkbox)??? -->
+
+		<para>
+			By default the <classname>BaseFieldFactory</classname> class is used and is
+			generally a good base for customizations. The
+			<classname>FieldFactory</classname> interface has several methods which we do
+			not want to implement and <classname>BaseFieldFactory</classname> has a good
+			implementations for these. Later we'll use the same field factory to tune the
+			form fields even more.
+		</para>
+
+		<para>
+			We start by adding a <classname>ComboBox</classname> field to our
+			<classname>PersonForm</classname>:
+		</para>
+
+		<programlisting><![CDATA[private final ComboBox cities = new ComboBox("City");]]></programlisting>
+
+		<para>
+			We make adding of new cities possible and populate the combo box with existing
+			cities from our data source in the constructor. We cannot have duplicate
+			itemIds in a <classname>ComboBox</classname> so each city will show up only
+			once. Add the following code to the <classname>PersonForm</classname>
+			constructor.
+		</para>
+
+		<programlisting><![CDATA[/* Allow the user to enter new cities */
+ cities.setNewItemsAllowed(true);
+ /* We do not want to use null values */
+
+cities.setNullSelectionAllowed(false);
+/* Add an empty city used for selecting no city */
+ cities.addItem("");
+
+/* Populate cities select using the cities in the data container */
+ PersonContainer ds = app.getDataSource();
+ for (Iterator<Person> it = ds.getItemIds().iterator(); it.hasNext();) {
+     String city = (it.next()).getCity();
+     cities.addItem(city);
+ }]]></programlisting>
+
+		<para>
+			Finally we'll make a field factory extending the
+			<classname>BaseFieldFactory</classname>. Using the field factory we can choose
+			what kind of field to use for each property. For the city property we'll
+			return the cities combo box, for all other properties we'll let the
+			<classname>BaseFieldFactory</classname> take care of creating the field.
+		</para>
+
+		<programlisting><![CDATA[/*
+  * Field factory for overriding how the component for city selection is
+  * created
+  */
+ setFieldFactory(new BaseFieldFactory() {
+
+     @Override
+     public Field createField(Item item, Object propertyId,
+        Component uiContext) {
+        if (propertyId.equals("city")) {
+           return cities;
+        }
+
+        return super.createField(item, propertyId, uiContext);
+    }
+
+});]]></programlisting>
+
+	</section>
+
+	<section xml:id="tuning.validation">
+		<title>Automatically validate user input</title>
+ 
+		<para>
+			We want to validate two of the fields in the form: the postal code field
+			should contain 5 numbers and not start with a zero, and the email address
+			should have a valid form.
+		</para>
+
+		<para>
+			For the postal code we create a <classname>PostalCodeValidator</classname>
+			which implements the <classname>Validator</classname> interface. We implement
+			the two required methods: <methodname>isValid()</methodname> which just
+			returns true or false depending on if the value is valid and
+			<methodname>validate()</methodname> which throws an
+			<classname>InvalidValueException</classname> containing a description of the
+			error for invalid values. To avoid duplicating code we use
+			<methodname>isValid()</methodname> inside the validate function. The actual
+			validation is done by the regular expression match return
+		</para>
+
+		<programlisting><![CDATA[(String) value).matches("[1-9][0-9]{4}")]]></programlisting>
+
+		<para>
+			which returns true only for a 5 digit <classname>String</classname> where the
+			first character is <literal>1</literal>-<literal>9</literal>.
+		</para>
+
+		<programlisting><![CDATA[package com.itmill.dev.addressbooktutorial.validators;
+
+import com.itmill.toolkit.data.Validator;
+
+
+public class PostalCodeValidator implements Validator {
+    public boolean isValid(Object value) {
+        if (value == null || !(value instanceof String)) {
+            return false;
+        }
+        return ((String) value).matches("[1-9][0-9]{4}");
+    }
+ 
+    public void validate(Object value) throws InvalidValueException {
+        if (!isValid(value)) {
+            throw new InvalidValueException(
+                    "Postal code must be a five digit number and cannot start with a zero.");
+        }
+    }
+}]]></programlisting>
+	 
+		<para>
+			We assign the validator to the field in our
+			<classname>FieldFactory</classname> and at the same time make the field
+			required. We make another improvement at the same time by changing the null
+			representation for the field. Instead of the default "<literal>null</literal>"
+			we want to display an empty field before the user has entered any value. The
+			code for the <varname>postalCode</varname> field in the
+			<classname>FieldFactory</classname> is now:
+		</para>
+ 
+		<programlisting><![CDATA[        /*
+         * Field factory for overriding how the component for city selection is
+         * created
+         */
+        setFieldFactory(new BaseFieldFactory() {
+            @Override
+            public Field createField(Item item, Object propertyId,
+                    Component uiContext) {
+                if (propertyId.equals("city")) {
+                    return cities;
+                }
+                Field field = super.createField(item, propertyId, uiContext);
+                if (propertyId.equals("postalCode")) {
+                    TextField tf = (TextField) field;
+                    /*
+                     * We do not want to display "null" to the user when the
+                     * field is empty
+                     */
+                    tf.setNullRepresentation("");
+
+                    /* Add a validator for postalCode and make it required */
+                    tf.addValidator(new PostalCodeValidator());
+                    tf.setRequired(true);
+                }
+
+                return field;
+            }
+        });]]></programlisting>
+	 
+		<para>
+			The field now contains a red star, telling the user that it must be filled
+			out. It is also initially empty.
+		</para>
+
+		<figure xml:id="figure.validation.empty">
+			<title>Validated Field Initially Empty</title>
+			<mediaobject>
+				<imageobject role="html">
+					<imagedata align="center" fileref="img/tuning-validation-1.png"/>
+				</imageobject>
+				<imageobject role="fo">
+					<imagedata scale="80" align="center" fileref="img/tuning-validation-1.png"/>
+				</imageobject>
+			</mediaobject>
+		</figure>
+
+		<para>
+			If the user enters an invalid value into the field a red exclamation mark
+			appears and when the user moves the mouse cursor over the field a tooltip
+			appears, containing the error message from the validator.
+		</para>
+
+		<figure xml:id="figure.validation.empty">
+			<title>Validated Field with Invalid Value</title>
+			<mediaobject>
+				<imageobject role="html">
+					<imagedata align="center" fileref="img/tuning-validation-2.png"/>
+				</imageobject>
+				<imageobject role="fo">
+					<imagedata scale="80" align="center" fileref="img/tuning-validation-2.png"/>
+				</imageobject>
+			</mediaobject>
+		</figure>
+
+		<para>
+			We do the same thing for the email field but use a different validator
+			implementation which checks that the email is of form
+			<literal>*@*.*</literal>. Implementing the EmailValidator is left here as an
+			exercise for the reader (the implementation can be found in the
+			<classname>EmailValidator</classname> file in the final package).
+		</para>
+	</section>
+
+	<section xml:id="tuning.table">
+		<title>Enabling advanced features in a Table</title>
+
+		<para>
+			The <classname>Table</classname> component in IT Mill Toolkit is quite
+			powerful. There are several features available that enhance the user
+			experience. Some of these (like sorting) require support from the data
+			source. The best place to enable these features is naturally the constructor
+			in our <classname>PersonList</classname> class.
+		</para>
+
+		<para>
+			Sorting is on by default provided the data source supports it. The
+			<classname>BeanItemContainer</classname> which our
+			<classname>PersonContainer</classname> is based upon has sorting support for
+			every field whose type implements <classname>Comparable</classname>. Try
+			clicking on column headers to sort the table according to any column. Sorting
+			can be explicitly disabled if necessary.
+		</para>
+
+		<para>
+			Other features enhancing the usability of a Table are column reordering and
+			column collapsing. These are disabled by default. Add the following lines to
+			<classname>PersonList</classname> and then try dragging column headers. Also
+			try the menu appearing in the top right corner of the table.
+		</para>
+
+		<programlisting><![CDATA[setColumnCollapsingAllowed(true);
+setColumnReorderingAllowed(true);]]></programlisting>
+
+	</section>
+
+	<section xml:id="tuning.summary">
+		<title>Summary</title>
+
+		<para>
+			We have in this chapter added some basic usability enhancing features to the
+			Address Book application. One final thing still remains before the application
+			is ready and that is changing the design, or theme as it is called in a
+			Toolkit application. This is done in the next chapter.
+		</para>
+
+		<para>
+			You can download the Eclipse project package for the end of this step from:
+		</para>
+		
+		<itemizedlist>
+			<listitem><link href="http://www.itmill.com/download/doc/tutorial/itmill-toolkit-5-tutorial/ab-ch6-finetuning.zip"/></listitem>
+		</itemizedlist>
+	</section>
+</chapter>
+
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: xml
+sgml-omittag:nil
+sgml-shorttag:nil
+sgml-namecase-general:nil
+sgml-general-insert-case:lower
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:4
+sgml-indent-data:t
+sgml-parent-document:nil
+sgml-exposed-tags:nil
+sgml-local-catalogs:("/etc/sgml/catalog" "/usr/share/xemacs21/xemacs-packages/etc/psgml-dtds/CATALOG")
+sgml-local-ecat-files:("ECAT" "~/sgml/ECAT" "/usr/share/sgml/ECAT" "/usr/local/share/sgml/ECAT" "/usr/local/lib/sgml/ECAT")
+End:
+-->
+

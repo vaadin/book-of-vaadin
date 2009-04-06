@@ -1,0 +1,425 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<chapter xml:id="themeing">
+	<title>Building a Simple Theme</title>
+
+	<para>
+		A toolkit application always uses a theme which defines the look and feel of the
+		application. If no theme is specified the "<literal>default</literal>" theme,
+		shipped with IT Mill Toolkit, is used and the application looks like this.
+	</para>
+
+	<figure xml:id="figure.themeing.unthemed">
+		<title>Layout with Default Theme</title>
+		<mediaobject>
+			<imageobject role="html">
+				<imagedata align="center" fileref="img/themeing-unthemed.png"/>
+			</imageobject>
+			<imageobject role="fo">
+				<imagedata scale="50" align="center" fileref="img/themeing-unthemed.png"/>
+			</imageobject>
+		</mediaobject>
+	</figure>
+
+	<para>
+		We have now arrived at the stage where we want the application to look a bit more
+		like the marketing department has visioned it. They have decided to brand our
+		application "Contacts!" and want a few images added and want to change the color
+		theme.
+	</para>
+
+	<section xml:id="themeing.custom">
+		<title>Using a Custom Theme</title>
+
+		<para>
+			We want to change the looks of the application and need to start by creating
+			our own theme. We decide to name our theme
+			"<literal>contacts</literal>". Creating a new theme is simple, we will extend
+			the default theme to keep the current look and then make some customizations
+			to change the looks to parts of the application. Creating a new theme can be
+			summarized in the following few steps:
+		</para>
+
+		<itemizedlist>
+			<listitem>Create a theme folder "<filename>contacts</filename>" in
+			<filename>WebContent/ITMILL/themes</filename></listitem>
+
+			<listitem>Create a <filename>styles.css</filename> inside the
+			"<filename>contacts</filename>" folder. This defines all the css used in our
+			theme. To include the default theme we add
+
+				<programlisting><![CDATA[@import url(../default/styles.css);]]></programlisting>
+
+				at the beginning of the <filename>styles.css</filename></listitem>
+
+			<listitem>
+				<para>
+					Tell the application to use our custom theme. This is done by calling
+					<methodname>setTheme()</methodname> when creating our application, so
+					we add the code
+				</para>
+				
+				<programlisting><![CDATA[setTheme("contacts")]]></programlisting>
+
+				<para>
+					to the <methodname>buildMainLayout()</methodname> method in
+					<classname>AddressBookApplication</classname>.
+				</para>
+			</listitem>
+		</itemizedlist>
+
+		<para>
+			The application now uses our custom theme (but you won't notice it as we have
+			not made any changes yet). If you are completely new to CSS (Cascading Style
+			Sheets), please have a look at e.g. <link
+			href="http://www.w3schools.com/css/"/>.
+		</para>
+	</section>
+
+	<section xml:id="themeing.spacing">
+		<title>Adding some space around the components</title>
+
+		<para>
+			In the original layout everything is pretty much packed together and a little
+			extra space here and there wouldn't hurt. We can add margins to layouts using
+			CSS (can select the size of the margin) or by using the
+			<methodname>setMargin()</methodname> method in the code (uses a default size
+			which can be overridden in CSS). Here we have chosen to use the default margin
+			sizes and just enable the margins in the code. We add margins and spacing to
+			the buttons in the toolbar by adding the following to the application classes
+			<methodname>createToolbar()</methodname> method:
+		</para>
+
+		<programlisting><![CDATA[        lo.setMargin(true);
+        lo.setSpacing(true);]]></programlisting>
+ 	
+		<para>
+			We also want a little space around the tree which we can get by adding two
+			lines of CSS to our <filename>styles.css</filename>, which now looks like the
+			following:
+		</para>
+
+		<programlisting><![CDATA[@import url(../default/styles.css);
+
+.i-tree {
+      padding-top: 8px;
+      padding-left: 4px;
+}]]></programlisting>
+	
+		<para>
+			Now the application already looks a little less packed:
+		</para>
+
+		<figure xml:id="figure.themeing.spacing">
+			<title>Layout with Spacing</title>
+			<mediaobject>
+				<imageobject role="html">
+					<imagedata align="center" fileref="img/themeing-spacing.png"/>
+				</imageobject>
+				<imageobject role="fo">
+					<imagedata scale="50" align="center" fileref="img/themeing-spacing.png"/>
+				</imageobject>
+			</mediaobject>
+		</figure>
+
+		<para>
+			Did it not work and everything disappeared or just looks broken? Make sure
+			your theme name is correct and that the <markup>@import</markup> line is
+			present in your <filename>styles.css</filename>.
+		</para>
+	</section>
+
+	<section xml:id="themeing.icons">
+		<title>Images and icons</title>
+
+		<para>
+			We are now ready to add some icons to the navigation buttons in the header
+			(<guibutton>Add contact</guibutton>, <guibutton>Search</guibutton>, etc.). We
+			will add the icon files to an "<filename>icons</filename>" folder below our
+			theme directory ("<filename>contacts</filename>") and then use them for the
+			buttons. The icon files are copied from the default theme included with IT
+			Mill Toolkit and are also included in the downloadable package for this step
+			(see <xref linkend="themeing.final"/> for the download link). To add an icon
+			to a button we use the <methodname>setIcon()</methodname> method:
+		</para>
+
+		<programlisting><![CDATA[search.setIcon(new ThemeResource("icons/32/folder-add.png"));]]></programlisting>
+ 	
+		<para>
+			The <classname>ThemeResource</classname> refers to a file found in the theme
+			directory. This code goes into
+			<classname>AddressBookApplication</classname>.<methodname>createToolbar()</methodname>
+			where the buttons are created. We add icons for the other buttons in the same
+			way:
+		</para>
+
+		<programlisting><![CDATA[share.setIcon(new ThemeResource("icons/32/users.png"));
+help.setIcon(new ThemeResource("icons/32/help.png"));
+newContact.setIcon(new ThemeResource("icons/32/document-add.png"));]]></programlisting>
+ 	
+		<para>
+			We also want to add a logo for the application in the right hand part of the
+			header. There is no need for this to be a <classname>Button</classname> so we
+			add an <classname>Embedded</classname> component to display the logo
+			instead. The logo can be found in the "images" folder in the theme directory
+			so we can access it by using a <classname>ThemeResource</classname>, the same
+			way we accessed the icons.
+
+			<!-- Tähän linkki paketin lataukseen kun logo.png ei ole vielä missään mukana
+			toistaiseksi. -->
+		</para>
+
+		<programlisting><![CDATA[lo.setWidth("100%");
+
+Embedded em = new Embedded("", new ThemeResource("images/logo.png"));
+lo.addComponent(em);
+lo.setComponentAlignment(em, Alignment.MIDDLE_RIGHT);
+lo.setExpandRatio(em, 1);]]></programlisting>
+ 	
+		<para>
+			We need a little extra code to get the logo where we want it. First of all we
+			want the toolbar to use all available space horizontally so we set its width
+			to <literal>100%</literal>. We set the alignment for the logo to the right so
+			it is placed at the right hand edge of the application. We also set the expand
+			ratio for the component so that all extra space available in the layout will
+			be assigned to this component. The result is that the navigation buttons are
+			placed at the left side, the logo at the right side and all extra, empty space
+			is placed between the logo and the buttons. The application now looks like the
+			following:
+		</para>
+
+		<figure xml:id="figure.themeing.icons">
+			<title>Themeing Icons</title>
+			<mediaobject>
+				<imageobject role="html">
+					<imagedata align="center" fileref="img/themeing-icons.png"/>
+				</imageobject>
+				<imageobject role="fo">
+					<imagedata scale="50" align="center" fileref="img/themeing-icons.png"/>
+				</imageobject>
+			</mediaobject>
+		</figure>
+
+		<para>
+			Even though we got our icons in place we are still not entirely happy about
+			the way the buttons look. We would like to take the borders away and place the
+			text below the image. We also want the text to be a little smaller and have a
+			small shadow.
+		</para>
+
+		<para>
+			We accomplish this by first assigning a style name to the toolbar using:
+		</para>
+
+		<programlisting><![CDATA[        lo.setStyleName("toolbar");]]></programlisting>
+
+		<para>
+			We can now use CSS to style the buttons inside the toolbar:
+		</para>
+  
+		<programlisting><![CDATA[.toolbar .i-button {
+      display: block;
+      width: 65px;
+      height: 55px;
+      background: transparent;
+      border: none;
+      text-align: center;
+}
+ 
+.toolbar .i-button img {
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      margin-bottom: 5px;
+}
+
+.toolbar .i-button span {
+      font-size: x-small;
+      text-shadow: #fafafa 1px 1px 0;
+}]]></programlisting>
+	 
+		<para>
+			We include <markup>.toolbar</markup> in the CSS file to make sure that we only
+			change the looks of the buttons in the toolbar (this refers to the
+			<varname>styleName</varname> that we set earlier).
+		</para>
+
+		<figure xml:id="figure.themeing.toolbar">
+			<title>Themeing Toolbar</title>
+			<mediaobject>
+				<imageobject role="html">
+					<imagedata align="center" fileref="img/themeing-toolbar.png"/>
+				</imageobject>
+				<imageobject role="fo">
+					<imagedata scale="50" align="center" fileref="img/themeing-toolbar.png"/>
+				</imageobject>
+			</mediaobject>
+		</figure>
+
+		<para>
+			Using the above CSS the application now looks like the following:
+		</para>
+ 
+		<para>
+			Next we add a background to the header and change some background colors and
+			the default font. In order for our background change to affect all views we
+			need to add style names to all of our views:
+		</para>
+
+		<programlisting><![CDATA[        addStyleName("view");]]></programlisting>
+
+		<para>
+			The same style name can be added to both <classname>ListView</classname> and
+			<classname>SearchView</classname>. The CSS we use is:
+		</para>
+ 
+		<programlisting><![CDATA[.i-app {
+      background: #d0e2ec;
+      font-family: "Lucida Grande", Helvetica, Arial, sans-serif;
+      color: #222;
+}
+
+.toolbar {
+      background: #ccc url(images/gradient.png) repeat-x bottom left;
+}
+
+.i-panel-caption-view {
+      color: #004b98;
+}
+ 
+.view {
+      background: white;     
+}]]></programlisting>
+
+	 
+		<para>
+			And we get:
+		</para>
+
+		<figure xml:id="figure.themeing.view">
+			<title>Themeing View</title>
+			<mediaobject>
+				<imageobject role="html">
+					<imagedata align="center" fileref="img/themeing-view.png"/>
+				</imageobject>
+				<imageobject role="fo">
+					<imagedata scale="50" align="center" fileref="img/themeing-view.png"/>
+				</imageobject>
+			</mediaobject>
+		</figure>
+
+		<para>
+			We still want to theme the table a bit to use a smaller font and some other
+			colors so we use the following CSS:
+		</para>
+
+		<programlisting><![CDATA[/* Theme table to look bit lighter */
+.i-table-header-wrap {
+      height: 20px;
+      border: none;
+      border-bottom: 1px solid #555;
+      background: transparent url(images/table-header-bg.png) repeat-x;
+}
+ 
+.i-table-caption-container {
+      font-size: 11px;
+      color: #000;
+      font-weight: bold;
+      text-shadow: #fff 0 1px 0;
+      padding-top: 1px;
+}
+ 
+.i-table-body {
+      border: none;
+}
+ 
+.i-table-row-odd {
+      background: #f1f5fa;
+}
+ 
+.i-table-row:hover {
+      background: #fff;
+}
+ 
+.i-table-row-odd:hover {
+      background: #f1f5fa;
+}
+ 
+.i-table .i-selected {
+      background: #3d80df;
+}
+ 
+.i-table-cell-content {
+      padding: 2px 0 2px 3px;
+      line-height: normal;
+      font-size: 85%;
+}]]></programlisting>
+	 
+		<para>
+			And get our final result which both we and our marketing department are happy
+			with:
+		</para>
+
+		<figure xml:id="figure.themeing.final">
+			<title>Final Graphical Design</title>
+			<mediaobject>
+				<imageobject role="html">
+					<imagedata align="center" fileref="img/themeing-final.png"/>
+				</imageobject>
+				<imageobject role="fo">
+					<imagedata scale="50" align="center" fileref="img/themeing-final.png"/>
+				</imageobject>
+			</mediaobject>
+		</figure>
+	</section>
+
+	<section xml:id="themeing.final">	
+		<title>Final version</title>
+
+		<para>
+			We have made a final version of the application which includes a few more
+			features including:
+		</para>
+		
+		<itemizedlist>
+			<listitem>Equal width for all form fields</listitem>
+
+			<listitem>Notifications if necessary parameters are missing from the search view</listitem>
+
+			<listitem>Ability to close the "share"-popup using the <guibutton>OK</guibutton> button</listitem>
+		</itemizedlist>
+
+		<!--
+			Feedback form at the end of the tutorial, a little feedback box that sends an
+			email to the DEV-team (and COM and ORG?)...
+		-->
+
+		<para>
+			You can download the Eclipse project package for this final step from:
+		</para>
+		
+		<itemizedlist>
+			<listitem><link href="http://www.itmill.com/download/doc/tutorial/itmill-toolkit-5-tutorial/ab-final.zip"/></listitem>
+		</itemizedlist>
+	</section>
+</chapter>
+
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: xml
+sgml-omittag:nil
+sgml-shorttag:nil
+sgml-namecase-general:nil
+sgml-general-insert-case:lower
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:4
+sgml-indent-data:t
+sgml-parent-document:nil
+sgml-exposed-tags:nil
+sgml-local-catalogs:("/etc/sgml/catalog" "/usr/share/xemacs21/xemacs-packages/etc/psgml-dtds/CATALOG")
+sgml-local-ecat-files:("ECAT" "~/sgml/ECAT" "/usr/share/sgml/ECAT" "/usr/local/share/sgml/ECAT" "/usr/local/lib/sgml/ECAT")
+End:
+-->
+

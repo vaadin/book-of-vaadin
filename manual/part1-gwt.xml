@@ -1,0 +1,2198 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<chapter xml:id="gwt">
+	<title>Developing Custom Components</title>
+
+	<para>
+		This chapter gives details on how to create custom client-side components as
+		Google Web Toolkit (GWT) widgets and how to integrate them with IT Mill
+		Toolkit. The client-side implementations of all standard user interface components
+		in IT Mill Toolkit use the same client-side interfaces and patterns.
+	</para>
+
+	<para>
+		Google Web Toolkit is intended for developing browser-based user interfaces using
+		the Java language, which is compiled into JavaScript. Knowledge of such
+		client-side technologies is usually not needed with IT Mill Toolkit, as its
+		repertoire of user interface components should be sufficient for most
+		applications. The easiest way to create custom components in IT Mill Toolkit is to
+		make composite components with the <classname>CustomComponent</classname>
+		class. See <xref linkend="components.custom"/> for more details on the
+		composite components. In some cases, however, you may need to either make
+		modifications to existing components or create new or integrate existing GWT
+		widgets with your application.
+	</para>
+
+	<para>
+		If you need more background on the architecture, <xref
+		linkend="architecture.client-side"/> gives an introduction to the
+		architecture of the IT Mill Toolkit Client-Side Engine. If you are new to Google
+		Web Toolkit, <xref linkend="architecture.technology.gwt"/> gives an introduction to
+		GWT and its role in the architecture of IT Mill Toolkit.
+	</para>
+
+	<note>
+		<title>On Terminology</title>
+		<para>
+			Google Web Toolkit uses the term <emphasis>widget</emphasis> for user
+			interface components. In this book, we use the term widget to refer to
+			client-side components made with Google Web Toolkit, while using the term
+			<emphasis>component</emphasis> in a general sense and also in the special sense
+			for server-side components.
+		</para>
+	</note>
+
+	<section xml:id="gwt.overview">
+		<title>Overview</title>
+
+		<para>
+			Google Web Toolkit (GWT) is an integral part of IT Mill Toolkit since Release
+			5. All rendering of user interface components in a web browser is programmed
+			with GWT. Using custom GWT widgets is easy in IT Mill Toolkit. This chapter
+			gives an introduction to GWT widgets and details on how to integrate them with
+			IT Mill Toolkit.
+		</para>
+		
+		<para>
+			On the client side, in the web browser, you have the IT Mill Toolkit
+			Client-Side Engine. It uses the GWT framework, and both are compiled into a
+			JavaScript runtime component. The client-side engine is contained in the
+			<package>com.itmill.toolkit.terminal.gwt.client</package> package and the
+			client-side implementations of various user interface components are in the
+			<package>com.itmill.toolkit.terminal.gwt.client.ui</package> package. You can
+			find the source code for these packages in the IT Mill Toolkit installation
+			package. You make custom components by inheriting GWT widget classes. To
+			integrate them with IT Mill Toolkit, you have to implement the
+			<classname>Paintable</classname> interface of the Client-Side Engine that
+			provides the AJAX communications with the server-side application. To enable
+			the custom widgets, you also need to implement a <emphasis>widget
+			set</emphasis>. A widget set is a factory class that can instantiate your
+			widgets. It needs to inherit the <classname>DefaultWidgetSet</classname> that
+			acts as the factory for the standard widgets. You can also define stylesheets
+			for custom widgets. A client-side module is defined in a GWT Module
+			Descriptor.
+		</para>
+
+		<para>
+			To summarize, to implement a client-side widget that is integrated with IT
+			Mill Toolkit, you need the following:
+		</para>
+
+		<itemizedlist>
+			<listitem>A GWT widget that implements the <classname>Paintable</classname>
+			interface of the IT Mill Toolkit Client-Side Engine</listitem>
+
+			<listitem>A widget factory (a "widget set") that can create the custom widget or widgets</listitem>
+
+			<listitem>Default CSS style sheet for the widget set (optional)</listitem>
+
+			<listitem>A GWT Module Descriptor (<filename>.gwt.xml</filename>) that describes the entry point and style sheet</listitem>
+
+		</itemizedlist>
+
+		<para>
+			On the server side, you need to implement a server-side component that manages
+			serialialization and deserialization of its attributes with the client-side
+			widget. A server-side component usually inherits the
+			<classname>AbstractComponent</classname> or
+			<classname>AbstractField</classname> class and implements either the
+			<methodname>paintContent()</methodname> or the more generic
+			<methodname>paint()</methodname> method to serialize its data to the
+			client. These methods "paint" the component by generating a UIDL element that
+			is sent to the client. The UIDL element contains all the relevant information
+			about the component, and you can easily add your own attributes to it.
+			Upon reception of UIDL messages, the client-side engine (using the widget
+			set) creates or updates user interface widgets as needed.
+		</para>
+
+		<para>
+			<xref linkend="figure.gwt.widget-files"/> below illustrates the folder
+			hierarchy of the Color Picker example used in this chapter. The example is
+			available in the demo application of IT Mill Toolkit with URL
+			<filename>/colorpicker/</filename>. You can find the full source code of the
+			application in the source module for the demos in the installation package.
+		</para>
+
+		<figure xml:id="figure.gwt.widget-files">
+			<title>Color Picker Module</title>
+			<mediaobject>
+				<imageobject role="html">
+					<imagedata align="center" fileref="img/gwt/gwt-widget-files-lo.png"/>
+				</imageobject>
+				<imageobject role="fo">
+					<imagedata scale="60" align="center" fileref="img/gwt/gwt-widget-files-hi.png"/>
+				</imageobject>
+			</mediaobject>
+		</figure>
+
+		<para>
+			The <filename>ColorPickerApplication.java</filename> application provides an
+			example of using the <classname>ColorPicker</classname> custom component. To
+			allow accessing the application, it must be defined in the deployment
+			descriptor <filename>web.xml</filename>. See <xref
+			linkend="section.web.web-xml"/> for details. The source code for the
+			server-side component is located in the same folder.
+		</para>
+
+		<para>
+			A client-side widget set must be developed within a single source module
+			tree. This is because GWT Compiler takes as its argument the root folder of
+			the source code, in the Color Picker example the
+			<filename>colorpicker.gwt.client</filename> module, and compiles all the
+			contained Java source files into JavaScript. The path to the source files, the
+			entry point class, and the style sheet are specified in the
+			<filename>WidgetSet.gwt.xml</filename> descriptor for the GWT Compiler. The
+			<filename>WidgetSet.java</filename> provides source code for the entry point,
+			which is a factory class for creating the custom widget objects. The actual
+			custom widget is split into two classes:
+			<classname>GwtColorPicker</classname>, a pure GWT widget, and
+			<classname>IColorPicker</classname> that provides the integration with IT
+			Mill Toolkit. The default style sheet for the widget set is provided in
+			<filename>gwt/public/colorpicker/styles.css</filename>.
+		</para>
+
+	</section>
+
+	<section xml:id="gwt.widgets">
+		<title>Google Web Toolkit Widgets</title>
+
+		<para>
+			Let us take a look into how custom GWT widgets are created. The authoritative
+			sources for developing with GWT are the <emphasis>Google Web Toolkit Developer
+			Guide</emphasis> and <emphasis>Google Web Toolkit Class Reference</emphasis>.
+		</para>
+
+		<para>
+			Google Web Toolkit offers a variety of ways for creating custom widgets. The
+			easiest way is to create <emphasis>composite</emphasis> widgets by grouping
+			existing basic widgets and adding some interaction logic to them. You can also
+			develop widgets using the lower-level Java interfaces used by the standard
+			GWT widgets or the really low-level JavaScript interfaces.
+		</para>
+
+		<para>
+			A custom GWT widget needs to find its place in the GWT class hierarchy. <xref
+			linkend="figure.gwt.widgets"/> below illustrates the abstract base classes for
+			GWT widgets.
+		</para>
+
+		<figure xml:id="figure.gwt.widgets">
+			<title>GWT Widget Base Class Hierarchy</title>
+			<mediaobject>
+				<imageobject role="html">
+					<imagedata align="center" fileref="img/gwt/gwt-widgets-lo.png"/>
+				</imageobject>
+				<imageobject role="fo">
+					<imagedata scale="60" align="center" fileref="img/gwt/gwt-widgets-hi.png"/>
+				</imageobject>
+			</mediaobject>
+		</figure>
+
+		<para>
+			Each of the base classes offers various services for different types of
+			widgets. Many custom widgets, such as the Color Picker example below, extend
+			the <classname>Composite</classname> class to combine the widget from existing
+			GWT widgets. Other base classes offer various features useful for different
+			kinds of widgets. You can also opt to extend an existing GWT widget, as we
+			have done for most of the standard user interface components of IT Mill
+			Toolkit, or extend an IT Mill Toolkit widget.
+		</para>
+
+		<section xml:id="gwt.widgets.extending">
+			<title>Extending an IT Mill Toolkit Widget</title>
+
+			<para>
+				Extending an IT Mill Toolkit widget is an easy way to add features, such
+				as advanced client-side validation, to existing standard components. If
+				the extended widget does not require any additional parameters, which is
+				usual in client-side validation, you may not even need to define a
+				server-side counterpart for your widget. A server-side component can be
+				mapped to multiple client-side components depending on its parameters.
+				The mapping is defined in the widget factory, i.e., the class inheriting
+				<classname>DefaultWidgetSet</classname>. For details on how to implement a
+				widget factory, see <xref linkend="gwt.widgetset" />.
+			</para>
+
+		</section>
+
+		<section xml:id="gwt.widgets.example.colorpicker">
+			<title>Example: A Color Picker GWT Widget</title>
+
+			<para>
+				In the following example, we implement a composite GWT widget built from
+				<classname>HorizontalPanel</classname>, <classname>Grid</classname>,
+				<classname>Button</classname>, and <classname>Label</classname>
+				widgets. This widget does not yet have any integration with the server
+				side code, which will be shown later in this chapter. The source code is
+				available in the source folder for the demo application in IT Mill Toolkit
+				installation folder, under package
+				<package>com.itmill.toolkit.demo.colorpicker</package>.
+			</para>
+
+		<programlisting><![CDATA[package com.itmill.toolkit.demo.colorpicker.gwt.client.ui;
+
+import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.Element;
+import com.google.gwt.user.client.ui.*;
+
+/**
+ * A regular GWT component without integration with IT Mill Toolkit.
+ **/
+public class GwtColorPicker extends Composite implements ClickListener {
+
+    /** Currently selected color name to give client-side feedback to the user. */
+    protected Label currentcolor = new Label();
+
+    public GwtColorPicker() {
+        // Create a 4x4 grid of buttons with names for 16 colors
+        Grid grid = new Grid(4,4);
+        String[] colors = new String[] {"aqua", "black", "blue", "fuchsia",
+                "gray", "green", "lime", "maroon", "navy", "olive",
+                "purple", "red", "silver", "teal", "white", "yellow"};
+        int colornum = 0;
+        for (int i=0; i<4; i++)
+            for (int j=0; j<4; j++, colornum++) {
+                // Create a button for each color
+                Button button = new Button(colors[colornum]);
+                button.addClickListener(this);
+                
+                // Put the button in the Grid layout
+                grid.setWidget(i, j, button);
+
+                // Set the button background colors.
+                DOM.setStyleAttribute(button.getElement(), "background", colors[colornum]);
+                
+                // For dark colors, the button label must be in white.
+                if ("black navy maroon blue purple".indexOf(colors[colornum]) != -1)
+                    DOM.setStyleAttribute(button.getElement(), "color", "white");
+            }
+
+        // Create a panel with the color grid and currently selected color indicator
+        HorizontalPanel panel = new HorizontalPanel();
+        panel.add(grid);
+        panel.add(currentcolor);
+
+        // Set the class of the color selection feedback box to allow CSS styling.
+        // We need to obtain the DOM element for the current color label.
+        // This assumes that the <td> element of the HorizontalPanel is
+        // the parent of the label element. Notice that the element has no parent
+        // before the widget has been added to the horizontal panel.
+        Element panelcell = DOM.getParent(currentcolor.getElement());
+        DOM.setElementProperty(panelcell, "className", "colorpicker-currentcolorbox");
+
+        // Set initial color. This will be overridden with the value read from server.
+        setColor("white");
+        
+        // Composite GWT widgets must call initWidget().
+        initWidget(panel);
+    }
+
+    /** Handles click on a color button. */
+    public void onClick(Widget sender) {
+        // Use the button label as the color name to set
+        setColor(((Button) sender).getText());
+    }
+
+    /** Sets the currently selected color. */
+    public void setColor(String newcolor) {
+        // Give client-side feedback by changing the color name in the label
+        currentcolor.setText(newcolor);
+
+        // Obtain the DOM elements. This assumes that the <td> element
+        // of the HorizontalPanel is the parent of the label element.
+        Element nameelement = currentcolor.getElement();
+        Element cell = DOM.getParent(nameelement);
+
+        // Give feedback by changing the background color
+        DOM.setStyleAttribute(cell,        "background", newcolor);
+        DOM.setStyleAttribute(nameelement, "background", newcolor);
+        if ("black navy maroon blue purple".indexOf(newcolor) != -1)
+            DOM.setStyleAttribute(nameelement, "color", "white");
+        else
+            DOM.setStyleAttribute(nameelement, "color", "black");
+    }
+}]]></programlisting>
+
+			<para>
+				This example demonstrates one reason for making a custom widget: it
+				provides client-side feedback to the user in a way that would not be
+				possible or at least practical from server-side code. Server-side code can
+				only select a static CSS style or a theme, while on the client-side we can
+				manipulate styles of HTML elements very flexibly. Notice that manipulation
+				of the DOM tree depends somewhat on the browser. In this example, the
+				manipulation should be rather compatible, but in some cases there could be
+				problems. Standard GWT and IT Mill Toolkit widgets handle many of such
+				compatibility issues, but when doing such low-level operations as DOM
+				manipulation, you may need to consider them.
+			</para>
+
+			<para>
+				The structure of the DOM tree depends on how GWT renders its widgets for a
+				specific browser. It is also not guaranteed that the rendering does not
+				change in future releases of GWT. You should therefore make as few
+				assumptions regarding the DOM structure as possible. Unfortunately, GWT
+				does not provide a way to set the style of, for example, cells of layout
+				elements. The above example therefore assumes that the
+				<classname>Grid</classname> is a table and the
+				<literal>&lt;button&gt;</literal> elements are inside
+				<literal>&lt;td&gt;</literal> elements of the table. See <xref
+				linkend="gwt.widgets.styling" /> below for more details on compatibility.
+			</para>
+
+			<para>
+				The widget will look as follows:
+			</para>
+
+			<figure xml:id="figure.gwt.integration.example.colorpicker.nostyle">
+				<title>Color Picker Widget Without Styling</title>
+				<mediaobject>
+					<imageobject role="fo">
+						<imagedata align="center" fileref="img/custom/gwt-colorpicker-2b.png"/>
+					</imageobject>
+					<imageobject role="html">
+						<imagedata align="center" fileref="img/custom/gwt-colorpicker-2b.png"/>
+					</imageobject>
+				</mediaobject>
+			</figure>
+
+			<para>
+				As you can notice, the widget will look rather uninviting without CSS styling. We will
+				next look how to define a default style for a GWT widget.
+			</para>
+		</section>
+
+		<section xml:id="gwt.widgets.styling">
+			<title>Styling GWT Widgets</title>
+			
+			<para>
+				GWT renders its widgets in the DOM tree of the web browser as HTML
+				elements. Therefore, their style can be defined with Cascading Style
+				Sheets (CSS) just as in HTML. GWT Compiler supports packaging style sheets
+				from the source package tree. The style sheet is defined in the
+				<filename>.gwt.xml</filename> descriptor file (see <xref
+				linkend="gwt.widgetset.moduledescriptor"/> for details).
+			</para>
+
+			<programlisting><![CDATA[<!-- WidgetSet default theme -->	
+<stylesheet src="colorpicker/styles.css"/>]]></programlisting>
+
+			<para>
+				The style sheet path is relative to the <filename>public</filename> folder
+				under the folder containing the <filename>.gwt.xml</filename> file.
+			</para>
+
+			<para>
+				Let us define the <filename>colorpicker/styles.css</filename> as follows.
+			</para>
+
+			<programlisting><![CDATA[/* Set style for the color picker table.
+   This assumes that the Grid layout is rendered as a HTML <table>.*/
+table.example-colorpicker {
+    border-collapse: collapse;
+    border: 0px;
+}
+
+/* Set color picker button style.
+   This does not make assumptions about the HTML element tree as it only uses
+   the class attributes of the elements.*/
+.example-colorpicker .gwt-Button {
+    height: 60px;
+    width: 60px;
+    border: none;
+    padding: 0px;
+}
+
+/* Set style for the right-hand box that shows the currently selected color.
+   While this may work for other implementations of the HorizontalPanel as well,
+   it somewhat assumes that the layout is rendered as a table where cells
+   are <td> elements. */
+.colorpicker-currentcolorbox {
+    width: 240px;
+    text-align: center;
+    vertical-align: middle !important; /* Must be !important to override GWT styling. */
+}]]></programlisting>
+
+			<para>
+				The stylesheet makes some assumptions regarding the HTML element
+				structure. First, it assumes that the <classname>Grid</classname> layout
+				is a table. Second, the custom class name,
+				<literal>colorpicker-currentcolorbox</literal>, of the right-hand
+				<classname>HorizontalPanel</classname> cell was inserted in the DOM
+				representation of the widget in the GwtColorPicker implementation. Styling
+				a button makes less assumptions. Using only class names instead of
+				specific element names may make a stylesheet more compatible if the HTML
+				representation is different in different browsers or changes in the future.
+			</para>
+			
+			<figure xml:id="figure.gwt.styling.colorpicker">
+				<title>Color Picker Widget With Styling</title>
+				<mediaobject>
+					<imageobject role="fo">
+						<imagedata align="center" fileref="img/custom/gwt-colorpicker-2.png"/>
+					</imageobject>
+					<imageobject role="html">
+						<imagedata align="center" fileref="img/custom/gwt-colorpicker-2.png"/>
+					</imageobject>
+				</mediaobject>
+			</figure>
+
+		</section>
+	</section>
+
+	<section xml:id="gwt.integration">
+		<title>Integrating a GWT Widget</title>
+		
+		<para>
+			Integration of GWT widgets with IT Mill Toolkit can be done in two basic ways:
+			by modifying the original class or by inheriting it and adding the integration
+			code in the subclass. The latter way is actually the way the standard
+			client-side components in IT Mill Toolkit are done: they simply inherit the
+			corresponding standard GWT widgets. For example,
+			<classname>IButton</classname> inherits GWT <classname>Button</classname>.
+		</para>
+
+		<para>
+			The integration code has the following tasks:
+		</para>
+
+		<itemizedlist>
+			<listitem>Manage CSS style class</listitem>
+			
+			<listitem>Receive component state from server</listitem>
+			
+			<listitem>Send state changes caused by user interaction to server</listitem>
+		</itemizedlist>
+		
+		<para>
+			The integration is broken down in the following sections into server-client
+			deserialization done in <methodname>updateFromUIDL()</methodname> and
+			client-server serialization done with
+			<methodname>updateVariable()</methodname>. The complete example of the
+			integration of the Color Picker widget is given at the end of this section.
+		</para>
+
+		<note>
+			<title>Naming Conventions</title>
+
+			<para>
+				While the use of IT Mill Toolkit does not require the use of any
+				particular naming conventions for GWT widgets, some notes regarding naming
+				may be necessary. While Java name spaces make it possible to use identical
+				class names in the same context, it may be useful to try to make them more
+				distinctive to avoid any inconvenience. GWT uses simple names for its
+				standard widgets, such as <classname>Button</classname>. The standard
+				components of IT Mill Toolkit use identical or similar names, but that
+				does not cause any inconvenience, because the GWT widgets and server-side
+				components of IT Mill Toolkit are never used in the same context. For the
+				client-side components of IT Mill Toolkit, we use the
+				"<literal>I</literal>" prefix, for example
+				<classname>IButton</classname>. In the Color Picker example, we use
+				<classname>GwtColorPicker</classname> for the GWT widget and
+				<classname>IColorPicker</classname> for the integration
+				implementation. You may wish to follow similar conventions.
+			</para>
+		</note>
+
+		<section xml:id="gwt.integration.deserialization">
+			<title>Deserialization of Component State from Server</title>
+	
+			<para>
+				To receive data from the server, a widget must implement the
+				<classname>Paintable</classname> interface and its
+				<methodname>updateFromUIDL()</methodname> method. The idea is that the
+				method "paints" the user interface description by manipulating the HTML
+				tree on the browser. Typically, when using composite GWT components, most
+				of the DOM tree manipulation is done by standard GWT widgets.
+			</para>
+
+			<para>
+				An implementation of the <methodname>updateFromUIDL()</methodname> method
+				must include some routine tasks:
+			</para>
+
+			<itemizedlist>
+				<listitem>
+					Call <methodname>updateComponent()</methodname> and return if it
+					succeeds
+				</listitem>
+				
+				<listitem>Manage the component identifier</listitem>
+				
+				<listitem>
+					Manage a reference to the <classname>ApplicationConnection</classname>
+					object. The widget needs to know it to be able to initiate a server
+					request when a browser event occurs.
+				</listitem>
+
+			</itemizedlist>
+			
+			<para>
+				The latter two of these tasks are not needed if the widget does not handle
+				any user input that needs to be sent to server.
+			</para>
+
+			<para>
+				The following excerpt provides a skeleton for the
+				<methodname>updateFromUIDL()</methodname> method and shows how the
+				component identifier and connection object reference are managed by a
+				widget.
+			</para>
+
+	<programlisting><![CDATA[    String uidlId;
+    ApplicationConnection client;
+
+    ...
+
+    public void updateFromUIDL(UIDL uidl, ApplicationConnection client) {
+        if (client.updateComponent(this, uidl, true))
+            return;
+ 
+        this.client = client;
+        uidlId = uidl.getId();
+
+        ...
+    }]]></programlisting>
+
+			<para>
+				The <methodname>updateComponent()</methodname> call has several functions
+				important for different kinds of components. It updates various default
+				attributes, such as <parameter>disabled</parameter>,
+				<parameter>readonly</parameter>, <parameter>invisible</parameter>, and
+				(CSS) <parameter>style</parameter> attributes.  If the
+				<parameter>manageCaption</parameter> argument is <literal>true</literal>,
+				the call will also update the caption of the component. By default, the
+				caption is managed by the parent layout of the component. Components,
+				such as a <classname>Button</classname>, that manage the caption
+				themselves, do not need management of the caption.
+			</para>
+
+			<para>
+				The <methodname>updateComponent()</methodname> is also part of the
+				transmutation mechanism that allows a single server-side component to have
+				alternative client-side implementations, based on its parameters. For
+				example, the <classname>Button</classname> server-side component can
+				manifest either as a clickable <classname>IButton</classname> or as a
+				switchable <classname>ICheckBox</classname> widget on the client-side. If
+				the parameters are changed, the client-side widget can be replaced with
+				another dynamically. Determination of the correct implementation is done
+				in a <classname>WidgetSet</classname>. If
+				<methodname>updateComponent()</methodname> returns
+				<returnvalue>true</returnvalue>, the client-side engine can attempt to
+				replace the implementation. For more details on the transmutation
+				mechanism, see <xref linkend="gwt.widgetset"/>.
+			</para>
+
+			<para>
+				The component identifier is used when the component needs to serialize its
+				updated state to server. The reference to the application connection
+				manager is needed to make the server request. If a component does not have
+				any state changes that need to be sent to the server, management of the
+				variables is not needed. See <xref
+				linkend="gwt.integration.serialization"/> below for further details.
+			</para>
+
+			<para>
+				The design of the client-side framework of IT Mill Toolkit, because the
+				<classname>Paintable</classname> is an interface and can not store any
+				references.  Having an API layer between GWT and custom widgets would be a
+				much more complicated solution.
+			</para>
+			
+		</section>
+
+		<section xml:id="gwt.integration.serialization">
+			<title>Serialization of Component State to Server</title>
+			
+			<para>
+				User input is handled in GWT widgets with events.
+			</para>
+
+			<para>
+				User input is passed to the server using the
+				<methodname>updateVariable()</methodname> method. If the
+				<parameter>immediate</parameter> parameter is
+				<parameter>false</parameter>, the value is simply added to a queue to be
+				sent to the server at next AJAX request. If the argument is
+				<parameter>true</parameter>, the AJAX request is made immediately, and
+				will include all queued updates to variables. The
+				<parameter>immediate</parameter> argument is described in more detail
+				below.
+			</para>
+
+			<programlisting><![CDATA[if (uidl_id == null || client == null)
+        return;
+
+client.updateVariable(uidl_id, "myvariable", newvalue, immediate);]]></programlisting>
+
+			<para>
+				The <parameter>client</parameter> of the above example is a reference to
+				the <classname>ApplicationConnection</classname> object that manages
+				server requests. The <parameter>uidl_id</parameter> argument is the UIDL
+				identifier obtained during a <methodname>updateFromUIDL()</methodname>
+				call with <methodname>uidl.getId()</methodname> method.
+			</para>
+
+			<para>
+				The <methodname>updateVariable()</methodname> method has several varieties
+				to send variables of different types.
+			</para>
+
+			<table>
+				<title>UIDL Variable Types</title>
+				<tgroup cols="3" align="left">
+					<thead>
+						<row valign="top">
+							<entry>Type</entry>
+							<entry>Description</entry>
+							<entry>UIDL Type</entry>
+						</row>
+					</thead>
+					<tbody>
+						<row valign="top">
+							<entry><constant>String</constant></entry>
+							<entry>
+								String object.
+							</entry>
+							<entry>s</entry>
+						</row>
+						<row valign="top">
+							<entry><constant>int</constant></entry>
+							<entry>
+								Native integer value.
+							</entry>
+							<entry>i</entry>
+						</row>
+						<row valign="top">
+							<entry><constant>long</constant></entry>
+							<entry>
+								Native long integer value.
+							</entry>
+							<entry>l</entry>
+						</row>
+						<row valign="top">
+							<entry><constant>float</constant></entry>
+							<entry>
+								Native single-precision floating-point value.
+							</entry>
+							<entry>f</entry>
+						</row>
+						<row valign="top">
+							<entry><constant>double</constant></entry>
+							<entry>
+								Native double-precision floating-point value.
+							</entry>
+							<entry>d</entry>
+						</row>
+						<row valign="top">
+							<entry><constant>boolean</constant></entry>
+							<entry>
+								Native boolean value.
+							</entry>
+							<entry>b</entry>
+						</row>
+						<row valign="top">
+							<entry><constant>Object[]</constant></entry>
+							<entry>
+								Array of object data. The
+								<methodname>toString()</methodname> method is used to
+								serialize each of the objects. The content strings are
+								escaped with <methodname>escapeString()</methodname>, to
+								allow characters such as quotes.
+							</entry>
+							<entry>a</entry>
+						</row>
+					</tbody>
+				</tgroup>
+			</table>
+
+			<para>
+				This serialization mechanism is intended to be as simple as possible
+				in most cases, when the user input is typically just one state
+				variable, while also allowing the serialization of more complex data,
+				if necessary.
+			</para>
+			
+			<section>
+				<title>Immediateness</title>
+				
+				<para>
+					Server-side components that inherit
+					<classname>AbstractComponent</classname> have an
+					<parameter>immediate</parameter> attribute, set with
+					<methodname>setImmediate()</methodname>. This attribute dictates
+					whether a component makes a server request immediately when its state
+					changes, or only afterwards. For example, there is no need to send the
+					contents of a "Username" <classname>TextField</classname> before the
+					"Login" button has been clicked. On the other hand, the server can set
+					the <classname>TextField</classname> as immediate to receive changes
+					for example when the component loses focus.
+				</para>
+
+				<para>
+					Most widgets should support immediateness by receiving the
+					<parameter>immediate</parameter> attribute from the UIDL message that
+					renders the widget. The following example is extracted from the
+					<classname>ITextField</classname> implementation.
+				</para>
+
+				<programlisting><![CDATA[    // Store the immediate attribute in a member variable
+    private boolean immediate = false;
+    ...
+
+    public void updateFromUIDL(UIDL uidl, ApplicationConnection client) {
+        if(client.updateComponent(this, uidl, true))
+            return;
+
+        // Receive and store the immediate attribute
+        immediate  = uidl.getBooleanAttribute("immediate");
+        ...
+    }
+
+    public void onChange(Widget sender) {
+        if(client != null && id != null) {
+            // Use the stored immediate attribute to say whether or not
+            // make the server request immediately.
+            client.updateVariable(id, "text", getText() , immediate);
+        }
+    }]]></programlisting>
+
+				<para>
+					In some widgets, the <parameter>immediate</parameter> attribute would
+					have little meaning, and in fact an accidental
+					<parameter>false</parameter> value would cause undesired
+					behaviour. For example, a button is always expected to send a request
+					to the server when it is clicked. Such widgets can simply use
+					<parameter>true</parameter> for the <parameter>immediate</parameter>
+					argument in <methodname>updateVariable()</methodname>. For example,
+					<classname>IButton</classname> does as follows:
+					</para>
+
+				<programlisting><![CDATA[public void onClick(Widget sender) {
+    if (id == null || client == null)
+        return;
+    client.updateVariable(id, "state", true, /* always immediate */ true);
+}]]></programlisting>
+
+			</section>
+		</section>
+
+		<section xml:id="gwt.integration.example.colorpicker">
+			<title>Example: Integrating the Color Picker Widget</title>
+
+			<para>
+				Below is a complete example of an integration component for the Color
+				Picker example. It demonstrates all the basic tasks needed for the
+				integration of a GWT widget with its server-side counterpart component.
+			</para>
+
+		<programlisting><![CDATA[import com.itmill.toolkit.terminal.gwt.client.ApplicationConnection;
+import com.itmill.toolkit.terminal.gwt.client.Paintable;
+import com.itmill.toolkit.terminal.gwt.client.UIDL;
+
+public class IColorPicker extends GwtColorPicker implements Paintable {
+
+    /** Set the CSS class name to allow styling. */
+    public static final String CLASSNAME = "example-colorpicker";
+
+    /** Component identifier in UIDL communications. */
+    String uidlId;
+
+    /** Reference to the server connection object. */
+    ApplicationConnection client;
+
+    /**
+     * The constructor should first call super() to initialize the component and
+     * then handle any initialization relevant to IT Mill Toolkit.
+     */
+    public IColorPicker() {
+        // The superclass has a lot of relevant initialization
+        super();
+
+        // This method call of the Paintable interface sets the component
+        // style name in DOM tree
+        setStyleName(CLASSNAME);
+    }
+
+    /**
+     * This method must be implemented to update the client-side component from
+     * UIDL data received from server.
+     * 
+     * This method is called when the page is loaded for the first time, and
+     * every time UI changes in the component are received from the server.
+     */
+    public void updateFromUIDL(UIDL uidl, ApplicationConnection client) {
+        // This call should be made first. Ensure correct implementation,
+        // and let the containing layout manage caption, etc.
+        if (client.updateComponent(this, uidl, true))
+            return;
+
+        // Save reference to server connection object to be able to send
+        // user interaction later
+        this.client = client;
+
+        // Save the UIDL identifier for the component
+        uidlId = uidl.getId();
+
+        // Get value received from server and actualize it in the GWT component
+        setColor(uidl.getStringVariable("colorname"));
+    }
+
+    /** Override the method to communicate the new value to server. */
+    public void setColor(String newcolor) {
+        // Ignore if no change
+        if (newcolor.equals(currentcolor.getText()))
+            return;
+
+        // Let the original implementation to do whatever it needs to do
+        super.setColor(newcolor);
+
+        // Updating the state to the server can not be done before
+        // the server connection is known, i.e., before updateFromUIDL()
+        // has been called.
+        if (uidlId == null || client == null)
+            return;
+
+        // Communicate the user interaction parameters to server. This call will
+        // initiate an AJAX request to the server.
+        client.updateVariable(uidlId, "colorname", newcolor, true);
+    }
+}]]></programlisting>
+
+		</section>
+	</section>
+	
+	<section xml:id="gwt.widgetset">
+		<title>Defining a Widget Set</title>
+		
+		<para>
+			The client-side components, or in GWT terminology, widgets, must be made
+			usable in the client-side GWT application by defining a widget set factory
+			that can create the widgets by their UIDL tag name. (Actually, such a widget
+			set factory <emphasis>is</emphasis> the client-side application.)
+		</para>
+
+		<para>
+			A widget set factory needs to inherit the default factory
+			<classname>DefaultWidgetSet</classname> and implement the
+			<methodname>createWidget()</methodname> and
+			<methodname>resolveWidgetType()</methodname> methods. The methods must call
+			their default implementation to allow creation of the standard widgets.
+		</para>
+
+		<para>
+			The following example shows how to define a widget set factory class for the
+			Color Picker example. The tag name of the widget was defined in the
+			server-side implementation of the widget (see <xref
+			linkend="gwt.integration.example.colorpicker"/>) as
+			<literal>colorpicker</literal>. The
+			<methodname>resolveWidgetType()</methodname> must resolve this name to the
+			class object of the <classname>IColorPicker</classname> integration class,
+			which is later passed to the <methodname>createWidget()</methodname> method for
+			creating an instance of the <classname>IColorPicker</classname> class.
+		</para>
+
+		<programlisting><![CDATA[import com.itmill.toolkit.demo.colorpicker.gwt.client.ui.IColorPicker;
+import com.itmill.toolkit.terminal.gwt.client.DefaultWidgetSet;
+import com.itmill.toolkit.terminal.gwt.client.Paintable;
+import com.itmill.toolkit.terminal.gwt.client.UIDL;
+
+public class ColorPickerWidgetSet extends DefaultWidgetSet {
+    /** Resolves UIDL tag name to widget class. */
+    protected Class resolveWidgetType(UIDL uidl) {
+        final String tag = uidl.getTag();
+        if ("colorpicker".equals(tag))
+            return IColorPicker.class;
+
+        // Let the DefaultWidgetSet handle resolution of default widgets
+        return super.resolveWidgetType(uidl);
+    }
+
+    /** Creates a widget instance according to its class object. */
+    public Paintable createWidget(UIDL uidl) {
+        final Class type = resolveWidgetType(uidl);
+        if (IColorPicker.class == type)
+            return new IColorPicker();
+
+        // Let the DefaultWidgetSet handle creation of default widgets
+        return super.createWidget(uidl);
+    }
+}]]></programlisting>
+
+		<para>
+			The default widgets in IT Mill Toolkit actually use more than just the tag
+			name to resolve the actual widget class. For example, the
+			<classname>Button</classname> server-side component, which has tag name
+			<literal>button</literal>, can be resolved to either an
+			<classname>IButton</classname> or <classname>ICheckBox</classname> widget,
+			depending on the <parameter>switch</parameter>
+			(<parameter>switchMode</parameter>) attribute. IT Mill Toolkit Client-Side
+			Engine can actually replace the client-side object of the parameters change.
+		</para>
+
+		<section xml:id="gwt.widgetset.moduledescriptor">
+			<title>GWT Module Descriptor</title>
+
+			<para>
+				A widget set is actually a GWT application and needs to be defined in the
+				GWT module descriptor as the entry point of the application. A GWT module
+				descriptor is an XML file with extension <filename>.gwt.xml</filename>.
+			</para>
+
+			<para>
+				The following example shows the GWT module descriptor of the Color Picker
+				application. The client-side entry point will be the
+				<classname>WidgetSet</classname> class. We also define the default
+				stylesheet for the color picker widget, as described above in <xref
+				linkend="gwt.widgets.styling"/>.
+			</para>
+
+			<programlisting><![CDATA[<module>
+    <!-- Inherit the NoEntry version to avoid multiple entrypoints -->
+    <inherits name="com.itmill.toolkit.terminal.gwt.DefaultWidgetSetNoEntry" /> 
+    
+    <!-- WidgetSet default theme -->    
+    <stylesheet src="colorpicker/styles.css"/>
+
+    <!-- Entry point -->
+    <entry-point class="com.itmill.toolkit.demo.colorpicker.gwt.client.WidgetSet"/>
+  
+</module>]]></programlisting>
+
+			<para>
+				For more information about the GWT Module XML Format, please see Google
+				Web Toolkit Developer Guide.
+			</para>
+		</section>
+
+		<programlisting><![CDATA[]]></programlisting>
+	</section>
+		
+	<section xml:id="gwt.server-side">
+		<title>Server-Side Components</title>
+
+		<para>
+			
+		</para>
+
+		<para>
+			Server-side components provide the API for user applications to build their
+			user interface. Many applications do not ever need to bother with the
+			client-side implementation of the standard components, but those that use
+			their own GWT widgets need to have corresponding server-side components.
+		</para>
+
+		<para>
+			A server-side component has two basic tasks: it has to be able to serialize
+			its state variables to the corresponding client-side component, and
+			deserialize any user input received from the client. Many of these tasks are
+			taken care of by the component framework.
+		</para>
+
+		<note>
+			<title>Component Tag Name</title>
+			
+			<para>
+				Server-side components are identified with a unique UIDL tag name, which
+				must be returned by the <methodname>getTag()</methodname> method. The tag
+				should follow XML rules for element names, that is, only characters a-z,
+				A-Z, 0-9, and _, and not begin with a number. Actually, as IT Mill Toolkit
+				Release 5 uses a JSON notation for serialization, the tag syntax is more
+				relaxed, but we nevertheless recommend using a stricter syntax. UIDL is
+				detailed in <xref linkend="uidl"/> together with lists of reserved
+				tags. The server-side implementation of the Color Picker component defines
+				the tag as follows:
+			</para>
+
+			<programlisting><![CDATA[    public String getTag() {
+        return "colorpicker";
+    }]]></programlisting>
+    
+			<para>
+				On the client side, this tag is mapped to a GWT widget. The mapping from
+				server-side to client-side components is actually one to many; a
+				server-side component can manifest as several client-side components,
+				depending on its parameters. For example, a server-side
+				<classname>Button</classname> can manifest either as an
+				<classname>IButton</classname> or <classname>ICheckBox</classname> in
+				client, depending on the <emphasis>switchMode</emphasis> attribute. For
+				the client side, see <xref linkend="gwt.widgets"/> above.
+			</para>
+				
+		</note>
+
+		<para>
+			The implementation of the server-side component is broken down into
+			server-client serialization and client-server deserialization in the following
+			sections. We will also present the complete example of the server-side
+			implementation of the Color Picker component below.
+		</para>
+
+		<section xml:id="gwt.server-side.serialization">
+			<title>Server-Client Serialization</title>
+
+			<!-- UNFINISHED -->
+			
+			<para>
+				The server-side implementation of a component must be able to serialize
+				its data into a UIDL message that is sent to the client. You need to
+				override the <methodname>paintContent()</methodname> method, defined in
+				<classname>AbstractComponent</classname>. You should call the superclass
+				to allow it to paint its data as well.
+			</para>
+
+			<para>
+				The data is serialized with the variants of the
+				<methodname>addAttribute()</methodname> and
+				<methodname>addVariable()</methodname> methods for different basic data
+				types.
+			</para>
+
+			<para>
+				The UIDL API offered in <classname>PaintTarget</classname> is covered in
+				<xref linkend="uidl.painting"/>.
+			</para>
+
+			<para>
+				<!-- done in <methodname>changeVariables()</methodname> method done with
+				<methodname>paintContent()</methodname> method -->
+			</para>
+
+		</section>
+
+		<section xml:id="gwt.server-side.deserialization">
+			<title>Client-Server Deserialization</title>
+			
+			<para>
+				The server-side component must be able to receive state changes from the
+				client-side widget. This is done by overriding the
+				<methodname>changeVariables()</methodname> method, defined in
+				<classname>AbstractComponent</classname>. A component should always call
+				the superclass implementation in the beginning to allow it handle its
+				variables.
+			</para>
+
+			<para>
+				The variables are given as objects in the <parameter>variables</parameter>
+				map, with the same key with which they were serialized on the
+				client-side. The object type is likewise the same as given for the
+				particular variable in <methodname>updateVariable()</methodname> in the
+				client-side.
+			</para>
+
+			<programlisting><![CDATA[@Override
+public void changeVariables(Object source, Map variables) {
+    // Let superclass read any common variables.
+    super.changeVariables(source, variables);
+
+    // Sets the currently selected color
+    if (variables.containsKey("colorname") && !isReadOnly()) {
+        final String newValue = (String) variables.get("colorname");
+        // Changing the property of the component will
+        // trigger a ValueChangeEvent
+        setValue(newValue, true);
+    }
+}]]></programlisting>
+
+			<para>
+				The above example handles variable changes for a field component
+				inheriting <classname>AbstractField</classname>. Fields have their value
+				as the value property of the object. Setting the value with
+				<methodname>setValue()</methodname>, as above, will trigger a
+				<classname>ValueChangeEvent</classname>, which the user of the component
+				can catch with a <classname>ValueChangeListener</classname>.
+			</para>
+
+			<para>
+				Contained components, such as components inside a layout, are deserialized
+				by referencing them by their <emphasis>paintable identifier</emphasis> or
+				<emphasis>PID</emphasis>.
+			</para>
+		</section>
+
+		<section>
+			<title>Extending Standard Components</title>
+
+			<para>
+				Extending standard components is one way to develop new components that
+				have some additional features.
+			</para>
+
+			<para>
+				Every component needs to have a unique UIDL tag that is used to create and
+				communicate with widgets on the client-side. The tag is normally unique
+				for server-side components. The minimal requirement for the server-side
+				component is that you reimplement the <methodname>getId()</methodname>
+				method that provides the tag.
+			</para>
+
+			<para>
+				If your extension component contains any specific state variables, you
+				need to handle their serialization in
+				<classname>paintContent()</classname> and deserialization in
+				<classname>changeVariables()</classname> and call the superclass
+				implementation in the beginning. See <xref
+				linkend="gwt.server-side.serialization"/> <xref
+				linkend="gwt.server-side.deserialization"/> above for details.
+			</para>
+
+			<para>
+				The client-side implementation goes also much like for regular custom
+				widgets.
+			</para>
+		</section>
+
+		<section xml:id="gwt.server-side.example.colorpicker">
+			<title>Example: Color Picker Server-Side Component</title>
+
+			<para>
+				The following example provides the complete server-side
+				<classname>ColorPicker</classname> component for the Color Picker
+				example. It has only one state variable: the currently selected color,
+				which is stored as the property of the component. Implementation of the
+				<classname>Property</classname> interface is provided in the
+				<classname>AbstractField</classname> superclass of the component. The UIDL
+				tag name for the component is <literal>colorpicker</literal> and the state
+				is communicated through the <parameter>colorname</parameter> variable.
+			</para>
+
+			<programlisting><![CDATA[package com.itmill.toolkit.demo.colorpicker;
+
+import java.util.Map;
+import com.itmill.toolkit.terminal.PaintException;
+import com.itmill.toolkit.terminal.PaintTarget;
+import com.itmill.toolkit.ui.*;
+
+public class ColorPicker extends AbstractField {
+    
+    public ColorPicker() {
+        super();
+        setValue(new String("white"));
+    }
+
+    /** The property value of the field is an Integer. */
+    public Class getType() {
+        return String.class;
+    }
+
+    /** Tag is the UIDL element name for client-server communications. */
+    public String getTag() {
+        return "colorpicker";
+    }
+    
+    /** Set the currently selected color. */
+    public void setColor(String newcolor) {
+        // Sets the color name as the property of the component.
+        // Setting the property will automatically cause repainting of
+        // the component with paintContent().
+        setValue(newcolor);
+    }
+    
+    /** Retrieve the currently selected color. */
+    public String getColor() {
+        return (String) getValue();
+    }
+
+    /** Paint (serialize) the component for the client. */
+    public void paintContent(PaintTarget target) throws PaintException {
+        // Superclass writes any common attributes in the paint target.
+        super.paintContent(target);
+        
+        // Add the currently selected color as a variable in the paint target.
+        target.addVariable(this, "colorname", getColor());
+    }
+    
+    /** Deserialize changes received from client. */
+    public void changeVariables(Object source, Map variables) {
+        // Sets the currently selected color
+        if (variables.containsKey("colorname") && !isReadOnly()) {
+            String newValue = (String) variables.get("colorname");
+            
+            // Changing the property of the component will
+            // trigger a ValueChangeEvent
+            setValue(newValue,true);
+        }
+    }
+}]]></programlisting>
+
+		</section>
+	</section>
+	
+	<section xml:id="gwt.usage">
+		<title>Using a Custom Component</title>
+
+		<para>
+			A custom component is used like any other IT Mill Toolkit component. You will,
+			however, need to compile the client-side widget set with the GWT Compiler.
+			See <xref linkend="gwt.development.compiler"/> for instructions on how to
+			compile widget sets.
+		</para>
+	
+		<section xml:id="gwt.usage.example.colorpicker">
+			<title>Example: Color Picker Application</title>
+
+			<para>
+				The following server-side example application shows how to use the Color
+				Picker custom widget. The example includes also server-side feedback of
+				the user input and changing the color selection to show that the
+				communication of the component state works in both directions.
+			</para>
+
+			<programlisting><![CDATA[package com.itmill.toolkit.demo.colorpicker;
+
+import com.itmill.toolkit.data.Property.ValueChangeEvent;
+import com.itmill.toolkit.data.Property.ValueChangeListener;
+import com.itmill.toolkit.ui.*;
+import com.itmill.toolkit.ui.Button.ClickEvent;
+
+/**
+ * Demonstration application that shows how to use a simple
+ * custom client-side GWT component, the ColorPicker.
+ */
+public class ColorPickerApplication extends com.itmill.toolkit.Application {
+    Window main = new Window("Color Picker Demo");
+    
+    /* The custom component. */
+    ColorPicker colorselector = new ColorPicker();
+    
+    /* Another component. */
+    Label colorname;
+    
+    public void init() {
+        setMainWindow(main);
+        setTheme("demo");
+        
+        // Listen for value change events in the custom component,
+        // triggered when user clicks a button to select another color.
+        colorselector.addListener(new ValueChangeListener() {
+            public void valueChange(ValueChangeEvent event) {
+                // Provide some server-side feedback
+                colorname.setValue("Selected color: " + colorselector.getColor());
+            }
+        });
+        main.addComponent(colorselector);
+        
+        // Add another component to give feedback from server-side code
+        colorname = new Label("Selected color: "+colorselector.getColor());
+        main.addComponent(colorname);
+        
+        // Server-side manipulation of the component state
+        Button button = new Button("Set to white");
+        button.addListener(new Button.ClickListener() {
+            public void buttonClick(ClickEvent event) {
+                colorselector.setColor("white");
+            }
+        });
+        main.addComponent(button);
+    }
+}]]></programlisting>
+
+		</section>
+
+		<section xml:id="gwt.usage.deployment">
+			<title>Web Application Deployment</title>
+
+			<para>
+				Deployment of web applications that include custom components is almost
+				identical to the normal case where you use only the default widget set of
+				IT Mill Toolkit. The default case is documented in <xref
+				linkend="section.web.web-xml"/>. You only need to specify the widget set
+				for the application in the <filename>WebContent/WEB-INF/web.xml</filename>
+				deployment descriptor.
+			</para>
+
+			<para>
+				The following deployment descriptor specifies the Color Picker Application
+				detailed in the previous section.
+			</para>
+			
+			<programlisting>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;web-app id="WebApp_ID" version="2.4" xmlns="http://java.sun.com/xml/ns/j2ee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd"&gt;
+    &lt;display-name&gt;myproject&lt;/display-name&gt;
+
+    &lt;servlet&gt;
+        &lt;servlet-name&gt;<parameter>ColorPickerServlet</parameter>&lt;/servlet-name&gt;
+        &lt;servlet-class&gt;com.itmill.toolkit.terminal.gwt.server.ApplicationServlet&lt;/servlet-class&gt;
+        &lt;init-param&gt;
+            &lt;param-name&gt;application&lt;/param-name&gt;
+            &lt;param-value&gt;<parameter>com.itmill.toolkit.demo.colorpicker.ColorPickerApplication</parameter>&lt;/param-value&gt;
+        &lt;/init-param&gt;
+        &lt;init-param&gt;
+            &lt;param-name&gt;widgetset&lt;/param-name&gt;
+            &lt;param-value&gt;<parameter>com.itmill.toolkit.demo.colorpicker.gwt.ColorPickerWidgetSet</parameter>&lt;/param-value&gt;
+        &lt;/init-param&gt;
+    &lt;/servlet&gt;
+
+    &lt;servlet-mapping&gt;
+        &lt;servlet-name&gt;<parameter>ColorPickerServlet</parameter>&lt;/servlet-name&gt;
+        &lt;url-pattern&gt;<parameter>/*</parameter>&lt;/url-pattern&gt;
+    &lt;/servlet-mapping&gt;
+&lt;/web-app&gt;</programlisting>
+		</section>
+
+		<para>
+			Project specific parameter are emphasized. Notice that the widget set name is
+			not a file name, but the base name for the
+			<filename>ColorPickerWidgetSet.gwt.xml</filename> module descriptor.
+		</para>
+
+		<para>
+			As the project context root in the above example is
+			<filename>myproject</filename> and the
+			<parameter>&lt;url-pattern&gt;</parameter> is <filename>/*</filename>, the URL
+			for the application will be <uri>/myproject/</uri>.
+		</para>
+		
+	</section>
+
+	<section xml:id="gwt.development">
+		<title>GWT Widget Development</title>
+
+		<para>
+			Development of new GWT widgets includes management of the source code tree,
+			running and debugging the application with the GWT Hosted Mode Browser, and
+			compiling the widgets and the IT Mill Toolkit Client-Side Engine to JavaScript
+			with the GWT Compiler.
+		</para>
+
+		<para>
+			You can use any IDE for developing GWT components for IT Mill Toolkit. The
+			examples given in this book are for the Eclipse IDE. It allows easy launching
+			of the GWT Hosted Mode Browser, debugging, and running an external compiler
+			for GWT widget sets.
+		</para>
+
+		<section xml:id="gwt.development.eclipse">
+			<title>Creating a Widget Project in Eclipse</title>
+
+			<para>
+				Creation of an IT Mill Toolkit project that uses the default widget set
+				was covered in <xref linkend="getting-started.first-project"/>. Developing
+				custom widgets creates a number of additional requirements for a
+				project. Let us review the steps required for creating a project. Details
+				for each step are given in the subsequent sections.
+			</para>
+
+			<orderedlist>
+				<listitem>
+					Create a new project in the Eclipse IDE. (<xref
+					linkend="getting-started.first-project.creation" xrefstyle="select: label"/>)
+				</listitem>
+				<listitem>
+					Import IT Mill Toolkit library JAR into the project. (<xref linkend="getting-started.first-project.libraries" xrefstyle="select: label"/>)
+				</listitem>
+				<listitem>
+					Import GWT directory into the project. (<xref linkend="gwt.development.import-gwt" xrefstyle="select: label"/> below)
+				</listitem>
+				<listitem>
+					Write the source code in a Java module. (<xref
+					linkend="gwt.development.module-creation" xrefstyle="select:
+					label"/> below)
+				</listitem>
+				<listitem>
+					<para>Write the <filename>web.xml</filename> Deployment Descriptor for the web application.</para>
+					<itemizedlist>
+						<listitem>
+							Define the custom widget set to use instead of the default
+							widget set. (<xref linkend="gwt.usage.deployment" xrefstyle="select: label"/> above)
+						</listitem>
+					</itemizedlist>
+				</listitem>
+				<listitem>
+					Compile the widget set to JavaScript runtime with GWT Compiler.  (<xref linkend="gwt.development.compiler" xrefstyle="select: label"/> below)
+				</listitem>
+				<listitem>
+					Configure the project in Apache Tomcat (or some other web container)
+					and start the server. (<xref
+					linkend="getting-started.first-project.server" xrefstyle="select: label"/> below)
+				</listitem>
+				<listitem>
+					<para>Either:</para>
+
+					<orderedlist>
+						<listitem>
+							Open a web browser to use the web application.
+						</listitem>
+						<listitem>
+							Debug the widgets with Hosted Mode Browser. (<xref
+							linkend="gwt.hosted-mode" xrefstyle="select: label"/>)
+						</listitem>
+					</orderedlist>
+				</listitem>
+			</orderedlist>
+
+			<para>
+				The contents of a ready widget development project are described in <xref
+				linkend="gwt.development.compiler.result"/>.
+			</para>
+
+		</section>
+
+		<section xml:id="gwt.development.import-gwt">
+			<title>Importing GWT Installation Package</title>
+			
+			<para>
+				You will need to include the Google Web Toolkit in your project to develop
+				custom widgets. The installation directory of IT Mill Toolkit includes
+				full GWT installation in the <filename>gwt</filename> subdirectory. The
+				package includes precompiled libraries and applications for the specific
+				platform of the installation. To use the libraries, you need to configure
+				them in the classpath of your project as described below.
+			</para>
+
+			<para>
+				You need to copy the <filename>gwt</filename> directory to your
+				project. You can either copy it with system tools or, if you are using
+				Eclipse, import the directory. Importing the directory is done as follows.
+			</para>
+
+			<orderedlist>
+				<listitem>
+					Right-click on the project folder in <guilabel>Project
+					Explorer</guilabel> and select
+					<menuchoice><guimenu>Import</guimenu><guimenuitem>Import...</guimenuitem></menuchoice>.
+				</listitem>
+				<listitem>
+					From the Import dialog, select
+					<menuchoice><guimenu>General</guimenu><guimenuitem>File
+					System</guimenuitem></menuchoice> and click
+					<guibutton>Next</guibutton>.
+				</listitem>
+				<listitem>
+					Click <guibutton>Browse</guibutton> button of the "<guilabel>From
+					directory</guilabel>" field and browse to the <filename>gwt</filename>
+					directory under the IT Mill Toolkit installation directory. Click
+					<guibutton>Ok</guibutton> in the file selection dialog.
+				</listitem>
+				<listitem>
+					Select the <filename>gwt</filename> entry in the list box for importing.
+				</listitem>
+				<listitem>
+					In the "<guilabel>Into folder</guilabel>" field, enter
+					<filename>myproject/gwt</filename>. (If you do not set this, all the
+					contents of the <filename>gwt</filename> directory will be imported
+					directly below the root directory of the project which is undesirable.)
+				</listitem>
+				<listitem>
+					Click <guibutton>Finish</guibutton>.
+				</listitem>
+			</orderedlist>
+
+			<para>
+				If you copied the directory with system tools, remember to select your
+				project and press F5 to refresh the project.
+			</para>
+
+			<para>
+				GWT libraries must be included in the classpath of the
+				project. Right-click on the project folder in the <guilabel>Project
+				Explorer</guilabel> in Eclipse and select
+				<menuchoice><guimenu>Properties</guimenu></menuchoice>. Select
+				<menuchoice><guimenu>Java Build
+				Path</guimenu><guimenuitem>Libraries</guimenuitem></menuchoice>.
+			</para>
+		</section>
+
+		<section xml:id="gwt.development.module-creation">
+			<title>Creating a GWT Module</title>
+
+			<para>
+				This section gives details on writing an application module that includes
+				custom widgets.
+			</para>
+
+			<section>
+				<title>Creating the Source Folder</title>
+
+				<para>
+					While the source files can be placed in any directory in ordinary
+					projects, usually in the <filename>src</filename> directory directly
+					under the project root, the widget build script described below in
+					<xref linkend="gwt.development.compiler"/> as well as the GWT
+					Hosted Mode Browser assume that source files are located under the
+					<filename>WebContent/WEB-INF/src</filename> folder. The source folder
+					has to be created and designated as a source folder for the project.
+				</para>
+
+				<orderedlist>
+					<listitem>
+						Right-click on the <filename>WebContent/WEB-INF</filename> folder
+						and select
+						<menuchoice><guimenu>New</guimenu><guimenuitem>Folder</guimenuitem></menuchoice>.
+					</listitem>
+					<listitem>
+						In the <guilabel>New Folder</guilabel> dialog, enter
+						<filename>src</filename> as the <guilabel>Folder name</guilabel>
+						and click <guibutton>Finish</guibutton>.
+					</listitem>
+					<listitem>
+						Right-click on the <filename>src</filename> folder and select
+						<menuchoice><guimenu>Build Path</guimenu><guimenuitem>Use as
+						Source Folder</guimenuitem></menuchoice>. 
+					</listitem>
+				</orderedlist>
+
+				<para>
+					The folders designated as source folders are moved under the
+					<guilabel>Java Resources</guilabel> folder in the <guilabel>Project
+					Explorer</guilabel> of Eclipse. This is only a display feature; the
+					source directory remains in its original location in the filesystem.
+				</para>
+			</section>
+
+			<section>
+				<title>Creating Source Files</title>
+
+				<!-- UNFINISHED -->
+
+				<para>
+					In Eclipse, you can insert a folder inside a source package in
+					<menuchoice><guimenu>File</guimenu><guisubmenu>New</guisubmenu><guimenuitem>Folder</guimenuitem></menuchoice>.
+				</para>
+			</section>
+
+			<section xml:id="gwt.development.module-creation.import">
+				<title>Importing the ColorPicker Demo</title>
+				
+				<para>
+					If you want to use the Color Picker application as an application
+					skeleton, you need to import it under the source folder.
+				</para>
+
+				<orderedlist>
+					<listitem>
+						Right-click on the source folder and select
+						<menuchoice><guimenuitem>Import</guimenuitem></menuchoice>.
+					</listitem>
+					<listitem>
+						In the <guilabel>Import</guilabel> dialog, select
+						<menuchoice><guimenu>General</guimenu><guimenuitem>File
+						System</guimenuitem></menuchoice> and click
+						<guibutton>Next</guibutton>.
+					</listitem>
+					<listitem>
+						Browse to
+						<filename>WebContent/WEB-INF/src/com/itmill/toolkit/demo/colorpicker/</filename>
+						and click <guibutton>Ok</guibutton> button in the <guilabel>Import
+						from directory</guilabel> dialog.
+					</listitem>
+					<listitem>
+						In the <guilabel>Into folder</guilabel> field, enter
+						<filename>myproject/WebContent/WEB-INF/src/com/itmill/toolkit/demo/colorpicker</filename>.
+					</listitem>
+					<listitem>
+						Check the <filename>colorpicker</filename> entry in the list box.
+					</listitem>
+					<listitem>
+						Click <guibutton>Finish</guibutton>.
+					</listitem>
+				</orderedlist>
+
+				<para>
+					This will import the directory as
+					<package>com.itmill.toolkit.demo.colorpicker</package> package. If you
+					want to use it as a skeleton for your own project, you should refactor
+					it to some other name. Notice that you will need to refactor the
+					package and application name manually in the
+					<filename>web.xml</filename> and <filename>.gwt.xml</filename>
+					descriptor files.
+				</para>
+			</section>
+		</section>
+
+		<section xml:id="gwt.development.compiler">
+			<title>Compiling GWT Widget Sets</title>
+
+			<para>
+				When running an application in a regular web browser, you need to compile
+				the IT Mill Toolkit Client-Side Engine and your custom widget set to
+				JavaScript. This is done with the GWT Compiler. IT Mill Toolkit
+				installation package includes an Ant build script
+				<filename>build-widgetset.xml</filename> in the
+				<filename>WebContent/doc/example-source/</filename> directory. To compile
+				the Color Picker widget set example, just change to the directory and
+				enter:
+			</para>
+
+			<screen><prompt>$</prompt> <command>ant -f build-widgetset.xml</command></screen>
+
+			<para>
+                We advice that you copy the build script to your project and use it as a
+                template. Just set the paths in the "configure" target and the widget set
+                class name in the "compile-widgetset" target to suit your project.
+			</para>
+
+			<para>
+				Alternatively, you can launch the build script from Eclipse, by
+				right-clicking the script in Package Explorer and selecting
+				<menuchoice><guimenu>Run As</guimenu><guimenuitem>Ant
+				Build</guimenuitem></menuchoice>. Progress of the compilation is shown in
+				the <guilabel>Console</guilabel> window.
+			</para>
+
+			<para>
+				After compilation, <emphasis>refresh the project by selecting it and
+				pressing <keycap>F5</keycap></emphasis>. This makes Eclipse scan new
+				content and become aware of the output of the compilation in the
+				<filename>WebContent/ITMILL/widgetsets/</filename> directory. If the
+				project is not refreshed, the JavaScript runtime is not included in the
+				web application and running the application will result in an error
+				message such as the following:
+			</para>
+
+			<screen>Requested resource [ITMILL/widgetsets/com.itmill.toolkit.demo.colorpicker.gwt.ColorPickerWidgetSet/
+com.itmill.toolkit.demo.colorpicker.gwt.ColorPickerWidgetSet.nocache.js] not found
+from filesystem or through class loader. Add widgetset and/or theme JAR to your
+classpath or add files to WebContent/ITMILL folder.</screen>
+
+			<para>
+				Compilation with GWT is required also initially when using the Hosted Mode
+				Browser described in <xref linkend="gwt.hosted-mode"/>. The
+				compilation with the GWT Compiler must be done at least once, as it
+				provides files that are used also by the Hosted Mode Browser, even though
+				the browser runs the GWT application in Java Virtual Machine instead of
+				JavaScript.
+			</para>
+
+			<warning>
+				<para>
+
+					Because GWT supports a slightly reduced version of Java, GWT
+					compilation can produce errors that do not occur with the Java
+					compiler integrated in the Eclipse IDE.
+				</para>
+			</warning>
+
+			<section xml:id="gwt.development.compiler.compiling">
+				<title>Compiling a Custom Widget Set</title>
+
+				<para>
+					If you wish to use the build script to compile your own widget sets,
+					open it in an editor. The build script contains some instructions in
+					the beginning of the file. You can use the
+					<parameter>compile-my-widgetset</parameter> target as a template for
+					your own widget sets.
+				</para>
+
+				<programlisting>&lt;!-- NOTE: Modify this example to compile your own widgetset  --&gt;
+&lt;target name="compile-widgetset" depends="init"&gt;
+  &lt;echo&gt;Compiling com.itmill.toolkit.demo.colorpicker.gwt.ColorPickerWidgetSet.&lt;/echo&gt;
+  &lt;echo&gt;Modify this example ant-script to compile your own widgetsets.&lt;/echo&gt;
+  &lt;java classname="com.google.gwt.dev.GWTCompiler"
+        failonerror="yes" fork="yes" maxmemory="256m"&gt;
+      &lt;arg value="-out" /&gt;
+      &lt;arg value="${client-side-destination}" /&gt;
+
+      &lt;!-- Define your GWT widget set class here. --&gt;
+      &lt;arg value="<emphasis role="bold">com.itmill.toolkit.demo.colorpicker.gwt.ColorPickerWidgetSet</emphasis>" /&gt;
+
+      &lt;jvmarg value="-Xss1024k"/&gt;
+      &lt;jvmarg value="-Djava.awt.headless=true"/&gt;
+      &lt;classpath&gt;
+        &lt;path refid="compile.classpath"/&gt;
+      &lt;/classpath&gt;
+  &lt;/java&gt;
+&lt;/target&gt;</programlisting>
+
+				<para>
+					Replace the target name with your desired target name and the widget
+					set class name with your own class name. The
+					<parameter>-Xss</parameter> parameter may be necessary if you
+					experience stack overflow errors with the default stack size. The
+					<parameter>-Djava.awt.headless=true</parameter> is relevant in
+					Linux/UNIX platforms to avoid some X11 warnings.
+				</para>
+
+				<para>
+					You can now compile the widget set with the following command:
+				</para>
+
+				<screen><prompt>$</prompt> <command>ant -f build-widgetset.xml</command></screen>
+			</section>
+		</section>
+
+		<section xml:id="gwt.development.compiler.result">
+			<title>Ready to Run</title>
+
+			<para>
+				<xref linkend="figure.gwt.compiler.result.annotated"/> shows the contents of
+				a ready project.
+			</para>
+			
+			<figure xml:id="figure.gwt.compiler.result.annotated">
+				<title>Annotated Project Contents</title>
+				<mediaobject>
+					<imageobject role="fo">
+						<imagedata scale="60" align="center" fileref="img/gwt/gwt-hostedmode-project-annotated-hi.png"/>
+					</imageobject>
+					<imageobject role="html">
+						<imagedata align="center" fileref="img/gwt/gwt-hostedmode-project-annotated-lo.png"/>
+					</imageobject>
+				</mediaobject>
+			</figure>
+
+			<para>
+				Notice that the Package Explorer does not correspond with the file system
+				contents. Eclipse displays the items marked with asterisk (*) in a logical
+				location, instead of the physical location in the file system.
+			</para>
+
+			<para>
+				You can either run the application in web mode, as introduced in <xref
+				linkend="getting-started.first-project.run" xrefstyle="select: label"/>,
+				or debug it with the GWT Hosted Mode Browser, as detailed in the next
+				section.
+			</para>
+		</section>
+
+		<section xml:id="gwt.hosted-mode">
+			<title>Hosted Mode Browser</title>
+
+			<para>
+				<emphasis>The Hosted Mode Browser does not work on Linux since IT Mill
+				Toolkit 5.3.0. The Out of Process Hosted Mode, described in <xref
+				linkend="gwt.development.oophm"/>, is an experimental alternative for the
+				Hosted Mode Browser. It is platform-independent and works also on
+				Linux.</emphasis>
+			</para>
+
+			<para>
+				The GWT Hosted Mode Browser allows easy debugging of GWT applications. The
+				GWT application is actually not compiled into JavaScript, as is done in
+				the deployment phase, but executed as a Java application. This makes it
+				possible to debug the application with, for example, the Eclipse IDE.
+			</para>
+
+			<figure xml:id="figure.gwt.hostedmodebrowser">
+				<title>Hosted Mode Browser</title>
+				<mediaobject>
+					<imageobject role="fo">
+						<imagedata scale="35" align="center" fileref="img/custom/gwt-colorpicker-3.png"/>
+					</imageobject>
+					<imageobject role="html">
+						<imagedata align="center" fileref="img/custom/gwt-colorpicker-3.png"/>
+					</imageobject>
+				</mediaobject>
+			</figure>
+
+			<para>
+				<xref linkend="figure.gwt.hostedmodebrowser"/> shows the hosted mode
+				browser in action. On the left, you have the GWT Development Shell window. It
+				displays compilation information and possible errors that occur during
+				compilation. You can open a new browser window by clicking
+				<guibutton>Hosted Browser</guibutton>.
+			</para>
+
+			<para>
+				The browser window has a <guibutton>Compile/Browse</guibutton> button, which
+				runs the GWT Compiler to produce the JavaScript runtime and opens a
+				regular web browser to run the application in Web Mode. Notice that even
+				though it is possible to recompile the program with the button, GWT
+				Compiler must be run before launching the Hosted Mode Browser, as
+				described in <xref linkend="gwt.development.compiler"/>.
+			</para>
+
+			<para>
+				Because GWT supports a slightly reduced version of Java, GWT compilation
+				can produce errors that do not occur with the Java compiler integrated in
+				the Eclipse IDE. Such errors will show up in the GWT Development Shell
+				window.
+			</para>
+
+			<para>
+				While the Hosted Mode Browser is a fast and easy way to debug
+				applications, it does not allow inspecting the HTML or DOM tree or network
+				traffic like Firebug does in Mozilla Firefox.
+			</para>
+
+			<section>
+				<title>Configuring Hosted Mode Launching in Eclipse</title>
+
+				<para>
+					This section gives details on configuring a launcher for the Hosted
+					Mode Browser in the Eclipse IDE. We use the QuickStart installation of
+					IT Mill Toolkit covered in <xref linkend="getting-started.quickstart"/>
+					as an example project. The project includes source code for the Color
+					Picker demo application.
+				</para>
+
+				<orderedlist>
+					<listitem>
+						Select from menu
+						<menuchoice><guimenu>Run</guimenu><guimenuitem>Debug...</guimenuitem></menuchoice>
+						and the <guilabel>Debug</guilabel> configuration window will
+						open. Notice that it is not purposeful to run the Hosted Mode
+						Browser in the "<guilabel>Run</guilabel>" mode, because its entire
+						purpose is to allow debugging.
+					</listitem>
+
+					<listitem>
+						<para>
+							Select the <menuchoice><guimenu>Java
+							Application</guimenu></menuchoice> folder and click on the
+							<guibutton>New</guibutton> button to create a new launch
+							configuration.
+						</para>
+
+						<figure>
+							<title>Creating New Launch Configuration</title>
+							<mediaobject>
+								<imageobject role="html">
+									<imagedata align="center" fileref="img/gwt/gwt-hostedmode-launch-1.png"/>
+								</imageobject>
+								<imageobject role="fo">
+									<imagedata scale="75" align="center" fileref="img/gwt/gwt-hostedmode-launch-1.png"/>
+								</imageobject>
+							</mediaobject>
+						</figure>
+					</listitem>
+
+					<listitem>
+						Click on the created launch configuration to open it on the
+						right-side panel. In the <guilabel>Main</guilabel> tab, give the
+						launch configuration a name. Define the <guilabel>Main
+						class</guilabel> as
+						<classname>com.google.gwt.dev.GWTShell</classname>.
+
+						<figure>
+							<title>Naming Launch Configuration</title>
+							<mediaobject>
+								<imageobject role="html">
+									<imagedata align="center" fileref="img/gwt/gwt-hostedmode-launch-2.png"/>
+								</imageobject>
+								<imageobject role="fo">
+									<imagedata scale="65" align="center" fileref="img/gwt/gwt-hostedmode-launch-2.png"/>
+								</imageobject>
+							</mediaobject>
+						</figure>
+					</listitem>
+
+					<listitem>
+						<para>
+							Switch to the <guilabel>Arguments</guilabel> tab and enter
+							arguments for the Hosted Mode Browsed Java application. 
+						</para>
+
+						<orderedlist>
+							<listitem>
+								<para>In the <guilabel>Program arguments</guilabel> field,
+								enter:</para>
+
+								<screen>-noserver -whitelist "127.0.0.1  ^http[:][/][/]127[.]0[.]0[.]1[:]<parameter>8080</parameter>"
+-out WebContent/ITMILL/widgetsets http://127.0.0.1:<parameter>8080</parameter>/<parameter>myproject</parameter></screen>
+
+								<para>
+									The browser application, <classname>GWTShell</classname>,
+									takes as its arguments the following parameters:
+								</para>
+								
+								<variablelist>
+									<varlistentry>
+										<term>-noserver</term>
+										<listitem>
+											<para>Prevents an embedded web server from starting, thereby
+												allowing to use an already running server.</para>
+										</listitem>
+									</varlistentry>
+									<varlistentry>
+										<term>-whitelist</term>
+										<listitem>
+											<para>Adds a regular expression to the list of allowed
+												URL patterns for the web browser. Modify the port
+												number from the 8080 given above as necessary.</para>
+										</listitem>
+									</varlistentry>
+									<varlistentry>
+										<term>-out</term>
+										<listitem>
+											<para>Output directory for compiling widgets with GWT
+												Compiler. The directory must be
+												<parameter>WebContent/ITMILL/widgetsets</parameter>.
+												You can compile the widgets either from the Hosted
+												Mode Browser or externally as explained later in this
+												chapter.</para>
+										</listitem>
+									</varlistentry>
+									<varlistentry>
+										<term>URL</term>
+										<listitem>
+											<para>The URL to connect to. This must be the
+											same as the whitelist entry given above. The
+											port number must correspond to the port of the
+											running web server. The Jetty web server
+											included in IT Mill Toolkit will run in port
+											8888 by default. In contrast, Apache Tomcat
+											installed under Eclipse will run in port 8080
+											by default.</para>
+										</listitem>
+									</varlistentry>
+								</variablelist>
+							</listitem>
+							<listitem>
+								<para>
+									In the <guilabel>VM arguments</guilabel> field enter, for
+									example, <parameter>-Xms256M -Xmx512M</parameter> to give the
+									hosted mode browser more memory than the default amount. On
+									Mac, add also <parameter>-XstartOnFirstThread</parameter>.
+								</para>
+							</listitem>
+						</orderedlist>
+
+						<figure>
+							<title>GWTShell Arguments</title>
+							<mediaobject>
+								<imageobject role="html">
+									<imagedata align="center" fileref="img/gwt/gwt-hostedmode-launch-3.png"/>
+								</imageobject>
+								<imageobject role="fo">
+									<imagedata scale="65" align="center" fileref="img/gwt/gwt-hostedmode-launch-3.png"/>
+								</imageobject>
+							</mediaobject>
+						</figure>
+					</listitem>
+
+					<listitem>
+						In the <guilabel>Classpath</guilabel> tab, you will by default
+						have <parameter>itmill-toolkit-examples</parameter>, which
+						contains the default classpath entries for the project. If the
+						classpath entries for the project are sufficient, this should be enough.
+					</listitem>
+
+					<listitem>
+						Click <guibutton>Apply</guibutton> to save the launch configuration.
+					</listitem>
+
+					<listitem>
+						Click <guibutton>Debug</guibutton> to launch the Hosted Mode
+						Browser using the launch configuration.
+					</listitem>
+				</orderedlist>
+				
+				<para>
+					 See the following section for details on debugging with the Hosted
+					 Mode Browser.
+				</para>
+			</section>
+
+			<section>
+				<title>Debugging with Hosted Mode Browser</title>
+
+				<para>
+					The purpose of the hosted mode browser is to allow debugging
+					client-side GWT applications, or in our case, GWT widgets.
+					Below is a checklist for important requirements for launching the
+					Hosted Mode Browser:
+				</para>
+				
+				<itemizedlist mark="square">
+					<listitem>
+						GWT is installed under the project folder.
+					</listitem>
+					<listitem>
+						GWT libraries are included in the project classpath.
+					</listitem>
+					<listitem>
+						Widget sets have been compiled with GWT Compiler.
+					</listitem>
+					<listitem>
+						<filename>web.xml</filename> descriptor is configured.
+					</listitem>
+					<listitem>
+						Web server is running and listening to the correct port.
+					</listitem>
+					<listitem>
+						Hosted Mode Browser launcher is configured.
+					</listitem>
+				</itemizedlist>
+
+				<para>
+					Once everything is ready to start debugging, just open a source file,
+					for example, the
+					<classname>com.itmill.toolkit.demo.colorpicker.gwt.client.ui.GwtColorPicker</classname>
+					class. Find the <methodname>onClick()</methodname> method. At the line
+					containing the <methodname>setColor()</methodname> call, right-click
+					on the leftmost bar in the editor and select
+					<menuchoice><guimenuitem>Toggle Breakpoint</guimenuitem></menuchoice>
+					from the popup menu. A small magnifying glass will appear in the bar
+					to indicate the breakpoint.
+				</para>
+
+				<figure>
+					<title>Setting a Breakpoint</title>
+					<mediaobject>
+						<imageobject role="html">
+							<imagedata align="center" fileref="img/gwt/gwt-hostedmode-debug-2.png"/>
+						</imageobject>
+						<imageobject role="fo">
+							<imagedata scale="85" align="center" fileref="img/gwt/gwt-hostedmode-debug-2.png"/>
+						</imageobject>
+					</mediaobject>
+				</figure>
+
+				<para>
+					Select from menu
+					<menuchoice><guimenu>Run</guimenu><guimenuitem>Debug...</guimenuitem></menuchoice>
+					and the <guilabel>Debug</guilabel> configuration window will
+					open. Notice that it is not purposeful to run the Hosted Mode Browser
+					in the "<guilabel>Run</guilabel>" mode, because its entire purpose is
+					to allow debugging.
+				</para>
+
+				<figure>
+					<title>Debugging with Hosted Mode Browser</title>
+					<mediaobject>
+						<imageobject role="html">
+							<imagedata align="center" fileref="img/gwt/gwt-hostedmode-debug-1.png"/>
+						</imageobject>
+						<imageobject role="fo">
+							<imagedata scale="40" align="center" fileref="img/gwt/gwt-hostedmode-debug-1.png"/>
+						</imageobject>
+					</mediaobject>
+				</figure>
+
+				<para>
+					<emphasis role="strong">Starting demo applications under the Hosted
+					Mode Browser can take considerable time!</emphasis> This is especially
+					true for the Reservation and Color Picker applications, which require
+					compilation of custom widget sets. During this time, the Hosted Mode
+					Browser is unresponsive and does not update its window. Compiling widgets
+					can take 5-30 seconds, depending on the hardware.
+				</para>
+
+				<para>
+					Please refer to Eclipse IDE documentation for further instructions on
+					using the debugger.
+				</para>
+
+			</section>
+		</section>
+
+		<section xml:id="gwt.development.oophm">
+			<title>Out of Process Hosted Mode (OOPHM)</title>
+
+			<para>
+				The Out of Process Hosted Mode of GWT is an experimental new way for
+				debugging GWT applications in a regular web browser. This allows using
+				other browser debugging tools, such as Firebug, while debugging in hosted
+				mode.
+			</para>
+
+			<para>
+				<emphasis>The Linux Hosted Mode Browser is not compatible with IT Mill
+				Toolkit 5.3.0, so OOPHM is the only way to debug client-side code in
+				Linux.</emphasis>
+			</para>
+
+
+			<para>
+				The OOPHM installation package of IT Mill Toolkit is a
+				platform-independent package available separately from the platform
+				specific packages. Use of OOPHM requires (see more detailed notes further
+				below):
+			</para>
+
+			<orderedlist>
+				<listitem>Installation of OOPHM plugin from <filename>gwt/plugins</filename>
+				into your browser</listitem>
+
+				<listitem>Compiling custom widget sets using the GWT Compiler provided in
+				<filename>gwt-dev-oophm.jar</filename> instead of the platform-dependent
+				library.</listitem>
+
+				<listitem>Launching Hosted Mode debugging with the
+				<filename>gwt-dev-oophm.jar</filename> in class path instead of the platform-dependent
+				library.</listitem>
+			</orderedlist>
+
+			<para>
+				If you try debugging the demo applications in the IT Mill Toolkit
+				installation package, just install the plugin (Step 1), launch the server
+				in Web Mode, and then launch the Hosted Mode in debug mode (Step 3) with
+				the included launch configuration.
+			</para>
+			
+			<para>
+				The OOPHM plugin is available for Mozilla Firefox, Internet Explorer, and
+				WebKit based browsers.
+			</para>
+			 
+			<section>
+				<title>Installing the OOPHM plugin in Firefox and WebKit</title>
+				<para>The plugin for Firefox and WebKit is installed by 
+				opening the plugin file for your browser in the
+				<filename>gwt/plugins</filename> directory. The Firefox plugin directory
+				contains two plugins; you should normally use the
+				<filename>oophm-xpcom.xpi</filename> plugin. 
+				</para>
+				</section>
+			
+			<section>
+				<title>Installing the OOPHM plugin in Internet Explorer</title>
+				<para>
+				The Internet Explorer plugin 
+				is installed by running the command <command>regsvr32 oophm.dll</command>
+				in the <filename>gwt/plugins/ie</filename> directory. Remember to restart
+				Internet Explorer afterwards.
+				</para>
+				</section>
+				
+			<para>
+				The installation package contains the built-in default widget set compiled
+				with the OOPHM, but if you have your own widget sets (which is usually the
+				reason why you want to use client-side debugging in the first place), you
+				need to compile them. If you have compiled them previously with a regular
+				installation of IT Mill Toolkit, you need to recompile them with the GWT
+				Compiler provided in the <filename>gwt-dev-oophm.jar</filename>
+				library. Compiling GWT widget sets is covered in <xref
+				linkend="gwt.development.compiler"/>. The compilation of OOPHM widget sets
+				uses a large amount of stack memory, so if the JVM default is too small,
+				you should set it explicitly in <filename>compile-widgetset.xml</filename>
+				with the following parameter for the Java process (currently included in
+				the example build script):
+
+				<programlisting><![CDATA[    <jvmarg value="-Xss1024k"/>]]></programlisting>
+			</para>
+
+			<para>
+				Launching the debugging is done just as described in <xref
+				linkend="gwt.hosted-mode"/> for the regular Hosted Mode Browser,
+				except that you must include the <filename>gwt-dev-oophm.jar</filename>
+				library in the class path instead of the platform specific
+				library. Launching the application with the debug configuration will
+				contact the plugin in your browser and automatically opens the configured
+				page.
+			</para>
+
+			<para>
+				To enable the usage of hosted mode in the browser you need to add a 
+				<parameter>gwt.hosted=ip:port</parameter> parameter
+				to the URL of the application you want to debug, e.g. 
+				<uri>http://localhost:8080/myapp/?gwt.hosted=127.0.0.1:9997</uri>. 
+				As OOPHM support is experimental
+				you might get messages such as "No GWT plugin found" but debugging should
+				still work. In Internet Explorer you might get a warning: 
+				"The website wants to run the following add-on: 'Google Web Toolkit Out-of-Process Hosted Mode...'"
+				when using OOPHM hosted mode. You need to allow execution of the ActiveX code to
+				be able to use it.
+			</para>
+		</section>
+	</section>
+</chapter>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: xml
+sgml-omittag:nil
+sgml-shorttag:nil
+sgml-namecase-general:nil
+sgml-general-insert-case:lower
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:4
+sgml-indent-data:t
+sgml-parent-document:nil
+sgml-exposed-tags:nil
+sgml-local-catalogs:("/etc/sgml/catalog" "/usr/share/xemacs21/xemacs-packages/etc/psgml-dtds/CATALOG")
+sgml-local-ecat-files:("ECAT" "~/sgml/ECAT" "/usr/share/sgml/ECAT" "/usr/local/share/sgml/ECAT" "/usr/local/lib/sgml/ECAT")
+End:
+-->
+

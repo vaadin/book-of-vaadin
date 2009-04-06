@@ -1,0 +1,543 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<chapter xml:id="skeleton">
+	<title>Application Skeleton</title>
+
+	<para>
+		We are now ready to start building the actual Application, starting from the
+		layout. Our component tree in the final application will look as shown in <xref
+		linkend="figure.finished-application"/> earlier.
+	</para>
+
+	<itemizedlist>
+		<listitem><classname>Window</classname>
+			<itemizedlist>
+				<listitem><classname>VerticalLayout</classname> (every window has a layout)
+					<itemizedlist>
+						<listitem><classname>HorizontalLayout</classname> (our toolbar)
+							<itemizedlist>
+								<listitem><classname>Button</classname> (<guibutton>Add contact</guibutton>)</listitem>
+								<listitem><classname>Button</classname> (<guibutton>Search</guibutton>)</listitem>
+								<listitem><classname>Button</classname> (<guibutton>Share</guibutton>)</listitem>
+								<listitem><classname>Button</classname> (<guibutton>Help</guibutton>)</listitem>
+							</itemizedlist>
+						</listitem>
+						<listitem><classname>SplitPanel</classname> (Horizontal)
+							<itemizedlist>
+								<listitem><classname>Tree</classname> (navigation tree on left side)</listitem>
+								<listitem>Main view area (on the right side, contents depends on the application state)</listitem>
+							</itemizedlist>
+						</listitem>
+					</itemizedlist>
+				</listitem>
+			</itemizedlist>
+		</listitem>
+	</itemizedlist>
+
+	<para>
+		We will build the main layout in the main application class but separate larger UI
+		parts to their own, distinct classes. This is a best practice in general as well,
+		it is always good to componentize similar things so that they (1) can easily be
+		reused and (2) so that they are easier to understand and maintain.
+	</para>
+
+	<section xml:id="skeleton.application">
+		<title>The Application Class</title>
+
+		<para>
+			The <methodname>init()</methodname> method in our application is called every
+			time a new application needs to be initialized i.e. when a new user navigates
+			to our application. To keep the <methodname>init()</methodname> method simple
+			we will not build our main layout there but in a separate method
+			(<methodname>buildMainLayout()</methodname>) which we call from
+			<methodname>init()</methodname>. So let us start by creating the method called
+			<methodname>buildMainLayout()</methodname> and adding a call to that method
+			from the <methodname>init()</methodname> method. The code should look like
+			this:
+		</para>
+
+		<programlisting><![CDATA[@Override
+public void init() {
+    buildMainLayout();
+}
+
+private void buildMainLayout() {
+    setMainWindow(new Window("Address Book Demo application"));
+}]]></programlisting>
+
+		<para>
+			Next we'll add some components which should be on the screen all the time. We'll
+			store these in fields as we need to reference them later on.
+		</para>
+
+		<programlisting><![CDATA[    private Button newContact = new Button("Add contact");
+    private Button search = new Button("Search");
+    private Button share = new Button("Share");
+    private Button help = new Button("Help");
+    private SplitPanel horizontalSplit = new SplitPanel(
+            SplitPanel.ORIENTATION_HORIZONTAL);]]></programlisting>
+	</section>
+
+	<section xml:id="skeleton.main-layout">
+		<title>Building the Main Layout</title>
+
+		<para>
+			Next we'll create a <classname>VerticalLayout</classname>, the layout for our
+			main window and make it consume all of the available space in the window. Then
+			we create a new <classname>HorizontalLayout</classname> for the toolbar and
+			populate it with our buttons. Finally we add the horizontal split panel to the
+			window's main layout. We have separated the creation of the toolbar to a
+			method of its own, <methodname>createToolbar()</methodname>, to keep the code
+			cleaner. We end up with the following code:
+		</para>
+
+		<programlisting><![CDATA[    private void buildMainLayout() {
+         setMainWindow(new Window("Address Book Demo application"));
+         VerticalLayout layout = new VerticalLayout();
+         layout.setSizeFull();
+                
+         layout.addComponent(createToolbar());
+         layout.addComponent(horizontalSplit);
+
+        /* Allocate all available extra space to the horizontal split panel */
+
+        layout.setExpandRatio(horizontalSplit, 1);
+        /* Set the initial split position so we can have a 200 pixel menu to the left */
+
+        horizontalSplit.setSplitPosition(200, SplitPanel.UNITS_PIXELS);
+
+        getMainWindow().setLayout(layout);
+
+    }
+
+    public HorizontalLayout createToolbar() {
+
+        HorizontalLayout lo = new HorizontalLayout();
+         lo.addComponent(newContact);
+         lo.addComponent(search);
+         lo.addComponent(share);
+         lo.addComponent(help);
+
+        return lo;
+
+    }]]></programlisting>
+
+		<tip>
+			<title>Hint!</title>
+			<para>
+				If Tomcat is running when you alter the class (copy/paste code) you might
+				get a "<errortext>Hot Code Replace Failed</errortext>" popup. Just click
+				<guibutton>Terminate</guibutton> to stop tomcat and then start the
+				application again when you want to have a look at the application.
+			</para>
+		</tip>
+
+		<para>
+			Try it out and you'll see the buttons at the top and the split panel at the
+			bottom. The <methodname>setExpandRatio()</methodname> call makes the split
+			panel use all available space that the toolbar doesn't want. 
+		</para>
+
+		<figure xml:id="figure.skeleton.initial">
+			<title>Initial Skeleton</title>
+			<mediaobject>
+				<imageobject role="html">
+					<imagedata align="center" fileref="img/skeleton-initial.png"/>
+				</imageobject>
+				<imageobject role="fo">
+					<imagedata scale="50" align="center" fileref="img/skeleton-initial.png"/>
+				</imageobject>
+			</mediaobject>
+		</figure>
+	</section>
+
+	<section xml:id="skeleton.components">
+		<title>Populating Application With Components</title>
+	
+		<para>
+			Now we have a very basic application skeleton ready. The rest of the UI parts
+			we need will be created by extending existing components. We'll extend basic
+			components and tune them for use in our application. Let's start with a
+			navigation <classname>Tree</classname>.
+		</para>
+
+		<para>
+			Create a <classname>NavigationTree</classname> class extending the Tree
+			component in a new package called "<package>ui</package>". Eclipse will do
+			most of this for you almost automatically. Add two lines of code to
+			<classname>Tree</classname> in the constructor. You'll end up with the
+			following class:
+		</para>
+
+		<programlisting><![CDATA[package com.itmill.dev.addressbooktutorial.ui;
+
+import com.itmill.toolkit.ui.Tree;
+
+public class NavigationTree extends Tree {
+     public static final Object SHOW_ALL = "Show all";
+     public static final Object SEARCH = "Search";
+
+    public NavigationTree() {
+             addItem(SHOW_ALL);
+             addItem(SEARCH);
+     }
+ }]]></programlisting>
+
+		<tip>
+			<title>Hint!</title>
+
+			<para>
+				Code for a complete class like the above can be pasted directly into the
+				<package>AddressBook</package> project in the Eclipse Package Explorer
+				provided you are using the Java perspective. Eclipse automatically places
+				the file in the correct place.
+			</para>
+		</tip>
+
+		<para>
+			Now lets add the navigation tree to our application class. We'll need to
+			reference it later so we store it in a field:
+		</para>
+
+		<programlisting><![CDATA[    private NavigationTree tree = new NavigationTree();]]></programlisting>
+
+		<para>
+			Then we set it is as the first component for the horizontal split panel in
+			<methodname>buildMainLayout()</methodname>.
+		</para>
+
+		<programlisting><![CDATA[    horizontalSplit.setFirstComponent(tree);]]></programlisting>
+
+		<para>
+			The next step is to create our views. As in any desktop style UI framework in
+			Toolkit there is no such a thing as a page (contrary to HTML/JSP which is page
+			based). Instead we work with views just as in desktop applications. The
+			application's main modes is what we usually call views. In our example
+			application we only have two views. A search view and a contacts list view. If
+			you are more familiar with page centric web application technologies like JSP
+			or PHP, you might consider views as a kind of page. Or try not to think of
+			creating something for the web, but just create a desktop application that
+			then happens to run in a browser. Views may be constructed in a many different
+			ways, but we are using the simplest approach here: our views are simply
+			extended Toolkit components.
+		</para>
+
+		<para>
+			In our application the main view will always use the right side of the
+			horizontal split panel. Let's start by making a generic setter for the main
+			view in the <classname>AddressBookApplication</classname>:
+		</para>
+
+		<programlisting><![CDATA[    private void setMainComponent(Component c) {
+         horizontalSplit.setSecondComponent(c);
+     }]]></programlisting>
+
+		<para>
+			We want this to be a separate method so we can use it later on to change the
+			main component (the view).
+		</para>
+
+		<para>
+			Now we create a <classname>ListView</classname>, which is our main view that
+			is shown when the application is started. We create it in the same manner as
+			the <classname>NavigationTree</classname> but extend
+			<classname>SplitPanel</classname> instead of <classname>Tree</classname>. This
+			split panel should be vertical, which is the default for split panels. We only
+			need an empty class with a constructor so far.
+		</para>
+
+		<programlisting><![CDATA[package com.itmill.dev.addressbooktutorial.ui;
+
+import com.itmill.toolkit.ui.SplitPanel;
+
+public class ListView extends SplitPanel {
+     public ListView() {
+     }
+ }]]></programlisting>
+
+		<para>
+			To minimize start-up time and memory usage we will use a lazy initialization
+			pattern for creating our views. In an application this small it doesn't
+			actually matter, but generally it is a very good habit to lazily instantiate
+			you GUI objects. So create a field for the ListView in the main application
+			class and create a lazy getter for it like this:
+		</para>
+
+		<programlisting><![CDATA[    private ListView listView = null;
+
+    private ListView getListView() {
+         if (listView == null) {
+             listView = new ListView();
+         }
+         return listView;
+     }]]></programlisting>
+
+		<para>
+			The method creates the view when it is needed for the first time, only
+			creating the views actually used. Now test this by changing the code in the
+			<methodname>init()</methodname> method to:
+		</para>
+
+		<programlisting><![CDATA[setMainComponent(getListView());]]></programlisting>
+
+		<para>
+			We'll be using this pattern for the most of our UI code.
+		</para>
+
+		<!-- Hmmm. Tämän kohdan jälkeen tuntuisi intuitiiviselta jos ListView luokka
+		luotaisiin seuraavaksi. Luotu yllä, ok? Musta on ok näin... -->
+
+		<para>
+			Now let's create the components we want to put in the
+			<classname>ListView</classname>. The first component (contacts list) will be
+			extended from Table so we create a sub class of <classname>Table</classname>
+			called <classname>PersonList</classname>. In its constructor we'll add some
+			dummy data to it and also set the size to make it consume all available space
+			given to it by the split panel. We end up with the following stub class:
+		</para>
+
+		<programlisting><![CDATA[package com.itmill.dev.addressbooktutorial.ui;
+
+import com.itmill.toolkit.ui.Table;
+
+public class PersonList extends Table {
+     public PersonList() {
+         // create some dummy data
+         addContainerProperty("First Name", String.class, "Mark");
+         addContainerProperty("Last Name", String.class, "Smith");
+         addItem();
+         addItem();
+         setSizeFull();
+     }
+ }]]></programlisting>
+
+		<para>
+			Next we create the viewer/editor for our contacts
+			(<classname>PersonForm</classname>) in the same way by extending
+			<classname>Form</classname>:
+		</para>
+
+		<programlisting><![CDATA[package com.itmill.dev.addressbooktutorial.ui;
+
+import com.itmill.toolkit.ui.Button;
+ import com.itmill.toolkit.ui.Form;
+ import com.itmill.toolkit.ui.HorizontalLayout;
+ import com.itmill.toolkit.ui.TextField;
+
+public class PersonForm extends Form {
+
+    private Button save = new Button("Save");
+     private Button cancel = new Button("Cancel");
+
+    public PersonForm() {
+         addField("First Name", new TextField("First Name"));
+         addField("Last Name", new TextField("Last Name"));
+         HorizontalLayout footer = new HorizontalLayout();
+         footer.setSpacing(true);
+         footer.addComponent(save);
+         footer.addComponent(cancel);
+         setFooter(footer);
+     }
+}]]></programlisting>
+
+		<para>
+			Modify the <classname>ListView</classname> constructor so we can pass the
+			components to it and add them to the split panel. Modify the
+			<classname>ListView</classname> getter to instantiate those new components too
+			and save a reference to them. You'll end up having the following code in your
+			application class:
+		</para>
+
+		<programlisting><![CDATA[private PersonList personList = null;
+ private PersonForm personForm = null;
+
+private ListView getListView() {
+     if (listView == null) {
+         personList = new PersonList();
+         personForm = new PersonForm();
+         listView = new ListView(personList, personForm);
+     }
+     return listView;
+ }]]></programlisting>
+
+		<para>
+			And the following in the <classname>ListView</classname> constructor:
+		</para>
+
+		<programlisting><![CDATA[package com.itmill.dev.addressbooktutorial.ui;
+
+import com.itmill.toolkit.ui.SplitPanel;
+
+public class ListView extends SplitPanel {
+     public ListView(PersonList personList, PersonForm personForm) {
+         setFirstComponent(personList);
+         setSecondComponent(personForm);
+         setSplitPosition(40);
+     }
+ }]]></programlisting>
+
+		<!-- Olisikos jopa parempi jos tuo ListView() rakentaja jäisi tyhjäksi ja
+		personlist sekä personform luodaan listview:n sisällä?  - Molemmat tarvitaan
+		ListView:n ulkopuolella myöhemmin. ok? -->
+
+		<para>
+			The application should now look like this:
+		</para>
+
+		<figure xml:id="figure.skeleton.views">
+			<title>Skeleton with Views</title>
+			<mediaobject>
+				<imageobject role="html">
+					<imagedata align="center" fileref="img/skeleton-views.png"/>
+				</imageobject>
+				<imageobject role="fo">
+					<imagedata scale="80" align="center" fileref="img/skeleton-views.png"/>
+				</imageobject>
+			</mediaobject>
+		</figure>
+	</section>
+
+	<section xml:id="skeleton.subwindows">
+		<title>Sub Windows</title>
+
+		<para>
+			As the last step in this chapter we'll get to know an often used feature in IT
+			Mill Toolkit: <emphasis>sub windows</emphasis>. Toolkit has two kinds of
+			windows: top level windows and sub windows.
+		</para>
+
+		<para>
+			Traditionally windows are not that much used in web applications, but during
+			the "Web 2.0" era the kind of windows inside browser windows have become quite
+			common. Sub windows are added to top level windows (~web browsers
+			windows). With moderate usage of sub windows one can make the application feel
+			more like a desktop application and really improve usability.
+		</para>
+
+		<para>
+			Sub windows are shown in the application by adding them to a top level window
+			using the <methodname>addWindow(Window window)</methodname> method. Most
+			commonly like the following:
+		</para>
+
+		<programlisting><![CDATA[getMainWindow().addWindow(mySubWindow);]]></programlisting>
+
+		<para>
+			We'll make two sub windows for our application. One is a help window which
+			will be floating over the main UI. The user can drag it to some place where it
+			doesn't disturb application usage and resize it so it is not in the way. The
+			other sub window is a (non-functional) <guilabel>Sharing options</guilabel>
+			screen. It will demonstrate how to create a modal dialog that blocks the rest
+			of the UI until it is closed. Both of those windows extend
+			<classname>Window</classname> and are created much in the same way as
+			<classname>ListView</classname> and <classname>SearchView</classname>
+			above. Implementations are below:
+		</para>
+
+		<programlisting><![CDATA[package com.itmill.dev.addressbooktutorial.ui;
+
+import com.itmill.toolkit.ui.Label;
+import com.itmill.toolkit.ui.Window;
+
+public class HelpWindow extends Window {
+     private static final String HELP_HTML_SNIPPET = "This is "
+             + "an application built during <strong><a href=\""
+             + "http://dev.itmill.com/\">Toolkit</a></strong> "
+             + "tutorial. Hopefully it don't need any real help.";
+
+    public HelpWindow() {
+         setCaption("Address Book help");
+         addComponent(new Label(HELP_HTML_SNIPPET, Label.CONTENT_XHTML));
+     }
+
+}
+
+package com.itmill.dev.addressbooktutorial.ui;
+
+import com.itmill.toolkit.ui.Button;
+import com.itmill.toolkit.ui.CheckBox;
+import com.itmill.toolkit.ui.Label;
+import com.itmill.toolkit.ui.Window;
+
+public class SharingOptions extends Window {
+     public SharingOptions() {
+         /*
+          * Make the window modal, which will disable all other components while
+          * it is visible
+          */
+         setModal(true);
+
+        /* Make the sub window 50% the size of the browser window */
+         setWidth("50%");
+         /*
+          * Center the window both horizontally and vertically in the browser
+          * window
+          */
+         center();
+         
+         setCaption("Sharing options");
+         addComponent(new Label(
+                 "With these setting you can modify contact sharing "
+                         + "options. (non-functional, example of modal dialog)"));
+         addComponent(new CheckBox("Gmail"));
+         addComponent(new CheckBox(".Mac"));
+         Button close = new Button("OK");
+         addComponent(close);
+     }
+ }]]></programlisting>
+
+		<!-- Tämän kohdan voisi jättää myöhemmäksi, eli sitten kun tehdään
+		click-listenereitä yms. ? Mikä kohta? -->
+
+		<para>
+			Now create lazy getter methods for both of those floating "views". We cannot
+			try them out in the same way as the other views as we cannot add a window as a
+			component. Instead we can test them using the
+			<methodname>Window.addWindow()</methodname> method like this:
+		</para>
+
+		<programlisting><![CDATA[		getMainWindow().addWindow(getHelpWindow());]]></programlisting>
+
+		<!-- Tämän luvun loppuun pieni summary mitä käytiin läpi. Alla. -->
+
+		<para>
+			In this step we have covered how to construct the main layout for our
+			application. We created components for navigating the program, both in the
+			form of buttons and a navigation tree. We have also created the table which
+			will list all our contacts and created a form for inputting data. Finally we
+			have introduced sub windows into our application and tested manually that
+			everything works as expected. Next we need to add some logic to our
+			application to make things happen when buttons are pushed etc. But before that
+			we will see how to bind some data to our table.
+		</para>
+
+		<para>
+			You can download the Eclipse project package for the end of this step from:
+		</para>
+			
+		<itemizedlist>
+			<listitem><link href="http://www.itmill.com/download/doc/tutorial/itmill-toolkit-5-tutorial/ab-ch3-layout.zip"/></listitem>
+		</itemizedlist>
+
+	</section>
+</chapter>
+
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: xml
+sgml-omittag:nil
+sgml-shorttag:nil
+sgml-namecase-general:nil
+sgml-general-insert-case:lower
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:4
+sgml-indent-data:t
+sgml-parent-document:nil
+sgml-exposed-tags:nil
+sgml-local-catalogs:("/etc/sgml/catalog" "/usr/share/xemacs21/xemacs-packages/etc/psgml-dtds/CATALOG")
+sgml-local-ecat-files:("ECAT" "~/sgml/ECAT" "/usr/share/sgml/ECAT" "/usr/local/share/sgml/ECAT" "/usr/local/lib/sgml/ECAT")
+End:
+-->
+
