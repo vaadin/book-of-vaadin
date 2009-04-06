@@ -49,55 +49,10 @@
 
     </target>
 
-    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-    <!-- Copy and preprocess sources for packaging                           -->
-    <!-- NOTE: Replaces <version></version> tags with build version tag for  -->
-    <!-- some "textual" files                                                -->
-    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-    <target name="preprocess-src"/>
-    <target name="preprocess-src-obsolete">
-        <loadfile property="ITMillApache2LicenseForJavaFiles" srcFile="build/ITMillApache2LicenseForJavaFiles.txt" />
-        <mkdir dir="${result-path}/src" />
-        <echo>Copying src directory and processing copied files.</echo>
-        <echo>Replacing &lt;version&gt; tag with build version for html/css/xml files.</echo>
-        <copy todir="${result-path}/src">
-            <filterset>
-                <filter token="ITMillApache2LicenseForJavaFiles" value="${ITMillApache2LicenseForJavaFiles}" />
-                <filter token="VERSION" value="${version}" />
-            </filterset>
-            <fileset dir="src">
-                <patternset>
-                    <include name="**/*.html" />
-                    <include name="**/*.css" />
-                    <include name="**/*.xml" />
-                </patternset>
-            </fileset>
-        </copy>
-
-        <!-- Unify mix usage of mac/Linux/Win characters -->
-        <echo>Unifying mix usage of Mac/Linux/Win linefeeds for java/html/css/xml files.</echo>
-        <fixcrlf srcdir="${result-path}/src" eol="crlf" tablength="4" tab="asis" includes="**/*.html **/*.css **/*.xml" />
-
-        <!-- Add other files such as images, these are not filtered or processed by fixcrlf task -->
-        <echo>Copying non java/html/css/xml files such as images.</echo>
-        <copy todir="${result-path}/src">
-            <fileset dir="src">
-                <patternset>
-                    <exclude name="**/.svn" />
-                    <exclude name="**/*.html" />
-                    <exclude name="**/*.css" />
-                    <exclude name="**/*.xml" />
-                </patternset>
-            </fileset>
-        </copy>
-
-    </target>
-
     <!-- ================================================================== -->
     <!-- Build Documentation.                                               -->
     <!-- ================================================================== -->
-    <target name="docs" depends="manual-pdf, manual-html">
-    </target>
+    <target name="docs" depends="manual-pdf, manual-html, package-docs"/>
 
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <!-- Package Documentation: Add documentation including style files      -->
@@ -212,7 +167,7 @@
 
     <!-- Common initialization tasks for a HTML manual.                                   -->
     <!-- Some properties must be defined in the more specific HTML manual initialization. -->
-    <target name="init-manual-html-common" depends="preprocess-src">
+    <target name="init-manual-html-common" depends="">
         <!-- Create the manual output directory if it doesn't already exist. -->
         <mkdir dir="${manual.html.output.dir}"/>
 
@@ -431,7 +386,7 @@
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <!-- HTML Tutorial                                                       -->
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-    <target name="tutorial-html" depends="init, init-tutorial, preprocess-src">
+    <target name="tutorial-html" depends="init, init-tutorial">
         <echo>Tutorial: HTML</echo>
         <echo>Publication date is ${tutorial.pubdate}</echo>
 
