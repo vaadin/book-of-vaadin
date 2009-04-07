@@ -185,7 +185,7 @@
       <xsl:when test="$double.sided != 0 and $position='center'">
         <!-- Custom footer: -->
         <xsl:value-of select="/book/info/title"/>
-        <!-- <xsl:text>IT Mill Toolkit Reference Manual</xsl:text>  -->
+        <!-- <xsl:text>Vaadin Reference Manual</xsl:text>  -->
       </xsl:when>
 
       <xsl:when test="$double.sided = 0 and $position='center'">

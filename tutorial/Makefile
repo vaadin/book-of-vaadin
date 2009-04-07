@@ -1,4 +1,4 @@
-all: images itmill-toolkit-tutorial.pdf
+all: images vaadin-tutorial.pdf
 
 DATE = `date +'%Y-%m-%d'`
 VERSION = `cat ../../build/VERSION.properties|sed -e 's/^version=\([0-9\.]\+\).\+/\1/'`
@@ -42,19 +42,19 @@ $(TRGIMAGES_LO): img/%-lo.png: original-drawings/%.svg
 DOCBOOK = ../../build/docbook/conf/custom-fo-docbook.xsl
 
 # Process Docbook to FO
-itmill-toolkit-tutorial.fo: tutorial.xml FORCE
+vaadin-tutorial.fo: tutorial.xml FORCE
 	@echo $(VERSION)
 	java -Xms256M -Xmx512M -classpath ../../build/lib/xalan.jar:../../build/lib/xercesImpl.jar:../../build/lib/xml-apis.jar org.apache.xalan.xslt.Process -xsl $(DOCBOOK) -in $< -out $@ $(DBPARS)
 
 XEPCONF = -Dcom.renderx.xep.CONFIG=../../build/lib/XEP/xep.xml
 
 # Run XEP FO processor to convert FO to PDF.
-itmill-toolkit-tutorial.pdf: itmill-toolkit-tutorial.fo
+vaadin-tutorial.pdf: vaadin-tutorial.fo
 	/opt/RenderX/XEP/xep $(XEPCONF) < $< > $@
 #	rm book.fo
 
 # View the result
-viewbook: itmill-toolkit-tutorial.pdf FORCE
+viewbook: vaadin-tutorial.pdf FORCE
 	kpdf $<
 
 ################################################################################
