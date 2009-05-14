@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<chapter xml:id="uidl">
+<appendix xml:id="uidl">
 	<title>User Interface Definition Language (UIDL)</title>
 	
 	<para>
@@ -13,9 +13,9 @@
 
 	<para>
 		The UIDL is used through both server-side and client-side APIs. The server-side
-		API consists of the <classname>PaintTarget</classname> interface, described below
+		API consists of the <classname>PaintTarget</classname> interface, described
 		in <xref linkend="uidl.painting"/>. The client-side interface depends on
-		the implementation of the client-side engine. In IT Mill Toolkit Release 5, the
+		the implementation of the client-side engine. In Vaadin Release 5, the
 		client-side engine uses the Google Web Toolkit framework. Painting the user
 		interface with a GWT widget is described in <xref linkend="gwt.widgets"/>.
 	</para>
@@ -28,22 +28,24 @@
 	</para>
 
 	<para>
-		Since IT Mill Toolkit Release 5, the UIDL communications are currently done using
-		JSON (JavaScript Object Notation), which is a lightweight data interchange format
-		that is especially efficient for interfacing with JavaScript-based AJAX code in
-		the browser. The use of JSON as the interchange format is largely transparent; IT
-		Mill Toolkit version 4 and the older versions used an XML-based UIDL representation with the
-		same API. Nevertheless, the UIDL API uses XML concepts such as attributes and
-		elements. Below, we show examples of a <classname>Button</classname> component in
-		both XML and JSON notation.
+		Since Vaadin Release 5, the UIDL communications are currently done using JSON
+		(JavaScript Object Notation), which is a lightweight data interchange format that
+		is especially efficient for interfacing with JavaScript-based AJAX code in the
+		browser. The use of JSON as the interchange format is largely transparent; IT Mill
+		Toolkit version 4 (predecessor of Vaadin released in 2006) the older versions used
+		an XML-based UIDL representation with the same API. Nevertheless, the UIDL API
+		uses XML concepts such as attributes and elements. Below, we show examples of a
+		<classname>Button</classname> component in both XML and JSON notation.
 	</para>
 
 	<para>
 		With XML notation:
 	</para>
 
-	<programlisting><![CDATA[<button id="PID2" immediate="true" caption="My Button" focusid="1">
-    <boolean id="v1" name="state" value="false"></boolean>
+	<programlisting><![CDATA[<button id="PID2" immediate="true"
+        caption="My Button" focusid="1">
+    <boolean id="v1" name="state"
+             value="false"></boolean>
 </button>]]></programlisting>
 
 	<para>
@@ -68,7 +70,7 @@
 	</para>
 			
 	<para>
-		<xref linkend="uidl.json"/> below gives further details on JSON. For more
+		<xref linkend="uidl.json"/> gives further details on JSON. For more
 		information about handling UIDL messages in the client-side components, see <xref
 		linkend="gwt"/>.
 	</para>
@@ -86,7 +88,7 @@
 		<para>
 			Serialization or "painting" of user interface components from server to the
 			client-side engine running in the browser is done through the
-			<classname>PaintTarget</classname> interface. In IT Mill Toolkit Release 5,
+			<classname>PaintTarget</classname> interface. In Vaadin Release 5,
 			the only implementation of the interface is the
 			<classname>JsonPaintTarget</classname>, detailed in <xref
 			linkend="uidl.json"/> below.
@@ -101,9 +103,9 @@
 			<classname>Button</classname> component is as follows:
 		</para>
 
-		<programlisting><![CDATA[    public String getTag() {
-        return "button";
-    }]]></programlisting>
+		<programlisting><![CDATA[public String getTag() {
+    return "button";
+}]]></programlisting>
 
 		<para>
 			<classname>AbstractComponent</classname> implements the
@@ -115,14 +117,16 @@
 			should call the default implementation to paint any common attributes.
 		</para>
 
-		<programlisting><![CDATA[    /* Paint (serialize) the component for the client. */
-    public void paintContent(PaintTarget target) throws PaintException {
-        // Superclass writes any common attributes in the paint target.
-        super.paintContent(target);
-        
-        // Set any values as variables of the paint target.
-        target.addVariable(this, "colorname", getColor());
-    }]]></programlisting>
+		<programlisting><?pocket-size 70% ?><![CDATA[/* Paint (serialize) the component for the client. */
+public void paintContent(PaintTarget target)
+                throws PaintException {
+    // Superclass writes any common attributes in
+    // the paint target.
+    super.paintContent(target);
+    
+    // Set any values as variables of the paint target.
+    target.addVariable(this, "colorname", getColor());
+}]]></programlisting>
 
 		<para>
 			Serialized data can be attributes or variables, serialized with the
@@ -167,25 +171,24 @@
 			<classname>Boolean</classname> value.
 		</para>
 
-		<programlisting><![CDATA[    public void paintContent(PaintTarget target) throws PaintException {
-        super.paintContent(target);
+		<programlisting><?pocket-size 75% ?><![CDATA[public void paintContent(PaintTarget target)
+                 throws PaintException {
+    super.paintContent(target);
 
-        // Serialize the switchMode as an attribute
-        if (isSwitchMode())
-            target.addAttribute("type", "switch");
+    // Serialize the switchMode as an attribute
+    if (isSwitchMode())
+        target.addAttribute("type", "switch");
 
-        // Get the state of the Button safely
-        boolean state;
-        try {
-            state = ((Boolean) getValue()).booleanValue();
-        } catch (NullPointerException e) {
-            state = false;
-        }
-        target.addVariable(this, "state", state);
+    // Get the state of the Button safely
+    boolean state;
+    try {
+        state = ((Boolean) getValue()).booleanValue();
+    } catch (NullPointerException e) {
+        state = false;
+    }
+    target.addVariable(this, "state", state);
 
-    }]]></programlisting>
-
-		<programlisting><![CDATA[]]></programlisting>
+}]]></programlisting>
 
 	</section>
 
@@ -193,17 +196,17 @@
 		<title>JSON Rendering</title>
 
 		<para>
-			IT Mill Toolkit 5 uses JSON, a lightweight data-interchange format, to
-			communicate UI rendering with the browser, because it is very fast to parse
-			compared to XML. JSON messages are essentially JavaScript statements that can
-			be directly evaluated by the browser. The client-side engine of IT Mill
-			Toolkit parses and evaluates the UIDL messages with the JSON library that
-			comes with the Google Web Toolkit.
+			Vaadin 5 uses JSON, a lightweight data-interchange format, to communicate UI
+			rendering with the browser, because it is very fast to parse compared to
+			XML. JSON messages are essentially JavaScript statements that can be directly
+			evaluated by the browser. The client-side engine of Vaadin parses and
+			evaluates the UIDL messages with the JSON library that comes with the Google
+			Web Toolkit.
 		</para>
 
 		<para>
 			<xref linkend="architecture.technology.json"/> gave a general introduction to
-			JSON as part of the architecture of IT Mill Toolkit. In this section, we look
+			JSON as part of the architecture of Vaadin. In this section, we look
 			into the technical details of the format. The technical details of the JSON
 			messages are useful mainly for debugging purposes, for example using the
 			Firebug plugin for Mozilla Firefox.
@@ -220,11 +223,11 @@
 		<figure xml:id="figure.uidl.json.firebug">
 			<title>Debugging UIDL Messages with Firebug</title>
 			<mediaobject>
-				<imageobject role="fo">
-					<imagedata scale="75" align="center" fileref="img/debug/firebug-net-uidl.png"/>
-				</imageobject>
 				<imageobject role="html">
 					<imagedata align="center" fileref="img/debug/firebug-net-uidl.png"/>
+				</imageobject>
+				<imageobject role="fo">
+					<imagedata scale="75" smallscale="100%" align="center" fileref="img/debug/firebug-net-uidl.png"/>
 				</imageobject>
 			</mediaobject>
 		</figure>
@@ -318,7 +321,7 @@
 		UNFINISHED
 	</section>
     -->
-</chapter>
+</appendix>
 
 <!-- Keep this comment at the end of the file
 Local variables:

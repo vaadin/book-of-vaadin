@@ -4,20 +4,20 @@
 	<title>Developing Custom Components</title>
 
 	<para>
-		This chapter gives details on how to create custom client-side components as
-		Google Web Toolkit (GWT) widgets and how to integrate them with IT Mill
-		Toolkit. The client-side implementations of all standard user interface components
-		in IT Mill Toolkit use the same client-side interfaces and patterns.
+		This chapter describes how you can create custom client-side components as Google
+		Web Toolkit (GWT) widgets and how you integrate them with Vaadin. The client-side
+		implementations of all standard user interface components in Vaadin use the same
+		client-side interfaces and patterns.
 	</para>
 
 	<para>
 		Google Web Toolkit is intended for developing browser-based user interfaces using
 		the Java language, which is compiled into JavaScript. Knowledge of such
-		client-side technologies is usually not needed with IT Mill Toolkit, as its
+		client-side technologies is usually not needed with Vaadin, as its
 		repertoire of user interface components should be sufficient for most
-		applications. The easiest way to create custom components in IT Mill Toolkit is to
+		applications. The easiest way to create custom components in Vaadin is to
 		make composite components with the <classname>CustomComponent</classname>
-		class. See <xref linkend="components.custom"/> for more details on the
+		class. See <xref linkend="components.customcomponent"/> for more details on the
 		composite components. In some cases, however, you may need to either make
 		modifications to existing components or create new or integrate existing GWT
 		widgets with your application.
@@ -26,9 +26,9 @@
 	<para>
 		If you need more background on the architecture, <xref
 		linkend="architecture.client-side"/> gives an introduction to the
-		architecture of the IT Mill Toolkit Client-Side Engine. If you are new to Google
+		architecture of the Vaadin Client-Side Engine. If you are new to Google
 		Web Toolkit, <xref linkend="architecture.technology.gwt"/> gives an introduction to
-		GWT and its role in the architecture of IT Mill Toolkit.
+		GWT and its role in the architecture of Vaadin.
 	</para>
 
 	<note>
@@ -42,27 +42,38 @@
 		</para>
 	</note>
 
+	<note>
+		<title>Eclipse plugin</title>
+		<para>
+			This chapter does not cover the use of new Vaadin Eclipse plugin. The plugin
+			will greatly simplify the process of building new widgets and composing widgetsets.
+			After introducing yourself with the concepts involved with developing custom
+			components, read about the plugin on <link xlink="http://vaadin.com/eclipse">
+			http://vaadin.com/eclipse</link>.
+		</para>
+	</note>
+
 	<section xml:id="gwt.overview">
 		<title>Overview</title>
 
 		<para>
-			Google Web Toolkit (GWT) is an integral part of IT Mill Toolkit since Release
+			Google Web Toolkit (GWT) is an integral part of Vaadin since Release
 			5. All rendering of user interface components in a web browser is programmed
-			with GWT. Using custom GWT widgets is easy in IT Mill Toolkit. This chapter
+			with GWT. Using custom GWT widgets is easy in Vaadin. This chapter
 			gives an introduction to GWT widgets and details on how to integrate them with
-			IT Mill Toolkit.
+			Vaadin.
 		</para>
 		
 		<para>
-			On the client side, in the web browser, you have the IT Mill Toolkit
+			On the client side, in the web browser, you have the Vaadin
 			Client-Side Engine. It uses the GWT framework, and both are compiled into a
 			JavaScript runtime component. The client-side engine is contained in the
-			<package>com.itmill.toolkit.terminal.gwt.client</package> package and the
+			<package>com.vaadin.terminal.gwt.client</package> package and the
 			client-side implementations of various user interface components are in the
-			<package>com.itmill.toolkit.terminal.gwt.client.ui</package> package. You can
-			find the source code for these packages in the IT Mill Toolkit installation
+			<package>com.vaadin.terminal.gwt.client.ui</package> package. You can
+			find the source code for these packages in the Vaadin installation
 			package. You make custom components by inheriting GWT widget classes. To
-			integrate them with IT Mill Toolkit, you have to implement the
+			integrate them with Vaadin, you have to implement the
 			<classname>Paintable</classname> interface of the Client-Side Engine that
 			provides the AJAX communications with the server-side application. To enable
 			the custom widgets, you also need to implement a <emphasis>widget
@@ -74,13 +85,13 @@
 		</para>
 
 		<para>
-			To summarize, to implement a client-side widget that is integrated with IT
-			Mill Toolkit, you need the following:
+			To summarize, to implement a client-side widget that is integrated with
+			Vaadin, you need the following:
 		</para>
 
 		<itemizedlist>
 			<listitem>A GWT widget that implements the <classname>Paintable</classname>
-			interface of the IT Mill Toolkit Client-Side Engine</listitem>
+			interface of the Vaadin Client-Side Engine</listitem>
 
 			<listitem>A widget factory (a "widget set") that can create the custom widget or widgets</listitem>
 
@@ -92,7 +103,7 @@
 
 		<para>
 			On the server side, you need to implement a server-side component that manages
-			serialialization and deserialization of its attributes with the client-side
+			serialization and deserialization of its attributes with the client-side
 			widget. A server-side component usually inherits the
 			<classname>AbstractComponent</classname> or
 			<classname>AbstractField</classname> class and implements either the
@@ -106,9 +117,9 @@
 		</para>
 
 		<para>
-			<xref linkend="figure.gwt.widget-files"/> below illustrates the folder
+			<xref linkend="figure.gwt.widget-files"/> illustrates the folder
 			hierarchy of the Color Picker example used in this chapter. The example is
-			available in the demo application of IT Mill Toolkit with URL
+			available in the demo application of Vaadin with URL
 			<filename>/colorpicker/</filename>. You can find the full source code of the
 			application in the source module for the demos in the installation package.
 		</para>
@@ -120,7 +131,7 @@
 					<imagedata align="center" fileref="img/gwt/gwt-widget-files-lo.png"/>
 				</imageobject>
 				<imageobject role="fo">
-					<imagedata scale="60" align="center" fileref="img/gwt/gwt-widget-files-hi.png"/>
+					<imagedata scale="60" smallscale="100%" align="center" fileref="img/gwt/gwt-widget-files-hi.png"/>
 				</imageobject>
 			</mediaobject>
 		</figure>
@@ -146,8 +157,8 @@
 			which is a factory class for creating the custom widget objects. The actual
 			custom widget is split into two classes:
 			<classname>GwtColorPicker</classname>, a pure GWT widget, and
-			<classname>IColorPicker</classname> that provides the integration with IT
-			Mill Toolkit. The default style sheet for the widget set is provided in
+			<classname>VColorPicker</classname> that provides the integration with
+			Vaadin. The default style sheet for the widget set is provided in
 			<filename>gwt/public/colorpicker/styles.css</filename>.
 		</para>
 
@@ -172,7 +183,7 @@
 
 		<para>
 			A custom GWT widget needs to find its place in the GWT class hierarchy. <xref
-			linkend="figure.gwt.widgets"/> below illustrates the abstract base classes for
+			linkend="figure.gwt.widgets"/> illustrates the abstract base classes for
 			GWT widgets.
 		</para>
 
@@ -183,7 +194,7 @@
 					<imagedata align="center" fileref="img/gwt/gwt-widgets-lo.png"/>
 				</imageobject>
 				<imageobject role="fo">
-					<imagedata scale="60" align="center" fileref="img/gwt/gwt-widgets-hi.png"/>
+					<imagedata scale="60" smallscale="100%" align="center" fileref="img/gwt/gwt-widgets-hi.png"/>
 				</imageobject>
 			</mediaobject>
 		</figure>
@@ -193,16 +204,16 @@
 			widgets. Many custom widgets, such as the Color Picker example below, extend
 			the <classname>Composite</classname> class to combine the widget from existing
 			GWT widgets. Other base classes offer various features useful for different
-			kinds of widgets. You can also opt to extend an existing GWT widget, as we
-			have done for most of the standard user interface components of IT Mill
-			Toolkit, or extend an IT Mill Toolkit widget.
+			kinds of widgets. You can also choose to extend an existing GWT widget, as we
+			have done for most of the standard user interface components of Vaadin, or
+			extend a Vaadin widget.
 		</para>
 
 		<section xml:id="gwt.widgets.extending">
-			<title>Extending an IT Mill Toolkit Widget</title>
+			<title>Extending a Vaadin Widget</title>
 
 			<para>
-				Extending an IT Mill Toolkit widget is an easy way to add features, such
+				Extending a Vaadin widget is an easy way to add features, such
 				as advanced client-side validation, to existing standard components. If
 				the extended widget does not require any additional parameters, which is
 				usual in client-side validation, you may not even need to define a
@@ -224,31 +235,36 @@
 				<classname>Button</classname>, and <classname>Label</classname>
 				widgets. This widget does not yet have any integration with the server
 				side code, which will be shown later in this chapter. The source code is
-				available in the source folder for the demo application in IT Mill Toolkit
+				available in the source folder for the demo application in Vaadin
 				installation folder, under package
-				<package>com.itmill.toolkit.demo.colorpicker</package>.
+				<package>com.vaadin.demo.colorpicker</package>.
 			</para>
 
-		<programlisting><![CDATA[package com.itmill.toolkit.demo.colorpicker.gwt.client.ui;
+		<programlisting><?pocket-size 65% ?><![CDATA[package com.vaadin.demo.colorpicker.gwt.client.ui;
 
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.ui.*;
 
 /**
- * A regular GWT component without integration with IT Mill Toolkit.
+ * A regular GWT component without integration with Vaadin.
  **/
-public class GwtColorPicker extends Composite implements ClickListener {
+public class GwtColorPicker extends Composite
+                            implements ClickListener {
 
-    /** Currently selected color name to give client-side feedback to the user. */
+    /**
+     * The currently selected color name to give client-side
+     * feedback to the user.
+     **/
     protected Label currentcolor = new Label();
 
     public GwtColorPicker() {
         // Create a 4x4 grid of buttons with names for 16 colors
         Grid grid = new Grid(4,4);
-        String[] colors = new String[] {"aqua", "black", "blue", "fuchsia",
-                "gray", "green", "lime", "maroon", "navy", "olive",
-                "purple", "red", "silver", "teal", "white", "yellow"};
+        String[] colors = new String[] {"aqua", "black", "blue",
+                "fuchsia", "gray", "green", "lime", "maroon",
+                "navy", "olive", "purple", "red", "silver",
+                "teal", "white", "yellow"};
         int colornum = 0;
         for (int i=0; i<4; i++)
             for (int j=0; j<4; j++, colornum++) {
@@ -260,27 +276,39 @@ public class GwtColorPicker extends Composite implements ClickListener {
                 grid.setWidget(i, j, button);
 
                 // Set the button background colors.
-                DOM.setStyleAttribute(button.getElement(), "background", colors[colornum]);
+                DOM.setStyleAttribute(button.getElement(),
+                                      "background",
+                                      colors[colornum]);
                 
-                // For dark colors, the button label must be in white.
-                if ("black navy maroon blue purple".indexOf(colors[colornum]) != -1)
-                    DOM.setStyleAttribute(button.getElement(), "color", "white");
+                // For dark colors, the button label must be
+                // in white.
+                if ("black navy maroon blue purple"
+                        .indexOf(colors[colornum]) != -1)
+                    DOM.setStyleAttribute(button.getElement(),
+                                          "color",
+                                          "white");
             }
 
-        // Create a panel with the color grid and currently selected color indicator
+        // Create a panel with the color grid and currently
+        // selected color indicator
         HorizontalPanel panel = new HorizontalPanel();
         panel.add(grid);
         panel.add(currentcolor);
 
-        // Set the class of the color selection feedback box to allow CSS styling.
-        // We need to obtain the DOM element for the current color label.
-        // This assumes that the <td> element of the HorizontalPanel is
-        // the parent of the label element. Notice that the element has no parent
-        // before the widget has been added to the horizontal panel.
-        Element panelcell = DOM.getParent(currentcolor.getElement());
-        DOM.setElementProperty(panelcell, "className", "colorpicker-currentcolorbox");
+        // Set the class of the color selection feedback box to
+        // allow CSS styling. We need to obtain the DOM element
+        // for the current color label. This assumes that the
+        // <td> element of the HorizontalPanel is the parent of
+        // the label element. Notice that the element has no
+        // parent before the widget has been added to the
+        // horizontal panel.
+        Element panelcell =
+                    DOM.getParent(currentcolor.getElement());
+        DOM.setElementProperty(panelcell, "className",
+                               "colorpicker-currentcolorbox");
 
-        // Set initial color. This will be overridden with the value read from server.
+        // Set initial color. This will be overridden with
+        // the value read from server.
         setColor("white");
         
         // Composite GWT widgets must call initWidget().
@@ -295,18 +323,22 @@ public class GwtColorPicker extends Composite implements ClickListener {
 
     /** Sets the currently selected color. */
     public void setColor(String newcolor) {
-        // Give client-side feedback by changing the color name in the label
+        // Give client-side feedback by changing the color
+        // name in the label
         currentcolor.setText(newcolor);
 
-        // Obtain the DOM elements. This assumes that the <td> element
-        // of the HorizontalPanel is the parent of the label element.
+        // Obtain the DOM elements. This assumes that the <td>
+        // element of the HorizontalPanel is the parent of
+        // the label element.
         Element nameelement = currentcolor.getElement();
         Element cell = DOM.getParent(nameelement);
 
         // Give feedback by changing the background color
-        DOM.setStyleAttribute(cell,        "background", newcolor);
-        DOM.setStyleAttribute(nameelement, "background", newcolor);
-        if ("black navy maroon blue purple".indexOf(newcolor) != -1)
+        DOM.setStyleAttribute(cell, "background", newcolor);
+        DOM.setStyleAttribute(nameelement, "background",
+                              newcolor);
+        if ("black navy maroon blue purple"
+                .indexOf(newcolor) != -1)
             DOM.setStyleAttribute(nameelement, "color", "white");
         else
             DOM.setStyleAttribute(nameelement, "color", "black");
@@ -321,7 +353,7 @@ public class GwtColorPicker extends Composite implements ClickListener {
 				manipulate styles of HTML elements very flexibly. Notice that manipulation
 				of the DOM tree depends somewhat on the browser. In this example, the
 				manipulation should be rather compatible, but in some cases there could be
-				problems. Standard GWT and IT Mill Toolkit widgets handle many of such
+				problems. Standard GWT and Vaadin widgets handle many of such
 				compatibility issues, but when doing such low-level operations as DOM
 				manipulation, you may need to consider them.
 			</para>
@@ -346,11 +378,11 @@ public class GwtColorPicker extends Composite implements ClickListener {
 			<figure xml:id="figure.gwt.integration.example.colorpicker.nostyle">
 				<title>Color Picker Widget Without Styling</title>
 				<mediaobject>
-					<imageobject role="fo">
-						<imagedata align="center" fileref="img/custom/gwt-colorpicker-2b.png"/>
-					</imageobject>
 					<imageobject role="html">
 						<imagedata align="center" fileref="img/custom/gwt-colorpicker-2b.png"/>
+					</imageobject>
+					<imageobject role="fo">
+						<imagedata align="center" smallscale="130" fileref="img/custom/gwt-colorpicker-2b.png"/>
 					</imageobject>
 				</mediaobject>
 			</figure>
@@ -385,16 +417,18 @@ public class GwtColorPicker extends Composite implements ClickListener {
 				Let us define the <filename>colorpicker/styles.css</filename> as follows.
 			</para>
 
-			<programlisting><![CDATA[/* Set style for the color picker table.
-   This assumes that the Grid layout is rendered as a HTML <table>.*/
+			<programlisting><?pocket-size 75% ?><![CDATA[/* Set style for the color picker table.
+ * This assumes that the Grid layout is rendered
+ * as a HTML <table>. */
 table.example-colorpicker {
     border-collapse: collapse;
     border: 0px;
 }
 
 /* Set color picker button style.
-   This does not make assumptions about the HTML element tree as it only uses
-   the class attributes of the elements.*/
+ * This does not make assumptions about the HTML
+ * element tree as it only uses the class attributes
+ * of the elements. */
 .example-colorpicker .gwt-Button {
     height: 60px;
     width: 60px;
@@ -402,14 +436,16 @@ table.example-colorpicker {
     padding: 0px;
 }
 
-/* Set style for the right-hand box that shows the currently selected color.
-   While this may work for other implementations of the HorizontalPanel as well,
-   it somewhat assumes that the layout is rendered as a table where cells
-   are <td> elements. */
+/* Set style for the right-hand box that shows the
+ * currently selected color.  While this may work for
+ * other implementations of the HorizontalPanel as well,
+ * it somewhat assumes that the layout is rendered
+ * as a table where cells are <td> elements. */
 .colorpicker-currentcolorbox {
     width: 240px;
     text-align: center;
-    vertical-align: middle !important; /* Must be !important to override GWT styling. */
+    /* Must be !important to override GWT styling: */
+    vertical-align: middle !important;
 }]]></programlisting>
 
 			<para>
@@ -427,11 +463,11 @@ table.example-colorpicker {
 			<figure xml:id="figure.gwt.styling.colorpicker">
 				<title>Color Picker Widget With Styling</title>
 				<mediaobject>
-					<imageobject role="fo">
-						<imagedata align="center" fileref="img/custom/gwt-colorpicker-2.png"/>
-					</imageobject>
 					<imageobject role="html">
 						<imagedata align="center" fileref="img/custom/gwt-colorpicker-2.png"/>
+					</imageobject>
+					<imageobject role="fo">
+						<imagedata smallscale="120" align="center" fileref="img/custom/gwt-colorpicker-2.png"/>
 					</imageobject>
 				</mediaobject>
 			</figure>
@@ -443,12 +479,12 @@ table.example-colorpicker {
 		<title>Integrating a GWT Widget</title>
 		
 		<para>
-			Integration of GWT widgets with IT Mill Toolkit can be done in two basic ways:
+			Integration of GWT widgets with Vaadin can be done in two basic ways:
 			by modifying the original class or by inheriting it and adding the integration
 			code in the subclass. The latter way is actually the way the standard
-			client-side components in IT Mill Toolkit are done: they simply inherit the
+			client-side components in Vaadin are done: they simply inherit the
 			corresponding standard GWT widgets. For example,
-			<classname>IButton</classname> inherits GWT <classname>Button</classname>.
+			<classname>VButton</classname> inherits GWT <classname>Button</classname>.
 		</para>
 
 		<para>
@@ -475,21 +511,28 @@ table.example-colorpicker {
 			<title>Naming Conventions</title>
 
 			<para>
-				While the use of IT Mill Toolkit does not require the use of any
-				particular naming conventions for GWT widgets, some notes regarding naming
-				may be necessary. While Java name spaces make it possible to use identical
-				class names in the same context, it may be useful to try to make them more
-				distinctive to avoid any inconvenience. GWT uses simple names for its
-				standard widgets, such as <classname>Button</classname>. The standard
-				components of IT Mill Toolkit use identical or similar names, but that
+				While the use of Vaadin does not require the use of any particular naming
+				conventions for GWT widgets, some notes regarding naming may be
+				necessary. Even though Java package names make it possible to use
+				identical class names in the same context, it may be useful to try to make
+				them more distinctive to avoid any inconvenience. GWT uses plain names
+				for its standard widgets, such as <classname>Button</classname>. The
+				standard components of Vaadin use identical or similar names, but that
 				does not cause any inconvenience, because the GWT widgets and server-side
-				components of IT Mill Toolkit are never used in the same context. For the
-				client-side components of IT Mill Toolkit, we use the
-				"<literal>I</literal>" prefix, for example
-				<classname>IButton</classname>. In the Color Picker example, we use
-				<classname>GwtColorPicker</classname> for the GWT widget and
-				<classname>IColorPicker</classname> for the integration
+				components of Vaadin are never used in the same context. For the
+				client-side components of Vaadin, we use the "<literal>V</literal>"
+				prefix, for example <classname>VButton</classname>. In the Color Picker
+				example, we use <classname>GwtColorPicker</classname> for the GWT widget
+				and <classname>VColorPicker</classname> for the integration
 				implementation. You may wish to follow similar conventions.
+			</para>
+
+			<para>
+				Notice that the naming convention changed when IT Mill Toolkit was renamed
+				as Vaadin. The prefix for client-side widgets in IT Mill Toolkit was
+				<literal>I</literal>, which was changed to <literal>V</literal> in
+				Vaadin. Similarly, CSS style name prefixes were changed from
+				<literal>i-</literal> to <literal>v-</literal>.
 			</para>
 		</note>
 
@@ -543,7 +586,8 @@ table.example-colorpicker {
 
     ...
 
-    public void updateFromUIDL(UIDL uidl, ApplicationConnection client) {
+    public void updateFromUIDL(UIDL uidl,
+            ApplicationConnection client) {
         if (client.updateComponent(this, uidl, true))
             return;
  
@@ -571,8 +615,8 @@ table.example-colorpicker {
 				transmutation mechanism that allows a single server-side component to have
 				alternative client-side implementations, based on its parameters. For
 				example, the <classname>Button</classname> server-side component can
-				manifest either as a clickable <classname>IButton</classname> or as a
-				switchable <classname>ICheckBox</classname> widget on the client-side. If
+				manifest either as a clickable <classname>VButton</classname> or as a
+				switchable <classname>VCheckBox</classname> widget on the client-side. If
 				the parameters are changed, the client-side widget can be replaced with
 				another dynamically. Determination of the correct implementation is done
 				in a <classname>WidgetSet</classname>. If
@@ -592,7 +636,7 @@ table.example-colorpicker {
 			</para>
 
 			<para>
-				The design of the client-side framework of IT Mill Toolkit, because the
+				The design of the client-side framework of Vaadin, because the
 				<classname>Paintable</classname> is an interface and can not store any
 				references.  Having an API layer between GWT and custom widgets would be a
 				much more complicated solution.
@@ -620,9 +664,10 @@ table.example-colorpicker {
 			</para>
 
 			<programlisting><![CDATA[if (uidl_id == null || client == null)
-        return;
+    return;
 
-client.updateVariable(uidl_id, "myvariable", newvalue, immediate);]]></programlisting>
+client.updateVariable(uidl_id, "myvariable",
+                      newvalue, immediate);]]></programlisting>
 
 			<para>
 				The <parameter>client</parameter> of the above example is a reference to
@@ -732,29 +777,32 @@ client.updateVariable(uidl_id, "myvariable", newvalue, immediate);]]></programli
 					Most widgets should support immediateness by receiving the
 					<parameter>immediate</parameter> attribute from the UIDL message that
 					renders the widget. The following example is extracted from the
-					<classname>ITextField</classname> implementation.
+					<classname>VTextField</classname> implementation.
 				</para>
 
-				<programlisting><![CDATA[    // Store the immediate attribute in a member variable
-    private boolean immediate = false;
+				<programlisting><?pocket-size 75% ?><![CDATA[// Store the immediate attribute in a member variable
+private boolean immediate = false;
+...
+
+public void updateFromUIDL(UIDL uidl,
+                           ApplicationConnection client) {
+    if(client.updateComponent(this, uidl, true))
+        return;
+
+    // Receive and store the immediate attribute
+    immediate  = uidl.getBooleanAttribute("immediate");
     ...
+}
 
-    public void updateFromUIDL(UIDL uidl, ApplicationConnection client) {
-        if(client.updateComponent(this, uidl, true))
-            return;
-
-        // Receive and store the immediate attribute
-        immediate  = uidl.getBooleanAttribute("immediate");
-        ...
+public void onChange(Widget sender) {
+    if(client != null && id != null) {
+        // Use the stored immediate attribute to say
+        // whether or not make the server request
+        //  immediately.
+        client.updateVariable(id, "text", getText(),
+                              immediate);
     }
-
-    public void onChange(Widget sender) {
-        if(client != null && id != null) {
-            // Use the stored immediate attribute to say whether or not
-            // make the server request immediately.
-            client.updateVariable(id, "text", getText() , immediate);
-        }
-    }]]></programlisting>
+}]]></programlisting>
 
 				<para>
 					In some widgets, the <parameter>immediate</parameter> attribute would
@@ -764,13 +812,14 @@ client.updateVariable(uidl_id, "myvariable", newvalue, immediate);]]></programli
 					to the server when it is clicked. Such widgets can simply use
 					<parameter>true</parameter> for the <parameter>immediate</parameter>
 					argument in <methodname>updateVariable()</methodname>. For example,
-					<classname>IButton</classname> does as follows:
+					<classname>VButton</classname> does as follows:
 					</para>
 
 				<programlisting><![CDATA[public void onClick(Widget sender) {
     if (id == null || client == null)
         return;
-    client.updateVariable(id, "state", true, /* always immediate */ true);
+    client.updateVariable(id, "state", true,
+                          /* always immediate */ true);
 }]]></programlisting>
 
 			</section>
@@ -785,11 +834,12 @@ client.updateVariable(uidl_id, "myvariable", newvalue, immediate);]]></programli
 				integration of a GWT widget with its server-side counterpart component.
 			</para>
 
-		<programlisting><![CDATA[import com.itmill.toolkit.terminal.gwt.client.ApplicationConnection;
-import com.itmill.toolkit.terminal.gwt.client.Paintable;
-import com.itmill.toolkit.terminal.gwt.client.UIDL;
+		<programlisting><?pocket-size 65% ?><![CDATA[import com.vaadin.terminal.gwt.client.ApplicationConnection;
+import com.vaadin.terminal.gwt.client.Paintable;
+import com.vaadin.terminal.gwt.client.UIDL;
 
-public class IColorPicker extends GwtColorPicker implements Paintable {
+public class VColorPicker extends GwtColorPicker
+                          implements Paintable {
 
     /** Set the CSS class name to allow styling. */
     public static final String CLASSNAME = "example-colorpicker";
@@ -801,60 +851,70 @@ public class IColorPicker extends GwtColorPicker implements Paintable {
     ApplicationConnection client;
 
     /**
-     * The constructor should first call super() to initialize the component and
-     * then handle any initialization relevant to IT Mill Toolkit.
+     * The constructor should first call super() to initialize
+     * the component and then handle any initialization relevant
+     * to Vaadin.
      */
-    public IColorPicker() {
+    public VColorPicker() {
         // The superclass has a lot of relevant initialization
         super();
 
-        // This method call of the Paintable interface sets the component
-        // style name in DOM tree
+        // This method call of the Paintable interface sets
+        // the component style name in DOM tree
         setStyleName(CLASSNAME);
     }
 
     /**
-     * This method must be implemented to update the client-side component from
-     * UIDL data received from server.
+     * This method must be implemented to update the client-side
+     * component from UIDL data received from server.
      * 
-     * This method is called when the page is loaded for the first time, and
-     * every time UI changes in the component are received from the server.
+     * This method is called when the page is loaded for the
+     * first time, and every time UI changes in the component
+     * are received from the server.
      */
-    public void updateFromUIDL(UIDL uidl, ApplicationConnection client) {
-        // This call should be made first. Ensure correct implementation,
-        // and let the containing layout manage caption, etc.
+    public void updateFromUIDL(UIDL uidl,
+                               ApplicationConnection client) {
+        // This call should be made first. Ensure correct
+        // implementation, and let the containing layout
+        // manage the caption, etc.
         if (client.updateComponent(this, uidl, true))
             return;
 
-        // Save reference to server connection object to be able to send
-        // user interaction later
+        // Save reference to server connection object to be
+        // able to send user interaction later
         this.client = client;
 
         // Save the UIDL identifier for the component
         uidlId = uidl.getId();
 
-        // Get value received from server and actualize it in the GWT component
+        // Get value received from server and actualize it
+        // in the GWT component
         setColor(uidl.getStringVariable("colorname"));
     }
 
-    /** Override the method to communicate the new value to server. */
+    /**
+     * Override the method to communicate the new value
+     * to server.
+     **/
     public void setColor(String newcolor) {
         // Ignore if no change
         if (newcolor.equals(currentcolor.getText()))
             return;
 
-        // Let the original implementation to do whatever it needs to do
+        // Let the original implementation to do
+        // whatever it needs to do
         super.setColor(newcolor);
 
-        // Updating the state to the server can not be done before
-        // the server connection is known, i.e., before updateFromUIDL()
-        // has been called.
+        // Updating the state to the server can not be done
+        // before the server connection is known, i.e., before
+        // updateFromUIDL() has been called.
         if (uidlId == null || client == null)
             return;
 
-        // Communicate the user interaction parameters to server. This call will
-        // initiate an AJAX request to the server.
-        client.updateVariable(uidlId, "colorname", newcolor, true);
+        // Communicate the user interaction parameters to server.
+        // This call will initiate an AJAX request to the server.
+        client.updateVariable(uidlId, "colorname",
+                              newcolor, true);
     }
 }]]></programlisting>
 
@@ -886,46 +946,48 @@ public class IColorPicker extends GwtColorPicker implements Paintable {
 			linkend="gwt.integration.example.colorpicker"/>) as
 			<literal>colorpicker</literal>. The
 			<methodname>resolveWidgetType()</methodname> must resolve this name to the
-			class object of the <classname>IColorPicker</classname> integration class,
+			class object of the <classname>VColorPicker</classname> integration class,
 			which is later passed to the <methodname>createWidget()</methodname> method for
-			creating an instance of the <classname>IColorPicker</classname> class.
+			creating an instance of the <classname>VColorPicker</classname> class.
 		</para>
 
-		<programlisting><![CDATA[import com.itmill.toolkit.demo.colorpicker.gwt.client.ui.IColorPicker;
-import com.itmill.toolkit.terminal.gwt.client.DefaultWidgetSet;
-import com.itmill.toolkit.terminal.gwt.client.Paintable;
-import com.itmill.toolkit.terminal.gwt.client.UIDL;
+		<programlisting><?pocket-size 65% ?><![CDATA[import com.vaadin.demo.colorpicker.gwt.client.ui.VColorPicker;
+import com.vaadin.terminal.gwt.client.DefaultWidgetSet;
+import com.vaadin.terminal.gwt.client.Paintable;
+import com.vaadin.terminal.gwt.client.UIDL;
 
 public class ColorPickerWidgetSet extends DefaultWidgetSet {
     /** Resolves UIDL tag name to widget class. */
     protected Class resolveWidgetType(UIDL uidl) {
         final String tag = uidl.getTag();
         if ("colorpicker".equals(tag))
-            return IColorPicker.class;
+            return VColorPicker.class;
 
-        // Let the DefaultWidgetSet handle resolution of default widgets
+        // Let the DefaultWidgetSet handle resolution of
+        // default widgets
         return super.resolveWidgetType(uidl);
     }
 
-    /** Creates a widget instance according to its class object. */
+    /** Creates a widget instance by its class object. */
     public Paintable createWidget(UIDL uidl) {
         final Class type = resolveWidgetType(uidl);
-        if (IColorPicker.class == type)
-            return new IColorPicker();
+        if (VColorPicker.class == type)
+            return new VColorPicker();
 
-        // Let the DefaultWidgetSet handle creation of default widgets
+        // Let the DefaultWidgetSet handle creation of
+        // default widgets
         return super.createWidget(uidl);
     }
 }]]></programlisting>
 
 		<para>
-			The default widgets in IT Mill Toolkit actually use more than just the tag
+			The default widgets in Vaadin actually use more than just the tag
 			name to resolve the actual widget class. For example, the
 			<classname>Button</classname> server-side component, which has tag name
 			<literal>button</literal>, can be resolved to either an
-			<classname>IButton</classname> or <classname>ICheckBox</classname> widget,
+			<classname>VButton</classname> or <classname>VCheckBox</classname> widget,
 			depending on the <parameter>switch</parameter>
-			(<parameter>switchMode</parameter>) attribute. IT Mill Toolkit Client-Side
+			(<parameter>switchMode</parameter>) attribute. Vaadin Client-Side
 			Engine can actually replace the client-side object of the parameters change.
 		</para>
 
@@ -946,15 +1008,17 @@ public class ColorPickerWidgetSet extends DefaultWidgetSet {
 				linkend="gwt.widgets.styling"/>.
 			</para>
 
-			<programlisting><![CDATA[<module>
-    <!-- Inherit the NoEntry version to avoid multiple entrypoints -->
-    <inherits name="com.itmill.toolkit.terminal.gwt.DefaultWidgetSetNoEntry" /> 
+			<programlisting><?pocket-size 65% ?><![CDATA[<module>
+  <!-- Inherit NoEntry version to avoid multiple entrypoints -->
+  <inherits
+      name="com.vaadin.terminal.gwt.DefaultWidgetSetNoEntry" /> 
     
-    <!-- WidgetSet default theme -->    
-    <stylesheet src="colorpicker/styles.css"/>
+  <!-- WidgetSet default theme -->    
+  <stylesheet src="colorpicker/styles.css"/>
 
-    <!-- Entry point -->
-    <entry-point class="com.itmill.toolkit.demo.colorpicker.gwt.client.WidgetSet"/>
+  <!-- Entry point -->
+  <entry-point
+      class="com.vaadin.demo.colorpicker.gwt.client.WidgetSet"/>
   
 </module>]]></programlisting>
 
@@ -971,10 +1035,6 @@ public class ColorPickerWidgetSet extends DefaultWidgetSet {
 		<title>Server-Side Components</title>
 
 		<para>
-			
-		</para>
-
-		<para>
 			Server-side components provide the API for user applications to build their
 			user interface. Many applications do not ever need to bother with the
 			client-side implementation of the standard components, but those that use
@@ -988,14 +1048,14 @@ public class ColorPickerWidgetSet extends DefaultWidgetSet {
 			taken care of by the component framework.
 		</para>
 
-		<note>
+		<section>
 			<title>Component Tag Name</title>
 			
 			<para>
 				Server-side components are identified with a unique UIDL tag name, which
 				must be returned by the <methodname>getTag()</methodname> method. The tag
 				should follow XML rules for element names, that is, only characters a-z,
-				A-Z, 0-9, and _, and not begin with a number. Actually, as IT Mill Toolkit
+				A-Z, 0-9, and _, and not begin with a number. Actually, as Vaadin
 				Release 5 uses a JSON notation for serialization, the tag syntax is more
 				relaxed, but we nevertheless recommend using a stricter syntax. UIDL is
 				detailed in <xref linkend="uidl"/> together with lists of reserved
@@ -1013,19 +1073,19 @@ public class ColorPickerWidgetSet extends DefaultWidgetSet {
 				server-side component can manifest as several client-side components,
 				depending on its parameters. For example, a server-side
 				<classname>Button</classname> can manifest either as an
-				<classname>IButton</classname> or <classname>ICheckBox</classname> in
+				<classname>VButton</classname> or <classname>VCheckBox</classname> in
 				client, depending on the <emphasis>switchMode</emphasis> attribute. For
 				the client side, see <xref linkend="gwt.widgets"/> above.
 			</para>
 				
-		</note>
+            <para>
+                The serialization is broken down into server-client serialization and
+                client-server deserialization in the following sections.  We will also
+                present the complete example of the server-side implementation of the
+                Color Picker component below.
+            </para>
 
-		<para>
-			The implementation of the server-side component is broken down into
-			server-client serialization and client-server deserialization in the following
-			sections. We will also present the complete example of the server-side
-			implementation of the Color Picker component below.
-		</para>
+		</section>
 
 		<section xml:id="gwt.server-side.serialization">
 			<title>Server-Client Serialization</title>
@@ -1079,14 +1139,15 @@ public class ColorPickerWidgetSet extends DefaultWidgetSet {
 				client-side.
 			</para>
 
-			<programlisting><![CDATA[@Override
+			<programlisting><?pocket-size 65% ?><![CDATA[@Override
 public void changeVariables(Object source, Map variables) {
     // Let superclass read any common variables.
     super.changeVariables(source, variables);
 
     // Sets the currently selected color
     if (variables.containsKey("colorname") && !isReadOnly()) {
-        final String newValue = (String) variables.get("colorname");
+        final String newValue = (String)variables.get("colorname");
+
         // Changing the property of the component will
         // trigger a ValueChangeEvent
         setValue(newValue, true);
@@ -1155,15 +1216,14 @@ public void changeVariables(Object source, Map variables) {
 				is communicated through the <parameter>colorname</parameter> variable.
 			</para>
 
-			<programlisting><![CDATA[package com.itmill.toolkit.demo.colorpicker;
+			<programlisting><?pocket-size 65% ?><![CDATA[package com.vaadin.demo.colorpicker;
 
 import java.util.Map;
-import com.itmill.toolkit.terminal.PaintException;
-import com.itmill.toolkit.terminal.PaintTarget;
-import com.itmill.toolkit.ui.*;
+import com.vaadin.terminal.PaintException;
+import com.vaadin.terminal.PaintTarget;
+import com.vaadin.ui.*;
 
 public class ColorPicker extends AbstractField {
-    
     public ColorPicker() {
         super();
         setValue(new String("white"));
@@ -1174,16 +1234,19 @@ public class ColorPicker extends AbstractField {
         return String.class;
     }
 
-    /** Tag is the UIDL element name for client-server communications. */
+    /**
+     * Tag is the UIDL element name for client-server
+     * communications.
+     **/
     public String getTag() {
         return "colorpicker";
     }
     
     /** Set the currently selected color. */
     public void setColor(String newcolor) {
-        // Sets the color name as the property of the component.
-        // Setting the property will automatically cause repainting of
-        // the component with paintContent().
+        // Sets the color name as the property of the
+        // component. Setting the property will automatically
+        // cause repainting of the component with paintContent().
         setValue(newcolor);
     }
     
@@ -1193,18 +1256,22 @@ public class ColorPicker extends AbstractField {
     }
 
     /** Paint (serialize) the component for the client. */
-    public void paintContent(PaintTarget target) throws PaintException {
-        // Superclass writes any common attributes in the paint target.
+    public void paintContent(PaintTarget target)
+                throws PaintException {
+        // Superclass writes any common attributes in the
+        // paint target.
         super.paintContent(target);
         
-        // Add the currently selected color as a variable in the paint target.
+        // Add the currently selected color as a variable in
+        // the paint target.
         target.addVariable(this, "colorname", getColor());
     }
     
     /** Deserialize changes received from client. */
     public void changeVariables(Object source, Map variables) {
         // Sets the currently selected color
-        if (variables.containsKey("colorname") && !isReadOnly()) {
+        if (variables.containsKey("colorname")
+            && !isReadOnly()) {
             String newValue = (String) variables.get("colorname");
             
             // Changing the property of the component will
@@ -1221,7 +1288,7 @@ public class ColorPicker extends AbstractField {
 		<title>Using a Custom Component</title>
 
 		<para>
-			A custom component is used like any other IT Mill Toolkit component. You will,
+			A custom component is used like any other Vaadin component. You will,
 			however, need to compile the client-side widget set with the GWT Compiler.
 			See <xref linkend="gwt.development.compiler"/> for instructions on how to
 			compile widget sets.
@@ -1237,18 +1304,19 @@ public class ColorPicker extends AbstractField {
 				communication of the component state works in both directions.
 			</para>
 
-			<programlisting><![CDATA[package com.itmill.toolkit.demo.colorpicker;
+			<programlisting><?pocket-size 65% ?><![CDATA[package com.vaadin.demo.colorpicker;
 
-import com.itmill.toolkit.data.Property.ValueChangeEvent;
-import com.itmill.toolkit.data.Property.ValueChangeListener;
-import com.itmill.toolkit.ui.*;
-import com.itmill.toolkit.ui.Button.ClickEvent;
+import com.vaadin.data.Property.ValueChangeEvent;
+import com.vaadin.data.Property.ValueChangeListener;
+import com.vaadin.ui.*;
+import com.vaadin.ui.Button.ClickEvent;
 
 /**
  * Demonstration application that shows how to use a simple
  * custom client-side GWT component, the ColorPicker.
  */
-public class ColorPickerApplication extends com.itmill.toolkit.Application {
+public class ColorPickerApplication
+       extends com.vaadin.Application {
     Window main = new Window("Color Picker Demo");
     
     /* The custom component. */
@@ -1261,18 +1329,22 @@ public class ColorPickerApplication extends com.itmill.toolkit.Application {
         setMainWindow(main);
         setTheme("demo");
         
-        // Listen for value change events in the custom component,
-        // triggered when user clicks a button to select another color.
+        // Listen for value change events in the custom
+        // component, triggered when user clicks a button
+        // to select another color.
         colorselector.addListener(new ValueChangeListener() {
             public void valueChange(ValueChangeEvent event) {
                 // Provide some server-side feedback
-                colorname.setValue("Selected color: " + colorselector.getColor());
+                colorname.setValue("Selected color: " + 
+                                   colorselector.getColor());
             }
         });
         main.addComponent(colorselector);
         
-        // Add another component to give feedback from server-side code
-        colorname = new Label("Selected color: "+colorselector.getColor());
+        // Add another component to give feedback from
+        // server-side code
+        colorname = new Label("Selected color: " +
+                              colorselector.getColor());
         main.addComponent(colorname);
         
         // Server-side manipulation of the component state
@@ -1294,7 +1366,7 @@ public class ColorPickerApplication extends com.itmill.toolkit.Application {
 			<para>
 				Deployment of web applications that include custom components is almost
 				identical to the normal case where you use only the default widget set of
-				IT Mill Toolkit. The default case is documented in <xref
+				Vaadin. The default case is documented in <xref
 				linkend="section.web.web-xml"/>. You only need to specify the widget set
 				for the application in the <filename>WebContent/WEB-INF/web.xml</filename>
 				deployment descriptor.
@@ -1305,20 +1377,33 @@ public class ColorPickerApplication extends com.itmill.toolkit.Application {
 				detailed in the previous section.
 			</para>
 			
-			<programlisting>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
-&lt;web-app id="WebApp_ID" version="2.4" xmlns="http://java.sun.com/xml/ns/j2ee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd"&gt;
+			<programlisting><?pocket-size 65% ?>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;web-app
+  id="WebApp_ID"
+  version="2.4"
+  xmlns="http://java.sun.com/xml/ns/j2ee"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee
+           http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd"&gt;
+
     &lt;display-name&gt;myproject&lt;/display-name&gt;
 
     &lt;servlet&gt;
         &lt;servlet-name&gt;<parameter>ColorPickerServlet</parameter>&lt;/servlet-name&gt;
-        &lt;servlet-class&gt;com.itmill.toolkit.terminal.gwt.server.ApplicationServlet&lt;/servlet-class&gt;
+        &lt;servlet-class&gt;
+            com.vaadin.terminal.gwt.server.ApplicationServlet
+        &lt;/servlet-class&gt;
         &lt;init-param&gt;
             &lt;param-name&gt;application&lt;/param-name&gt;
-            &lt;param-value&gt;<parameter>com.itmill.toolkit.demo.colorpicker.ColorPickerApplication</parameter>&lt;/param-value&gt;
+            &lt;param-value&gt;
+                <parameter>com.vaadin.demo.colorpicker.ColorPickerApplication</parameter>
+            &lt;/param-value&gt;
         &lt;/init-param&gt;
         &lt;init-param&gt;
             &lt;param-name&gt;widgetset&lt;/param-name&gt;
-            &lt;param-value&gt;<parameter>com.itmill.toolkit.demo.colorpicker.gwt.ColorPickerWidgetSet</parameter>&lt;/param-value&gt;
+            &lt;param-value&gt;
+                <parameter>com.vaadin.demo.colorpicker.gwt.ColorPickerWidgetSet</parameter>
+            &lt;/param-value&gt;
         &lt;/init-param&gt;
     &lt;/servlet&gt;
 
@@ -1330,7 +1415,7 @@ public class ColorPickerApplication extends com.itmill.toolkit.Application {
 		</section>
 
 		<para>
-			Project specific parameter are emphasized. Notice that the widget set name is
+			The project specific parameters are emphasized. Notice that the widget set name is
 			not a file name, but the base name for the
 			<filename>ColorPickerWidgetSet.gwt.xml</filename> module descriptor.
 		</para>
@@ -1350,12 +1435,12 @@ public class ColorPickerApplication extends com.itmill.toolkit.Application {
 		<para>
 			Development of new GWT widgets includes management of the source code tree,
 			running and debugging the application with the GWT Hosted Mode Browser, and
-			compiling the widgets and the IT Mill Toolkit Client-Side Engine to JavaScript
+			compiling the widgets and the Vaadin Client-Side Engine to JavaScript
 			with the GWT Compiler.
 		</para>
 
 		<para>
-			You can use any IDE for developing GWT components for IT Mill Toolkit. The
+			You can use any IDE for developing GWT components for Vaadin. The
 			examples given in this book are for the Eclipse IDE. It allows easy launching
 			of the GWT Hosted Mode Browser, debugging, and running an external compiler
 			for GWT widget sets.
@@ -1365,7 +1450,7 @@ public class ColorPickerApplication extends com.itmill.toolkit.Application {
 			<title>Creating a Widget Project in Eclipse</title>
 
 			<para>
-				Creation of an IT Mill Toolkit project that uses the default widget set
+				Creation of a Vaadin project that uses the default widget set
 				was covered in <xref linkend="getting-started.first-project"/>. Developing
 				custom widgets creates a number of additional requirements for a
 				project. Let us review the steps required for creating a project. Details
@@ -1376,9 +1461,6 @@ public class ColorPickerApplication extends com.itmill.toolkit.Application {
 				<listitem>
 					Create a new project in the Eclipse IDE. (<xref
 					linkend="getting-started.first-project.creation" xrefstyle="select: label"/>)
-				</listitem>
-				<listitem>
-					Import IT Mill Toolkit library JAR into the project. (<xref linkend="getting-started.first-project.libraries" xrefstyle="select: label"/>)
 				</listitem>
 				<listitem>
 					Import GWT directory into the project. (<xref linkend="gwt.development.import-gwt" xrefstyle="select: label"/> below)
@@ -1432,7 +1514,7 @@ public class ColorPickerApplication extends com.itmill.toolkit.Application {
 			
 			<para>
 				You will need to include the Google Web Toolkit in your project to develop
-				custom widgets. The installation directory of IT Mill Toolkit includes
+				custom widgets. The installation directory of Vaadin includes
 				full GWT installation in the <filename>gwt</filename> subdirectory. The
 				package includes precompiled libraries and applications for the specific
 				platform of the installation. To use the libraries, you need to configure
@@ -1460,7 +1542,7 @@ public class ColorPickerApplication extends com.itmill.toolkit.Application {
 				<listitem>
 					Click <guibutton>Browse</guibutton> button of the "<guilabel>From
 					directory</guilabel>" field and browse to the <filename>gwt</filename>
-					directory under the IT Mill Toolkit installation directory. Click
+					directory under the Vaadin installation directory. Click
 					<guibutton>Ok</guibutton> in the file selection dialog.
 				</listitem>
 				<listitem>
@@ -1571,13 +1653,13 @@ public class ColorPickerApplication extends com.itmill.toolkit.Application {
 					</listitem>
 					<listitem>
 						Browse to
-						<filename>WebContent/WEB-INF/src/com/itmill/toolkit/demo/colorpicker/</filename>
+						<filename>WebContent/WEB-INF/src/com.vaadin/demo/colorpicker/</filename>
 						and click <guibutton>Ok</guibutton> button in the <guilabel>Import
 						from directory</guilabel> dialog.
 					</listitem>
 					<listitem>
 						In the <guilabel>Into folder</guilabel> field, enter
-						<filename>myproject/WebContent/WEB-INF/src/com/itmill/toolkit/demo/colorpicker</filename>.
+						<filename>myproject/WebContent/WEB-INF/src/com.vaadin/demo/colorpicker</filename>.
 					</listitem>
 					<listitem>
 						Check the <filename>colorpicker</filename> entry in the list box.
@@ -1589,7 +1671,7 @@ public class ColorPickerApplication extends com.itmill.toolkit.Application {
 
 				<para>
 					This will import the directory as
-					<package>com.itmill.toolkit.demo.colorpicker</package> package. If you
+					<package>com.vaadin.demo.colorpicker</package> package. If you
 					want to use it as a skeleton for your own project, you should refactor
 					it to some other name. Notice that you will need to refactor the
 					package and application name manually in the
@@ -1604,8 +1686,8 @@ public class ColorPickerApplication extends com.itmill.toolkit.Application {
 
 			<para>
 				When running an application in a regular web browser, you need to compile
-				the IT Mill Toolkit Client-Side Engine and your custom widget set to
-				JavaScript. This is done with the GWT Compiler. IT Mill Toolkit
+				the Vaadin Client-Side Engine and your custom widget set to
+				JavaScript. This is done with the GWT Compiler. Vaadin
 				installation package includes an Ant build script
 				<filename>build-widgetset.xml</filename> in the
 				<filename>WebContent/doc/example-source/</filename> directory. To compile
@@ -1633,16 +1715,13 @@ public class ColorPickerApplication extends com.itmill.toolkit.Application {
 				After compilation, <emphasis>refresh the project by selecting it and
 				pressing <keycap>F5</keycap></emphasis>. This makes Eclipse scan new
 				content and become aware of the output of the compilation in the
-				<filename>WebContent/ITMILL/widgetsets/</filename> directory. If the
+				<filename>WebContent/VAADIN/widgetsets/</filename> directory. If the
 				project is not refreshed, the JavaScript runtime is not included in the
 				web application and running the application will result in an error
 				message such as the following:
 			</para>
 
-			<screen>Requested resource [ITMILL/widgetsets/com.itmill.toolkit.demo.colorpicker.gwt.ColorPickerWidgetSet/
-com.itmill.toolkit.demo.colorpicker.gwt.ColorPickerWidgetSet.nocache.js] not found
-from filesystem or through class loader. Add widgetset and/or theme JAR to your
-classpath or add files to WebContent/ITMILL folder.</screen>
+			<screen>Requested resource [VAADIN/widgetsets/com.vaadin.demo.colorpicker.gwt.ColorPickerWidgetSet/com.vaadin.demo.colorpicker.gwt.ColorPickerWidgetSet.nocache.js] not found from filesystem or through class loader. Add widgetset and/or theme JAR to your classpath or add files to WebContent/VAADIN folder.</screen>
 
 			<para>
 				Compilation with GWT is required also initially when using the Hosted Mode
@@ -1673,23 +1752,23 @@ classpath or add files to WebContent/ITMILL folder.</screen>
 					your own widget sets.
 				</para>
 
-				<programlisting>&lt;!-- NOTE: Modify this example to compile your own widgetset  --&gt;
+				<programlisting><?pocket-size 65% ?>&lt;!-- NOTE: Modify this example to compile your own widgetset  --&gt;
 &lt;target name="compile-widgetset" depends="init"&gt;
-  &lt;echo&gt;Compiling com.itmill.toolkit.demo.colorpicker.gwt.ColorPickerWidgetSet.&lt;/echo&gt;
-  &lt;echo&gt;Modify this example ant-script to compile your own widgetsets.&lt;/echo&gt;
+  &lt;echo&gt;Compiling ColorPickerWidgetSet.&lt;/echo&gt;
+  &lt;echo&gt;Modify this script to compile your own widgetsets.&lt;/echo&gt;
   &lt;java classname="com.google.gwt.dev.GWTCompiler"
         failonerror="yes" fork="yes" maxmemory="256m"&gt;
-      &lt;arg value="-out" /&gt;
-      &lt;arg value="${client-side-destination}" /&gt;
+    &lt;arg value="-out" /&gt;
+    &lt;arg value="${client-side-destination}" /&gt;
 
-      &lt;!-- Define your GWT widget set class here. --&gt;
-      &lt;arg value="<emphasis role="bold">com.itmill.toolkit.demo.colorpicker.gwt.ColorPickerWidgetSet</emphasis>" /&gt;
-
-      &lt;jvmarg value="-Xss1024k"/&gt;
-      &lt;jvmarg value="-Djava.awt.headless=true"/&gt;
-      &lt;classpath&gt;
-        &lt;path refid="compile.classpath"/&gt;
-      &lt;/classpath&gt;
+    &lt;!-- Define your GWT widget set class here. --&gt;
+    &lt;arg value="<emphasis role="bold">com.vaadin.demo.colorpicker.gwt.Col
+                orPickerWidgetSet</emphasis>"/&gt;
+    &lt;jvmarg value="-Xss1024k"/&gt;
+    &lt;jvmarg value="-Djava.awt.headless=true"/&gt;
+    &lt;classpath&gt;
+      &lt;path refid="compile.classpath"/&gt;
+    &lt;/classpath&gt;
   &lt;/java&gt;
 &lt;/target&gt;</programlisting>
 
@@ -1721,11 +1800,11 @@ classpath or add files to WebContent/ITMILL folder.</screen>
 			<figure xml:id="figure.gwt.compiler.result.annotated">
 				<title>Annotated Project Contents</title>
 				<mediaobject>
-					<imageobject role="fo">
-						<imagedata scale="60" align="center" fileref="img/gwt/gwt-hostedmode-project-annotated-hi.png"/>
-					</imageobject>
 					<imageobject role="html">
 						<imagedata align="center" fileref="img/gwt/gwt-hostedmode-project-annotated-lo.png"/>
+					</imageobject>
+					<imageobject role="fo">
+						<imagedata scale="60" smallscale="100%" align="center" fileref="img/gwt/gwt-hostedmode-project-annotated-hi.png"/>
 					</imageobject>
 				</mediaobject>
 			</figure>
@@ -1749,7 +1828,7 @@ classpath or add files to WebContent/ITMILL folder.</screen>
 
 			<para>
 				<emphasis>The Hosted Mode Browser does not work on Linux since IT Mill
-				Toolkit 5.3.0. The Out of Process Hosted Mode, described in <xref
+				Toolkit 5.3.0 and in Vaadin 6.0. The Out of Process Hosted Mode, described in <xref
 				linkend="gwt.development.oophm"/>, is an experimental alternative for the
 				Hosted Mode Browser. It is platform-independent and works also on
 				Linux.</emphasis>
@@ -1810,7 +1889,7 @@ classpath or add files to WebContent/ITMILL folder.</screen>
 				<para>
 					This section gives details on configuring a launcher for the Hosted
 					Mode Browser in the Eclipse IDE. We use the QuickStart installation of
-					IT Mill Toolkit covered in <xref linkend="getting-started.quickstart"/>
+					Vaadin covered in <xref linkend="getting-started.quickstart"/>
 					as an example project. The project includes source code for the Color
 					Picker demo application.
 				</para>
@@ -1878,7 +1957,7 @@ classpath or add files to WebContent/ITMILL folder.</screen>
 								enter:</para>
 
 								<screen>-noserver -whitelist "127.0.0.1  ^http[:][/][/]127[.]0[.]0[.]1[:]<parameter>8080</parameter>"
--out WebContent/ITMILL/widgetsets http://127.0.0.1:<parameter>8080</parameter>/<parameter>myproject</parameter></screen>
+-out WebContent/VAADIN/widgetsets http://127.0.0.1:<parameter>8080</parameter>/<parameter>myproject</parameter></screen>
 
 								<para>
 									The browser application, <classname>GWTShell</classname>,
@@ -1906,7 +1985,7 @@ classpath or add files to WebContent/ITMILL folder.</screen>
 										<listitem>
 											<para>Output directory for compiling widgets with GWT
 												Compiler. The directory must be
-												<parameter>WebContent/ITMILL/widgetsets</parameter>.
+												<parameter>WebContent/VAADIN/widgetsets</parameter>.
 												You can compile the widgets either from the Hosted
 												Mode Browser or externally as explained later in this
 												chapter.</para>
@@ -1919,7 +1998,7 @@ classpath or add files to WebContent/ITMILL folder.</screen>
 											same as the whitelist entry given above. The
 											port number must correspond to the port of the
 											running web server. The Jetty web server
-											included in IT Mill Toolkit will run in port
+											included in Vaadin will run in port
 											8888 by default. In contrast, Apache Tomcat
 											installed under Eclipse will run in port 8080
 											by default.</para>
@@ -1952,7 +2031,7 @@ classpath or add files to WebContent/ITMILL folder.</screen>
 
 					<listitem>
 						In the <guilabel>Classpath</guilabel> tab, you will by default
-						have <parameter>itmill-toolkit-examples</parameter>, which
+						have <parameter>vaadin-examples</parameter>, which
 						contains the default classpath entries for the project. If the
 						classpath entries for the project are sufficient, this should be enough.
 					</listitem>
@@ -2007,7 +2086,7 @@ classpath or add files to WebContent/ITMILL folder.</screen>
 				<para>
 					Once everything is ready to start debugging, just open a source file,
 					for example, the
-					<classname>com.itmill.toolkit.demo.colorpicker.gwt.client.ui.GwtColorPicker</classname>
+					<classname>com.vaadin.demo.colorpicker.gwt.client.ui.GwtColorPicker</classname>
 					class. Find the <methodname>onClick()</methodname> method. At the line
 					containing the <methodname>setColor()</methodname> call, right-click
 					on the leftmost bar in the editor and select
@@ -2084,7 +2163,7 @@ classpath or add files to WebContent/ITMILL folder.</screen>
 
 
 			<para>
-				The OOPHM installation package of IT Mill Toolkit is a
+				The OOPHM installation package of Vaadin is a
 				platform-independent package available separately from the platform
 				specific packages. Use of OOPHM requires (see more detailed notes further
 				below):
@@ -2104,7 +2183,7 @@ classpath or add files to WebContent/ITMILL folder.</screen>
 			</orderedlist>
 
 			<para>
-				If you try debugging the demo applications in the IT Mill Toolkit
+				If you try debugging the demo applications in the Vaadin
 				installation package, just install the plugin (Step 1), launch the server
 				in Web Mode, and then launch the Hosted Mode in debug mode (Step 3) with
 				the included launch configuration.
@@ -2140,7 +2219,7 @@ classpath or add files to WebContent/ITMILL folder.</screen>
 				with the OOPHM, but if you have your own widget sets (which is usually the
 				reason why you want to use client-side debugging in the first place), you
 				need to compile them. If you have compiled them previously with a regular
-				installation of IT Mill Toolkit, you need to recompile them with the GWT
+				installation of Vaadin, you need to recompile them with the GWT
 				Compiler provided in the <filename>gwt-dev-oophm.jar</filename>
 				library. Compiling GWT widget sets is covered in <xref
 				linkend="gwt.development.compiler"/>. The compilation of OOPHM widget sets

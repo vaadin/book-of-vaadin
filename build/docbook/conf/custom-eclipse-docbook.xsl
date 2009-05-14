@@ -8,8 +8,8 @@
   <xsl:import href="../xsl/eclipse/eclipse.xsl"/>
 
   <!-- Eclipse Help parameters. -->
-  <xsl:param name="eclipse.plugin.name" select="'IT Mill Toolkit'"/>
-  <xsl:param name="eclipse.plugin.id" select="'com.itmill.toolkit'"/>
+  <xsl:param name="eclipse.plugin.name" select="'Vaadin Help'"/>
+  <xsl:param name="eclipse.plugin.id" select="'com.vaadin.manual'"/>
   <xsl:param name="eclipse.plugin.provider" select="'IT Mill'"/>
   
   <!-- Custom Eclipse Help parameters. -->

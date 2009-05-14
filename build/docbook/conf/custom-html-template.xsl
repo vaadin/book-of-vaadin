@@ -3,7 +3,7 @@
   <!-- ==================================================================== -->
   <!-- This is the common HTML stylesheet for all HTML-based manuals:       -->
   <!--   - Regular HTML manual                                              -->
-  <!--   - Toolkit Manual as an Eclipse Plugin                              -->
+  <!--   - Vaadin Manual as an Eclipse Plugin                               -->
   <!--                                                                      -->
   <!-- This is a template that has the following tags:                      -->
   <!--   - @BODYHEADER@                                                     -->
