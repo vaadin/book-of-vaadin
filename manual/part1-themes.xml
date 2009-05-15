@@ -24,9 +24,9 @@
 		<para>
 			You place custom themes under the
 			<filename>WebContents/VAADIN/themes/</filename> folder of the web application.
-			This location is fixed -- the folder "VAADIN" specifies that these are (static)
+			This location is fixed -- the folder "VAADIN" specifies that these are static
 			resources specific to Vaadin. The folder should normally contain also
-			the built-in default theme, although you can let it be loaded dynamically from
+			the built-in themes, although you can let them be loaded dynamically from
 			the Vaadin JAR (even though that is somewhat inefficient).  <xref
 			linkend="figure.themes.theme-contents"/> illustrates the contents of a theme.
 		</para>
@@ -53,11 +53,11 @@
 		</para>
 
 		<para>
-			Custom themes must inherit the default theme (unless you just copy the default
-			theme and use it as a template for efficiency reasons). See <xref
-			linkend="section.themes.default"/> and <xref
-			linkend="themes.creating.inheritance"/> for details on inheriting the default
-			theme.
+			Custom themes that use an existing complete theme need to inherit the
+			theme. See <xref linkend="section.themes.default"/> and <xref
+			linkend="themes.creating.inheritance"/> for details on inheriting a
+			theme. Copying and modifying a complete theme is also possible, but it may
+			need more work to maintain if the modifications are small.
 		</para>
 
 		<para>
@@ -378,7 +378,7 @@ td.another {background: yellow;}]]></programlisting>
 			</para>
 
 			<figure xml:id="figure.themes.example.login.1">
-				<title>Themeing Login Box Example with Default Theme</title>
+				<title>Themeing Login Box Example with 'itmill5' theme.</title>
 				<mediaobject>
 					<imageobject>
 						<imagedata smallscale="120" align="center" fileref="img/themes/example-login-default.png"/>
@@ -493,7 +493,7 @@ td.another {background: yellow;}]]></programlisting>
 				since at least 1995, the support has been very incomplete at times and
 				there still exists an unfortunate number of incompatibilities between
 				browsers. While we have tried to take these incompatibilities into account
-				in the default themes in Vaadin, you need to consider them while
+				in the built-in themes in Vaadin, you need to consider them while
 				developing custom themes.
 			</para>
 
@@ -519,20 +519,23 @@ td.another {background: yellow;}]]></programlisting>
 		</para>
 
 		<para>
-			A custom theme must also inherit the default theme, as shown in the example
+			A custom theme must also inherit a built-in theme, as shown in the example
 			below:
 		</para>
 
-		<programlisting><![CDATA[@import "../default/styles.css";
+		<programlisting><![CDATA[@import "../reindeer/styles.css";
 
 body {
     background: yellow;
 }]]></programlisting>
 
-		<para>
-			See <xref linkend="section.themes.default"/> and <xref
-			linkend="themes.creating.inheritance"/> below for details on inheriting the
-			default theme and theme inheritance generally.
+        <para>
+            Vaadin 6.0 includes two built-in themes: <literal>reindeer</literal> and
+            <literal>itmill5</literal>. The latter is a compatibility theme for IT Mill
+            Toolkit 5; there is no longer a "default" theme. See <xref
+            linkend="section.themes.default"/> and <xref
+            linkend="themes.creating.inheritance"/> below for details on inheriting
+            themes.
 		</para>
 
 		<section>
@@ -797,30 +800,44 @@ body {
 
 			<section>
 				<section xml:id="section.themes.default">
-					<title>Default Theme</title>
+					<title>Built-in Themes</title>
+
+                    <para>
+                        Vaadin currently includes two built-in themes:
+                        <literal>reindeer</literal> and <literal>itmill5</literal>. The
+                        latter is the default theme for IT Mill Toolkit 5; there is no
+                        "default" theme in Vaadin 6.0.
+                    </para>
 					
 					<para>
-						The default theme is provided in the
-						<filename>VAADIN/themes/default/styles.css</filename> stylesheet
-						in the Vaadin library JAR. This stylesheet is a
-						compilation of the separate stylesheets for each component in the
-						corresponding subdirectory.
+						The built-in themes are provided in the respective
+						<filename>VAADIN/themes/reindeer/styles.css</filename> and
+						<filename>VAADIN/themes/itmill5/styles.css</filename> stylesheets
+						in the Vaadin library JAR. These stylesheets are compilations of
+						the separate stylesheets for each component in the corresponding
+						subdirectory. The stylesheets are compiled to a single file for
+						efficiency: the browser needs to load just a single file.
 					</para>
 					
-					<para>
-						Notice that the default theme included in the Vaadin
-						library JAR is served dynamically from the JAR by the
-						servlet. Serving the theme statically by the web server is much
-						more efficient. You only need to extract the
-						<filename>VAADIN/</filename> directory from the JAR under your
-						<filename>WebContent</filename> directory. Just make sure to
-						update it if you upgrade to a newer version of Vaadin.
-					</para>
+                    <note>
+                        <title>Serving Built-In Themes Statically</title>
+
+                        <para>
+                            The built-in themes included in the Vaadin library JAR are
+                            served dynamically from the JAR by the servlet. Serving a
+                            theme statically by the web server is much more efficient. You
+                            only need to extract the <filename>VAADIN/</filename>
+                            directory from the JAR under your
+                            <filename>WebContent</filename> directory. Just make sure to
+                            update it if you upgrade to a newer version of Vaadin.
+                        </para>
+                    </note>
 
 					<para>
-						Creation of a default theme of custom GWT widgets is detailed in
+						Creation of a default theme for custom GWT widgets is described in
 						<xref linkend="gwt.widgets.styling"/>.
 					</para>
+
 				</section>
 			</section>
 		</section>
@@ -845,17 +862,17 @@ body {
 			<title>Theme Inheritance</title>
 
 			<para>
-				When you define your own theme, you will need to inherit the default theme
-				(unless you just copy the default theme).
+				When you define your own theme, you will need to inherit a built-in theme
+				(unless you just copy the built-in theme).
 			</para>
 
 			<para>
 				Inheritance in CSS is done with the <literal>@import</literal>
-				statement. In the typical case where you define your own theme, you
-				inherit the default theme as follows:
+				statement. In the typical case, when you define your own theme, you
+				inherit a built-in theme as follows:
 			</para>
 
-			<programlisting><![CDATA[@import "../default/styles.css";
+			<programlisting><![CDATA[@import "../reindeer/styles.css";
 
 body {
     background: yellow;
