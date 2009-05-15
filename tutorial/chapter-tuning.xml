@@ -195,7 +195,7 @@ cities.setNullSelectionAllowed(false);
   * Field factory for overriding how the component for city selection is
   * created
   */
- setFieldFactory(new BaseFieldFactory() {
+ setFormFieldFactory(new DefaultFieldFactory() {
 
      @Override
      public Field createField(Item item, Object propertyId,
@@ -221,44 +221,17 @@ cities.setNullSelectionAllowed(false);
 		</para>
 
 		<para>
-			For the postal code we create a <classname>PostalCodeValidator</classname>
-			which implements the <classname>Validator</classname> interface. We implement
-			the two required methods: <methodname>isValid()</methodname> which just
-			returns true or false depending on if the value is valid and
-			<methodname>validate()</methodname> which throws an
-			<classname>InvalidValueException</classname> containing a description of the
-			error for invalid values. To avoid duplicating code we use
-			<methodname>isValid()</methodname> inside the validate function. The actual
-			validation is done by the regular expression match return
+			For the postal code use a <classname>RegexpValidator</classname>
+			which implements the <classname>Validator</classname> interface.
+			The user input is checked against the regular expression
 		</para>
 
-		<programlisting><![CDATA[(String) value).matches("[1-9][0-9]{4}")]]></programlisting>
+		<programlisting><![CDATA["[1-9][0-9]{4}"]]></programlisting>
 
 		<para>
 			which returns true only for a 5 digit <classname>String</classname> where the
 			first character is <literal>1</literal>-<literal>9</literal>.
 		</para>
-
-		<programlisting><![CDATA[package com.vaadin.addressbooktutorial.validators;
-
-import com.vaadin.data.Validator;
-
-
-public class PostalCodeValidator implements Validator {
-    public boolean isValid(Object value) {
-        if (value == null || !(value instanceof String)) {
-            return false;
-        }
-        return ((String) value).matches("[1-9][0-9]{4}");
-    }
- 
-    public void validate(Object value) throws InvalidValueException {
-        if (!isValid(value)) {
-            throw new InvalidValueException(
-                    "Postal code must be a five digit number and cannot start with a zero.");
-        }
-    }
-}]]></programlisting>
 	 
 		<para>
 			We assign the validator to the field in our
@@ -274,7 +247,7 @@ public class PostalCodeValidator implements Validator {
          * Field factory for overriding how the component for city selection is
          * created
          */
-        setFieldFactory(new BaseFieldFactory() {
+        setFormFieldFactory(new DefaultFieldFactory() {
             @Override
             public Field createField(Item item, Object propertyId,
                     Component uiContext) {
@@ -291,7 +264,8 @@ public class PostalCodeValidator implements Validator {
                     tf.setNullRepresentation("");
 
                     /* Add a validator for postalCode and make it required */
-                    tf.addValidator(new PostalCodeValidator());
+                    tf.addValidator(new RegexpValidator("[1-9][0-9]{4}",
+                        "Postal code must be a five digit number and cannot start with a zero."));
                     tf.setRequired(true);
                 }
 
@@ -336,10 +310,9 @@ public class PostalCodeValidator implements Validator {
 
 		<para>
 			We do the same thing for the email field but use a different validator
-			implementation which checks that the email is of form
-			<literal>*@*.*</literal>. Implementing the EmailValidator is left here as an
-			exercise for the reader (the implementation can be found in the
-			<classname>EmailValidator</classname> file in the final package).
+			implementation which checks for legal e-mail address format.
+			Using the <classname>EmailValidator</classname> provided by Vaadin is
+			left here as an exercise for the reader.
 		</para>
 	</section>
 
