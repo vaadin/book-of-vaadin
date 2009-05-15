@@ -20,6 +20,7 @@ IMAGES =	intro/architecture intro/architecture-detailed intro/toolchain intro/to
 			application/application-architecture application/resource_classdiagram \
 			themes/theme-contents \
 			gwt/gwt-widgets gwt/gwt-widget-files gwt/gwt-hostedmode-project-annotated\
+			vaadin-logo
 
 # List if icons in img/icons
 ICONS =		warning note

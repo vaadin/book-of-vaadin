@@ -221,28 +221,6 @@
 
   <xsl:include href="custom-fo-titlepage.xsl"/>
 
-  <!-- Have a custom graphical title with the logo.
-       The title graphics is defined in 'imageobject' element under the
-       book/info element, just like the textual title.
-
-       This overrides the default declaration in custom-fo-titlepage.xsl. -->
-  <xsl:template match="title" mode="book.titlepage.recto.auto.mode">
-    <xsl:message>
-      Custom title. Use image: <xsl:value-of select="../titleimage/imageobject/imagedata/@fileref"/>
-    </xsl:message>
-
-    <!-- The title is aligned left to allow indentation. -->
-    <fo:block xmlns:fo="http://www.w3.org/1999/XSL/Format"
-      xsl:use-attribute-sets="book.titlepage.recto.style"
-      space-before="5pt"
-      text-align="left" 
-      start-indent="16mm">
-
-      <!-- The 'titleimage' element is an entirely custom element. -->
-      <xsl:apply-templates select="../titleimage/imageobject"/>
-    </fo:block>
-  </xsl:template>
-
   <!-- Get the publication date from the command-line arguments. -->
   <xsl:param name="manual.pubdate">xxxx-xx-xx</xsl:param>
   <xsl:template match="pubdate" mode="titlepage.mode">
