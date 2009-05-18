@@ -123,7 +123,7 @@
 </xsl:template>
 
 <xsl:template match="title" mode="book.titlepage.recto.auto.mode">
-<fo:block xmlns:fo="http://www.w3.org/1999/XSL/Format" xsl:use-attribute-sets="book.titlepage.recto.style" text-align="center" font-size="36pt" space-before="3cm" font-weight="bold" font-family="{$title.fontset}">
+<fo:block xmlns:fo="http://www.w3.org/1999/XSL/Format" xsl:use-attribute-sets="book.titlepage.recto.style" text-align="center" font-size="36pt" space-before="5cm" margin-top="5cm" font-weight="bold" font-family="{$title.fontset}">
 <xsl:call-template name="division.title">
 <xsl:with-param name="node" select="ancestor-or-self::book[1]"/>
 </xsl:call-template>
