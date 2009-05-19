@@ -11,7 +11,7 @@
   <xsl:import href="custom-html-processed.xsl"/>
 
   <!-- Eclipse Help parameters. -->
-  <xsl:param name="eclipse.plugin.name" select="'Vaadin Reference Manual'"/>
+  <xsl:param name="eclipse.plugin.name" select="'Book of Vaadin'"/>
   <xsl:param name="eclipse.plugin.id" select="'com.vaadin.manual'"/>
   <xsl:param name="eclipse.plugin.provider" select="'IT Mill'"/>
   
