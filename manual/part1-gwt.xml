@@ -1431,7 +1431,7 @@ public class ColorPickerApplication
 
 	<section xml:id="gwt.development">
 		<title>GWT Widget Development</title>
-
+		
 		<para>
 			Development of new GWT widgets includes management of the source code tree,
 			running and debugging the application with the GWT Hosted Mode Browser, and
@@ -1521,10 +1521,31 @@ public class ColorPickerApplication
 				them in the classpath of your project as described below.
 			</para>
 
+			<note>
+				<title>Experimental OOPHM Package</title>
+
+				<para>
+					The Out of Process Hosted Mode, described in <xref
+					linkend="gwt.development.oophm"/>, is an experimental alternative for
+					the Hosted Mode Browser, which you will need to debug GWT widgets. It
+					runs the application in a regular browser instead of the built-in
+					browser, so it will later probably become the default
+					solution. <emphasis>The regular Hosted Mode Browser does not work on
+					Linux in Vaadin 6.0.</emphasis> For the Linux platform, the OOPHM
+					package is the only option if you wish to debug GWT code.
+				</para>
+
+				<para>
+					The OOPHM version of GWT is included in the experimental
+					platform-independent OOPHM package of Vaadin, available from the
+					download site.
+				</para>
+			</note>
+		
 			<para>
 				You need to copy the <filename>gwt</filename> directory to your
 				project. You can either copy it with system tools or, if you are using
-				Eclipse, import the directory. Importing the directory is done as follows.
+				Eclipse, import the directory. You can import the directory as follows.
 			</para>
 
 			<orderedlist>
@@ -1560,8 +1581,9 @@ public class ColorPickerApplication
 			</orderedlist>
 
 			<para>
-				If you copied the directory with system tools, remember to select your
-				project and press F5 to refresh the project.
+				If you copied the directory outside Eclipse with system tools, remember to
+				select your project folder in Eclipse and press <keycap>F5</keycap> to
+				refresh the project.
 			</para>
 
 			<para>
@@ -1756,16 +1778,23 @@ public class ColorPickerApplication
 &lt;target name="compile-widgetset" depends="init"&gt;
   &lt;echo&gt;Compiling ColorPickerWidgetSet.&lt;/echo&gt;
   &lt;echo&gt;Modify this script to compile your own widgetsets.&lt;/echo&gt;
-  &lt;java classname="com.google.gwt.dev.GWTCompiler"
+  &lt;java classname="com.google.gwt.dev.Compiler"
         failonerror="yes" fork="yes" maxmemory="256m"&gt;
-    &lt;arg value="-out" /&gt;
+
+    &lt;!-- Define the output directory. --&gt;
+    &lt;arg value="-war" /&gt;
     &lt;arg value="${client-side-destination}" /&gt;
 
     &lt;!-- Define your GWT widget set class here. --&gt;
     &lt;arg value="<emphasis role="bold">com.vaadin.demo.colorpicker.gwt.Col
                 orPickerWidgetSet</emphasis>"/&gt;
+
+    &lt;!-- Reserve more than the default amount of stack space. --&gt;
     &lt;jvmarg value="-Xss1024k"/&gt;
+
+    &lt;!-- Prevent some X11 warnings on Linux/UNIX. --&gt;
     &lt;jvmarg value="-Djava.awt.headless=true"/&gt;
+
     &lt;classpath&gt;
       &lt;path refid="compile.classpath"/&gt;
     &lt;/classpath&gt;
@@ -1774,10 +1803,47 @@ public class ColorPickerApplication
 
 				<para>
 					Replace the target name with your desired target name and the widget
-					set class name with your own class name. The
-					<parameter>-Xss</parameter> parameter may be necessary if you
-					experience stack overflow errors with the default stack size. The
-					<parameter>-Djava.awt.headless=true</parameter> is relevant in
+					set class name with your own class name.
+				</para>
+
+				<note>
+					<title>Google Web Toolkit 1.6 Required</title>
+					
+					<para>
+						As of version 6.0, Vaadin requires GWT version 1.6 (included in
+						the installation package). The 1.6 version contains a new compiler
+						and the old <classname>GWTCompiler</classname> class used
+						previously for compiling GWT widgets is deprecated and replaced
+						with <classname>com.google.gwt.dev.Compiler</classname>. You
+						should update your existing widget set build scripts or launch
+						configurations to use the new compiler class. The only significant
+						API change is the output directory parameter, previously
+						<literal>-out</literal>, now <literal>-war</literal>, as shown in
+						the example above.
+					</para>
+				</note>
+
+				<warning>
+					<title>Java Stack Overflow Problems</title>
+
+					<para>
+						The <parameter>-Xss</parameter> parameter for the Java process may
+						be necessary if you experience stack overflow errors with the
+						default stack size. They occur especially with GWT 1.6, which uses
+						large amount of stack space.
+					</para>
+					
+					<para>
+						Notice further that the Windows version of Sun JRE 1.5 has a bug
+						that makes the stack size setting ineffective. The Windows version
+						also has a smaller default stack size than the other platforms. If
+						you experience the problem, we advice that you use JRE 1.6 on the
+						Windows platform.
+					</para>
+				</warning>
+
+				<para>
+					The <parameter>-Djava.awt.headless=true</parameter> is relevant in
 					Linux/UNIX platforms to avoid some X11 warnings.
 				</para>
 
@@ -1827,19 +1893,32 @@ public class ColorPickerApplication
 			<title>Hosted Mode Browser</title>
 
 			<para>
-				<emphasis>The Hosted Mode Browser does not work on Linux in Vaadin
-				6.0. The Out of Process Hosted Mode, described in <xref
-				linkend="gwt.development.oophm"/>, is an experimental alternative for the
-				Hosted Mode Browser. It is platform-independent and works also on
-				Linux.</emphasis>
-			</para>
-
-			<para>
 				The GWT Hosted Mode Browser allows easy debugging of GWT applications. The
 				GWT application is actually not compiled into JavaScript, as is done in
 				the deployment phase, but executed as a Java application. This makes it
 				possible to debug the application with, for example, the Eclipse IDE.
 			</para>
+
+			<note>
+				<title>Experimental OOPHM Package</title>
+
+				<para>
+					The <emphasis>Out of Process Hosted Mode</emphasis> (OOPHM), described
+					in <xref linkend="gwt.development.oophm"/>, is an experimental
+					alternative for the Hosted Mode Browser, which you will need to debug
+					GWT widgets. It runs the application in a regular browser instead of
+					the built-in browser, so it will later probably become the default
+					solution. The OOPHM version of GWT is included in the experimental
+					platform-independent OOPHM package of Vaadin, available from the
+					download site.
+				</para>
+
+				<para>
+					<emphasis>The regular Hosted Mode Browser does not work on Linux in
+					Vaadin 6.0.</emphasis> For the Linux platform, the OOPHM package is
+					the only option if you wish to debug GWT code.
+				</para>
+			</note>
 
 			<figure xml:id="figure.gwt.hostedmodebrowser">
 				<title>Hosted Mode Browser</title>
