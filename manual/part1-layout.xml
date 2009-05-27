@@ -1046,8 +1046,10 @@ horizontal.addComponent(new Label("Lower right area. "+
 
 		<para>
 			You add new tabs to a tab sheet with the <methodname>addTab()</methodname>
-			method. The method takes as its parameter the root component of the
-			tab. Typically, you put a layout component as the root component.
+			method. The simple version of the method takes as its parameter the root
+			component of the tab. You can use the root component to retrieve its
+			corresponding <classname>Tab</classname> object. Typically, you put a layout
+			component as the root component.
 		</para>
 
         <programlisting><?pocket-size 70% ?><![CDATA[// Create an empty tab sheet.
@@ -1067,24 +1069,28 @@ tabsheet.getTab(myTab).setCaption("My Tab");]]></programlisting>
         <para>
 			Each tab in a tab sheet is represented as a <classname>Tab</classname> object,
 			which manages the tab caption, icon, and attributes such as hidden and
-			visible. New tabs can be added simply with the
-			<methodname>addComponent()</methodname> method, but doing so leaves them
-			without a caption. You can set the caption with
-			<methodname>setTabCaption()</methodname> or simply use the
-			<methodname>addTab()</methodname> method to create tabs and give them a
-			caption. In addition to a caption, tabs can contain an icon, which you can
-			define either in the <methodname>addTab()</methodname> call or set later with
-			<methodname>setTabIcon()</methodname>.
+			visible. You can set the caption with <methodname>setCaption()</methodname>
+			and the icon with <methodname>setIcon()</methodname>. If the component added
+			with <methodname>addTab()</methodname> has a caption or icon, it is used as
+			the default for the <classname>Tab</classname> object. However, changing the
+			attributes of the root component later does not affect the tab, but you must
+			make the setting through the <classname>Tab</classname> object. The
+			<methodname>addTab()</methodname> returns the new <classname>Tab</classname>
+			object, so you can easily set an attribute using the reference.
         </para>
+
+        <programlisting><?pocket-size 70% ?><![CDATA[// Set an attribute using the returned reference
+tabsheet.addTab(myTab).setCaption("My Tab");]]></programlisting>
 
         <para>
-            The following example demonstrates the creation of a simple tab sheet, where
-            each tab shows a different <classname>Label</classname> component. The
-            tabs have an icon, which are (in this example) loaded as Java class loader
-            resources from the application.
+            You can also give the caption and the icon as parameters for the
+            <methodname>addTab()</methodname> method. The following example demonstrates
+            the creation of a simple tab sheet, where each tab shows a different
+            <classname>Label</classname> component. The tabs have an icon, which are (in
+            this example) loaded as Java class loader resources from the application.
         </para>
 
-        <programlisting><?pocket-size 70% ?><![CDATA[final TabSheet tabsheet = new TabSheet();
+        <programlisting><?pocket-size 70% ?><![CDATA[TabSheet tabsheet = new TabSheet();
 
 // Make the tabsheet shrink to fit the contents.
 tabsheet.setSizeUndefined();
@@ -1097,7 +1103,7 @@ tabsheet.addTab(new Label("Contents of the second tab"),
           new ClassResource("images/Venus_small.png", this));
 tabsheet.addTab(new Label("Contents of the third tab"),
           "Third tab",
-          new ClassResource("images/Earth_small.png", this));
+          new ClassResource("images/Earth_small.png", this));]]></programlisting>
 
         <figure xml:id="figure.tabsheet.example1">
             <title>A Simple TabSheet Layout</title>
@@ -1110,23 +1116,26 @@ tabsheet.addTab(new Label("Contents of the third tab"),
 
         <para>
             The <methodname>hideTabs()</methodname> method allows hiding the tab bar
-            entirely. This can be useful in tabbed document interfaces (TDI) when
-            there is only one tab. An individual tab can be made invisible by making
-            its component invisible with <methodname>setVisible(false)</methodname>. A
-            tab can be disabled by disabling its component with
-            <methodname>setEnabled(false)</methodname>. A tab can be selected
-            programmatically with <methodname>setSelectedTab()</methodname>.
+            entirely. This can be useful in tabbed document interfaces (TDI) when there is
+            only one tab. An individual tab can be made invisible by setting
+            <methodname>setVisible(false)</methodname> for the <classname>Tab</classname>
+            object. A tab can be disabled by setting
+            <methodname>setEnabled(false)</methodname>.
         </para>
 
         <para>
             Clicking on a tab selects it. This fires a
-            <classname>TabSheet.SelectedTabChangeEvent</classname>, which can be
-            handled with the
-            <classname>TabSheet.SelectedTabChangeListener</classname>. The source
-            component of the event, which you can retrieve with
+            <classname>TabSheet.SelectedTabChangeEvent</classname>, which you can handle
+            by implementing the <classname>TabSheet.SelectedTabChangeListener</classname>
+            interface. The source component of the event, which you can retrieve with
             <methodname>getSource()</methodname> method of the event, will be the
-            <classname>TabSheet</classname> component. You can find out the currently
-            selected component with <methodname>getSelectedTab()</methodname>.
+            <classname>TabSheet</classname> component. You can find the currently selected
+            tab with <methodname>getSelectedTab()</methodname> and select (open) a
+            particular tab programmatically with
+            <methodname>setSelectedTab()</methodname>. Notice that also adding the first
+            tab fires the <classname>SelectedTabChangeEvent</classname>, which may cause
+            problems in your handler if you assume that everything is initialized before
+            the first change event.
         </para>
         
         <para>
@@ -1141,52 +1150,59 @@ tabsheet.addTab(new Label("Contents of the third tab"),
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.TabSheet.SelectedTabChangeEvent;
 
-public class TabSheetExample extends CustomComponent
-        implements Button.ClickListener,
-        TabSheet.SelectedTabChangeListener {
+public class TabSheetExample extends CustomComponent implements
+        Button.ClickListener, TabSheet.SelectedTabChangeListener {
     TabSheet tabsheet = new TabSheet();
     Button tab1 = new Button("Push this button");
-    Label  tab2 = new Label("Contents of Second Tab");
-    Label  tab3 = new Label("Contents of Third Tab");
-    
-    TabSheetExample () {
-        setCompositionRoot (tabsheet);
+    Label tab2 = new Label("Contents of Second Tab");
+    Label tab3 = new Label("Contents of Third Tab");
+
+    TabSheetExample() {
+        setCompositionRoot(tabsheet);
 
         // Listen for changes in tab selection.
         tabsheet.addListener(this);
 
-        // First tab contains a button, for which
-        // we listen button click events.
+        // First tab contains a button, for which we
+        // listen button click events.
         tab1.addListener(this);
+        
+        // This will cause a selectedTabChange() call.
         tabsheet.addTab(tab1, "First Tab", null);
 
         // A tab that is initially invisible.
-        tab2.setVisible(false);
         tabsheet.addTab(tab2, "Second Tab", null);
-        
+        tabsheet.getTab(tab2).setVisible(false);
+
         // A tab that is initially disabled.
-        tab3.setEnabled(false);
         tabsheet.addTab(tab3, "Third tab", null);
+        tabsheet.getTab(tab3).setEnabled(false);
     }
 
     public void buttonClick(ClickEvent event) {
         // Enable the invisible and disabled tabs.
-        tab2.setVisible(true);
-        tab3.setEnabled(true);
-        
+    	tabsheet.getTab(tab2).setVisible(true);
+    	tabsheet.getTab(tab3).setEnabled(true);
+
         // Change selection automatically to second tab.
         tabsheet.setSelectedTab(tab2);
     }
 
-    // Handle changes in tab selection.
-    public void selectedTabChange(
-                         SelectedTabChangeEvent event) {
-        TabSheet source = event.getTabSheet();
+    public void selectedTabChange(SelectedTabChangeEvent event) {
+        // Cast to a TabSheet. This isn't really necessary in
+    	// this example, as we have only one TabSheet component,
+    	// but would be useful if there were multiple TabSheets.
+        final TabSheet source = (TabSheet) event.getSource();
+
         if (source == tabsheet) {
             // If the first tab was selected.
             if (source.getSelectedTab() == tab1) {
-                tab2.setVisible(false);
-                tab3.setEnabled(false);
+            	// The 2. and 3. tabs may not have been set yet.
+            	if (tabsheet.getTab(tab2) != null
+            		&& tabsheet.getTab(tab3) != null) {
+            		tabsheet.getTab(tab2).setVisible(false);
+            		tabsheet.getTab(tab3).setEnabled(false);
+            	}
             }
         }
     }
