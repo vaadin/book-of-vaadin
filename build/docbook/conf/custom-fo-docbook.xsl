@@ -72,6 +72,27 @@
   </xsl:attribute-set>
 
   <!-- ==================================================================== -->
+  <!-- Admonitions (warnings, notes, etc.)                                  -->
+  <!-- ==================================================================== -->
+
+  <!-- Admonition graphics (warning and note boxes). -->
+  <xsl:param name="admon.graphics">1</xsl:param>
+  <xsl:param name="admon.graphics.path">manual/img/icons/</xsl:param>
+
+  <!-- Admonition (warning/note) box. -->
+  <xsl:attribute-set name="graphical.admonition.properties">
+    <xsl:attribute name="border-style">solid</xsl:attribute>
+    <xsl:attribute name="border-width">1pt</xsl:attribute>
+    <xsl:attribute name="border-color">grey</xsl:attribute>
+    <xsl:attribute name="padding">2pt</xsl:attribute>
+  </xsl:attribute-set>
+
+  <!-- Admonition (warning/note) title. -->
+  <xsl:attribute-set name="admonition.title.properties">
+    <xsl:attribute name="font-size">10pt</xsl:attribute>
+  </xsl:attribute-set>
+
+  <!-- ==================================================================== -->
   <!-- Custom headers.                                                      -->
   <!-- ==================================================================== -->
 

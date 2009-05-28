@@ -70,7 +70,7 @@ book.fo: book.xml part1.xml images
 
 # Run XEP FO processor to convert FO to PDF.
 book.pdf: book.fo
-	/opt/RenderX/XEP/xep <book.fo >book.pdf
+	cd .. ; /opt/RenderX/XEP/xep <manual/book.fo >manual/book.pdf
 #	rm book.fo
 
 # View the result
