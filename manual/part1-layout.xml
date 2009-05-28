@@ -133,6 +133,57 @@
 		</para>
 			
 	</section>
+
+    <section xml:id="layout.root-layout">
+        <title>Root Layout</title>
+
+        <para>
+            The <classname>Window</classname> and its superclass
+            <classname>Panel</classname> have a single root layout component. The
+            component is usually a <classname>Layout</classname>, but any
+            <classname>ComponentContainer</classname> is allowed. When you create the
+            components, they create a default root layout, usually
+            <classname>VerticalLayout</classname>, but you can change it with the
+            <classname>setContent()</classname> method.
+        </para>
+
+        <programlisting><?pocket-size 70% ?><![CDATA[Window main = new Window("My Application");
+setMainWindow(main);
+
+// Set another root layout for the main window.
+TabSheet tabsheet = new TabSheet();
+main.setContent(tabsheet);]]></programlisting>
+
+        <para>
+            The size of the root layout is the default size of the particular layout
+            component, for example, a <classname>VerticalLayout</classname> has 100% width
+            and undefined height by default. In many applications, you want to use the
+            full area of the browser view. Setting the components contained inside the
+            root layout to full size is not enough, and would actually lead to an invalid
+            state if the height of the root layout is undefined.
+        </para>
+
+        <programlisting><?pocket-size 70% ?><![CDATA[// This is actually the default.
+main.setContent(new VerticalLayout());
+
+// Set the size of the root layout to full width and height.
+main.getContent().setSizeFull();
+
+// Add a title area on top of the screen. This takes just the
+// vertical space it needs.
+main.addComponent(new Label("My Application"));
+
+// Add a menu-view area that takes rest of the vertical space.
+HorizontalLayout menuview = new HorizontalLayout();
+menuview.setSizeFull();
+main.addComponent(menuview);]]></programlisting>
+
+        <para>
+            See <xref linkend="layout.settings.size"/> for more
+            information about setting layout sizes.
+        </para>
+
+    </section>
 		
     <section xml:id="layout.components.orderedlayout">
         <title><classname>VerticalLayout</classname> and <classname>HorizontalLayout</classname></title>
@@ -141,9 +192,9 @@
             <classname>VerticalLayout</classname> and
             <classname>HorizontalLayout</classname> components are containers for laying
             out components either vertically or horizontally, respectively. Some
-            components, such as <classname>Window</classname>, have a
-            <classname>VerticalLayout</classname> as the root layout, which you can set
-            with <methodname>setLayout()</methodname>.
+            components, such as <classname>Window</classname> and
+            <classname>Panel</classname>, have a <classname>VerticalLayout</classname> as
+            the root layout, which you can set with <methodname>setContent()</methodname>.
         </para>
 
         <para>
@@ -834,7 +885,7 @@ form.addComponent(new TextField("Name"));
 form.addComponent(new TextField("Email"));
 
 // Set the layout as the root layout of the panel
-panel.setLayout(form);]]></programlisting>
+panel.setContent(form);]]></programlisting>
 
         <para>
             The resulting layout will look as follows.
@@ -887,7 +938,7 @@ final Window window = new Window("Window with a Light Panel");
 window.setWidth("400px");
 window.setHeight("200px");
 final SplitPanel splitter = new SplitPanel(SplitPanel.ORIENTATION_HORIZONTAL);
-window.setLayout(splitter);
+window.setContent(splitter);
 
 // Create a panel with a caption.
 final Panel light = new Panel("Light Panel");
@@ -1998,7 +2049,7 @@ CustomLayout custom = new CustomLayout("layoutname");
 custom.addStyleName("customlayoutexample");
 
 // Use it as the layout of the Panel.
-panel.setLayout(custom);
+panel.setContent(custom);
 
 // Create a few components and bind them to the location tags
 // in the custom layout.
