@@ -3,42 +3,6 @@
 <chapter xml:id="layout">
 	<title>Managing Layout</title>
 
-	<para>
-		This chapter gives an overview of layout components, starting with their
-		history, and then gives more specific description of the components
-		together with some examples.
-	</para>
-	
-	<section xml:id="layout.overview">
-		<title>Overview</title>
-
-        <para>
-            Layout components are used to place other components to specific places in the
-            user interface. You can use plain Java to accomplish sophisticated component
-            layouting. Another option is to use <classname>CustomLayout</classname> class
-            and let the web page designers take responsibility of component layouting
-            using their own set of tools.
-        </para>
-
-        <para>
-            Layouts are often strongly coupled with themes that specify various layout
-            attributes such as backgrounds, borders, alignment, and so on. Themes are
-            detailed in <xref linkend="themes"/>.
-        </para>
-        
-     	<note>
-			<title>WYSIWYG editor</title>
-
-			In addition to programmed layouts discussed in this chapter, the layouts
-			can be edited visually using WYSIWYG editor. You can read more about the
-			WYSIWYG editor on <uri>http://vaadin.com/eclipse</uri>. 
-		</note>
-
-    </section>
-
-	<section xml:id="layout.background">
-		<title>Background for Layout</title>
-		
 		<para>
 			Ever since the ancient xeroxians invented graphical user interfaces,
 			programmers have wanted to make GUI programming ever easier for
@@ -132,10 +96,97 @@
 			artists create to make people feel good about your software.
 		</para>
 			
-	</section>
+	<section xml:id="layout.overview">
+		<title>Overview</title>
+
+        <para>
+            The user interface components in Vaadin can roughly be divided in two groups:
+            components that the user can interact with and layout components for placing
+            the other components to specific places in the user interface. The layout
+            components are identical in their purpose to layout managers in regular
+            desktop frameworks for Java and you can use plain Java to accomplish
+            sophisticated component layouting.
+        </para>
+
+		<para>
+			You start by creating a root layout for the main window, unless you use the
+			default, and then add the other layout components hierarchically, and finally
+			the interaction components as the leaves of the component tree.
+		</para>
+
+        <programlisting><?pocket-size 70% ?><![CDATA[// Create the main window.
+Window main = new Window("My Application");
+setMainWindow(main);
+
+// Set the root layout (VerticalLayout is actually the default).
+VerticalLayout root = new VerticalLayout();
+main.setContent(root);
+
+// Add the topmost component.
+root.addComponent(new Label("The Ultimate Cat Finder"));
+
+// Add a horizontal layout for the bottom part.
+HorizontalLayout bottom = new HorizontalLayout();
+root.addComponent(bottom);
+
+bottom.addComponent(new Tree("Major Planets and Their Moons"));
+bottom.addComponent(new Panel());
+...]]></programlisting>
+
+		<para>
+			You will usually need to tune the layout components a bit by setting sizes,
+			expansion ratios, alignments, spacings, and so on. The general settings are
+			described in <xref linkend="layout.settings"/>, while the layout component
+			specific settings are described in connection with the component.
+		</para>
+
+		<para>
+			Layouts are usually strongly coupled with themes that specify various layout
+			features, such as backgrounds, borders, alignment, and so on. Definition and
+			use of themes is described in <xref linkend="themes"/>
+		</para>
+
+		<para>
+			You can see a finished version of the above example in 
+		</para>
+
+		<figure xml:id="figure.layout.intro.simple">
+			<title>Layout Example</title>
+			<mediaobject>
+				<imageobject>
+					<imagedata align="center" fileref="img/layout/layout-intro-example-1.png"/>
+				</imageobject>
+			</mediaobject>
+		</figure>
+
+		<para>
+			The alternative for using layout components is to use the special
+			<classname>CustomLayout</classname> that allows using HTML templates. This
+			way, you can let the web page designers take responsibility of component
+			layouting using their own set of tools. What you lose is the ability to manage
+			the layout dynamically.
+		</para>
+
+     	<note>
+			<title>The Visual Editor</title>
+
+			<para>
+				While you can always program the layout by hand, the Vaadin plugin for the
+				Eclipse IDE includes a WYSIWYG editor that you can use to create user
+				interfaces visually. The editor generates the code that creates the user
+				interface and is useful for rapid application development and prototyping.
+				It is especially helpful when you are still learning the framework, as the
+				generated code, which is designed to be as reusable as possible, also
+				works as an example of how you create user interfaces with Vaadin. You can
+				find more about the WYSIWYG editor at
+				<uri>http://vaadin.com/eclipse</uri>.
+			</para>
+		</note>
+
+    </section>
 
     <section xml:id="layout.root-layout">
-        <title>Root Layout</title>
+        <title>Window and Panel Root Layout</title>
 
         <para>
             The <classname>Window</classname> and its superclass
@@ -858,8 +909,11 @@ tf2.setComponentError(
 
         <para>
             <classname>Panel</classname> is a simple container with a frame and an
-            optional caption. The content area has an inner layout component for laying
-            out the contained components.
+            optional caption. The content area is bound to a an inner layout component for
+            laying out the contained components. The default content layout is a
+            <classname>VerticalLayout</classname>, but you can change it with the
+            <methodname>setContent()</methodname> method to be any class implementing the
+            <classname>ComponentContainer</classname> interface.
         </para>
 
         <para>
@@ -900,6 +954,11 @@ panel.setContent(form);]]></programlisting>
             </mediaobject>
         </figure>	
 
+        <para>
+			See <xref linkend="layout.root-layout"/> for more information about setting
+			the content layout.
+		</para>
+
         <simplesect>
             <title>CSS Style Rules</title>
             
@@ -920,17 +979,10 @@ panel.setContent(form);]]></programlisting>
             </para>
             
             <para>
-                The <emphasis>light style</emphasis> for the
-                <classname>Panel</classname> is a predefined style that has now
-                borders or border decorations for the panel. You enable it simply by
-                adding the <literal>light</literal> style name for the panel, as is
-                done in the example below. 
-            </para>
-
-            <para>
-                The light style is typical when using a <classname>Panel</classname>
-                as the root layout of a window or some similar layout, as in the
-                example below.
+                The built-in <emphasis>light</emphasis> style has no borders or border
+                decorations for the <classname>Panel</classname>. You enable it simply by
+                adding the <literal>light</literal> style name for the panel, as is done
+                in the example below.
             </para>
 
             <programlisting><![CDATA[// Have a window with a SplitPanel.
@@ -956,6 +1008,11 @@ splitter.setSplitPosition(250, Sizeable.UNITS_PIXELS);
 
 main.addWindow(window);]]></programlisting>
 
+			<para>
+				<xref linkend="figure.layout.panel.light"/> shows the rendered
+				<classname>Panel</classname>.
+			</para>
+
 			<figure xml:id="figure.layout.panel.light">
 				<title>A <classname>Panel</classname> with Light Style</title>
 				<mediaobject>
@@ -965,6 +1022,11 @@ main.addWindow(window);]]></programlisting>
 				</mediaobject>
 			</figure>	
             
+            <para>
+                The <emphasis>light</emphasis> style is typical when using a
+                <classname>Panel</classname> as the root layout of a window or some
+                similar layout, as in the example above.
+            </para>
         </simplesect>
     </section>
 
@@ -1108,14 +1170,14 @@ TabSheet tabsheet = new TabSheet();
 
 // Create a component to put in a tab and put
 // some content in it.
-VerticalLayout myTab = new VerticalLayout();
-myTab.addComponent(new Label("Hello, I am a Tab!"));
+VerticalLayout myTabRoot = new VerticalLayout();
+myTabRoot.addComponent(new Label("Hello, I am a Tab!"));
 
 // Add the component to the tab sheet as a new tab.
-tabsheet.addTab(myTab);
+tabsheet.addTab(myTabRoot);
 
 // Get the Tab holding the component and set its caption.
-tabsheet.getTab(myTab).setCaption("My Tab");]]></programlisting>
+tabsheet.getTab(myTabRoot).setCaption("My Tab");]]></programlisting>
         
         <para>
 			Each tab in a tab sheet is represented as a <classname>Tab</classname> object,
