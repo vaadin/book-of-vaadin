@@ -101,22 +101,224 @@
 	</section>
 
 	<section xml:id="components.interfaces">
-		<title>Component Abstraction</title>
+		<title>Interfaces and Abstractions</title>
+
+        <para>
+			Vaadin user interface components are built on a skeleton of interfaces and
+			abstract classes that define and implement the features common to all
+			components and the basic logic how the component states are serialized between
+			the server and the client.
+        </para>
         
         <para>
+			This section gives details on the basic component interfaces and
+			abstractions. The layout and other component container abstractions are
+			described in <xref linkend="layout"/>. The interfaces that define the Vaadin
+			data model are described in <xref linkend="datamodel"/>.
         </para>
 
-        <section>
+        <para>
+			All components also implement the <classname>Paintable</classname> interface,
+			which is used for serializing ("painting") the components to the client, and
+			the reverse <classname>VariableOwner</classname> interface, which is needed
+			for deserializing component state or user interaction from the client.
+        </para>
+
+        <para>
+			In addition to the interfaces defined within the Vaadin framework, all
+			components implement the <classname>java.io.Serializable</classname> interface
+			to allow serialization. Serialization is needed in many clustering and cloud
+			computing solutions.
+		</para>
+
+        <section xml:id="components.interfaces.component">
             <title><classname>Component</classname> Interface</title>
 
             <para>
                 The <classname>Component</classname> interface is paired with the
                 <classname>AbstractComponent</classname> class, which implements all the
-                methods.
+                methods defined in the interface.
             </para>
+
+			<section>
+				<title>Interface Attributes</title>
+
+				<para>
+					The interface defines a number of attributes, which you can retrieve or
+					manipulate with the corresponding setters and getters.
+				</para>
+
+				<variablelist>
+					<varlistentry>
+						<term><methodname>caption</methodname></term>
+						<listitem>
+							<para>
+								The caption of a component is usually rendered by the
+								layout component in which the component is placed. This
+								allows the layout component to control the placement of
+								the caption. Some components, such as
+								<classname>Button</classname> and
+								<classname>Panel</classname>, manage the caption
+								themselves inside the component itself.
+							</para>
+						</listitem>
+					</varlistentry>
+					<varlistentry>
+						<term><methodname>enabled</methodname></term>
+						<listitem>
+							<para>
+								Can the user use the component? A disabled component is
+								grayed out and the user can not use it; it is
+								automatically in read-only state. Disabled components have
+								the <literal>v-disabled</literal> CSS style.
+							</para>
+						</listitem>
+					</varlistentry>
+					<varlistentry>
+						<term><methodname>icon</methodname></term>
+						<listitem>
+							<para>
+								The icon of a component is usually rendered by the layout
+								component in which the component is placed. This allows
+								the layout component to control the placement of the
+								icon. Some components, such as
+								<classname>Button</classname> and
+								<classname>Panel</classname>, manage the icon themselves
+								inside the component itself.
+							</para>
+						</listitem>
+					</varlistentry>
+					<varlistentry>
+						<term><methodname>locale</methodname></term>
+						<listitem>
+							<para>
+								The locale defines the country and language used in the
+								component. If the locale is undefined, the locale of 1)
+								the parent component, 2) the application.
+							</para>
+						</listitem>
+					</varlistentry>
+					<varlistentry>
+						<term><methodname>readOnly</methodname></term>
+						<listitem>
+							<para>
+								Can the user change the component state? This attribute is
+								obviously applicable only for components that allow
+								changing the state. The attribute does not prevent
+								changing the state programmatically. While the appearance
+								of the component does not change, unlike with the
+								<emphasis>enabled</emphasis> attribute, the setter does
+								trigger repainting of the component. Client-side state
+								modifications will not be communicated to the server-side
+								at all, which is an important security feature, because a
+								malicious user can not fabricate state changes in a
+								read-only component.
+							</para>
+						</listitem>
+					</varlistentry>
+					<varlistentry>
+						<term><methodname>styleName</methodname></term>
+						<listitem>
+							<para>
+								A user-defined CSS style class name of the component. The
+								attribute allows listing multiple style names as a
+								space-separated list. In addition to the setter and
+								getter, you can add and remove individual style names with
+								<methodname>addStylename()</methodname> and
+								<methodname>removeStyleName()</methodname>.
+							</para>
+						</listitem>
+					</varlistentry>
+					<varlistentry>
+						<term><methodname>visible</methodname></term>
+						<listitem>
+							<para>
+								Is the component visible or hidden? Hidden components are
+								not just not visible, but not communicated to the browser
+								at all. That is, they are not made invisible with only CSS
+								rules. This feature is important for security if you have
+								components that contain security-critical information that
+								must only be shown in specific application states.
+							</para>
+						</listitem>
+					</varlistentry>
+				</variablelist>
+			</section>
+
+			<section>
+				<title>Component Tree Management</title>
+
+				<para>
+					Components are laid out in the user interface hierarchically. The
+					layout is managed by layout components, or more generally components
+					that implement the <classname>ComponentContainer</classname>
+					interface. Such a container is the parent of the contained components.
+				</para>
+
+				<para>
+					The <methodname>getParent()</methodname> method allows retrieving the
+					parent component of a component. While there is a
+					<methodname>setParent()</methodname>, you rarely need it as you
+					usually add components with the
+					<methodname>addComponent()</methodname> method of the
+					<classname>ComponentContainer</classname> interface, which
+					automatically sets the parent.
+				</para>
+
+				<para>
+					A component does not know its parent when the component is created, so
+					you can not refer to the parent in the constructor with
+					<methodname>getParent()</methodname>. Also, it is not possible to
+					fetch a reference to the application object with
+					<methodname>getApplication()</methodname> before having a parent. For
+					example, the following is invalid:
+				</para>
+
+				<programlisting><?pocket-size 65% ?><![CDATA[public class AttachExample extends CustomComponent {
+    public AttachExample() {
+        // ERROR: We can't access the application object yet.
+        ClassResource r = new ClassResource("smiley.jpg",
+                                            getApplication());
+        Embedded image = new Embedded("Image:", r); 
+        setCompositionRoot(image);
+    }
+}]]></programlisting>
+
+				<para>
+					Adding a component to an application triggers calling the
+					<methodname>attach()</methodname> method for the
+					component. Correspondingly, removing a component from a container
+					triggers calling the <methodname>detach()</methodname> method. If the
+					parent of an added component is already connected to the application,
+					the <methodname>attach()</methodname> is called immediately from
+					<methodname>setParent()</methodname>.
+				</para>
+
+				<programlisting><?pocket-size 65% ?><![CDATA[public class AttachExample extends CustomComponent {
+    public AttachExample() {
+    }
+    
+    @Override
+    public void attach() {
+        super.attach(); // Must call.
+        
+        // Now we know who ultimately owns us.
+        ClassResource r = new ClassResource("smiley.jpg",
+                                            getApplication());
+        Embedded image = new Embedded("Image:", r); 
+        setCompositionRoot(image);
+    }
+}]]></programlisting>
+
+				<para>
+					The attachment logic is implemented in
+					<classname>AbstractComponent</classname>, as described in .
+				</para>
+
+			</section>
         </section>
 
-        <section>
+        <section xml:id="components.interfaces.abstractcomponent">
             <title><classname>AbstractComponent</classname></title>
 
             <para>
@@ -126,7 +328,7 @@
             </para>
         </section>
 
-        <section>
+        <section xml:id="components.interfaces.field">
             <title><classname>Field</classname> Interface</title>
 
 
