@@ -17,6 +17,7 @@ DBPARS =	-param section.autolabel 1 \
 IMAGES =	intro/architecture intro/architecture-detailed intro/toolchain intro/toolkit-package \
 			intro/intro-themes-faded \
 			arch/clientside-arch \
+			components/component-diagram components/component-abstractions \
 			application/application-architecture application/resource_classdiagram \
 			themes/theme-contents \
 			gwt/gwt-widgets gwt/gwt-widget-files gwt/gwt-hostedmode-project-annotated\
