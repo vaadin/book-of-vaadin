@@ -4,14 +4,13 @@ DATE = `date +'%Y-%m-%d'`
 VERSION = `cat ../build/VERSION.properties|sed -e 's/^version=\([0-9\.]\+\).\+/\1/'`
 
 # Command-line parameters for Docbook
-DBPARS =	-param section.autolabel 1 \
-			-param section.label.includes.component.label 1 \
-			-param section.autolabel.max.depth 2 \
-			-param draft.watermark.image '' \
-			-param draft.mode 'no' \
-			-param double.sided 1 \
-			-param manual.pubdate ${DATE} \
-			-param manual.version $(VERSION)
+DBPARS =	section.autolabel=1 \
+			section.label.includes.component.label=1 \
+			section.autolabel.max.depth=2 \
+			draft.mode='no' \
+			double.sided=1 \
+			manual.pubdate=${DATE} \
+			manual.version=$(VERSION)
 
 # List of images to be converted from SVG to PNG
 IMAGES =	intro/architecture intro/architecture-detailed intro/toolchain intro/toolkit-package \
@@ -64,11 +63,19 @@ $(TRGICONS): img/icons/%.png: original-drawings/icons/%.svg
 ################################################################################
 
 DOCBOOK = ../build/docbook/conf/custom-fo-docbook.xsl
+#HIGHLIGHTER_CONFIG = -Dxslthl.config=$(PWD)/../build/docbook/xsl/highlighting/xslthl-config.xml
+
+# The highlighter configuration is included in the DocBook package.
+# It must be given as an absolute URL.
+HIGHLIGHTER_CONFIG = -Dxslthl.config="file://$(PWD)/../build/docbook/xsl/highlighting/xslthl-config.xml"
+
 
 # Process Docbook to FO
 book.fo: book.xml part1.xml images
 	@echo $(VERSION)
-	java -Xms256M -Xmx512M -classpath ../build/lib/xalan.jar:../build/lib/xercesImpl.jar:../build/lib/xml-apis.jar org.apache.xalan.xslt.Process -xsl $(DOCBOOK) -in book.xml -out book.fo $(DBPARS)
+	@echo "Highlighter configuration: $(HIGHLIGHTER_CONFIG)"
+	java -Xms256M -Xmx512M -classpath ../build/lib/saxon.jar:../build/lib/xercesImpl.jar:../build/lib/xml-apis.jar:../build/lib/xslthl.jar $(HIGHLIGHTER_CONFIG) com.icl.saxon.StyleSheet -o book.fo book.xml $(DOCBOOK) $(DBPARS)
+# ../build/lib/xalan.jar ... org.apache.xalan.xslt.Process
 
 # Run XEP FO processor to convert FO to PDF.
 book.pdf: book.fo

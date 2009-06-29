@@ -8,6 +8,15 @@
 
   <xsl:import href="../xsl/fo/docbook.xsl"/>
 
+  <!-- For syntax color highlighting. -->
+  <xsl:import href="../xsl/highlighting/common.xsl"/>
+  <xsl:import href="../xsl/fo/highlight.xsl"/>
+
+  <xsl:param name="manual.fonts.custom" select="false"/>
+
+  <!-- Enable syntax color highlighting. -->
+  <xsl:param name="highlight.source" select="1"/>
+
   <xsl:attribute-set name="monospace.verbatim.properties">
     <xsl:attribute name="font-size">
       <xsl:value-of select="$body.font.master * 0.80"/>
@@ -69,6 +78,225 @@
   <!-- Deeper indentation of lists. -->
   <xsl:attribute-set name="list.block.spacing">
     <xsl:attribute name="margin-left">1cm</xsl:attribute>
+  </xsl:attribute-set>
+
+  <!-- ==================================================================== -->
+  <!-- Table of Contents                                                    -->
+  <!-- ==================================================================== -->
+
+  <!-- Have chapter titles in bold. (from autotoc.xsl)-->
+  <xsl:template name="toc.line">
+    <xsl:param name="toc-context" select="NOTANODE"/>
+    
+    <xsl:variable name="id">
+      <xsl:call-template name="object.id"/>
+    </xsl:variable>
+    
+    <xsl:variable name="label">
+      <xsl:apply-templates select="." mode="label.markup"/>
+    </xsl:variable>
+    
+    <fo:block xsl:use-attribute-sets="toc.line.properties"
+      end-indent="{$toc.indent.width}pt"
+      last-line-end-indent="-{$toc.indent.width}pt">
+
+      <!-- Vaadin customization: -->
+      <xsl:choose>
+        <xsl:when test="self::chapter or self::appendix">
+          <xsl:attribute name="font-weight">bold</xsl:attribute>
+          <xsl:attribute name="margin-top">2.5mm</xsl:attribute>
+        </xsl:when>
+      </xsl:choose>
+
+      <xsl:if test="local-name($toc-context) = 'chapter'">
+        <xsl:attribute name="font-size">12pt</xsl:attribute>
+        <xsl:attribute name="margin-left">0cm</xsl:attribute>
+        <xsl:attribute name="margin-right">2cm</xsl:attribute>
+      </xsl:if>
+
+      <fo:inline keep-with-next.within-line="always">
+        <fo:basic-link internal-destination="{$id}">
+          <xsl:if test="$label != ''">
+            <xsl:copy-of select="$label"/>
+            <xsl:value-of select="$autotoc.label.separator"/>
+          </xsl:if>
+          <xsl:apply-templates select="." mode="titleabbrev.markup"/>
+        </fo:basic-link>
+      </fo:inline>
+      <fo:inline keep-together.within-line="always">
+        <xsl:text> </xsl:text>
+        <fo:leader leader-pattern="dots"
+          leader-pattern-width="3pt"
+          leader-alignment="reference-area"
+          keep-with-next.within-line="always"/>
+      <xsl:text> </xsl:text>
+      <fo:basic-link internal-destination="{$id}">
+        <fo:page-number-citation ref-id="{$id}"/>
+      </fo:basic-link>
+    </fo:inline>
+  </fo:block>
+  </xsl:template>
+
+  <!-- Only generate ToC of chapters/sections. -->
+  <xsl:param name="generate.toc">
+    appendix  nop
+    article   toc,title
+    book      toc,title
+    chapter   toc
+    part      nop
+    preface   nop
+    qandadiv  nop
+    qandaset  nop
+    reference toc,title
+    section   nop
+    set       toc
+  </xsl:param>
+
+  <!-- Only first level section titles in chapter ToC. From autotoc.xsl. -->  
+  <xsl:template match="section" mode="toc">
+    <xsl:param name="toc-context" select="."/>
+    
+    <xsl:variable name="id">
+      <xsl:call-template name="object.id"/>
+    </xsl:variable>
+    
+    <xsl:variable name="cid">
+      <xsl:call-template name="object.id">
+        <xsl:with-param name="object" select="$toc-context"/>
+      </xsl:call-template>
+    </xsl:variable>
+    
+    <xsl:variable name="depth" select="count(ancestor::section) + 1"/>
+    <xsl:variable name="reldepth"
+      select="count(ancestor::*)-count($toc-context/ancestor::*)"/>
+
+    <xsl:variable name="depth.from.context" select="count(ancestor::*)-count($toc-context/ancestor::*)"/>
+
+    <!-- xsl:message>
+      <xsl:text>toc-context: </xsl:text>
+      <xsl:value-of select="local-name($toc-context)"/>
+    </xsl:message -->
+
+    <xsl:variable name="toc.section.depth.vaadin">
+      <xsl:choose>
+        <xsl:when test="local-name($toc-context) = 'chapter'">1</xsl:when>
+        <xsl:otherwise>
+          <xsl:value-of select="$toc.section.depth"/>
+        </xsl:otherwise>
+      </xsl:choose>
+    </xsl:variable>
+
+    <xsl:if test="$toc.section.depth.vaadin &gt;= $depth">
+      <xsl:call-template name="toc.line">
+        <xsl:with-param name="toc-context" select="$toc-context"/>
+      </xsl:call-template>
+      
+      <xsl:if test="$toc.section.depth > $depth and $toc.max.depth > $depth.from.context and section">
+        <fo:block id="toc.{$cid}.{$id}">
+          <xsl:attribute name="margin-left">
+            <xsl:call-template name="set.toc.indent">
+              <xsl:with-param name="reldepth" select="$reldepth"/>
+            </xsl:call-template>
+          </xsl:attribute>
+          
+          <xsl:apply-templates select="section" mode="toc">
+            <xsl:with-param name="toc-context" select="$toc-context"/>
+          </xsl:apply-templates>
+        </fo:block>
+      </xsl:if>
+    </xsl:if>
+  </xsl:template>
+
+  <!-- ==================================================================== -->
+  <!-- Fonts.                                                               -->
+  <!-- ==================================================================== -->
+
+  <xsl:param name="body.font.family">
+    <xsl:choose>
+      <xsl:when test="$manual.fonts.custom">Helvetica</xsl:when>
+      <xsl:otherwise>Times</xsl:otherwise>
+    </xsl:choose>
+  </xsl:param>
+
+  <!-- ==================================================================== -->
+  <!-- Custom chapter title.                                                -->
+  <!-- ==================================================================== -->
+
+  <xsl:template match="title" mode="chapter.titlepage.recto.auto.mode">  
+    <fo:block xmlns:fo="http://www.w3.org/1999/XSL/Format" 
+      xsl:use-attribute-sets="chapter.titlepage.recto.style" 
+      margin-left="{$title.margin.left}" 
+      font-size="32.0pt" 
+      font-weight="bold" 
+      font-family="{$title.font.family}">
+      <xsl:call-template name="vaadinchapter.title">
+        <xsl:with-param name="node" select="ancestor-or-self::chapter[1]"/>
+      </xsl:call-template>
+    </fo:block>
+  </xsl:template>
+
+  <!-- Use the same style for the appendices. -->
+  <xsl:template match="title" mode="appendix.titlepage.recto.auto.mode">  
+    <fo:block xmlns:fo="http://www.w3.org/1999/XSL/Format" 
+      xsl:use-attribute-sets="chapter.titlepage.recto.style" 
+      margin-left="{$title.margin.left}" 
+      font-size="32.0pt" 
+      font-weight="bold" 
+      font-family="{$title.font.family}">
+      <xsl:call-template name="vaadinchapter.title">
+        <xsl:with-param name="node" select="ancestor-or-self::appendix[1]"/>
+      </xsl:call-template>
+    </fo:block>
+  </xsl:template>
+
+  <xsl:template name="vaadinchapter.title">
+    <xsl:param name="node" select="."/>
+    <xsl:variable name="id">
+      <xsl:call-template name="object.id">
+        <xsl:with-param name="object" select="$node"/>
+      </xsl:call-template>
+    </xsl:variable>
+    
+    <fo:block id="{$id}"
+      xsl:use-attribute-sets="chap.label.properties">
+      <xsl:call-template name="gentext">
+        <xsl:with-param name="key">
+          <xsl:choose>
+            <xsl:when test="$node/self::chapter">chapter</xsl:when>
+            <xsl:when test="$node/self::appendix">appendix</xsl:when>
+          </xsl:choose>
+        </xsl:with-param>
+      </xsl:call-template>
+      <xsl:text> </xsl:text>
+      <xsl:apply-templates select="$node" mode="label.markup"/>
+    </fo:block>
+    <fo:block xsl:use-attribute-sets="chap.title.properties">
+      <xsl:apply-templates select="$node" mode="title.markup"/>
+    </fo:block>
+  </xsl:template>
+
+  <!-- The formatting properties for the chapter label. -->
+  <xsl:attribute-set name="chap.label.properties">
+    <xsl:attribute name="font-size">36pt</xsl:attribute>
+    <xsl:attribute name="font-family">sans-serif</xsl:attribute>
+    <xsl:attribute name="text-align">right</xsl:attribute>
+    <xsl:attribute name="space-before.minimum">4cm</xsl:attribute>
+    <xsl:attribute name="space-before.optimum">6cm</xsl:attribute>
+    <xsl:attribute name="space-before.maximum">8cm</xsl:attribute>
+  </xsl:attribute-set>
+
+  <!-- The formatting properties for the chapter title. -->
+  <xsl:attribute-set name="chap.title.properties">
+    <xsl:attribute name="font-size">48pt</xsl:attribute>
+    <xsl:attribute name="font-family">sans-serif</xsl:attribute>
+    <xsl:attribute name="text-align">right</xsl:attribute>
+    <xsl:attribute name="space-before.minimum">2cm</xsl:attribute>
+    <xsl:attribute name="space-before.optimum">4cm</xsl:attribute>
+    <xsl:attribute name="space-before.maximum">6cm</xsl:attribute>
+    <xsl:attribute name="space-after.minimum">2cm</xsl:attribute>
+    <xsl:attribute name="space-after.optimum">3cm</xsl:attribute>
+    <xsl:attribute name="space-after.maximum">4cm</xsl:attribute>
+    <xsl:attribute name="hyphenate">false</xsl:attribute>
   </xsl:attribute-set>
 
   <!-- ==================================================================== -->
