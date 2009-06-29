@@ -12,10 +12,12 @@
 		<title>Overview</title>
 
 		<para>
-			Vaadin provides a comprehensive set of user interface
-			components and allows you to define custom components. <xref
-			linkend="figure.uicomponents"/> illustrates the inheritance hierarchy
-			of the UI component classes and interfaces.
+			Vaadin provides a comprehensive set of user interface components and allows
+			you to define custom components. <xref linkend="figure.uicomponents"/>
+			illustrates the inheritance hierarchy of the UI component classes and
+			interfaces. Interfaces are displayed in gray, abstract classes in orange, and
+			regular classes in blue. An annotated version of the diagram is featured in
+			the <emphasis>Vaadin Cheat Sheet</emphasis>.
 		</para>
 
 		<figure xml:id="figure.uicomponents">
@@ -31,16 +33,15 @@
 		</figure>
 
 		<para>
-			Interfaces are displayed in gray, abstract classes in orange, and
-			regular classes in blue. At the bottom of the interface hierarchy, we
-			have the <classname>Component</classname> interface. At the bottom of the
-			class hierarchy, we have the <classname>AbstractComponent</classname>
-			class. It is inherited by two other abstract classes:
-			<classname>AbstractField</classname>, inherited further by field
-			components and <classname>AbstractComponentContainer</classname>,
-			inherited by various container components. Some miscellaneous
-			components, such as labels and links, inherit this base class
-			directly.
+			At the top of the interface hierarchy, we have the
+			<classname>Component</classname> interface. At the top of the class hierarchy,
+			we have the <classname>AbstractComponent</classname> class. It is inherited by
+			two other abstract classes: <classname>AbstractField</classname>, inherited
+			further by field components, and
+			<classname>AbstractComponentContainer</classname>, inherited by various
+			container and layout components. Components that are not bound to a content
+			data model, such as labels and links, inherit
+			<classname>AbstractComponent</classname> directly.
 		</para>
 
 		<para>
@@ -317,7 +318,8 @@
 
 				<para>
 					The attachment logic is implemented in
-					<classname>AbstractComponent</classname>, as described in .
+					<classname>AbstractComponent</classname>, as described in <xref
+					linkend="components.interfaces.abstractcomponent"/>.
 				</para>
 
 			</section>
@@ -331,6 +333,23 @@
                 the <classname>Component</classname> interface, implementing all the
                 methods defined in the interface.
             </para>
+			
+			<para>
+				<classname>AbstractComponent</classname> has a single abstract method,
+				<methodname>getTag()</methodname>, which returns the serialization
+				identifier of a particular component class. It needs to be implemented
+				when (and only when) creating entirely new
+				components. <classname>AbstractComponent</classname> manages much of the
+				serialization of component states between the client and the
+				server. Creation of new components and serialization is described in <xref
+				linkend="gwt"/>, and the server-side serialization API in <xref
+				linkend="uidl"/>.
+			</para>
+
+			<section>
+				<title>Serialization Support</title>
+
+			</section>
         </section>
 
         <section xml:id="components.interfaces.field">
@@ -351,6 +370,96 @@
             features. Let us look at some of the most commonly needed features. Features
             not documented here can be found from the Java API Refefence.
         </para>
+
+		<section xml:id="components.features.description">
+			<title>Description and Tooltips</title>
+
+			<para>
+				All components (that inherit <classname>AbstractComponent</classname>)
+				have a description separate from their caption. The description is usually
+				shown as a tooltip that appears when the mouse pointer hovers over the
+				component for a short time.
+			</para>
+
+			<para>
+				You can set the description with <methodname>setDescription()</methodname>
+				and retrieve with <methodname>getDescription()</methodname>.
+			</para>
+
+			<programlisting><?pocket-size 65% ?><![CDATA[Button button = new Button("A Button");
+button.setDescription("This is the tooltip");]]></programlisting>
+
+			<para>
+				The tooltip is shown in <xref
+				linkend="figure.components.tooltip.plain"/>.
+			</para>
+
+			<figure xml:id="figure.components.tooltip.plain">
+				<title>Component Description as a Tooltip</title>
+				<mediaobject>
+					<imageobject role="html">
+						<imagedata align="center" fileref="img/components/tooltip-plain-withpointer-lo.png"/>
+					</imageobject>
+					<imageobject role="fo">
+						<imagedata scale="80" smallscale="100" align="center" fileref="img/components/tooltip-plain-withpointer-hi.png"/>
+					</imageobject>
+				</mediaobject>
+			</figure>
+
+			<para>
+				A description is rendered as a tooltip in most
+				components. <classname>Form</classname> shows it as text in the top area
+				of the component, as described in <xref
+				linkend="components.form.layout"/>.
+			</para>
+
+			<para>
+				When a component error has been set with
+				<methodname>setComponentError()</methodname>, the error is usually also
+				displayed in the tooltip, below the description
+				(<classname>Form</classname> displays it in the bottom area of the
+				form). Components that are in error state will also display the error
+				indicator. See <xref linkend="application.errors.error-indicator"/>.
+			</para>
+
+			<para>
+				The description is actually not plain text, but you can use XHTML tags to
+				format it. Such a rich text description can contain any HTML elements,
+				including images.
+			</para>
+
+			<programlisting><?pocket-size 60% ?><![CDATA[button.setDescription(
+    "<h2><img src=\"../VAADIN/themes/sampler/icons/comment_yellow.gif\"/>"+
+    "A richtext tooltip</h2>"+
+    "<ul>"+
+    "  <li>Use rich formatting with XHTML</li>"+
+    "  <li>Include images from themes</li>"+
+    "  <li>etc.</li>"+
+    "</ul>");]]></programlisting>
+
+			<para>
+				The result is shown in <xref
+				linkend="figure.components.tooltip.richtext"/>.
+			</para>
+
+			<figure xml:id="figure.components.tooltip.richtext">
+				<title>A Rich Text Tooltip</title>
+				<mediaobject>
+					<imageobject role="html">
+						<imagedata align="center" fileref="img/components/tooltip-richtext-withpointer-lo.png"/>
+					</imageobject>
+					<imageobject role="fo">
+						<imagedata scale="80" smallscale="100" align="center" fileref="img/components/tooltip-richtext-withpointer-hi.png"/>
+					</imageobject>
+				</mediaobject>
+			</figure>
+
+			<para>
+				Notice that the setter and getter are defined for all fields in the
+				<classname>Field</classname> interface, not for all components in the
+				<classname>Component</classname> interface.
+			</para>
+		</section>
 
 		<section xml:id="components.features.sizeable">
 			<title>Sizing Components</title>
