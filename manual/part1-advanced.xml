@@ -1736,6 +1736,195 @@ printButton.addListener(new Button.ClickListener() {
 
 	</section>
 
+	<section>
+		<title>Portal Integration</title>
+
+		<para>
+			Vaadin supports running applications as portlets, as defined in the JSR-168
+			standard. While providing generic support for all portals implementing the
+			standard, Vaadin especially supports the Liferay portal and the needed
+			portal-specific configuration is given below for Liferay.
+		</para>
+
+		<note>
+			<title>Portal Integration Examples</title>
+			<para>
+				You can deploy the Vaadin demo package WAR (available from the download
+				site) directly to a portal such as Liferay. It contains all the necessary
+				portlet configuration files. For optimal performance with Liferay, you
+				need to install and configure the widget set and themes in Liferay as
+				described below.
+			</para>
+
+			<para>
+				You can find more documentation and examples from the Vaadin Developer's
+				Site at <uri>http://dev.vaadin.com/</uri>.
+			</para>
+		</note>
+
+		<section>
+			<title>Deploying to a Portal</title>
+
+			<para>
+				Deploying a Vaadin application as a portlet is essentially just as easy as
+				deploying a regular application to an application server. You do not need
+				to make any changes in the application itself, but only the following:
+			</para>
+
+			<itemizedlist spacing="compact">
+				<listitem><para>Application packaged as a WAR</para>
+					<itemizedlist spacing="compact" mark="disc">
+						<listitem><para><filename>portlet.xml</filename> descriptor</para></listitem>
+						<listitem><para><filename>liferay-portlet.xml</filename> descriptor for Liferay</para></listitem>
+					</itemizedlist>
+				</listitem>
+
+				<listitem>Widget set installed to portal (recommended)</listitem>
+				<listitem>Themes installed to portal (recommended)</listitem>
+                <listitem>Portal configuration settings (optional)</listitem>
+			</itemizedlist>
+
+			<para>
+				Installing the widget set and themes to the portal is required for running
+				two or more Vaadin portlets simultaneously in a portal page. As this
+				situation occurs quite easily, we recommend installing them in any case.
+			</para>
+
+		</section>
+
+		<section>
+			<title>Portlet Descriptors</title>
+
+			<para>
+				The portlet WAR must include a portlet descriptor located at
+				<filename>WebContent/WEB-INF/portlet.xml</filename>. A portlet definition
+				includes the portlet name, mapping to a servlet in
+				<filename>web.xml</filename>, modes supported by the portlet, and other
+				configuration. Below is an example of a simple portlet definition in
+				<filename>portlet.xml</filename> descriptor.
+			</para>
+
+			<programlisting><?pocket-size 65% ?>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;portlet-app
+  xmlns="http://java.sun.com/xml/ns/portlet/portlet-app_1_0.xsd"
+  version="1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://java.sun.com/xml/ns/portlet/portlet-app_1_0.xsd
+                      http://java.sun.com/xml/ns/portlet/portlet-app_1_0.xsd"&gt;
+
+  &lt;portlet&gt;
+    &lt;!-- Must not be the same as servlet name. --&gt;
+    &lt;portlet-name&gt;<emphasis role="bold">PortletExamplePortlet</emphasis>&lt;/portlet-name&gt;
+    &lt;display-name&gt;<emphasis role="bold">Vaadin Portlet Example</emphasis>&lt;/display-name&gt;
+
+    &lt;!-- Map portlet to a servlet. --&gt;
+    &lt;portlet-class&gt;com.vaadin.terminal.gwt.server.ApplicationPortlet&lt;/portlet-class&gt;
+    &lt;init-param&gt;
+      &lt;name&gt;application&lt;/name&gt;
+
+      &lt;!-- Must match the servlet name in web.xml. --&gt;
+      &lt;value&gt;<emphasis role="bold">PortletExample</emphasis>&lt;/value&gt;
+    &lt;/init-param&gt;
+
+    &lt;!-- Supported portlet modes and content types. --&gt;
+    &lt;supports&gt;
+      &lt;mime-type&gt;text/html&lt;/mime-type&gt;
+      &lt;portlet-mode&gt;view&lt;/portlet-mode&gt;
+      &lt;portlet-mode&gt;edit&lt;/portlet-mode&gt;
+      &lt;portlet-mode&gt;help&lt;/portlet-mode&gt;
+    &lt;/supports&gt;
+
+    &lt;!-- Not always required but Liferay requires these. --&gt;
+    &lt;portlet-info&gt;
+      &lt;title&gt;<emphasis role="bold">Vaadin Portlet Example</emphasis>&lt;/title&gt;
+      &lt;short-title&gt;<emphasis role="bold">Portlet Example</emphasis>&lt;/short-title&gt;
+    &lt;/portlet-info&gt;
+  &lt;/portlet&gt;
+&lt;/portlet-app&gt;</programlisting>
+
+			<para>
+				Enabling portlet modes enables portlet controls in the portal user interface
+				that allow changing the mode, as described later.
+			</para>
+
+			<simplesect>
+				<title>Liferay Portlet Descriptor</title>
+
+				<para>
+					Liferay requires a special <filename>liferay-portlet.xml</filename>
+					descriptor file that sets Liferay-specific parameters needed to run
+					Vaadin applications as portlets. Especially, Vaadin portlets must be
+					defined as "<emphasis>instanceable</emphasis>", but not
+					"<emphasis>ajaxable</emphasis>".
+				</para>
+
+				<para>
+					Below is an example descriptor for the earlier portlet example:
+				</para>
+
+				<programlisting><?pocket-size 65% ?>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;!DOCTYPE liferay-portlet-app PUBLIC
+  "-//Liferay//DTD Portlet Application 4.3.0//EN"
+  "http://www.liferay.com/dtd/liferay-portlet-app_4_3_0.dtd"&gt;
+
+&lt;liferay-portlet-app&gt;
+    &lt;portlet&gt;
+        &lt;!-- Matches definition in portlet.xml.          --&gt;
+        &lt;!-- Note: Must not be the same as servlet name. --&gt;
+        &lt;portlet-name&gt;<emphasis role="bold">PortletExamplePortlet</emphasis>&lt;/portlet-name&gt;
+
+        &lt;instanceable&gt;true&lt;/instanceable&gt;
+        &lt;ajaxable&gt;false&lt;/ajaxable&gt;
+    &lt;/portlet&gt;
+&lt;/liferay-portlet-app&gt;</programlisting>
+			</simplesect>
+
+		</section>
+
+		<section>
+			<title>Handling Portlet Events</title>
+
+			<para>
+				Portals send special portlet requests that allow an application to handle
+				functionalities offered by portals. Portlets send two kinds of requests:
+				<emphasis>action</emphasis> and <emphasis>render</emphasis> requests. You
+				can handle both types of requests by implementing the
+				<classname>PortletApplicationContext.PortletListener</classname> interface
+				and the respective handler methods
+				<methodname>handleActionRequest()</methodname> and
+				<methodname>handleRenderRequest()</methodname>.
+			</para>
+
+			<para>
+				You need to add such a listener to the application context, which is a
+				<classname>PortletApplicationContext</classname> when (and only when) the
+				application is being run as a portlet.
+			</para>
+
+			<programlisting><![CDATA[// Check that we are running as a portlet.
+if (getContext() instanceof PortletApplicationContext) {
+    PortletApplicationContext ctx = (PortletApplicationContext) getContext();
+
+    // Add a custom listener to handle action and render requests.
+    ctx.addPortletListener(this, new MyPortletListener());
+} else {
+    getMainWindow().showNotification("Not initialized via Portal!",
+            Notification.TYPE_ERROR_MESSAGE);
+}]]></programlisting>
+
+			<para>
+				The handler methods receive references to the request and response
+				interfaces, which are as defined in the Java Servlet API. Please refer to
+				the Servlet API documentation for further details.
+			</para>
+
+			<para>
+				The PortletDemo application included in the demo WAR package includes
+				examples of processing requests and mode changes in a portlet listener.
+			</para>
+		</section>
+
+	</section>
+
 </chapter>
 
 <!-- Keep this comment at the end of the file
