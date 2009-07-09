@@ -46,6 +46,14 @@
     </xsl:attribute>
   </xsl:attribute-set>
 
+  <xsl:attribute-set name="section.title.level4.properties">
+    <xsl:attribute name="font-size">
+      <xsl:value-of select="$body.font.master"/>
+      <xsl:text>pt</xsl:text>
+    </xsl:attribute>
+    <xsl:attribute name="margin-left">1.7cm</xsl:attribute>
+  </xsl:attribute-set>
+
   <!-- Turn off Part ToC. -->
   <xsl:template name="generate.part.toc">
   </xsl:template>
@@ -73,6 +81,13 @@
   <!-- Turn hyphenation off in monospace (parameter)-->
   <xsl:attribute-set name="monospace.properties">
     <xsl:attribute name="hyphenate">false</xsl:attribute>
+    <xsl:attribute name="font-weight">normal</xsl:attribute>
+    <xsl:attribute name="font-style">normal</xsl:attribute>
+  </xsl:attribute-set>
+
+  <xsl:attribute-set name="monospace.verbatim.properties">
+    <xsl:attribute name="font-weight">normal</xsl:attribute>
+    <xsl:attribute name="font-style">normal</xsl:attribute>
   </xsl:attribute-set>
 
   <!-- Deeper indentation of lists. -->

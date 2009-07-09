@@ -18,7 +18,9 @@ IMAGES =	intro/architecture intro/architecture-detailed intro/toolchain intro/to
 			arch/clientside-arch \
 			components/component-diagram components/component-abstractions \
 			components/tooltip-plain-withpointer components/tooltip-richtext-withpointer \
+			components/field-diagram components/field-interface \
 			application/application-architecture application/resource_classdiagram \
+			advanced/liferay-display \
 			themes/theme-contents \
 			gwt/gwt-widgets gwt/gwt-widget-files gwt/gwt-hostedmode-project-annotated\
 			vaadin-logo

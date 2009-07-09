@@ -1774,8 +1774,9 @@ printButton.addListener(new Button.ClickListener() {
 			<itemizedlist spacing="compact">
 				<listitem><para>Application packaged as a WAR</para>
 					<itemizedlist spacing="compact" mark="disc">
-						<listitem><para><filename>portlet.xml</filename> descriptor</para></listitem>
-						<listitem><para><filename>liferay-portlet.xml</filename> descriptor for Liferay</para></listitem>
+						<listitem><para><filename>WEB-INF/portlet.xml</filename> descriptor</para></listitem>
+						<listitem><para><filename>WEB-INF/liferay-portlet.xml</filename> descriptor for Liferay</para></listitem>
+						<listitem><para><filename>WEB-INF/liferay-display.xml</filename> descriptor for Liferay</para></listitem>
 					</itemizedlist>
 				</listitem>
 
@@ -1790,21 +1791,49 @@ printButton.addListener(new Button.ClickListener() {
 				situation occurs quite easily, we recommend installing them in any case.
 			</para>
 
+			<para>
+				In addition to the Vaadin library, you will need to copy the
+				<filename>portlet.jar</filename> to your project. It is included in the
+				Vaadin installation package. Notice that you must not put the
+				<filename>portlet.jar</filename> in the same
+				<filename>WebContent/WEB-INF/lib</filename> directory as the Vaadin JAR or
+				otherwise include it in the WAR to be deployed, because otherwise it will
+				create a conflict with the internal portlet library of the portal.
+			</para>
+
+			<para>
+				How you actually deploy a WAR package depends on the portal. In Liferay,
+				you simply copy it to the <filename>deploy</filename> subdirectory under
+				the Liferay installation directory. Liferay uses Tomcat by default, so you
+				will find the extracted package in the <filename>webapps</filename>
+				directory under the Tomcat installation directory included in Liferay.
+			</para>
 		</section>
 
 		<section>
-			<title>Portlet Descriptors</title>
+			<title>Portlet Deployment Descriptors</title>
 
 			<para>
-				The portlet WAR must include a portlet descriptor located at
-				<filename>WebContent/WEB-INF/portlet.xml</filename>. A portlet definition
-				includes the portlet name, mapping to a servlet in
-				<filename>web.xml</filename>, modes supported by the portlet, and other
-				configuration. Below is an example of a simple portlet definition in
-				<filename>portlet.xml</filename> descriptor.
+				To deploy a portlet WAR in a portal, you need to provide the basic
+				<filename>portlet.xml</filename> descriptor specified in the Java Portlet
+				standard. In addition, you may need to include possible portal vendor
+				specific deployment descriptors. The ones required by Liferay are
+				described below.
 			</para>
 
-			<programlisting><?pocket-size 65% ?>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+			<simplesect>
+				<title>Basic Portlet Descriptor</title>
+
+				<para>
+					The portlet WAR must include a portlet descriptor located at
+					<filename>WebContent/WEB-INF/portlet.xml</filename>. A portlet
+					definition includes the portlet name, mapping to a servlet in
+					<filename>web.xml</filename>, modes supported by the portlet, and
+					other configuration. Below is an example of a simple portlet
+					definition in <filename>portlet.xml</filename> descriptor.
+				</para>
+
+				<programlisting><?pocket-size 65% ?>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;portlet-app
   xmlns="http://java.sun.com/xml/ns/portlet/portlet-app_1_0.xsd"
   version="1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -1841,19 +1870,68 @@ printButton.addListener(new Button.ClickListener() {
   &lt;/portlet&gt;
 &lt;/portlet-app&gt;</programlisting>
 
-			<para>
-				Enabling portlet modes enables portlet controls in the portal user interface
-				that allow changing the mode, as described later.
-			</para>
+				<para>
+					Enabling portlet modes enables portlet controls in the portal user interface
+					that allow changing the mode, as described later.
+				</para>
+
+				<section>
+					<title>Using a Single Widget Set</title>
+
+					<para>
+						If you have just one Vaadin application that you ever need to run
+						in your portal, you can just deploy the WAR as described above and
+						that's it. However, if you have multiple applications, especially
+						ones that use different custom widget sets, you run into problems,
+						because a portal window can load only a single Vaadin widget set
+						at a time. You can solve this problem by combining all the
+						different widget sets in your different applications into a single
+						widget set using inheritance or composition.
+					</para>
+
+					<para>
+						For example, the portal demos defined in the
+						<filename>portlet.xml</filename> in the demo WAR have the
+						following setting that defines every portlet to use the same
+						widget set:
+					</para>
+
+					<programlisting><?pocket-size 75% ?><![CDATA[<portlet>
+  ...
+  <!-- Use the Sampler widget set for all portal demos. -->
+  <init-param>
+    <name>widgetset</name>
+    <value>com.vaadin.demo.sampler.gwt.SamplerWidgetSet</value>
+  </init-param>
+  ...]]></programlisting>
+
+					<para>
+						The <classname>SamplerWidgetSet</classname> required by the
+						Sampler application inherits the
+						<classname>DefaultWidgetSet</classname> so that the latter is
+						essentially a subset of the former. Other applications requiring
+						only the regular <classname>DefaultWidgetSet</classname> can as
+						well use the larger set.
+					</para>
+
+					<para>
+						If your portlets are contained in multiple WARs, which can happen
+						quite typically, you need to install the widget set and theme
+						portal-wide so that all the portlets can use them. See <xref
+						linkend="advanced.liferay.widgetsets"/> on configuring the widget
+						sets in the portal itself.
+					</para>
+				</section>
+			</simplesect>
 
 			<simplesect>
 				<title>Liferay Portlet Descriptor</title>
 
 				<para>
 					Liferay requires a special <filename>liferay-portlet.xml</filename>
-					descriptor file that sets Liferay-specific parameters needed to run
-					Vaadin applications as portlets. Especially, Vaadin portlets must be
-					defined as "<emphasis>instanceable</emphasis>", but not
+					descriptor file that defines Liferay-specific parameters. Especially,
+					Vaadin portlets must be defined as
+					"<emphasis>instanceable</emphasis>", but not
 					"<emphasis>ajaxable</emphasis>".
 				</para>
 
@@ -1876,7 +1954,206 @@ printButton.addListener(new Button.ClickListener() {
         &lt;ajaxable&gt;false&lt;/ajaxable&gt;
     &lt;/portlet&gt;
 &lt;/liferay-portlet-app&gt;</programlisting>
+
+				<para>
+					See Liferay documentation for further details on the
+					<filename>liferay-portlet.xml</filename> deployment descriptor.
+				</para>
+
 			</simplesect>
+
+			<simplesect xml:id="advanced.liferay.descriptor.display">
+				<title>Liferay Display Descriptor</title>
+				
+				<para>
+					The <filename>liferay-display.xml</filename> file defines the portlet
+					category under which portlets are organized in the <guilabel>Add
+					Application</guilabel> window in Liferay. Without this definition,
+					portlets will be organized under the "Undefined" category.
+				</para>
+
+				<para>
+					The following display configuration, which is included in the demo
+					WAR, puts the Vaadin portlets under the "Vaadin" category, as shown in
+					<xref linkend="figure.advanced.liferay.descriptor.display"/>.
+				</para>
+
+				<programlisting><?pocket-size 75% ?><![CDATA[<?xml version="1.0"?>
+<!DOCTYPE display PUBLIC
+  "-//Liferay//DTD Display 4.0.0//EN"
+  "http://www.liferay.com/dtd/liferay-display_4_0_0.dtd">
+
+<display>
+    <category name="Vaadin">
+        <portlet id="PortletExamplePortlet" />
+    </category>
+</display>]]></programlisting>
+
+				<figure xml:id="figure.advanced.liferay.descriptor.display">
+					<title>Portlet Categories in Add Application Window</title>
+					<mediaobject>
+						<imageobject role="html">
+							<imagedata align="center" fileref="img/advanced/liferay-display-lo.png"/>
+						</imageobject>
+						<imageobject role="fo">
+							<imagedata scale="70" smallscale="100%" align="center" fileref="img/advanced/liferay-display-hi.png"/>
+						</imageobject>
+					</mediaobject>
+				</figure>
+
+				<para>
+					See Liferay documentation for further details on how to configure the
+					categories in the <filename>liferay-display.xml</filename> deployment
+					descriptor.
+				</para>
+			</simplesect>
+
+		</section>
+
+		<section xml:id="advanced.liferay.helloworld">
+			<title>Portlet Hello World</title>
+
+			<para>
+				The Hello World program that runs as a portlet is no different from a
+				regular Vaadin application, as long as it doesn't need to handle portlet
+				actions, mode changes, and so on.
+			</para>
+
+			<programlisting><?pocket-size 75% ?><![CDATA[import com.vaadin.Application;
+import com.vaadin.ui.*;
+
+public class PortletExample extends Application {
+    @Override 
+    public void init() {
+        Window mainWindow = new Window("Portlet Example");
+
+        Label label = new Label("Hello Vaadin user");
+        mainWindow.addComponent(label);
+        setMainWindow(mainWindow);
+    }
+}]]></programlisting>
+
+			<para>
+				In addition to the application class, you need the descriptor files,
+				libraries, and other files as described earlier. <xref linkend="figure.advanced.liferay.helloworld.project"/> shows
+				the complete project structure under Eclipse.
+			</para>
+
+			<figure xml:id="figure.advanced.liferay.helloworld.project">
+				<title>Portlet Project Structure in Eclipse</title>
+				<mediaobject>
+					<imageobject role="html">
+						<imagedata align="center" fileref="img/advanced/liferay-project.png"/>
+					</imageobject>
+					<imageobject role="fo">
+						<imagedata scale="80" smallscale="100%" align="center" fileref="img/advanced/liferay-project.png"/>
+					</imageobject>
+				</mediaobject>
+			</figure>
+
+			<para>
+				Installed as a portlet in Liferay from the <guilabel>Add
+				Application</guilabel> menu, the application will show as illustrated in
+				<xref linkend="figure.advanced.liferay.helloworld"/>.
+			</para>
+
+			<figure xml:id="figure.advanced.liferay.helloworld">
+				<title>Hello World Portlet</title>
+				<mediaobject>
+					<imageobject role="html">
+						<imagedata align="center" fileref="img/advanced/liferay-helloworld.png"/>
+					</imageobject>
+					<imageobject role="fo">
+						<imagedata scale="100" smallscale="100%" align="center" fileref="img/advanced/liferay-helloworld.png"/>
+					</imageobject>
+				</mediaobject>
+			</figure>
+		</section>
+
+		<section xml:id="advanced.liferay.widgetsets">
+			<title>Installing Widget Sets and Themes in Liferay</title>
+			
+			<para>
+				Loading widget sets and themes from a portlet WAR is possible as long as
+				you have a single WAR, but it will not work if you have multiple WARs. To
+				solve this, Vaadin portlets use globally installed widget sets and
+				themes. Liferay actually includes them and the required configuration in
+				Liferay 5.3 and later, but if you are using an earlier version of Liferay
+				or have a customized widget set, you will need to do the configuration
+				manually.
+			</para>
+
+			<para>
+				We assume that you use the Tomcat installation included in the Liferay
+				installation package, under the <filename>tomcat-x.x.x</filename>
+				directory.
+			</para>
+
+			<para>
+				The widget set needs to be located at
+				<filename>/html/VAADIN/widgetsets/</filename> and themes at
+				<filename>/html/VAADIN/themes/</filename> path under the portal
+				context. You simply need to copy the contents from under your
+				<filename>WebContent/VAADIN</filename> directory to the
+				<filename>tomcat-x.x.x/webapps/ROOT/html/VAADIN</filename> directory under
+				the Liferay installation directory. If you use a widget set or theme
+				included in Vaadin, you should copy it from the Vaadin installation
+				directory or extract them from Vaadin JAR.
+			</para>
+
+			<para>
+				You need to define the widget set and the theme in the
+				<filename>portal-ext.properties</filename> configuration file for
+				Liferay. The file should normally be placed in the Liferay installation
+				directory and you need to restart Liferay after creating or modifying the
+				file. See Liferay documentation for details on the configuration file.
+			</para>
+
+			<para>
+				Below is an example of a <filename>portal-ext.properties</filename> file:
+			</para>
+
+			<programlisting><?pocket-size 70% ?><![CDATA[# Path under which the VAADIN directory is located.
+# (/html is the default so it is not needed.)
+# vaadin.resources.path=/html
+
+# Portal-wide widget set
+vaadin.widgetset=com.vaadin.demo.sampler.gwt.SamplerWidgetSet
+
+# Theme to use
+vaadin.theme=reindeer]]></programlisting>
+
+			<para>
+				The allowed parameters are:
+			</para>
+
+			<variablelist>
+				<varlistentry>
+					<term><parameter>vaadin.resources.path</parameter></term>
+					<listitem>
+						<para>Specifies the resource root path under the portal
+						context. This is <filename>/html</filename> by default, pointing
+						to the <filename>webapps/ROOT/html</filename> directory under
+						Tomcat installation directory.</para>
+					</listitem>
+				</varlistentry>
+				<varlistentry>
+					<term><parameter>vaadin.widgetset</parameter></term>
+					<listitem>
+						<para>The widget set class to use. Give the full path to the class
+						name in the dot notation. If the parameter is not given, the
+						default widget set is used.</para>
+					</listitem>
+				</varlistentry>
+				<varlistentry>
+					<term><parameter>vaadin.theme</parameter></term>
+					<listitem>
+						<para>Name of the theme to use. If the parameter is not given, the
+						default theme is used, which is <literal>reindeer</literal> in
+						Vaadin 6.</para>
+					</listitem>
+				</varlistentry>
+			</variablelist>
 
 		</section>
 
@@ -1884,20 +2161,34 @@ printButton.addListener(new Button.ClickListener() {
 			<title>Handling Portlet Events</title>
 
 			<para>
-				Portals send special portlet requests that allow an application to handle
-				functionalities offered by portals. Portlets send two kinds of requests:
-				<emphasis>action</emphasis> and <emphasis>render</emphasis> requests. You
-				can handle both types of requests by implementing the
-				<classname>PortletApplicationContext.PortletListener</classname> interface
-				and the respective handler methods
-				<methodname>handleActionRequest()</methodname> and
-				<methodname>handleRenderRequest()</methodname>.
+				Portals such as Liferay are not AJAX applications but reload the page
+				every time a user interaction requires data from the server. They consider
+				a Vaadin application as a regular (though dynamic) web page. All the AJAX
+				communications required by the Vaadin application are done by the Vaadin
+				Client-Side Engine (the widget set) past the portal.
 			</para>
 
 			<para>
-				You need to add such a listener to the application context, which is a
-				<classname>PortletApplicationContext</classname> when (and only when) the
-				application is being run as a portlet.
+				The only way for a portal to interact with an application is to load it
+				with a <emphasis>render request</emphasis> (reloading does not reset the
+				application). The render requests can be cause by user interaction with
+				the portal or by loading action URLs launched from the application. You
+				can handle render requests by implementing the
+				<classname>PortletApplicationContext.PortletListener</classname> interface
+				and the <methodname>handleRenderRequest()</methodname> handler method. You
+				can access portal data, such as user information, from the request object
+				passed to the handler.
+			</para>
+
+			<para>
+				You can also define portal actions, which you can handle in the
+				<methodname>handleActionRequest()</methodname> method of the interface.
+			</para>
+				.
+			<para>
+				You add your portal request listener to the application context of your
+				application, which is a <classname>PortletApplicationContext</classname>
+				when (and only when) the application is being run as a portlet.
 			</para>
 
 			<programlisting><![CDATA[// Check that we are running as a portlet.
@@ -1913,13 +2204,14 @@ if (getContext() instanceof PortletApplicationContext) {
 
 			<para>
 				The handler methods receive references to the request and response
-				interfaces, which are as defined in the Java Servlet API. Please refer to
-				the Servlet API documentation for further details.
+				interfaces, which are defined in the Java Servlet API. Please refer to the
+				Servlet API documentation for further details.
 			</para>
 
 			<para>
 				The PortletDemo application included in the demo WAR package includes
-				examples of processing requests and mode changes in a portlet listener.
+				examples of processing mode and portlet window state changes in a portlet
+				request listener.
 			</para>
 		</section>
 
