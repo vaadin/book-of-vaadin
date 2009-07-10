@@ -347,18 +347,179 @@
 				linkend="uidl"/>.
 			</para>
 
-			<section>
+			<!-- section>
 				<title>Serialization Support</title>
 
-			</section>
+			</section -->
         </section>
 
-        <section xml:id="components.interfaces.field">
-            <title><classname>Field</classname> Interface</title>
-
+        <section xml:id="components.fields">
+            <title>Field Components (<classname>Field</classname> and <classname>AbstractField</classname>)</title>
 
             <para>
-            </para>
+				<emphasis>Fields</emphasis> are components that have a value that the user
+				can change through the user interface. <xref
+				linkend="figure.components.fields"/> illustrates the inheritance
+				relationships and the important interfaces and base classes.
+			</para>
+
+			<figure xml:id="figure.components.fields">
+				<title>Field Components</title>
+				<mediaobject>
+					<imageobject role="html">
+						<imagedata align="center" fileref="img/components/field-diagram-lo.png"/>
+					</imageobject>
+					<imageobject role="fo">
+						<imagedata scale="100" smallscale="100%" align="center" fileref="img/components/field-diagram-hi.png"/>
+					</imageobject>
+				</mediaobject>
+			</figure>
+
+			<para>
+				Field components are built upon the framework defined in the
+				<classname>Field</classname> interface and the
+				<classname>AbstractField</classname> base class.
+			</para>
+
+			<para>
+				Fields are strongly coupled with the Vaadin data model. The field value is
+				handled as a <classname>Property</classname> of the field
+				component. Selection fields allow management of the selectable items
+				through the <classname>Container</classname> interface.
+			</para>
+
+			<para>
+				The description of the field interfaces and base classes is broken down in
+				the following sections.
+			</para>
+
+			<section>
+				<title><classname>Field</classname> Interface</title>
+
+				<para>
+					The <classname>Field</classname> interface inherits the
+					<classname>Component</classname> superinterface and also the
+					<classname>Property</classname> interface to have a value for the
+					field. The relationships are illustrated in <xref
+					linkend="figure.components.fields.field"/>.
+				</para>
+
+				<figure xml:id="figure.components.fields.field">
+					<title><classname>Field</classname> Interface Inheritance Diagram</title>
+					<mediaobject>
+						<imageobject role="html">
+							<imagedata align="center" fileref="img/components/field-interface-lo.png"/>
+						</imageobject>
+						<imageobject role="fo">
+							<imagedata scale="100" smallscale="100%" align="center" fileref="img/components/field-interface-hi.png"/>
+						</imageobject>
+					</mediaobject>
+				</figure>
+
+				<para>
+					You can set the field value with the <methodname>setValue()</methodname>
+					and read with the <methodname>getValue()</methodname> method defined in
+					the <classname>Property</classname> interface. The actual value type
+					depends on the component.
+				</para>
+
+				<para>
+					In addition, <classname>Field</classname> inherits
+					<classname>Property.ValueChangeListener</classname> to allow listening for
+					field value changes and <classname>Property.Editor</classname> to allow
+					editing values.
+				</para>
+
+				<para>
+					<classname>AbstractField</classname> is the only class implementing the
+					<classname>Field</classname> interface directly.
+				</para>
+
+				<section>
+					<title>Attributes</title>
+					
+					<para>
+						The <classname>Field</classname> interface defines a number of
+						attributes, which you can retrieve or manipulate with the
+						corresponding setters and getters.
+					</para>
+
+					<variablelist>
+						<varlistentry>
+							<term><methodname>description</methodname></term>
+							<listitem>
+								<para>
+									All fields have a description. Notice that while this
+									attribute is defined in the
+									<classname>Field</classname> component, it is
+									implemented in <classname>AbstractField</classname>,
+									which does not directly implement
+									<classname>Field</classname>, but only through the
+									<classname>AbstractField</classname> class.
+								</para>
+							</listitem>
+						</varlistentry>
+						<varlistentry>
+							<term><methodname>required</methodname></term>
+							<listitem>
+								<para>
+									A field can be marked as required and a required
+									indicator marker (usually * character) is displayed in
+									front of the field. If such fields are validated but
+									are empty, the error indicator is shown and the
+									component error is set to the text defined with the
+									<methodname>requiredError</methodname> attribute (see
+									below). Without validation, the required indicator is
+									merely a visual guide.
+								</para>
+							</listitem>
+						</varlistentry>
+						<varlistentry>
+							<term><methodname>requiredError</methodname></term>
+							<listitem>
+								<para>
+									Defines the error message to show when a value is
+									required for a field but no value is given. The error
+									message is set as the component error for the field
+									and is usually displayed in a tooltip. The
+									<classname>Form</classname> component can display the
+									error message in a special error indicator area.
+								</para>
+							</listitem>
+						</varlistentry>
+					</variablelist>
+				</section>
+
+				<section>
+					<title>Handling Field Value Changes</title>
+
+					<para>
+						When the value of a field changes, a
+						<classname>Property.ValueChangeEvent</classname> is triggered for
+						the field. You should not implement the
+						<methodname>valueChange()</methodname> method in a class
+						inheriting <classname>AbstractField</classname>, as it is already
+						implemented in <classname>AbstractField</classname>. You should
+						instead implement the method explicitly by adding the implementing
+						object as a listener.
+					</para>
+				</section>
+			</section>
+
+			<section>
+				<title><classname>AbstractField</classname> Base Class</title>
+
+				<para>
+					<classname>AbstractField</classname> is the base class for all field
+					components. In addition to the component features inherited from
+					<classname>AbstractComponent</classname>, it implements a number of
+					features defined in <classname>Property</classname>,
+					<classname>Buffered</classname>, <classname>Validatable</classname>,
+					and <classname>Component.Focusable</classname> interfaces.
+				</para>
+
+			</section>
+			
         </section>
 
     </section>
@@ -369,7 +530,7 @@
         <para>
             The component base classes and interfaces provide a large number of
             features. Let us look at some of the most commonly needed features. Features
-            not documented here can be found from the Java API Refefence.
+            not documented here can be found from the Java API Reference.
         </para>
 
 		<section xml:id="components.features.description">
@@ -622,6 +783,76 @@ mycomponent.setHeight("400px");]]></programlisting>
 				linkend="layout.settings.size"/> for details.
 			</para>
 		</section>
+
+		<!-- section>
+			<title>Buffering Data (<classname>Buffered</classname> interface)</title>
+		</section>
+				
+		<section>
+			<title>Validating Fields (<classname>Validatable</classname> interface)</title>
+		</section -->
+				
+		<section>
+			<title>Managing Input Focus</title>
+
+			<para>
+				When the user clicks on a component, the component gets the
+				<emphasis>input focus</emphasis>, which is indicated by highlighting
+				according to style definitions. If the component allows inputting text,
+				the focus and insertion point are indicated by a cursor. Pressing the
+				<keysym>Tab</keysym> key moves the focus to the component next in the
+				<emphasis>focus order</emphasis>.
+			</para>
+
+			<para>
+				Focusing is supported by all <classname>Field</classname> components and
+				also by <classname>Form</classname> and <classname>Upload</classname>.
+			</para>
+
+			<para>
+				The focus order or <emphasis>tab index</emphasis> of a component is
+				defined as a positive integer value, which you can set with
+				<methodname>setTabIndex()</methodname> and get with
+				<methodname>getTabIndex()</methodname>. The tab index is managed in the
+				context of the application-level <classname>Window</classname> in which
+				the components are contained. The focus order can therefore jump between
+				two any lower-level component containers, such as sub-windows or panels.
+			</para>
+
+			<para>
+				The default focus order is determined by the natural hierarchical order of
+				components in the order in which they were added under their parents. The
+				default tab index is 0 (zero).
+			</para>
+
+			<para>
+				Giving a negative integer as the tab index removes the component from the
+				focus order entirely.
+			</para>
+
+			<simplesect>
+				<title>CSS Style Rules</title>
+
+				<para>
+					The component having the focus will have an additional style class
+					with the <literal>-focus</literal> prefix. For example, a
+					<classname>TextField</classname> would have style
+					<literal>v-textfield-focus</literal>.
+				</para>
+
+				<para>
+					For example (if we have the <literal>focusexample</literal> style
+					defined for a parent of a text field), the following would make a text
+					field blue when it has focus.
+				</para>
+
+				<programlisting><![CDATA[.focusexample .v-textfield-focus {
+	background: lightblue;
+}]]></programlisting>
+			</simplesect>
+
+		</section>
+				
 	</section>
 
 	<section xml:id="components.label">
