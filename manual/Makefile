@@ -1,5 +1,8 @@
 all: images icons
 
+################################################################################
+################################################################################
+
 DATE = `date +'%Y-%m-%d'`
 VERSION = `cat ../build/VERSION.properties|sed -e 's/^version=\([0-9\.]\+\).\+/\1/'`
 
@@ -10,7 +13,8 @@ DBPARS =	section.autolabel=1 \
 			draft.mode='no' \
 			double.sided=1 \
 			manual.pubdate=${DATE} \
-			manual.version=$(VERSION)
+			manual.version=$(VERSION) \
+			manual.fonts.custom=1
 
 # List of images to be converted from SVG to PNG
 IMAGES =	intro/architecture intro/architecture-detailed intro/toolchain intro/toolkit-package \
@@ -63,8 +67,16 @@ $(TRGICONS): img/icons/%.png: original-drawings/icons/%.svg
 ################################################################################
 # Docbook processing
 ################################################################################
+# Main target: book.pdf
+# Parameters:
+#     A4: Make A4 page size. 
+#         $ make book.pdf A4=1
 
+ifdef A4
 DOCBOOK = ../build/docbook/conf/custom-fo-docbook.xsl
+else
+DOCBOOK = ../build/docbook/conf/custom-fo-docbook-pocket.xsl
+endif
 #HIGHLIGHTER_CONFIG = -Dxslthl.config=$(PWD)/../build/docbook/xsl/highlighting/xslthl-config.xml
 
 # The highlighter configuration is included in the DocBook package.
@@ -79,9 +91,11 @@ book.fo: book.xml part1.xml images
 	java -Xms256M -Xmx512M -classpath ../build/lib/saxon.jar:../build/lib/xercesImpl.jar:../build/lib/xml-apis.jar:../build/lib/xslthl.jar $(HIGHLIGHTER_CONFIG) com.icl.saxon.StyleSheet -o book.fo book.xml $(DOCBOOK) $(DBPARS)
 # ../build/lib/xalan.jar ... org.apache.xalan.xslt.Process
 
+XEPPARS = -Dcom.renderx.xep.CONFIG=build/lib/XEP/xep-vaadinfonts.xml
+
 # Run XEP FO processor to convert FO to PDF.
 book.pdf: book.fo
-	cd .. ; /opt/RenderX/XEP/xep <manual/book.fo >manual/book.pdf
+	cd .. ; /opt/RenderX/XEP/xep $(XEPPARS) <manual/book.fo >manual/book.pdf
 #	rm book.fo
 
 # View the result
