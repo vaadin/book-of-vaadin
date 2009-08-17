@@ -25,7 +25,7 @@ IMAGES =	intro/architecture intro/architecture-detailed intro/toolchain intro/to
 			components/field-diagram components/field-interface \
 			application/application-architecture application/resource_classdiagram \
 			advanced/liferay-display \
-			themes/theme-contents \
+			themes/theme-contents themes/eclipse-theme-created-annotated \
 			gwt/gwt-widgets gwt/gwt-widget-files gwt/gwt-hostedmode-project-annotated\
 			vaadin-logo
 
@@ -72,17 +72,13 @@ $(TRGICONS): img/icons/%.png: original-drawings/icons/%.svg
 #     A4: Make A4 page size. 
 #         $ make book.pdf A4=1
 
-ifdef A4
 DOCBOOK = ../build/docbook/conf/custom-fo-docbook.xsl
-else
-DOCBOOK = ../build/docbook/conf/custom-fo-docbook-pocket.xsl
-endif
+DOCBOOK_POCKET = ../build/docbook/conf/custom-fo-docbook-pocket.xsl
 #HIGHLIGHTER_CONFIG = -Dxslthl.config=$(PWD)/../build/docbook/xsl/highlighting/xslthl-config.xml
 
 # The highlighter configuration is included in the DocBook package.
 # It must be given as an absolute URL.
 HIGHLIGHTER_CONFIG = -Dxslthl.config="file://$(PWD)/../build/docbook/xsl/highlighting/xslthl-config.xml"
-
 
 # Process Docbook to FO
 book.fo: book.xml part1.xml images
@@ -91,12 +87,20 @@ book.fo: book.xml part1.xml images
 	java -Xms256M -Xmx512M -classpath ../build/lib/saxon.jar:../build/lib/xercesImpl.jar:../build/lib/xml-apis.jar:../build/lib/xslthl.jar $(HIGHLIGHTER_CONFIG) com.icl.saxon.StyleSheet -o book.fo book.xml $(DOCBOOK) $(DBPARS)
 # ../build/lib/xalan.jar ... org.apache.xalan.xslt.Process
 
+book-pocket.fo: book.xml part1.xml images
+	@echo $(VERSION)
+	@echo "Highlighter configuration: $(HIGHLIGHTER_CONFIG)"
+	java -Xms256M -Xmx512M -classpath ../build/lib/saxon.jar:../build/lib/xercesImpl.jar:../build/lib/xml-apis.jar:../build/lib/xslthl.jar $(HIGHLIGHTER_CONFIG) com.icl.saxon.StyleSheet -o book-pocket.fo book.xml $(DOCBOOK_POCKET) $(DBPARS)
+
 XEPPARS = -Dcom.renderx.xep.CONFIG=build/lib/XEP/xep-vaadinfonts.xml
 
 # Run XEP FO processor to convert FO to PDF.
 book.pdf: book.fo
 	cd .. ; /opt/RenderX/XEP/xep $(XEPPARS) <manual/book.fo >manual/book.pdf
 #	rm book.fo
+
+book-pocket.pdf: book-pocket.fo
+	cd .. ; /opt/RenderX/XEP/xep $(XEPPARS) <manual/book-pocket.fo >manual/book-pocket.pdf
 
 # View the result
 viewbook: book.pdf FORCE
