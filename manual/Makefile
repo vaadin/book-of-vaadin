@@ -14,7 +14,8 @@ DBPARS =	section.autolabel=1 \
 			double.sided=1 \
 			manual.pubdate=${DATE} \
 			manual.version=$(VERSION) \
-			manual.fonts.custom=1
+			manual.fonts.custom=1 \
+			xep.extensions=1
 
 # List of images to be converted from SVG to PNG
 IMAGES =	intro/architecture intro/architecture-detailed intro/toolchain intro/toolkit-package \
