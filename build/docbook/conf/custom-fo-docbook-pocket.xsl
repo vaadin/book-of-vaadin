@@ -494,7 +494,7 @@
 
         <!-- Footer text in chapter title page. -->
         <xsl:when test="$double.sided != 0 and ($sequence = 'first') and $position='center'">
-          <xsl:text>Vaadin Reference Manual</xsl:text>
+          <xsl:text>Book of Vaadin</xsl:text>
         </xsl:when>
 
         <!-- Section title in right-hand-side page footer. -->

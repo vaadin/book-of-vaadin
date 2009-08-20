@@ -339,6 +339,9 @@
   <!-- Custom headers.                                                      -->
   <!-- ==================================================================== -->
 
+  <!-- Header cell sizes. -->
+  <xsl:param name="header.column.widths">1 10 1</xsl:param>
+
   <!-- Custom header data element. Not processed - skip. -->
   <xsl:template match="headerdata">
   </xsl:template>
@@ -378,11 +381,6 @@
                   <!-- Have an empty line above the section header because of the logo. -->
                   <xsl:apply-templates select="." mode="titleabbrev.markup"/>
                 </fo:block>
-                <fo:block>
-                  <fo:retrieve-marker retrieve-class-name="section.head.marker"
-                    retrieve-position="first-including-carryover"
-                    retrieve-boundary="page-sequence"/>
-                </fo:block>
               </xsl:when>
               <xsl:otherwise>
                 <xsl:apply-templates select="." mode="titleabbrev.markup"/>
@@ -417,6 +415,10 @@
   <!-- ==================================================================== -->
   <!-- Custom footers.                                                      -->
   <!-- ==================================================================== -->
+
+  <!-- Footer cell sizes. -->
+  <xsl:param name="footer.column.widths">1 10 1</xsl:param>
+
 <xsl:template name="footer.content">
   <xsl:param name="pageclass" select="''"/>
   <xsl:param name="sequence" select="''"/>
@@ -446,11 +448,17 @@
       <xsl:when test="$double.sided != 0 and ($sequence = 'even') and $position='right'">
       </xsl:when>
 
-      <xsl:when test="$double.sided != 0 and $position='center'">
-        <!-- Custom footer: -->
-        <xsl:value-of select="/book/info/title"/>
-        <!-- <xsl:text>Vaadin Reference Manual</xsl:text>  -->
+      <!-- Footer text in chapter title page. -->
+      <xsl:when test="$double.sided != 0 and ($sequence = 'first') and $position='center'">
+        <xsl:text>Book of Vaadin</xsl:text>
       </xsl:when>
+
+        <!-- Section title in regular (not first or last) page footer. -->
+        <xsl:when test="$double.sided != 0 and ($sequence = 'odd' or $sequence = 'even') and $position = 'center'">
+          <fo:retrieve-marker retrieve-class-name="section.head.marker"
+            retrieve-position="first-including-carryover"
+            retrieve-boundary="page-sequence"/>
+        </xsl:when>
 
       <xsl:when test="$double.sided = 0 and $position='center'">
         <fo:page-number/>
