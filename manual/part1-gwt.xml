@@ -24,6 +24,12 @@
 	</para>
 
 	<para>
+		Creation of new widgets involves a number of rather intricate tasks. The Vaadin
+		Plugin for Eclipse makes many of the tasks much easier, so if you are using
+		Eclipse and the plugin, you should find <xref linkend="gwt.eclipse"/> helpful.
+	</para>
+		
+	<para>
 		If you need more background on the architecture, <xref
 		linkend="architecture.client-side"/> gives an introduction to the
 		architecture of the Vaadin Client-Side Engine. If you are new to Google
@@ -46,13 +52,13 @@
 		<title>Overview</title>
 
 		<para>
-			Google Web Toolkit (GWT) is an integral part of Vaadin since Release
-			5. All rendering of user interface components in a web browser is programmed
-			with GWT. Using custom GWT widgets is easy in Vaadin. This chapter
-			gives an introduction to GWT widgets and details on how to integrate them with
+			Google Web Toolkit (GWT) is an integral part of Vaadin since Release 5. All
+			rendering of user interface components in a web browser is programmed with
+			GWT. Using custom GWT widgets is easy in Vaadin. This chapter gives an
+			introduction to GWT widgets and details on how to integrate them with
 			Vaadin.
 		</para>
-		
+
 		<para>
 			On the client side, in the web browser, you have the Vaadin
 			Client-Side Engine. It uses the GWT framework, and both are compiled into a
@@ -154,23 +160,411 @@
 	</section>
 
 	<section xml:id="gwt.eclipse">
-		<title>Widget Development in Eclipse</title>
+		<title>Doing It the Simple Way in Eclipse</title>
 
 		<para>
 			The Vaadin Plugin for Eclipse automates all the Vaadin related routines of
-			widget development.
+			widget development, most importantly the creation of new widgets and the
+			required widget set.
 		</para>
 
-		<note>
-			<title>Eclipse plugin</title>
+		<section xml:id="gwt.eclipse.widgetset">
+			<title>Creating a Widget Set</title>
+
 			<para>
-				This chapter does not cover the use of new Vaadin Eclipse plugin. The plugin
-				will greatly simplify the process of building new widgets and composing widgetsets.
-				After introducing yourself with the concepts involved with developing custom
-				components, read about the plugin on <link xlink="http://vaadin.com/eclipse">
-					http://vaadin.com/eclipse</link>.
+				Before creating new widgets, you need to create a new <emphasis>widget
+				set</emphasis>. The Vaadin widget set wizard will automate the creation of
+				new widget sets. The definition of widget sets is described in detail in
+				<xref linkend="gwt.widgetset"/>.
 			</para>
-		</note>
+
+			<orderedlist>
+				<listitem>
+					<para>
+						Select
+						<menuchoice><guimenu>File</guimenu><guisubmenu>New</guisubmenu><guimenuitem>Other...</guimenuitem></menuchoice>
+						in the main menu <emphasis>or</emphasis> right-click the <guilabel>Project
+						Explorer</guilabel> and select
+						<menuchoice><guimenu>New</guimenu><guimenuitem>Other...</guimenuitem></menuchoice>
+						<emphasis>or</emphasis> press
+						<keycombo><keycap>Ctrl</keycap><keycap>N</keycap></keycombo> to
+						open the <guilabel>New</guilabel> dialog.
+					</para>
+				</listitem>
+
+				<listitem>
+					<para>
+						In the first, <guilabel>Select a wizard</guilabel> step, select
+						<menuchoice><guimenu>Vaadin</guimenu><guimenuitem>Vaadin
+						Widgetset</guimenuitem></menuchoice> and click
+						<guibutton>Next</guibutton>.
+					</para>
+
+					<screenshot>
+						<mediaobject>
+							<imageobject role="html">
+								<imagedata align="center" fileref="img/eclipse/widgetset-new-select.png"/>
+							</imageobject>
+							<imageobject role="fo">
+								<imagedata scale="100" smallscale="100%" align="center" fileref="img/eclipse/widgetset-new-select.png"/>
+							</imageobject>
+						</mediaobject>
+					</screenshot>
+				</listitem>
+
+				<listitem>
+					<para>
+						In the <guilabel>Vaadin widgetset</guilabel> step, fill out the
+						target folder, package, and class information.
+					</para>
+
+					<screenshot>
+						<mediaobject>
+							<imageobject role="html">
+								<imagedata align="center" fileref="img/eclipse/widgetset-new-settings.png"/>
+							</imageobject>
+							<imageobject role="fo">
+								<imagedata scale="100" smallscale="100%" align="center" fileref="img/eclipse/widgetset-new-settings.png"/>
+							</imageobject>
+						</mediaobject>
+					</screenshot>
+
+					<variablelist>
+						<varlistentry>
+							<term><guilabel>Source folder</guilabel></term>
+							<listitem>
+								<para>
+									The root folder of the source tree under which you
+									wish to put the new widget sets. The default value is
+									your default source tree.
+								</para>
+							</listitem>
+						</varlistentry>
+						<varlistentry>
+							<term><guilabel>Package</guilabel></term>
+							<listitem>
+								<para>
+									The parent package under which the widget set should
+									be created. Widget sets will be created under the
+									<package>client</package> subpackage under
+									this package.
+								</para>
+							</listitem>
+						</varlistentry>
+						<varlistentry>
+							<term><guilabel>Name</guilabel></term>
+							<listitem>
+								<para>
+									Name of the widget set class to be created. We suggest
+									a naming convention that uses
+									-<classname>Widgetset</classname> suffix in the class
+									name.
+								</para>
+							</listitem>
+						</varlistentry>
+						<varlistentry>
+							<term><guilabel>Superclass</guilabel></term>
+							<listitem>
+								<para>
+									The superclass defines the base widget set that you
+									extend with your own widgets. You should always have
+									<classname>DefaultWidgetSet</classname> highest at the
+									hierarchy.
+								</para>
+							</listitem>
+						</varlistentry>
+						<varlistentry>
+							<term><guilabel>Modify applications to use widget set</guilabel></term>
+							<listitem>
+								<para>
+									Select the application(s) that will use the created
+									widget set. This will modify the
+									<filename>web.xml</filename> deployment descriptor of
+									the selected application(s) to enable the widget set.
+								</para>
+							</listitem>
+						</varlistentry>
+						<varlistentry>
+							<term><guilabel>Compile widgetset</guilabel></term>
+							<listitem>
+								<para>
+									When this option is enabled, the wizard will start
+									compilation of the new widget set automatically after
+									it is created. See below for details and <xref
+									linkend="gwt.eclipse.compiling"/> for information on
+									compiling a widget set manually.
+								</para>
+							</listitem>
+						</varlistentry>
+					</variablelist>
+
+					<para>
+						Finally, click <guibutton>Finish</guibutton> to create the new widget set.
+					</para>
+				</listitem>
+			</orderedlist>
+
+			<para>
+				The wizard will create:
+			</para>
+
+			<itemizedlist>
+				<listitem><para>Widget set class in <filename>client</filename> folder under the base folder</para></listitem>
+				<listitem><para>GWT module descriptor file (<filename>.gwt.xml</filename>) in the base folder</para></listitem>
+				<listitem><para>Launch configuration (<filename>.launch</filename>) for compiling the widget set in the project root folder</para></listitem>
+			</itemizedlist>
+
+			<para>
+				If you selected the <guilabel>Compile widgetset</guilabel> option, the
+				wizard will also automatically compile the widget set. After the
+				compilation finishes, you should be able to run your application as
+				before, but using the new widget set. The compilation result is written
+				under the <filename>WebContent/VAADIN/widgetsets</filename> folder. When
+				you need to recompile the widget set in Eclipse, see <xref
+				linkend="gwt.eclipse.compiling"/>. For detailed information on compiling
+				widget sets, see <xref linkend="gwt.development.compiler"/>.
+			</para>
+
+			<para>
+				You do not normally need to edit the widget set class yourself, as the
+				<guilabel>New widget</guilabel> wizard will manage it for you. If you need
+				to have more complex logic for the creation of widget objects, please see
+				<xref linkend="gwt.widgetset"/> for a detailed description of widget
+				sets. You should not touch the methods marked as
+				<literal>AUTOGENERATED</literal>.
+			</para>
+
+			<para>
+				If you selected application(s) in the <guilabel>Modify applications to use
+				widget set</guilabel> selection, the following setting is inserted in your
+				<filename>web.xml</filename> deployment descriptor(s) to enable the widget
+				set:
+			</para>
+
+			<programlisting><?pocket-size 65% ?>&lt;init-param&gt;
+    &lt;description&gt;Application widgetset&lt;/description&gt;
+    &lt;param-name&gt;widgetset&lt;/param-name&gt;
+    &lt;param-value&gt;<emphasis mode="bold">com.example.myproject.MyprojectApplicationWidgetset</emphasis>&lt;/param-value&gt;
+&lt;/init-param&gt;</programlisting>
+
+			<!-- TODO: Will this change? -->
+
+			<para>
+				Notice that the package structure created by the Vaadin Plugin for Eclipse
+				is slightly different from the one illustrated in <xref
+				linkend="figure.gwt.widget-files"/> earlier, with no intermediate
+				<filename>gwt</filename> package that contains the GWT module descriptor.
+
+				<!-- TODO: Is the following statement correct? -->
+
+				You can refactor the package structure if you find need for it, but the
+				client-side code <emphasis>must</emphasis> always be stored under a
+				package named "<filename>client</filename>".
+			</para>
+
+		</section>
+
+		<section xml:id="gwt.eclipse.widget">
+			<title>Creating a Widget</title>
+
+			<para>
+				Once you have created a widget set as described above, you can create new
+				widgets in it as follows:
+			</para>
+
+			<orderedlist>
+				<listitem>
+					<para>
+						Select
+						<menuchoice><guimenu>File</guimenu><guisubmenu>New</guisubmenu><guimenuitem>Other...</guimenuitem></menuchoice>
+						in the main menu <emphasis>or</emphasis> right-click the
+						<guilabel>Project Explorer</guilabel> and select
+						<menuchoice><guimenu>New</guimenu><guimenuitem>Other...</guimenuitem></menuchoice>
+						<emphasis>or</emphasis> press
+						<keycombo><keycap>Ctrl</keycap><keycap>N</keycap></keycombo> to
+						open the <guilabel>New</guilabel> dialog.
+					</para>
+				</listitem>
+
+				<listitem>
+					<para>
+						In the first, <guilabel>Select a wizard</guilabel> step, select
+						<menuchoice><guimenu>Vaadin</guimenu><guimenuitem>Vaadin
+						Widget</guimenuitem></menuchoice> and click
+						<guibutton>Next</guibutton>.
+					</para>
+
+					<screenshot>
+						<mediaobject>
+							<imageobject role="html">
+								<imagedata align="center" fileref="img/eclipse/widget-new-select.png"/>
+							</imageobject>
+							<imageobject role="fo">
+								<imagedata scale="100" smallscale="100%" align="center" fileref="img/eclipse/widget-new-select.png"/>
+							</imageobject>
+						</mediaobject>
+					</screenshot>
+				</listitem>
+
+				<listitem>
+					<para>
+						In the <guilabel>New Component wizard</guilabel> step, fill out
+						the target folder, package, and class information.
+					</para>
+
+					<screenshot>
+						<mediaobject>
+							<imageobject role="html">
+								<imagedata align="center" fileref="img/eclipse/widget-new-settings.png"/>
+							</imageobject>
+							<imageobject role="fo">
+								<imagedata scale="100" smallscale="100%" align="center" fileref="img/eclipse/widget-new-settings.png"/>
+							</imageobject>
+						</mediaobject>
+					</screenshot>
+
+					<variablelist>
+						<varlistentry>
+							<term><guilabel>Source folder</guilabel></term>
+							<listitem>
+								<para>
+									The root folder of the source tree under which you
+									wish to put the new widget sets. The default value is
+									the default source tree of your project.
+								</para>
+							</listitem>
+						</varlistentry>
+						<varlistentry>
+							<term><guilabel>Package</guilabel></term>
+							<listitem>
+								<para>
+									The parent package under which the new server-side component should
+									be created. The client-side widget will be created under the
+									<package>client</package> subpackage under
+									this package.
+								</para>
+							</listitem>
+						</varlistentry>
+						<varlistentry>
+							<term><guilabel>Name</guilabel></term>
+							<listitem>
+								<para>
+									The class name of the new <emphasis>server-side
+									component</emphasis>. The name of the client-side
+									widget stub (if you have its creation enabled) will
+									be the same but with "<classname>V</classname>-"
+									prefix. You can easily refactor the class names
+									afterwards.
+								</para>
+							</listitem>
+						</varlistentry>
+						<varlistentry>
+							<term><guilabel>Superclass</guilabel></term>
+							<listitem>
+								<para>
+									The superclass of the server-side component. It is
+									<classname>AbstractComponent</classname> by default,
+									but <classname>com.vaadin.ui.AbstractField</classname>
+									or <classname>com.vaadin.ui.AbstractSelect</classname>
+									are other commonly used superclasses. If you are
+									extending an existing component, you should select it
+									as the superclass. You can easily change the
+									superclass later.
+								</para>
+							</listitem>
+						</varlistentry>
+						<varlistentry>
+							<term><guilabel>Build client-side stub</guilabel></term>
+							<listitem>
+								<para>
+									When this option is selected (strongly recommended),
+									the wizard will build a stub for the client-side
+									widget.
+								</para>
+							</listitem>
+						</varlistentry>
+						<varlistentry>
+							<term><guilabel>To widgetset</guilabel></term>
+							<listitem>
+								<para>
+									Select the widget set in which the client-side stub
+									should be included.
+								</para>
+							</listitem>
+						</varlistentry>
+					</variablelist>
+
+					<para>
+						Finally, click <guibutton>Finish</guibutton> to create the new component.
+					</para>
+				</listitem>
+			</orderedlist>
+
+			<para>
+				The wizard will create:
+			</para>
+
+			<itemizedlist>
+				<listitem><para>Server-side component stub in the defined package</para></listitem>
+				<listitem><para>Client-side widget stub in the <filename>client.ui</filename> package under the base package</para></listitem>
+			</itemizedlist>
+
+			<para>
+				The structure of the server-side component and the client-side widget, and
+				the serialization of component state between them, is explained in the
+				subsequent sections of this chapter.
+			</para>
+			
+			<para>
+				The wizard will automatically recompile the widget set in which you
+				included the new widget. See <xref linkend="gwt.eclipse.compiling"/>.
+			</para>
+		</section>
+
+		<section xml:id="gwt.eclipse.compiling">
+			<title>Recompiling the Widget Set</title>
+
+			<para>
+				After you edit your widget or widget set, you need to recompile it. You
+				can do this from <menuchoice><guimenu>Run</guimenu><guimenuitem>External
+				Tools</guimenuitem></menuchoice> menu, where the run configuration whould
+				be listed. You can view the launch configuration settings by selecting
+				<menuchoice><guimenu>Run</guimenu><guisubmenu>External
+				Tools</guisubmenu><guimenuitem>External Tools
+				Configurations</guimenuitem></menuchoice>.
+			</para>
+
+			<para>
+				The compilation progress is shown in the <guilabel>Console</guilabel>
+				panel in Eclipse, as illustrated in <xref
+				linkend="figure.gwt.eclipse.compiling"/>.
+			</para>
+
+			<figure xml:id="figure.gwt.eclipse.compiling">
+				<title>Recompiling a Widget Set</title>
+				<mediaobject>
+					<imageobject role="html">
+						<imagedata align="center" fileref="img/eclipse/widgetset-compiling.png"/>
+					</imageobject>
+					<imageobject role="fo">
+						<imagedata scale="100" smallscale="100%" align="center" fileref="img/eclipse/widgetset-compiling.png"/>
+					</imageobject>
+				</mediaobject>
+			</figure>
+
+			<para>
+				The compilation output is written under the
+				<filename>WebContent/VAADIN/widgetset</filename> folder, in a widget set
+				specific folder.
+			</para>
+
+			<para>
+				For detailed information on compiling widget sets, see <xref
+				linkend="gwt.development.compiler"/>. Should you ever compile a widget set
+				outside Eclipse, you need to refresh the project by selecting it in
+				<guilabel>Project Explorer</guilabel> and pressing <keycap>F5</keycap>.
+			</para>
+		</section>
 	</section>
 
 	<section xml:id="gwt.widgets">
@@ -514,6 +908,13 @@ table.example-colorpicker {
 			client-server serialization done with
 			<methodname>updateVariable()</methodname>. The complete example of the
 			integration of the Color Picker widget is given at the end of this section.
+		</para>
+
+		<para>
+			If you are using the Eclipse IDE, the Vaadin Plugin for Eclipse allows easy
+			creation of a stub for a new widget, alongside its server-side component. It
+			also manages the widget set for you automatically. See <xref
+			linkend="gwt.eclipse.widget"/> for detailed instructions.
 		</para>
 
 		<note>
@@ -1010,6 +1411,12 @@ public class ColorPickerWidgetSet extends DefaultWidgetSet {
 			</para>
 
 			<para>
+				If you are using the Eclipse IDE, the New Vaadin Widget Set wizard will
+				create the GWT module descriptor for you. See <xref
+				linkend="gwt.eclipse.widgetset"/> for detailed instructions.
+			</para>
+
+			<para>
 				The following example shows the GWT module descriptor of the Color Picker
 				application. The client-side entry point will be the
 				<classname>WidgetSet</classname> class. We also define the default
@@ -1048,6 +1455,12 @@ public class ColorPickerWidgetSet extends DefaultWidgetSet {
 			user interface. Many applications do not ever need to bother with the
 			client-side implementation of the standard components, but those that use
 			their own GWT widgets need to have corresponding server-side components.
+		</para>
+
+		<para>
+			If you are using the Vaadin Plugin for Eclipse, the wizard for creating new
+			widgets will also create a stub of the server-side component for you. See
+			<xref linkend="gwt.eclipse.widget"/> for detailed instructions.
 		</para>
 
 		<para>
@@ -1382,6 +1795,13 @@ public class ColorPickerApplication
 			</para>
 
 			<para>
+				If you are using the Vaadin Plugin for Eclipse, creating a new widget set
+				with the <guilabel>New Vaadin Widgetset</guilabel> wizard will modify the
+				deployment descriptor for you to use the custom widget set. See <xref
+				linkend="gwt.eclipse.widgetset"/> for detailed instructions.
+			</para>
+
+			<para>
 				The following deployment descriptor specifies the Color Picker Application
 				detailed in the previous section.
 			</para>
@@ -1464,6 +1884,12 @@ public class ColorPickerApplication
 				custom widgets creates a number of additional requirements for a
 				project. Let us review the steps required for creating a project. Details
 				for each step are given in the subsequent sections.
+			</para>
+
+			<para>
+				The Vaadin Plugin for Eclipse makes the creation of custom widgets in
+				Eclipse very easy. See <xref linkend="gwt.eclipse"/> for detailed
+				instructions.
 			</para>
 
 			<orderedlist>
@@ -1658,7 +2084,7 @@ public class ColorPickerApplication
 				<!-- UNFINISHED -->
 
 				<para>
-					In Eclipse, you can insert a folder inside a source package in
+					In Eclipse, you can insert a folder inside a source package by selecting
 					<menuchoice><guimenu>File</guimenu><guisubmenu>New</guisubmenu><guimenuitem>Folder</guimenuitem></menuchoice>.
 				</para>
 			</section>
@@ -1721,9 +2147,19 @@ public class ColorPickerApplication
 				JavaScript. This is done with the GWT Compiler. Vaadin
 				installation package includes an Ant build script
 				<filename>build-widgetset.xml</filename> in the
-				<filename>WebContent/docs/example-source/</filename> directory. To compile
-				the Color Picker widget set example, just change to the directory and
-				enter:
+				<filename>WebContent/docs/example-source/</filename> directory.
+			</para>
+
+			<para>
+				If you are using the Vaadin Plugin for Eclipse, it will create a launch
+				configuration for compiling the widget sets for you. See <xref
+				linkend="gwt.eclipse.widgetset"/> and <xref
+				linkend="gwt.eclipse.compiling"/> for instructions.
+			</para>
+
+			<para>
+				To compile the Color Picker widget set example using the Ant build script,
+				just change to the directory and enter:
 			</para>
 
 			<screen><prompt>$</prompt> <command>ant -f build-widgetset.xml</command></screen>
@@ -1983,6 +2419,13 @@ public class ColorPickerApplication
 					Vaadin covered in <xref linkend="getting-started.quickstart"/>
 					as an example project. The project includes source code for the Color
 					Picker demo application.
+				</para>
+
+				<para>
+					If you are using the Vaadin Plugin for Eclipse, it will create a
+					launch configuration for compiling the widget sets for you. See <xref
+					linkend="gwt.eclipse.widgetset"/> and <xref
+					linkend="gwt.eclipse.compiling"/> for instructions.
 				</para>
 
 				<orderedlist>
