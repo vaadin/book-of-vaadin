@@ -4,7 +4,7 @@ all: images icons
 ################################################################################
 
 DATE = `date +'%Y-%m-%d'`
-VERSION = `cat ../build/VERSION.properties|sed -e 's/^version=\([0-9\.]\+\).\+/\1/'`
+VERSION = `cat ../build/VERSION.properties|sed -e 's/^version=\([0-9]\+\.[0-9]\+\).\+/\1/'`
 
 # Command-line parameters for Docbook
 DBPARS =	section.autolabel=1 \
@@ -82,18 +82,18 @@ DOCBOOK_POCKET = ../build/docbook/conf/custom-fo-docbook-pocket.xsl
 HIGHLIGHTER_CONFIG = -Dxslthl.config="file://$(PWD)/../build/docbook/xsl/highlighting/xslthl-config.xml"
 
 # Process Docbook to FO
-book.fo: book.xml part1.xml images
+book.fo: book.xml images
 	@echo $(VERSION)
 	@echo "Highlighter configuration: $(HIGHLIGHTER_CONFIG)"
 	java -Xms256M -Xmx512M -classpath ../build/lib/saxon.jar:../build/lib/xercesImpl.jar:../build/lib/xml-apis.jar:../build/lib/xslthl.jar $(HIGHLIGHTER_CONFIG) com.icl.saxon.StyleSheet -o book.fo book.xml $(DOCBOOK) $(DBPARS)
 # ../build/lib/xalan.jar ... org.apache.xalan.xslt.Process
 
-book-pocket.fo: book.xml part1.xml images
+book-pocket.fo: book.xml images
 	@echo $(VERSION)
 	@echo "Highlighter configuration: $(HIGHLIGHTER_CONFIG)"
 	java -Xms256M -Xmx512M -classpath ../build/lib/saxon.jar:../build/lib/xercesImpl.jar:../build/lib/xml-apis.jar:../build/lib/xslthl.jar $(HIGHLIGHTER_CONFIG) com.icl.saxon.StyleSheet -o book-pocket.fo book.xml $(DOCBOOK_POCKET) $(DBPARS)
 
-XEPPARS = -Dcom.renderx.xep.CONFIG=build/lib/XEP/xep-vaadinfonts.xml
+XEPPARS = -Dcom.renderx.xep.CONFIG=build/lib/XEP/xep-vaadinfonts.xml -quiet
 
 # Run XEP FO processor to convert FO to PDF.
 book.pdf: book.fo

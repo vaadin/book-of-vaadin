@@ -539,17 +539,7 @@
   <!-- Title page                                                           -->
   <!-- ==================================================================== -->
 
-
   <xsl:include href="custom-fo-titlepage-pocket.xsl"/>
-
-  <!-- Get the publication date from the command-line arguments. -->
-  <xsl:param name="manual.pubdate">xxxx-xx-xx</xsl:param>
-  <xsl:template match="pubdate" mode="titlepage.mode">
-    <fo:block>
-      <xsl:text>Published: </xsl:text> 
-      <xsl:value-of select="$manual.pubdate"/>
-    </fo:block>
-  </xsl:template>
 
   <xsl:template match="pubdate" mode="book.titlepage.recto.mode">
     <fo:block>
@@ -557,6 +547,12 @@
     </fo:block>
   </xsl:template>
 
+  <!-- ==================================================================== -->
+  <!-- Edition notice (verso title page)                                    -->
+  <!-- ==================================================================== -->
+
+  <!-- Get the publication date from the command-line arguments. -->
+  <xsl:param name="manual.pubdate">xxxx-xx-xx</xsl:param>
   <xsl:template match="pubdate" mode="titlepage.mode">
     <fo:block>
       <xsl:text>Published: </xsl:text> 
@@ -568,6 +564,18 @@
   <xsl:param name="manual.version">x.x.x</xsl:param>
   <xsl:template match="releasenumber">
     <xsl:value-of select="$manual.version"/>
+  </xsl:template>
+
+  <xsl:template match="publisher" mode="titlepage.mode">
+    <fo:block>
+      <xsl:text>Printed at </xsl:text>
+      <xsl:value-of select="publishername"/>
+      <xsl:text>, </xsl:text>
+      <xsl:value-of select="address/city"/>
+      <xsl:text>, </xsl:text>
+      <xsl:value-of select="address/country"/>
+      <xsl:text>.</xsl:text>
+    </fo:block>
   </xsl:template>
 
   <!-- ==================================================================== -->
