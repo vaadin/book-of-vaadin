@@ -547,9 +547,34 @@
     </fo:block>
   </xsl:template>
 
+  <xsl:template match="corpauthor" mode="book.titlepage.recto.mode">
+    <fo:block>
+      <xsl:value-of select="orgname"/>
+    </fo:block>
+  </xsl:template>
+
   <!-- ==================================================================== -->
   <!-- Edition notice (verso title page)                                    -->
   <!-- ==================================================================== -->
+
+  <!-- Nicer formatting for corporate author.                   -->
+  <!-- The address is normally intended and with large margins. -->
+  <xsl:template match="corpauthor" mode="book.titlepage.verso.mode">
+    <fo:block>
+      <xsl:apply-templates select="orgname" mode="book.titlepage.verso.mode"/>
+    </fo:block>
+    <fo:block>
+      <xsl:value-of select="address/street"/>
+    </fo:block>
+    <fo:block>
+      <xsl:value-of select="address/postcode"/>
+      <xsl:text> </xsl:text>
+      <xsl:value-of select="address/city"/>
+    </fo:block>
+    <fo:block>
+      <xsl:value-of select="address/country"/>
+    </fo:block>
+  </xsl:template>
 
   <!-- Get the publication date from the command-line arguments. -->
   <xsl:param name="manual.pubdate">xxxx-xx-xx</xsl:param>
