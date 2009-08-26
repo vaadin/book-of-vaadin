@@ -61,14 +61,18 @@
   <xsl:apply-templates mode="book.titlepage.verso.auto.mode" select="info/pubdate"/>
   <xsl:apply-templates mode="book.titlepage.verso.auto.mode" select="bookinfo/releaseinfo"/>
   <xsl:apply-templates mode="book.titlepage.verso.auto.mode" select="info/releaseinfo"/>
+  <xsl:apply-templates mode="book.titlepage.verso.auto.mode" select="bookinfo/websitenotice"/>
+  <xsl:apply-templates mode="book.titlepage.verso.auto.mode" select="info/websitenotice"/>
+  <xsl:apply-templates mode="book.titlepage.verso.auto.mode" select="bookinfo/publisher"/>
+  <xsl:apply-templates mode="book.titlepage.verso.auto.mode" select="info/publisher"/>
   <xsl:apply-templates mode="book.titlepage.verso.auto.mode" select="bookinfo/abstract"/>
   <xsl:apply-templates mode="book.titlepage.verso.auto.mode" select="info/abstract"/>
   <xsl:apply-templates mode="book.titlepage.verso.auto.mode" select="bookinfo/copyright"/>
   <xsl:apply-templates mode="book.titlepage.verso.auto.mode" select="info/copyright"/>
   <xsl:apply-templates mode="book.titlepage.verso.auto.mode" select="bookinfo/legalnotice"/>
   <xsl:apply-templates mode="book.titlepage.verso.auto.mode" select="info/legalnotice"/>
-  <xsl:apply-templates mode="book.titlepage.verso.auto.mode" select="bookinfo/publisher"/>
-  <xsl:apply-templates mode="book.titlepage.verso.auto.mode" select="info/publisher"/>
+  <xsl:apply-templates mode="book.titlepage.verso.auto.mode" select="bookinfo/printer"/>
+  <xsl:apply-templates mode="book.titlepage.verso.auto.mode" select="info/printer"/>
   <xsl:apply-templates mode="book.titlepage.verso.auto.mode" select="bookinfo/biblioid"/>
   <xsl:apply-templates mode="book.titlepage.verso.auto.mode" select="info/biblioid"/>
 </xsl:template>
@@ -183,7 +187,7 @@
 </xsl:template>
 
 <xsl:template match="corpauthor" mode="book.titlepage.verso.auto.mode">
-<fo:block xmlns:fo="http://www.w3.org/1999/XSL/Format" xsl:use-attribute-sets="book.titlepage.verso.style" space-before="1em" space-after="1em">
+<fo:block xmlns:fo="http://www.w3.org/1999/XSL/Format" xsl:use-attribute-sets="book.titlepage.verso.style" space-after="1em">
 <xsl:apply-templates select="." mode="book.titlepage.verso.mode"/>
 </fo:block>
 </xsl:template>
@@ -206,6 +210,18 @@
 </fo:block>
 </xsl:template>
 
+<xsl:template match="websitenotice" mode="book.titlepage.verso.auto.mode">
+<fo:block xmlns:fo="http://www.w3.org/1999/XSL/Format" xsl:use-attribute-sets="book.titlepage.verso.style" space-before="1em">
+<xsl:apply-templates select="." mode="book.titlepage.verso.mode"/>
+</fo:block>
+</xsl:template>
+
+<xsl:template match="publisher" mode="book.titlepage.verso.auto.mode">
+<fo:block xmlns:fo="http://www.w3.org/1999/XSL/Format" xsl:use-attribute-sets="book.titlepage.verso.style" space-before="1em" space-after="1em">
+<xsl:apply-templates select="." mode="book.titlepage.verso.mode"/>
+</fo:block>
+</xsl:template>
+
 <xsl:template match="abstract" mode="book.titlepage.verso.auto.mode">
 <fo:block xmlns:fo="http://www.w3.org/1999/XSL/Format" xsl:use-attribute-sets="book.titlepage.verso.style" space-before="2em">
 <xsl:apply-templates select="." mode="book.titlepage.verso.mode"/>
@@ -213,7 +229,7 @@
 </xsl:template>
 
 <xsl:template match="copyright" mode="book.titlepage.verso.auto.mode">
-<fo:block xmlns:fo="http://www.w3.org/1999/XSL/Format" xsl:use-attribute-sets="book.titlepage.verso.style" space-before="1cm">
+<fo:block xmlns:fo="http://www.w3.org/1999/XSL/Format" xsl:use-attribute-sets="book.titlepage.verso.style" space-before="2em">
 <xsl:apply-templates select="." mode="book.titlepage.verso.mode"/>
 </fo:block>
 </xsl:template>
@@ -224,7 +240,7 @@
 </fo:block>
 </xsl:template>
 
-<xsl:template match="publisher" mode="book.titlepage.verso.auto.mode">
+<xsl:template match="printer" mode="book.titlepage.verso.auto.mode">
 <fo:block xmlns:fo="http://www.w3.org/1999/XSL/Format" xsl:use-attribute-sets="book.titlepage.verso.style" space-before="1em" space-after="1em">
 <xsl:apply-templates select="." mode="book.titlepage.verso.mode"/>
 </fo:block>

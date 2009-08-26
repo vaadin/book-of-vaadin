@@ -557,21 +557,29 @@
   <!-- Edition notice (verso title page)                                    -->
   <!-- ==================================================================== -->
 
-  <!-- Nicer formatting for corporate author.                   -->
+  <!-- The default font size is too big. -->
+  <xsl:attribute-set name="book.titlepage.verso.style">
+    <xsl:attribute name="font-size">9pt</xsl:attribute>
+  </xsl:attribute-set>
+
+  <!-- Nicer formatting for publisher.                         -->
   <!-- The address is normally intended and with large margins. -->
-  <xsl:template match="corpauthor" mode="book.titlepage.verso.mode">
+  <xsl:template match="publisher" mode="book.titlepage.verso.mode">
     <fo:block>
-      <xsl:apply-templates select="orgname" mode="book.titlepage.verso.mode"/>
+      <xsl:text>Published by </xsl:text>
     </fo:block>
-    <fo:block>
+    <fo:block margin-left="2em">
+      <xsl:apply-templates select="publishername" mode="book.titlepage.verso.mode"/>
+    </fo:block>
+    <fo:block margin-left="2em">
       <xsl:value-of select="address/street"/>
     </fo:block>
-    <fo:block>
+    <fo:block margin-left="2em">
       <xsl:value-of select="address/postcode"/>
       <xsl:text> </xsl:text>
       <xsl:value-of select="address/city"/>
     </fo:block>
-    <fo:block>
+    <fo:block margin-left="2em">
       <xsl:value-of select="address/country"/>
     </fo:block>
   </xsl:template>
@@ -591,11 +599,24 @@
     <xsl:value-of select="$manual.version"/>
   </xsl:template>
 
-  <xsl:template match="publisher" mode="titlepage.mode">
+  <!-- Website notice (custom element). -->
+  <xsl:template match="websitenotice" mode="book.titlepage.verso.mode">
     <fo:block>
-      <xsl:text>Printed at </xsl:text>
-      <xsl:value-of select="publishername"/>
-      <xsl:text>, </xsl:text>
+      <xsl:value-of select="title"/>
+    </fo:block>
+    <fo:block>
+      <xsl:value-of select="uri"/>
+    </fo:block>
+  </xsl:template>
+
+  <!-- The print location (custom element). -->
+  <xsl:template match="printer" mode="book.titlepage.verso.mode">
+    <fo:block>
+      <xsl:text>Printed in </xsl:text>
+
+      <!-- No printer name. -->
+      <!-- <xsl:value-of select="orgname"  < xsl:text>, </xsl:text> -->
+
       <xsl:value-of select="address/city"/>
       <xsl:text>, </xsl:text>
       <xsl:value-of select="address/country"/>
