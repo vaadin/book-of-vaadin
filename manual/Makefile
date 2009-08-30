@@ -28,7 +28,8 @@ IMAGES =	intro/architecture intro/architecture-detailed intro/toolchain intro/to
 			advanced/liferay-display \
 			themes/theme-contents themes/eclipse-theme-created-annotated \
 			gwt/gwt-widgets gwt/gwt-widget-files gwt/gwt-hostedmode-project-annotated\
-			vaadin-logo
+			vaadin-logo \
+			eclipse/editor-design-2-crop
 
 # List if icons in img/icons
 ICONS =		warning note
