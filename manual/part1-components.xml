@@ -1416,15 +1416,16 @@ main.addComponent(date);]]></programlisting>
 		<title><classname>Button</classname></title>
 
 		<para>
-			The <classname>Button</classname> is the primary user interface
-			component that is normally used for finalizing input and initiating
-			some action. When the user clicks a button, a
-			<classname>Button.ClickEvent</classname> is emitted. A listener that
-			inherits the <classname>Button.ClickListener</classname> interface
-			can handle clicks with the <methodname>buttonClick()</methodname> method.
+			The <classname>Button</classname> is a user interface component that is
+			normally used for finalizing input and initiating some action. When the user
+			clicks a button, a <classname>Button.ClickEvent</classname> is emitted. A
+			listener that inherits the <classname>Button.ClickListener</classname>
+			interface can handle clicks with the <methodname>buttonClick()</methodname>
+			method.
 		</para>
 
-		<programlisting><?pocket-size 65% ?><![CDATA[public class TheButton extends CustomComponent implements Button.ClickListener {
+		<programlisting><?pocket-size 65% ?><![CDATA[public class TheButton extends CustomComponent
+                       implements Button.ClickListener {
     Button thebutton;
 
     public TheButton() {
@@ -2927,11 +2928,12 @@ class ValueColumnGenerator implements Table.ColumnGenerator {
     }
 }]]></programlisting>
 
-			<para>
+            <!-- TODO: The following was removed because it's probably false (#3189). -->
+			<!-- para>
 				If you wish to have a custom style for the cells, you have to set it in
 				the generator. A <classname>CellStyleGenerator</classname> defined for a
 				table will not be called for the cells of generated columns.
-			</para>
+			</para -->
 
 			<para>
 				The generator is called for all the visible (or more accurately cached)
@@ -2988,15 +2990,20 @@ editable.addListener(new ClickListener() {
                 <parameter>immediate</parameter> mode to have the update occur immediately
                 when an edit field loses the focus. You can set the fields in
                 <parameter>immediate</parameter> mode with the a custom
-                <classname>FieldFactory</classname>, such as the one given below:
+                <classname>TableFieldFactory</classname>, such as the one given below,
+                that just extends the default implementation to set the mode:
             </para>
 
-			<programlisting><?pocket-size 65% ?><![CDATA[public class ImmediateFieldFactory extends BaseFieldFactory {
-    public Field createField(Class type, Component uiContext) {
-        // Let the BaseFieldFactory create the fields
-        Field field = super.createField(type, uiContext);
+			<programlisting><?pocket-size 65% ?><![CDATA[public class ImmediateFieldFactory extends DefaultFieldFactory {
+    public Field createField(Container container,
+                             Object itemId,
+                             Object propertyId,
+                             Component uiContext) {
+        // Let the DefaultFieldFactory create the fields...
+        Field field = super.createField(container, itemId,
+                                        propertyId, uiContext);
         
-        // ...and just set them as immediate
+        // ...and just set them as immediate.
         ((AbstractField)field).setImmediate(true);
         
         return field;
@@ -3737,28 +3744,28 @@ form.addField("another", new TextField("Another Field"));</programlisting>
 			</para>
 
 			<programlisting><?pocket-size 65% ?><emphasis>// Set the footer layout.</emphasis>
-form.setFooter(new VerticalLayout());
+form.<methodname>setFooter</methodname>(new <classname>VerticalLayout</classname>());
 
-form.getFooter().addComponent(
-        new Label("This is the footer area of the Form. "+
+form.<methodname>getFooter</methodname>().<methodname>addComponent</methodname>(
+        new <classname>Label</classname>("This is the footer area of the Form. "+
                   "You can use any layout here. "+
                   "This is nice for buttons."));
 
 // Have a button bar in the footer.
 <classname>HorizontalLayout</classname> okbar = new <classname>HorizontalLayout</classname>();
-okbar.setHeight("25px");
-form.getFooter().addComponent(okbar);</programlisting>
+okbar.<methodname>setHeight</methodname>("25px");
+form.<methodname>getFooter</methodname>().<methodname>addComponent</methodname>(okbar);
 
 <emphasis>// Add an Ok (commit), Reset (discard), and Cancel buttons
 // for the form.</emphasis>
 <classname>Button</classname> okbutton = new <classname>Button</classname>("OK", form, "commit");
-okbar.addComponent(okbutton);
-okbar.setComponentAlignment(okbutton, Alignment.TOP_RIGHT);
-okbar.addComponent(new <classname>Button</classname>("Reset", form, "discard"));
-okbar.addComponent(new <classname>Button</classname>("Cancel"));
+okbar.<methodname>addComponent</methodname>(okbutton);
+okbar.<methodname>setComponentAlignment</methodname>(okbutton, Alignment.TOP_RIGHT);
+okbar.<methodname>addComponent</methodname>(new <classname>Button</classname>("Reset", form, "discard"));
+okbar.<methodname>addComponent</methodname>(new <classname>Button</classname>("Cancel"));</programlisting>
 
 
-			<section xml:id="components.form.layout.css">
+			<simplesect xml:id="components.form.layout.css">
 				<title>CSS Style Rules</title>
 
 				<programlisting>.v-form {}
@@ -3788,7 +3795,7 @@ okbar.addComponent(new <classname>Button</classname>("Cancel"));
 					the form.
 				</para>
 
-			</section>
+			</simplesect>
 
 		</section>
 
@@ -3897,7 +3904,7 @@ form.setVisibleItemProperties(order);</programlisting>
 			</para>
 
 			<section xml:id="components.form.binding.fieldfactory">
-				<title>Generating Proper Fields with a <classname>FieldFactory</classname></title>
+				<title>Generating Proper Fields with a <classname>FormFieldFactory</classname></title>
 
 				<para>
 					The form generates the fields automatically using very coarse logic. A
@@ -3906,48 +3913,39 @@ form.setVisibleItemProperties(order);</programlisting>
 					<classname>TextField</classname> alike, regardless of the meaning of
 					the field. You might want to have a city name to be input with a combo
 					box, for example. You can create such custom fields by implementing
-					the proper methods in the <classname>FieldFactory</classname>
-					interface.
+					the <methodname>createField()</methodname> method in the
+					<classname>FormFieldFactory</classname> interface.
 				</para>
 
 				<para>
-					The <classname>FieldFactory</classname> interface has four different
-					<classname>createField()</classname> methods for creating the fields,
-					each with a slightly different set of parameters. Each of the methods
-					is used in different situations; please use debugger to find which one
-					is used in your case.
-				</para>
+                    The default implementation, <classname>DefaultFieldFactory</classname>
+                    is shared with the <classname>Table</classname> component: it also
+                    implements the <classname>TableFieldFactory</classname>
+                    interface. This allows the <classname>DefaultFieldFactory</classname>
+                    to create the fields for both purposes with the same logic. It is
+                    usually simplest to just extend the default implementation instead of
+                    implementing the interfaces from scratch. You should consult the
+                    source code of <classname>DefaultFieldFactory</classname> to see how
+                    it works; you may want to reimplement
+                    <methodname>createFieldByPropertyType()</methodname>, which actually
+                    creates the fields by type, instead of the
+                    <methodname>createField()</methodname>.
+                </para>
 
-				<!-- NOTE: This may change when #2499 is done. -->
-
-				<para>
-					The <parameter>type</parameter> is the class of the item property:
-					<classname>String</classname> for both of the bean properties in our
-					example. The <parameter>uiContext</parameter> is reference to UI
-					component that will contain the fields, in this case the
-					<classname>Form</classname> component. The
-					<parameter>propertyId</parameter> is the identifier of the property,
-					usually a <classname>String</classname>. In our example, it can be
-					either the "<literal>name</literal>" or "<literal>city</literal>"
-					property of the bean. The <parameter>item</parameter> is a reference
-					to the <classname>Item</classname> implementation instance, which is
-					in the above example a <classname>BeanItem</classname> bound to a bean
-					object. The <parameter>property</parameter> parameter is a plain
-					property (object-type pair). You can use these parameters in the logic
-					for creating the proper field object.
-				</para>
+                <!-- TODO: describe the createField() method somehow. -->
 
 				<para>
-					The easiest and safest way to make a custom field factory is to extend
-					the default <classname>BaseFieldFactory</classname> implementation, as
-					we don in the example below:
+					Below is an example of implementing the
+					<classname>FormFieldFactory</classname> interface for a specific form,
+					using the names of the fields of the form to create the editable field
+					components.
 				</para>
 
-			<programlisting><?pocket-size 65% ?>class MyFieldFactory extends BaseFieldFactory {
-    @Override
+                <!-- TODO: Have an example that extends DefaultFieldFactory? -->
+
+                <programlisting><?pocket-size 65% ?>class MyFieldFactory implements FormFieldFactory {
     public Field createField(Item item, Object propertyId,
                              Component uiContext) {
-        
         // Identify the fields by their Property ID.
         String pid = (String) propertyId;
         if (pid.equals("name")) {
@@ -3963,24 +3961,22 @@ form.setVisibleItemProperties(order);</programlisting>
             return select;
         }
         
-        // Let BaseFieldFactory create other possible fields.
-        return super.createField(item, propertyId, uiContext);
+        return null; // Invalid field (property) name.
     }
 }</programlisting>
 
 				<para>
-					You set the custom field factory as the field factory of the
-					<classname>Form</classname> with
-					<methodname>setFieldFactory()</methodname>:
+					You set a <classname>Form</classname> to use a custom field factory
+					with <methodname>setFieldFactory()</methodname>:
 				</para>
 
 				<programlisting>form.setFieldFactory(new MyFieldFactory());</programlisting>
 				<para>
-					Our example will now look as shown below:
+					The earlier example will now look as shown in <xref linkend="figure.ui.form.binding.fieldfactory"/>.
 				</para>
 
 				<figure xml:id="figure.ui.form.binding.fieldfactory">
-					<title>Form Fields Generated with a <classname>FieldFactory</classname></title>
+					<title>Form Fields Generated with a <classname>FormFieldFactory</classname></title>
 					<mediaobject>
 						<imageobject>
 							<imagedata smallscale="120" align="center" fileref="img/components/form-example2.png"/>
