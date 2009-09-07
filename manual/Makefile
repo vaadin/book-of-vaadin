@@ -31,6 +31,14 @@ IMAGES =	intro/architecture intro/architecture-detailed intro/toolchain intro/to
 			vaadin-logo \
 			eclipse/editor-design-2-crop
 
+# List of source XML files
+XMLFILES =  book.xml \
+			part1-advanced.xml part1-architecture.xml part1-datamodel.xml \
+			part1-getting-started.xml part1-introduction.xml part1-themes.xml \
+			part1-vaadin.xml part1-application.xml part1-components.xml \
+			part1-eclipse.xml part1-gwt.xml part1-layout.xml part1-uidl.xml
+
+
 # List if icons in img/icons
 ICONS =		warning note
 
@@ -107,6 +115,27 @@ book-pocket.pdf: book-pocket.fo
 # View the result
 viewbook: book.pdf FORCE
 	kpdf book.pdf
+
+################################################################################
+# Internationalization
+################################################################################
+
+i18n: pot
+
+POTFILES := $(foreach file, $(XMLFILES), $(patsubst %.xml, %.pot, translations/pot/$(file)))
+
+pot: $(POTFILES)
+
+translations/pot/%.pot: %.xml
+	xml2po $< > $@
+
+################################################################################
+# Compile localizations
+################################################################################
+
+l10n: fi_FI
+
+FI_TRANSLATED := book.po
 
 ################################################################################
 # Misc
