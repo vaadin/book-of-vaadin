@@ -5,6 +5,11 @@ all: images icons
 
 DOCROOT = ..
 
+# Document language; this is the default, translations can override this.
+DBLANGUAGE = en
+
+DBEXTRAPARS = l10n.gentext.language=$(DBLANGUAGE)
+
 # Command-line parameters for Docbook
 DBPARS =	section.autolabel=1 \
 			section.label.includes.component.label=1 \
@@ -14,7 +19,8 @@ DBPARS =	section.autolabel=1 \
 			manual.pubdate=${DATE} \
 			manual.version=$(VERSION) \
 			manual.fonts.custom=1 \
-			xep.extensions=1
+			xep.extensions=1 \
+			$(DBEXTRAPARS)
 
 # List of images to be converted from SVG to PNG
 IMAGES =	intro/architecture intro/architecture-detailed intro/toolchain intro/toolkit-package \

@@ -1,3 +1,4 @@
+LANGUAGE =	fi
 POFILES  =	book.po
 XMLFILES =  book.xml \
 			part1-advanced.xml part1-architecture.xml part1-datamodel.xml \
@@ -24,7 +25,7 @@ WORKDIR = result
 TRANSLATED_XMLFILES := $(foreach file, $(POFILES), $(patsubst %.po, $(WORKDIR)/%.xml, $(file)))
 
 compile: create-workdir copy-images copy-source-xml include-translated
-	cd $(WORKDIR) ; make -f ../../../Makefile book.pdf DOCROOT=../../../..
+	cd $(WORKDIR) ; make -f ../../../Makefile book.pdf DOCROOT=../../../.. DBLANGUAGE=$(LANGUAGE)
 
 create-workdir:
 	mkdir -p $(WORKDIR)
