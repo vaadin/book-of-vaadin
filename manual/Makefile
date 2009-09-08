@@ -127,7 +127,7 @@ POTFILES := $(foreach file, $(XMLFILES), $(patsubst %.xml, %.pot, translations/p
 pot: $(POTFILES)
 
 translations/pot/%.pot: %.xml
-	xml2po $< > $@
+	xml2pot $< > $@
 
 ################################################################################
 # Compile localizations
