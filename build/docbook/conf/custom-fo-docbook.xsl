@@ -320,7 +320,7 @@
 
   <!-- Admonition graphics (warning and note boxes). -->
   <xsl:param name="admon.graphics">1</xsl:param>
-  <xsl:param name="admon.graphics.path">manual/img/icons/</xsl:param>
+  <xsl:param name="admon.graphics.path">img/icons/</xsl:param>
 
   <!-- Admonition (warning/note) box. -->
   <xsl:attribute-set name="graphical.admonition.properties">
