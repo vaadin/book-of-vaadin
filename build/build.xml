@@ -47,6 +47,20 @@
         <mkdir dir="${output-dir}/WebContent/docs" />
         <mkdir dir="${output-dir}/WebContent/docs/book" />
 
+		<!-- Read the English book from the default directory, translations from prepared ones. -->
+        <condition property="manual.source.dir" value="manual">
+			<not><isset property="locale"/></not>
+		</condition>
+        <condition property="manual.source.dir" value="${result-path}/translations/${locale}">
+			<isset property="locale"/>
+		</condition>
+
+		<!-- The language string for DocBook. -->
+		<property name="manual.language.docbook" value="en"/>
+		<property name="manual.language.extension" value=""/>
+
+		<property name="manual.source.xml" value="${manual.source.dir}/book.xml"/>
+		<echo>Manual source XML: ${manual.source.xml}</echo>
     </target>
 
     <!-- ================================================================== -->
@@ -77,7 +91,7 @@
     <!-- ================================================================== -->
 
     <!-- Initialize properties especially for the Reference Manual. -->
-    <target name="init-manual" depends="">
+    <target name="init-manual" depends="prepare-translations">
         <!-- Sets the current date as the publication date of the Manual. -->
         <tstamp>
             <format property="manual.pubdate" pattern="yyyy-MM-dd"/>
@@ -90,6 +104,12 @@
             <pathelement path="build/lib/xercesImpl.jar" />
             <pathelement path="build/lib/xml-apis.jar" />
         </path>
+
+		<condition property="locale.explicit" value="en_US">
+			<not><isset property="locale"/></not>
+		</condition>
+		<property name="locale.explicit" value="${locale}"/>
+		<echo>Locale: ${locale.explicit}</echo>
     </target>
 
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
@@ -137,9 +157,9 @@
             <arg value="-xsl" />
             <arg value="build/docbook/conf/${manual.fo.conf}" />
             <arg value="-in" />
-            <arg value="manual/book.xml" />
+            <arg value="${manual.source.xml}" />
             <arg value="-out" />
-            <arg value="${result-path}/book.fo" />
+            <arg value="${result-path}/book${manual.language.extension}.fo" />
             <arg value="-param" />
             <arg value="section.autolabel" />
             <arg value="1" />
@@ -170,12 +190,15 @@
             <arg value="-param" />
             <arg value="manual.fonts.custom" />
             <arg value="${manual.fonts.custom}" />
+            <arg value="-param" />
+            <arg value="l10n.gentext.language" />
+            <arg value="${manual.language.docbook}" />
             <classpath refid="docbook-xsl.classpath" />
         </java>
 
         <echo>PDF Manual: converting fo to pdf</echo>
         <!-- Run XEP FO processor to convert FO to PDF -->
-        <java classname="com.renderx.xep.XSLDriver" error="${result-path}/xep-error.log" failonerror="yes" fork="yes" maxmemory="512m" input="${result-path}/book.fo" output="${output-dir}/WebContent/docs/book-of-vaadin.pdf">
+        <java classname="com.renderx.xep.XSLDriver" error="${result-path}/xep-error.log" failonerror="yes" fork="yes" maxmemory="512m" input="${result-path}/book${manual.language.extension}.fo" output="${output-dir}/WebContent/docs/book-of-vaadin${manual.language.extension}.pdf">
             <arg value="-Dcom.renderx.xep.CONFIG=${xep.config}" />
             <classpath>
                 <pathelement location="build/lib/XEP/lib/tools.jar" />
@@ -214,7 +237,7 @@
     <target name="manual-html-build" depends="init-manual-html, init-manual-html-common">
         <java classname="org.apache.xalan.xslt.Process" failonerror="yes" fork="yes" maxmemory="512m">
             <arg value="-in" />
-            <arg value="manual/book.xml" />
+            <arg value="${manual.source.xml}" />
             <arg value="-xsl" />
             <arg value="${manual.html.xsl}" />
             <!-- The output file will be empty for eclipse plugin. -->
@@ -242,6 +265,9 @@
             <arg value="-param" />
             <arg value="eclipse.plugin.version" />
             <arg value="${eclipse.plugin.manual.version}" />
+            <arg value="-param" />
+            <arg value="l10n.gentext.language" />
+            <arg value="${manual.language.docbook}" />
             <classpath refid="docbook-xsl.classpath" />
         </java>
 
@@ -255,17 +281,17 @@
         </copy>
     </target>
 
-    <!-- Configuration for building the regular HTML manual. -->
+    <!-- Configuration for building the HTML manual. -->
     <target name="init-manual-html" depends="init, init-manual">
         <property name="manual.html.xsl" value="build/docbook/conf/manual-html.xsl"/>
-        <property name="manual.html.output.dir" value="${output-dir}/WebContent/docs/book"/>
+        <property name="manual.html.output.dir" value="${output-dir}/WebContent/docs/book${manual.language.extension}"/>
         <property name="manual.html.output.index" value="${manual.html.output.dir}/index.html"/>
 
         <property name="output-dir-manual" value="${output-dir}/WebContent/docs/book" />
 
         <echo>Manual: HTML</echo>
         <echo>Published: ${manual.pubdate}</echo>
-    </target>
+	</target>
 
     <target name="manual-html" depends="init, init-manual, init-manual-html, init-manual-html-common, manual-html-build">
     </target>
@@ -292,6 +318,50 @@
 
         <property name="output-dir-manual" value="${output-dir}/WebContent/docs/book" />
     </target>
+
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+    <!-- Translations                                                        -->
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+	<target name="prepare-translations" if="locale">
+        <mkdir dir="${manual.source.dir}"/>
+
+		<!-- Copy English book on bottom. -->
+		<copy todir="${manual.source.dir}">
+			<fileset dir="manual">
+				<include name="book.xml"/>
+				<include name="part1*.xml"/>
+				<include name="*.dtd"/>
+				<include name="img/**/*.png"/>
+				<include name="img/**/*.jpg"/>
+			</fileset>
+		</copy>
+
+		<property name="manual.translations.dir" value="manual/translations/${locale}"/>
+
+		<!-- Generate translated XML files from PO and English XML files. -->
+		<apply executable="po2xml" dest="." verbose="yes" force="yes">
+			<targetfile/>
+			<srcfile/>
+			<fileset dir="${manual.translations.dir}">
+				<include name="book.po"/>
+				<include name="part1*.po"/>
+			</fileset>
+			<globmapper from="*.po" to="manual/*.xml"/>
+			<redirector>
+				<outputmapper id="out" type="glob" from="*.po" to="${manual.source.dir}/*.xml"/>
+			</redirector>
+		</apply>
+	</target>
+
+	<!-- Compile localized documentation. -->
+	<target name="localized-docs">
+		<antcall target="docs">
+			<param name="locale" value="pl_PL"/>
+			<param name="manual.language.docbook" value="pl"/>
+			<param name="manual.language.extension" value="-pl"/>
+		</antcall>
+	</target>
 
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <!-- Eclipse Manual                                                      -->
