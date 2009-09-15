@@ -303,22 +303,6 @@
         </classpath>
     </taskdef>
 
-    <target name="init-manual-eclipse" depends="">
-        <!-- Timestamp in YYYYMMDDHHMM format for plugin version number. -->
-        <tstamp>
-            <format property="eclipse.plugin.manual.pubtime" pattern="yyyyMMddkkmm"/>
-        </tstamp>
-
-        <property name="eclipse.plugin.manual.version" value="${version}.v${eclipse.plugin.manual.pubtime}" />
-        <echo>Manual: Eclipse Help Plugin (version ${eclipse.plugin.manual.version})</echo>
-
-        <property name="manual.html.xsl" value="build/docbook/conf/manual-eclipse-plugin.xsl"/>
-        <property name="manual.html.output.dir" value="${output-dir}/WebContent/docs/eclipse"/>
-        <property name="manual.html.output.index" value="${manual.html.output.dir}/index-eclipse.html"/>
-
-        <property name="output-dir-manual" value="${output-dir}/WebContent/docs/book" />
-    </target>
-
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <!-- Translations                                                        -->
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
@@ -367,9 +351,25 @@
     <!-- Eclipse Manual                                                      -->
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
+    <target name="init-manual-eclipse" depends="">
+        <!-- Timestamp in YYYYMMDDHHMM format for plugin version number. -->
+        <tstamp>
+            <format property="eclipse.plugin.manual.pubtime" pattern="yyyyMMddkkmm"/>
+        </tstamp>
+
+        <property name="eclipse.plugin.manual.version" value="${version}.v${eclipse.plugin.manual.pubtime}" />
+        <echo>Manual: Eclipse Help Plugin (version ${eclipse.plugin.manual.version})</echo>
+
+        <property name="manual.html.xsl" value="build/docbook/conf/manual-eclipse-plugin.xsl"/>
+        <property name="manual.html.output.dir" value="${output-dir}/WebContent/docs/eclipse"/>
+        <property name="manual.html.output.index" value="${manual.html.output.dir}/index-eclipse.html"/>
+
+        <property name="output-dir-manual" value="${output-dir}/WebContent/docs/book" />
+    </target>
+
     <!-- Builds Eclipse Help plugin. Uses the manual-html-build target  -->
     <!-- to build the HTML content of the manual.                       -->
-    <target name="manual-eclipse" depends="init, init-manual, init-manual-eclipse, init-manual-html-common, manual-html-build">
+    <target name="manual-eclipse-plugin" depends="init, init-manual, init-manual-eclipse, init-manual-html-common"> <!--, manual-html-build -->
         <!-- The index-eclipse.html file is empty. -->
         <delete file="${manual.html.output.index}" />
 
@@ -393,6 +393,47 @@
             </manifest>
         </jar>
     </target>
+
+	<!-- Packages the plugin as a "feature" plugin in Eclipse. -->
+	<target name="manual-eclipse-feature">
+		<property name="manual.eclipse.feature.dir" value="${output-dir}/feature"/>
+
+        <!-- Plugin JAR filename -->
+        <property name="eclipse.manual.feature.jar"
+                 value="com.vaadin.integration.eclipse.manual_${eclipse.plugin.manual.version}.jar" />
+
+		<!-- Fill out the feature.xml template. -->
+		<copy file="build/feature.xml.tpl" tofile="${output-dir}/feature.xml">
+			<filterchain>
+				<replacetokens begintoken="@" endtoken="@">
+					<token key="manual-version" value="${eclipse.plugin.manual.version}" />
+				</replacetokens>
+				<replacetokens begintoken="@" endtoken="@">
+					<token key="vaadin-version" value="${version}" />
+				</replacetokens>
+			</filterchain>
+		</copy>
+		
+		<echo>Build:   ${output-dir}/${eclipse.manual.feature.jar}</echo>
+		<echo>Include: ${output-dir}/${eclipse.plugin.manual.jar-name}</echo>
+		<echo>Include: ${output-dir}/feature.xml</echo>
+		<jar destfile="${output-dir}/${eclipse.manual.feature.jar}" compress="true">
+			<fileset dir="${output-dir}">
+				<include name="${eclipse.plugin.manual.jar-name}"/>
+				<include name="feature.xml"/>
+			</fileset>
+            <manifest>
+                <attribute name="Built-By" value="${user.name}"/>
+                <attribute name="Bundle-Name" value="Book of Vaadin"/>
+                <attribute name="Bundle-SymbolicName" value="com.vaadin.integration.eclipse.manual"/>
+                <attribute name="Bundle-Version" value="${eclipse.plugin.manual.version}"/>
+                <attribute name="Bundle-Vendor" value="IT Mill Inc."/>
+            </manifest>
+		</jar>
+	</target>
+
+	<target name="manual-eclipse" depends="manual-eclipse-plugin, manual-eclipse-feature">
+	</target>
 
     <!-- ================================================================== -->
     <!-- Application Tutorial.                                              -->
