@@ -2,7 +2,7 @@
 <feature
       id="com.vaadin.integration.eclipse.manual"
       label="Book of Vaadin"
-      version="@vaadin-version@"
+      version="@manual-version@"
       provider-name="IT Mill Ltd"
       plugin="com.vaadin.manual">
 
