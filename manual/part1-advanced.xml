@@ -2224,6 +2224,80 @@ if (getContext() instanceof PortletApplicationContext) {
 
 	</section>
 
+	<section xml:id="advanced.gae">
+		<title>Google App Engine Integration</title>
+
+		<para>
+			Vaadin includes support to run Vaadin applications in the Google App Engine
+			(GAE). The most essential requirement for GAE is the ability to serialize the
+			application state. Vaadin applications are serializable through the
+			<classname>java.io.Serializable</classname> interface.
+		</para>
+
+		<para>
+			To run as a GAE application, an application must use
+			<classname>GAEApplicationServlet</classname> instead of
+			<classname>ApplicationServlet</classname> in <filename>web.xml</filename>, and
+			of course implement the <classname>java.io.Serializable</classname> interface
+			for all persistent classes.  You also need to enable session support in
+			<filename>appengine-web.xml</filename> with:
+		</para>
+		
+		<programlisting><![CDATA[<sessions-enabled>true</sessions-enabled>]]></programlisting>
+
+		<para>
+			The Vaadin Project wizard can create the configuration files needed for GAE
+			deployment. See <xref linkend="getting-started.first-project.creation"/>. When
+			the Google App Engine deployment configuration is selected, the wizard will
+			create the project structure following the GAE Servlet convention instead of
+			the regular Servlet convention. The main differences are:
+		</para>
+
+		<itemizedlist>
+			<listitem>Source directory: <filename>src/main/java</filename></listitem>
+			<listitem>Output directory: <filename>war/WEB-INF/classes</filename></listitem>
+			<listitem>Content directory: <filename>war</filename></listitem>
+		</itemizedlist>
+
+		<simplesect>
+			<title>Rules and Limitations</title>
+
+			<para>
+				Running Vaadin applications in Google App Engine has the following rules
+				and limitations:
+			</para>
+			
+			<itemizedlist>
+				<listitem><para>Avoid using the session for storage, usual App Engine
+				limitations apply (no synchronization, that is, it is
+				unreliable).</para></listitem>
+
+				<listitem><para>Vaadin uses memcache for mutex, the key is of the form
+				<parameter>_vmutex&lt;sessionid&gt;</parameter>.</para></listitem>
+
+				<listitem><para>The Vaadin <classname>WebApplicationContext</classname>
+				class is serialized separately into memcache and datastore; the memcache
+				key is <parameter>_vac&lt;sessionid&gt;</parameter> and the datastore
+				entity kind is <parameter>_vac</parameter> with identifiers of the type
+				<parameter>_vac&lt;sessionid&gt;</parameter>.</para></listitem>
+
+				<listitem><para><emphasis>Do not</emphasis> update the application state when serving an
+				<classname>ApplicationResource</classname> (such as
+				<classname>ClassResource</classname>.<methodname>getStream()</methodname>).</para></listitem>
+
+				<listitem><para><emphasis>Avoid</emphasis> (or be very careful when)
+				updating application state in a <classname>TransactionListener</classname>
+				- it is called even when the application is not locked and won't be
+				serialized (such as with <classname>ApplicationResource</classname>), and
+				changes can therefore be lost (it should be safe to update things that can
+				be safely discarded later, that is, valid only for the current
+				request).</para></listitem>
+
+				<listitem><para>The application remains locked during uploads - a progress
+				bar is not possible.</para></listitem>
+			</itemizedlist>
+		</simplesect>
+	</section>	
 </chapter>
 
 <!-- Keep this comment at the end of the file
