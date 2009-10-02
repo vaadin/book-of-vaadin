@@ -117,7 +117,7 @@ XEPPARS = -Dcom.renderx.xep.CONFIG=build/lib/XEP/xep-vaadinfonts.xml -quiet
 
 # Run XEP FO processor to convert FO to PDF.
 book.pdf: book.fo
-	cd $(DOCROOT) ; /opt/RenderX/XEP/xep $(XEPPARS) <book.fo >book.pdf
+	cd $(DOCROOT) ; /opt/RenderX/XEP/xep $(XEPPARS) <manual/book.fo >manual/book.pdf
 #	rm book.fo
 
 book-pocket.pdf: book-pocket.fo
