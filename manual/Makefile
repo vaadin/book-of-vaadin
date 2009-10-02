@@ -113,15 +113,15 @@ book-pocket.fo: $(XMLFILES) images
 	@echo "Highlighter configuration: $(HIGHLIGHTER_CONFIG)"
 	java -Xms256M -Xmx512M -classpath $(DOCROOT)/build/lib/saxon.jar:$(DOCROOT)/build/lib/xercesImpl.jar:$(DOCROOT)/build/lib/xml-apis.jar:$(DOCROOT)/build/lib/xslthl.jar $(HIGHLIGHTER_CONFIG) com.icl.saxon.StyleSheet -o book-pocket.fo book.xml $(DOCBOOK_POCKET) $(DBPARS)
 
-XEPPARS = -Dcom.renderx.xep.CONFIG=$(DOCROOT)/build/lib/XEP/xep-vaadinfonts.xml -quiet
+XEPPARS = -Dcom.renderx.xep.CONFIG=build/lib/XEP/xep-vaadinfonts.xml -quiet
 
 # Run XEP FO processor to convert FO to PDF.
 book.pdf: book.fo
-	/opt/RenderX/XEP/xep $(XEPPARS) <book.fo >book.pdf
+	cd $(DOCROOT) ; /opt/RenderX/XEP/xep $(XEPPARS) <book.fo >book.pdf
 #	rm book.fo
 
 book-pocket.pdf: book-pocket.fo
-	/opt/RenderX/XEP/xep $(XEPPARS) <manual/book-pocket.fo >manual/book-pocket.pdf
+	cd $(DOCROOT) ; /opt/RenderX/XEP/xep $(XEPPARS) <manual/book-pocket.fo >manual/book-pocket.pdf
 
 # View the result
 viewbook: book.pdf FORCE
