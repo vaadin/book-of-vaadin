@@ -378,7 +378,9 @@
                  value="com.vaadin.manual_${eclipse.plugin.manual.version}.jar" />
 
         <!-- Package the JAR. -->
-        <jar jarfile="${output-dir}/${eclipse.plugin.manual.jar-name}" compress="true">
+    	<mkdir dir="${output-dir}/eclipse"/>
+    	<mkdir dir="${output-dir}/eclipse/plugins"/>
+        <jar jarfile="${output-dir}/eclipse/plugins/${eclipse.plugin.manual.jar-name}" compress="true">
             <fileset dir="${manual.html.output.dir}">
                 <patternset>
                     <include name="**/*" />
@@ -392,7 +394,6 @@
                 <attribute name="Bundle-Vendor" value="IT Mill Inc."/>
             </manifest>
         </jar>
-		<echo>##teamcity[publishArtifacts '${output-dir}/${eclipse.plugin.manual.jar-name}']</echo>
     </target>
 
 	<!-- Packages the plugin as a "feature" plugin in Eclipse. -->
@@ -404,7 +405,7 @@
                  value="com.vaadin.integration.eclipse.manual_${eclipse.plugin.manual.version}.jar" />
 
 		<!-- Fill out the feature.xml template. -->
-		<copy file="build/feature.xml.tpl" tofile="${output-dir}/feature.xml">
+		<copy file="build/feature.xml.tpl" tofile="${output-dir}/feature.xml" overwrite="true">
 			<filterchain>
 				<replacetokens begintoken="@" endtoken="@">
 					<token key="manual-version" value="${eclipse.plugin.manual.version}" />
@@ -418,7 +419,9 @@
 		<echo>Build:   ${output-dir}/${eclipse.manual.feature.jar}</echo>
 		<echo>Include: ${output-dir}/${eclipse.plugin.manual.jar-name}</echo>
 		<echo>Include: ${output-dir}/feature.xml</echo>
-		<jar destfile="${output-dir}/${eclipse.manual.feature.jar}" compress="true">
+    	<mkdir dir="${output-dir}/eclipse"/>
+    	<mkdir dir="${output-dir}/eclipse/features"/>
+		<jar destfile="${output-dir}/eclipse/features/${eclipse.manual.feature.jar}" compress="true">
 			<fileset dir="${output-dir}">
 				<include name="feature.xml"/>
 			</fileset>
@@ -430,10 +433,10 @@
                 <attribute name="Bundle-Vendor" value="IT Mill Inc."/>
             </manifest>
 		</jar>
-		<echo>##teamcity[publishArtifacts '${output-dir}/${eclipse.manual.feature.jar}']</echo>
 	</target>
 
 	<target name="manual-eclipse" depends="manual-eclipse-plugin, manual-eclipse-feature">
+		<echo>##teamcity[publishArtifacts '${output-dir}/eclipse/**/*.jar']</echo>
 	</target>
 
     <!-- ================================================================== -->
