@@ -12,15 +12,15 @@
 
 	<para>
 		Google Web Toolkit is intended for developing browser-based user interfaces using
-		the Java language, which is compiled into JavaScript. Knowledge of such
-		client-side technologies is usually not needed with Vaadin, as its
-		repertoire of user interface components should be sufficient for most
-		applications. The easiest way to create custom components in Vaadin is to
-		make composite components with the <classname>CustomComponent</classname>
-		class. See <xref linkend="components.customcomponent"/> for more details on the
-		composite components. In some cases, however, you may need to either make
-		modifications to existing components or create new or integrate existing GWT
-		widgets with your application.
+		the Java language, which is compiled into JavaScript that is executed in the
+		browser. Knowledge of such client-side technologies is usually not needed with
+		Vaadin, as its built-in repertoire of user interface components should be
+		sufficient for most applications. The easiest way to create custom components in
+		Vaadin is to make composite components with the
+		<classname>CustomComponent</classname> class, as described in <xref
+		linkend="components.customcomponent"/>. In some cases, however, you may need to
+		make modifications to existing components, integrate existing GWT widgets with
+		your application, or create entirely new ones.
 	</para>
 
 	<para>
@@ -28,7 +28,7 @@
 		Plugin for Eclipse makes many of the tasks much easier, so if you are using
 		Eclipse and the plugin, you should find <xref linkend="gwt.eclipse"/> helpful.
 	</para>
-		
+
 	<para>
 		If you need more background on the architecture, <xref
 		linkend="architecture.client-side"/> gives an introduction to the
@@ -51,76 +51,78 @@
 	<section xml:id="gwt.overview">
 		<title>Overview</title>
 
-		<para>
-			Google Web Toolkit (GWT) is an integral part of Vaadin since Release 5. All
-			rendering of user interface components in a web browser is programmed with
-			GWT. Using custom GWT widgets is easy in Vaadin. This chapter gives an
-			introduction to GWT widgets and details on how to integrate them with
-			Vaadin.
-		</para>
+        <para>
+            The Client-Side Engine of Vaadin runs in the web browser as a JavaScript
+            program and renders the user interface components according to state data
+            received from the server. For each server-side component, there is a
+            client-side widget, which renders the content of the particular component
+            type. The client-side engine and all the built-in client-side widgets of
+            Vaadin have been programmed in Java with GWT, and compiled into JavaScript
+            with the GWT Compiler. Developing custom Vaadin components and integrating
+            existing GWT widgets is easy, requiring only Java programming.
+        </para>
+
+        <para>
+            You can start with any existing GWT widget or design a new one. To integrate
+            it with Vaadin, you have to implement the <classname>Paintable</classname>
+            interface of the client-side engine that provides the AJAX communications with
+            the server-side application. You can find the interface in the
+            <package>com.vaadin.terminal.gwt.client</package> package. You can also choose
+            to extend an existing Vaadin client-side widget in the
+            <package>com.vaadin.terminal.gwt.client.ui</package> package. You can find the
+            source code for the built-in widgets in the Vaadin JAR.
+        </para>
+
+        <para>
+            To use custom widgets, you need to define a <emphasis>widget set</emphasis>
+            that inherits the <classname>DefaultWidgetSet</classname>, which contains the
+            standard widgets, or some other widget set. You can also define stylesheets
+            for custom widgets. A widget set is defined in a GWT Module Descriptor.
+        </para>
 
 		<para>
-			On the client side, in the web browser, you have the Vaadin
-			Client-Side Engine. It uses the GWT framework, and both are compiled into a
-			JavaScript runtime component. The client-side engine is contained in the
-			<package>com.vaadin.terminal.gwt.client</package> package and the
-			client-side implementations of various user interface components are in the
-			<package>com.vaadin.terminal.gwt.client.ui</package> package. You can
-			find the source code for these packages in the Vaadin installation
-			package. You make custom components by inheriting GWT widget classes. To
-			integrate them with Vaadin, you have to implement the
-			<classname>Paintable</classname> interface of the Client-Side Engine that
-			provides the AJAX communications with the server-side application. To enable
-			the custom widgets, you also need to implement a <emphasis>widget
-			set</emphasis>. A widget set is a factory class that can instantiate your
-			widgets. It needs to inherit the <classname>DefaultWidgetSet</classname> that
-			acts as the factory for the standard widgets. You can also define stylesheets
-			for custom widgets. A client-side module is defined in a GWT Module
-			Descriptor.
-		</para>
-
-		<para>
-			To summarize, to implement a client-side widget that is integrated with
-			Vaadin, you need the following:
-		</para>
-
-		<itemizedlist>
-			<listitem>A GWT widget that implements the <classname>Paintable</classname>
-			interface of the Vaadin Client-Side Engine</listitem>
-
-			<listitem>A widget factory (a "widget set") that can create the custom widget or widgets</listitem>
-
-			<listitem>Default CSS style sheet for the widget set (optional)</listitem>
-
-			<listitem>A GWT Module Descriptor (<filename>.gwt.xml</filename>) that describes the entry point and style sheet</listitem>
-
-		</itemizedlist>
-
-		<para>
-			On the server side, you need to implement a server-side component that manages
-			serialization and deserialization of its attributes with the client-side
-			widget. A server-side component usually inherits the
+			For the server-side API, you need a server-side component that can serialize
+			and deserialize its attributes to and from the client-side counterpart. A
+			server-side component usually inherits the
 			<classname>AbstractComponent</classname> or
 			<classname>AbstractField</classname> class and implements either the
 			<methodname>paintContent()</methodname> or the more generic
 			<methodname>paint()</methodname> method to serialize its data to the
-			client. These methods "paint" the component by generating a UIDL element that
-			is sent to the client. The UIDL element contains all the relevant information
-			about the component, and you can easily add your own attributes to it.
-			Upon reception of UIDL messages, the client-side engine (using the widget
-			set) creates or updates user interface widgets as needed.
+			client. These methods "paint" the component in the browser by generating a
+			UIDL element that is sent to the client. The UIDL element contains all the
+			relevant information about the component, and you can easily add your own
+			attributes to it. Upon reception of UIDL messages, the client-side engine
+			creates or updates user interface widgets as needed.
 		</para>
 
 		<para>
-			<xref linkend="figure.gwt.widget-files"/> illustrates the folder
-			hierarchy of the Color Picker example used in this chapter. The example is
-			available in the demo application of Vaadin with URL
-			<filename>/colorpicker/</filename>. You can find the full source code of the
-			application in the source module for the demos in the installation package.
+			To summarize, you need to do the following:
+		</para>
+
+		<itemizedlist>
+			<listitem>Implement the <classname>Paintable</classname> interface of Vaadin in a GWT widget</listitem>
+
+			<listitem>Define a widget set that extends an existing widget set with the new widget</listitem>
+
+			<listitem>Create a default CSS style sheet for the widget set (optional)</listitem>
+
+			<listitem>Create a GWT Module Descriptor (<filename>.gwt.xml</filename>) that
+			defines the widget set and the optional style sheet</listitem>
+
+			<listitem>Create a server-side counterpart for the client-side widget</listitem>
+
+		</itemizedlist>
+
+		<para>
+			<xref linkend="figure.gwt.widget-files"/> illustrates the folder hierarchy of
+			the Color Picker example used in this chapter. The example is available in the
+			demo application of Vaadin with URL <filename>/colorpicker/</filename>. You
+			can find the full source code of the application in the source folder of the
+			demos in the installation package.
 		</para>
 
 		<figure xml:id="figure.gwt.widget-files">
-			<title>Color Picker Module</title>
+			<title>Color Picker Package</title>
 			<mediaobject>
 				<imageobject role="html">
 					<imagedata align="center" fileref="img/gwt/gwt-widget-files-lo.png"/>
@@ -133,28 +135,25 @@
 
 		<para>
 			The <filename>ColorPickerApplication.java</filename> application provides an
-			example of using the <classname>ColorPicker</classname> custom component. To
-			allow accessing the application, it must be defined in the deployment
-			descriptor <filename>web.xml</filename>. See <xref
-			linkend="section.web.web-xml"/> for details. The source code for the
-			server-side component is located in the same folder.
+			example of using the custom <classname>ColorPicker</classname> component. The
+			source code for the server-side implementation of the component is located in
+			the same folder.
 		</para>
 
 		<para>
-			A client-side widget set must be developed within a single source module
-			tree. This is because GWT Compiler takes as its argument the root folder of
-			the source code, in the Color Picker example the
-			<filename>colorpicker.gwt.client</filename> module, and compiles all the
-			contained Java source files into JavaScript. The path to the source files, the
-			entry point class, and the style sheet are specified in the
-			<filename>WidgetSet.gwt.xml</filename> descriptor for the GWT Compiler. The
-			<filename>WidgetSet.java</filename> provides source code for the entry point,
-			which is a factory class for creating the custom widget objects. The actual
-			custom widget is split into two classes:
+			The GWT Compiler takes the root folder of the client-side source code as its
+			argument and compiles all the Java source files into JavaScript. A client-side
+			widget set must therefore be contained within a single package, which in the
+			Color Picker example is the
+			<filename>com.vaadin.demo.colorpicker.gwt.client</filename> package. The
+			inherited widget set and an optional style sheet are specified in a
+			<filename>.gwt.xml</filename> descriptor for the GWT Compiler. In the example,
+			the client-side widget is split in two classes:
 			<classname>GwtColorPicker</classname>, a pure GWT widget, and
 			<classname>VColorPicker</classname> that provides the integration with
-			Vaadin. The default style sheet for the widget set is provided in
-			<filename>gwt/public/colorpicker/styles.css</filename>.
+			Vaadin. The default style sheet for the widget set is defined in the
+			descriptor and located in the
+			<filename>gwt/public/colorpicker/styles.css</filename> subfolder.
 		</para>
 
 	</section>
@@ -163,213 +162,16 @@
 		<title>Doing It the Simple Way in Eclipse</title>
 
 		<para>
-			The Vaadin Plugin for Eclipse automates all the Vaadin related routines of
-			widget development, most importantly the creation of new widgets and the
-			required widget set.
+			While you can develop new widgets with any IDE or even without, you may find
+			Eclipse and the Vaadin Plugin for it useful, as it automates all the basic
+			routines of widget development, most importantly the creation of new widgets.
 		</para>
-
-		<section xml:id="gwt.eclipse.widgetset">
-			<title>Creating a Widget Set</title>
-
-			<para>
-				Before creating new widgets, you need to create a new <emphasis>widget
-				set</emphasis>. The Vaadin widget set wizard will automate the creation of
-				new widget sets. The definition of widget sets is described in detail in
-				<xref linkend="gwt.widgetset"/>.
-			</para>
-
-			<orderedlist>
-				<listitem>
-					<para>
-						Select
-						<menuchoice><guimenu>File</guimenu><guisubmenu>New</guisubmenu><guimenuitem>Other...</guimenuitem></menuchoice>
-						in the main menu <emphasis>or</emphasis> right-click the <guilabel>Project
-						Explorer</guilabel> and select
-						<menuchoice><guimenu>New</guimenu><guimenuitem>Other...</guimenuitem></menuchoice>
-						<emphasis>or</emphasis> press
-						<keycombo><keycap>Ctrl</keycap><keycap>N</keycap></keycombo> to
-						open the <guilabel>New</guilabel> dialog.
-					</para>
-				</listitem>
-
-				<listitem>
-					<para>
-						In the first, <guilabel>Select a wizard</guilabel> step, select
-						<menuchoice><guimenu>Vaadin</guimenu><guimenuitem>Vaadin
-						Widgetset</guimenuitem></menuchoice> and click
-						<guibutton>Next</guibutton>.
-					</para>
-
-					<screenshot>
-						<mediaobject>
-							<imageobject role="html">
-								<imagedata align="center" fileref="img/eclipse/widgetset-new-select.png"/>
-							</imageobject>
-							<imageobject role="fo">
-								<imagedata scale="100" smallscale="100%" align="center" fileref="img/eclipse/widgetset-new-select.png"/>
-							</imageobject>
-						</mediaobject>
-					</screenshot>
-				</listitem>
-
-				<listitem>
-					<para>
-						In the <guilabel>Vaadin widgetset</guilabel> step, fill out the
-						target folder, package, and class information.
-					</para>
-
-					<screenshot>
-						<mediaobject>
-							<imageobject role="html">
-								<imagedata align="center" fileref="img/eclipse/widgetset-new-settings.png"/>
-							</imageobject>
-							<imageobject role="fo">
-								<imagedata scale="100" smallscale="100%" align="center" fileref="img/eclipse/widgetset-new-settings.png"/>
-							</imageobject>
-						</mediaobject>
-					</screenshot>
-
-					<variablelist>
-						<varlistentry>
-							<term><guilabel>Source folder</guilabel></term>
-							<listitem>
-								<para>
-									The root folder of the source tree under which you
-									wish to put the new widget sets. The default value is
-									your default source tree.
-								</para>
-							</listitem>
-						</varlistentry>
-						<varlistentry>
-							<term><guilabel>Package</guilabel></term>
-							<listitem>
-								<para>
-									The parent package under which the widget set should
-									be created. Widget sets will be created under the
-									<package>client</package> subpackage under
-									this package.
-								</para>
-							</listitem>
-						</varlistentry>
-						<varlistentry>
-							<term><guilabel>Name</guilabel></term>
-							<listitem>
-								<para>
-									Name of the widget set class to be created. We suggest
-									a naming convention that uses
-									-<classname>Widgetset</classname> suffix in the class
-									name.
-								</para>
-							</listitem>
-						</varlistentry>
-						<varlistentry>
-							<term><guilabel>Superclass</guilabel></term>
-							<listitem>
-								<para>
-									The superclass defines the base widget set that you
-									extend with your own widgets. You should always have
-									<classname>DefaultWidgetSet</classname> highest at the
-									hierarchy.
-								</para>
-							</listitem>
-						</varlistentry>
-						<varlistentry>
-							<term><guilabel>Modify applications to use widget set</guilabel></term>
-							<listitem>
-								<para>
-									Select the application(s) that will use the created
-									widget set. This will modify the
-									<filename>web.xml</filename> deployment descriptor of
-									the selected application(s) to enable the widget set.
-								</para>
-							</listitem>
-						</varlistentry>
-						<varlistentry>
-							<term><guilabel>Compile widgetset</guilabel></term>
-							<listitem>
-								<para>
-									When this option is enabled, the wizard will start
-									compilation of the new widget set automatically after
-									it is created. See below for details and <xref
-									linkend="gwt.eclipse.compiling"/> for information on
-									compiling a widget set manually.
-								</para>
-							</listitem>
-						</varlistentry>
-					</variablelist>
-
-					<para>
-						Finally, click <guibutton>Finish</guibutton> to create the new widget set.
-					</para>
-				</listitem>
-			</orderedlist>
-
-			<para>
-				The wizard will create:
-			</para>
-
-			<itemizedlist>
-				<listitem><para>Widget set class in <filename>client</filename> folder under the base folder</para></listitem>
-				<listitem><para>GWT module descriptor file (<filename>.gwt.xml</filename>) in the base folder</para></listitem>
-				<listitem><para>Launch configuration (<filename>.launch</filename>) for compiling the widget set in the project root folder</para></listitem>
-			</itemizedlist>
-
-			<para>
-				If you selected the <guilabel>Compile widgetset</guilabel> option, the
-				wizard will also automatically compile the widget set. After the
-				compilation finishes, you should be able to run your application as
-				before, but using the new widget set. The compilation result is written
-				under the <filename>WebContent/VAADIN/widgetsets</filename> folder. When
-				you need to recompile the widget set in Eclipse, see <xref
-				linkend="gwt.eclipse.compiling"/>. For detailed information on compiling
-				widget sets, see <xref linkend="gwt.development.compiler"/>.
-			</para>
-
-			<para>
-				You do not normally need to edit the widget set class yourself, as the
-				<guilabel>New widget</guilabel> wizard will manage it for you. If you need
-				to have more complex logic for the creation of widget objects, please see
-				<xref linkend="gwt.widgetset"/> for a detailed description of widget
-				sets. You should not touch the methods marked as
-				<literal>AUTOGENERATED</literal>.
-			</para>
-
-			<para>
-				If you selected application(s) in the <guilabel>Modify applications to use
-				widget set</guilabel> selection, the following setting is inserted in your
-				<filename>web.xml</filename> deployment descriptor(s) to enable the widget
-				set:
-			</para>
-
-			<programlisting><?pocket-size 65% ?>&lt;init-param&gt;
-    &lt;description&gt;Application widgetset&lt;/description&gt;
-    &lt;param-name&gt;widgetset&lt;/param-name&gt;
-    &lt;param-value&gt;<emphasis mode="bold">com.example.myproject.MyprojectApplicationWidgetset</emphasis>&lt;/param-value&gt;
-&lt;/init-param&gt;</programlisting>
-
-			<!-- TODO: Will this change? -->
-
-			<para>
-				Notice that the package structure created by the Vaadin Plugin for Eclipse
-				is slightly different from the one illustrated in <xref
-				linkend="figure.gwt.widget-files"/> earlier, with no intermediate
-				<filename>gwt</filename> package that contains the GWT module descriptor.
-
-				<!-- TODO: Is the following statement correct? -->
-
-				You can refactor the package structure if you find need for it, but the
-				client-side code <emphasis>must</emphasis> always be stored under a
-				package named "<filename>client</filename>".
-			</para>
-
-		</section>
 
 		<section xml:id="gwt.eclipse.widget">
 			<title>Creating a Widget</title>
 
 			<para>
-				Once you have created a widget set as described above, you can create new
-				widgets in it as follows:
+				You can create a new widget as follows:
 			</para>
 
 			<orderedlist>
@@ -406,6 +208,7 @@
 					</screenshot>
 				</listitem>
 
+				<?dbfo-need height="5cm" ?>
 				<listitem>
 					<para>
 						In the <guilabel>New Component wizard</guilabel> step, fill out
@@ -428,9 +231,10 @@
 							<term><guilabel>Source folder</guilabel></term>
 							<listitem>
 								<para>
-									The root folder of the source tree under which you
-									wish to put the new widget sets. The default value is
-									the default source tree of your project.
+									The root folder of the entire source tree. The default
+									value is the default source tree of your project, and
+									you should normally leave it unchanged unless you have
+									a different project structure.
 								</para>
 							</listitem>
 						</varlistentry>
@@ -438,10 +242,13 @@
 							<term><guilabel>Package</guilabel></term>
 							<listitem>
 								<para>
-									The parent package under which the new server-side component should
-									be created. The client-side widget will be created under the
-									<package>client</package> subpackage under
-									this package.
+									The parent package under which the new server-side
+									component should be created. If it does not already
+									exist, the <filename>.gwt.xml</filename> descriptor
+									that defines the widget set will be created under the
+									<package>widgetset</package> subpackage under this
+									package, and the actual new widget under the
+									<package>widgetset.client.ui</package> subpackage.
 								</para>
 							</listitem>
 						</varlistentry>
@@ -451,10 +258,10 @@
 								<para>
 									The class name of the new <emphasis>server-side
 									component</emphasis>. The name of the client-side
-									widget stub (if you have its creation enabled) will
-									be the same but with "<classname>V</classname>-"
-									prefix. You can easily refactor the class names
-									afterwards.
+									widget stub (if you have its creation enabled) will be
+									the same but with "<classname>V</classname>-" prefix,
+									for example, <classname>VMycomponent</classname>. You
+									can rename the classes afterwards.
 								</para>
 							</listitem>
 						</varlistentry>
@@ -483,15 +290,6 @@
 								</para>
 							</listitem>
 						</varlistentry>
-						<varlistentry>
-							<term><guilabel>To widgetset</guilabel></term>
-							<listitem>
-								<para>
-									Select the widget set in which the client-side stub
-									should be included.
-								</para>
-							</listitem>
-						</varlistentry>
 					</variablelist>
 
 					<para>
@@ -501,12 +299,29 @@
 			</orderedlist>
 
 			<para>
-				The wizard will create:
+				The wizard will:
 			</para>
 
 			<itemizedlist>
-				<listitem><para>Server-side component stub in the defined package</para></listitem>
-				<listitem><para>Client-side widget stub in the <filename>client.ui</filename> package under the base package</para></listitem>
+				<listitem>
+                    <para>Create a server-side component stub in the base package</para>
+                </listitem>
+
+				<listitem>
+                    <para>Create a GWT module descriptor file (<filename>.gwt.xml</filename>) in
+                    the <filename>widgetset</filename> package under the base package</para>
+                </listitem>
+
+				<listitem>
+                    <para>Create a client-side widget stub in the
+                    <filename>widgetset.client.ui</filename> package under the base
+                    package</para>
+                </listitem>
+
+                <listitem>
+                    <para>Modify the <filename>web.xml</filename> deployment descriptor to
+                    specify the widget set class name parameter for the application.</para>
+                </listitem>
 			</itemizedlist>
 
 			<para>
@@ -516,8 +331,32 @@
 			</para>
 			
 			<para>
-				The wizard will automatically recompile the widget set in which you
-				included the new widget. See <xref linkend="gwt.eclipse.compiling"/>.
+				To compile the widget set, click the <guibutton>Compile widget
+				set</guibutton> button in the Eclipse toolbar. See <xref
+				linkend="gwt.eclipse.compiling"/> for details. After the compilation
+				finishes, you should be able to run your application as before, but using
+				the new widget set. The compilation result is written under the
+				<filename>WebContent/VAADIN/widgetsets</filename> folder. When you need to
+				recompile the widget set in Eclipse, see <xref
+				linkend="gwt.eclipse.compiling"/>. For detailed information on compiling
+				widget sets, see <xref linkend="gwt.development.compiler"/>.
+			</para>
+
+			<para>
+				The following setting is inserted in the <filename>web.xml</filename>
+				deployment descriptor to enable the widget set:
+			</para>
+
+			<programlisting><?pocket-size 65% ?>&lt;init-param&gt;
+    &lt;description&gt;Application widgetset&lt;/description&gt;
+    &lt;param-name&gt;widgetset&lt;/param-name&gt;
+    &lt;param-value&gt;<emphasis mode="bold">com.example.myproject.widgetset.MyprojectApplicationWidgetset</emphasis>&lt;/param-value&gt;
+&lt;/init-param&gt;</programlisting>
+
+			<para>
+				You can refactor the package structure if you find need for it, but GWT
+				compiler requires that the client-side code <emphasis>must</emphasis>
+				always be stored under a package named "<filename>client</filename>".
 			</para>
 		</section>
 
@@ -525,22 +364,40 @@
 			<title>Recompiling the Widget Set</title>
 
 			<para>
-				After you edit your widget or widget set, you need to recompile it. You
-				can do this from <menuchoice><guimenu>Run</guimenu><guimenuitem>External
-				Tools</guimenuitem></menuchoice> menu, where the run configuration whould
-				be listed. You can view the launch configuration settings by selecting
-				<menuchoice><guimenu>Run</guimenu><guisubmenu>External
-				Tools</guisubmenu><guimenuitem>External Tools
-				Configurations</guimenuitem></menuchoice>.
+				After you edit a widget, you need to recompile the widget set. Vaadin
+				automatically suggests to compile the widget set every time you save
+				a client-side source file. If this gets annoying, you can disable the automatic
+				recompilation from the Vaadin category in project settings, by selecting
+				the <guilabel>Suspend automatic widgetset builds</guilabel> option.
+            </para>
+
+            <para>
+                You can recompile the widget set manually by clicking the
+                <guibutton>Compile widgetset</guibutton> button in the Eclipse toolbar,
+                shown in <xref linkend="figure.gwt.eclipse.compiling.toolbar"/> while the
+                project is open and selected.
 			</para>
 
-			<para>
-				The compilation progress is shown in the <guilabel>Console</guilabel>
-				panel in Eclipse, as illustrated in <xref
-				linkend="figure.gwt.eclipse.compiling"/>.
-			</para>
+            <!-- TODO: Better icon as requested in #3692. -->
+            <figure xml:id="figure.gwt.eclipse.compiling.toolbar">
+				<title>The <guibutton>Compile Widgetset</guibutton> Button in Eclipse Toolbar</title>
+				<mediaobject>
+					<imageobject role="html">
+						<imagedata align="center" fileref="img/eclipse/widgetset-compiling-toolbar-lo.png"/>
+					</imageobject>
+					<imageobject role="fo">
+						<imagedata scale="100" smallscale="70%" align="center" fileref="img/eclipse/widgetset-compiling-toolbar-hi.png"/>
+					</imageobject>
+				</mediaobject>
+			</figure>
 
-			<figure xml:id="figure.gwt.eclipse.compiling">
+            <para>
+                The compilation progress is shown in the <guilabel>Console</guilabel>
+                panel in Eclipse, as illustrated in <xref
+                linkend="figure.gwt.eclipse.compiling"/>.
+            </para>
+
+			<figure xml:id="figure.gwt.eclipse.compiling" float="center" floatstyle="before">
 				<title>Recompiling a Widget Set</title>
 				<mediaobject>
 					<imageobject role="html">
@@ -558,22 +415,121 @@
 				specific folder.
 			</para>
 
+            <para>
+                You can speed up the compilation significantly by compiling the widget set
+                only for your browser during development. The generated
+                <filename>.gwt.xml</filename> descriptor stub includes a disabled element
+                that specifies the target browser. See <xref linkend="gwt.widgetset"/> for
+                more details on setting the <literal>user-agent</literal> property.
+            </para>
+
 			<para>
 				For detailed information on compiling widget sets, see <xref
-				linkend="gwt.development.compiler"/>. Should you ever compile a widget set
+				linkend="gwt.development.compiler"/>. Should you compile a widget set
 				outside Eclipse, you need to refresh the project by selecting it in
 				<guilabel>Project Explorer</guilabel> and pressing <keycap>F5</keycap>.
 			</para>
 		</section>
+
+        <section xml:id="gwt.plugin.settings">
+            <title>Plugin Related Project Settings</title>
+
+            <para>
+                When you have the Eclipse Plugin installed, the project settings will have
+                a <guilabel>Vaadin</guilabel> section, where you can select the Vaadin
+                version and make settings to widget set building. The settings window is
+                shown in <xref linkend="figure.gwt.plugin.settings"/>.
+            </para>
+
+            <figure xml:id="figure.gwt.plugin.settings">
+                <title>Plugin Related Project Settings</title>
+                <mediaobject>
+                    <imageobject role="html">
+                        <imagedata align="center" fileref="img/eclipse/project-settings-widgetset.png"/>
+                    </imageobject>
+                    <imageobject role="fo">
+                        <imagedata scale="60" smallscale="100%" align="center" fileref="img/eclipse/project-settings-widgetset.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+
+            <variablelist>
+                <varlistentry>
+                    <term><guilabel>Suspend automatic widgetset builds</guilabel></term>
+                    <listitem>
+                        <para>
+                            Normally, when this option is unselected, Eclipse will suggest
+                            to rebuild the widget set automatically every time you save a
+                            widget source file. If this gets annoying, you can suspend the
+                            automatic building by enabling this option. You then have to
+                            click the widget set build button in the Eclipse toolbar.
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><guilabel>JavaScript style</guilabel></term>
+                    <listitem>
+                        <para>
+                            Normally, GWT outputs obfuscated JavaScript to make the code
+                            less readable. The main purpose is to protect the intellectual
+                            property, but the obfuscated code is also more compact,
+                            reducing the time required to load and parse the files. The
+                            <guilabel>Obfuscated</guilabel> mode is the default. The other
+                            output types are <guilabel>Pretty</guilabel>, which makes the
+                            JavaScript more readable to a human, and
+                            <guilabel>Detailed</guilabel>, which is more detailed than the
+                            pretty option with, for example, more descriptive variable
+                            names.
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><guilabel>Compiler threads</guilabel></term>
+                    <listitem>
+                        <para>
+                            You can set the GWT Compiler to use a specific number of
+                            threads to use the available processor cores.
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><guilabel>Create hosted mode launch</guilabel></term>
+                    <listitem>
+                        <para>
+                            Clicking this button generates a launch configuration for
+                            starting the GWT Hosted Mode Browser. You can use the launch
+                            configuration to debug client-side code. See <xref
+                            linkend="gwt.hosted-mode"/> for detailed information on the
+                            hosted mode browser launch configuration.  Notice that the
+                            generated launch configuration is not directly compatible with
+                            the Out-of-Process Hosted Mode (OOPHM), as described in <xref
+                            linkend="gwt.development.oophm"/>, but you have to modify the
+                            configuration manually.
+                        </para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+
+            <para>
+                The plugin will automatically download the GWT version compatible with the
+                selected Vaadin package. If you are using the experimental Out-of-Process
+                Hosted Mode, as described in <xref linkend="gwt.development.oophm"/>, you
+                will have to download Vaadin OOPHM package, copy the included GWT folder
+                under the project, and create or modify the hosted mode launch
+                configuration manually.
+            </para>
+
+        </section>
 	</section>
 
 	<section xml:id="gwt.widgets">
 		<title>Google Web Toolkit Widgets</title>
 
 		<para>
-			Let us take a look into how custom GWT widgets are created. The authoritative
+			Let us take a look into how you create custom GWT widgets. The authoritative
 			sources for developing with GWT are the <emphasis>Google Web Toolkit Developer
-			Guide</emphasis> and <emphasis>Google Web Toolkit Class Reference</emphasis>.
+			Guide</emphasis> and <emphasis>Google Web Toolkit Class Reference</emphasis>,
+			both available from the GWT website.
 		</para>
 
 		<para>
@@ -605,27 +561,60 @@
 		<para>
 			Each of the base classes offers various services for different types of
 			widgets. Many custom widgets, such as the Color Picker example below, extend
-			the <classname>Composite</classname> class to combine the widget from existing
-			GWT widgets. Other base classes offer various features useful for different
-			kinds of widgets. You can also choose to extend an existing GWT widget, as we
-			have done for most of the standard user interface components of Vaadin, or
-			extend a Vaadin widget.
+			the <classname>Composite</classname> class to compose the widget from existing
+			GWT widgets. The other base classes offer various features useful for
+			different kinds of widgets. You can also choose to extend an existing GWT
+			widget, as we have done for most of the standard user interface components of
+			Vaadin, or to extend a Vaadin widget.
 		</para>
 
 		<section xml:id="gwt.widgets.extending">
 			<title>Extending a Vaadin Widget</title>
 
 			<para>
-				Extending a Vaadin widget is an easy way to add features, such
-				as advanced client-side validation, to existing standard components. If
-				the extended widget does not require any additional parameters, which is
-				usual in client-side validation, you may not even need to define a
-				server-side counterpart for your widget. A server-side component can be
-				mapped to multiple client-side components depending on its parameters.
-				The mapping is defined in the widget factory, i.e., the class inheriting
-				<classname>DefaultWidgetSet</classname>. For details on how to implement a
-				widget factory, see <xref linkend="gwt.widgetset" />.
+				Extending an existing Vaadin widget is an easy way to add features, such
+				as advanced client-side validation, to existing standard components. Just
+				extend both the server-side component and the client-side widget, and add
+				the needed properties and other functionality.
 			</para>
+
+			<para>
+                A few guidelines apply for extending existing components:
+            </para>
+
+            <itemizedlist>
+                <listitem>Do not redefine the <varname>client</varname> or
+                <varname>id</varname> member variables in the subclass. They should always
+                be defined as <parameter>protected</parameter> and set by the base class
+                where they are defined in
+                <methodname>updateFromUIDL()</methodname>.</listitem>
+
+                <listitem>Call <methodname>super()</methodname> as the first thing in the
+                constructor.</listitem>
+
+                <listitem>In <methodname>updateFromUIDL()</methodname>:
+
+                    <itemizedlist>
+                        <listitem>Do not call
+                        <methodname>client.updateComponent()</methodname> as it is already
+                        called in the superclass. If the superclass calls it in an
+                        undesired way, you have to reimplement the entire functionality
+                        and not call <methodname>super.updateFromUIDL()</methodname> at
+                        all.</listitem>
+
+                        <listitem>Call <methodname>super.updateFromUIDL(uidl,
+                        client)</methodname>, unless you specifically want to change the
+                        behaviour of the superclass implementation of the method. In such
+                        case, you have to set the <varname>client</varname> and
+                        <varname>id</varname> yourself.</listitem>
+                    </itemizedlist>
+
+                </listitem>
+
+                <listitem>Be careful about overloading superclass handlers, etc.</listitem>
+            </itemizedlist>
+
+            <!-- TODO: An example. -->
 
 		</section>
 
@@ -633,48 +622,44 @@
 			<title>Example: A Color Picker GWT Widget</title>
 
 			<para>
-				In the following example, we implement a composite GWT widget built from
+				In the following example, we present a custom widget composited from the
 				<classname>HorizontalPanel</classname>, <classname>Grid</classname>,
-				<classname>Button</classname>, and <classname>Label</classname>
-				widgets. This widget does not yet have any integration with the server
-				side code, which will be shown later in this chapter. The source code is
-				available in the source folder for the demo application in Vaadin
-				installation folder, under package
-				<package>com.vaadin.demo.colorpicker</package>.
+				<classname>Button</classname>, and <classname>Label</classname> GWT
+				widgets. This widget does not include any Vaadin integration with the
+				server-side code, which will be added in a separate integration widget
+				later in this chapter.
 			</para>
 
-		<programlisting><?pocket-size 65% ?><![CDATA[package com.vaadin.demo.colorpicker.gwt.client.ui;
+            <programlisting><?pocket-size 65% ?><![CDATA[package com.vaadin.demo.colorpicker.gwt.client.ui;
 
-import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.Element;
+import com.google.gwt.event.dom.client.*;
+import com.google.gwt.user.client.*;
 import com.google.gwt.user.client.ui.*;
 
 /**
  * A regular GWT component without integration with Vaadin.
- **/
+ */
 public class GwtColorPicker extends Composite
-                            implements ClickListener {
+                            implements ClickHandler {
 
-    /**
-     * The currently selected color name to give client-side
-     * feedback to the user.
-     **/
+    // The currently selected color name to give client-side 
+    // feedback to the user.
     protected Label currentcolor = new Label();
 
     public GwtColorPicker() {
         // Create a 4x4 grid of buttons with names for 16 colors
-        Grid grid = new Grid(4,4);
-        String[] colors = new String[] {"aqua", "black", "blue",
-                "fuchsia", "gray", "green", "lime", "maroon",
-                "navy", "olive", "purple", "red", "silver",
-                "teal", "white", "yellow"};
+        final Grid grid = new Grid(4, 4);
+        final String[] colors = new String[] { "aqua", "black",
+                "blue", "fuchsia", "gray", "green", "lime",
+                "maroon", "navy", "olive", "purple", "red",
+                "silver", "teal", "white", "yellow" };
         int colornum = 0;
-        for (int i=0; i<4; i++)
-            for (int j=0; j<4; j++, colornum++) {
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++, colornum++) {
                 // Create a button for each color
                 Button button = new Button(colors[colornum]);
-                button.addClickListener(this);
-                
+                button.addClickHandler(this);
+
                 // Put the button in the Grid layout
                 grid.setWidget(i, j, button);
 
@@ -682,87 +667,94 @@ public class GwtColorPicker extends Composite
                 DOM.setStyleAttribute(button.getElement(),
                                       "background",
                                       colors[colornum]);
-                
+
                 // For dark colors, the button label must be
                 // in white.
                 if ("black navy maroon blue purple"
-                        .indexOf(colors[colornum]) != -1)
+                        .indexOf(colors[colornum]) != -1) {
                     DOM.setStyleAttribute(button.getElement(),
-                                          "color",
-                                          "white");
+                                          "color", "white");
+                }
             }
+        }
 
         // Create a panel with the color grid and currently
-        // selected color indicator
-        HorizontalPanel panel = new HorizontalPanel();
+        // selected color indicator.
+        final HorizontalPanel panel = new HorizontalPanel();
         panel.add(grid);
         panel.add(currentcolor);
 
-        // Set the class of the color selection feedback box to
-        // allow CSS styling. We need to obtain the DOM element
-        // for the current color label. This assumes that the
-        // <td> element of the HorizontalPanel is the parent of
-        // the label element. Notice that the element has no
-        // parent before the widget has been added to the
-        // horizontal panel.
-        Element panelcell =
-                    DOM.getParent(currentcolor.getElement());
+        // Set the class of the color selection feedback box 
+        // to allow CSS styling. We need to obtain the DOM
+        // element for the current color label. This assumes 
+        // that the <td> element of the HorizontalPanel is
+        // the parent of the label element. Notice that the 
+        // element has no parent before the widget has been
+        // added to the horizontal panel.
+        final Element panelcell =
+            DOM.getParent(currentcolor.getElement());
         DOM.setElementProperty(panelcell, "className",
                                "colorpicker-currentcolorbox");
 
-        // Set initial color. This will be overridden with
-        // the value read from server.
+        // Set initial color. This will be overridden with the
+        // value read from server.
         setColor("white");
-        
+
         // Composite GWT widgets must call initWidget().
         initWidget(panel);
     }
 
     /** Handles click on a color button. */
-    public void onClick(Widget sender) {
+    @Override
+    public void onClick(ClickEvent event) {
         // Use the button label as the color name to set
-        setColor(((Button) sender).getText());
+        setColor(((Button) event.getSource()).getText());
     }
 
     /** Sets the currently selected color. */
     public void setColor(String newcolor) {
         // Give client-side feedback by changing the color
-        // name in the label
+        // name in the label.
         currentcolor.setText(newcolor);
 
         // Obtain the DOM elements. This assumes that the <td>
-        // element of the HorizontalPanel is the parent of
-        // the label element.
-        Element nameelement = currentcolor.getElement();
-        Element cell = DOM.getParent(nameelement);
+        // element of the HorizontalPanel is the parent of the
+        // caption element.
+        final Element caption = currentcolor.getElement();
+        final Element cell = DOM.getParent(caption);
 
         // Give feedback by changing the background color
         DOM.setStyleAttribute(cell, "background", newcolor);
-        DOM.setStyleAttribute(nameelement, "background",
-                              newcolor);
+        DOM.setStyleAttribute(caption, "background", newcolor);
         if ("black navy maroon blue purple"
                 .indexOf(newcolor) != -1)
-            DOM.setStyleAttribute(nameelement, "color", "white");
+            DOM.setStyleAttribute(caption, "color", "white");
         else
-            DOM.setStyleAttribute(nameelement, "color", "black");
+            DOM.setStyleAttribute(caption, "color", "black");
     }
 }]]></programlisting>
+
+            <para>
+                You can find the source code in the source folder of the Vaadin
+                installation package, under the Java package
+                <package>com.vaadin.demo.colorpicker</package>.
+            </para>
 
 			<para>
 				This example demonstrates one reason for making a custom widget: it
 				provides client-side feedback to the user in a way that would not be
 				possible or at least practical from server-side code. Server-side code can
 				only select a static CSS style or a theme, while on the client-side we can
-				manipulate styles of HTML elements very flexibly. Notice that manipulation
-				of the DOM tree depends somewhat on the browser. In this example, the
+				manipulate styles of HTML elements flexibly. Notice that manipulation of
+				the DOM tree depends somewhat on the browser. In this example, the
 				manipulation should be rather compatible, but in some cases there could be
-				problems. Standard GWT and Vaadin widgets handle many of such
-				compatibility issues, but when doing such low-level operations as DOM
-				manipulation, you may need to consider them.
+				problems. Thd standard GWT and Vaadin widgets handle many of such
+				compatibility issues, but when doing low-level operations such as DOM
+				manipulation, you may need to consider browser compatibility.
 			</para>
 
 			<para>
-				The structure of the DOM tree depends on how GWT renders its widgets for a
+				The structure of the DOM tree depends on how GWT renders its widgets in a
 				specific browser. It is also not guaranteed that the rendering does not
 				change in future releases of GWT. You should therefore make as few
 				assumptions regarding the DOM structure as possible. Unfortunately, GWT
@@ -775,7 +767,8 @@ public class GwtColorPicker extends Composite
 			</para>
 
 			<para>
-				The widget will look as follows:
+				The widget will look as shown in <xref
+				linkend="figure.gwt.integration.example.colorpicker.nostyle"/>.
 			</para>
 
 			<figure xml:id="figure.gwt.integration.example.colorpicker.nostyle">
@@ -791,7 +784,7 @@ public class GwtColorPicker extends Composite
 			</figure>
 
 			<para>
-				As you can notice, the widget will look rather uninviting without CSS styling. We will
+				As you may notice, the widget will look rather uninviting without CSS styling. We will
 				next look how to define a default style for a GWT widget.
 			</para>
 		</section>
@@ -801,19 +794,21 @@ public class GwtColorPicker extends Composite
 			
 			<para>
 				GWT renders its widgets in the DOM tree of the web browser as HTML
-				elements. Therefore, their style can be defined with Cascading Style
-				Sheets (CSS) just as in HTML. GWT Compiler supports packaging style sheets
-				from the source package tree. The style sheet is defined in the
-				<filename>.gwt.xml</filename> descriptor file (see <xref
-				linkend="gwt.widgetset.moduledescriptor"/> for details).
+				elements. Therefore, you can define their style with Cascading Style
+				Sheets (CSS), just as in HTML. The GWT Compiler supports packaging style
+				sheets from the source package tree. The style sheet is defined in the
+				<filename>.gwt.xml</filename> GWT module descriptor file (see <xref
+				linkend="gwt.widgetset"/> for details).
 			</para>
 
-			<programlisting><![CDATA[<!-- WidgetSet default theme -->	
+			<programlisting><![CDATA[<!-- Default theme for the widget set. -->
 <stylesheet src="colorpicker/styles.css"/>]]></programlisting>
 
 			<para>
 				The style sheet path is relative to the <filename>public</filename> folder
-				under the folder containing the <filename>.gwt.xml</filename> file.
+				under the folder containing the <filename>.gwt.xml</filename> file. In
+				Eclipse, you can add the folders as regular folders instead of Java
+				packages.
 			</para>
 
 			<para>
@@ -852,7 +847,7 @@ table.example-colorpicker {
 }]]></programlisting>
 
 			<para>
-				The stylesheet makes some assumptions regarding the HTML element
+				The stylesheet above makes some assumptions regarding the HTML element
 				structure. First, it assumes that the <classname>Grid</classname> layout
 				is a table. Second, the custom class name,
 				<literal>colorpicker-currentcolorbox</literal>, of the right-hand
@@ -883,7 +878,7 @@ table.example-colorpicker {
 		
 		<para>
 			Integration of GWT widgets with Vaadin can be done in two basic ways:
-			by modifying the original class or by inheriting it and adding the integration
+			by modifying the original widget or by extending it and adding the integration
 			code in the subclass. The latter way is actually the way the standard
 			client-side components in Vaadin are done: they simply inherit the
 			corresponding standard GWT widgets. For example,
@@ -891,15 +886,15 @@ table.example-colorpicker {
 		</para>
 
 		<para>
-			The integration code has the following tasks:
+			The client-side integration code has the following tasks:
 		</para>
 
 		<itemizedlist>
-			<listitem>Manage CSS style class</listitem>
-			
 			<listitem>Receive component state from server</listitem>
 			
 			<listitem>Send state changes caused by user interaction to server</listitem>
+
+			<listitem>Manage CSS style class</listitem>
 		</itemizedlist>
 		
 		<para>
@@ -925,16 +920,17 @@ table.example-colorpicker {
 				conventions for GWT widgets, some notes regarding naming may be
 				necessary. Even though Java package names make it possible to use
 				identical class names in the same context, it may be useful to try to make
-				them more distinctive to avoid any inconvenience. GWT uses plain names
-				for its standard widgets, such as <classname>Button</classname>. The
-				standard components of Vaadin use identical or similar names, but that
-				does not cause any inconvenience, because the GWT widgets and server-side
+				them more distinctive to avoid any inconvenience. GWT uses plain names for
+				its standard widgets, such as <classname>Button</classname>. The standard
+				components of Vaadin use identical or similar names, but that does not
+				cause any inconvenience, because the GWT widgets and server-side
 				components of Vaadin are never used in the same context. For the
 				client-side components of Vaadin, we use the "<literal>V</literal>"
 				prefix, for example <classname>VButton</classname>. In the Color Picker
-				example, we use <classname>GwtColorPicker</classname> for the GWT widget
-				and <classname>VColorPicker</classname> for the integration
-				implementation. You may wish to follow similar conventions.
+				example, we use <classname>GwtColorPicker</classname> for the GWT widget,
+				<classname>VColorPicker</classname> for the integration implementation,
+				and <classname>ColorPicker</classname> for the server-side component. You
+				may wish to follow similar conventions.
 			</para>
 
 			<para>
@@ -1336,115 +1332,92 @@ public class VColorPicker extends GwtColorPicker
 		
 		<para>
 			The client-side components, or in GWT terminology, widgets, must be made
-			usable in the client-side GWT application by defining a widget set factory
-			that can create the widgets by their UIDL tag name. (Actually, such a widget
-			set factory <emphasis>is</emphasis> the client-side application.)
+			usable in the client-side GWT application by defining a widget set. A widget
+			set is actually a GWT application and needs to be defined in the <emphasis>GWT
+			module descriptor</emphasis> as the entry point of the client-side engine. A
+			GWT module descriptor is an XML file with extension
+			<filename>.gwt.xml</filename>.
 		</para>
 
-		<para>
-			A widget set factory needs to inherit the default factory
-			<classname>DefaultWidgetSet</classname> and implement the
-			<methodname>createWidget()</methodname> and
-			<methodname>resolveWidgetType()</methodname> methods. The methods must call
-			their default implementation to allow creation of the standard widgets.
-		</para>
+        <para>
+            If you are using the Eclipse IDE, the New Vaadin Widget wizard will
+            automatically create the GWT module descriptor. See <xref
+            linkend="gwt.eclipse.widget"/> for detailed instructions.
+        </para>
 
-		<para>
-			The following example shows how to define a widget set factory class for the
-			Color Picker example. The tag name of the widget was defined in the
-			server-side implementation of the widget (see <xref
-			linkend="gwt.integration.example.colorpicker"/>) as
-			<literal>colorpicker</literal>. The
-			<methodname>resolveWidgetType()</methodname> must resolve this name to the
-			class object of the <classname>VColorPicker</classname> integration class,
-			which is later passed to the <methodname>createWidget()</methodname> method for
-			creating an instance of the <classname>VColorPicker</classname> class.
-		</para>
+        <para>
+            The following example of <filename>ColorPickerWidgetSet.gwt.xml</filename>
+            shows the GWT module descriptor of the Color Picker application. We also
+            define the default stylesheet for the color picker widget, as described above
+            in <xref linkend="gwt.widgets.styling"/>.
+        </para>
 
-		<programlisting><?pocket-size 65% ?><![CDATA[import com.vaadin.demo.colorpicker.gwt.client.ui.VColorPicker;
-import com.vaadin.terminal.gwt.client.DefaultWidgetSet;
-import com.vaadin.terminal.gwt.client.Paintable;
-import com.vaadin.terminal.gwt.client.UIDL;
-
-public class ColorPickerWidgetSet extends DefaultWidgetSet {
-    /** Resolves UIDL tag name to widget class. */
-    protected Class resolveWidgetType(UIDL uidl) {
-        final String tag = uidl.getTag();
-        if ("colorpicker".equals(tag))
-            return VColorPicker.class;
-
-        // Let the DefaultWidgetSet handle resolution of
-        // default widgets
-        return super.resolveWidgetType(uidl);
-    }
-
-    /** Creates a widget instance by its class object. */
-    public Paintable createWidget(UIDL uidl) {
-        final Class type = resolveWidgetType(uidl);
-        if (VColorPicker.class == type)
-            return new VColorPicker();
-
-        // Let the DefaultWidgetSet handle creation of
-        // default widgets
-        return super.createWidget(uidl);
-    }
-}]]></programlisting>
-
-		<para>
-			The default widgets in Vaadin actually use more than just the tag
-			name to resolve the actual widget class. For example, the
-			<classname>Button</classname> server-side component, which has tag name
-			<literal>button</literal>, can be resolved to either an
-			<classname>VButton</classname> or <classname>VCheckBox</classname> widget,
-			depending on the <parameter>switch</parameter>
-			(<parameter>switchMode</parameter>) attribute. Vaadin Client-Side
-			Engine can actually replace the client-side object of the parameters change.
-		</para>
-
-		<section xml:id="gwt.widgetset.moduledescriptor">
-			<title>GWT Module Descriptor</title>
-
-			<para>
-				A widget set is actually a GWT application and needs to be defined in the
-				GWT module descriptor as the entry point of the application. A GWT module
-				descriptor is an XML file with extension <filename>.gwt.xml</filename>.
-			</para>
-
-			<para>
-				If you are using the Eclipse IDE, the New Vaadin Widget Set wizard will
-				create the GWT module descriptor for you. See <xref
-				linkend="gwt.eclipse.widgetset"/> for detailed instructions.
-			</para>
-
-			<para>
-				The following example shows the GWT module descriptor of the Color Picker
-				application. The client-side entry point will be the
-				<classname>WidgetSet</classname> class. We also define the default
-				stylesheet for the color picker widget, as described above in <xref
-				linkend="gwt.widgets.styling"/>.
-			</para>
-
-			<programlisting><?pocket-size 65% ?><![CDATA[<module>
-  <!-- Inherit NoEntry version to avoid multiple entrypoints -->
-  <inherits
-      name="com.vaadin.terminal.gwt.DefaultWidgetSetNoEntry" /> 
-    
-  <!-- WidgetSet default theme -->    
-  <stylesheet src="colorpicker/styles.css"/>
-
-  <!-- Entry point -->
-  <entry-point
-      class="com.vaadin.demo.colorpicker.gwt.client.WidgetSet"/>
-  
+		<programlisting><?pocket-size 65% ?><![CDATA[<module>
+	<!-- Inherit the default widget set -->
+	<inherits name="com.vaadin.terminal.gwt.DefaultWidgetSet" />
+	
+	<!-- The default theme of this widget set -->	
+	<stylesheet src="colorpicker/styles.css"/>
 </module>]]></programlisting>
 
-			<para>
-				For more information about the GWT Module XML Format, please see Google
-				Web Toolkit Developer Guide.
-			</para>
-		</section>
+        <para>
+            Compiling widget sets takes considerable time. You can reduce the compilation
+            time significantly by compiling the widget sets only for your browser, which
+            is useful during development. You can do this by setting the
+            <parameter>user.agent</parameter> property in the
+            <filename>.gwt.xml</filename> GWT module descriptor.
+        </para>
 
-		<programlisting><![CDATA[]]></programlisting>
+        <programlisting><?pocket-size 75% ?><![CDATA[<set-property name="user.agent" value="gecko"/>]]></programlisting>
+
+        <para>
+            The <parameter>value</parameter> attribute should match your browser. The
+            browsers supported by GWT depend on the GWT version, below is a list of
+            browser identifiers supported by GWT 1.7.
+        </para>
+
+        <table>
+            <title>GWT User Agents</title>
+            <tgroup cols="2" align="left">
+                <thead>
+                    <row valign="top">
+                        <entry>Identifier</entry>
+                        <entry>Name</entry>
+                    </row>
+                </thead>
+                <tbody>
+                    <row valign="top">
+                        <entry>gecko</entry>
+                        <entry>Mozilla Firefox</entry>
+                    </row>
+                    <row valign="top">
+                        <entry>gecko1_8</entry>
+                        <entry>Mozilla Firefox 1.5 and 2</entry>
+                    </row>
+                    <row valign="top">
+                        <entry>ie6</entry>
+                        <entry>Internet Explorer 6</entry>
+                    </row>
+                    <row valign="top">
+                        <entry>ie8</entry>
+                        <entry>Internet Explorer 8</entry>
+                    </row>
+                    <row valign="top">
+                        <entry>safari</entry>
+                        <entry>Apple Safari and other Webkit-based browsers including Google Chrome</entry>
+                    </row>
+                    <row valign="top">
+                        <entry>opera</entry>
+                        <entry>Opera</entry>
+                    </row>
+                </tbody>
+            </tgroup>
+        </table>
+
+        <para>
+            For more information about the GWT Module XML Format, please see Google Web
+            Toolkit Developer Guide.
+        </para>
 	</section>
 		
 	<section xml:id="gwt.server-side">
@@ -1471,33 +1444,27 @@ public class ColorPickerWidgetSet extends DefaultWidgetSet {
 		</para>
 
 		<section>
-			<title>Component Tag Name</title>
-			
-			<para>
-				Server-side components are identified with a unique UIDL tag name, which
-				must be returned by the <methodname>getTag()</methodname> method. The tag
-				should follow XML rules for element names, that is, only characters a-z,
-				A-Z, 0-9, and _, and not begin with a number. Actually, as Vaadin
-				Release 5 uses a JSON notation for serialization, the tag syntax is more
-				relaxed, but we nevertheless recommend using a stricter syntax. UIDL is
-				detailed in <xref linkend="uidl"/> together with lists of reserved
-				tags. The server-side implementation of the Color Picker component defines
-				the tag as follows:
-			</para>
+			<title>Binding to the Client-Side Widget</title>
 
-			<programlisting><![CDATA[    public String getTag() {
-        return "colorpicker";
-    }]]></programlisting>
-    
+            <para>
+                A server-side component needs to be bound to a specific client-side
+                widget. This is done with a special annotation. For example, for the
+                <classname>ColorPicker</classname> server-side component, we define:
+            </para>
+			
+			<programlisting><![CDATA[import com.vaadin.demo.colorpicker.widgetset.client.ui.VColorPicker;
+
+@ClientWidget(VColorPicker.class)
+public class ColorPicker extends AbstractField {
+    ...]]></programlisting>
+
 			<para>
-				On the client side, this tag is mapped to a GWT widget. The mapping from
-				server-side to client-side components is actually one to many; a
-				server-side component can manifest as several client-side components,
-				depending on its parameters. For example, a server-side
-				<classname>Button</classname> can manifest either as an
-				<classname>VButton</classname> or <classname>VCheckBox</classname> in
-				client, depending on the <emphasis>switchMode</emphasis> attribute. For
-				the client side, see <xref linkend="gwt.widgets"/> above.
+				The annotation is read during the compilation of the widget with the GWT
+				Compiler. The compiler invokes a <classname>WidgetMapGenerator</classname>
+				that reads the annotations from the compiled server-side component
+				classes. It is therefore necessary that the server-side components are
+				compiled before the client-side compilation, as noted in <xref
+				linkend="gwt.development.compiler"/>.
 			</para>
 				
             <para>
@@ -1592,37 +1559,7 @@ public void changeVariables(Object source, Map variables) {
 			</para>
 		</section>
 
-		<section>
-			<title>Extending Standard Components</title>
-
-			<para>
-				Extending standard components is one way to develop new components that
-				have some additional features.
-			</para>
-
-			<para>
-				Every component needs to have a unique UIDL tag that is used to create and
-				communicate with widgets on the client-side. The tag is normally unique
-				for server-side components. The minimal requirement for the server-side
-				component is that you reimplement the <methodname>getId()</methodname>
-				method that provides the tag.
-			</para>
-
-			<para>
-				If your extension component contains any specific state variables, you
-				need to handle their serialization in
-				<classname>paintContent()</classname> and deserialization in
-				<classname>changeVariables()</classname> and call the superclass
-				implementation in the beginning. See <xref
-				linkend="gwt.server-side.serialization"/> <xref
-				linkend="gwt.server-side.deserialization"/> above for details.
-			</para>
-
-			<para>
-				The client-side implementation goes also much like for regular custom
-				widgets.
-			</para>
-		</section>
+        <!-- Edit bookmark. -->
 
 		<section xml:id="gwt.server-side.example.colorpicker">
 			<title>Example: Color Picker Server-Side Component</title>
@@ -1640,65 +1577,62 @@ public void changeVariables(Object source, Map variables) {
 
 			<programlisting><?pocket-size 65% ?><![CDATA[package com.vaadin.demo.colorpicker;
 
-import java.util.Map;
-import com.vaadin.terminal.PaintException;
-import com.vaadin.terminal.PaintTarget;
-import com.vaadin.ui.*;
+import com.vaadin.demo.colorpicker.widgetset.client.ui.VColorPicker;
+...
 
+/**
+ * Color picker for selecting a color from a palette.
+ * 
+ * @author magi
+ */
+@ClientWidget(VColorPicker.class)
 public class ColorPicker extends AbstractField {
     public ColorPicker() {
         super();
         setValue(new String("white"));
     }
 
-    /** The property value of the field is an Integer. */
-    public Class getType() {
+    /** The property value of the field is a String. */
+    @Override
+    public Class<?> getType() {
         return String.class;
     }
 
-    /**
-     * Tag is the UIDL element name for client-server
-     * communications.
-     **/
-    public String getTag() {
-        return "colorpicker";
-    }
-    
     /** Set the currently selected color. */
     public void setColor(String newcolor) {
-        // Sets the color name as the property of the
-        // component. Setting the property will automatically
-        // cause repainting of the component with paintContent().
+        // Sets the color name as the property of the component.
+        // Setting the property will automatically cause
+        // repainting of the component with paintContent().
         setValue(newcolor);
     }
-    
+
     /** Retrieve the currently selected color. */
     public String getColor() {
         return (String) getValue();
     }
 
     /** Paint (serialize) the component for the client. */
+    @Override
     public void paintContent(PaintTarget target)
-                throws PaintException {
+    throws PaintException {
         // Superclass writes any common attributes in the
         // paint target.
         super.paintContent(target);
-        
+
         // Add the currently selected color as a variable in
-        // the paint target.
+        // the paint target.  
         target.addVariable(this, "colorname", getColor());
     }
-    
-    /** Deserialize changes received from client. */
+
+    /** Deserialize changes received from the client. */
+    @Override
     public void changeVariables(Object source, Map variables) {
         // Sets the currently selected color
-        if (variables.containsKey("colorname")
-            && !isReadOnly()) {
-            String newValue = (String) variables.get("colorname");
-            
+        if (variables.containsKey("colorname") &&
+                !isReadOnly()) {
             // Changing the property of the component will
             // trigger a ValueChangeEvent
-            setValue(newValue,true);
+            setValue((String) variables.get("colorname"), true);
         }
     }
 }]]></programlisting>
@@ -1795,10 +1729,9 @@ public class ColorPickerApplication
 			</para>
 
 			<para>
-				If you are using the Vaadin Plugin for Eclipse, creating a new widget set
-				with the <guilabel>New Vaadin Widgetset</guilabel> wizard will modify the
-				deployment descriptor for you to use the custom widget set. See <xref
-				linkend="gwt.eclipse.widgetset"/> for detailed instructions.
+				If you use the Vaadin Plugin for Eclipse to create a new widget in your
+				project, the plugin will modify the deployment descriptor to use the
+				custom widget set.
 			</para>
 
 			<para>
@@ -1831,7 +1764,7 @@ public class ColorPickerApplication
         &lt;init-param&gt;
             &lt;param-name&gt;widgetset&lt;/param-name&gt;
             &lt;param-value&gt;
-                <parameter>com.vaadin.demo.colorpicker.gwt.ColorPickerWidgetSet</parameter>
+                <parameter>com.vaadin.demo.colorpicker.widgetset.ColorPickerWidgetSet</parameter>
             &lt;/param-value&gt;
         &lt;/init-param&gt;
     &lt;/servlet&gt;
@@ -1844,17 +1777,33 @@ public class ColorPickerApplication
 		</section>
 
 		<para>
-			The project specific parameters are emphasized. Notice that the widget set name is
-			not a file name, but the base name for the
+			The project specific parameters are emphasized. Notice that the widget set
+			name is not a file name, but the base name for the
 			<filename>ColorPickerWidgetSet.gwt.xml</filename> module descriptor.
+        </para>
+
+        <para>
+            The Eclipse Plugin will automatically generate the
+            <parameter>init-param</parameter> parameter in the
+            <filename>web.xml</filename> file of your project when you create a new
+            widget.
 		</para>
 
 		<para>
 			As the project context root in the above example is
 			<filename>myproject</filename> and the
 			<parameter>&lt;url-pattern&gt;</parameter> is <filename>/*</filename>, the URL
-			for the application will be <uri>/myproject/</uri>.
+			for the application will be <uri>/myproject/</uri>. If you are using an URL
+			pattern such as <filename>/myapp/*</filename>, you need to make an additional
+			mapping to map requests to <filename>/VAADIN/*</filename> context to the same
+			servlet. Otherwise the default widget set and built-in themes in Vaadin will
+			be missing.
 		</para>
+
+        <programlisting><?pocket-size 65% ?><![CDATA[  <servlet-mapping>
+    <servlet-name>Book of Vaadin Examples</servlet-name>
+    <url-pattern>/VAADIN/*</url-pattern>
+  </servlet-mapping>]]></programlisting>
 		
 	</section>
 
@@ -1876,51 +1825,54 @@ public class ColorPickerApplication
 		</para>
 
 		<section xml:id="gwt.development.eclipse">
-			<title>Creating a Widget Project in Eclipse</title>
+			<title>Creating a Widget Project</title>
 
 			<para>
-				Creation of a Vaadin project that uses the default widget set
-				was covered in <xref linkend="getting-started.first-project"/>. Developing
-				custom widgets creates a number of additional requirements for a
-				project. Let us review the steps required for creating a project. Details
-				for each step are given in the subsequent sections.
-			</para>
+				Creation of a Vaadin project that uses the default widget set was covered
+				in <xref linkend="getting-started.first-project"/>. Developing custom
+				widgets creates a number of additional requirements for a project.
+            </para>
 
-			<para>
-				The Vaadin Plugin for Eclipse makes the creation of custom widgets in
-				Eclipse very easy. See <xref linkend="gwt.eclipse"/> for detailed
-				instructions.
+            <para>
+                Let us review the steps required for creating an application that contains
+                custom widgets. Details for each step are given in the subsequent
+                sections.
 			</para>
 
 			<orderedlist>
 				<listitem>
-					Create a new project in the Eclipse IDE. (<xref
-					linkend="getting-started.first-project.creation" xrefstyle="select: label"/>)
+					Create a new Vaadin project (for Eclipse, see <xref
+					linkend="getting-started.first-project.creation"
+					xrefstyle="select:label"/>)
 				</listitem>
 				<listitem>
-					Import GWT directory into the project. (<xref linkend="gwt.development.import-gwt" xrefstyle="select: label"/> below)
+					Copy or import the GWT JARs to the project and add them to the class
+					path (<xref linkend="gwt.development.import-gwt"
+					xrefstyle="select:label"/>)
 				</listitem>
 				<listitem>
-					Write the source code in a Java module. (<xref
-					linkend="gwt.development.module-creation" xrefstyle="select:
-					label"/> below)
+					Write the source code for the client-side widgets, their server-side
+					counterparts, and the application (<xref
+					linkend="gwt.development.module-creation" xrefstyle="select: label"/>)
 				</listitem>
 				<listitem>
-					<para>Write the <filename>web.xml</filename> Deployment Descriptor for the web application.</para>
+					<para>Write the <filename>web.xml</filename> Deployment Descriptor for
+					the web application</para>
 					<itemizedlist>
 						<listitem>
-							Define the custom widget set to use instead of the default
-							widget set. (<xref linkend="gwt.usage.deployment" xrefstyle="select: label"/> above)
+							Define the widget set used in the application (<xref linkend="gwt.usage.deployment"
+							xrefstyle="select:label"/>)
 						</listitem>
 					</itemizedlist>
 				</listitem>
 				<listitem>
-					Compile the widget set to JavaScript runtime with GWT Compiler.  (<xref linkend="gwt.development.compiler" xrefstyle="select: label"/> below)
+					Compile the widget set to JavaScript runtime with GWT Compiler (<xref
+					linkend="gwt.development.compiler" xrefstyle="select:label"/>)
 				</listitem>
 				<listitem>
-					Configure the project in Apache Tomcat (or some other web container)
-					and start the server. (<xref
-					linkend="getting-started.first-project.server" xrefstyle="select: label"/> below)
+					Deploy the project to an application server (for Eclipse and Tomcat see <xref
+					linkend="getting-started.first-project.server"
+					xrefstyle="select:label"/>)
 				</listitem>
 				<listitem>
 					<para>Either:</para>
@@ -1931,7 +1883,7 @@ public class ColorPickerApplication
 						</listitem>
 						<listitem>
 							Debug the widgets with Hosted Mode Browser. (<xref
-							linkend="gwt.hosted-mode" xrefstyle="select: label"/>)
+							linkend="gwt.hosted-mode" xrefstyle="select:label"/>)
 						</listitem>
 					</orderedlist>
 				</listitem>
@@ -1942,6 +1894,12 @@ public class ColorPickerApplication
 				linkend="gwt.development.compiler.result"/>.
 			</para>
 
+            <para>
+                The Vaadin Plugin for Eclipse makes the creation of application custom
+                widgets as well as the application projects easy by taking care of all the
+                above steps (except deployment), so if you use it, please see <xref
+                linkend="gwt.eclipse"/> for detailed instructions.
+			</para>
 		</section>
 
 		<section xml:id="gwt.development.import-gwt">
@@ -1964,23 +1922,29 @@ public class ColorPickerApplication
 					linkend="gwt.development.oophm"/>, is an experimental alternative for
 					the Hosted Mode Browser, which you will need to debug GWT widgets. It
 					runs the application in a regular browser instead of the built-in
-					browser, so it will later probably become the default
-					solution. <emphasis>The regular Hosted Mode Browser does not work on
-					Linux in Vaadin 6.1.</emphasis> For the Linux platform, the OOPHM
+					browser. <emphasis>The regular Hosted Mode Browser does not work in
+					Linux in Vaadin 6.2.</emphasis>, so for the Linux platform, the OOPHM
 					package is the only option if you wish to debug GWT code.
 				</para>
 
-				<para>
-					The OOPHM version of GWT is included in the experimental
-					platform-independent OOPHM package of Vaadin, available from the
-					download site.
+                <para>
+                    OOPHM will be the default hosted mode browsing method in GWT 2, which
+                    will be used in Vaadin 6.3. Until then, the OOPHM version of GWT is
+                    included in an experimental platform-independent OOPHM package of
+                    Vaadin, available from the download site.
 				</para>
 			</note>
 		
 			<para>
-				You need to copy the <filename>gwt</filename> directory to your
-				project. You can either copy it with system tools or, if you are using
-				Eclipse, import the directory. You can import the directory as follows.
+				You can copy or import either the entire <filename>gwt</filename>
+				directory or just the GWT JARs to your project.
+			</para>
+
+			<para>
+				If you use Eclipse and copy the GWT directory or the libraries to the
+				project with system tools, remember to select your project folder and
+				press <keycap>F5</keycap> to refresh the project. You can also import the
+				directory as follows (importing the JARs is similar):
 			</para>
 
 			<orderedlist>
@@ -2016,14 +1980,8 @@ public class ColorPickerApplication
 			</orderedlist>
 
 			<para>
-				If you copied the directory outside Eclipse with system tools, remember to
-				select your project folder in Eclipse and press <keycap>F5</keycap> to
-				refresh the project.
-			</para>
-
-			<para>
-				GWT libraries must be included in the classpath of the
-				project. Right-click on the project folder in the <guilabel>Project
+				You must include the GWT libraries in the classpath of the project. If
+				using Eclipse, right-click on the project folder in the <guilabel>Project
 				Explorer</guilabel> in Eclipse and select
 				<menuchoice><guimenu>Properties</guimenu></menuchoice>. Select
 				<menuchoice><guimenu>Java Build
@@ -2032,62 +1990,34 @@ public class ColorPickerApplication
 		</section>
 
 		<section xml:id="gwt.development.module-creation">
-			<title>Creating a GWT Module</title>
+			<title>Writing the Code</title>
 
-			<para>
-				This section gives details on writing an application module that includes
-				custom widgets.
-			</para>
+            <section>
+                <title>Guidelines for the Project Structure</title>
 
-			<section>
-				<title>Creating the Source Folder</title>
+                <para>
+                    The project structure is otherwise free, but if you use the build
+                    script described in <xref linkend="gwt.development.compiler"/> or
+                    configure the GWT Hosted Mode Browser as described in <xref
+                    linkend="gwt.hosted-mode"/>, the examples assume that source files are
+                    located under the <filename>WebContent/WEB-INF/src</filename> folder.
+                </para>
 
-				<para>
-					While the source files can be placed in any directory in ordinary
-					projects, usually in the <filename>src</filename> directory directly
-					under the project root, the widget build script described below in
-					<xref linkend="gwt.development.compiler"/> as well as the GWT
-					Hosted Mode Browser assume that source files are located under the
-					<filename>WebContent/WEB-INF/src</filename> folder. The source folder
-					has to be created and designated as a source folder for the project.
-				</para>
+                <para>
+                    We recommend that the name for the package containing the widget set
+                    is <filename>widgetset</filename>, but this is not required. GWT does,
+                    however, require that the client-side code is written under a
+                    <filename>client</filename> package and any stylesheets are located
+                    under a <filename>public</filename> directory (not necessarily a
+                    package) under the package containing the
+                    <filename>.gwt.xml</filename> descriptor.
+                </para>
 
-				<orderedlist>
-					<listitem>
-						Right-click on the <filename>WebContent/WEB-INF</filename> folder
-						and select
-						<menuchoice><guimenu>New</guimenu><guimenuitem>Folder</guimenuitem></menuchoice>.
-					</listitem>
-					<listitem>
-						In the <guilabel>New Folder</guilabel> dialog, enter
-						<filename>src</filename> as the <guilabel>Folder name</guilabel>
-						and click <guibutton>Finish</guibutton>.
-					</listitem>
-					<listitem>
-						Right-click on the <filename>src</filename> folder and select
-						<menuchoice><guimenu>Build Path</guimenu><guimenuitem>Use as
-						Source Folder</guimenuitem></menuchoice>. 
-					</listitem>
-				</orderedlist>
-
-				<para>
-					The folders designated as source folders are moved under the
-					<guilabel>Java Resources</guilabel> folder in the <guilabel>Project
-					Explorer</guilabel> of Eclipse. This is only a display feature; the
-					source directory remains in its original location in the filesystem.
-				</para>
-			</section>
-
-			<section>
-				<title>Creating Source Files</title>
-
-				<!-- UNFINISHED -->
-
-				<para>
-					In Eclipse, you can insert a folder inside a source package by selecting
-					<menuchoice><guimenu>File</guimenu><guisubmenu>New</guisubmenu><guimenuitem>Folder</guimenuitem></menuchoice>.
-				</para>
-			</section>
+                <para>
+                    See <xref linkend="gwt.development.compiler.result"/> for an example
+                    project structure.
+                </para>
+            </section>
 
 			<section xml:id="gwt.development.module-creation.import">
 				<title>Importing the ColorPicker Demo</title>
@@ -2142,18 +2072,15 @@ public class ColorPickerApplication
 			<title>Compiling GWT Widget Sets</title>
 
 			<para>
-				When running an application in a regular web browser, you need to compile
-				the Vaadin Client-Side Engine and your custom widget set to
-				JavaScript. This is done with the GWT Compiler. Vaadin
-				installation package includes an Ant build script
-				<filename>build-widgetset.xml</filename> in the
-				<filename>WebContent/docs/example-source/</filename> directory.
+				You need to compile the Vaadin Client-Side Engine and your custom widget
+				set to JavaScript with the GWT Compiler. Vaadin installation package
+				includes an Ant build script <filename>build-widgetset.xml</filename> in
+				the <filename>WebContent/docs/example-source/</filename> directory.
 			</para>
 
 			<para>
-				If you are using the Vaadin Plugin for Eclipse, it will create a launch
-				configuration for compiling the widget sets for you. See <xref
-				linkend="gwt.eclipse.widgetset"/> and <xref
+				If you are using the Vaadin Plugin for Eclipse, it will enable a toolbar
+				button that allows you to compile the widget set. See <xref
 				linkend="gwt.eclipse.compiling"/> for instructions.
 			</para>
 
@@ -2163,6 +2090,8 @@ public class ColorPickerApplication
 			</para>
 
 			<screen><prompt>$</prompt> <command>ant -f build-widgetset.xml</command></screen>
+
+            <!-- TODO: A separate script template for own projects. -->
 
 			<para>
                 We advice that you copy the build script to your project and use it as a
@@ -2201,12 +2130,19 @@ public class ColorPickerApplication
 
 			<warning>
 				<para>
-
 					Because GWT supports a slightly reduced version of Java, GWT
 					compilation can produce errors that do not occur with the Java
 					compiler integrated in the Eclipse IDE.
 				</para>
 			</warning>
+
+            <para>
+                Also notice that client-side compilation loads the server-side classes (to
+                find the <literal>@ClientWidget</literal> annotations) and, as a side
+                effect, executes any static code blocks in the classes, even in any
+                non-component classes such as the application class. This could cause
+                unexpected behaviour during the compilation.
+            </para>
 
 			<section xml:id="gwt.development.compiler.compiling">
 				<title>Compiling a Custom Widget Set</title>
@@ -2214,42 +2150,88 @@ public class ColorPickerApplication
 				<para>
 					If you wish to use the build script to compile your own widget sets,
 					open it in an editor. The build script contains some instructions in
-					the beginning of the file. You can use the
-					<parameter>compile-my-widgetset</parameter> target as a template for
-					your own widget sets.
+					the beginning of the file.
 				</para>
 
-				<programlisting><?pocket-size 65% ?>&lt;!-- NOTE: Modify this example to compile your own widgetset  --&gt;
-&lt;target name="compile-widgetset" depends="init"&gt;
-  &lt;echo&gt;Compiling ColorPickerWidgetSet.&lt;/echo&gt;
-  &lt;echo&gt;Modify this script to compile your own widgetsets.&lt;/echo&gt;
-  &lt;java classname="com.google.gwt.dev.Compiler"
-        failonerror="yes" fork="yes" maxmemory="256m"&gt;
+                <para>
+                    First, you need to make some basic configuration in the
+                    <parameter>configure</parameter> target:
+                </para>
 
-    &lt;!-- Define the output directory. --&gt;
-    &lt;arg value="-war" /&gt;
-    &lt;arg value="${client-side-destination}" /&gt;
+				<programlisting><?pocket-size 65% ?>&lt;target name="configure"&gt;
 
-    &lt;!-- Define your GWT widget set class here. --&gt;
-    &lt;arg value="<emphasis role="bold">com.vaadin.demo.colorpicker.gwt.Col
-                orPickerWidgetSet</emphasis>"/&gt;
+    &lt;!-- Path from this file to the project root --&gt;
+    &lt;property name="base"
+              value="<emphasis role="bold">../../../</emphasis>" /&gt;
 
-    &lt;!-- Reserve more than the default amount of stack space. --&gt;
-    &lt;jvmarg value="-Xss1024k"/&gt;
+    &lt;!-- The platform (windows, linux, mac, or oophm) --&gt;
+    &lt;property name="gwt-platform"
+              value="<emphasis role="bold">linux</emphasis>" /&gt;
 
-    &lt;!-- Prevent some X11 warnings on Linux/UNIX. --&gt;
-    &lt;jvmarg value="-Djava.awt.headless=true"/&gt;
+    &lt;!-- Location of platform-specific GWT distribution --&gt;
+    &lt;property name="gwt-location"
+              value="${base}<emphasis role="bold">gwt</emphasis>" /&gt;
 
-    &lt;classpath&gt;
-      &lt;path refid="compile.classpath"/&gt;
-    &lt;/classpath&gt;
-  &lt;/java&gt;
+    &lt;!-- Location of Vaadin JAR --&gt;
+    &lt;property name="toolkit-jar-location"
+              value="${base}<emphasis role="bold">WebContent/WEB-INF/lib/vaad
+                            in-&lt;version&gt;.jar</emphasis>" /&gt;
+
+    &lt;!-- Location of project source code --&gt;
+    &lt;property name="src-location"
+              value="${base}<emphasis role="bold">WebContent/WEB-INF/src</emphasis>" /&gt;
+
+    &lt;!-- Target where to compile server-side classes --&gt;
+    &lt;property name="server-side-destination"
+              value="${base}<emphasis role="bold">WebContent/WEB-INF/classes</emphasis>"/&gt;
+
+    &lt;!-- Target where to compile the widget set --&gt;
+    &lt;property name="client-side-destination"
+              value="${base}WebContent/VAADIN/widgetsets" /&gt;
 &lt;/target&gt;</programlisting>
 
 				<para>
-					Replace the target name with your desired target name and the widget
-					set class name with your own class name.
+					You also need to define the widget set in the
+					<parameter>configure-widgetset</parameter> target:
 				</para>
+
+				<programlisting><?pocket-size 65% ?>&lt;!-- NOTE: Modify this example to compile your own widgetset --&gt;
+&lt;target name="configure-widgetset"&gt;
+
+  &lt;!-- Name of the widget set --&gt;
+  &lt;property name="widgetset"
+    value="<emphasis role="bold">com.vaadin.demo.colorpicker.gwt.ColorPickerWidgetSet</emphasis>"/&gt;</programlisting>
+
+                <para>
+                    You can use the <parameter>compile-widgetset</parameter> target as it
+                    is, or as a template for your own configuration:
+                </para>
+
+				<programlisting><?pocket-size 65% ?>&lt;!-- Build the widget set. --&gt;
+&lt;target name="compile-widgetset"
+        depends="compile-server-side, generate-widgetset"&gt;
+    &lt;echo&gt;Compiling ${widgetset}...&lt;/echo&gt;
+
+    &lt;java classname="com.google.gwt.dev.Compiler"
+          failonerror="yes" fork="yes" maxmemory="256m"&gt;
+        &lt;arg value="-war" /&gt;
+        &lt;arg value="${client-side-destination}" /&gt;
+        &lt;arg value="${widgetset}" /&gt;
+        &lt;jvmarg value="-Xss1024k"/&gt;
+        &lt;jvmarg value="-Djava.awt.headless=true"/&gt;
+        &lt;classpath&gt;
+            &lt;path refid="compile.classpath"/&gt;
+        &lt;/classpath&gt;
+    &lt;/java&gt;
+&lt;/target&gt;</programlisting>
+
+                <para>
+                    Notice that the server-side must be compiled before the client-side
+                    and the compiled server-side classes must be included in the class
+                    path for the GWT Compiler. The reason is that the annotations that
+                    define the component-to-widget mappings are read from the class files
+                    during the GWT compilation.
+                </para>
 
 				<note>
 					<title>Google Web Toolkit Version</title>
@@ -2307,6 +2289,89 @@ public class ColorPickerApplication
 
 				<screen><prompt>$</prompt> <command>ant -f build-widgetset.xml</command></screen>
 			</section>
+
+            <section xml:id="gwt.development.compiler.widgetset.generating">
+                <title>Generating Widget Set Definition</title>
+                
+                <para>
+                    If you use libraries containing other widget sets, you may want to
+                    automatically generate the <filename>.gwt.xml</filename> GWT Module
+                    Descriptor that defines the widget set that combines the Vaadin
+                    default widget set, widget sets included in any libraries, and any
+                    widget sets defined in your project.
+                </para>
+
+                <para>
+                    If you use the <filename>build-widgetset.xml</filename> Ant build
+                    script as a template, you need to define the settings required for
+                    generating a widget set in the <literal>configure-widgetset</literal>
+                    target.
+                </para>
+
+				<programlisting><?pocket-size 65% ?>&lt;target name="configure-widgetset"&gt;
+  &lt;property name="widgetset"
+         value="<emphasis role="bold">com.vaadin.demo.generated.GeneratedWidgetSet</emphasis>"/&gt;
+  <emphasis role="bold">&lt;property name="generate.widgetset" value="1"/&gt;</emphasis>
+  &lt;property name="widgetset-path" value="com/vaadin/demo/widgetset"/&gt;
+&lt;/target&gt;</programlisting>
+
+                <para>
+                    Define the name of the widget set definition file, without the
+                    <filename>.gwt.xml</filename> suffix, in the
+                    <literal>widgetset</literal> property. The
+                    <literal>generate-widgetset</literal> target is executed only if the
+                    <literal>generate.widgetset</literal> property is defined. You also
+                    need to give a file path to the widget set directory, relative to the
+                    <literal>$src-location directory.</literal>.
+                </para>
+
+                <para>
+                    The <literal>generate-widgetset</literal> target is defined as
+                    follows:
+                </para>
+
+				<programlisting><?pocket-size 65% ?><![CDATA[<target name="generate-widgetset"
+        depends="compile-server-side, configure-widgetset"
+        if="generate.widgetset">
+    
+    <!-- Create the directory if it does not already exist. -->
+    <mkdir dir="${src-location}/${widgetset-path}"/>
+    
+    <java classname="com.vaadin.terminal.gwt.widgetsetutils.WidgetSetBuilder"
+          failonerror="yes" fork="yes" maxmemory="256m">
+        <arg value="${widgetset}"/>
+        <jvmarg value="-Xss1024k"/>
+        <jvmarg value="-Djava.awt.headless=true"/>
+        <classpath>
+            <path refid="compile.classpath"/>
+        </classpath>
+    </java>
+</target>]]></programlisting>
+
+                <para>
+                    The widget set builder assumes that the root of the source directory
+                    is the <emphasis>first</emphasis> item in the class path, here defined
+                    with the <literal>src-location</literal> property. The location must
+                    point to the root of the entire source tree, not the path of the
+                    widget set under it. Also the location of compiled server-side classes
+                    must be included, here defined with the
+                    <literal>server-side-destination</literal> property. In the example
+                    script, the class path is defined in the <literal>init</literal>
+                    target as follows:
+                </para>
+
+				<programlisting><?pocket-size 65% ?><![CDATA[<path id="compile.classpath">
+    <pathelement path="${src-location}" />
+	<pathelement path="${server-side-destination}" />
+	<pathelement path="${toolkit-jar-location}" />
+	<pathelement path="${gwt-location}/gwt-user.jar" />
+	<pathelement path="${gwt-location}/gwt-dev-${gwt-platform}.jar" />
+    <fileset dir="${base}WebContent/WEB-INF/lib/">
+    	<include name="**/*.jar"/>
+     </fileset>
+</path>]]></programlisting>
+            </section>
+
 		</section>
 
 		<section xml:id="gwt.development.compiler.result">
@@ -2361,16 +2426,20 @@ public class ColorPickerApplication
 					in <xref linkend="gwt.development.oophm"/>, is an experimental
 					alternative for the Hosted Mode Browser, which you will need to debug
 					GWT widgets. It runs the application in a regular browser instead of
-					the built-in browser, so it will later probably become the default
-					solution. The OOPHM version of GWT is included in the experimental
-					platform-independent OOPHM package of Vaadin, available from the
-					download site.
+					the built-in browser.
+				</para>
+
+                <para>
+                    OOPHM will be the default hosted mode browsing method in GWT 2, which
+                    will be used in Vaadin 6.3. Until then, the OOPHM version of GWT is
+                    included in an experimental platform-independent OOPHM package of
+                    Vaadin, available from the download site.
 				</para>
 
 				<para>
 					<emphasis>The regular Hosted Mode Browser does not work on Linux in
-					Vaadin 6.1.</emphasis> For the Linux platform, the OOPHM package is
-					the only option if you wish to debug GWT code.
+					Vaadin 6.2.</emphasis>, so for the Linux platform, the OOPHM package
+					is the only option if you wish to debug GWT code.
 				</para>
 			</note>
 
@@ -2428,10 +2497,9 @@ public class ColorPickerApplication
 				</para>
 
 				<para>
-					If you are using the Vaadin Plugin for Eclipse, it will create a
-					launch configuration for compiling the widget sets for you. See <xref
-					linkend="gwt.eclipse.widgetset"/> and <xref
-					linkend="gwt.eclipse.compiling"/> for instructions.
+					If you use the Vaadin Plugin for Eclipse, it can create a launch
+					configuration for launching the hosted mode browser. See <xref
+					linkend="gwt.plugin.settings"/> for instructions.
 				</para>
 
 				<orderedlist>
@@ -2793,7 +2861,169 @@ public class ColorPickerApplication
 				be able to use it.
 			</para>
 		</section>
-	</section>
+
+        <section>
+            <title>Packaging a Widget Set</title>
+
+            <para>
+                Packaging and reusing custom components is almost as easy as with any Java
+                code, but with a small difference. You can package the <emphasis>source
+                code</emphasis> of a widget set as a JAR. A user can drop the JAR in the
+                project and add it to the class path. If using widgets from multiple
+                widget sets, the user has to inherit the widget set in a combining widget
+                set (which can be generated automatically). The user then has to compile
+                the widget set(s) as described in <xref
+                linkend="gwt.development.compiler"/>.
+            </para>
+
+            <para>
+                While you could, in theory, package precompiled widget sets in the JAR as
+                well, it would create a serious danger for incompatibility between the
+                client-side and server-side versions of Vaadin. The user would anyhow have
+                to recompile the widget set if he uses multiple widget sets packaged in
+                different JARs, or has developed project-specific widgets.
+            </para>
+
+            <para>
+                The <filename>build-widgetset.xml</filename> Ant script in the
+                <filename>WebContent/docs/example-source</filename> directory of the
+                Vaadin installation package includes an example
+                <literal>package-jar</literal> target for building a JAR. You can use the
+                example as it is or modify it as you need.
+            </para>
+
+            <para>
+                You need to make the JAR packaging specific configuration in the
+                <literal>configure-jar</literal> target. Change to property values to
+                reflect your widget set.
+            </para>
+
+            <programlisting>&lt;target name="configure-jar"&gt;
+    &lt;!-- The compiled JAR name --&gt;
+    &lt;property name="jar-destination"
+              value="${base}<emphasis role="bold">colorpicker.jar</emphasis>"/&gt;
+
+    &lt;!-- Title of the widget set (for JAR) --&gt;
+    &lt;property name="widgetset-title"
+              value="<emphasis role="bold">ColorPicker</emphasis>"/&gt;
+
+    &lt;!-- Version of the widget set (for JAR) --&gt;
+    &lt;property name="widgetset-version" value="<emphasis role="bold">1.0</emphasis>"/&gt;
+
+    &lt;!-- Vendor of the widget set (for JAR) --&gt;
+    &lt;property name="widgetset-vendor"
+              value="<emphasis role="bold">IT Mill Oy</emphasis>"/&gt;
+&lt;/target&gt;</programlisting>
+
+            <para>
+                You may want to check also the <literal>package-jar</literal> target if
+                you want to use other license information or otherwise customize the
+                package content.
+            </para>
+
+            <para>
+                Assuming that you have otherwise configured the build script for your
+                project as described in <xref linkend="gwt.development.compiler"/>, you
+                can build the JAR package with the following command:
+            </para>
+
+            <screen><prompt>$</prompt> <command>ant -f build-widgetset.xml package-jar</command></screen>
+
+            <para>
+                Notice that the <literal>package-jar</literal> target <emphasis>does
+                not</emphasis> depend on the <literal>compile-widgetset</literal> target,
+                as the compiled widget set is not included in the package. If you really
+                wish to do so, add the dependency and include the compiled files as a
+                fileset for the package.
+            </para>
+        </section>
+
+        <section>
+            <title>Troubleshooting</title>
+
+            <para>
+                Below are some typical cases that may cause you trouble.
+            </para>
+
+            <variablelist>
+                <varlistentry>
+                    <term><emphasis>Deferred binding fails</emphasis></term>
+                    <listitem>
+                        <para>
+                            The OOPHM widget set compilation produces the following error
+                            in Eclipse console:
+                        </para>
+
+                        <programlisting><![CDATA[Deferred binding failed for 'com.vaadin.csvalidation.widgetset.client.ui.VJavaScriptEditor' (did you forget to inherit a required module?)]]></programlisting>
+
+                        <para>
+                            This problem occurs if the creation of an instance of a widget
+                            fails, usually due to an exception in the constructor. The GWT
+                            Hosted Mode console displays a more detailed exception log.
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><emphasis>Widgets are missing from the widget set</emphasis></term>
+                    <listitem>
+                        <para>
+                            The widget set compilation displays the list of widgets included
+                            in the widget set. If the list includes only the inherited widgets
+                            (built-in Vaadin widgets), but your custom widgets are missing,
+                            there is a problem.
+                        </para>
+                        
+                        <para>
+                            The typical reason is that the server-side classes are not yet
+                            compiled or are missing from the classpath. Check that the
+                            server-side compilation output folder (such as
+                            <filename>build/classes</filename>) is included in the classpath
+                            of GWT Compiler and that you compile the server-side components
+                            before the client-side, so that they are available in the
+                            classpath. The reason for this is that GWT Compiler (or more
+                            precisely a Vaadin widget set generator) reads the annotations
+                            that define the mappping from server-side components to
+                            client-side widgets from compiled class files.
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><emphasis>The correct widget set is not loaded</emphasis></term>
+                    <listitem>
+                        <para>
+                            The widget set must be specified in
+                            <filename>WebContent/WEB-INF/web.xml</filename> descriptor, as an
+                            initialization parameter for the servlet.
+                        </para>
+                        
+                        <programlisting><?pocket-size 65% ?><![CDATA[<init-param>
+    <description>Application widgetset</description>
+    <param-name>widgetset</param-name>
+    <param-value>com.example.mylibrary.widgetset.MyWidgetset</param-value>
+</init-param>]]></programlisting>
+
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><emphasis>A generated widget set inherits itself</emphasis></term>
+                    <listitem>
+                        <para>
+                            The widget set builder can create a <filename>.gwt.xml</filename>
+                            descriptor that inherits the same widget set. This usually occurs
+                            when the class path for the source files is set to something
+                            different than the root of the entire source tree, so that the
+                            package name of the widget set to be defined with the descriptor
+                            would be invalid.
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term></term>
+                    <listitem></listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+    </section>
 </chapter>
 
 <!-- Keep this comment at the end of the file

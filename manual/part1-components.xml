@@ -1527,7 +1527,7 @@ final CheckBox checkbox2 = new CheckBox("Checked CheckBox");
 checkbox2.setValue(true);
 main.addComponent(checkbox2);
 
-// Make some application logic. We use anynymous listener
+// Make some application logic. We use anonymous listener
 // classes here. The above references were defined as final
 // to allow accessing them from inside anonymous classes.
 checkbox1.addListener(new ValueChangeListener() {
@@ -4368,46 +4368,78 @@ button.addListener(new Button.ClickListener() {
 
 		<para>
 			The ease of making new user interface components is one of the core features
-			of Vaadin. New components can be created at several levels. Typically, you
-			simply combine existing built-in components to produce composite
-			components. In many applications, such composite components make up the
-			majority of the user interface. 
-		</para>
-
-		<para>
-			The easiest way to create new components is to combine existing ones. This can
-			be done in two basic ways: inheritance and management. With inheritance, you
-			inherit some containing class, typically
-			<classname>CustomComponent</classname> or some abstract class such as
-			<classname>AbstractComponent</classname>,
-			<classname>AbstractField</classname>, or
-			<classname>AbstractComponentContainer</classname>. With management, you create
-			a class that creates the needed components under some layout and handles their
-			events. Both of these patterns are used extensively in the examples in <xref
-			linkend="components"/> and elsewhere.
+			of Vaadin. Typically, you simply combine existing built-in components to
+			produce composite components. In many applications, such composite components
+			make up the majority of the user interface.
 		</para>
 
         <para>
-            The <classname>CustomComponent</classname> class is a simple implementation of
-            the <classname>Component</classname> interface that provides a simple way to
-            create new user interface components by the composition of existing
-            components.
-        </para>
-
-        <para>
-            Composition is done by inheriting the <classname>CustomComponent</classname>
-            class and setting the <emphasis>composite root</emphasis> inside the component
-            with <methodname>setCompositionRoot()</methodname>. The composite root is
+            To create a composite component, you need to inherit the
+            <classname>CustomComponent</classname> and call the
+            <methodname>setCompositionRoot()</methodname> in the constructor to set the
+            <emphasis>composition root</emphasis> component. The root component is
             typically a layout component that contains multiple components.
         </para>
 
-        <!-- TODO: Example. -->
+        <para>
+            For example:
+        </para>
+
+        <programlisting><?pocket-size 65% ?><![CDATA[class MyComposite extends CustomComponent {
+    public MyComposite(String message) {
+        // A layout structure used for composition
+        Panel panel = new Panel("My Custom Component");
+        panel.setContent(new VerticalLayout());
+        
+        // Compose from multiple components
+        Label label = new Label(message);
+        label.setSizeUndefined(); // Shrink
+        panel.addComponent(label);
+        panel.addComponent(new Button("Ok"));
+
+        // Set the size as undefined at all levels
+        panel.getContent().setSizeUndefined();
+        panel.setSizeUndefined();
+        setSizeUndefined();
+
+        // The composition root MUST be set
+        setCompositionRoot(panel);
+    }
+}]]></programlisting>
+
+        <para>
+            Take note of the sizing when trying to make a customcomponent that shrinks to
+            fit the contained components. You have to set the size as undefined at all
+            levels; the sizing of the composite component and the composition root are
+            separate.
+        </para>
+
+        <para>
+            You can use the component as follows:
+        </para>
+
+        <programlisting><?pocket-size 65% ?><![CDATA[MyComposite mycomposite = new MyComposite("Hello");]]></programlisting>
+
+        <para>
+            The rendered component is shown in <xref
+            linkend="figure.components.customcomponent"/>.
+        </para>
+
+		<figure xml:id="figure.components.customcomponent">
+			<title>A Custom Composite Component</title>
+			<mediaobject>
+				<imageobject>
+					<imagedata smallscale="140" align="center" fileref="img/components/customcomponent-example1.png"/>
+				</imageobject>
+			</mediaobject>
+		</figure>
 
 		<para>
-			You can also create your own low-level components, for example existing Google
-			Web Toolkit components. It is also possible to extend the functionality of
-			existing components. Development of custom GWT components is covered in <xref
-			linkend="gwt"/>.
+            You can also inherit any other components, such as layouts, to attain similar
+            composition. Even further, you can create entirely new low-level components,
+            by integrating custom Google Web Toolkit components or by extending the
+            client-side functionality of built-in components. Development of custom GWT
+            components is covered in <xref linkend="gwt"/>.
 		</para>
 	</section>
 </chapter>

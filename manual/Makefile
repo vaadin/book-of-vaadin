@@ -33,8 +33,9 @@ IMAGES =	intro/architecture intro/architecture-detailed intro/toolchain intro/to
 			advanced/liferay-display \
 			themes/theme-contents themes/eclipse-theme-created-annotated \
 			gwt/gwt-widgets gwt/gwt-widget-files gwt/gwt-hostedmode-project-annotated\
+			gwt/gwt-custom-architecture \
 			vaadin-logo \
-			eclipse/editor-design-2-crop
+			eclipse/editor-design-2-crop eclipse/widgetset-compiling-toolbar
 
 # List of source XML files
 XMLFILES =  book.xml \
