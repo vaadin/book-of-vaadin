@@ -1012,9 +1012,9 @@ main.addComponent(poller);]]></programlisting>
 		</para>
 
 		<programlisting><?pocket-size 75% ?><![CDATA[<context-param>
+  <description>Vaadin production mode</description>
   <param-name>productionMode</param-name>
   <param-value>true</param-value>
-  <description>Vaadin production mode</description>
 </context-param>]]></programlisting>
 		
 		<para>
@@ -1653,80 +1653,100 @@ public class DefaultButtonExample extends CustomComponent
 	<section xml:id="advanced.printing">
 		<title>Printing</title>
 
+        <indexterm xml:id="term:advanced.printing" class="startofrange">
+            <primary>printing</primary>
+        </indexterm>
+
 		<para>
 			Vaadin does not currently have any special support for
-			printing. Printing on the server-side is anyhow largely independent from the
+			printing. Printing on the server-side is, in any case, largely independent from the
 			web UI of an application. You just have to take care that the printing does
 			not block server requests, possibly by running printing in another thread.
 		</para>
 
 		<para>
-			For client-side printing, most browsers support printing the web page. The
-			<methodname>print()</methodname> method in JavaScript opens the print window
-			of the browser. You can easily make a HTML button or link that prints the
-			current page by placing the custom HTML code inside a
-			<classname>Label</classname>.
+            <indexterm xml:id="term:advanced.printing/print" class="startofrange">
+                <primary><methodname>print()</methodname></primary>
+            </indexterm>
+            <indexterm xml:id="term:advanced.printing/JavaScript.print" class="startofrange">
+                <primary>JavaScript</primary>
+                <secondary><methodname>print()</methodname></secondary>
+            </indexterm>
+            
+			For client-side printing, most browsers support printing the web page. Vaadin
+			does not explicitly support launching the printing in browser, but you can
+			easily use the JavaScript <methodname>print()</methodname> method that opens
+			the print window of the browser.
 		</para>
 
-		<programlisting><?pocket-size 65% ?><![CDATA[main.addComponent(new Label("<input type='button' onClick='print()' value='Click to Print'/>", Label.CONTENT_XHTML));]]></programlisting>
+        <indexterm><primary>JavaScript</primary><secondary><methodname>executeJavaScript()</methodname></secondary></indexterm>
+        <indexterm><primary><methodname>executeJavaScript()</methodname></primary></indexterm>
 
-		<para>
-			This button would print the current page. Often you want to be able to print a
-			report or receipt and it should not have any UI components. In such a case you
-			could offer it as a PDF resource, or you could open a new window as is done
-			below and automatically launch printing.
-		</para>
-
-		<programlisting><?pocket-size 65% ?><![CDATA[// A button to open the printer-friendly page.
-Button printButton = new Button("Click to Print");
-main.addComponent(printButton);
-printButton.addListener(new Button.ClickListener() {
+		<programlisting><?pocket-size 65% ?><![CDATA[final Button print = new Button("Print This Page");
+print.addListener(new ClickListener() {
     public void buttonClick(ClickEvent event) {
-        // Create a window that contains stuff you want to print.
-        Window printWindow = new Window("Window to Print");
-        
-        // Have some content to print.
-        printWindow.addComponent(
-                new Label("Here's some dynamic content."));
-        
-        // To execute the print() JavaScript, we need to run it
-        // from a custom layout.
-        CustomLayout scriptLayout = new CustomLayout("printpage");
-        printWindow.addComponent (scriptLayout);
-        
-        // Add the printing window as an application-level window.
-        main.getApplication().addWindow(printWindow);
-
-        // Open the printing window as a new browser window
-        main.open(new ExternalResource(printWindow.getURL()),
-                  "_new");
-    } 
+        print.getWindow().executeJavaScript("print();");
+    }
 });]]></programlisting>
 
 		<para>
-			How the browser opens the window, as an actual window or just a tab, depends
-			on the browser. Notice that above we create a new window object each time the
-			print button is clicked, which leads to unused window objects. If this is a
-			real problem, you might want to reuse the same window object or clean up the
-			old ones - it's ok because the user doesn't interact with them later anyhow.
+			This button would print the current page, including the button itself. Often,
+			you want to be able to print a report or receipt and it should not have any
+			visible UI components. In such a case, you could offer it as a PDF resource,
+			or you could open a new window, as is done below, and automatically launch
+			printing.
 		</para>
 
+		<programlisting><?pocket-size 65% ?><![CDATA[// A button to open the printer-friendly page.
+Button print = new Button("Click to Print");
+
+print.addListener(new Button.ClickListener() {
+	public void buttonClick(ClickEvent event) {
+        // Create a window that contains what you want to print
+        Window window = new Window("Window to Print");
+
+        // Have some content to print
+        window.addComponent(new Label(
+                "<h1>Here's some dynamic content</h1>\n" +
+                "<p>This is to be printed to the printer.</p>",
+                Label.CONTENT_XHTML));
+
+        // Add the printing window as a new application-level
+        // window
+        getApplication().addWindow(window);
+
+        // Open it as a popup window with no decorations
+        getWindow().open(new ExternalResource(window.getURL()),
+                "_blank", 500, 200,  // Width and height 
+                Window.BORDER_NONE); // No decorations
+
+        // Print automatically when the window opens.
+        // This call will block until the print dialog exits!
+        window.executeJavaScript("print();");
+
+        // Close the window automatically after printing
+        window.executeJavaScript("self.close();");
+    }
+});]]></programlisting>
+
 		<para>
-			You will also need a custom layout that contains the
-			<methodname>print()</methodname> JavaScript function that launches the
-			printing. Notice that the custom layout <emphasis>must</emphasis> contain also
-			another element (below a <literal>&lt;div&gt;</literal>) in addition to the
-			<literal>&lt;script&gt;</literal> element.
+			How the browser opens the window, as an actual (popup) window or just a tab, depends
+			on the browser. Notice that calling the <methodname>print()</methodname> method in the
+            window will block the entire application until the print dialog exits.
+
+            <indexterm><primary><classname>Window</classname></primary><secondary>closing</secondary></indexterm>
+
+            After printing, we automatically close the window with another JavaScript
+            call, as there is no <methodname>close()</methodname> method in
+            <classname>Window</classname>.
 		</para>
 
-		<programlisting><![CDATA[<div>This is some static content.</div>
-
-<script type='text/javascript'>
-    print();
-</script>
-]]></programlisting>
+        <indexterm startref="term:advanced.printing/print" class="endofrange"/>
+        <indexterm startref="term:advanced.printing/JavaScript.print" class="endofrange"/>
 
 		<para>
+            <indexterm><primary>PDF</primary></indexterm>
+
 			Printing as PDF would not require creating a <classname>Window</classname>
 			object, but you would need to provide the content as a static or a dynamic
 			resource for the <methodname>open()</methodname> method. Printing a PDF file
@@ -1734,6 +1754,7 @@ printButton.addListener(new Button.ClickListener() {
 			browser.
 		</para>
 
+        <indexterm startref="term:advanced.printing" class="endofrange"/>
 	</section>
 
 	<section xml:id="advanced.portal">
@@ -2494,6 +2515,380 @@ if (getContext() instanceof PortletApplicationContext) {
 			<!-- NOTE: Document the rude HTML sanitization method when #3382 is closed. -->
 		</section>
 	</section>
+
+	<section xml:id="advanced.urifu">
+		<title>URI Fragment and History Management with <classname>UriFragmentUtility</classname></title>
+
+        <para>
+            A major issue in AJAX applications is that as they run in a single web page,
+            bookmarking the application URL (or more generally the
+            <emphasis>URI</emphasis>) can only bookmark the application, not an
+            application state. This is a problem for many applications such as product
+            catalogs and forums, in which it would be good to provide links to specific
+            products or messages. Consequently, as browsers remember the browsing history
+            by URI, the history and the <guibutton>Back</guibutton> button do not normally
+            work. The solution is to use the <emphasis>fragment</emphasis> part of the
+            URI, which is separated from the primary part (address + path + optional query
+            parameters) of the URI with the hash (#) character. For example:
+        </para>
+
+        <programlisting><?pocket-size 75% ?><![CDATA[http://example.com/path#myfragment]]></programlisting>
+
+        <para>
+            The exact syntax of the fragment part is defined in RFC 3986 (Internet
+            standard STD 66) that defines the URI syntax. A fragment may only contain the
+            regular URI <emphasis>path characters</emphasis> (see the standard) and
+            additionally the slash and the question mark.
+        </para>
+
+        <para>
+            The <classname>UriFragmentUtility</classname> is a special-purpose component
+            that manages the URI fragment; it allows setting the fragment and to handle
+            user-made changes to it. As it is a regular component, though invisible, you
+            must add it to a layout in an application window with the
+            <methodname>addComponent()</methodname>, as usual.
+        </para>
+
+        <programlisting><?pocket-size 65% ?><![CDATA[public void init() {
+    Window main = new Window("URI Fragment Example");
+    setMainWindow(main);
+
+    // Create the URI fragment utility
+    final UriFragmentUtility urifu = new UriFragmentUtility();
+    main.addComponent(urifu);]]></programlisting>
+
+        <para>
+            Notice that the utility component can work only when it is attached to the
+            window, so in practice it must be added in the <methodname>init()</methodname>
+            method of the application and must afterwards always remain in the
+            application's user interface.
+        </para>
+
+        <para>
+            You can set the URI fragment with the <methodname>setFragment()</methodname>
+            method of the <classname>UriFragmentUtility</classname> object. The method takes the
+            fragment as a string parameter. In the following example, we have a menu, from
+            which the user can select the URI fragment.
+        </para>
+
+        <programlisting><?pocket-size 65% ?><![CDATA[// Application state menu
+final ListSelect menu = new ListSelect("Select a URI Fragment");
+menu.addItem("mercury");
+menu.addItem("venus");
+menu.addItem("earth");
+menu.addItem("mars");
+menu.setImmediate(true);
+main.addComponent(menu);
+
+// Set the URI Fragment when menu selection changes
+menu.addListener(new Property.ValueChangeListener() {
+    public void valueChange(ValueChangeEvent event) {
+        String itemid = (String) event.getProperty().getValue();
+        urifu.setFragment(itemid);
+    }
+});]]></programlisting>
+
+        <para>
+            The URI fragment and any changes to it are passed to an application as
+            <classname>FragmentChangedEvent</classname>s, which you can handle with a
+            <classname>FragmentChangedListener</classname>. You can get the new fragment
+            value with the <methodname>getFragment()</methodname> method from the URI
+            fragment utility component.
+        </para>
+
+        <programlisting><?pocket-size 65% ?><![CDATA[// When the URI fragment is given, use it to set menu selection 
+urifu.addListener(new FragmentChangedListener() {
+    public void fragmentChanged(FragmentChangedEvent source) {
+        String fragment =
+                  source.getUriFragmentUtility().getFragment();
+        if (fragment != null)
+            menu.setValue(fragment);
+    }
+});]]></programlisting>
+
+        <para>
+            <xref linkend="figure.advanced.urifu"/> shows an application that allows
+            specifying the menu selection with a URI fragment and correspondingly sets the
+            fragment when the user selects a menu item, as done in the code examples
+            above.
+        </para>
+
+        <figure xml:id="figure.advanced.urifu">
+            <title>Application State Management with URI Fragment Utility</title>
+            <mediaobject>
+                <imageobject role="html">
+                    <imagedata align="center" fileref="img/advanced/urifu-1.png"/>
+                </imageobject>
+                <imageobject role="fo">
+                    <imagedata scale="100" smallscale="100%" align="center" fileref="img/advanced/urifu-1.png"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
+    </section>
+
+    <section xml:id="advanced.httpservletrequestlistener">
+        <title>Capturing HTTP Requests</title>
+
+        <indexterm xml:id="term:advanced.httpservletrequestlistener" class="startofrange">
+            <primary>HttpServletRequestListener</primary>
+        </indexterm>
+
+        <para>
+            Behind the event-driven processing model of Vaadin lies the Java Servlet API,
+            which is based on processing HTTP requests. These requests are normally
+            hidden from Vaadin applications, but can be caught using the
+            <classname>HttpServletRequestListener</classname> interface. You must
+            implement the interface in your application class. The two methods defined in
+            the interface, <methodname>onRequestStart()</methodname> and
+            <methodname>onRequestEnd()</methodname>, allow processing the request before
+            and after other processing.
+        </para>
+
+        <programlisting><?pocket-size 65% ?><![CDATA[import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import com.vaadin.Application;
+import com.vaadin.terminal.gwt.server.HttpServletRequestListener;
+import com.vaadin.ui.*;
+
+public class HttpServletRequestApplication extends Application
+       implements HttpServletRequestListener {
+
+    @Override
+    public void init() {
+        System.out.println("  Application.init() called.");
+        
+        Window main = new Window("URI Fragment Example");
+        setMainWindow(main);
+        setTheme("book-examples");
+                
+        // Does nothing but causes a request
+        Button button = new Button ("Make a request");
+        main.addComponent(button);
+    }
+
+    public void onRequestStart(HttpServletRequest request,
+                               HttpServletResponse response) {
+        System.out.println("[Start of request");
+        System.out.println(" Query string: " +
+                           request.getQueryString());
+        System.out.println(" Path: " +
+                           request.getPathInfo());
+    }
+
+    public void onRequestEnd(HttpServletRequest request,
+                             HttpServletResponse response) {
+        System.out.println(" End of request]");
+    }
+}]]></programlisting>
+
+        <para>
+            The <methodname>onRequestStart()</methodname> is called for the first time
+            when the application class is loaded but the <methodname>init()</methodname>
+            is not yet called. This can be seen in the output of the above code example:
+        </para>
+
+        <programlisting><?pocket-size 65% ?><![CDATA[[Start of request
+ Query string: null
+ Path: null
+  Application.init() called.
+ End of request]
+[Start of request
+ Query string: repaintAll=1&sh=1050&sw=1680&cw=500&ch=300&vw=500
+ Path: /UIDL/
+ End of request]
+[Start of request
+ Query string: windowName=1071684214
+ Path: /UIDL/
+ End of request]]]></programlisting>
+
+        <para>
+            The first call is a regular HTML page load, so the URL path is simply the
+            application path. The subsequent calls are AJAX calls made using the UIDL
+            protocol, so the request path includes the <literal>/UIDL/</literal> part. This is
+            important to know when using cookies, as explained later.
+        </para>
+
+        <section>
+            <title>Using Request and Response Objects</title>
+
+            <indexterm xml:id="term:advanced.httpservletrequestlistener.httpservletrequest" class="startofrange">
+                <primary>HttpServletRequest</primary>
+            </indexterm>
+            <indexterm xml:id="term:advanced.httpservletrequestlistener.httpservletresponse" class="startofrange">
+                <primary>HttpServletResponse</primary>
+            </indexterm>
+            
+            <para>
+                The <classname>HttpServletRequest</classname> object provides access to
+                the request data, such as request headers, path info, and query string, as
+                well as to some higher-level information such as cookies.
+            </para>
+
+            <para>
+                The <classname>HttpServletResponse</classname> object is somewhat
+                different, as most write operations write data directly to the output
+                stream of the server request. It is therefore possible to add new headers
+                and cookies in the <methodname>onRequestStart()</methodname>, and make
+                other settings, but not later on, especially not in the
+                <methodname>onRequestEnd()</methodname>, as all the UIDL response data has
+                already been written to the output stream. The framework writes the UIDL
+                response to the output stream of the response <emphasis>before</emphasis>
+                calling <methodname>onRequestEnd()</methodname>. You therefore have to be
+                careful when writing to the response object. You can usually write to it
+                when handling component events in listeners, as is done in the cookie
+                example later.
+            </para>
+
+            <para>
+                While it is theoretically possible to redirect the output stream of the
+                response object to write custom data to the response, you should never
+                need to do that, as it would break the UIDL communication protocol.
+            </para>
+        
+            <para>
+                The servlet request and response objects are defined in the Java Servlet
+                API. Please refer to its documentation for more detailed information.
+            </para>
+
+            <indexterm startref="term:advanced.httpservletrequestlistener.httpservletrequest" class="endofrange"/>
+            <indexterm startref="term:advanced.httpservletrequestlistener.httpservletresponse" class="endofrange"/>
+        </section>
+
+        <section>
+            <title>Managing Cookies</title>
+
+            <indexterm xml:id="term:advanced.httpservletrequestlistener.cookies" class="startofrange">
+                <primary>cookies</primary>
+            </indexterm>
+
+            <para>
+                Setting and reading cookies is one of the typical uses of
+                <classname>HttpServletRequestListener</classname>. The application gets
+                the <classname>HttpServletRequest</classname> object containing the
+                cookies in the <methodname>onRequestStart()</methodname> method.
+            </para>
+
+            <section>
+                <title>Setting a Cookie</title>
+
+                <para>
+                    You normally set a cookie in an event listener. As the request object
+                    is a transient object that exists only for the duration of the
+                    request, it is not accessible from the
+                    <classname>Application</classname> object. The only way to access it
+                    is to store it in <methodname>onRequestStart()</methodname>, as done
+                    in the following example.
+                </para>
+
+                <programlisting><?pocket-size 65% ?><![CDATA[public class CookieExampleApplication extends Application
+       implements HttpServletRequestListener {
+    HttpServletResponse response;
+
+    public void onRequestStart(HttpServletRequest request,
+                               HttpServletResponse response) {
+        // Store the reference to the response object for
+        // using it in event listeners
+        this.response = response;
+        ...
+   }
+   ...]]></programlisting>
+
+                <para>
+                    We can then use the reference to set or delete cookies in event
+                    listeners. Notice that the <emphasis>cookie path</emphasis> property
+                    is automatically set to the application path (such as
+                    <filename>/book-examples/cookies</filename>) on the first request, but
+                    contains the <filename>UIDL</filename> subpath on subsequent calls
+                    (such as <filename>/book-examples/cookies/UIDL</filename>). As the
+                    cookies are matched against this path, you may need to set the path
+                    explicitly with <methodname>setPath()</methodname>.
+                </para>
+
+                <programlisting><?pocket-size 65% ?><![CDATA[newuser = new TextField ("Give a user name");
+login = new Button("Login");
+login.addListener(new Button.ClickListener() {
+    public void buttonClick(ClickEvent event) {
+        Object value = newuser.getValue(); 
+        if (value != null &&
+            !((String)value).equals("")) {
+            username = (String) value;
+
+            Cookie cookie = new Cookie("username",
+                                       username);
+            // Use a fixed path
+            cookie.setPath("/book-examples");
+            cookie.setMaxAge(3600); // One hour
+            response.addCookie(cookie);
+            System.out.println("Set cookie.");
+
+            newuser.setEnabled(false);
+            login.setEnabled(false);
+            restart.setEnabled(true);
+            logout.setEnabled(true);
+        }
+    }
+});
+loginrow.addComponent(newuser);
+loginrow.addComponent(login);]]></programlisting>
+
+                <para>
+                    Removing cookie can be set in similar way by setting the
+                    <emphasis>maxAge</emphasis> property to zero.
+                </para>
+
+                <programlisting><?pocket-size 65% ?><![CDATA[// Delete the cookie
+Cookie cookie = new Cookie("username", username);
+cookie.setPath("/book-examples");
+cookie.setMaxAge(0); // Delete
+response.addCookie(cookie);]]></programlisting>
+            </section>
+
+            <section>
+                <title>Reading a Cookie</title>
+
+                <para>
+                    Reading a cookie can be done in the
+                    <methodname>onRequestStart()</methodname> event. As this method is
+                    called also on the first client request before the application is
+                    initialized, it is possible to read user identification cookies and
+                    such on the first request.
+                </para>
+
+                <programlisting><?pocket-size 65% ?><![CDATA[public class CookieExampleApplication extends Application
+       implements HttpServletRequestListener {
+    String username;
+
+    public void onRequestStart(HttpServletRequest request,
+                               HttpServletResponse response) {
+        if (username == null) {
+            Cookie[] cookies = request.getCookies();
+            for (int i=0; i<cookies.length; i++) {
+                if (cookies[i].getName().equals("username"))
+                    // Log the user in automatically
+                    username = cookies[i].getValue();
+            }
+        }
+    }
+    ...]]></programlisting>
+
+                <para>
+                    Notice that the request path is the application path (such as
+                    <filename>/book-examples/cookies</filename>) on the first request, but
+                    contains the <filename>UIDL</filename> subpath on subsequent AJAX
+                    calls (such as <filename>/book-examples/cookies/UIDL</filename>). So,
+                    if you have set the cookie in an AJAX request without setting the
+                    cookie path explicitly to such that does not contain the
+                    <filename>UIDL</filename> subpath, the cookie will be filtered out on
+                    the initial <methodname>onRequestStart()</methodname> call.
+                </para>
+            </section>
+
+            <indexterm startref="term:advanced.httpservletrequestlistener.cookies" class="endofrange"/>
+        </section>
+
+        <indexterm startref="term:advanced.httpservletrequestlistener" class="endofrange"/>
+    </section>
 </chapter>
 
 <!-- Keep this comment at the end of the file
