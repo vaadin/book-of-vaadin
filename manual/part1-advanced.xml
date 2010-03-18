@@ -1760,19 +1760,22 @@ print.addListener(new Button.ClickListener() {
 	<section xml:id="advanced.portal">
 		<title>Portal Integration</title>
 
+        <indexterm xml:id="term.advanced.portal" class="startofrange"><primary>portal integration</primary></indexterm>
+
 		<para>
 			Vaadin supports running applications as portlets, as defined in the JSR-168
-			standard. While providing generic support for all portals implementing the
-			standard, Vaadin especially supports the Liferay portal and the needed
-			portal-specific configuration is given below for Liferay.
+			(Java Portlet API) and JSR-286 (Java Portlet API 2.0) standards. While
+			providing generic support for all portals implementing the standards, Vaadin
+			especially supports the Liferay portal and the needed portal-specific
+			configuration is given below for Liferay.
 		</para>
 
 		<para>
 			You can deploy the Vaadin demo package WAR (available from the download site)
 			directly to a portal such as Liferay. It contains all the necessary portlet
-			configuration files. For optimal performance with Liferay, you can install and
-			configure the widget set and themes in Liferay as described later in this
-			section.
+			configuration files. For optimal performance with Liferay, you can install the
+			Vaadin library and other needed resources in Liferay as described later in
+			this section.
 		</para>
 
 		<para>
@@ -1793,13 +1796,16 @@ print.addListener(new Button.ClickListener() {
 				<listitem><para>Application packaged as a WAR</para>
 					<itemizedlist spacing="compact" mark="disc">
 						<listitem><para><filename>WEB-INF/portlet.xml</filename> descriptor</para></listitem>
+						<listitem><para><filename>WEB-INF/web.xml</filename> descriptor for Portlet 1.0 portlets</para></listitem>
 						<listitem><para><filename>WEB-INF/liferay-portlet.xml</filename> descriptor for Liferay</para></listitem>
 						<listitem><para><filename>WEB-INF/liferay-display.xml</filename> descriptor for Liferay</para></listitem>
+						<listitem><para><filename>WEB-INF/liferay-plugin-package.properties</filename> for Liferay</para></listitem>
 					</itemizedlist>
 				</listitem>
 
-				<listitem>Widget set installed to portal (recommended)</listitem>
-				<listitem>Themes installed to portal (recommended)</listitem>
+				<listitem>Widget set installed to portal (optional)</listitem>
+				<listitem>Themes installed to portal (optional)</listitem>
+				<listitem>Vaadin library installed to portal (optional)</listitem>
                 <listitem>Portal configuration settings (optional)</listitem>
 			</itemizedlist>
 
@@ -1822,27 +1828,29 @@ print.addListener(new Button.ClickListener() {
 
 			<para>
 				How you actually deploy a WAR package depends on the portal. In Liferay,
-				you simply put it to the <filename>deploy</filename> subdirectory under
-				the Liferay installation directory. Liferay uses Tomcat by default, so you
-				will find the extracted package in the <filename>webapps</filename>
-				directory under the Tomcat installation directory included in Liferay.
+				you simply drop it to the <filename>deploy</filename> subdirectory under
+				the Liferay installation directory. The deployment depends on the
+				application server under which Liferay runs; for example, if you use
+				Liferay bundled with Tomcat, you will find the extracted package in the
+				<filename>webapps</filename> directory under the Tomcat installation
+				directory included in Liferay.
 			</para>
 		</section>
 
-		<section>
+		<section xml:id="advanced.portal.eclipse">
 			<title>Creating a Portal Application Project in Eclipse</title>
 
 			<para>
 				While you can create the needed deployment descriptors manually for any
 				existing Vaadin application, as described in subsequent sections, the
 				Vaadin Plugin for Eclipse provides a wizard for easy creation of portal
-				application projects as well.
+				application projects.
 			</para>
 
 			<para>
 				Creation of a portal application project is almost identical to the
-				creation of a regular application project. For a full treatment of the new
-				project wizard and the possible options, please see <xref
+				creation of a regular application project. For a full treatment of the New
+				Project Wizard and the possible options, please see <xref
 				linkend="getting-started.first-project.creation"/>.
 			</para>
 
@@ -1902,23 +1910,94 @@ print.addListener(new Button.ClickListener() {
 				<listitem>
 					<para>
 						The <guilabel>Vaadin project</guilabel> step page has various
-						Vaadin-specific application settings. If you are trying Vaadin out
-						for the first time, you should not need to change anything. The
-						<guilabel>Create portlet configuration</guilabel> option should be
-						automatically selected. You can give another portlet title of you
-						want. You can change most of the settings afterward.
+						Vaadin-specific application settings. These are largely the same
+						as for regular applications. You should not need to change
+						anything as you can change the application titles and other
+						details afterwards. The <guilabel>Create portlet
+						template</guilabel> option should be automatically selected. You
+						can give another portlet title of you want. You can change most of
+						the settings afterward.
 					</para>
 				
 					<screenshot>
 						<mediaobject>
 							<imageobject role="html">
-								<imagedata align="center" fileref="img/eclipse/project-new-portlet-2.png"/>
+								<imagedata align="center" fileref="img/eclipse/project-new-portlet-3.png"/>
 							</imageobject>
 							<imageobject role="fo">
-								<imagedata scale="50" smallscale="100%" align="center" fileref="img/eclipse/project-new-portlet-2.png"/>
+								<imagedata scale="50" smallscale="100%" align="center" fileref="img/eclipse/project-new-portlet-3.png"/>
 							</imageobject>
 						</mediaobject>
 					</screenshot>
+
+                    <variablelist>
+						<varlistentry>
+							<term><guilabel>Create project template</guilabel></term>
+							<listitem>
+								<para>
+                                    Creates an application class and all the needed
+                                    portlet deployment descriptors.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+						<varlistentry>
+							<term><guilabel>Application name</guilabel></term>
+							<listitem>
+								<para>
+                                    The application name is used in the title of the main
+                                    window (which is usually invisible in portlets) and as
+                                    an identifier, either as is or with a suffix, in
+                                    various deployment descriptors.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+						<varlistentry>
+							<term><guilabel>Base package name</guilabel></term>
+							<listitem>
+								<para>
+                                    Java package for the application class.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+						<varlistentry>
+							<term><guilabel>Application class name</guilabel></term>
+							<listitem>
+								<para>
+                                    Name of the application class. The default is derived
+                                    from the project name.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+						<varlistentry>
+							<term><guilabel>Portlet version</guilabel></term>
+							<listitem>
+								<para>
+                                    Same as in the project settings.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+						<varlistentry>
+							<term><guilabel>Portlet title</guilabel></term>
+							<listitem>
+								<para>
+                                    The portlet title, defined in
+                                    <filename>portlet.xml</filename>, can be used as the
+                                    display name of the portlet (at least in Liferay). The
+                                    default value is the project name. The title is also
+                                    used as a short description in
+                                    <filename>liferay-plugin-package.properties</filename>.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+						<varlistentry>
+							<term><guilabel>Vaadin version</guilabel></term>
+							<listitem>
+								<para>
+                                    Same as in the project settings.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+                    </variablelist>
 
                     <para>
                         Finally, click <guibutton>Finish</guibutton> to create the project.
@@ -1948,7 +2027,7 @@ print.addListener(new Button.ClickListener() {
 			</para>
 
 			<simplesect>
-				<title>Basic Portlet Descriptor</title>
+				<title>Portlet 2.0 Deployment Descriptor</title>
 
 				<para>
 					The portlet WAR must include a portlet descriptor located at
@@ -1958,6 +2037,84 @@ print.addListener(new Button.ClickListener() {
 					other configuration. Below is an example of a simple portlet
 					definition in <filename>portlet.xml</filename> descriptor.
 				</para>
+
+				<programlisting><?pocket-size 65% ?>&lt;?xml version="1.0" encoding="UTF-8" standalone="no"?&gt;
+&lt;portlet-app
+  xmlns="http://java.sun.com/xml/ns/portlet/portlet-app_2_0.xsd"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  version="2.0"
+  xsi:schemaLocation=
+    "http://java.sun.com/xml/ns/portlet/portlet-app_2_0.xsd
+     http://java.sun.com/xml/ns/portlet/portlet-app_2_0.xsd"&gt;
+
+  &lt;portlet&gt;
+    &lt;portlet-name&gt;<emphasis role="bold">Portlet Example portlet</emphasis>&lt;/portlet-name&gt;
+    &lt;display-name&gt;<emphasis role="bold">Vaadin Portlet Example</emphasis>&lt;/display-name&gt;
+
+    &lt;!-- Map portlet to a servlet. --&gt;
+    &lt;portlet-class&gt;
+      com.vaadin.terminal.gwt.server.ApplicationPortlet2
+    &lt;/portlet-class&gt;
+    &lt;init-param&gt;
+      &lt;name&gt;application&lt;/name&gt;
+
+      &lt;!-- The application class with package name. --&gt;
+      &lt;value&gt;<emphasis role="bold">com.example.myportlet.MyportletApplication</emphasis>&lt;/value&gt;
+    &lt;/init-param&gt;
+
+    &lt;!-- Supported portlet modes and content types. --&gt;
+    &lt;supports&gt;
+      &lt;mime-type&gt;text/html&lt;/mime-type&gt;
+      &lt;portlet-mode&gt;view&lt;/portlet-mode&gt;
+      &lt;portlet-mode&gt;edit&lt;/portlet-mode&gt;
+      &lt;portlet-mode&gt;help&lt;/portlet-mode&gt;
+    &lt;/supports&gt;
+
+    &lt;!-- Not always required but Liferay requires these. --&gt;
+    &lt;portlet-info&gt;
+      &lt;title&gt;<emphasis role="bold">Vaadin Portlet Example</emphasis>&lt;/title&gt;
+      &lt;short-title&gt;<emphasis role="bold">Portlet Example</emphasis>&lt;/short-title&gt;
+    &lt;/portlet-info&gt;
+  &lt;/portlet&gt;
+&lt;/portlet-app&gt;</programlisting>
+
+				<para>
+					Listing supported portlet modes in <filename>portlet.xml</filename>
+					enables the corresponding portlet controls in the portal user
+					interface that allow changing the mode, as described later.
+				</para>
+            </simplesect>
+
+            <simplesect>
+                <title>Portlet 1.0 Deployment Descriptor</title>
+
+                <para>
+                    The portlet deployment descriptor for Portlet 1.0 API is largely the
+                    same as for Portlet 2.0. The main differences are:
+                </para>
+
+                <orderedlist>
+                    <listitem><para>XML namespace and schema names</para></listitem>
+
+                    <listitem><para>Portlet-class:
+                    <classname>ApplicationPortlet</classname> vs
+                    <classname>ApplicationPortlet2</classname></para></listitem>
+
+                    <listitem><para>The <literal>application</literal> parameter is a name
+                    of the servlet (defined in <filename>web.xml</filename> in Portlet
+                    1.0, but name of the application class in Portlet 2.0. There is no
+                    longer a separate <filename>web.xml</filename> file in Servlet
+                    2.0.</para></listitem>
+
+                    <listitem><para>The <literal>portlet-name</literal> must not be same
+                    as the servlet name in Portlet 1.0; in Portlet 2.0 this does not matter.</para></listitem>
+
+                    <listitem><para></para></listitem>
+                </orderedlist>
+
+                <para>
+                    Below is an example of a complete deployment descriptor for Portlet 1.0:
+                </para>
 
 				<programlisting><?pocket-size 65% ?>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;portlet-app
@@ -1970,7 +2127,7 @@ print.addListener(new Button.ClickListener() {
 
   &lt;portlet&gt;
     &lt;!-- Must not be the same as servlet name. --&gt;
-    &lt;portlet-name&gt;<emphasis role="bold">PortletExamplePortlet</emphasis>&lt;/portlet-name&gt;
+    &lt;portlet-name&gt;<emphasis role="bold">Portlet Example portlet</emphasis>&lt;/portlet-name&gt;
     &lt;display-name&gt;<emphasis role="bold">Vaadin Portlet Example</emphasis>&lt;/display-name&gt;
 
     &lt;!-- Map portlet to a servlet. --&gt;
@@ -2016,12 +2173,6 @@ print.addListener(new Button.ClickListener() {
 
 				<para>
 					In fact, it would also match the <literal>/*</literal> mapping.
-				</para>
-
-				<para>
-					Listing supported portlet modes in <filename>portlet.xml</filename>
-					enables the corresponding portlet controls in the portal user
-					interface that allow changing the mode, as described later.
 				</para>
             </simplesect>
 
@@ -2078,8 +2229,13 @@ print.addListener(new Button.ClickListener() {
                 </para>
             </simplesect>
 
-			<simplesect>
+			<simplesect xml:id="advanced.liferay.descriptor.liferay-portlet">
 				<title>Liferay Portlet Descriptor</title>
+
+                <indexterm xml:id="term.advanced.liferay.descriptor.liferay-portlet.liferay" class="startofrange">
+                    <primary>Liferay</primary>
+                    <secondary>portlet descriptor</secondary>
+                </indexterm>
 
 				<para>
 					Liferay requires a special <filename>liferay-portlet.xml</filename>
@@ -2102,7 +2258,7 @@ print.addListener(new Button.ClickListener() {
     &lt;portlet&gt;
         &lt;!-- Matches definition in portlet.xml.          --&gt;
         &lt;!-- Note: Must not be the same as servlet name. --&gt;
-        &lt;portlet-name&gt;<emphasis role="bold">PortletExamplePortlet</emphasis>&lt;/portlet-name&gt;
+        &lt;portlet-name&gt;<emphasis role="bold">Portlet Example portlet</emphasis>&lt;/portlet-name&gt;
 
         &lt;instanceable&gt;true&lt;/instanceable&gt;
         &lt;ajaxable&gt;false&lt;/ajaxable&gt;
@@ -2114,13 +2270,21 @@ print.addListener(new Button.ClickListener() {
 					<filename>liferay-portlet.xml</filename> deployment descriptor.
 				</para>
 
+                <indexterm startref="term.advanced.liferay.descriptor.liferay-portlet.liferay" class="endofrange"/>
 			</simplesect>
 
 			<simplesect xml:id="advanced.liferay.descriptor.display">
 				<title>Liferay Display Descriptor</title>
+                <indexterm xml:id="term.advanced.liferay.descriptor.liferay-display" class="startofrange">
+                    <primary><filename>liferay-display.xml</filename></primary>
+                </indexterm>
+                <indexterm xml:id="term.advanced.liferay.descriptor.liferay-display.liferay" class="startofrange">
+                    <primary>Liferay</primary>
+                    <secondary>display descriptor</secondary>
+                </indexterm>
 				
 				<para>
-					The <filename>liferay-display.xml</filename> file defines the portlet
+					The <filename>WEB-INF/liferay-display.xml</filename> file defines the portlet
 					category under which portlets are located in the <guilabel>Add
 					Application</guilabel> window in Liferay. Without this definition,
 					portlets will be organized under the "Undefined" category.
@@ -2139,7 +2303,7 @@ print.addListener(new Button.ClickListener() {
 
 <display>
     <category name="Vaadin">
-        <portlet id="PortletExamplePortlet" />
+        <portlet id="Portlet Example portlet" />
     </category>
 </display>]]></programlisting>
 
@@ -2160,8 +2324,91 @@ print.addListener(new Button.ClickListener() {
 					categories in the <filename>liferay-display.xml</filename> deployment
 					descriptor.
 				</para>
+
+                <indexterm startref="term.advanced.liferay.descriptor.liferay-display" class="endofrange"/>
+                <indexterm startref="term.advanced.liferay.descriptor.liferay-display.liferay" class="endofrange"/>
 			</simplesect>
 
+            <simplesect>
+                <title>Liferay Plugin Package Properties</title>
+
+                <indexterm xml:id="term.advanced.liferay.descriptor.liferay-plugin" class="startofrange">
+                    <primary><filename>liferay-plugin-package.xml</filename></primary>
+                </indexterm>
+                <indexterm xml:id="term.advanced.liferay.descriptor.liferay-plugin.liferay" class="startofrange">
+                    <primary>Liferay</primary>
+                    <secondary>plugin properties</secondary>
+                </indexterm>
+
+                <para>
+                    The <filename>liferay-plugin-package.properties</filename> file
+                    defines a number of settings for the portlet, most importantly the
+                    Vaadin JAR to be used.
+                </para>
+
+				<programlisting><?pocket-size 75% ?>name=<emphasis role="bold">Portlet Example portlet</emphasis>
+short-description=<emphasis role="bold">myportlet</emphasis>
+module-group-id=<emphasis role="bold">Vaadin</emphasis>
+module-incremental-version=1
+#change-log=
+#page-uri=
+#author=
+license=Proprietary
+portal-dependency-jars=\
+    <emphasis role="bold">vaadin.jar</emphasis></programlisting>
+
+                <variablelist>
+                    <varlistentry>
+                        <term><parameter>name</parameter></term>
+                        <listitem>
+                            <para>
+                                The plugin name must match the portlet name.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><parameter>short-description</parameter></term>
+                        <listitem>
+                            <para>
+                                A short description of the plugin. This is by default the
+                                project name.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><parameter>module-group-id</parameter></term>
+                        <listitem>
+                            <para>
+                                The application group, same as the category id defined in
+                                <filename>liferay-display.xml</filename>.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><parameter>license</parameter></term>
+                        <listitem>
+                            <para>
+                                The plugin license type; "proprietary" by default.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><parameter>portal-dependency-jars</parameter></term>
+                        <listitem>
+                            <para>
+                                The JAR libraries on which this portlet depends. This should
+                                have value <filename>vaadin.jar</filename>, unless you need to
+                                use a specific version. The JAR must be installed in the
+                                portal, for example, in Liferay bundled with Tomcat to
+                                <filename>tomcat-x.x.x/webapps/ROOT/WEB-INF/lib/vaadin.jar</filename>.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                </variablelist>
+                
+                <indexterm startref="term.advanced.liferay.descriptor.liferay-plugin" class="endofrange"/>
+                <indexterm startref="term.advanced.liferay.descriptor.liferay-plugin.liferay" class="endofrange"/>
+            </simplesect>
 		</section>
 
 		<section xml:id="advanced.liferay.helloworld">
@@ -2225,23 +2472,32 @@ public class PortletExample extends Application {
 		</section>
 
 		<section xml:id="advanced.liferay.widgetsets">
-			<title>Installing Widget Sets and Themes in Liferay</title>
+			<title>Installing Vaadin in Liferay</title>
 			
 			<para>
-				Loading widget sets and themes from a portlet WAR is possible as long as
-				you have a single WAR, but causes a problem if you have multiple WARs. To
-				solve this, Vaadin portlets need to use a globally installed widget set
-				and themes. The default (portal) widget set, themes, and the required
-				configuration needed for Vaadin applications are included in Liferay 5.3
-				and later. If you are using an earlier version of Liferay or have a
-				customized widget set, you will need to do the configuration manually.
+				Loading widget sets, themes, and the Vaadin JAR from a portlet is possible
+				as long as you have a single portlet, but causes a problem if you have
+				multiple portlets. To solve this, Vaadin portlets need to use a globally
+				installed widget set, themes, and Vaadin JAR. They, and all the required
+				configuration, are bundled with Liferay 5.3 and later, but if you are
+				using an earlier version of Liferay or use a custom widget set, custom
+				themes, or a specific version of Vaadin, you will need to do the
+				configuration manually.
 			</para>
 
 			<para>
-				We assume that you use the Tomcat installation included in the Liferay
+				In these instructions, we assume that you use Liferay bundled with Apache
+				Tomcat, although you can use many other application servers with Liferay
+				just as well. The Tomcat installation is included in the Liferay
 				installation package, under the <filename>tomcat-x.x.x</filename>
 				directory.
 			</para>
+
+            <para>
+                The Vaadin JAR should be put in
+                <filename>tomcat-x.x.x/webapps/ROOT/WEB-INF/lib/vaadin.jar</filename>. The
+                Vaadin version number should normally be left out from the JAR.
+            </para>
 
 			<para>
 				The widget set needs to be located at
@@ -2260,10 +2516,11 @@ public class PortletExample extends Application {
 			</para>
 
 			<para>
-				You need to define the widget set and the theme in the
-				<filename>portal-ext.properties</filename> configuration file for
-				Liferay. The file should normally be placed in the Liferay installation
-				directory. See Liferay documentation for details on the configuration file.
+				You need to define the widget set, the theme, and the JAR in the
+				<filename>portal-ext.properties</filename> configuration file for Liferay,
+				as described earlier. The file should normally be placed in the Liferay
+				installation directory. See Liferay documentation for details on the
+				configuration file.
 			</para>
 
 			<para>
@@ -2289,9 +2546,11 @@ vaadin.theme=reindeer]]></programlisting>
 					<term><parameter>vaadin.resources.path</parameter></term>
 					<listitem>
 						<para>Specifies the resource root path under the portal
-						context. This is <filename>/html</filename> by default, pointing
-						to the <filename>webapps/ROOT/html</filename> directory under
-						Tomcat installation directory.</para>
+						context. This is <filename>/html</filename> by default. Its actual
+						location depends on the portal and the application server; in
+						Liferay with Tomcat it would be located at
+						<filename>webapps/ROOT/html</filename> under the Tomcat
+						installation directory.</para>
 					</listitem>
 				</varlistentry>
 				<varlistentry>
@@ -2319,34 +2578,57 @@ vaadin.theme=reindeer]]></programlisting>
 		</section>
 
 		<section>
-			<title>Handling Portlet Events</title>
+			<title>Handling Portlet Requests</title>
 
 			<para>
 				Portals such as Liferay are not AJAX applications but reload the page
 				every time a user interaction requires data from the server. They consider
-				a Vaadin application to be a regular (though dynamic) web page. All the
-				AJAX communications required by the Vaadin application are done by the
-				Vaadin Client-Side Engine (the widget set) past the portal, so that the
-				portal is unaware of the communications.
+				a Vaadin application to be a regular web application that works by HTTP
+				requests. All the AJAX communications required by the Vaadin application
+				are done by the Vaadin Client-Side Engine (the widget set) past the
+				portal, so that the portal is unaware of the communications.
 			</para>
 
 			<para>
-				The only way for a portal to interact with an application is to load it
-				with a <emphasis>render request</emphasis>; reloading does not reset the
-				application. The render requests can be caused by user interaction with
-				the portal or by loading action URLs launched from the portlet. You can
-				handle render requests by implementing the
-				<classname>PortletApplicationContext.PortletListener</classname> interface
-				and the <methodname>handleRenderRequest()</methodname> handler method. You
-				can use the request object passed to the handler to access certain portal
-				data, such as user information.
+				The only way a portal can interact with an application is to load it with
+				a HTTP request; reloading does not reset the application. The Portlet 2.0
+				API supports four types of requests: <emphasis>render</emphasis>,
+				<emphasis>action</emphasis>, <emphasis>resource</emphasis>, and
+				<emphasis>event</emphasis> requests. The old Portlet 1.0 API supports only
+				the render and action requests. Requests can be caused by user interaction
+				with the portal controls or by clicking action URLs displayed by the
+				portlet. You can handle portlet requests by implementing the
+				<classname>PortletListener</classname> interface and the handler methods
+				for each of the request types. You can use the request object passed to
+				the handler to access certain portal data, such as user information, the
+				portlet mode, etc.
 			</para>
+
+            <para>
+                The <classname>PortletListener</classname> interface is defined in the
+                <classname>PortletApplicationContext2</classname> for Portlet 2.0 API and
+                <classname>com.vaadin.terminal.gwt.server.PortletApplicationContext</classname>
+                class for the old Portlet 1.0 API. You can get the portlet application
+                context with <methodname>getContext()</methodname> method of the
+                application class.
+            </para>
+
+            <para>
+                You need to have the <filename>portlet.jar</filename> in your class path
+                during development. However, you must <emphasis>not</emphasis> deploy the
+                <filename>portlet.jar</filename> with the portlet, because it would create
+                a conflict with the internal portlet library of the portal. You should put
+                it in a directory that is not deployed with the portlet, for example, if
+                you are using Eclipse, under the <filename>lib</filename> directory under
+                the project root, not under <filename>WebContent/WEB-INF/lib</filename>,
+                for example.
+            </para>
 
 			<para>
 				You can also define portal actions that you can handle in the
 				<methodname>handleActionRequest()</methodname> method of the interface.
 			</para>
-				.
+
 			<para>
 				You add your portlet request listener to the application context of your
 				application, which is a <classname>PortletApplicationContext</classname>
@@ -2354,9 +2636,9 @@ vaadin.theme=reindeer]]></programlisting>
 			</para>
 
 			<programlisting><?pocket-size 70% ?><![CDATA[// Check that we are running as a portlet.
-if (getContext() instanceof PortletApplicationContext) {
-    PortletApplicationContext ctx =
-            (PortletApplicationContext) getContext();
+if (getContext() instanceof PortletApplicationContext2) {
+    PortletApplicationContext2 ctx =
+            (PortletApplicationContext2) getContext();
 
     // Add a custom listener to handle action and
     // render requests.
@@ -2380,7 +2662,160 @@ if (getContext() instanceof PortletApplicationContext) {
 			</para>
 		</section>
 
-	</section>
+        <section xml:id="advanced.portal.portlet-mode">
+            <title>Handling Portlet Mode Changes</title>
+
+            <para>
+                Portals support three portlet modes defined in the Portlet API:
+                <emphasis>view</emphasis>, <emphasis>edit</emphasis>, and
+                <emphasis>help</emphasis> modes. The <emphasis>view</emphasis> mode is the
+                default and the portal can have buttons to switch the portlet to the other
+                modes. In addition to the three predefined modes, the Portlet API
+                standards allow custom portlet modes, although portals may support custom
+                modes to a varying degree.
+            </para>
+
+            <para>
+                You need to define which portlet modes are enabled in the
+                <filename>portlet.xml</filename> deployment descriptor as follows.
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[<!-- Supported portlet modes and content types. -->
+<supports>
+    <mime-type>text/html</mime-type>
+    <portlet-mode>view</portlet-mode>
+    <portlet-mode>edit</portlet-mode>
+    <portlet-mode>help</portlet-mode>
+</supports>]]></programlisting>
+
+            <para>
+                Changes in the portlet mode are received as resource requests, which you
+                can handle with a <methodname>handleResourceRequest()</methodname>,
+                defined in the <classname>PortletListener</classname> interface. The
+                current portlet mode can be acquired with
+                <methodname>getPortletMode()</methodname> from the request object.
+            </para>
+
+            <para>
+                The following complete example (for Portlet 2.0) shows how to handle the
+                three built-modes in a portlet application.
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[// Use Portlet 2.0 API
+import com.vaadin.terminal.gwt.server.PortletApplicationContext2;
+import com.vaadin.terminal.gwt.server.PortletApplicationContext2.PortletListener;
+
+public class PortletModeExample extends Application
+                                implements PortletListener {
+    Window         mainWindow;
+    ObjectProperty data; // Data to view and edit
+    VerticalLayout viewContent   = new VerticalLayout();
+    VerticalLayout editContent   = new VerticalLayout();
+    VerticalLayout helpContent   = new VerticalLayout();
+    
+    @Override
+    public void init() {
+        mainWindow = new Window("Myportlet Application");
+        setMainWindow(mainWindow);
+
+        // Data model
+        data = new ObjectProperty("<h1>Heading</h1>"+
+                       "<p>Some example content</p>");
+
+        // Prepare views for the three modes (view, edit, help)
+        // Prepare View mode content
+        Label viewText = new Label(data, Label.CONTENT_XHTML);
+        viewContent.addComponent(viewText);
+
+        // Prepare Edit mode content
+        RichTextArea editText = new RichTextArea();
+        editText.setCaption("Edit the value:");
+        editText.setPropertyDataSource(data);
+        editContent.addComponent(editText);
+
+        // Prepare Help mode content
+        Label helpText = new Label("<h1>Help</h1>" +
+                                   "<p>This helps you!</p>",
+                                   Label.CONTENT_XHTML);
+        helpContent.addComponent(helpText);
+
+        // Start in the view mode
+        mainWindow.setContent(viewContent);
+
+        // Check that we are running as a portlet.
+        if (getContext() instanceof PortletApplicationContext2) {
+            PortletApplicationContext2 ctx =
+                (PortletApplicationContext2) getContext();
+
+            // Add a custom listener to handle action and
+            // render requests.
+            ctx.addPortletListener(this, this);
+        } else {
+            mainWindow.showNotification("Not running in portal",
+                               Notification.TYPE_ERROR_MESSAGE);
+        }
+    }
+
+    // Dummy implementations for the irrelevant request types
+    public void handleActionRequest(ActionRequest request,
+                                    ActionResponse response) {
+    }
+    public void handleRenderRequest(RenderRequest request,
+                                    RenderResponse response) {
+    }
+    public void handleEventRequest(EventRequest request,
+                                   EventResponse response) {
+    }
+
+    public void handleResourceRequest(ResourceRequest request,
+                                      ResourceResponse response) {
+        // Switch the view according to the portlet mode
+        if (request.getPortletMode() == PortletMode.EDIT)
+            mainWindow.setContent(editContent);
+        else if (request.getPortletMode() == PortletMode.VIEW)
+            mainWindow.setContent(viewContent);
+        else if (request.getPortletMode() == PortletMode.HELP)
+            mainWindow.setContent(helpContent);
+    }
+}]]></programlisting>
+
+            <para>
+                <xref linkend="figure.advanced.portal.portlet-mode"/> shows the resulting
+                portlet in the three modes: view, edit, and help. In Liferay, the edit
+                mode is shown in the popup menu as a <guilabel>Preferences</guilabel> item.
+            </para>
+
+            <figure xml:id="figure.advanced.portal.portlet-mode">
+                <title>Portlet Modes in Action</title>
+                <mediaobject>
+                    <imageobject role="html">
+                        <imagedata align="center" fileref="img/advanced/portal-mode-view.png"/>
+                    </imageobject>
+                    <imageobject role="fo">
+                        <imagedata scale="100" smallscale="100%" align="center" fileref="img/advanced/portal-mode-view.png"/>
+                    </imageobject>
+                </mediaobject>
+                <mediaobject>
+                    <imageobject role="html">
+                        <imagedata align="center" fileref="img/advanced/portal-mode-edit.png"/>
+                    </imageobject>
+                    <imageobject role="fo">
+                        <imagedata scale="100" smallscale="100%" align="center" fileref="img/advanced/portal-mode-edit.png"/>
+                    </imageobject>
+                </mediaobject>
+                <mediaobject>
+                    <imageobject role="html">
+                        <imagedata align="center" fileref="img/advanced/portal-mode-help.png"/>
+                    </imageobject>
+                    <imageobject role="fo">
+                        <imagedata scale="100" smallscale="100%" align="center" fileref="img/advanced/portal-mode-help.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+        </section>
+
+        <indexterm startref="term.advanced.portal" class="endofrange"/>
+    </section>
 
 	<section xml:id="advanced.gae">
 		<title>Google App Engine Integration</title>

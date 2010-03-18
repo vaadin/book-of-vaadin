@@ -174,111 +174,6 @@
             </para>
 
 			<section>
-				<title>Interface Attributes</title>
-
-				<para>
-					The interface defines a number of attributes, which you can retrieve or
-					manipulate with the corresponding setters and getters.
-				</para>
-
-				<variablelist>
-					<varlistentry>
-						<term><methodname>caption</methodname></term>
-						<listitem>
-							<para>
-								The caption of a component is usually rendered by the
-								layout component in which the component is placed. This
-								allows the layout component to control the placement of
-								the caption. Some components, such as
-								<classname>Button</classname> and
-								<classname>Panel</classname>, manage the caption
-								themselves inside the component itself.
-							</para>
-						</listitem>
-					</varlistentry>
-					<varlistentry>
-						<term><methodname>enabled</methodname></term>
-						<listitem>
-							<para>
-								Can the user use the component? A disabled component is
-								grayed out and the user can not use it; it is
-								automatically in read-only state. Disabled components have
-								the <literal>v-disabled</literal> CSS style.
-							</para>
-						</listitem>
-					</varlistentry>
-					<varlistentry>
-						<term><methodname>icon</methodname></term>
-						<listitem>
-							<para>
-								The icon of a component is usually rendered by the layout
-								component in which the component is placed. This allows
-								the layout component to control the placement of the
-								icon. Some components, such as
-								<classname>Button</classname> and
-								<classname>Panel</classname>, manage the icon themselves
-								inside the component itself.
-							</para>
-						</listitem>
-					</varlistentry>
-					<varlistentry>
-						<term><methodname>locale</methodname></term>
-						<listitem>
-							<para>
-								The locale defines the country and language used in the
-								component. If the locale is undefined, the locale of 1)
-								the parent component, 2) the application.
-							</para>
-						</listitem>
-					</varlistentry>
-					<varlistentry>
-						<term><methodname>readOnly</methodname></term>
-						<listitem>
-							<para>
-								Can the user change the component state? This attribute is
-								obviously applicable only for components that allow
-								changing the state. The attribute does not prevent
-								changing the state programmatically. While the appearance
-								of the component does not change, unlike with the
-								<emphasis>enabled</emphasis> attribute, the setter does
-								trigger repainting of the component. Client-side state
-								modifications will not be communicated to the server-side
-								at all, which is an important security feature, because a
-								malicious user can not fabricate state changes in a
-								read-only component.
-							</para>
-						</listitem>
-					</varlistentry>
-					<varlistentry>
-						<term><methodname>styleName</methodname></term>
-						<listitem>
-							<para>
-								A user-defined CSS style class name of the component. The
-								attribute allows listing multiple style names as a
-								space-separated list. In addition to the setter and
-								getter, you can add and remove individual style names with
-								<methodname>addStylename()</methodname> and
-								<methodname>removeStyleName()</methodname>.
-							</para>
-						</listitem>
-					</varlistentry>
-					<varlistentry>
-						<term><methodname>visible</methodname></term>
-						<listitem>
-							<para>
-								Is the component visible or hidden? Hidden components are
-								not just not visible, but not communicated to the browser
-								at all. That is, they are not made invisible with only CSS
-								rules. This feature is important for security if you have
-								components that contain security-critical information that
-								must only be shown in specific application states.
-							</para>
-						</listitem>
-					</varlistentry>
-				</variablelist>
-			</section>
-
-			<section>
 				<title>Component Tree Management</title>
 
 				<para>
@@ -563,8 +458,126 @@
             not documented here can be found from the Java API Reference.
         </para>
 
+        <para>
+            The interface defines a number of properties, which you can retrieve
+            or manipulate with the corresponding setters and getters.
+        </para>
+
+        <section xml:id="components.features.caption">
+            <title>Caption</title>
+
+            <indexterm zone="components.features.caption">
+                <primary>caption property</primary>
+            </indexterm>
+
+            <indexterm zone="components.features.caption">
+                <primary>Component interface</primary>
+                <secondary>caption</secondary>
+            </indexterm>
+
+            <para>
+                A caption is an explanatory textual label accompanying a user interface
+                component, usually shown above, left of, or inside the component. The
+                contents of a caption are automatically quoted, so no raw XHTML can be
+                rendered in a caption.
+            </para>
+
+            <para>
+                The caption can usually be given as the first parameter of a constructor
+                or later with the <methodname>setCaption()</methodname> method.
+            </para>
+
+            <programlisting><?pocket-size 75% ?><![CDATA[// New text field with caption "Name"
+TextField name = new TextField("Name");
+layout.addComponent(name);]]></programlisting>
+
+            <para>
+                The caption of a component is, by default, managed and displayed by the
+                layout component or component container in which the component is
+                placed. For example, the <classname>VerticalLayout</classname> component
+                shows the captions left-aligned above the contained components, while the
+                <classname>FormLayout</classname> component shows the captions on the left
+                side of the vertically laid components, with the captions and their
+                associated components left-aligned in their own columns. The
+                <classname>CustomComponent</classname> does not manage the caption of its
+                composition root, so if the root component has a caption, it will not be
+                rendered.
+            </para>
+
+			<figure xml:id="figure.components.features.caption.layoutmanaged">
+				<title>Caption Management by <classname>VerticalLayout</classname> and <classname>FormLayout</classname> components.</title>
+				<mediaobject>
+					<imageobject role="html">
+						<imagedata align="center" fileref="img/components/features-caption-layoutmanaged.png"/>
+					</imageobject>
+					<imageobject role="fo">
+						<imagedata scale="80" smallscale="100%" align="center" fileref="img/components/features-caption-layoutmanaged.png"/>
+					</imageobject>
+				</mediaobject>
+			</figure>
+
+            <para>
+                Some components, such as <classname>Button</classname> and
+                <classname>Panel</classname>, manage the caption themselves and display it
+                inside the component.
+            </para>
+
+            <para>
+                Icon (see <xref linkend="components.features.icon"/>) is closely related
+                to caption and is usually displayed horizontally before or after it,
+                depending on the component and the containing layout.
+            </para>
+
+            <para>
+                
+            </para>
+
+            <para>
+                An alternative way to implement a caption is to use another component as
+                the caption, typically a <classname>Label</classname>, a
+                <classname>TextField</classname>, or a <classname>Panel</classname>. A
+                <classname>Label</classname>, for example, allows highlighting a shortcut
+                key with XHTML markup or to bind the caption to a data source. The
+                <classname>Panel</classname> provides an easy way to add both a caption
+                and a border around a component.
+            </para>
+
+            <para>
+                Setting the caption with <methodname>setCaption()</methodname> will cause
+                updating the component. A reimplementation of
+                <methodname>setCaption()</methodname> should call the superclass
+                implementation.
+            </para>
+
+            <simplesect>
+                <title>CSS Style Rules</title>
+
+                <para>
+                    A caption will be rendered inside an HTML element that has the
+                    &lt;component&gt;-caption CSS style class, where &lt;component&gt; is
+                    the identifier of the component to which the caption is attached. For
+                    example, the caption of a <classname>TextField</classname> would have
+                    <literal>v-textfield-caption</literal> style. The containing layout
+                    may enclose a caption inside other caption-related elements.
+                </para>
+            </simplesect>
+        </section>
+
 		<section xml:id="components.features.description">
 			<title>Description and Tooltips</title>
+
+            <indexterm zone="components.features.description">
+                <primary>description property</primary>
+            </indexterm>
+
+            <indexterm zone="components.features.description">
+                <primary>Component interface</primary>
+                <secondary>description</secondary>
+            </indexterm>
+
+            <indexterm zone="components.features.description">
+                <primary>tooltips</primary>
+            </indexterm>
 
 			<para>
 				All components (that inherit <classname>AbstractComponent</classname>)
@@ -653,8 +666,592 @@ button.setDescription("This is the tooltip");]]></programlisting>
 			</para>
 		</section>
 
+        <section xml:id="components.features.enabled">
+            <title>Enabled</title>
+            
+            <indexterm zone="components.features.enabled">
+                <primary>enabled property</primary>
+            </indexterm>
+
+            <indexterm zone="components.features.enabled">
+                <primary>Component interface</primary>
+                <secondary>enabled</secondary>
+            </indexterm>
+
+            <para>
+                The <emphasis>enabled</emphasis> property controls whether the user can
+                actually use the component. A disabled component is visible, but grayed to
+                indicate the disabled state.
+            </para>
+
+            <para>
+                Components are always enabled by default. You can disable a component with
+                <methodname>setEnabled(false)</methodname>.
+            </para>
+
+            <programlisting><?pocket-size 75% ?><![CDATA[Button enabled = new Button("Enabled");
+enabled.setEnabled(true); // The default
+layout.addComponent(enabled);
+        
+Button disabled = new Button("Disabled");
+disabled.setEnabled(false);
+layout.addComponent(disabled);]]></programlisting>
+
+            <para>
+                <xref linkend="figure.components.features.enabled.simple"/> shows the
+                enabled and disabled buttons.
+            </para>
+
+			<figure xml:id="figure.components.features.enabled.simple">
+				<title>An Enabled and Disabled <classname>Button</classname></title>
+				<mediaobject>
+					<imageobject role="html">
+						<imagedata align="center" fileref="img/components/features-enabled-simple.png"/>
+					</imageobject>
+					<imageobject role="fo">
+						<imagedata scale="80" smallscale="75%" align="center" fileref="img/components/features-enabled-simple.png"/>
+					</imageobject>
+				</mediaobject>
+			</figure>
+
+            <para>
+                A disabled component is automatically put in read-only state. No client
+                interaction with such a component is sent to the server and, as an
+                important security feature, the server-side component does not receive
+                state updates from the client.
+            </para>
+
+            <simplesect>
+                <title>CSS Style Rules</title>
+
+                <para>
+                    Disabled components have the <literal>v-disabled</literal> CSS style
+                    in addition to the component-specific style. To match a component with
+                    both the styles, you have to join the style class names with a dot as
+                    done in the example below.
+                </para>
+
+            <programlisting><?pocket-size 75% ?><![CDATA[.v-textfield.v-disabled {
+    border: dotted;
+}]]></programlisting>
+
+                <para>
+                    This would make the border of all disabled text fields dotted.
+                </para>
+
+            <programlisting><?pocket-size 75% ?><![CDATA[TextField disabled = new TextField("Disabled");
+disabled.setValue("Read-only value");
+disabled.setEnabled(false);
+layout.addComponent(disabled);]]></programlisting>
+
+                <para>
+                    The result is illustrated in <xref
+                    linkend="figure.components.features.enabled.styling"/>.
+                </para>
+
+                <figure xml:id="figure.components.features.enabled.styling">
+                    <title>Styling Disabled Components</title>
+                    <mediaobject>
+                        <imageobject role="html">
+                            <imagedata align="center" fileref="img/components/features-enabled-styling.png"/>
+                        </imageobject>
+                        <imageobject role="fo">
+                            <imagedata scale="80" smallscale="80%" align="center" fileref="img/components/features-enabled-styling.png"/>
+                        </imageobject>
+                    </mediaobject>
+                </figure>
+            </simplesect>
+        </section>
+        
+        <section xml:id="components.features.icon">
+            <title>Icon</title>
+            
+            <indexterm zone="components.features.icon">
+                <primary>icon property</primary>
+            </indexterm>
+
+            <indexterm zone="components.features.icon">
+                <primary>Component interface</primary>
+                <secondary>icon</secondary>
+            </indexterm>
+
+            <para>
+                An icon is an explanatory graphical label accompanying a user interface
+                component, usually shown above, left of, or inside the component. Icon is
+                closely related to caption (see <xref
+                linkend="components.features.caption"/>) and is usually displayed
+                horizontally before or after it, depending on the component and the
+                containing layout.
+            </para>
+
+            <para>
+                The icon of a component can be set with the
+                <methodname>setIcon()</methodname> method. The image is provided as a
+                resource, perhaps most typically a <classname>ThemeResource</classname>.
+            </para>
+
+            <programlisting><?pocket-size 75% ?><![CDATA[// Component with an icon from a custom theme
+TextField name = new TextField("Name");
+name.setIcon(new ThemeResource("icons/user.png"));
+layout.addComponent(name);
+        
+// Component with an icon from another theme ('runo')
+Button ok = new Button("OK");
+ok.setIcon(new ThemeResource("../runo/icons/16/ok.png"));
+layout.addComponent(ok);]]></programlisting>
+
+            <para>
+                The icon of a component is, by default, managed and displayed by the
+                layout component or component container in which the component is
+                placed. For example, the <classname>VerticalLayout</classname> component
+                shows the icons left-aligned above the contained components, while the
+                <classname>FormLayout</classname> component shows the icons on the left
+                side of the vertically laid components, with the icons and their
+                associated components left-aligned in their own columns. The
+                <classname>CustomComponent</classname> does not manage the icon of its
+                composition root, so if the root component has an icon, it will not be
+                rendered.
+            </para>
+
+			<figure xml:id="figure.components.features.icon">
+				<title>Displaying an Icon from a Theme Resource.</title>
+				<mediaobject>
+					<imageobject role="html">
+						<imagedata align="center" fileref="img/components/features-icon.png"/>
+					</imageobject>
+					<imageobject role="fo">
+						<imagedata scale="80" smallscale="100%" align="center" fileref="img/components/features-icon.png"/>
+					</imageobject>
+				</mediaobject>
+			</figure>
+
+            <para>
+                Some components, such as <classname>Button</classname> and
+                <classname>Panel</classname>, manage the icon themselves and display it
+                inside the component.
+            </para>
+
+            <simplesect>
+                <title>CSS Style Rules</title>
+
+                <para>
+                    An icon will be rendered inside an HTML element that has the
+                    <literal>v-icon</literal> CSS style class. The containing layout may
+                    enclose an icon and a caption inside elements related to the caption,
+                    such as <literal>v-caption</literal>.
+                </para>
+            </simplesect>
+        </section>
+        
+        <section xml:id="components.features.locale">
+            <title>Locale</title>
+            
+            <indexterm zone="components.features.locale">
+                <primary>locale property</primary>
+                <secondary>in <classname>Component</classname></secondary>
+            </indexterm>
+
+            <indexterm zone="components.features.locale">
+                <primary>Component interface</primary>
+                <secondary>locale</secondary>
+            </indexterm>
+
+            <para>
+                The locale property defines the country and language used in a
+                component. You can use the locale information in conjunction with an
+                internationalization scheme to acquire localized resources. Some
+                components, such as <classname>DateField</classname>, use the locale for
+                component localization.
+            </para>
+
+            <para>
+                You can set the locale of a component (or the application) with
+                <methodname>setLocale()</methodname>.
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[// Component for which the locale is meaningful
+InlineDateField date = new InlineDateField("Datum");
+        
+// German language specified with ISO 639-1 language
+// code and ISO 3166-1 alpha-2 country code. 
+date.setLocale(new Locale("de", "DE"));
+        
+date.setResolution(DateField.RESOLUTION_DAY);
+layout.addComponent(date);]]></programlisting>
+
+            <para>
+                The resulting date field is shown in <xref
+                linkend="figure.components.features.locale.simple"/>.
+            </para>
+            
+			<figure xml:id="figure.components.features.locale.simple">
+				<title>Set Locale for <classname>InlineDateField</classname></title>
+				<mediaobject>
+					<imageobject role="html">
+						<imagedata align="center" fileref="img/components/features-locale-simple.png"/>
+					</imageobject>
+					<imageobject role="fo">
+						<imagedata scale="80" smallscale="100%" align="center" fileref="img/components/features-locale-simple.png"/>
+					</imageobject>
+				</mediaobject>
+			</figure>
+
+            <para>
+                <indexterm><primary><methodname>getLocale()</methodname></primary></indexterm>
+
+                You can get the locale of a component with
+                <methodname>getLocale()</methodname>. If the locale is undefined for a
+                component, that is, not explicitly set, the locale of the parent component
+                is used. If none of the parent components have a locale set, the locale of
+                the application is used, and if that is not set, the default system locale
+                is set, as given by <methodname>Locale.getDefault()</methodname>.
+            </para>
+
+            <para>
+                Because of the requirement that the component must be attached to the
+                application, it is awkward to use <methodname>getLocale()</methodname> for
+                internationalization. You can not use it in the constructor, so you would
+                have to get the locale in <methodname>attach()</methodname> as shown in
+                the following example:
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[Button cancel = new Button() {
+    @Override
+    public void attach() {
+        ResourceBundle bundle = ResourceBundle.getBundle(
+                MyAppCaptions.class.getName(), getLocale());
+        setCaption(bundle.getString("CancelKey"));
+    }
+};
+layout.addComponent(cancel);]]></programlisting>
+
+            <para>
+                It is normally a better practice to get the locale from an
+                application-global parameter and use it to get the localized resource
+                right when the component is created.
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[// Captions are stored in MyAppCaptions resource bundle
+// and the application object is known in this context.
+ResourceBundle bundle =
+    ResourceBundle.getBundle(MyAppCaptions.class.getName(),
+                             getApplication().getLocale());
+        
+// Get a localized resource from the bundle
+Button cancel = new Button(bundle.getString("CancelKey"));
+layout.addComponent(cancel);]]></programlisting>
+
+            <simplesect>
+                <title>Selecting a Locale</title>
+
+                <para>
+                    A common task in many applications is selecting a locale. This is done
+                    in the following example with a <classname>Select</classname> component.
+                </para>
+
+                <programlisting><?pocket-size 65% ?><![CDATA[// The locale in which we want to have the language
+// selection list
+Locale displayLocale = Locale.ENGLISH;
+        
+// All known locales
+final Locale[] locales = Locale.getAvailableLocales();
+        
+// Allow selecting a language. We are in a constructor of a
+// CustomComponent, so preselecting the current
+// language of the application can not be done before
+// this (and the selection) component are attached to
+// the application.
+final Select select = new Select("Select a language") {
+    @Override
+    public void attach() {
+        setValue(getLocale());
+    }
+};
+for (int i=0; i<locales.length; i++) {
+    select.addItem(locales[i]);
+    select.setItemCaption(locales[i],
+                          locales[i].getDisplayName(displayLocale));
+    
+    // Automatically select the current locale
+    if (locales[i].equals(getLocale()))
+        select.setValue(locales[i]);
+}
+layout.addComponent(select);
+
+// Locale code of the selected locale
+final Label localeCode = new Label("");
+layout.addComponent(localeCode);
+
+// A date field which language the selection will change
+final InlineDateField date =
+    new InlineDateField("Calendar in the selected language");
+date.setResolution(DateField.RESOLUTION_DAY);
+layout.addComponent(date);
+        
+// Handle language selection
+select.addListener(new Property.ValueChangeListener() {
+    public void valueChange(ValueChangeEvent event) {
+        Locale locale = (Locale) select.getValue();
+        date.setLocale(locale);
+        localeCode.setValue("Locale code: " +
+                            locale.getLanguage() + "_" +
+                            locale.getCountry());
+    }
+});
+select.setImmediate(true);]]></programlisting>
+
+                <para>
+                    The user interface is shown in <xref
+                    linkend="figure.components.features.locale.selection"/>.
+                </para>
+
+                <figure xml:id="figure.components.features.locale.selection">
+                    <title>Selecting a Locale</title>
+                    <mediaobject>
+                        <imageobject role="html">
+                            <imagedata align="center" fileref="img/components/features-locale-selection.png"/>
+                        </imageobject>
+                        <imageobject role="fo">
+                            <imagedata scale="80" smallscale="100%" align="center" fileref="img/components/features-locale-selection.png"/>
+                        </imageobject>
+                    </mediaobject>
+                </figure>
+
+            </simplesect>
+        </section>
+
+        <section xml:id="components.features.readonly">
+            <title>Read-Only</title>
+
+            <indexterm zone="components.features.readonly">
+                <primary>read-only property</primary>
+            </indexterm>
+
+            <indexterm zone="components.features.readonly">
+                <primary>Component interface</primary>
+                <secondary>read-only</secondary>
+            </indexterm>
+
+            <para>
+                The property defines whether the user can change the value of a
+                component. As only <classname>Field</classname> components have a value
+                that can be input or edited by the user, this method is mainly applicable
+                to field components. The read-only property does not prevent changing the
+                value of a component programmatically.
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[TextField readwrite = new TextField("Read-Write");
+readwrite.setValue("You can change this");
+readwrite.setReadOnly(false); // The default
+layout.addComponent(readwrite);
+        
+TextField readonly = new TextField("Read-Only");
+readonly.setValue("You can't touch this!");
+readonly.setReadOnly(true);
+layout.addComponent(readonly);]]></programlisting>
+
+            <para>
+                The resulting read-only text field is shown in <xref
+                linkend="figure.components.features.readonly.simple"/>.
+            </para>
+
+			<figure xml:id="figure.components.features.readonly.simple">
+				<title>A Read-Only Component.</title>
+				<mediaobject>
+					<imageobject role="html">
+						<imagedata align="center" fileref="img/components/features-readonly-simple.png"/>
+					</imageobject>
+					<imageobject role="fo">
+						<imagedata scale="80" smallscale="75%" align="center" fileref="img/components/features-readonly-simple.png"/>
+					</imageobject>
+				</mediaobject>
+			</figure>
+
+            <para>
+                Even when a component is read-only, the user may be able to interact with
+                some component features, such as scrolling.
+            </para>
+
+            <para>
+                Client-side state modifications will not be communicated to the
+                server-side and, more important, server-side field components will not
+                accept changes to the value of a read-only component. This is an important
+                security feature, because a malicious user can not fabricate state changes
+                in a read-only component. Notice that this occurs at the level of
+                <classname>AbstractField</classname> in
+                <methodname>setValue()</methodname> and therefore only applies to the
+                property value of the component; a component could itself accept some
+                variable changes from the client-side.
+            </para>
+
+            <simplesect>
+                <title>CSS Style Rules</title>
+
+                <para>
+                    The appearance of the component can change to indicate that the value
+                    is not editable. A read-only component will have the
+                    <literal>v-readonly</literal> style. The following CSS rule would make
+                    the text in all read-only <classname>TextField</classname> components
+                    appear in italic.
+                </para>
+
+                <programlisting><?pocket-size 65% ?><![CDATA[.v-textfield.v-readonly {
+    font-style: italic;
+}]]></programlisting>
+                
+                <para>
+                    An icon will be rendered inside an HTML element that has the
+                    <literal>v-icon</literal> CSS style class. The containing layout may
+                    enclose an icon and a caption inside elements related to the caption,
+                    such as <literal>v-caption</literal>.
+                </para>
+            </simplesect>
+        </section>
+
+        <section xml:id="components.features.stylename">
+            <title>Style Name</title>
+
+            <indexterm zone="components.features.stylename">
+                <primary>style name property</primary>
+            </indexterm>
+
+            <indexterm zone="components.features.stylename">
+                <primary>Component interface</primary>
+                <secondary>style name</secondary>
+            </indexterm>
+
+            <para>
+                The <emphasis>style name</emphasis> property defines one or more custom
+                CSS style class names for the component. The
+                <methodname>getStyleName()</methodname> returns the current style names as
+                a space-separated list. The <methodname>setStyleName()</methodname>
+                replaces all the styles with the given style name or a space-separated
+                list of style names. You can also add and remove individual style names
+                with <methodname>addStylename()</methodname> and
+                <methodname>removeStyleName()</methodname>. A style name must be a valid
+                CSS style name.
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[Label label = new Label("This text has a lot of style");
+label.addStyleName("mystyle");
+layout.addComponent(label);]]></programlisting>
+
+            <para>
+                The style name will appear in the component's HTML element in two forms:
+                literally as given and prefixed with the component class specific style
+                name. For example, if you add a style name <literal>mystyle</literal> to a
+                <classname>Button</classname>, the component would get both
+                <literal>mystyle</literal> and <literal>v-button-mystyle</literal>
+                styles. Neither form may conflict with built-in style names of Vaadin or
+                GWT. For example, <literal>focus</literal> style would conflict with a
+                built-in style of the same name, and an <literal>option</literal> style
+                for a <classname>Select</classname> component would conflict with the
+                built-in <literal>v-select-option</literal> style.
+            </para>
+
+            <para>
+                The following CSS rule would apply the style to any component that has the
+                <literal>mystyle</literal> style.
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[.mystyle {
+    font-family: fantasy;
+    font-style:  italic;
+    font-size:   25px;
+    font-weight: bolder;
+    line-height: 30px;
+}]]></programlisting>
+
+            <para>
+                The resulting styled component is shown in <xref
+                linkend="figure.components.features.stylename"/>
+            </para>
+
+			<figure xml:id="figure.components.features.stylename">
+				<title>Component with a Custom Style</title>
+				<mediaobject>
+					<imageobject role="html">
+						<imagedata align="center" fileref="img/components/features-stylename-simple.png"/>
+					</imageobject>
+					<imageobject role="fo">
+						<imagedata scale="80" smallscale="100%" align="center" fileref="img/components/features-stylename-simple.png"/>
+					</imageobject>
+				</mediaobject>
+			</figure>
+        </section>
+
+        <section xml:id="components.features.visible">
+            <title>Visible</title>
+            
+            <indexterm zone="components.features.visible">
+                <primary>visible property</primary>
+            </indexterm>
+
+            <indexterm zone="components.features.visible">
+                <primary>Component interface</primary>
+                <secondary>visible</secondary>
+            </indexterm>
+
+            <para>
+                Components can be hidden by setting the <emphasis>visible</emphasis>
+                property to <emphasis>false</emphasis>. Also the caption, icon and any
+                other component features are made hidden. Hidden components are not just
+                invisible, but their content is not communicated to the browser at
+                all. That is, they are not made invisible cosmetically with only CSS
+                rules. This feature is important for security if you have components that
+                contain security-critical information that must only be shown in specific
+                application states.
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[TextField readonly = new TextField("Read-Only");
+readonly.setValue("You can't see this!");
+readonly.setVisible(false);
+layout.addComponent(readonly);]]></programlisting>
+
+            <para>
+                The resulting invisible component is shown in <xref
+                linkend="figure.components.features.visible.simple"/>.
+            </para>
+
+			<figure xml:id="figure.components.features.visible.simple">
+				<title>An Invisible Component.</title>
+				<mediaobject>
+					<imageobject role="html">
+						<imagedata align="center" fileref="img/components/features-visible-simple.png"/>
+					</imageobject>
+					<imageobject role="fo">
+						<imagedata scale="80" smallscale="100%" align="center" fileref="img/components/features-visible-simple.png"/>
+					</imageobject>
+				</mediaobject>
+			</figure>
+
+            <para>
+                If you need to make a component only cosmetically invisible, you should
+                use a custom theme to set it <literal>display: none</literal> style. This
+                is mainly useful for certain special components such as
+                <classname>ProgressIndicator</classname>, which have effects even when
+                made invisible in CSS. If the hidden component has undefined size and is
+                enclosed in a layout that also has undefined size, the containing layout
+                will collapse when the component disappears. If you want to have the
+                component keep its size, you have to make it invisible by setting all its
+                font and other attributes to be transparent. In such cases, the invisible
+                content of the component can be made visible easily in the browser.
+            </para>
+
+            <para>
+                An invisible component has no particular CSS style class to indicate that
+                it is hidden. The element does exist though, but has <literal>display:
+                none</literal> style, which overrides any CSS styling.
+            </para>
+
+        </section>
+
 		<section xml:id="components.features.sizeable">
 			<title>Sizing Components</title>
+
+            <indexterm zone="components.features.sizeable">
+                <primary><classname>Sizeable</classname> interface</primary>
+            </indexterm>
 
 			<para>
 				Vaadin components are sizeable; not in the sense that they were
