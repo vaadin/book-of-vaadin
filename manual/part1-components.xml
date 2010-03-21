@@ -2443,11 +2443,57 @@ for (int i=0; i<planets.length; i++)
                         Item captions are read from the <classname>String</classname>
                         representation of the property with the identifier specified with
                         <methodname>setItemCaptionPropertyId()</methodname>. This is
-                        useful, for example, when you have a <classname>Table</classname>
-                        component that you use as the data source for the
-                        <classname>Select</classname>, and you want to use a specific
-                        table column for captions.
+                        useful, for example, when you have a container that you use as the
+                        data source for a <classname>Select</classname>, and you want to
+                        use a specific property for caption.
 					</para>
+
+					<para>
+                        In the example below, we bind a selection component to a bean
+                        container and use a property of the bean as the caption.
+                    </para>
+
+                    <programlisting><?pocket-size 65% ?><![CDATA[/* A bean with a "name" property. */
+public class Planet implements Serializable {
+    String name;
+
+    public Planet(String name) {
+        this.name = name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
+    }
+}
+
+void propertyModeExample() {
+    VerticalLayout layout = new VerticalLayout();
+
+    // Have a bean container to put the beans in
+    BeanItemContainer<Planet> container =
+        new BeanItemContainer<Planet>(Planet.class);
+
+    // Put some example data in it
+    container.addItem(new Planet("Mercury"));
+    container.addItem(new Planet("Venus"));
+    container.addItem(new Planet("Earth"));
+    container.addItem(new Planet("Mars"));
+
+    // Create a selection component bound to the container
+    Select select = new Select("Planets", container);
+
+    // Set the caption mode to read the caption directly
+    // from the 'name' property of the bean
+    select.setItemCaptionMode(
+            Select.ITEM_CAPTION_MODE_PROPERTY);
+    select.setItemCaptionPropertyId("name");
+
+    layout.addComponent(select);]]></programlisting>
+
 				</listitem>
 			</varlistentry>
         </variablelist>
