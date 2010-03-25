@@ -3366,7 +3366,7 @@ response.addCookie(cookie);]]></programlisting>
                 <classname>DragAndDropEvent</classname> as its parameters. The event
                 object provides references to two important object:
                 <classname>Transferable</classname> and
-                <classname>DropTargetDetails</classname>.
+                <classname>TargetDetails</classname>.
             </para>
 
             <para>
@@ -3382,11 +3382,11 @@ response.addCookie(cookie);]]></programlisting>
             </para>
 
             <para>
-                The <classname>DropTargetDetails</classname> object provides details
+                The <classname>TargetDetails</classname> object provides details
                 regarding the exact location where the transferable object is being
                 dropped. If the target is a tree or a table, the
-                <classname>TreeDropTargetDetails</classname> and
-                <classname>TableDropTargetDetails</classname> objects provide the tree or
+                <classname>TreeTargetDetails</classname> and
+                <classname>TableTargetDetails</classname> objects provide the tree or
                 table item on which the drop is being made. For entire components, the
                 information is provided in a <classname>WrapperDropDetails</classname>
                 object. In addition to the target item or component, the details objects
@@ -3431,8 +3431,8 @@ tree.setDropHandler(new DropHandler() {
         if (t.getSourceComponent() != tree)
             return;
         
-        TreeDropTargetDetails target = (TreeDropTargetDetails)
-            event.getDropTargetDetails();
+        TreeTargetDetails target = (TreeTargetDetails)
+            event.getTargetDetails();
 
         // Get ids of the dragged item and the target item
         Object sourceItemId = t.getData("itemId");
@@ -3531,9 +3531,9 @@ tree.setDropHandler(new DropHandler() {
                         </listitem>
                     </varlistentry>
                     <varlistentry>
-                        <term><classname>ContaindDataFlavour</classname></term>
+                        <term><classname>ContainsDataFlavour</classname></term>
                         <listitem>
-                            The transferable must be bound to data and contain the defined
+                            The transferable must contain the defined
                             data flavour.
                         </listitem>
                     </varlistentry>
@@ -3589,9 +3589,11 @@ tree.setDropHandler(new DropHandler() {
                     programmable logic for accepting drops, but the negative side is that
                     it causes a very large amount of server requests. A request is made
                     for every target position on which the pointer hovers. This problem is
-                    eased in many cases by the component-specific
-                    <classname>ServerSideTableCriterion</classname> and
-                    <classname>ServerSideTreeCriterion</classname>
+                    eased in many cases by the component-specific lazy loading criteria
+                    <classname>TableDropCriterion</classname> and
+                    <classname>TreeDropCriterion</classname>. They do the server visit
+                    once for each drag and drop operation and return all accepted rows or 
+                    nodes for current <classname>Transferable</classname> at once.
                 </para>
 
                 <para>
@@ -3605,8 +3607,8 @@ tree.setDropHandler(new DropHandler() {
     // location except on nodes that may not have children
     ServerSideCriterion criterion = new ServerSideCriterion() {
         public boolean accept(DragAndDropEvent dragEvent) {
-            TreeDropTargetDetails target = (TreeDropTargetDetails)
-                dragEvent.getDropTargetDetails();
+            TreeTargetDetails target = (TreeTargetDetails)
+                dragEvent.getTargetDetails();
 
             // The tree item on which the load hovers
             Object targetItemId = target.getItemIdOver();
