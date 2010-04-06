@@ -2814,6 +2814,162 @@ public class PortletModeExample extends Application
             </figure>
         </section>
 
+        <section xml:id="advanced.portal.portlet-html-mode">
+            <title>Non-Vaadin Portlet Modes</title>
+
+            <para>
+                In some cases, it can be useful to implement certain modes of a portlet
+                as pure HTML or JSP pages instead of running the full Vaadin application
+                user interface in them. Common reasons for this are mostly static
+                pages (e.g. a simple help mode), integrating legacy content to a portlet
+                (e.g. a JSP configuration interface) and providing an ultra-lightweight
+                initial view for a portlet for users behind slow connections.
+            </para>
+            
+            <para>
+                Fully static modes that do not require the Vaadin server side
+                application to be running can be implemented by subclassing the portlet
+                class <classname>ApplicationPortlet2</classname> (Portlet 2.0).
+                The subclass can either create the HTML content directly or dispatch
+                the request to e.g. a HTML or JSP page via the portal. When using
+                this approach, any Vaadin portlet and portlet request listeners are not
+                called.
+            </para>
+            
+            <para>
+                Customizing the content for the standard modes
+                (<emphasis>view</emphasis>, <emphasis>edit</emphasis>, and
+                <emphasis>help</emphasis>) can be performed by overriding the methods
+                <methodname>doView</methodname>, <methodname>doEdit</methodname>
+                and <methodname>doHelp</methodname>, respectively. Custom modes
+                can be handled by implementing similar methods with the
+                <classname>javax.portlet.RenderMode(name = "mymode")</classname>
+                annotation.
+            </para>
+
+            <para>
+                You need to define which portlet modes are enabled in the
+                <filename>portlet.xml</filename> deployment descriptor as described in
+                <xref linkend="advanced.portal.portlet-mode"/>. Also, the portlet class
+                in <filename>portlet.xml</filename> should point to the customized
+                subclass of <classname>AbstractApplicationPortlet</classname> or
+                <classname>ApplicationPortlet2</classname>.
+            </para>
+
+            <para>
+                The following example (for Portlet 2.0) shows how to create a static
+                help page for the portlet.
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[<!-- Supported portlet modes and content types. -->
+<supports>
+    <mime-type>text/html</mime-type>
+    <portlet-mode>view</portlet-mode>
+    <portlet-mode>help</portlet-mode>
+</supports>]]></programlisting>
+            
+            <programlisting><?pocket-size 65% ?><![CDATA[// Use Portlet 2.0 API
+import com.vaadin.terminal.gwt.server.ApplicationPortlet2;
+
+public class HtmlHelpPortlet extends ApplicationPortlet2 {
+
+    // override the help mode, let the Vaadin application handle the view mode
+    @Override
+    protected void doHelp(RenderRequest request, RenderResponse response)
+            throws PortletException, IOException {
+        // bypass the Vaadin application entirely
+        response.setContentType("text/html");
+        response.getWriter().println("This is the help text as plain HTML.");
+
+        // alternatively could use the dispatcher for e.g. JSP help pages:
+        // PortletRequestDispatcher dispatcher = getPortletContext()
+        // .getRequestDispatcher("/html/myhelp.jsp");
+        // dispatcher.include(request, response);
+    }
+}]]></programlisting>
+
+            <para>
+                To produce pure HTML portlet content from a running Vaadin application
+                instead of statically outside an application, the portlet method
+                <methodname>writeAjaxPage</methodname> should be overridden.
+                This approach allows using the application state in HTML content
+                generation, and all relevant Vaadin portlet request and portlet
+                listeners are called around the portlet content generation. However,
+                the client side engine (widgetset) is not loaded by the browser,
+                which can shorten the initial page display time.
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[<portlet-class>com.vaadin.demo.portlet.HtmlModePortlet</portlet-class>
+<supports>
+    <mime-type>text/html</mime-type>
+    <portlet-mode>view</portlet-mode>
+    <portlet-mode>help</portlet-mode>
+</supports>]]></programlisting>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[public class CountApplication extends Application {
+    private int count = 0;
+    
+    public void init() {
+        Window window = new Window("Portlet mode example");
+        window.addComponent(new Label("This is the Vaadin application."));
+        window.addComponent(new Label("Try opening the help mode."));
+        setMainWindow(window);
+    }
+        
+    public int incrementCount() {
+        return ++count;
+    }
+}]]></programlisting>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[// Use Portlet 2.0 API
+public class HtmlModePortlet extends AbstractApplicationPortlet {
+
+    @Override
+    protected void writeAjaxPage(RenderRequest request,
+            RenderResponse response, Window window,
+            Application application) throws PortletException, IOException {
+        if (PortletMode.HELP.equals(request.getPortletMode())) {
+            CountApplication app = (CountApplication) application;
+            response.setContentType("text/html");
+            response.getWriter().println("This is the HTML help, shown "
+                + app.incrementCount() + " times so far.");
+        } else {
+            super.writeAjaxPage(request, response, window, application);
+        }
+    }
+    
+    @Override
+    protected Class<? extends Application> getApplicationClass() {
+        return CountApplication.class;
+    }
+    
+}]]></programlisting>
+
+            <para>
+                In the case of Portlet 1.0, both a portlet and a servlet are involved.
+                A render request is received by
+                <classname>ApplicationPortlet</classname> when the portlet mode is
+                changed, and serving pure HTML in some modes can be achieved by
+                overriding the method <methodname>render</methodname> and handling
+                the modes of interest separately while calling
+                <methodname>super.render()</methodname> for other modes. As always,
+                when extending the portlet, the reference to the portlet class in
+                <filename>portlet.xml</filename> needs to be updated.
+            </para>
+            
+            <para>
+                To serve HTML-only content in the Portlet 1.0 case after starting the
+                server side application and calling the relevant listeners, the servlet
+                class <classname>ApplicationServlet</classname> should be subclassed
+                instead of the portlet. The method
+                <methodname>writeAjaxPage</methodname> can be overridden to produce
+                custom HTML content for certain modes. However, it should be noted
+                that some HTML content (e.g. loading the portal-wide Vaadin theme) is
+                created by the portlet and not the servlet.
+            </para>
+
+        </section>
+
         <indexterm startref="term.advanced.portal" class="endofrange"/>
     </section>
 
