@@ -1423,34 +1423,55 @@ mainWindow.addURIHandler(myresource);]]></programlisting>
 
 		<!-- UNFINISHED -->
 
-		<para>
-			Shortcut keys can be defined as <emphasis>actions</emphasis> using the
-			<classname>ShortcutAction</classname> class. ShortcutAction extends generic 
-			<classname>Action</classname> class that is used for example in 
-			<classname>Tree</classname> and <classname>Table</classname> for context menus.
-			Currently the only classes that accept <classname>ShortcutActions</classname> 
-			are <classname>Window</classname> and <classname>Panel</classname>.
-			This may change in the future. <classname>Table</classname> is a good
-			candidate to support ShortcutActions. 
-		</para>
+        <para>
+            Vaadin provides a generic shortcut key binding API based on actions as well as
+            a simplified way for defining shortcut keys for field components.
+        </para>
+
+        <section>
+            <title>Field Focus Shortcuts</title>
+
+            <para>
+                You can define a shortcut key that moves the focus to a field component
+                (any component that inherits <classname>AbstractField</classname> by
+                adding a <classname>FocusShortcut</classname> as a shortcut listener to
+                the field.
+            </para>
+        </section>
+
+        <section>
+            <title>Generic Shortcut Actions</title>
+
+            <para>
+                Shortcut keys can be defined as <emphasis>actions</emphasis> using the
+                <classname>ShortcutAction</classname> class. ShortcutAction extends the
+                generic <classname>Action</classname> class that is used for example in
+                <classname>Tree</classname> and <classname>Table</classname> for context
+                menus.  Currently, the only classes that accept
+                <classname>ShortcutActions</classname> are <classname>Window</classname>
+                and <classname>Panel</classname>.  This may change in the future,
+                especially <classname>Table</classname> is a good candidate to support
+                shortcut actions.
+            </para>
 		
-		<para>		
-			To handle key presses, you need	to define an action handler by implementing 
-			the <classname>Handler</classname> interface. The interface has two methods 
-			that you need to implement: <methodname>getActions()</methodname> and
-			<methodname>handleAction()</methodname>.
-		</para>
+            <para>
+                To handle key presses, you need to define an action handler by
+                implementing the <classname>Handler</classname> interface. The interface
+                has two methods that you need to implement:
+                <methodname>getActions()</methodname> and
+                <methodname>handleAction()</methodname>.
+            </para>
 
-		<para>
-			The <methodname>getActions()</methodname> interface method must return an
-			array of <classname>Action</classname> objects for the component specified
-			with the second parameter for the method, the <parameter>sender</parameter> of
-			an action. For a keyboard shortcut, you use a
-			<classname>ShortcutAction</classname>. The implementation of the method could
-			be following:
-		</para>
+            <para>
+                The <methodname>getActions()</methodname> interface method must return an
+                array of <classname>Action</classname> objects for the component specified
+                with the second parameter for the method, the
+                <parameter>sender</parameter> of an action. For a keyboard shortcut, you
+                use a <classname>ShortcutAction</classname>. The implementation of the
+                method could be following:
+            </para>
 
-        <programlisting language="java"><?pocket-size 65% ?><![CDATA[// Have the unmodified Enter key cause an event
+            <programlisting language="java"><?pocket-size 65% ?><![CDATA[// Have the unmodified Enter key cause an event
 Action action_ok = new ShortcutAction("Default key",
         ShortcutAction.KeyCode.ENTER, null);
 
@@ -1468,74 +1489,73 @@ public Action[] getActions(Object target, Object sender) {
     return null;
 }]]></programlisting>
 
-		<para>
-			The returned Action array may be static or created dynamically for different
-			senders according to your needs. 
-		</para>
+            <para>
+                The returned <classname>Action</classname> array may be static or you can
+                create it dynamically for different senders according to your needs.
+            </para>
 
-		<para>
-			The constructor method of <classname>ShortcutAction</classname> takes a 
-			symbolic caption for the action; this is largely irrelevant
-			for shortcut actions in their current implementation, but might be used 
-			later if implementors use them in both menus and as shortcut actions.
-			The second parameter is the keycode, as defined in 
-			<classname>ShortcutAction.KeyCode</classname> interface. Currently, the 
-			following keycodes are allowed:
-		</para>
+            <para>
+                The constructor of <classname>ShortcutAction</classname> takes a symbolic
+                caption for the action; this is largely irrelevant for shortcut actions in
+                their current implementation, but might be used later if implementors use
+                them both in menus and as shortcut actions.  The second parameter is the
+                keycode, as defined in <classname>ShortcutAction.KeyCode</classname>
+                interface. Currently, the following keycodes are allowed:
+            </para>
 
-		<variablelist>
-			<varlistentry>
-				<term>Keys <parameter>A</parameter> to <parameter>Z</parameter></term>
-				<listitem>Normal letter keys</listitem>
-			</varlistentry>
-			<varlistentry>
-				<term><parameter>F1</parameter> to <parameter>F12</parameter></term>
-				<listitem>
-					<para>Function keys</para>
-				</listitem>
-			</varlistentry>
-			<varlistentry>
-				<term><parameter>BACKSPACE</parameter>, <parameter>DELETE</parameter>, <parameter>ENTER</parameter>, <parameter>ESCAPE</parameter>, <parameter>INSERT</parameter>, <parameter>TAB</parameter></term>
-				<listitem>
-					<para>Control keys</para>
-				</listitem>
-			</varlistentry>
-			<varlistentry>
-				<term><parameter>NUM0</parameter> to <parameter>NUM9</parameter></term>
-				<listitem>
-					<para>Number pad keys</para>
-				</listitem>
-			</varlistentry>
-			<varlistentry>
-				<term><parameter>ARROW_DOWN</parameter>, <parameter>ARROW_UP</parameter>, <parameter>ARROW_LEFT</parameter>, <parameter>ARROW_RIGHT</parameter></term>
-				<listitem>
-					<para>Arrow keys</para>
-				</listitem>
-			</varlistentry>
-			<varlistentry>
-				<term><parameter>HOME</parameter>, <parameter>END</parameter>, <parameter>PAGE_UP</parameter>, <parameter>PAGE_DOWN</parameter></term>
-				<listitem>
-					<para>Other movement keys</para>
-				</listitem>
-			</varlistentry>
-		</variablelist>
+            <variablelist>
+                <varlistentry>
+                    <term>Keys <parameter>A</parameter> to <parameter>Z</parameter></term>
+                    <listitem>Normal letter keys</listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>F1</parameter> to <parameter>F12</parameter></term>
+                    <listitem>
+                        <para>Function keys</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>BACKSPACE</parameter>, <parameter>DELETE</parameter>, <parameter>ENTER</parameter>, <parameter>ESCAPE</parameter>, <parameter>INSERT</parameter>, <parameter>TAB</parameter></term>
+                    <listitem>
+                        <para>Control keys</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>NUM0</parameter> to <parameter>NUM9</parameter></term>
+                    <listitem>
+                        <para>Number pad keys</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>ARROW_DOWN</parameter>, <parameter>ARROW_UP</parameter>, <parameter>ARROW_LEFT</parameter>, <parameter>ARROW_RIGHT</parameter></term>
+                    <listitem>
+                        <para>Arrow keys</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>HOME</parameter>, <parameter>END</parameter>, <parameter>PAGE_UP</parameter>, <parameter>PAGE_DOWN</parameter></term>
+                    <listitem>
+                        <para>Other movement keys</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
 
-		<para>
-			The third parameter is an array of modifier keys, as defined in the
-			<classname>ShortcutAction.ModifierKey</classname> interface. The
-			following modifier keys are allowed: <parameter>ALT</parameter>,
-			<parameter>CTRL</parameter>, and <parameter>SHIFT</parameter>. The modifier
-			keys can be combined; for example, the following defines shortcut key
-			combination
-			<keycombo><keycap>Ctrl</keycap><keycap>Shift</keycap><keycap>S</keycap></keycombo>:
+            <para>
+                The third parameter is an array of modifier keys, as defined in the
+                <classname>ShortcutAction.ModifierKey</classname> interface. The following
+                modifier keys are allowed: <parameter>ALT</parameter>,
+                <parameter>CTRL</parameter>, and <parameter>SHIFT</parameter>. The
+                modifier keys can be combined; for example, the following defines shortcut
+                key combination
+                <keycombo><keycap>Ctrl</keycap><keycap>Shift</keycap><keycap>S</keycap></keycombo>:
+            </para>
 
 
-		<programlisting language="java"><?pocket-size 65% ?><![CDATA[ShortcutAction("Ctrl+Shift+S",
+            <programlisting language="java"><?pocket-size 65% ?><![CDATA[ShortcutAction("Ctrl+Shift+S",
                ShortcutAction.KeyCode.S, new int[] {
                       ShortcutAction.ModifierKey.CTRL,
                       ShortcutAction.ModifierKey.SHIFT});]]></programlisting>
 
-		</para>
 
 		<para>
 			The following example demonstrates the definition of a default button for a
@@ -1628,7 +1648,6 @@ public class DefaultButtonExample extends CustomComponent
         formlayout.addComponent(new Label("OK clicked. "
                 + "User=" + username.getValue() + ", password="
                 + password.getValue()));
-        //  
     }
 
     public void cancelHandler() {
@@ -1639,18 +1658,19 @@ public class DefaultButtonExample extends CustomComponent
     }
 }]]></programlisting>
 
-		<para>
-			Notice that the keyboard actions can currently be attached only to 
-			<classname>Panel</classname>s and <classname>Window</classname>s. This can
-			cause problems if you have components that require a certain key. For example,
-			multi-line <classname>TextField</classname> requires the
-			<keycap>Enter</keycap> key. There is currently no way to filter the shortcut
-			actions out while the focus is inside some specific component, so you need to
-			avoid such conflicts.
-		</para>
-	</section>
+            <para>
+                Notice that the keyboard actions can currently be attached only to
+                <classname>Panel</classname>s and <classname>Window</classname>s. This can
+                cause problems if you have components that require a certain key. For
+                example, multi-line <classname>TextField</classname> requires the
+                <keycap>Enter</keycap> key. There is currently no way to filter the
+                shortcut actions out while the focus is inside some specific component, so
+                you need to avoid such conflicts.
+            </para>
+        </section>
+    </section>
 
-	<section xml:id="advanced.printing">
+    <section xml:id="advanced.printing">
 		<title>Printing</title>
 
         <indexterm xml:id="term:advanced.printing" class="startofrange">
