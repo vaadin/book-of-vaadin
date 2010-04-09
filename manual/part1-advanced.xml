@@ -1421,25 +1421,85 @@ mainWindow.addURIHandler(myresource);]]></programlisting>
 	<section xml:id="advanced.shortcuts">
 		<title>Shortcut Keys</title>
 
-		<!-- UNFINISHED -->
-
         <para>
-            Vaadin provides a generic shortcut key binding API based on actions as well as
-            a simplified way for defining shortcut keys for field components.
+            Vaadin provides simple ways for defining shortcut keys for field components
+            and a default button, and a lower-level generic shortcut key binding API based
+            on actions.
         </para>
 
-        <section>
+        <section xml:id="advanced.shortcuts.defaultbutton">
+            <title>Click Shortcuts for Default Buttons</title>
+
+            <para>
+                You can add or set a <emphasis>click shortcut</emphasis> to a button to
+                set it as "default" button; pressing the defined key, typically
+                <keycap>Enter</keycap>, in any component in the window causes a click
+                event for the button.
+            </para>
+
+            <para>
+                You can define a click shortcut with the
+                <methodname>setClickShortcut()</methodname> shorthand method:
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[// Have an OK button and set it as the default button
+Button ok = new Button("OK");
+ok.setClickShortcut(KeyCode.ENTER);
+ok.addStyleName("primary");]]></programlisting>
+
+            <para>
+                The <literal>primary</literal> style name highlights a button to show the
+                default button status; usually with a bolder font than usual, depending on
+                the theme. The result can be seen in <xref
+                linkend="figure.advanced.shortcuts.defaultbutton"/>.
+            </para>
+
+			<figure xml:id="figure.advanced.shortcuts.defaultbutton">
+				<title>Default Button with Click Shortcut</title>
+				<mediaobject>
+					<imageobject role="html">
+						<imagedata align="center" fileref="img/advanced/shortcut-defaultbutton.png"/>
+					</imageobject>
+					<imageobject role="fo">
+						<imagedata scale="70" smallscale="100%" align="center" fileref="img/advanced/shortcut-defaultbutton.png"/>
+					</imageobject>
+				</mediaobject>
+			</figure>
+        </section>
+
+        <section xml:id="advanced.shortcuts.focus">
             <title>Field Focus Shortcuts</title>
 
             <para>
-                You can define a shortcut key that moves the focus to a field component
-                (any component that inherits <classname>AbstractField</classname> by
+                You can define a shortcut key that sets the focus to a field component
+                (any component that inherits <classname>AbstractField</classname>) by
                 adding a <classname>FocusShortcut</classname> as a shortcut listener to
                 the field.
             </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[// A field with Alt+N bound to it
+TextField name = new TextField("Name (Alt+N)");
+name.addShortcutListener(
+        new AbstractField.FocusShortcut(name, KeyCode.N,
+                                        ModifierKey.ALT));
+layout.addComponent(name);
+
+// A field with Alt+A bound to it
+TextField address = new TextField("Address (Alt+A)");
+address.addShortcutListener(
+        new AbstractField.FocusShortcut(address, KeyCode.A,
+                                        ModifierKey.ALT));
+layout.addComponent(address);]]></programlisting>
+
+            <para>
+                The constructor of the <classname>FocusShortcut</classname> takes the
+                field component as its first parameter, followed by the key code, and an
+                optional list of modifier keys, as listed in <xref
+                    linkend="advanced.shortcuts.keycodes"/>.
+            </para>
         </section>
 
-        <section>
+        <section xml:id="advanced.shortcuts.actions">
             <title>Generic Shortcut Actions</title>
 
             <para>
@@ -1448,10 +1508,8 @@ mainWindow.addURIHandler(myresource);]]></programlisting>
                 generic <classname>Action</classname> class that is used for example in
                 <classname>Tree</classname> and <classname>Table</classname> for context
                 menus.  Currently, the only classes that accept
-                <classname>ShortcutActions</classname> are <classname>Window</classname>
-                and <classname>Panel</classname>.  This may change in the future,
-                especially <classname>Table</classname> is a good candidate to support
-                shortcut actions.
+                <classname>ShortcutAction</classname>s are <classname>Window</classname>
+                and <classname>Panel</classname>.
             </para>
 		
             <para>
@@ -1463,12 +1521,12 @@ mainWindow.addURIHandler(myresource);]]></programlisting>
             </para>
 
             <para>
-                The <methodname>getActions()</methodname> interface method must return an
-                array of <classname>Action</classname> objects for the component specified
-                with the second parameter for the method, the
-                <parameter>sender</parameter> of an action. For a keyboard shortcut, you
-                use a <classname>ShortcutAction</classname>. The implementation of the
-                method could be following:
+                The <methodname>getActions()</methodname> method must return an array of
+                <classname>Action</classname> objects for the component, specified with the
+                second parameter for the method, the <parameter>sender</parameter> of an
+                action. For a keyboard shortcut, you use a
+                <classname>ShortcutAction</classname>. The implementation of the method
+                could be following:
             </para>
 
             <programlisting language="java"><?pocket-size 65% ?><![CDATA[// Have the unmodified Enter key cause an event
@@ -1483,7 +1541,7 @@ Action action_cancel = new ShortcutAction("Alt+C",
 Action[] actions = new Action[] {action_cancel, action_ok};
 
 public Action[] getActions(Object target, Object sender) {
-    if(sender == myPanel)
+    if (sender == myPanel)
         return actions;
 
     return null;
@@ -1499,83 +1557,18 @@ public Action[] getActions(Object target, Object sender) {
                 caption for the action; this is largely irrelevant for shortcut actions in
                 their current implementation, but might be used later if implementors use
                 them both in menus and as shortcut actions.  The second parameter is the
-                keycode, as defined in <classname>ShortcutAction.KeyCode</classname>
-                interface. Currently, the following keycodes are allowed:
+                key code and the third a list of modifier keys, which are listed in <xref
+                linkend="advanced.shortcuts.keycodes"/>.
             </para>
-
-            <variablelist>
-                <varlistentry>
-                    <term>Keys <parameter>A</parameter> to <parameter>Z</parameter></term>
-                    <listitem>Normal letter keys</listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term><parameter>F1</parameter> to <parameter>F12</parameter></term>
-                    <listitem>
-                        <para>Function keys</para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term><parameter>BACKSPACE</parameter>, <parameter>DELETE</parameter>, <parameter>ENTER</parameter>, <parameter>ESCAPE</parameter>, <parameter>INSERT</parameter>, <parameter>TAB</parameter></term>
-                    <listitem>
-                        <para>Control keys</para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term><parameter>NUM0</parameter> to <parameter>NUM9</parameter></term>
-                    <listitem>
-                        <para>Number pad keys</para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term><parameter>ARROW_DOWN</parameter>, <parameter>ARROW_UP</parameter>, <parameter>ARROW_LEFT</parameter>, <parameter>ARROW_RIGHT</parameter></term>
-                    <listitem>
-                        <para>Arrow keys</para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term><parameter>HOME</parameter>, <parameter>END</parameter>, <parameter>PAGE_UP</parameter>, <parameter>PAGE_DOWN</parameter></term>
-                    <listitem>
-                        <para>Other movement keys</para>
-                    </listitem>
-                </varlistentry>
-            </variablelist>
 
             <para>
-                The third parameter is an array of modifier keys, as defined in the
-                <classname>ShortcutAction.ModifierKey</classname> interface. The following
-                modifier keys are allowed: <parameter>ALT</parameter>,
-                <parameter>CTRL</parameter>, and <parameter>SHIFT</parameter>. The
-                modifier keys can be combined; for example, the following defines shortcut
-                key combination
-                <keycombo><keycap>Ctrl</keycap><keycap>Shift</keycap><keycap>S</keycap></keycombo>:
+                The following example demonstrates the definition of a default button for a
+                user interface, as well as a normal shortcut key,
+                <keycombo><keycap>Alt</keycap><keycap>C</keycap></keycombo> for clicking the
+                <guibutton>Cancel</guibutton> button.
             </para>
 
-
-            <programlisting language="java"><?pocket-size 65% ?><![CDATA[ShortcutAction("Ctrl+Shift+S",
-               ShortcutAction.KeyCode.S, new int[] {
-                      ShortcutAction.ModifierKey.CTRL,
-                      ShortcutAction.ModifierKey.SHIFT});]]></programlisting>
-
-
-		<para>
-			The following example demonstrates the definition of a default button for a
-			user interface, as well as a normal shortcut key,
-			<keycombo><keycap>Alt</keycap><keycap>C</keycap></keycombo> for clicking the
-			<guibutton>Cancel</guibutton> button.
-		</para>
-
-		<programlisting language="java"><?pocket-size 65% ?><![CDATA[import com.vaadin.event.Action;
-import com.vaadin.event.ShortcutAction;
-import com.vaadin.event.Action.Handler;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.CustomComponent;
-import com.vaadin.ui.FormLayout;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Panel;
-import com.vaadin.ui.TextField;
-
-public class DefaultButtonExample extends CustomComponent
+            <programlisting language="java"><?pocket-size 65% ?><![CDATA[public class DefaultButtonExample extends CustomComponent
                                   implements Handler {
     // Define and create user interface components
     Panel panel = new Panel("Login");
@@ -1667,6 +1660,103 @@ public class DefaultButtonExample extends CustomComponent
                 shortcut actions out while the focus is inside some specific component, so
                 you need to avoid such conflicts.
             </para>
+        </section>
+
+        <section xml:id="advanced.shortcuts.keycodes">
+            <title>Supported Key Codes and Modifier Keys</title>
+            
+            <para>
+                The shortcut key definitions require a key code to identify the pressed
+                key and modifier keys, such as Shift, Alt, or Ctrl, to specify a key
+                combination.
+            </para>
+
+            <para>
+                The key codes are defined in the
+                <classname>ShortcutAction.KeyCode</classname> interface and are:
+            </para>
+
+            <variablelist>
+                <varlistentry>
+                    <term>Keys <parameter>A</parameter> to <parameter>Z</parameter></term>
+                    <listitem>Normal letter keys</listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>F1</parameter> to <parameter>F12</parameter></term>
+                    <listitem>
+                        <para>Function keys</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>BACKSPACE</parameter>, <parameter>DELETE</parameter>, <parameter>ENTER</parameter>, <parameter>ESCAPE</parameter>, <parameter>INSERT</parameter>, <parameter>TAB</parameter></term>
+                    <listitem>
+                        <para>Control keys</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>NUM0</parameter> to <parameter>NUM9</parameter></term>
+                    <listitem>
+                        <para>Number pad keys</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>ARROW_DOWN</parameter>, <parameter>ARROW_UP</parameter>, <parameter>ARROW_LEFT</parameter>, <parameter>ARROW_RIGHT</parameter></term>
+                    <listitem>
+                        <para>Arrow keys</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>HOME</parameter>, <parameter>END</parameter>, <parameter>PAGE_UP</parameter>, <parameter>PAGE_DOWN</parameter></term>
+                    <listitem>
+                        <para>Other movement keys</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+
+            <para>
+                Modifier keys are defined in
+                <classname>ShortcutAction.ModifierKey</classname> and are:
+            </para>
+
+            <variablelist>
+                <varlistentry>
+                    <term><parameter>ModifierKey.ALT</parameter></term>
+                    <listitem>Alt key</listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>ModifierKey.CTRL</parameter></term>
+                    <listitem>Ctrl key</listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>ModifierKey.SHIFT</parameter></term>
+                    <listitem>Shift key</listitem>
+                </varlistentry>
+            </variablelist>
+
+            <para>
+                All constructors and methods accepting modifier keys take them as a
+                variable argument list following the key code, separated with commas. For
+                example, the following defines a
+                <keycombo><keycap>Ctrl</keycap><keycap>Shift</keycap><keycap>N</keycap></keycombo>
+                key combination for a shortcut.
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[TextField name = new TextField("Name (Ctrl+Shift+N)");
+name.addShortcutListener(
+        new AbstractField.FocusShortcut(name, KeyCode.N,
+                                        ModifierKey.CTRL,
+                                        ModifierKey.SHIFT));]]></programlisting>
+
+            <section>
+                <title>Supported Key Combinations</title>
+
+                <para>
+                    The actual possible key combinations vary between browsers, as most
+                    browsers have a number of built-in shortcut keys, which can not be
+                    used in web applications. Also, the operating system can reserve some
+                    key combinations.
+                </para>
+            </section>
         </section>
     </section>
 
