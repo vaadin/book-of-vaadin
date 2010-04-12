@@ -2934,10 +2934,10 @@ public class PortletModeExample extends Application
             <para>
                 In some cases, it can be useful to implement certain modes of a portlet
                 as pure HTML or JSP pages instead of running the full Vaadin application
-                user interface in them. Common reasons for this are mostly static
+                user interface in them. Common reasons for this are static
                 pages (e.g. a simple help mode), integrating legacy content to a portlet
                 (e.g. a JSP configuration interface) and providing an ultra-lightweight
-                initial view for a portlet for users behind slow connections.
+                initial view for a portlet (for users behind slow connections).
             </para>
             
             <para>
@@ -2957,7 +2957,7 @@ public class PortletModeExample extends Application
                 <methodname>doView</methodname>, <methodname>doEdit</methodname>
                 and <methodname>doHelp</methodname>, respectively. Custom modes
                 can be handled by implementing similar methods with the
-                <classname>javax.portlet.RenderMode(name = "mymode")</classname>
+                <classname>@javax.portlet.RenderMode(name = "mymode")</classname>
                 annotation.
             </para>
 
@@ -2966,13 +2966,16 @@ public class PortletModeExample extends Application
                 <filename>portlet.xml</filename> deployment descriptor as described in
                 <xref linkend="advanced.portal.portlet-mode"/>. Also, the portlet class
                 in <filename>portlet.xml</filename> should point to the customized
-                subclass of <classname>AbstractApplicationPortlet</classname> or
-                <classname>ApplicationPortlet2</classname>.
+                subclass of <classname>ApplicationPortlet2</classname>.
             </para>
 
             <para>
                 The following example (for Portlet 2.0) shows how to create a static
                 help page for the portlet.
+            </para>
+            
+            <para>
+            	<filename>portlet.xml</filename>:
             </para>
 
             <programlisting><?pocket-size 65% ?><![CDATA[<!-- Supported portlet modes and content types. -->
@@ -2982,6 +2985,10 @@ public class PortletModeExample extends Application
     <portlet-mode>help</portlet-mode>
 </supports>]]></programlisting>
             
+            <para>
+            	<filename>HtmlHelpPortlet.java:</filename>:
+            </para>
+
             <programlisting><?pocket-size 65% ?><![CDATA[// Use Portlet 2.0 API
 import com.vaadin.terminal.gwt.server.ApplicationPortlet2;
 
@@ -3004,7 +3011,8 @@ public class HtmlHelpPortlet extends ApplicationPortlet2 {
 
             <para>
                 To produce pure HTML portlet content from a running Vaadin application
-                instead of statically outside an application, the portlet method
+                instead of statically outside an application, the
+                <classname>ApplicationPortlet2</classname> method
                 <methodname>writeAjaxPage</methodname> should be overridden.
                 This approach allows using the application state in HTML content
                 generation, and all relevant Vaadin portlet request and portlet
@@ -3058,6 +3066,16 @@ public class HtmlModePortlet extends AbstractApplicationPortlet {
     }
     
 }]]></programlisting>
+
+            <para>
+            	The user can freely move between Vaadin and non-Vaadin portlet
+            	modes with the user interface provided by the portal (for
+            	standard modes) or the portlet (e.g. action links). Once the
+            	server side application has been started, it continues to run
+            	as long as the session is alive.
+            	If necessary, specific portlet mode transitions can be
+            	disallowed in <filename>portlet.xml</filename>.
+            </para>
 
             <para>
                 In the case of Portlet 1.0, both a portlet and a servlet are involved.
