@@ -1751,10 +1751,13 @@ name.addShortcutListener(
                 <title>Supported Key Combinations</title>
 
                 <para>
-                    The actual possible key combinations vary between browsers, as most
-                    browsers have a number of built-in shortcut keys, which can not be
-                    used in web applications. Also, the operating system can reserve some
-                    key combinations.
+                    The actual possible key combinations vary greatly between browsers, as
+                    most browsers have a number of built-in shortcut keys, which can not
+                    be used in web applications. For example, Mozilla Firefox allows
+                    binding almost any key combination, while Opera does not even allow
+                    binding Alt shortcuts. Other browsers are generally in between these
+                    two. Also, the operating system can reserve some key combinations and
+                    some computer manufacturers define their own system key combinations.
                 </para>
             </section>
         </section>
@@ -3630,9 +3633,44 @@ response.addCookie(cookie);]]></programlisting>
         </para>
 
         <para>
-            Dragged objects can be either entire components or parts of components;
-            <classname>Table</classname> and <classname>Tree</classname> support dragging
-            items, that is, table rows and tree nodes.
+            Dragged objects, or <emphasis>transferables</emphasis>, are essentially data
+            objects. You can drag and drop rows in <classname>Table</classname> and nodes
+            in <classname>Tree</classname> components, either within or between the
+            components. You can also drag entire components by wrapping them inside
+            <classname>DragAndDropWrapper</classname>.
+        </para>
+
+        <para>
+            Dragging starts from a <emphasis>drag source</emphasis>, which defines the
+            transferable. Transferables implement the <classname>Transferable</classname>
+            interfaces. For trees and tables, which are bound to
+            <classname>Container</classname> data sources, a node or row transferable is a
+            reference to an <classname>Item</classname> in the Vaadin Data Model. Dragged
+            components are referenced with a
+            <classname>WrapperTransferable</classname>. Starting dragging does not require
+            any client-server communication, you only need to enable dragging. All drag
+            and drop logic occurs in two operations: determining
+            (<emphasis>accepting</emphasis>) where dropping is allowed and actually
+            dropping. Drops can be done on a <emphasis>drop target</emphasis>, which
+            implements the <classname>DropTarget</classname> interface. Three components
+            implement the interface: <classname>Tree</classname>,
+            <classname>Table</classname>, and
+            <classname>DragAndDropWrapper</classname>. These accept and drop operations
+            need to be provided in a <emphasis>drop handler</emphasis>. Essentially all
+            you need to do to enable drag and drop is to enable dragging in the drag
+            source and implement the <methodname>getAcceptCriterion()</methodname> and
+            <methodname>drop()</methodname> methods in the
+            <classname>DropHandler</classname> interface.
+        </para>
+
+        <para>
+            The client-server architecture of Vaadin causes special requirements for the
+            drag and drop functionality. The logic for determining where a dragged object
+            can be dropped, that is, <emphasis>accepting</emphasis> a drop, should
+            normally be done on the client-side, in the browser. Server communications are
+            too slow to have much of such logic on the server-side. The drag and drop
+            feature therefore offers a number of ways to avoid the server communications
+            to ensure a good user experience.
         </para>
 
         <section xml:id="advanced.dragndrop.drophandler">
@@ -3643,9 +3681,9 @@ response.addCookie(cookie);]]></programlisting>
                 handler</emphasis>, which is provided by implementing the
                 <methodname>drop()</methodname> method in the
                 <classname>DropHandler</classname> interface. A closely related definition
-                is the drop criterion, which is defined in the
+                is the drop accept criterion, which is defined in the
                 <methodname>getAcceptCriterion()</methodname> method in the same
-                interface, as described in <xref
+                interface. It is described in <xref
                 linkend="advanced.dragndrop.acceptcriteria"/> later.
             </para>
 
@@ -3658,8 +3696,8 @@ response.addCookie(cookie);]]></programlisting>
             </para>
 
             <para>
-                The <classname>Transferable</classname> object contains a reference to the
-                component or item that is being dragged. A tree or table item is
+                A <classname>Transferable</classname> contains a reference to the object
+                (component or data item) that is being dragged. A tree or table item is
                 represented as a <classname>TreeTransferable</classname> or
                 <classname>TableTransferable</classname> object, which carries the item
                 identifier of the dragged tree or table item. These special transferables,
@@ -3687,6 +3725,40 @@ response.addCookie(cookie);]]></programlisting>
                 <classname>HorizontalDropLocation</classname> objects. The drop location
                 objects specify whether the transferable is being dropped above, below, or
                 directly on (at the middle of) a component or item.
+            </para>
+
+            <para>
+                Dropping on a <classname>Tree</classname>, <classname>Table</classname>,
+                and a wrapped component is explained further in the following sections.
+            </para>
+        </section>
+
+        <section xml:id="advanced.dragndrop.treedrop">
+            <title>Dropping Items On a <classname>Tree</classname></title>
+
+            <para>
+                You can drag items from, to, or within a
+                <classname>Tree</classname>. Making tree a drag source requires simply
+                setting the drag mode with
+                <methodname>setDragMode()</methodname>. <classname>Tree</classname>
+                currently supports only one drag mode,
+                <literal>TreeDragMode.NODE</literal>, which allows dragging single tree
+                nodes. While dragging, the dragged node is referenced with a
+                <classname>TreeTransferable</classname> object, which is a
+                <classname>DataBoundTransferable</classname>. The tree node is identified
+                by the item ID of the container item.
+            </para>
+
+            <para>
+                When a transferable is dropped on a tree, the drop location is stored in a
+                <classname>TreeTargetDetails</classname> object, which identifies the
+                target location by item ID of the tree node on which the drop is made. You
+                can get the item ID with <methodname>getItemIdOver()</methodname> method
+                in <classname>AbstractSelectTargetDetails</classname>, which the
+                <classname>TreeTargetDetails</classname> inherits. A drop can occur
+                directly on or above or below a node; the exact location is a
+                <classname>VerticalDropLocation</classname>, which you can get with the
+                <methodname>getDropLocation()</methodname> method.
             </para>
 
             <para>
@@ -3752,7 +3824,116 @@ tree.setDropHandler(new DropHandler() {
         }
     }
 });]]></programlisting>
+
+            <section>
+                <title>Accept Criteria for Trees</title>
+
+                <para>
+                    <classname>Tree</classname> defines some specialized accept
+                    criteria for trees.
+                </para>
+
+                <variablelist>
+                    <varlistentry>
+                        <term><classname>TargetInSubtree</classname> (client-side)</term>
+                        <listitem>
+                            Accepts if the target item is in the specified sub-tree. The
+                            sub-tree is specified by the item ID of the root of the
+                            sub-tree in the constructor. The second constructor includes a
+                            depth parameter, which specifies how deep from the given root
+                            node are drops accepted. Value <literal>-1</literal> means
+                            infinite, that is, the entire sub-tree, and is therefore the
+                            same as the simpler constructor.
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><classname>TargetItemAllowsChildren</classname> (client-side)</term>
+                        <listitem>
+                            Accepts a drop if the tree has
+                            <methodname>setChildrenAllowed()</methodname> enabled for the
+                            target item. The criterion does not require parameters, so the
+                            class is a singleton and can be acquired with
+                            <methodname>Tree.TargetItemAllowsChildren.get()</methodname>. For
+                            example, the following composite criterion accepts drops only
+                            on nodes that allow children, but between all nodes:
+
+                            <programlisting><?pocket-size 65% ?><![CDATA[return new Or (Tree.TargetItemAllowsChildren.get(), new Not(VerticalLocationIs.MIDDLE));]]></programlisting>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><classname>TreeDropCriterion</classname> (server-side)</term>
+                        <listitem>
+                            Accepts drops on only some items, which as specified by a set
+                            of item IDs. You must extend the abstract class and implement
+                            the <methodname>getAllowedItemIds()</methodname> to return the
+                            set. While the criterion is server-side, it is lazy-loading,
+                            so that the list of accepted target nodes is loaded only once
+                            from the server for each drag operation. See <xref
+                            linkend="advanced.dragndrop.acceptcriteria"/> for an example.
+                        </listitem>
+                    </varlistentry>
+                </variablelist>
+
+                <para>
+                    In addition, the accept criteria defined in
+                    <classname>AbstractSelect</classname> are available for a
+                    <classname>Tree</classname>, as listed in <xref
+                    linkend="advanced.dragndrop.acceptcriteria"/>.
+                </para>
+            </section>
             
+        </section>
+
+        <section xml:id="advanced.dragndrop.tabledrop">
+            <title>Dropping Items On a <classname>Table</classname></title>
+
+            <para>
+                You can drag items from, to, or within a
+                <classname>Table</classname>. Making table a drag source requires simply
+                setting the drag mode with
+                <methodname>setDragMode()</methodname>. <classname>Table</classname>
+                supports dragging both single rows, with
+                <literal>TableDragMode.ROW</literal>, and multiple rows, with
+                <literal>TableDragMode.MULTIROW</literal>. While dragging, the dragged
+                node or nodes are referenced with a
+                <classname>TreeTransferable</classname> object, which is a
+                <classname>DataBoundTransferable</classname>. Tree nodes are identified by
+                the item IDs of the container items.
+            </para>
+
+            <para>
+                When a transferable is dropped on a table, the drop location is stored in
+                a <classname>AbstractSelectTargetDetails</classname> object, which
+                identifies the target row by its item ID. You can get the item ID with
+                <methodname>getItemIdOver()</methodname> method. A drop can occur directly
+                on or above or below a row; the exact location is a
+                <classname>VerticalDropLocation</classname>, which you can get with the
+                <methodname>getDropLocation()</methodname> method from the details object.
+            </para>
+
+            <section>
+                <title>Accept Criteria for Tables</title>
+
+                <para>
+                    <classname>Table</classname> defines one specialized accept
+                    criterion for tables.
+                </para>
+
+                <variablelist>
+                    <varlistentry>
+                        <term><classname>TableDropCriterion</classname> (server-side)</term>
+                        <listitem>
+                            Accepts drops only on (or above or below) items that are
+                            specified by a set of item IDs. You must extend the abstract
+                            class and implement the
+                            <methodname>getAllowedItemIds()</methodname> to return the
+                            set. While the criterion is server-side, it is lazy-loading,
+                            so that the list of accepted target items is loaded only once
+                            from the server for each drag operation.
+                        </listitem>
+                    </varlistentry>
+                </variablelist>
+            </section>
         </section>
 
         <section xml:id="advanced.dragndrop.acceptcriteria">
@@ -3808,7 +3989,7 @@ tree.setDropHandler(new DropHandler() {
                     <varlistentry>
                         <term><classname>AcceptAll</classname></term>
                         <listitem>
-                            Accepts all transferables.
+                            Accepts all transferables and targets.
                         </listitem>
                     </varlistentry>
                     <varlistentry>
@@ -3862,6 +4043,61 @@ tree.setDropHandler(new DropHandler() {
                             Accepts any transferable if the target detail, such as the
                             item of a tree node or table row, is of the given data flavor
                             and has the given value.
+                        </listitem>
+                    </varlistentry>
+                </variablelist>
+
+                <para>
+                    In addition, target components such as <classname>Tree</classname> and
+                    <classname>Table</classname> define some component-specific
+                    client-side accept criteria. See <xref
+                    linkend="advanced.dragndrop.treedrop"/> for more details.
+                </para>
+
+                <para>
+                    <classname>AbstractSelect</classname> defines the following criteria
+                    for all selection components, including <classname>Tree</classname>
+                    and <classname>Table</classname>.
+                </para>
+
+                <variablelist>
+                    <varlistentry>
+                        <term><classname>AcceptItem</classname></term>
+                        <listitem>
+                            Accepts only specific items from a specific selection
+                            component. The selection component, which must inherit
+                            <classname>AbstractSelect</classname>, is given as the first
+                            parameter for the constructor. It is followed by a list of
+                            allowed item identifiers in the drag source.
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><classname>AcceptItem.ALL</classname></term>
+                        <listitem>
+                            Accepts all transferables as long as they are items.
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><classname>TargetItemIs</classname></term>
+                        <listitem>
+                            Accepts all drops on the specified target items. The
+                            constructor requires the target component
+                            (<classname>AbstractSelect</classname>) followed by a list of
+                            allowed item identifiers.
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><classname>VerticalLocationIs.MIDDLE</classname>,
+                        <classname>TOP</classname>, and
+                        <classname>BOTTOM</classname></term>
+                        <listitem>
+                            The three static criteria accepts drops on, above, or below an
+                            item. For example, you could accept drops only in between
+                            items with the following:
+
+                            <programlisting><?pocket-size 65% ?><![CDATA[public AcceptCriterion getAcceptCriterion() {
+    return new Not(VerticalLocationIs.MIDDLE);
+}]]></programlisting>
                         </listitem>
                     </varlistentry>
                 </variablelist>
@@ -3956,13 +4192,88 @@ tree.setDropHandler(new DropHandler() {
                 Dragging a component requires wrapping the source component within a
                 <classname>DragAndDropWrapper</classname>. You can then allow dragging by
                 putting the wrapper (and the component) in drag mode with
-                <methodname>setDragStartMode(DragStartMode.WRAPPER)</methodname>.
+                <methodname>setDragStartMode()</methodname>. The method supports two drag
+                modes: <parameter>DragStartMode.WRAPPER</parameter> and
+                <parameter>DragStartMode.COMPONENT</parameter>, which defines whether the
+                entire wrapper is shown as the drag image while dragging or just the
+                wrapped component.
             </para>
 
             <para>
-                The <classname>DragAndDropWrapper</classname> is used also for the drop
-                target when the target is a component. You just need to define the
-                <classname>DropHandler</classname> for the wrapper.
+                Dragged components are referenced in the
+                <classname>WrapperTransferable</classname>. You can get the reference to
+                the dragged component with
+                <methodname>getDraggedComponent()</methodname>. The method will return
+                <literal>null</literal> if the transferable is not a component. Also HTML
+                5 drags (see later) are held in wrapper transferables.
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[]]></programlisting>
+        </section>
+
+        <section>
+            <title>Dropping on a Component</title>
+
+            <para>
+                Drops on a component can be made by wrapping the component in a
+                <classname>DragAndDropWrapper</classname>. The wrapper is an ordinary
+                component; the constructor takes the wrapped component as a parameter. You
+                just need to define the <classname>DropHandler</classname> for the
+                wrapper.
+            </para>
+
+            <para>
+                In the following example, we have allow reordering components in a
+                horizontal layout. The drop handler is omitted.
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[public class SortableLayout extends CustomComponent {
+    HorizontalLayout layout = new HorizontalLayout();
+    DropHandler dropHandler;
+
+    public SortableLayout() {
+        dropHandler = new ReorderLayoutDropHandler(layout);
+
+        // Wrap the layout to accept drops to an empty layout
+        DragAndDropWrapper wrapper =
+                new DragAndDropWrapper(layout);
+        setCompositionRoot(wrapper);
+    }
+
+    @Override
+    public void addComponent(Component component) {
+        // Wrap each component in a wrapper to allow
+        // drops on or between the contained components
+        DragAndDropWrapper wrapped =
+                new DragAndDropWrapper(component);
+        wrapped.setDropHandler(dropHandler);
+        layout.addComponent(wrapped);
+    }]]></programlisting>
+
+            <para>
+                Drops on a component are handled with a
+                <classname>DropHandler</classname>, as usual. You set the drop handler of
+                a wrapper with <methodname>setDropHandler()</methodname>. The drop handler
+                receives the drop target details in a
+                <classname>WrapperTargetDetails</classname> object. You can find out the
+                exact x and y coordinates of the drop with
+                <methodname>getAbsoluteLeft()</methodname> and
+                <methodname>getAbsoluteTop()</methodname>. The
+                <methodname>verticalDropLocation()</methodname> and
+                <methodname>horizontalDropLocation()</methodname> return the more detailed
+                drop location in the target.
+            </para>
+
+            <para>
+                The <classname>DragAndDropWrapper</classname> allows dropping files from
+                outside the browser. Dropped files are automatically uploaded to the
+                application and can be acquired from the wrapper with
+                <methodname>getFiles()</methodname>. The files are represented as
+                <classname>Html5File</classname> objects as defined in the inner
+                class. You can define an upload <classname>Receiver</classname> to receive
+                the content of a file to an <classname>OutputStream</classname>. Dropping
+                files is supported in HTML 5 and requires a compatible browser, such as
+                Mozilla Firefox 3.6 or newer.
             </para>
         </section>
 
