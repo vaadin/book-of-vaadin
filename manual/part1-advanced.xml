@@ -3937,7 +3937,7 @@ tree.setDropHandler(new DropHandler() {
         </section>
 
         <section xml:id="advanced.dragndrop.acceptcriteria">
-            <title>Handling Drop Accept Criteria</title>
+            <title>Accepting Drops</title>
 
             <indexterm xml:id="term:advanced.dragndrop.acceptcriteria" class="startofrange">
                 <primary>Drag and Drop</primary>
@@ -3945,10 +3945,22 @@ tree.setDropHandler(new DropHandler() {
             </indexterm>
 
             <para>
-                A drop handler must define criteria on objects which it accepts to be
-                dropped on itself. The criteria need to be provided in the
+                You can not drop the objects you are dragging around just anywhere. Before
+                a drop is possible, the specific drop location on which the mouse hovers
+                must be <emphasis>accepted</emphasis>. Hovering a dragged object over an
+                accepted location displays an <emphasis>accept indicator</emphasis>, which
+                allows the user to position the drop properly. As such checks have to be
+                done all the time when the mouse pointer moves around the drop targets, it
+                is not feasible to send the accept requests to the server-side, so drops
+                on a target are normally accepted by a client-side <emphasis>accept
+                criterion</emphasis>.
+            </para>
+
+            <para>
+                A drop handler must define the criterion on the objects which it accepts
+                to be dropped on the target. The criterion needs to be provided in the
                 <classname>getAcceptCriterion()</classname> method of the
-                <classname>DropHandler</classname> interface. The criteria are represented
+                <classname>DropHandler</classname> interface. A criterion is represented
                 in an <classname>AcceptCriterion</classname> object, which can be a
                 composite of multiple criteria that are evaluated using logical
                 operations. There are two basic types of criteria:
@@ -4182,6 +4194,32 @@ tree.setDropHandler(new DropHandler() {
 
             </section>
 
+            <section>
+                <title>Accept Indicators</title>
+
+                <para>
+                    When a dragged object hovers on a drop target, an <emphasis>accept
+                    indicator</emphasis> is displayed to show whether or not the location
+                    is accepted. For <parameter>MIDDLE</parameter> location, the indicator
+                    is a box around the target (tree node, table row, or component). For
+                    vertical drop locations, the accepted locations are shown as
+                    horizontal lines, and for horizontal drop locations as vertical lines.
+                </para>
+
+                <para>
+                    You can disable the accept indicators or <emphasis>drag
+                    hints</emphasis> with the
+                    <parameter>no-vertical-drag-hints</parameter>,
+                    <parameter>no-horizontal-drag-hints</parameter>, and
+                    <parameter>no-box-drag-hints</parameter> styles, as shown in the
+                    following example.
+                </para>
+
+                <programlisting><?pocket-size 65% ?><![CDATA[wrapper.addStyleName("no-vertical-drag-hints");
+wrapper.addStyleName("no-horizontal-drag-hints");
+wrapper.addStyleName("no-box-drag-hints");]]></programlisting>
+            </section>
+
             <indexterm startref="term:advanced.dragndrop.acceptcriteria" class="endofrange"/>
         </section>
 
@@ -4199,6 +4237,28 @@ tree.setDropHandler(new DropHandler() {
                 wrapped component.
             </para>
 
+            <programlisting><?pocket-size 65% ?><![CDATA[// Have a component to drag
+final Button button = new Button("An Absolute Button");
+
+// Put the component in a D&D wrapper and allow dragging it
+final DragAndDropWrapper buttonWrap = new DragAndDropWrapper(button);
+buttonWrap.setDragStartMode(DragStartMode.COMPONENT);
+
+// Set the wrapper to wrap tightly around the component
+buttonWrap.setSizeUndefined();
+        
+// Add the wrapper, not the component, to the layout
+layout.addComponent(buttonWrap, "left: 50px; top: 50px;");]]></programlisting>
+
+            <para>
+                The default height of <classname>DragAndDropWrapper</classname> is
+                undefined, but the default width is 100%. If you want to ensure that the
+                wrapper fits tightly around the wrapped component, you should call
+                <methodname>setSizeUndefined()</methodname> for the wrapper. Doing so, you
+                should make sure that the wrapped component does not have a relative size,
+                which would cause a paradox.
+            </para>
+
             <para>
                 Dragged components are referenced in the
                 <classname>WrapperTransferable</classname>. You can get the reference to
@@ -4208,72 +4268,120 @@ tree.setDropHandler(new DropHandler() {
                 5 drags (see later) are held in wrapper transferables.
             </para>
 
-            <programlisting><?pocket-size 65% ?><![CDATA[]]></programlisting>
         </section>
 
         <section>
             <title>Dropping on a Component</title>
 
             <para>
-                Drops on a component can be made by wrapping the component in a
+                Drops on a component are enabled by wrapping the component in a
                 <classname>DragAndDropWrapper</classname>. The wrapper is an ordinary
                 component; the constructor takes the wrapped component as a parameter. You
-                just need to define the <classname>DropHandler</classname> for the
-                wrapper.
+                just need to define the <classname>DropHandler</classname> for the wrapper
+                with <methodname>setDropHandler()</methodname>.
             </para>
 
             <para>
-                In the following example, we have allow reordering components in a
-                horizontal layout. The drop handler is omitted.
+                In the following example, we allow moving components in an absolute
+                layout. Details on the drop handler are given later.
             </para>
 
-            <programlisting><?pocket-size 65% ?><![CDATA[public class SortableLayout extends CustomComponent {
-    HorizontalLayout layout = new HorizontalLayout();
-    DropHandler dropHandler;
+            <programlisting><?pocket-size 65% ?><![CDATA[// A layout that allows moving its contained components
+// by dragging and dropping them
+final AbsoluteLayout absLayout = new AbsoluteLayout();
+absLayout.setWidth("100%");
+absLayout.setHeight("400px");
 
-    public SortableLayout() {
-        dropHandler = new ReorderLayoutDropHandler(layout);
+... put some (wrapped) components in the layout ...
 
-        // Wrap the layout to accept drops to an empty layout
-        DragAndDropWrapper wrapper =
-                new DragAndDropWrapper(layout);
-        setCompositionRoot(wrapper);
+// Wrap the layout to allow handling drops
+DragAndDropWrapper layoutWrapper =
+        new DragAndDropWrapper(absLayout);
+
+// Handle moving components within the AbsoluteLayout
+layoutWrapper.setDropHandler(new DropHandler() {
+    public AcceptCriterion getAcceptCriterion() {
+        return AcceptAll.get();
     }
+    
+    public void drop(DragAndDropEvent event) {
+        ...        
+    }
+});]]></programlisting>
 
-    @Override
-    public void addComponent(Component component) {
-        // Wrap each component in a wrapper to allow
-        // drops on or between the contained components
-        DragAndDropWrapper wrapped =
-                new DragAndDropWrapper(component);
-        wrapped.setDropHandler(dropHandler);
-        layout.addComponent(wrapped);
-    }]]></programlisting>
+            <section>
+                <title>Target Details for Wrapped Components</title>
 
+                <para>
+                    The drop handler receives the drop target details in a
+                    <classname>WrapperTargetDetails</classname> object, which implements
+                    the <classname>TargetDetails</classname> interface.
+                </para>
+
+                <programlisting><?pocket-size 65% ?><![CDATA[public void drop(DragAndDropEvent event) {
+    WrapperTransferable t =
+        (WrapperTransferable) event.getTransferable();
+    WrapperTargetDetails details =
+        (WrapperTargetDetails) event.getTargetDetails();]]></programlisting>
+
+                <para>
+                    The wrapper target details include a
+                    <classname>MouseEventDetails</classname> object, which you can get
+                    with <methodname>getMouseEvent()</methodname>. You can use it to get
+                    the mouse coordinates for the position where the mouse button was
+                    released and the drag ended. Similarly, you can find out the drag
+                    start position from the transferable object (if it is a
+                    <classname>WrapperTransferable</classname>) with
+                    <methodname>getMouseDownEvent()</methodname>.
+                </para>
+                
+                <programlisting><?pocket-size 65% ?><![CDATA[// Calculate the drag coordinate difference
+int xChange = details.getMouseEvent().getClientX()
+              - t.getMouseDownEvent().getClientX();
+int yChange = details.getMouseEvent().getClientY()
+              - t.getMouseDownEvent().getClientY();
+
+// Move the component in the absolute layout
+ComponentPosition pos =
+    absLayout.getPosition(t.getSourceComponent());
+pos.setLeftValue(pos.getLeftValue() + xChange);
+pos.setTopValue(pos.getTopValue() + yChange);]]></programlisting>
+
+                <para>
+                    You can get the absolute x and y coordinates of the target wrapper
+                    with <methodname>getAbsoluteLeft()</methodname> and
+                    <methodname>getAbsoluteTop()</methodname>, which allows you to
+                    translate the absolute mouse coordinates to coordinates relative to
+                    the wrapper. Notice that the coordinates are really the position of
+                    the wrapper, not the wrapped component; the wrapper reserves some
+                    space for the accept indicators.
+                </para>
+
+                <para>
+                    The <methodname>verticalDropLocation()</methodname> and
+                    <methodname>horizontalDropLocation()</methodname> return the more
+                    detailed drop location in the target.
+                </para>
+            </section>
+        </section>
+
+        <section>
+            <title>Dragging Files from Outside the Browser</title>
+            
             <para>
-                Drops on a component are handled with a
-                <classname>DropHandler</classname>, as usual. You set the drop handler of
-                a wrapper with <methodname>setDropHandler()</methodname>. The drop handler
-                receives the drop target details in a
-                <classname>WrapperTargetDetails</classname> object. You can find out the
-                exact x and y coordinates of the drop with
-                <methodname>getAbsoluteLeft()</methodname> and
-                <methodname>getAbsoluteTop()</methodname>. The
-                <methodname>verticalDropLocation()</methodname> and
-                <methodname>horizontalDropLocation()</methodname> return the more detailed
-                drop location in the target.
-            </para>
-
-            <para>
-                The <classname>DragAndDropWrapper</classname> allows dropping files from
-                outside the browser. Dropped files are automatically uploaded to the
-                application and can be acquired from the wrapper with
+                The <classname>DragAndDropWrapper</classname> allows dragging files from
+                outside the browser and dropping them on a component wrapped in the
+                wrapper. Dropped files are automatically uploaded to the application and
+                can be acquired from the wrapper with
                 <methodname>getFiles()</methodname>. The files are represented as
                 <classname>Html5File</classname> objects as defined in the inner
                 class. You can define an upload <classname>Receiver</classname> to receive
-                the content of a file to an <classname>OutputStream</classname>. Dropping
-                files is supported in HTML 5 and requires a compatible browser, such as
-                Mozilla Firefox 3.6 or newer.
+                the content of a file to an <classname>OutputStream</classname>.
+            </para>
+
+            <para>
+                Dragging and dropping files to browser is supported in HTML 5 and
+                requires a compatible browser, such as Mozilla Firefox 3.6 or newer.
             </para>
         </section>
 
