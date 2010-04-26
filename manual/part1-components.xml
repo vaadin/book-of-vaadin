@@ -1727,6 +1727,63 @@ main.addComponent(new Label("Here we have an image <img src=\"" +
 			application, which may not be able to render XHTML at all. There are
 			also differences between web browsers in their support of XHTML.
 		</para>
+
+        <simplesect>
+            <title>Spacing with a <classname>Label</classname></title>
+
+            <para>
+                You can use a <classname>Label</classname> to create vertical or
+                horizontal space in a layout. If you need a empty "line" in a vertical
+                layout, having just a label with empty text is not enough, as it will
+                collapse to zero height. The same goes for a label with only whitespace as
+                the label text. You need to use a non-breaking space character, either
+                <literal>&amp;nbsp;</literal> or <literal>&amp;#160;</literal>:
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[layout.addComponent(new Label("&nbsp;", Label.CONTENT_XHTML));]]></programlisting>
+
+            <para>
+                Using the <parameter>Label.CONTENT_PREFORMATTED</parameter> mode has the
+                same effect; preformatted spaces do not collapse in a vertical layout. In
+                a <classname>HorizontalLayout</classname>, the width of a space character
+                may be unpredictable if the label font is proportional, so you can use the
+                preformatted mode to add em-width wide spaces.
+            </para>
+
+            <para>
+                If you want a gap that has adjustable width or height, you can use an
+                empty label if you specify a height or width for it. For example, to
+                create vertical space in a <classname>VerticalLayout</classname>:
+            </para>
+
+            <programlisting><![CDATA[Label gap = new Label();
+gap.setHeight("1em");
+verticalLayout.addComponent(gap);]]></programlisting>
+
+            <para>
+                You can make a flexible expanding spacer by having a relatively sized
+                empty label with <literal>100%</literal> height or width and setting the
+                label as expanding in the layout.
+            </para>
+
+            <programlisting><![CDATA[// A wide component bar
+HorizontalLayout horizontal = new HorizontalLayout();
+horizontal.setWidth("100%");
+
+// Have a component before the gap (a collapsing cell)
+Button button1 = new Button("I'm on the left");
+horizontal.addComponent(button1);
+
+// An expanding gap spacer
+Label expandingGap = new Label();
+expandingGap.setWidth("100%");
+horizontal.addComponent(expandingGap);
+horizontal.setExpandRatio(expandingGap, 1.0f);
+
+// A component after the gap (a collapsing cell)
+Button button2 = new Button("I'm on the right");
+horizontal.addComponent(button2);]]></programlisting>
+        </simplesect>
 	</section>
 
 	<section xml:id="components.link">
