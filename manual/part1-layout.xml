@@ -1486,6 +1486,333 @@ panel.getLayout().setMargin(false);]]></programlisting>
 		</simplesect>
     </section>
 
+	<section xml:id="layout.absolutelayout">
+		<title><classname>AbsoluteLayout</classname></title>
+
+        <para>
+            <classname>AbsoluteLayout</classname> allows placing components in arbitrary
+            positions in the layout area. The positions are specified in the
+            <methodname>addComponent()</methodname> method with horizontal and vertical
+            coordinates relative to an edge of the layout area. The positions can include
+            a third depth dimension, the <emphasis>z-index</emphasis>, which specifies
+            which components are displayed in front and which behind other components.
+        </para>
+
+        <para>
+            The positions are specified by a CSS absolute position string, using the
+            <literal>left</literal>, <literal>right</literal>, <literal>top</literal>,
+            <literal>bottom</literal>, and <literal>z-index</literal> properties known
+            from CSS. In the following example, we have a 300 by 150 pixels large layout
+            and position a text field 50 pixels from both the left and the top edge:
+        </para>
+
+<programlisting><?pocket-size 65% ?><![CDATA[// A 400x250 pixels size layout
+AbsoluteLayout layout = new AbsoluteLayout();
+layout.setWidth("400px");
+layout.setHeight("250px");
+        
+// A component with coordinates for its top-left corner
+TextField text = new TextField("Somewhere someplace");
+layout.addComponent(text, "left: 50px; top: 50px;");]]></programlisting>
+
+        <para>
+            The <literal>left</literal> and <literal>top</literal> specify the distance
+            from the left and top edge, respectively. The <literal>right</literal> and
+            <literal>bottom</literal> specify the distances from the right and top edge.
+        </para>
+
+<programlisting><?pocket-size 65% ?><![CDATA[// At the top-left corner
+Button button = new Button( "left: 0px; top: 0px;");
+layout.addComponent(button, "left: 0px; top: 0px;");
+
+// At the bottom-right corner
+Button buttCorner = new Button( "right: 0px; bottom: 0px;");
+layout.addComponent(buttCorner, "right: 0px; bottom: 0px;");
+
+// Relative to the bottom-right corner
+Button buttBrRelative = new Button( "right: 50px; bottom: 50px;");
+layout.addComponent(buttBrRelative, "right: 50px; bottom: 50px;");
+
+// On the bottom, relative to the left side
+Button buttBottom = new Button( "left: 50px; bottom: 0px;");
+layout.addComponent(buttBottom, "left: 50px; bottom: 0px;");
+
+// On the right side, up from the bottom
+Button buttRight = new Button( "right: 0px; bottom: 100px;");
+layout.addComponent(buttRight, "right: 0px; bottom: 100px;");]]></programlisting>
+
+        <para>
+            The result of the above code examples is shown in <xref linkend="figure.layout.absolutelayout.bottomright"/>.
+        </para>
+
+        <figure xml:id="figure.layout.absolutelayout.bottomright">
+            <title>Components Positioned Relative to Various Edges</title>
+            <mediaobject>
+                <imageobject>
+                    <imagedata smallscale="70%" align="center" fileref="img/layout/absolutelayout-bottomright.png"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
+
+        <para>
+            In the above examples, we had components of undefined size and specified the
+            positions of components by a single pair of coordinates. The other possibility
+            is to specify an area and let the component fill the area by specifying a
+            proportinal size for the component, such as
+            "<literal>100%</literal>". Normally, you use
+            <methodname>setSizeFull()</methodname> to take the entire area given by the
+            layout.
+        </para>
+
+        <programlisting><?pocket-size 65% ?><![CDATA[// Specify an area that a component should fill
+Panel panel = new Panel("A Panel filling an area");
+panel.setSizeFull(); // Fill the entire given area
+layout.addComponent(panel, "left: 25px; right: 50px; "+
+                           "top: 100px; bottom: 50px;");]]></programlisting>
+
+        <para>
+            The result is shown in <xref linkend="figure.layout.absolutelayout.area"/>
+        </para>
+
+        <figure xml:id="figure.layout.absolutelayout.area">
+            <title>Component Filling an Area Specified by Coordinates</title>
+            <mediaobject>
+                <imageobject>
+                    <imagedata smallscale="70%" align="center" fileref="img/layout/absolutelayout-area.png"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
+
+        <para>
+            You can also use proportional coordinates to specify the coordinates:
+        </para>
+
+<programlisting><?pocket-size 65% ?><![CDATA[// A panel that takes 30% to 90% horizontally and
+// 20% to 80% vertically
+Panel panel = new Panel("A Panel");
+panel.setSizeFull(); // Fill the specified area
+layout.addComponent(panel, "left: 30%; right: 10%;" +
+                           "top: 20%; bottom: 20%;");]]></programlisting>
+
+        <para>
+            The result is shown in <xref linkend="figure.layout.absolutelayout.proportional"/>
+        </para>
+
+        <figure xml:id="figure.layout.absolutelayout.proportional">
+            <title>Specifying an Area by Proportional Coordinates</title>
+            <mediaobject>
+                <imageobject>
+                    <imagedata smallscale="70%" align="center" fileref="img/layout/absolutelayout-proportional.png"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
+
+        <para>
+            Drag and drop is very useful for moving the components contained in an
+            <classname>AbsoluteLayout</classname>. Check out the example in <xref
+            linkend="advanced.dragndrop.drop-on-component"/>.
+        </para>
+
+        <simplesect>
+            <title>Styling with CSS</title>
+
+            <programlisting><![CDATA[.v-absolutelayout {}
+.v-absolutelayout-wrapper {}]]></programlisting>
+
+            <para>
+                The <classname>AbsoluteLayout</classname> component has
+                <literal>v-absolutelayout</literal> root style. Each component in the
+                layout is contained within an element that has the
+                <literal>v-absolutelayout-wrapper</literal>. The component captions are
+                outside the wrapper elements, in a separate element with the usual
+                <literal>v-caption</literal> style.
+            </para>
+        </simplesect>
+    </section>
+
+	<section xml:id="layout.csslayout">
+		<title><classname>CssLayout</classname></title>
+
+        <para>
+            <classname>CssLayout</classname> allows strong control over styling of the
+            components contained inside the layout. The components are contained in a
+            simple DOM structure consisting of <literal>&lt;div&gt;</literal> elements. By
+            default, the contained components are laid out horizontally and wrap naturally
+            when they reach the width of the layout, but you can control this and most
+            other behaviour with CSS. You can also inject custom CSS for each contained
+            component. As <classname>CssLayout</classname> has a very simple DOM structure
+            and no dynamic rendering logic, relying purely on the built-in rendering logic
+            of the browsers, it is the fastest of the layout components.
+        </para>
+
+        <para>
+            The basic use of <classname>CssLayout</classname> is just like with any other
+            layout component:
+        </para>
+
+        <programlisting><?pocket-size 65% ?><![CDATA[CssLayout layout = new CssLayout();
+        
+// Component with a layout-managed caption and icon
+TextField tf = new TextField("A TextField");
+tf.setIcon(new ThemeResource("icons/user.png"));
+layout.addComponent(tf);
+
+// Labels are 100% wide by default so must unset width
+Label label = new Label("A Label");
+label.setWidth(Sizeable.SIZE_UNDEFINED, 0);
+layout.addComponent(label);
+        
+layout.addComponent(new Button("A Button"));]]></programlisting>
+
+        <para>
+            The result is shown in <xref linkend="figure.layout.csslayout.basic"/>. Notice
+            that the default spacing and alignment of the layout is quite crude and CSS
+            styling is nearly always needed.
+        </para>
+
+        <figure xml:id="figure.layout.csslayout.basic">
+            <title>Basic Use of <classname>CssLayout</classname></title>
+            <mediaobject>
+                <imageobject>
+                    <imagedata smallscale="100%" align="center" fileref="img/layout/csslayout-basic.png"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
+
+        <para>
+            The <literal>display</literal> attribute of <classname>CssLayout</classname>
+            is <literal>inline-block</literal> by default, so the components are laid out
+            horizontally following another. <classname>CssLayout</classname> has 100%
+            width by default. If the components reach the width of the layout, they are
+            wrapped to the next "line" just as text would be. If you add a component with
+            100% width, it will take an entire line by wrapping before and after the
+            component.
+        </para>
+
+        <para>
+            Overriding the <methodname>getCss()</methodname> method allows injecting
+            custom CSS for each component. The CSS returned by the method is inserted in
+            the <parameter>style</parameter> attribute of the
+            <literal>&lt;div&gt;</literal> element of the component, so it will override
+            any style definitions made in CSS files.
+        </para>
+
+        <programlisting><?pocket-size 65% ?><![CDATA[CssLayout layout = new CssLayout() {
+    @Override
+    protected String getCss(Component c) {
+        if (c instanceof Label) {
+            // Color the boxes with random colors
+            int rgb = (int) (Math.random()*(1<<24));
+            return "background: #" + Integer.toHexString(rgb);
+        }
+        return null;
+    }
+};
+layout.setWidth("400px"); // Causes to wrap the contents
+
+// Add boxes of various sizes
+for (int i=0; i<40; i++) {
+    Label box = new Label("&nbsp;", Label.CONTENT_XHTML);
+    box.addStyleName("flowbox");
+    box.setWidth((float) Math.random()*50,
+                 Sizeable.UNITS_PIXELS);
+    box.setHeight((float) Math.random()*50,
+                  Sizeable.UNITS_PIXELS);
+    layout.addComponent(box);
+}]]></programlisting>
+
+        <para>
+            The style name added to the components allows making common styling in a CSS
+            file:
+        </para>
+
+        <programlisting><?pocket-size 65% ?><![CDATA[.v-label-flowbox {
+  border: thin black solid;
+}]]></programlisting>
+
+        <para>
+            <xref linkend="figure.layout.csslayout.getcss"/> shows the rendered result.
+        </para>
+
+        <figure xml:id="figure.layout.csslayout.getcss">
+            <title>Use of <methodname>getCss()</methodname> and line wrap</title>
+            <mediaobject>
+                <imageobject>
+                    <imagedata smallscale="100%" align="center" fileref="img/layout/csslayout-getcss.png"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
+
+        <para>
+            The stregth of the <classname>CssLayout</classname> is also its weakness. Much
+            of the logic behind the other layout components is there to give nice default
+            behaviour and to handle the differences in different browsers. Some browsers,
+            no need to say which, are notoriously incompatible with the CSS standards, so
+            they require a lot of custom CSS. You may need to make use of the
+            browser-specific style classes described in <xref
+            linkend="advanced.browserinfo"/>. Some features in the other layouts are not
+            even solvable in pure CSS, at least in all browsers.
+        </para>
+
+        <simplesect>
+            <title>Styling with CSS</title>
+
+            <programlisting><![CDATA[.v-csslayout {}
+.v-csslayout-margin {}
+.v-csslayout-container {}]]></programlisting>
+
+            <para>
+                The <classname>CssLayout</classname> component has
+                <literal>v-csslayout</literal> root style. The margin element with
+                <literal>v-csslayout-margin</literal> style is always enabled. The
+                components are contained in an element with
+                <literal>v-csslayout-container</literal> style.
+            </para>
+
+            <para>
+                For example, we could style the basic <classname>CssLayout</classname>
+                example shown earlier as follows:
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[/* Have the caption right of the text box, bottom-aligned */
+.csslayoutexample .mylayout .v-csslayout-container {
+    direction: rtl;
+    line-height: 24px;
+    vertical-align: bottom;
+}
+
+/* Have some space before and after the caption */
+.csslayoutexample .mylayout .v-csslayout-container .v-caption {
+    padding-left:  3px;
+    padding-right: 10px;
+}]]></programlisting>
+
+            <para>
+                The example would now be rendered as shown in <xref
+                linkend="figure.layout.csslayout.styling"/>.
+            </para>
+
+            <figure xml:id="figure.layout.csslayout.styling">
+                <title>Styling <classname>CssLayout</classname></title>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata smallscale="70%" align="center" fileref="img/layout/csslayout-styling.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+
+            <para>
+                Captions and icons that are managed by the layout are contained in an
+                element with <literal>v-caption</literal> style. These caption elements
+                are contained flat at the same level as the actual component
+                elements. This may cause problems with wrapping in
+                <literal>inline-block</literal> mode, as wrapping can occur between the
+                caption and its corresponding component element just as well as between
+                components. Such use case is therefore not feasible.
+            </para>
+        </simplesect>
+    </section>
+
 	<section xml:id="layout.settings">
 		<title>Layout Formatting</title>
 
