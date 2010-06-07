@@ -3156,158 +3156,54 @@ table.addListener(new Property.ValueChangeListener() {
 				<methodname>setNullSelectionAllowed(false)</methodname> for the table.
 			</para>
 
-			<para>
-				A table can also be in <emphasis>multiselect</emphasis> mode, where a user
-				can select and unselect any item by clicking on it. The mode is enabled
-				with the <methodname>setMultiSelect()</methodname> method of the
-				<classname>Select</classname> interface of
-				<classname>Table</classname>. Selecting an item triggers a
-				<classname>ValueChangeEvent</classname>, which will have as its parameter
-				an array of item identifiers.
-			</para>
-		</section>
-		
-		<section xml:id="components.table.css">
-			<title>CSS Style Rules</title>
-
             <para>
-                Styling the overall style of a <classname>Table</classname> can be done
-                with the following CSS rules.
-            </para>
-
-			<programlisting><?pocket-size 75% ?><![CDATA[.v-table {}
-  .v-table-header-wrap {}
-    .v-table-header {}
-      .v-table-header-cell {}
-        .v-table-resizer {} /* Column resizer handle. */
-        .v-table-caption-container {}
-  .v-table-body {}
-    .v-table-row-spacer {}
-    .v-table-table {}
-      .v-table-row {}
-        .v-table-cell-content {}]]></programlisting>
-
-			<para>
-				Notice that some of the widths and heights in a table are calculated
-				dynamically and can not be set in CSS.
+                The selection is the value of the table's property, so you can get it with
+                <methodname>getValue()</methodname>. You can get it also from a reference
+                to the table itself. In single selection mode, the value is the item
+                identifier of the selected item or <parameter>null</parameter> if no item
+                is selected. In multiple selection mode (see below), the value is a
+                <classname>Set</classname> of item identifiers. Notice that the set is
+                unmodifiable, so you can not simply change it to change the selection.
 			</para>
 
-			<section>
-				<title>Setting Individual Cell Styles</title>
+            <simplesect>
+                <title>Multiple Selection Mode</title>
 
-				<para>
-					The <classname>Table.CellStyleGenerator</classname> interface allows
-					you to set the CSS style for each individual cell in a table. You need
-					to implement the <methodname>getStyle()</methodname>, which gets the
-					row (item) and column (property) identifiers as parameters and can
-					return a style name for the cell. The returned style name will be
-					concatenated to prefix "<literal>v-table-cell-content-</literal>".
-				<para>
+                <para>
+                    A table can also be in <emphasis>multiselect</emphasis> mode, where a
+                    user can select multiple items by clicking them with left mouse button
+                    while holding the <keycap>Ctrl</keycap> key (or <keycap>Meta</keycap>
+                    key) pressed. If <keycap>Ctrl</keycap> is not held, clicking an item
+                    will select it and other selected items are deselected. The user can
+                    select a range by selecting an item, holding the
+                    <keycap>Shift</keycap> key pressed, and clicking another item, in
+                    which case all the items between the two are also selected. Multiple
+                    ranges can be selected by first selecting a range, then selecting an
+                    item while holding <keycap>Ctrl</keycap>, and then selecting another
+                    item with both <keycap>Ctrl</keycap> and <keycap>Shift</keycap>
+                    pressed.
+                </para>
 
-				</para>
-					Alternatively, you
-					can use a <classname>Table.ColumnGenerator</classname> (see <xref
-					linkend="components.table.columngenerator"/>) to generate the actual UI
-					components of the cells and add style names to them. A cell style
-					generator is not used for the cells in generated columns.
-				</para>
-			
-				<programlisting><?pocket-size 65% ?><![CDATA[Table table = new Table("Table with Cell Styles");
-table.addStyleName("checkerboard");
+                <para>
+                    The multiselect mode is enabled with the
+                    <methodname>setMultiSelect()</methodname> method of the
+                    <classname>Select</classname> interface of
+                    <classname>Table</classname>. Setting table in multiselect mode does
+                    not implicitly set it as <emphasis>selectable</emphasis>, so it must
+                    be set separately.
+                </para>
 
-// Add some columns in the table. In this example, the property
-// IDs of the container are integers so we can determine the
-// column number easily.
-table.addContainerProperty("0", String.class, null, "", null, null);
-for (int i=0; i<8; i++)
-    table.addContainerProperty(""+(i+1), String.class, null,
-                         String.valueOf((char) (65+i)), null, null);
-
-// Add some items in the table.
-table.addItem(new Object[]{
-    "1", "R", "N", "B", "Q", "K", "B", "N", "R"}, new Integer(0));
-table.addItem(new Object[]{
-    "2", "P", "P", "P", "P", "P", "P", "P", "P"}, new Integer(1));
-for (int i=2; i<6; i++)
-    table.addItem(new Object[]{String.valueOf(i+1), 
-                 "", "", "", "", "", "", "", ""}, new Integer(i));
-table.addItem(new Object[]{
-    "7", "P", "P", "P", "P", "P", "P", "P", "P"}, new Integer(6));
-table.addItem(new Object[]{
-    "8", "R", "N", "B", "Q", "K", "B", "N", "R"}, new Integer(7));
-table.setPageLength(8);
-
-// Set cell style generator
-table.setCellStyleGenerator(new Table.CellStyleGenerator() {
-    public String getStyle(Object itemId, Object propertyId) {
-        int row = ((Integer)itemId).intValue();
-        int col = Integer.parseInt((String)propertyId);
-        
-        // The first column.
-        if (col == 0)
-            return "rowheader";
-        
-        // Other cells.
-        if ((row+col)%2 == 0)
-            return "black";
-        else
-            return "white";
-    }
-});]]></programlisting>
-				
-				<para>
-					You can then style the cells, for example, as follows:
-				</para>
-
-				<programlisting><?pocket-size 65% ?><![CDATA[/* Center the text in header. */
-.v-table-header-cell {
-    text-align: center;
-}
-
-/* Basic style for all cells. */
-.v-table-checkerboard .v-table-cell-content {
-    text-align: center;
-    vertical-align: middle;
-    padding-top: 12px;
-    width: 20px;
-    height: 28px;
-}
-
-/* Style specifically for the row header cells. */
-.v-table-cell-content-rowheader {
-	background: #E7EDF3
-     url(../default/table/img/header-bg.png) repeat-x scroll 0 0;
-}
-
-/* Style specifically for the "white" cells. */
-.v-table-cell-content-white {
-    background: white;
-    color: black;
-}
-
-/* Style specifically for the "black" cells. */
-.v-table-cell-content-black {
-    background: black;
-    color: white;
-}]]></programlisting>
-
-				<para>
-					The table will look as shown in <xref
-					linkend="figure.components.table.cell-style"/>.
-				</para>
-
-				<figure xml:id="figure.components.table.cell-style">
-					<title>Cell Style Generator for a Table</title>
-					<mediaobject>
-						<imageobject role="fo">
-							<imagedata align="center" scale="75" fileref="img/components/table-cellstylegenerator1.png"/>
-						</imageobject>
-						<imageobject role="html">
-							<imagedata smallscale="125" align="center" fileref="img/components/table-cellstylegenerator1.png"/>
-						</imageobject>
-					</mediaobject>
-				</figure>
-			</section>
+                <para>
+                    The <methodname>setMultiSelectMode()</methodname> property affects the
+                    control of multiple selection:
+                    <parameter>MultiSelectMode.DEFAULT</parameter> is the default
+                    behaviour, which requires holding the <keycap>Ctrl</keycap> (or
+                    <keycap>Meta</keycap>) key pressed while selecting items, while in
+                    <parameter>MultiSelectMode.SIMPLE</parameter> holding the
+                    <keycap>Ctrl</keycap> key is not needed. In the simple mode, items can
+                    only be deselected by clicking them.
+                </para>
+            </simplesect>
 		</section>
 
 		<section xml:id="components.table.features">
@@ -3829,6 +3725,149 @@ table.setFieldFactory(new ImmediateFieldFactory());]]></programlisting>
 				<classname>com.vaadin.demo.featurebrowser.GeneratedColumnExample.java</classname>.
 			</para>
 
+		</section>
+
+		<section xml:id="components.table.css">
+			<title>CSS Style Rules</title>
+
+            <para>
+                Styling the overall style of a <classname>Table</classname> can be done
+                with the following CSS rules.
+            </para>
+
+			<programlisting><?pocket-size 75% ?><![CDATA[.v-table {}
+  .v-table-header-wrap {}
+    .v-table-header {}
+      .v-table-header-cell {}
+        .v-table-resizer {} /* Column resizer handle. */
+        .v-table-caption-container {}
+  .v-table-body {}
+    .v-table-row-spacer {}
+    .v-table-table {}
+      .v-table-row {}
+        .v-table-cell-content {}]]></programlisting>
+
+			<para>
+				Notice that some of the widths and heights in a table are calculated
+				dynamically and can not be set in CSS.
+			</para>
+
+			<section>
+				<title>Setting Individual Cell Styles</title>
+
+				<para>
+					The <classname>Table.CellStyleGenerator</classname> interface allows
+					you to set the CSS style for each individual cell in a table. You need
+					to implement the <methodname>getStyle()</methodname>, which gets the
+					row (item) and column (property) identifiers as parameters and can
+					return a style name for the cell. The returned style name will be
+					concatenated to prefix "<literal>v-table-cell-content-</literal>".
+				<para>
+
+				</para>
+					Alternatively, you
+					can use a <classname>Table.ColumnGenerator</classname> (see <xref
+					linkend="components.table.columngenerator"/>) to generate the actual UI
+					components of the cells and add style names to them. A cell style
+					generator is not used for the cells in generated columns.
+				</para>
+			
+				<programlisting><?pocket-size 65% ?><![CDATA[Table table = new Table("Table with Cell Styles");
+table.addStyleName("checkerboard");
+
+// Add some columns in the table. In this example, the property
+// IDs of the container are integers so we can determine the
+// column number easily.
+table.addContainerProperty("0", String.class, null, "", null, null);
+for (int i=0; i<8; i++)
+    table.addContainerProperty(""+(i+1), String.class, null,
+                         String.valueOf((char) (65+i)), null, null);
+
+// Add some items in the table.
+table.addItem(new Object[]{
+    "1", "R", "N", "B", "Q", "K", "B", "N", "R"}, new Integer(0));
+table.addItem(new Object[]{
+    "2", "P", "P", "P", "P", "P", "P", "P", "P"}, new Integer(1));
+for (int i=2; i<6; i++)
+    table.addItem(new Object[]{String.valueOf(i+1), 
+                 "", "", "", "", "", "", "", ""}, new Integer(i));
+table.addItem(new Object[]{
+    "7", "P", "P", "P", "P", "P", "P", "P", "P"}, new Integer(6));
+table.addItem(new Object[]{
+    "8", "R", "N", "B", "Q", "K", "B", "N", "R"}, new Integer(7));
+table.setPageLength(8);
+
+// Set cell style generator
+table.setCellStyleGenerator(new Table.CellStyleGenerator() {
+    public String getStyle(Object itemId, Object propertyId) {
+        int row = ((Integer)itemId).intValue();
+        int col = Integer.parseInt((String)propertyId);
+        
+        // The first column.
+        if (col == 0)
+            return "rowheader";
+        
+        // Other cells.
+        if ((row+col)%2 == 0)
+            return "black";
+        else
+            return "white";
+    }
+});]]></programlisting>
+				
+				<para>
+					You can then style the cells, for example, as follows:
+				</para>
+
+				<programlisting><?pocket-size 65% ?><![CDATA[/* Center the text in header. */
+.v-table-header-cell {
+    text-align: center;
+}
+
+/* Basic style for all cells. */
+.v-table-checkerboard .v-table-cell-content {
+    text-align: center;
+    vertical-align: middle;
+    padding-top: 12px;
+    width: 20px;
+    height: 28px;
+}
+
+/* Style specifically for the row header cells. */
+.v-table-cell-content-rowheader {
+	background: #E7EDF3
+     url(../default/table/img/header-bg.png) repeat-x scroll 0 0;
+}
+
+/* Style specifically for the "white" cells. */
+.v-table-cell-content-white {
+    background: white;
+    color: black;
+}
+
+/* Style specifically for the "black" cells. */
+.v-table-cell-content-black {
+    background: black;
+    color: white;
+}]]></programlisting>
+
+				<para>
+					The table will look as shown in <xref
+					linkend="figure.components.table.cell-style"/>.
+				</para>
+
+				<figure xml:id="figure.components.table.cell-style">
+					<title>Cell Style Generator for a Table</title>
+					<mediaobject>
+						<imageobject role="fo">
+							<imagedata align="center" scale="75" fileref="img/components/table-cellstylegenerator1.png"/>
+						</imageobject>
+						<imageobject role="html">
+							<imagedata smallscale="125" align="center" fileref="img/components/table-cellstylegenerator1.png"/>
+						</imageobject>
+					</mediaobject>
+				</figure>
+			</section>
 		</section>
 
 		<!-- programlisting><![CDATA[]]></programlisting -->
