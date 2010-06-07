@@ -36,7 +36,8 @@ IMAGES =	intro/architecture intro/architecture-detailed intro/toolchain intro/to
 			gwt/gwt-widgets gwt/gwt-widget-files gwt/gwt-hostedmode-project-annotated\
 			gwt/gwt-custom-architecture \
 			vaadin-logo \
-			eclipse/editor-design-2-crop eclipse/widgetset-compiling-toolbar
+			eclipse/editor-design-2-crop eclipse/widgetset-compiling-toolbar \
+			datamodel/datamodel-interfaces
 
 # List of source XML files
 XMLFILES =  book.xml \
@@ -69,7 +70,7 @@ TRGIMAGES_LO := $(foreach file, $(IMAGES), img/$(file)-lo.png)
 images: $(TRGIMAGES_HI) $(TRGIMAGES_LO) FORCE
 
 $(TRGIMAGES_HI): img/%-hi.png: original-drawings/%.svg
-	inkscape --export-png $@ --export-dpi=150 --export-area-drawing $<
+	inkscape --export-png $@ --export-dpi=300 --export-area-drawing $<
 
 $(TRGIMAGES_LO): img/%-lo.png: original-drawings/%.svg
 	inkscape --export-png $@ --export-dpi=90 --export-area-drawing $<
