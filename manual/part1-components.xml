@@ -3239,19 +3239,120 @@ table.addListener(new Property.ValueChangeListener() {
 			</section>
 
 			<section>
-				<title>Organizing Columns</title>
+				<title>Resizing Columns</title>
+
+                <para>
+                    You can set the width of a column programmatically from the
+                    server-side with <methodname>setColumnWidth()</methodname>. The column
+                    is identified by the property ID and the width is given in pixels.
+                </para>
+
+				<para>
+					The user can resize table columns by dragging the resize handle
+					between two columns. Resizing a table column causes a
+					<classname>ColumnResizeEvent</classname>, which you can handle with a
+					<classname>Table.ColumnResizeListener</classname>. The table must be
+					set in immediate mode if you want to receive the resize events
+					immediately, which is typical.
+                </para>
+
+<programlisting><?pocket-size 65% ?><![CDATA[table.addListener(new Table.ColumnResizeListener() {
+    public void columnResize(ColumnResizeEvent event) {
+        // Get the new width of the resized column
+        int width = event.getCurrentWidth();
+        
+        // Get the property ID of the resized column
+        String column = (String) event.getPropertyId();
+
+        // Do something with the information
+        table.setColumnFooter(column, String.valueOf(width) + "px");
+    }
+});
+        
+// Must be immediate to send the resize events immediately
+table.setImmediate(true);]]></programlisting>
+
+                <para>
+                    See <xref linkend="figure.component.table.columnresize"/> for a result
+                    after the columns of a table has been resized.
+                </para>
+
+                <figure xml:id="figure.component.table.columnresize">
+                    <title>Resizing Columns</title>
+                    <mediaobject>
+                        <imageobject>
+                            <imagedata smallscale="100%" align="center" fileref="img/components/table-column-resize.png"/>
+                        </imageobject>
+                    </mediaobject>
+                </figure>
+			</section>
+
+			<section>
+				<title>Reordering Columns</title>
 			
 				<para>
-					The default scrollable style supports most of the table features. User
-					can resize the columns by dragging their borders, change the sorting
-					by clicking on the column headers, collapse the columns if
-					<parameter>columnCollapsingAllowed</parameter> is
-					<parameter>true</parameter>, and reorder them if
-					<parameter>columnReorderingAllowed</parameter> is
-					<parameter>true</parameter>. You can set the column width of
-					individual columns with <methodname>setColumnWidth()</methodname>.
+                    If <methodname>setColumnReorderingAllowed(true)</methodname> is set,
+                    the user can reorder table columns by dragging them with the mouse
+                    from the column header,
 				</para>
 			</section>
+
+			<section xml:id="component.table.columncollapsing">
+                <title>Collapsing Columns</title>
+
+                <para>
+                    When <methodname>setColumnCollapsingAllowed(true)</methodname> is set,
+                    the right side of the table header shows a drop-down list that allows
+                    selecting which columns are shown. Collapsing columns is different
+                    than hiding columns with <methodname>setVisibleColumns()</methodname>,
+                    which hides the columns completely so that they can not be made
+                    visible (uncollapsed) from the user interface.
+                </para>
+
+                <para>
+                    You can collapse columns programmatically with
+                    <methodname>setColumnCollapsed()</methodname>. Collapsing must be
+                    enabled before collapsing columns with the method or it will throw an
+                    <classname>IllegalAccessException</classname>.
+                </para>
+
+                <programlisting><?pocket-size 65% ?><![CDATA[// Allow the user to collapse and uncollapse columns
+table.setColumnCollapsingAllowed(true);
+
+// Collapse this column programmatically
+try {
+    table.setColumnCollapsed("born", true);
+} catch (IllegalAccessException e) {
+    // Can't occur - collapsing was allowed above
+    System.err.println("Something horrible occurred");
+}
+        
+// Give enough width for the table to accommodate the
+// initially collapsed column later
+table.setWidth("250px");]]></programlisting>
+
+                <para>
+                    See <xref linkend="figure.component.table.columncollapsing"/>.
+                </para>
+
+                <figure xml:id="figure.component.table.columncollapsing">
+                    <title>Collapsing Columns</title>
+                    <mediaobject>
+                        <imageobject>
+                            <imagedata smallscale="100%" align="center" fileref="img/components/table-column-collapsing.png"/>
+                        </imageobject>
+                    </mediaobject>
+                </figure>
+
+                <para>
+                    If the table has undefined width, it minimizes its width to fit the
+                    width of the visible columns. If some columns are initially collapsed,
+                    the width of the table may not be enough to accomodate them later,
+                    which will result in an ugly horizontal scrollbar. You should consider
+                    giving the table enough width to accomodate columns uncollapsed by the
+                    user.
+                </para>
+            </section>
 
 			<section>
 				<title>Components Inside a Table</title>
@@ -3513,7 +3614,186 @@ layout.addComponent(switchEditable);]]></programlisting>
 					items. Changing the data is allowed.
 				</para>
 			</section>
+
 		</section>
+
+        <section xml:id="components.table.headersfooters">
+            <title>Column Headers and Footers</title>
+            
+            <para>
+                <classname>Table</classname> supports both column headers and footers; the
+                headers are enabled by default.
+            </para>
+
+            <section xml:id="components.table.headersfooters.headers">
+                <title>Headers</title>
+
+                <para>
+                    The table header displays the column headers at the top of the
+                    table. You can use the column headers to reorder or resize the
+                    columns, as described earlier. By default, the header of a column is
+                    the property ID of the column, unless given explicitly with
+                    <methodname>setColumnHeader()</methodname>.
+                </para>
+
+                <programlisting><?pocket-size 65% ?><![CDATA[// Define the properties
+table.addContainerProperty("lastname", String.class, null);
+table.addContainerProperty("born", Integer.class, null);
+table.addContainerProperty("died", Integer.class, null);
+
+// Set nicer header names
+table.setColumnHeader("lastname", "Name");
+table.setColumnHeader("born", "Born");
+table.setColumnHeader("died", "Died");]]></programlisting>
+
+                <para>
+                    The text of the column headers and the visibility of the header
+                    depends on the <emphasis>column header mode</emphasis>. The header is
+                    visible by default, but you can disable it with
+                    <methodname>setColumnHeaderMode(Table.COLUMN_HEADER_MODE_HIDDEN)</methodname>.
+                </para>
+            </section>
+
+            <section xml:id="components.table.headersfooters.footers">
+                <title>Footers</title>
+
+                <para>
+                    The table footer can be useful for displaying sums or averages of
+                    values in a column, and so on. The footer is not visible by default;
+                    you can enable it with
+                    <methodname>setFooterVisible(true)</methodname>. Unlike in the header,
+                    the column headers are empty by default. You can set their value with
+                    <methodname>setColumnFooter()</methodname>. The columns are identified
+                    by their property ID.
+                </para>
+
+                <para>
+                    The following example shows how to calculate average of the values in
+                    a column:
+                </para>
+
+                <programlisting><?pocket-size 65% ?><![CDATA[// Have a table with a numeric column
+Table table = new Table("Custom Table Footer");
+table.addContainerProperty("Name", String.class, null);
+table.addContainerProperty("Died At Age", Integer.class, null);
+        
+// Insert some data
+Object people[][] = {{"Galileo",  77},
+                     {"Monnier",  83},
+                     {"Vaisala",  79},
+                     {"Oterma",   86}};
+for (int i=0; i<people.length; i++)
+    table.addItem(people[i], new Integer(i));
+        
+// Calculate the average of the numeric column
+double avgAge = 0;
+for (int i=0; i<people.length; i++)
+    avgAge += (Integer) people[i][1];
+avgAge /= people.length;
+
+// Set the footers
+table.setFooterVisible(true);
+table.setColumnFooter("Name", "Average");
+table.setColumnFooter("Died At Age", String.valueOf(avgAge));
+
+// Adjust the table height a bit
+table.setPageLength(table.size());]]></programlisting>
+
+                <para>
+                    The resulting table is shown in <xref
+                    linkend="figure.components.table.headersfooters.footer"/>.
+                </para>
+
+				<figure xml:id="figure.components.table.headersfooters.footer">
+					<title>A Table with a Footer</title>
+					<mediaobject>
+						<imageobject role="html">
+							<imagedata align="center" fileref="img/components/table-footer.png"/>
+						</imageobject>
+						<imageobject role="fo">
+							<imagedata scale="120" smallscale="80%" align="center" fileref="img/components/table-footer.png"/>
+						</imageobject>
+					</mediaobject>
+				</figure>
+            </section>
+
+            <section>
+                <title>Handling Mouse Clicks on Headers and Footers</title>
+
+                <para>
+                    Normally, when the user clicks a column header, the table will be
+                    sorted by the column, assuming that the data source is
+                    <classname>Sortable</classname> and sorting is not disabled. In some
+                    cases, you might want some other functionality when the user clicks
+                    the column header, such as selecting the column in some way.
+                </para>
+
+                <para>
+                    Clicks in the header cause a <classname>HeaderClickEvent</classname>,
+                    which you can handle with a
+                    <classname>Table.HeaderClickHandler</classname> that you set with
+                    <methodname>setHeaderClickHandler()</methodname>. Click events on the
+                    table header are, like button clicks, sent immediately to server, so
+                    there is no need to set <methodname>setImmediate()</methodname>.
+                </para>
+
+                <programlisting><?pocket-size 65% ?><![CDATA[// Handle the header clicks
+table.setHeaderClickHandler(new Table.HeaderClickHandler() {
+    public void handleHeaderClick(HeaderClickEvent event) {
+        String column = (String) event.getPropertyId();
+        getWindow().showNotification("Clicked " + column +
+                "with " + event.getButtonName());
+    }
+});
+        
+// Disable the default sorting behavior
+table.setSortDisabled(false);]]></programlisting>
+
+                <para>
+                    Setting a click handler does not automatically disable the sorting
+                    behavior of the header; you need to disable it explicitly with
+                    <methodname>setSortDisabled(true)</methodname>.
+                </para>
+
+                <para>
+                    The <classname>HeaderClickEvent</classname> object provides the
+                    identity of the clicked column with
+                    <methodname>getPropertyId()</methodname>. The
+                    <methodname>getButton()</methodname> reports the mouse button with
+                    which the click was made: <parameter>BUTTON_LEFT</parameter>,
+                    <parameter>BUTTON_RIGHT</parameter>, or
+                    <parameter>BUTTON_MIDDLE</parameter>. The
+                    <methodname>getButtonName()</methodname> a human-readable button name
+                    in English: "<parameter>left</parameter>",
+                    "<parameter>right</parameter>", or
+                    "<parameter>middle</parameter>". The
+                    <methodname>isShiftKey()</methodname>,
+                    <methodname>isCtrlKey()</methodname>, etc., methods indicate if the
+                    <keycap>Shift</keycap>, <keycap>Ctrl</keycap>, <keycap>Alt</keycap> or
+                    other modifier keys were pressed during the click.
+                </para>
+
+                <para>
+                    Header click events are not sent when the user clicks the column
+                    resize handlers to drag them.
+                </para>
+
+                <para>
+                    Clicks in the footer cause a <classname>FooterClickEvent</classname>,
+                    which you can handle with a
+                    <classname>Table.FooterClickHandler</classname> that you set with
+                    <methodname>setFooterClickHandler()</methodname>. Footers do not have
+                    any default click behavior, like the sorting in the header. Otherwise,
+                    handling clicks in the footer are equivalent to handling clicks in the
+                    header.
+                </para>
+
+                <para>
+                    The header and footer must, rather obviously, be visible to be able to
+                    cause click events.
+                </para>
+            </section>
+        </section>
 
 		<section xml:id="components.table.columngenerator">
 			<title>Generated Table Columns</title>
