@@ -5290,7 +5290,7 @@ try {
                     <imagedata align="center" fileref="img/components/slider-example1-lo.png"/>
                 </imageobject>
                 <imageobject role="fo">
-                    <imagedata scale="70" smallscale="70%" align="center" fileref="img/components/slider-example1-hi.png"/>
+                    <imagedata scale="100" smallscale="70%" align="center" fileref="img/components/slider-example1-hi.png"/>
                 </imageobject>
             </mediaobject>
         </figure>
@@ -5312,6 +5312,251 @@ try {
                 <emphasis>background</emphasis> CSS property.
             </para>
         </simplesect>  
+    </section>
+
+	<section xml:id="components.loginform">
+		<title><classname>LoginForm</classname></title>
+
+        <para>
+            The <classname>LoginForm</classname> component is a login form that allows a
+            password manager in the web browser to remember and later automatically fill
+            in the username and password. This commonly used functionality does not work
+            with regular Vaadin components and is a common problem with Ajax
+            applications.
+        </para>
+
+        <programlisting><?pocket-size 65% ?><![CDATA[// A wrapper with a caption for the login form
+Panel loginPanel = new Panel("Login");
+loginPanel.setWidth("250px");
+        
+LoginForm login = new LoginForm();
+loginPanel.addComponent(login);]]></programlisting>
+
+        <para>
+            The resulting form is shown in <xref linkend="figure.components.loginform.basic"/>.
+        </para>
+
+        <figure xml:id="figure.components.loginform.basic">
+            <title>The <classname>LoginForm</classname> Component</title>
+            <mediaobject>
+                <imageobject role="html">
+                    <imagedata align="center" fileref="img/components/loginform-basic.png"/>
+                </imageobject>
+                <imageobject role="fo">
+                    <imagedata scale="120" smallscale="80%" align="center" fileref="img/components/loginform-basic.png"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
+
+        <para>
+            The <classname>LoginForm</classname> uses static HTML inside an
+            <literal>iframe</literal> element to enable the functionality. The component
+            provides a default implementation of the static HTML; if you want to change
+            the layout, you need to reimplement the
+            <methodname>getLoginHtml()</methodname> method.
+        </para>
+
+        <para>
+            The login form expands to fill the containing layout as with
+            <methodname>setSizeFull()</methodname>; the containing layout must not have an
+            undefined size in either dimension. How the actual form uses this space
+            depends on the static HTML; the <literal>iframe</literal> element in which the
+            form is contained has fixed size.
+        </para>
+
+        <section>
+            <title>Customizing <classname>LoginForm</classname></title>
+
+            <para>
+                Customization of the login form is necessary, for example, if you need to
+                change the layout or internationalize the form. Customization is done by
+                overriding the <methodname>getLoginHtml()</methodname> method, which
+                returns the static HTML of the form. The customization layer is very
+                "unvaadin"-like, and at best hack-ish, but dictated by the form management
+                in browsers.
+            </para>
+
+            <para>
+                Let us look at a custom login form that lets the user of the form to give
+                the field captions:
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[class MyLoginForm extends LoginForm {
+    String usernameCaption;
+    String passwordCaption;
+    String submitCaption;
+    
+    public MyLoginForm(String usernameCaption,
+            String passwordCaption, String submitCaption) {
+        this.usernameCaption = usernameCaption;
+        this.passwordCaption = passwordCaption;
+        this.submitCaption  = submitCaption;
+    }]]></programlisting>
+
+            <para>
+                Then we override the method that generates the static HTML for the form:
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[@Override
+protected byte[] getLoginHTML() {
+    // Application URI needed for submitting form
+    String appUri = getApplication().getURL().toString()
+            + getWindow().getName() + "/";
+
+    String x, h, b; // XML header, HTML head and body]]></programlisting>
+
+            <para>
+                The XML header is needed for the validity of the XHTML page:
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[    x = "<!DOCTYPE html PUBLIC \"-//W3C//DTD "
+      + "XHTML 1.0 Transitional//EN\" "
+      + "\"http://www.w3.org/TR/xhtml1/"
+      + "DTD/xhtml1-transitional.dtd\">\n";]]></programlisting>
+
+            <para>
+                Notice that it is important to have a newline (<literal>\n</literal>) at
+                the end of the XML header line.
+            </para>
+
+            <para>
+                The HTML header part contains JavaScript definitions that handle
+                submitting the form data. It also copies the style sheet references from
+                the parent window.
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[    h = "<head><script type='text/javascript'>"
+      + "var setTarget = function() {"
+      + "  var uri = '" + appUri + "loginHandler';"
+      + "  var f = document.getElementById('loginf');"
+      + "  document.forms[0].action = uri;"
+      + "  document.forms[0].username.focus();"
+      + "};"
+      + ""
+      + "var styles = window.parent.document.styleSheets;"
+      + "for(var j = 0; j < styles.length; j++) {\n"
+      + "  if(styles[j].href) {"
+      + "    var stylesheet = document.createElement('link');\n"
+      + "    stylesheet.setAttribute('rel', 'stylesheet');\n"
+      + "    stylesheet.setAttribute('type', 'text/css');\n"
+      + "    stylesheet.setAttribute('href', styles[j].href);\n"
+      + "    document.getElementsByTagName('head')[0]"
+      + "                .appendChild(stylesheet);\n"
+      + "  }"
+      + "}\n"
+      + "function submitOnEnter(e) {"
+      + "  var keycode = e.keyCode || e.which;"
+      + "  if (keycode == 13) {document.forms[0].submit();}"
+      + "}\n"
+      + "</script>"
+      + "</head>";]]></programlisting>
+
+            <para>
+                The HTML body element contains the actual form. Notice that it is contained
+                within an inner <literal>iframe</literal>. The form and the button must
+                have JavaScript calls to submit the form content.
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[    b = "<body onload='setTarget();'"
+      + "  style='margin:0;padding:0; background:transparent;'"
+      + "  class='"
+      + ApplicationConnection.GENERATED_BODY_CLASSNAME + "'>"
+      + "<div class='v-app v-app-loginpage'"
+      + "     style='background:transparent;'>"
+      + "<iframe name='logintarget' style='width:0;height:0;"
+      + "border:0;margin:0;padding:0;'></iframe>"
+      + "<form id='loginf' target='logintarget'"
+      + "      onkeypress='submitOnEnter(event)'"
+      + "      method='post'>"
+      + "<table>"
+      + "<tr><td>" + usernameCaption + "</td>"
+      + "<td><input class='v-textfield' style='display:block;'"
+      + "           type='text' name='username'></td></tr>"
+      + "<tr><td>" + passwordCaption + "</td>"
+      + "    <td><input class='v-textfield'"
+      + "          style='display:block;' type='password'"
+      + "          name='password'></td></tr>"
+      + "</table>"
+      + "<div>"
+      + "<div onclick='document.forms[0].submit();'"
+      + "     tabindex='0' class='v-button' role='button'>"
+      + "<span class='v-button-wrap'>"
+      + "<span class='v-button-caption'>"
+      + submitCaption + "</span>"
+      + "</span></div></div></form></div></body>";]]></programlisting>
+
+            <para>
+                Then combine and return the page as a byte array.
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[    return (x + "<html>" + h + b + "</html>").getBytes();
+}]]></programlisting>
+
+            <para>
+                We can use the custom login form as follows:
+            </para>
+        
+            <programlisting><?pocket-size 65% ?><![CDATA[MyLoginForm loginForm = new MyLoginForm("Name of the User",
+        "A passing word", "Login Me Now");]]></programlisting>
+
+            <para>
+                The customized <classname>LoginForm</classname> is shown in <xref linkend="figure.components.loginform.customization"/>.
+            </para>
+
+            <figure xml:id="figure.components.loginform.customization">
+                <title>Customizing the <classname>LoginForm</classname></title>
+                <mediaobject>
+                    <imageobject role="html">
+                        <imagedata align="center" fileref="img/components/loginform-customization.png"/>
+                    </imageobject>
+                    <imageobject role="fo">
+                        <imagedata scale="120" smallscale="80%" align="center" fileref="img/components/loginform-customization.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+        </section>
+
+        <simplesect>
+            <title>Styling with CSS</title>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[.v-customcomponent {}
+.v-customcomponent .v-embedded {}
+.v-app-loginpage {}
+.v-app-loginpage .v-textfield {}
+.v-app-loginpage .v-button  {}]]></programlisting>
+
+            <para>
+                The <classname>LoginForm</classname> component is a purely server-side
+                component that extends <classname>CustomComponent</classname> and
+                therefore has a <literal>v-customcomponent</literal> base style. If you
+                wish to do any styling for the component, you should give it a custom
+                style name to distinguish it from the regular
+                <classname>CustomComponent</classname>.
+            </para>
+
+            <para>
+                The component contains an <literal>iframe</literal> in an element with
+                <literal>v-embedded</literal> style. The other styles are defined in the
+                static HTML code returned by the <methodname>getLoginHTML()</methodname>
+                method. The default implementation reuses the styles of the
+                <classname>TextField</classname> and <classname>Button</classname>
+                components for the input fields and the button, that is,
+                <literal>v-textfield</literal> and <literal>v-button</literal>. The root
+                element has the same <literal>v-app</literal> style as a regular Vaadin
+                application would have, and an additional
+                <literal>v-app-loginpage</literal> style.
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[...
++ "<div class='v-app v-app-loginpage'
+        style=\"background:transparent;\">"
+...
++ "<input class='v-textfield' ...
+...
++ "<div><input class='v-textfield' ...
+...
+<div ... class='v-button' role='button'>]]></programlisting>
+        </simplesect>
     </section>
 
 	<section xml:id="components.customcomponent">
