@@ -3906,15 +3906,15 @@ table.setPageLength(table.size());]]></programlisting>
                 <para>
                     Clicks in the header cause a <classname>HeaderClickEvent</classname>,
                     which you can handle with a
-                    <classname>Table.HeaderClickHandler</classname> that you set with
-                    <methodname>setHeaderClickHandler()</methodname>. Click events on the
-                    table header are, like button clicks, sent immediately to server, so
-                    there is no need to set <methodname>setImmediate()</methodname>.
+                    <classname>Table.HeaderClickListener</classname>. Click events on the
+                    table header (and footer) are, like button clicks, sent immediately to
+                    server, so there is no need to set
+                    <methodname>setImmediate()</methodname>.
                 </para>
 
                 <programlisting><?pocket-size 65% ?><![CDATA[// Handle the header clicks
-table.setHeaderClickHandler(new Table.HeaderClickHandler() {
-    public void handleHeaderClick(HeaderClickEvent event) {
+table.addListener(new Table.HeaderClickListener() {
+    public void headerClick(HeaderClickEvent event) {
         String column = (String) event.getPropertyId();
         getWindow().showNotification("Clicked " + column +
                 "with " + event.getButtonName());
@@ -3922,13 +3922,16 @@ table.setHeaderClickHandler(new Table.HeaderClickHandler() {
 });
         
 // Disable the default sorting behavior
-table.setSortDisabled(false);]]></programlisting>
+table.setSortDisabled(true);]]></programlisting>
 
                 <para>
                     Setting a click handler does not automatically disable the sorting
                     behavior of the header; you need to disable it explicitly with
-                    <methodname>setSortDisabled(true)</methodname>.
+                    <methodname>setSortDisabled(true)</methodname>. Header click events
+                    are not sent when the user clicks the column resize handlers to drag
+                    them.
                 </para>
+
 
                 <para>
                     The <classname>HeaderClickEvent</classname> object provides the
@@ -3949,23 +3952,12 @@ table.setSortDisabled(false);]]></programlisting>
                 </para>
 
                 <para>
-                    Header click events are not sent when the user clicks the column
-                    resize handlers to drag them.
-                </para>
-
-                <para>
                     Clicks in the footer cause a <classname>FooterClickEvent</classname>,
                     which you can handle with a
-                    <classname>Table.FooterClickHandler</classname> that you set with
-                    <methodname>setFooterClickHandler()</methodname>. Footers do not have
+                    <classname>Table.FooterClickListener</classname>. Footers do not have
                     any default click behavior, like the sorting in the header. Otherwise,
-                    handling clicks in the footer are equivalent to handling clicks in the
+                    handling clicks in the footer is equivalent to handling clicks in the
                     header.
-                </para>
-
-                <para>
-                    The header and footer must, rather obviously, be visible to be able to
-                    cause click events.
                 </para>
             </section>
         </section>
