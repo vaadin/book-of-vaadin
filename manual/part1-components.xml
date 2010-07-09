@@ -2311,8 +2311,9 @@ checkbox2.addListener(new ValueChangeListener() {
             <varlistentry>
                 <term><classname>Select</classname></term>
                 <listitem>
-                    A drop-down list for single selection. The component contains a text
-                    input area, which the user can use to filter the displayed items.
+                    In single selection mode, a drop-down list with a text input area,
+                    which the user can use to filter the displayed items. In multiselect
+                    mode, a list box equivalent to <classname>ListSelect</classname>.
                 </listitem>
             </varlistentry>
             <varlistentry>
@@ -2706,9 +2707,15 @@ void propertyModeExample() {
 
 			<para>
 				The <classname>Select</classname> component allows, in single selection
-				mode, selecting an item from a drop-down list, or in multiple selection
-				mode, from a list box that shows multiple items.
+				mode, selecting an item from a drop-down list. The component also has a
+				text field area, which allows entering search text by which the items
+				shown in the drop-down list are filtered.
 			</para>
+
+            <para>
+                In multiple selection mode, the component shows the items in a vertical
+                list box, identical to <classname>ListSelect</classname>.
+            </para>
 
 			<figure>
 				<title>The Select Component</title>
@@ -2718,17 +2725,6 @@ void propertyModeExample() {
 					</imageobject>
 				</mediaobject>
 			</figure>
-
-			<section>
-				<title>Combo Box Behaviour</title>
-
-				<para>
-					The <classname>Select</classname> component will act as a combo box in
-					single selection mode, allowing either to choose the value from the
-					drop-down list or to write the value in the text field part of the
-					component.
-				</para>
-			</section>
 
 			<section>
 				<title>Filtered Selection</title>
@@ -2787,12 +2783,6 @@ for (int i = 0; i < planets.length; i++)
 						</imageobject>
 					</mediaobject>
 				</figure>
-
-				<para>
-					The FilterSelect demo in the Vaadin Demo Application provides
-					an example of filtering items in a <classname>Select</classname>
-					component.
-				</para>
             </section>
 					
             <simplesect>
@@ -2804,7 +2794,9 @@ for (int i = 0; i < planets.length; i++)
 .v-filterselect-suggestpopup { }
 .v-filterselect-prefpage-off { }
 .v-filterselect-suggestmenu { }
-.v-filterselect-status { }]]></programlisting>
+.v-filterselect-status { }
+.v-select { }
+.v-select-select { }]]></programlisting>
 					
                 <para>
                     In its default state, only the input field of the
@@ -2824,35 +2816,125 @@ for (int i = 0; i < planets.length; i++)
                     suggestions is padded with an area with
                     <literal>v-filterselect-prefpage-off</literal> style above and below
                     the list.
-					</para>
-            </simplesect>
+                </para>
 
+                <para>
+                    In multiselect-mode, the styles of the component aere identical to
+                    <classname>ListSelect</classname> component, with
+                    <literal>v-select</literal> overall style and
+                    <literal>v-select-select</literal> for the native selection element.
+                </para>
+            </simplesect>
+        </section>
+
+		<section xml:id="components.selecting.listselect">
+            <title><classname>ListSelect</classname></title>
+
+            <para>
+                The <classname>ListSelect</classname> component is list box that shows the
+                selectable items in a vertical list. If the number of items exceeds the
+                height of the component, a scrollbar is shown. The component allows both
+                single and multiple selection modes, which you can set with
+                <methodname>setMultiSelect()</methodname>. It is visually identical in
+                both modes.
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[// Create the selection component
+ListSelect select = new ListSelect("My Selection");
+        
+// Add some items
+select.addItem("Mercury");
+select.addItem("Venus");
+select.addItem("Earth");
+...
+
+select.setNullSelectionAllowed(false);
+
+// Show 5 items and a scrollbar if there are more
+select.setRows(5);]]></programlisting>
+
+            <para>
+                The number of visible items is set with
+                <methodname>setRows()</methodname>.
+            </para>
+
+            <figure xml:id="figure.selecting.listselect.basic">
+                <title>The <classname>ListSelect</classname> Component</title>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata smallscale="80%" align="center" fileref="img/components/listselect-basic.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+
+
+			<simplesect>
+				<title>CSS Style Rules</title>
+				
+				<programlisting><![CDATA[.v-select {}
+.v-select-select {}]]></programlisting>
+
+				<para>
+					The component has a <literal>v-select</literal> overall style. The
+					native <literal>select</literal> element has
+					<literal>v-select-select</literal> style.
+				</para>
+			</simplesect>
         </section>
 
 		<section xml:id="components.selecting.nativeselect">
 			<title>Native Selection Component <classname>NativeSelect</classname></title>
 			
 			<para>
-				<classname>NativeSelect</classname> offers the native selection
-				component in web browsers, using an HTML <literal>&lt;select&gt;</literal>
-				element. In single selection mode, the component is shown as a drop-down
-				list, and in multiple selection mode as a list box.
+				<classname>NativeSelect</classname> offers the native selection component
+				of web browsers, using the HTML <literal>&lt;select&gt;</literal>
+				element. The component is shown as a drop-down list.
 			</para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[// Create the selection component
+final NativeSelect select = new NativeSelect("Native Selection");
+        
+// Add some items
+select.addItem("Mercury");
+select.addItem("Venus");
+...
+        
+// Set the width in "columns" as in TextField
+select.setColumns(10);
+        
+select.setNullSelectionAllowed(false);]]></programlisting>
+
+            <para>
+                The <methodname>setColumns()</methodname> allows setting the width of the
+                list as "columns", which is a measure that depends on the browser.
+            </para>
+
+            <figure xml:id="figure.selecting.nativeselect.basic">
+                <title>The <classname>NativeSelect</classname> Component</title>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata smallscale="80%" align="center" fileref="img/components/nativeselect-basic.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+
+            <para>
+                Multiple selection mode is not allowed; you should use the
+                <classname>ListSelect</classname> component instead. Also adding new
+                items, which would be enabled with
+                <methodname>setNewItemsAllowed()</methodname>, is not allowed.
+            </para>
 
 			<simplesect>
 				<title>CSS Style Rules</title>
 				
-				<programlisting><![CDATA[.v-select-optiongroup {}
-.v-checkbox, .v-select-option {}
-.v-radiobutton, .v-select-option {}]]></programlisting>
+				<programlisting><![CDATA[.v-select {}
+.v-select-select {}]]></programlisting>
 
 				<para>
-					The <literal>v-select-optiongroup</literal> is the overall style for
-					the component. Each check box will have the
-					<literal>v-checkbox</literal> style and each radio button the
-					<literal>v-radiobutton</literal> style. Both the radio buttons and
-					check boxes will also have the <literal>v-select-option</literal>
-					style that allows styling regardless of the option type.
+					The component has a <literal>v-select</literal> overall style. The
+					native <literal>select</literal> element has
+					<literal>v-select-select</literal> style.
 				</para>
 			</simplesect>
 		</section>
