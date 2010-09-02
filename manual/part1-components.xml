@@ -3722,23 +3722,42 @@ table.setPageLength(3);]]></programlisting>
 			</section>
 
 			<section>
-				<title>Editing the Values of a Table</title>
+				<title>Iterating Over a Table</title>
 
 				<para>
-					Normally, a <classname>Table</classname> simply displays the items and
-					their fields as text. If you want to allow the user to edit the
-					values, you can either put them inside components as we did above, or
-					you can simply call <methodname>setEditable(true)</methodname> and the
-					cells are automatically turned into editable fields.
+					As the items in a <classname>Table</classname> are not indexed, iterating
+					over the items has to be done using an iterator. The
+					<methodname>getItemIds()</methodname> method of the
+					<classname>Container</classname> interface of <classname>Table</classname>
+					returns a <classname>Collection</classname> of item identifiers over which
+					you can iterate using an <classname>Iterator</classname>. For an example
+					about iterating over a <classname>Table</classname>, please see <xref
+						linkend="datamodel.container"/>. Notice that you may not modify the
+					<classname>Table</classname> during iteration, that is, add or remove
+					items. Changing the data is allowed.
 				</para>
+			</section>
 
-				<para>
-					Let us begin with a regular table with a some columns with usual Java
-					types, namely a <classname>Date</classname>,
-					<classname>Boolean</classname>, and a <classname>String</classname>.
-				</para>
+		</section>
 
-				<programlisting><?pocket-size 65% ?><![CDATA[// Create a table. It is by default not editable.
+        <section xml:id="components.table.editing">
+            <title>Editing the Values in a Table</title>
+            
+            <para>
+                Normally, a <classname>Table</classname> simply displays the items and
+                their fields as text. If you want to allow the user to edit the values,
+                you can either put them inside components as we did above, or you can
+                simply call <methodname>setEditable(true)</methodname> and the cells are
+                automatically turned into editable fields.
+            </para>
+
+            <para>
+                Let us begin with a regular table with a some columns with usual Java
+                types, namely a <classname>Date</classname>,
+                <classname>Boolean</classname>, and a <classname>String</classname>.
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[// Create a table. It is by default not editable.
 final Table table = new Table();
 
 // Define the names and data types of columns.
@@ -3761,13 +3780,13 @@ for (int i=0; i<100; i++) {
 table.setPageLength(8);
 layout.addComponent(table);]]></programlisting>
 
-				<para>
-					You could put the table in editable mode right away if you need
-					to. We'll continue the example by adding a mechanism to switch the
-					<classname>Table</classname> from and to the editable mode.
-				</para>
+            <para>
+                You could put the table in editable mode right away if you need to. We'll
+                continue the example by adding a mechanism to switch the
+                <classname>Table</classname> from and to the editable mode.
+            </para>
 
-				<programlisting><?pocket-size 65% ?><![CDATA[final CheckBox switchEditable = new CheckBox("Editable");
+            <programlisting><?pocket-size 65% ?><![CDATA[final CheckBox switchEditable = new CheckBox("Editable");
 switchEditable.addListener(new Property.ValueChangeListener() {
     public void valueChange(ValueChangeEvent event) {
         table.setEditable(((Boolean)event.getProperty()
@@ -3777,102 +3796,215 @@ switchEditable.addListener(new Property.ValueChangeListener() {
 switchEditable.setImmediate(true);
 layout.addComponent(switchEditable);]]></programlisting>
 
-				<para>
-					Now, when you check to checkbox, the components in the table turn into
-					editable fields, as shown in <xref
-					linkend="figure.component.table.editable"/>.
-				</para>
+            <para>
+                Now, when you check to checkbox, the components in the table turn into
+                editable fields, as shown in <xref
+                linkend="figure.component.table.editable"/>.
+            </para>
 
-				<figure xml:id="figure.component.table.editable">
-					<title>A Table in Normal and Editable Mode</title>
-					<mediaobject>
-						<imageobject role="html">
-							<imagedata align="center" fileref="img/components/table-editable3.png"/>
-						</imageobject>
-						<imageobject role="fo">
-							<imagedata scale="45" smallscale="100%" align="center" fileref="img/components/table-editable3.png"/>
-						</imageobject>
-					</mediaobject>
-				</figure>
+            <figure xml:id="figure.component.table.editable">
+                <title>A Table in Normal and Editable Mode</title>
+                <mediaobject>
+                    <imageobject role="html">
+                        <imagedata align="center" fileref="img/components/table-editable3.png"/>
+                    </imageobject>
+                    <imageobject role="fo">
+                        <imagedata scale="45" smallscale="100%" align="center" fileref="img/components/table-editable3.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
 
-				<para>
-					The field components that allow editing the values of particular types
-					in a table are defined in a field factory that implements the
-					<classname>TableFieldFactory</classname> interface. The default
-					implementation is <classname>DefaultFieldFactory</classname>, which
-					offers the following crude mappings:
-				</para>
+            <section>
+                <title>Field Factories</title>
 
-				<table>
-					<title>Type to Field Mappings in <classname>DefaultFieldFactory</classname></title>
-					<tgroup cols="2" align="left">
-						<thead>
-							<row valign="top">
-								<entry>Property Type</entry>
-								<entry>Mapped to Field Class</entry>
-							</row>
-						</thead>
-						<tbody>
-							<row valign="top">
-								<entry><classname>Date</classname></entry>
-								<entry>A <classname>DateField</classname>. </entry>
-							</row>
-							<row valign="top">
-								<entry><classname>Boolean</classname></entry>
-								<entry>A <classname>CheckBox</classname>.</entry>
-							</row>
-							<row valign="top">
-								<entry><classname>Item</classname></entry>
+                <para>
+                    The field components that allow editing the values of particular types
+                    in a table are defined in a field factory that implements the
+                    <classname>TableFieldFactory</classname> interface. The default
+                    implementation is <classname>DefaultFieldFactory</classname>, which
+                    offers the following crude mappings:
+                </para>
+                
+                <table>
+                    <title>Type to Field Mappings in <classname>DefaultFieldFactory</classname></title>
+                    <tgroup cols="2" align="left">
+                        <thead>
+                            <row valign="top">
+                                <entry>Property Type</entry>
+                                <entry>Mapped to Field Class</entry>
+                            </row>
+                        </thead>
+                        <tbody>
+                            <row valign="top">
+                                <entry><classname>Date</classname></entry>
+                                <entry>A <classname>DateField</classname>. </entry>
+                            </row>
+                            <row valign="top">
+                                <entry><classname>Boolean</classname></entry>
+                                <entry>A <classname>CheckBox</classname>.</entry>
+                            </row>
+                            <row valign="top">
+                                <entry><classname>Item</classname></entry>
+                                
+                                <entry>A <classname>Form</classname>. The fields of the
+                                    form are automatically created from the item's properties
+                                    using a <classname>FormFieldFactory</classname>. The
+                                    normal use for this property type is inside a
+                                    <classname>Form</classname> and is less useful inside a
+                                    <classname>Table</classname>.</entry>
+                            </row>
+                            <row valign="top">
+                                <entry><emphasis>other</emphasis></entry>
+                                
+                                <entry>A <classname>TextField</classname>. The text field
+                                    manages conversions from the basic types, if
+                                    possible.</entry>
+                            </row>
+                        </tbody>
+                    </tgroup>
+                </table>
+                
+                <para>
+                    Field factories are covered with more detail in <xref
+                        linkend="components.form.binding"/>. You could just implement the
+                    <classname>TableFieldFactory</classname> interface, but we recommend that
+                    you extend the <classname>DefaultFieldFactory</classname> according to
+                    your needs. In the default implementation, the mappings are defined in the
+                    <methodname>createFieldByPropertyType()</methodname> method (you might
+                    want to look at the source code) both for tables and forms.
+                </para>
+            </section>
 
-								<entry>A <classname>Form</classname>. The fields of the
-								form are automatically created from the item's properties
-								using a <classname>FormFieldFactory</classname>. The
-								normal use for this property type is inside a
-								<classname>Form</classname> and is less useful inside a
-								<classname>Table</classname>.</entry>
-							</row>
-							<row valign="top">
-								<entry><emphasis>others</emphasis></entry>
+            <section>
+                <title>Navigation in Editable Mode</title>
 
-								<entry>A <classname>TextField</classname>. The text field
-								manages conversions from the basic types, if
-								possible.</entry>
-							</row>
-						</tbody>
-					</tgroup>
-				</table>
+                <para>
+                    In the editable mode, the editor fields can have focus. Pressing
+                    <keycap>Tab</keycap> moves the focus to next column or, at the last
+                    column, to the first column of the next item. Respectively, pressing
+                    <keycombo><keycap>Shift</keycap><keycap>Tab</keycap></keycombo> moves
+                    the focus backward. If the focus is in the last column of the last
+                    visible item, the pressing <keycap>Tab</keycap> moves the focus
+                    outside the table. Moving backward from the first column of the first
+                    item moves the focus to the table itself. Some updates to the table,
+                    such as changing the headers or footers or regenerating a column, can
+                    move the focus from an editor component to the table itself.
+                </para>
 
-				<para>
-					Field factories are covered with more detail in <xref
-					linkend="components.form.binding"/>. You could just implement the
-					<classname>TableFieldFactory</classname> interface, but we recommend
-					that you extend the <classname>DefaultFieldFactory</classname>
-					according to your needs. In the default implementation, the mappings
-					are defined in the
-					<methodname>createFieldByPropertyType()</methodname> method (you might
-					want to look at the source code) both for tables and forms.
-				</para>
+                <para>
+                    The default behaviour may be undesirable in many cases. For example,
+                    the focus also goes through any read-only editor fields and can move
+                    out of the table inappropriately. You can provide better navigation is
+                    to use event handler for shortcut keys such as <keycap>Tab</keycap>,
+                    <keycap>Arrow Up</keycap>, <keycap>Arrow Down</keycap>, and
+                    <keycap>Enter</keycap>.
+                </para>
 
-			</section>
+                <programlisting><?pocket-size 65% ?><![CDATA[// Keyboard navigation
+class KbdHandler implements Handler {
+    Action tab_next = new ShortcutAction("Tab",
+            ShortcutAction.KeyCode.TAB, null);
+    Action tab_prev = new ShortcutAction("Shift+Tab",
+            ShortcutAction.KeyCode.TAB,
+            new int[] {ShortcutAction.ModifierKey.SHIFT});
+    Action cur_down = new ShortcutAction("Down",
+            ShortcutAction.KeyCode.ARROW_DOWN, null);
+    Action cur_up   = new ShortcutAction("Up",
+            ShortcutAction.KeyCode.ARROW_UP,   null);
+    Action enter   = new ShortcutAction("Enter",
+            ShortcutAction.KeyCode.ENTER,      null);
+    public Action[] getActions(Object target, Object sender) {
+        return new Action[] {tab_next, tab_prev, cur_down,
+                             cur_up, enter};
+    }
 
-			<section>
-				<title>Iterating Over a Table</title>
+    public void handleAction(Action action, Object sender,
+                             Object target) {
+        if (target instanceof TextField) {
+            // Move according to keypress
+            int itemid = (Integer) ((TextField) target).getData();
+            if (action == tab_next || action == cur_down)
+                itemid++;
+            else if (action == tab_prev || action == cur_up)
+                itemid--;
+            // On enter, just stay where you were. If we did
+            // not catch the enter action, the focus would be
+            // moved to wrong place.
+            
+            if (itemid >= 0 && itemid < table.size()) {
+                TextField newTF = valueFields.get(itemid);
+                if (newTF != null)
+                    newTF.focus();
+            }
+        }
+    }
+}
 
-				<para>
-					As the items in a <classname>Table</classname> are not indexed, iterating
-					over the items has to be done using an iterator. The
-					<methodname>getItemIds()</methodname> method of the
-					<classname>Container</classname> interface of <classname>Table</classname>
-					returns a <classname>Collection</classname> of item identifiers over which
-					you can iterate using an <classname>Iterator</classname>. For an example
-					about iterating over a <classname>Table</classname>, please see <xref
-						linkend="datamodel.container"/>. Notice that you may not modify the
-					<classname>Table</classname> during iteration, that is, add or remove
-					items. Changing the data is allowed.
-				</para>
-			</section>
+// Panel that handles keyboard navigation
+Panel navigator = new Panel();
+navigator.addStyleName(Reindeer.PANEL_LIGHT);
+navigator.addComponent(table);
+navigator.addActionHandler(new KbdHandler());]]></programlisting>
 
-		</section>
+                <para>
+                    The main issue in implementing keyboard navigation in an editable
+                    table is that the editor fields do not know the table they are in. To
+                    find the parent table, you can either look up in the component
+                    container hierarchy or simply store a reference to the table with
+                    <methodname>setData()</methodname> in the field component. The other
+                    issue is that you can not acquire a reference to an editor field from
+                    the <classname>Table</classname> component. One solution is to use
+                    some external collection, such as a <classname>HashMap</classname>, to
+                    map item IDs to the editor fields.
+                </para>
+
+                <programlisting><?pocket-size 65% ?><![CDATA[// Can't access the editable components from the table so
+// must store the information
+final HashMap<Integer,TextField> valueFields =
+    new HashMap<Integer,TextField>();]]></programlisting>
+
+                <para>
+                    The map has to be filled in a
+                    <classname>TableFieldFactory</classname>, such as in the
+                    following. You also need to set the reference to the table there and
+                    you can also set the initial focus there.
+                </para>
+
+                <programlisting><?pocket-size 65% ?><![CDATA[table.setTableFieldFactory(new TableFieldFactory () {
+    public Field createField(Container container, Object itemId,
+            Object propertyId, Component uiContext) {
+        TextField field = new TextField((String) propertyId);
+        
+        // User can only edit the numeric column
+        if (propertyId.equals("Source of Fear"))
+            field.setReadOnly(true);
+        else { // The numeric column
+            // The field needs to know the item it is in
+            field.setData(itemId);
+            
+            // Remember the field
+            valueFields.put((Integer) itemId, field);
+            
+            // Focus the first editable value
+            if (((Integer)itemId) == 0)
+                field.focus();
+        }
+        return field;
+    }
+});]]></programlisting>
+
+                <para>
+                    The issues are complicated by the fact that the editor fields are not
+                    generated for the entire table, but only for a cache window that
+                    includes the visible items and some items above and below it. For
+                    example, if the beginning of a big scrollable table is visible, the
+                    editor component for the last item does not exist. This issue is
+                    relevant mostly if you want to have wrap-around navigation that jumps
+                    from the last to first item and vice versa.
+                </para>
+            </section>
+
+        </section>
 
         <section xml:id="components.table.headersfooters">
             <title>Column Headers and Footers</title>
