@@ -2045,75 +2045,235 @@ rtarea.setValue("<h1>Hello</h1>\n" +
 	</section>
 
 	<section xml:id="components.datefield">
-		<title>Date and Time Input</title>
+		<title>Date and Time Input with <classname>DateField</classname></title>
 		<para>
 			The <classname>DateField</classname> component provides the means to display
 			and input date and time. The field comes in two variations:
-			<classname>PopupDateField</classname> with numeric input fields and a popup
-			calendar view and <classname>InlineDateField</classname> with the calendar
-			view always visible and the numeric input fields only for time. The
-			<classname>DateField</classname> base class defaults to the popup variation.
+			<classname>PopupDateField</classname>, with a numeric input box and a popup
+			calendar view, and <classname>InlineDateField</classname>, with the calendar
+			view always visible. The <classname>DateField</classname> base class defaults
+			to the popup variation.
 		</para>
 
-		<para>
-			The example below illustrates the use of the
-			<classname>DateField</classname> with the default style. We set the
-			time of the <classname>DateField</classname> to current time with the
-			default constructor of the <classname>java.util.Date</classname>
-			class.
-		</para>
+        <para>
+            The example below illustrates the use of the <classname>DateField</classname>
+            baseclass, which is equivalent to the
+            <classname>PopupDateField</classname>. We set the initial time of the date
+            field to current time by using the default constructor of the
+            <classname>java.util.Date</classname> class.
+        </para>
 
-		<programlisting><![CDATA[/* Create a DateField with the default style. */
+        <programlisting><![CDATA[// Create a DateField with the default style
 DateField date = new DateField();
 	
-/* Set the date and time to present. */
-date.setValue(new java.util.Date());]]></programlisting>
+// Set the date and time to present
+date.setValue(new Date());]]></programlisting>
 
-		<figure>
-			<title>Example of the Date Field with Default Style</title>
+        <para>
+            The result is shown in <xref linkend="figure:components.datefield.basic"/>.
+        </para>
+
+		<figure xml:id="figure:components.datefield.basic">
+			<title><classname>DateField</classname> (<classname>PopupDateField</classname>) for Selecting Date and Time</title>
 			<mediaobject>
 				<imageobject role="html">
 					<imagedata align="center" fileref="img/components/datefield-example1.png"/>
 				</imageobject>
 				<imageobject role="fo">
-					<imagedata smallscale="150" align="center" fileref="img/components/datefield-example1.png"/>
+					<imagedata smallscale="100%" align="center" fileref="img/components/datefield-example1.png"/>
 				</imageobject>
 			</mediaobject>
 		</figure>
 
-		<para>
-			The default style provides date input using a text box for the date
-			and combo boxes for the time, down to milliseconds. Pressing the
-			"..." button right of the date opens a month view for selecting the
-			date.
-		</para>
+        <section xml:id="components.datefield.popupdatefield">
+            <title><classname>PopupDateField</classname></title>
 
-		<para>
-			You probably will not need milliseconds in most applications, and
-			might not even need the time, but just the date. The visibility of
-			the input components is controlled by <emphasis>resolution</emphasis>
-			of the field which can be set with
-			<methodname>setResolution()</methodname> method. The method takes as
-			its parameters the lowest visible component, typically
-			<parameter>RESOLUTION_DAY</parameter> for just dates and
-			<parameter>RESOLUTION_MIN</parameter> for dates with time in hours
-			and minutes. Please see the API Reference for a complete list of resolution parameters.
-		</para>
+            <para>
+                The <classname>PopupDateField</classname> provides date input using a text
+                box for the date and time. As the <classname>DateField</classname>
+                defaults to this component, the use is exactly the same as described
+                earlier. Clicking the handle right of the date opens a popup view for
+                selecting the year, month, and day, as well as time. Also the
+                <keycap>Down</keycap> key opens the popup. Once opened, the user can
+                navigate the calendar using the cursor keys.
+            </para>
+
+            <para>
+                The date and time selected from the popup are displayed in the text box
+                according to the default date and time format of the current locale, or as
+                specified with <methodname>setDateFormat()</methodname>. The same format
+                definitions are used for parsing user input.
+            </para>
+
+            <simplesect xml:id="components.datefield.popupdatefield.format">
+                <title>Date and Time Format</title>
+
+                <para>
+                    The date and time are normally displayed according to the default
+                    format for the current locale (see <xref
+                    linkend="components.features.locale"/>). You can specify a custom
+                    format with <methodname>setDateFormat()</methodname>. It takes a
+                    format string that follows the format of the
+                    <classname>SimpleDateFormat</classname> in Java.
+                </para>
+
+                <programlisting><?pocket-size 75% ?><![CDATA[// Display only year, month, and day in ISO format
+date.setDateFormat("yyyy-MM-dd");]]></programlisting>
+
+                <para>
+                    The result is shown in <xref
+                    linkend="figure:components.datefield.popupdatefield.format"/>.
+                </para>
+
+                <figure xml:id="figure:components.datefield.popupdatefield.format">
+                    <title>Custom Date Format for
+                    <classname>PopupDateField</classname></title>
+                    <mediaobject>
+                        <imageobject role="html">
+                            <imagedata align="center" fileref="img/components/datefield-formatting.png"/>
+                        </imageobject>
+                        <imageobject role="fo">
+                            <imagedata smallscale="75%" align="center" fileref="img/components/datefield-formatting.png"/>
+                        </imageobject>
+                    </mediaobject>
+                </figure>
+
+                <para>
+                    The same format specification is also used for parsing user-input date
+                    and time, as described later. 
+                </para>
+            </simplesect>
+
+            <simplesect>
+                <title>Handling Malformed User Input</title>
+
+                <para>
+                    A user can easily input a malformed date or time. The
+                    <methodname>setLenient(true)</methodname> setting enables relaxed
+                    parsing of the format. Even then, the input can be invalid. You can
+                    handle the errors by overriding the
+                    <methodname>handleUnparsableDateString()</methodname> method. The
+                    method gets the user input as a string parameter and can provide a
+                    custom parsing mechanism, as shown in the following example.
+                </para>
+
+                <programlisting><?pocket-size 65% ?><![CDATA[// Create a date field with a custom parsing and a
+// custom error message for invalid format
+PopupDateField date = new PopupDateField("My Date") {
+    @Override
+    protected Date handleUnparsableDateString(String dateString)
+    throws Property.ConversionException {
+        // Try custom parsing
+        String fields[] = dateString.split("/");
+        if (fields.length >= 3) {
+            try {
+                int year  = Integer.parseInt(fields[0]);
+                int month = Integer.parseInt(fields[1])-1;
+                int day   = Integer.parseInt(fields[2]);
+                GregorianCalendar c =
+                    new GregorianCalendar(year, month, day);
+                return c.getTime();
+            } catch (NumberFormatException e) {
+                throw new Property.
+                    ConversionException("Not a number");
+            }
+        }
+        
+        // Bad date
+        throw new Property.
+            ConversionException("Your date needs two slashes");
+    }
+};
+        
+// Display only year, month, and day in slash-delimited format
+date.setDateFormat("yyyy/MM/dd");
+
+// Don't be too tight about the format of user-input values
+date.setLenient(true);]]></programlisting>
+
+                <para>
+                    The handler method must either return a parsed
+                    <classname>Date</classname> object or throw a
+                    <classname>ConversionException</classname>. Returning
+                    <parameter>null</parameter> will set the field value to
+                    <parameter>null</parameter> and clear the input box.
+                </para>
+            </simplesect>
+
+            <simplesect>
+                <title>Customizing the Error Message</title>
+
+                <para>
+                    In addition to customized parsing, overriding the handler method for
+                    unparseable input is useful for internationalization and other
+                    customization of the error message. You can also use it for another
+                    way for reporting the errors, as is done in the example below:
+                </para>
+
+                <programlisting><?pocket-size 65% ?><![CDATA[// Create a date field with a custom error message for invalid format
+PopupDateField date = new PopupDateField("My Date") {
+    @Override
+    protected Date handleUnparsableDateString(String dateString)
+    throws Property.ConversionException {
+        // Have a notification for the error
+        getWindow().showNotification(
+                "Your date needs two slashes",
+                Notification.TYPE_WARNING_MESSAGE);
+        
+        // A failure must always also throw an exception
+        throw new Property.ConversionException("Bad date");
+    }
+};]]></programlisting>
+
+                <para>
+                    If the input is invalid, you should always throw the exception;
+                    returning a <parameter>null</parameter> value would make the input
+                    field empty, which is probably undesired.
+                </para>
+            </simplesect>
+
+            <simplesect>
+                <title>Input Prompt</title>
+
+                <para>
+                    Like other fields that have a text box,
+                    <classname>PopupDateField</classname> allows an input prompt that is
+                    visible until the user has input a value. You can set the prompt with
+                    <methodname>setInputPrompt</methodname>.
+                </para>
+
+<programlisting><?pocket-size 65% ?><![CDATA[PopupDateField date = new PopupDateField();
+
+// Set the prompt
+date.setInputPrompt("Select a date");
+        
+// Set width explicitly to accommodate the prompt
+date.setWidth("10em");]]></programlisting>
+
+                <para>
+                    The date field doesn't automatically scale to accommodate the prompt,
+                    so you need to set it explicitly with
+                    <methodname>setWidth()</methodname>.
+                </para>
+
+                <para>
+                    The input prompt is not available in the
+                    <classname>DateField</classname> superclass.
+                </para>
+            </simplesect>
+        </section>
 
 		<section xml:id="components.datefield.calendar">
-			<title>Calendar</title>
-
-			<!-- UNFINISHED -->
+			<title><classname>InlineDateField</classname></title>
 
 			<para>
-				The <parameter>calendar</parameter> style of the
-				<classname>DateField</classname> provides a date picker component
-				with a month view, just like the one in the default style that opens
-				by clicking the "..." button. The user can navigate months and years by
-				clicking the appropriate arrows.
+				The <classname>InlineDateField</classname> provides a date picker
+				component with a month view. The user can navigate months and years by
+				clicking the appropriate arrows. Unlike with the popup variant, the month
+				view is always visible in the inline field.
 			</para>
 
-		<programlisting><?pocket-size 75% ?><![CDATA[// Create a DateField with the calendar style.
+            <programlisting><?pocket-size 75% ?><![CDATA[// Create a DateField with the calendar style.
 DateField date = new DateField("Here is a calendar field");
 date.setStyle("calendar");
 	
@@ -2122,27 +2282,55 @@ date.setValue(new java.util.Date());
 
 main.addComponent(date);]]></programlisting>
 
-		<figure>
-			<title>Example of the Date Field with Calendar Style</title>
-			<mediaobject>
-				<imageobject role="html">
-					<imagedata align="center" fileref="img/components/datefield-example2.png"/>
-				</imageobject>
-				<imageobject role="fo">
-					<imagedata smallscale="150" align="center" fileref="img/components/datefield-example2.png"/>
-				</imageobject>
-			</mediaobject>
-		</figure>
+            <para>
+                The result is shown in <xref
+                linkend="figure:components.datefield.inlinedatefield"/>.
+            </para>
+
+            <figure xml:id="figure:components.datefield.inlinedatefield">
+                <title>Example of the <classname>InlineDateField</classname></title>
+                <mediaobject>
+                    <imageobject role="html">
+                        <imagedata align="center" fileref="img/components/datefield-inlinedatefield.png"/>
+                    </imageobject>
+                    <imageobject role="fo">
+                        <imagedata smallscale="150" align="center" fileref="img/components/datefield-inlinedatefield.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+
+            <para>
+                The user can also navigate the calendar using the cursor keys.
+            </para>
 		</section>
-		
+
+		<section>
+            <title>Time Resolution</title>
+
+            <para>
+                You probably will not need milliseconds in most applications, and might
+                not even need the time, but just the date, or month or year. The
+                visibility of the input components is controlled by <emphasis>time
+                resolution</emphasis>, which can be set with
+                <methodname>setResolution()</methodname> method. The method takes as its
+                parameters the lowest visible component, typically
+                <parameter>RESOLUTION_DAY</parameter> for just dates and
+                <parameter>RESOLUTION_MIN</parameter> for dates with time in hours and
+                minutes. Please see the API Reference for a complete list of resolution
+                parameters.
+            </para>
+        </section>
+
 		<section>
 			<title>DateField Locale</title>
 
 			<para>
-				The date fields use the locale set for the component, which defaults to
-				the system locale. You can set a custom locale with the
+				The date and time are displayed according to the locale of the user, as
+				reported by the browser. You can set a custom locale with the
 				<methodname>setLocale()</methodname> method of
-				<classname>AbstractComponent</classname>.
+				<classname>AbstractComponent</classname>, as described in <xref
+				linkend="components.features.locale"/>. Only Gregorian calendar is
+				supported.
 			</para>
 		</section>
 	</section>
