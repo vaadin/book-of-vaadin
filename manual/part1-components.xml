@@ -2148,10 +2148,42 @@ date.setDateFormat("yyyy-MM-dd");]]></programlisting>
                 <title>Handling Malformed User Input</title>
 
                 <para>
-                    A user can easily input a malformed date or time. The
-                    <methodname>setLenient(true)</methodname> setting enables relaxed
-                    parsing of the format. Even then, the input can be invalid. You can
-                    handle the errors by overriding the
+                    A user can easily input a malformed or otherwise invalid date or
+                    time. <classname>DateField</classname> has two validation layers:
+                    first on the client-side and then on the server-side.
+                </para>
+
+                <para>
+                    The validity of the entered date is first validated on the
+                    client-side, immediately when the input box loses focus. If the date
+                    format is invalid, the <literal>v-datefield-parseerror</literal> style
+                    is set. Whether this causes a visible indication of a problem depends
+                    on the theme. The built-in <literal>reindeer</literal> theme does not
+                    shown any indication by default, making server-side handling of the
+                    problem more convenient.
+                </para>
+
+                <programlisting><?pocket-size 65% ?><![CDATA[.mydate.v-datefield-parseerror .v-textfield {
+    background: pink;
+}]]></programlisting>
+
+                <para>
+                    The <methodname>setLenient(true)</methodname> setting enables relaxed
+                    interpretation of dates, so that invalid dates, such as February 30th
+                    or March 0th, are wrapped to the next or previous month, for example.
+                </para>
+
+                <para>
+                    The server-side validation phase occurs when the date value is sent to
+                    the server. If the date field is set in immediate state, it occurs
+                    immediately after the field loses focus. Once this is done and if the
+                    status is still invalid, an error indicator is displayed beside the
+                    component. Hovering the mouse pointer over the indicator shows the
+                    error message.
+                </para>
+
+                <para>
+                    You can handle the errors by overriding the
                     <methodname>handleUnparsableDateString()</methodname> method. The
                     method gets the user input as a string parameter and can provide a
                     custom parsing mechanism, as shown in the following example.
@@ -2188,7 +2220,8 @@ PopupDateField date = new PopupDateField("My Date") {
 // Display only year, month, and day in slash-delimited format
 date.setDateFormat("yyyy/MM/dd");
 
-// Don't be too tight about the format of user-input values
+// Don't be too tight about the validity of dates
+// on the client-side
 date.setLenient(true);]]></programlisting>
 
                 <para>
@@ -2261,6 +2294,60 @@ date.setWidth("10em");]]></programlisting>
                     <classname>DateField</classname> superclass.
                 </para>
             </simplesect>
+
+            <simplesect>
+                <title>CSS Style Rules</title>
+
+                <programlisting><![CDATA[.v-datefield, v-datefield-popupcalendar {}
+  .v-textfield, v-datefield-textfield {}
+  .v-datefield-button {}]]></programlisting>
+
+                <para>
+                    The top-level element of <classname>DateField</classname> and all its
+                    variants have <literal>v-datefield</literal> style. The base class and
+                    the <classname>PopupDateField</classname> also have the
+                    <literal>v-datefield-popupcalendar</literal> style.
+                </para>
+                
+                <para>
+                    In addition, the top-level element has a style that indicates the
+                    resolution, with <literal>v-datefield-</literal> basename and an
+                    extension, which is one of <literal>full</literal>,
+                    <literal>day</literal>, <literal>month</literal>, or
+                    <literal>year</literal>. The <literal>-full</literal> style is enabled
+                    when the resolution is smaller than a day. These styles are used
+                    mainly for controlling the appearance of the popup calendar.
+                </para>
+
+                <para>
+                    The text box has <literal>v-textfield</literal> and
+                    <literal>v-datefield-textfield</literal> styles, and the calendar
+                    button <literal>v-datefield-button</literal>.
+                </para>
+
+                <para>
+                    Once opened, the calendar popup has the following styles at the top
+                    level:
+                </para>
+
+                <programlisting><![CDATA[.v-datefield-popup {}
+  .v-popupcontent {}
+    .v-datefield-calendarpanel {}]]></programlisting>
+
+                <para>
+                    The top-level element of the floating popup calendar has
+                    <literal>.v-datefield-popup</literal> style. Observe that the popup
+                    frame is outside the HTML structure of the component, hence it is not
+                    enclosed in the <literal>v-datefield</literal> element and does not
+                    include any custom styles.
+
+                    <!-- NOTE: May be changed in #5752. -->
+
+                    The content in the <literal>v-datefield-calendarpanel</literal> is the
+                    same as in <classname>InlineDateField</classname>, as described in
+                    <xref linkend="components.datefield.calendar"/>.
+                </para>
+            </simplesect>
         </section>
 
 		<section xml:id="components.datefield.calendar">
@@ -2302,6 +2389,54 @@ main.addComponent(date);]]></programlisting>
             <para>
                 The user can also navigate the calendar using the cursor keys.
             </para>
+
+            <simplesect>
+                <title>CSS Style Rules</title>
+
+                <programlisting><![CDATA[.v-datefield {}
+  .v-datefield-calendarpanel {}
+    .v-datefield-calendarpanel-header {}
+      .v-datefield-calendarpanel-prevyear {}
+      .v-datefield-calendarpanel-prevmonth {}
+      .v-datefield-calendarpanel-month {}
+      .v-datefield-calendarpanel-nextmonth {}
+      .v-datefield-calendarpanel-nextyear {}
+    .v-datefield-calendarpanel-body {}
+      .v-datefield-calendarpanel-weekdays,
+      .v-datefield-calendarpanel-weeknumbers {}
+        .v-first {}
+        .v-last {}
+      .v-datefield-calendarpanel-weeknumber {}
+      .v-datefield-calendarpanel-day {}
+    .v-datefield-calendarpanel-time {}
+      .v-datefield-time {}
+        .v-select {}
+        .v-label {}]]></programlisting>
+
+                <para>
+                    The top-level element has the <literal>v-datefield</literal> style. In
+                    addition, the top-level element has a style name that indicates the
+                    resolution of the calendar, with <literal>v-datefield-</literal>
+                    basename and an extension, which is one of <literal>full</literal>,
+                    <literal>day</literal>, <literal>month</literal>, or
+                    <literal>year</literal>. The <literal>-full</literal> style is enabled
+                    when the resolution is smaller than a day.
+                </para>
+
+                <para>
+                    The <literal>v-datefield-calendarpanel-weeknumbers</literal> and
+                    <literal>v-datefield-calendarpanel-weeknumber</literal> styles are
+                    enabled when the week numbers are enabled. The former controls the
+                    appearance of the weekday header and the latter the actual week
+                    numbers.
+                </para>
+
+                <para>
+                    The other style names should be self-explanatory. For weekdays, the
+                    <literal>v-first</literal> and <literal>v-last</literal> styles allow
+                    making rounded endings for the weekday bar.
+                </para>
+            </simplesect>
 		</section>
 
 		<section>
