@@ -4718,6 +4718,105 @@ table.setFieldFactory(new ImmediateFieldFactory());]]></programlisting>
 
 		</section>
 
+        <section xml:id="components.table.columnformatting">
+            <title>Formatting Table Columns</title>
+
+            <para>
+                The displayed values of properties shown in a table are normally formatted
+                using the <methodname>toString()</methodname> method of each
+                property. Customizing the format of a column can be done in several ways:
+            </para>
+
+            <itemizedlist>
+                <listitem>Using <classname>ColumnGenerator</classname> to generate a
+                second column that is formatted. The original column needs to be set
+                invisible. See <xref
+                linkend="components.table.columngenerator"/>.</listitem>
+
+                <listitem>Using a <classname>PropertyFormatter</classname> as a proxy
+                between the table and the data property. This also normally requires using
+                an mediate container in the table.</listitem>
+
+                <listitem>Overriding the default
+                <methodname>formatPropertyValue()</methodname> in
+                <classname>Table</classname>.</listitem>
+            </itemizedlist>
+
+            <para>
+                As using a <classname>PropertyFormatter</classname> is generally much more
+                awkward than overriding the
+                <methodname>formatPropertyValue()</methodname>, its use is not described
+                here.
+            </para>
+
+            <para>
+                You can override <methodname>formatPropertyValue()</methodname> as is done
+                in the following example:
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[// Create a table that overrides the default
+// property (column) format
+final Table table = new Table("Formatted Table") {
+    @Override
+    protected String formatPropertyValue(Object rowId,
+            Object colId, Property property) {
+        // Format by property type
+        if (property.getType() == Date.class) {
+            SimpleDateFormat df =
+                new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+            return df.format((Date)property.getValue());
+        }
+
+        return super.formatPropertyValue(rowId, colId, property);
+    }
+};
+        
+// The table has some columns
+table.addContainerProperty("Time", Date.class, null);
+        
+... Fill the table with data ...]]></programlisting>
+
+            <para>
+                You can also distinguish between columns by the
+                <parameter>colId</parameter> parameter, which is the property ID of the
+                column. <classname>DecimalFormat</classname> is useful for formatting
+                decimal values.
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[... in formatPropertyValue() ...
+} else if (pid.equals("Value")) {
+    // Format a decimal value for a specific locale
+    DecimalFormat df = new DecimalFormat("#.00",
+            new DecimalFormatSymbols(locale));
+    return df.format((Double) property.getValue());
+}
+...
+table.addContainerProperty("Value", Double.class, null);]]></programlisting>
+
+            <para>
+                A table with the formatted date and decimal value columns is shown in
+                <xref linkend="figure:components.table.columnformatting"/>.
+            </para>
+
+            <figure xml:id="figure:components.table.columnformatting">
+                <title>Formatted Table Columns</title>
+                <mediaobject>
+                    <imageobject role="html">
+                        <imagedata align="center" fileref="img/components/table-columnformatting.png"/>
+                    </imageobject>
+                    <imageobject role="fo">
+                        <imagedata smallscale="100%" align="center" fileref="img/components/table-columnformatting.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+
+            <para>
+                You can use CSS for further styling of table rows, columns, and individual
+                cells by using a <classname>CellStyleGenerator</classname>. It is
+                described in <xref linkend="components.table.css"/>.
+            </para>
+        </section>
+
 		<section xml:id="components.table.css">
 			<title>CSS Style Rules</title>
 
