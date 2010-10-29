@@ -19,11 +19,8 @@ public DatabaseHelper getDbHelp() {
 
     <para>
       In addition to this we need to change the <classname>PersonList</classname> constructor
-      so that we pass the application instance to it. This allows the
-      <classname>PersonList</classname> to acquire its data source. Remember to modify the
-      call to the constructor in <classname>AddressBookApplication</classname> as well. We can
-      also remove the dummy test data creation from the previous step, leaving the
-      <classname>PersonList</classname> class as:
+      so that it gets the person container from the <classname>DatabaseHelper</classname>
+      instance. The <classname>PersonList</classname> constructor should look like this:
     </para>
 
     <programlisting>
@@ -43,42 +40,16 @@ public DatabaseHelper getDbHelp() {
     </para>
 
     <para>
-      We now have a data source connected to the table and running the application will show
-      that the <classname>PersonList</classname> contains 100 rows of data, based on 100 rows
-      of generated dummy data in the database.
-    </para>
-
-    <!-- TODO: CONNECTED TABLE FIGURE -->
-
-    <para>
-      The order of the columns is still wrong, we at least want the name to come first.
-      Additionally the field names extracted from the <classname>PersonAddress</classname>
-      -table aren't all that human-friendly. We can handle this by first adding two static
-      arrays to the <classname>DatabaseHelper</classname> class. Note that the order of the
-      column headers must correspond to the specified column order.
+      The <varname>NATURAL_COL_ORDER</varname> in the <classname>DatabaseHelper</classname>
+      class should also be updated for the SQLContainer. The result should be:
     </para>
 
     <programlisting>
 <![CDATA[public static final Object[] NATURAL_COL_ORDER = new Object[] {
       "FIRSTNAME", "LASTNAME", "EMAIL", "PHONENUMBER", "STREETADDRESS",
-      "POSTALCODE", "CITYID" };
-public static final String[] COL_HEADERS_ENGLISH = new String[] {
-      "First name", "Last name", "Email", "Phone number",
-      "Street Address", "Postal Code", "City" };]]>
+      "POSTALCODE", "CITYID" };]]>
     </programlisting>
 
-    <para>
-      Next we'll add the following two rows to the constructor of the
-      <classname>PersonList</classname> class to sort the columns and make the headers nicer.
-    </para>
-    <programlisting>
-<![CDATA[setVisibleColumns(DatabaseHelper.NATURAL_COL_ORDER);
-setColumnHeaders(DatabaseHelper.COL_HEADERS_ENGLISH);]]>
-    </programlisting>
-
-    <para>The table will now look nicer:</para>
-
-    <!-- TODO: TABLE COLUMN NAMES FIGURE -->
 
         <section>
           <title>Replacing the CityID with the name of the city</title>
