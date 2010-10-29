@@ -1,7 +1,7 @@
-all: images vaadin-tutorial.pdf
+all: vaadin-sqlcontainer-tutorial.pdf
 
 DATE = `date +'%Y-%m-%d'`
-VERSION = `cat ../../build/VERSION.properties|sed -e 's/^version=\([0-9\.]\+\).\+/\1/'`
+VERSION = `cat ../../../build/VERSION.properties|sed -e 's/^version=\([0-9\.]\+\).\+/\1/'`
 
 # Command-line parameters for Docbook
 DBPARS =	-param section.autolabel 1 \
@@ -13,29 +13,26 @@ DBPARS =	-param section.autolabel 1 \
 			-param manual.pubdate ${DATE} \
 			-param manual.version $(VERSION)
 
-# List of images to be converted from SVG to PNG
-IMAGES =	
-
 ################################################################################
 # Docbook processing
 ################################################################################
 
-DOCBOOK = ../../build/docbook/conf/custom-fo-docbook.xsl
+DOCBOOK = ../../../build/docbook/conf/custom-fo-docbook.xsl
 
 # Process Docbook to FO
 vaadin-sqlcontainer-tutorial.fo: tutorial.xml FORCE
 	@echo $(VERSION)
-	java -Xms256M -Xmx512M -classpath ../../build/lib/xalan.jar:../../build/lib/xercesImpl.jar:../../build/lib/xml-apis.jar org.apache.xalan.xslt.Process -xsl $(DOCBOOK) -in $< -out $@ $(DBPARS)
+	java -Xms256M -Xmx512M -classpath ../../../build/lib/xalan.jar:../../../build/lib/xercesImpl.jar:../../../build/lib/xml-apis.jar org.apache.xalan.xslt.Process -xsl $(DOCBOOK) -in $< -out $@ $(DBPARS)
 
-XEPCONF = -Dcom.renderx.xep.CONFIG=../../build/lib/XEP/xep.xml
+XEPCONF = -Dcom.renderx.xep.CONFIG=../../../build/lib/XEP/xep.xml
 
 # Run XEP FO processor to convert FO to PDF.
-vaadin-sqlcontainer-tutorial.pdf: vaadin-tutorial.fo
+vaadin-sqlcontainer-tutorial.pdf: vaadin-sqlcontainer-tutorial.fo
 	/opt/RenderX/XEP/xep $(XEPCONF) < $< > $@
 #	rm book.fo
 
 # View the result
-viewbook: vaadin-tutorial.pdf FORCE
+viewbook: vaadin-sqlcontainer-tutorial.pdf FORCE
 	kpdf $<
 
 ################################################################################
