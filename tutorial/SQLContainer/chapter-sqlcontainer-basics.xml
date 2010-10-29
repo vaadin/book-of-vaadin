@@ -38,7 +38,7 @@
     </para>
     
     <section>
-      <title>Database connection and initialization</title>
+      <title>Connecting to and initializing the database</title>
       <para>
         In the scope of the address book application we will create a database connection helper
         class called DatabaseHelper. The purpose of this class is to handle database connections,
@@ -278,29 +278,27 @@ setColumnHeaders(DatabaseHelper.COL_HEADERS_ENGLISH);]]>
       
       <!-- TODO: TABLE COLUMN NAMES FIGURE -->
 
-    </section>
-    
-    <section>
-      <title>Replacing the CityID with the name of the city</title>
-      <para>
-        As you have probably noticed, the <literal>City</literal> column of the table currently
-        shows only the <literal>CityID</literal> (actually the foreign key reference) and not
-        the name of the city. This happens because the city data is stored in another database
-        table and so far we have not even touched it. Therefore we need to modify the
-        <literal>City</literal> column of the <classname>PersonList</classname> table to fetch
-        the human-readable name of the city from the <classname>City</classname> table and display
-        it to the user.
-      </para>
-      
-      <para>
-        The easiest way to do this is to add a generated column to the table. When the column
-        is generated we will fetch the city name using the <classname>DatabaseHelper</classname>
-        and create a <classname>Label</classname> that will be rendered to the column. The code
-        to do this can be seen below; add the code to the constructor of the
-        <classname>PersonList</classname> class.
-      </para>
+          <section>
+            <title>Replacing the CityID with the name of the city</title>
+            <para>
+              As you have probably noticed, the <literal>City</literal> column of the table currently
+              shows only the <literal>CityID</literal> (actually the foreign key reference) and not
+              the name of the city. This happens because the city data is stored in another database
+              table and so far we have not even touched it. Therefore we need to modify the
+              <literal>City</literal> column of the <classname>PersonList</classname> table to fetch
+              the human-readable name of the city from the <classname>City</classname> table and display
+              it to the user.
+            </para>
 
-      <programlisting>
+            <para>
+              The easiest way to do this is to add a generated column to the table. When the column
+              is generated we will fetch the city name using the <classname>DatabaseHelper</classname>
+              and create a <classname>Label</classname> that will be rendered to the column. The code
+              to do this can be seen below; add the code to the constructor of the
+              <classname>PersonList</classname> class.
+            </para>
+
+            <programlisting>
 <![CDATA[addGeneratedColumn("CITYID", new ColumnGenerator() {
     public Component generateCell(Table source, Object itemId,
               Object columnId) {
@@ -315,14 +313,458 @@ setColumnHeaders(DatabaseHelper.COL_HEADERS_ENGLISH);]]>
         return null;
     }
 });]]>
+            </programlisting>
+
+            <para>
+              Note that we are using the same column name for this column that is actually a property
+              id in the person container. This way the generated column will override the column that
+              only contained the <literal>CityID</literal>s.
+            </para>
+
+          </section>
+
+    </section>
+
+    <section>
+      <title>Changing the PersonForm to accomodate SQLContainer</title>
+      
+      <para>
+        In order to reflect the changes to the transaction aware SQLContainer, the
+        <methodname>commit()</methodname> and <methodname>discard()</methodname> methods need to
+        be overridden in the <classname>PersonForm</classname>. At the very least the
+        <methodname>commit()</methodname> or <methodname>rollback()</methodname> method of the
+        SQLContainer needs to be called so that the changes will be either properly written to
+        the database, or discarded from the container alltogether.
+      </para>
+      
+      <para>
+        Our overridden <methodname>commit()</methodname> and <methodname>discard()</methodname>
+        methods look like the following:
+      </para>
+      <programlisting>
+<![CDATA[@Override
+public void commit() throws Buffered.SourceException {
+    /* Commit the data entered to the person form to the actual item. */
+    super.commit();
+
+    /* Commit changes to the database. */
+    try {
+        app.getDbHelp().getPersonContainer().commit();
+    } catch (UnsupportedOperationException e) {
+        e.printStackTrace();
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    setReadOnly(true);
+}
+
+@Override
+public void discard() throws Buffered.SourceException {
+    super.discard();
+    /* On discard roll back the changes. */
+    try {
+        app.getDbHelp().getPersonContainer().rollback();
+    } catch (UnsupportedOperationException e) {
+        e.printStackTrace();
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    /* Clear the form */
+    setItemDataSource(null);
+    setReadOnly(true);
+}]]>
+      </programlisting>
+      
+    </section>
+    
+    <section>
+      <title>Adding a new contact</title>
+      <para>
+        The Address book tutorial creates a new instance of <classname>Person</classname>,
+        wraps it in a <para>BeanItem</para> and adds the item to the
+        <classname>PersonForm</classname>. When using an SQLContainer, we should add a new
+        item to the container and then edit that item. When done in this way we get automatic
+        persistence of the new item when running
+        <classname>SQLContainer</classname><methodname>.commit()</methodname>. The updated
+        <classname>PersonForm</classname><methodname>.addContact()</methodname> looks like this:
+      </para>
+
+      <programlisting>
+<![CDATA[public void addContact() {
+    /* Roll back changes just in case */
+    try {
+        app.getDbHelp().getPersonContainer().rollback();
+    } catch (SQLException ignored) {
+    }
+    Object tempItemId = app.getDbHelp().getPersonContainer().addItem();
+    setItemDataSource(app.getDbHelp().getPersonContainer().getItem(
+            tempItemId));
+    setReadOnly(false);
+}]]>
+      </programlisting>
+      
+    </section>
+    
+    <section>
+      <title>Map the <classname>City</classname> table to the contacts</title>
+      
+      <para>
+        Adding and editing contacts should now work but you will notice that the city of a contact
+        is shown only by its ID, not by the actual city name. Since this is not very usable, we need
+        to create a mapping from the city ID to the name of the city and display that instead.
+      </para>
+      
+      <para>
+        For this purpose we will constuct a <classname>ComboBox</classname> which will contain the
+        existing cities as well as allow the user to enter new ones. This way selecting an existing
+        city becomes much easier.
+      </para>
+      
+      <para>
+        Replacing the normal text field with a combo box will introduce you to the system used
+        in Vaadin for populating a form. The same mechanism can be used in tables if you put the
+        table into editable mode. Fields are generated using the factory pattern by a class
+        implementing the FieldFactory interface.
+      </para>
+      
+      <para>
+        By default the <classname>BaseFieldFactory</classname> class is used and is generally a
+        good base for customizations. The <classname>FieldFactory</classname> interface has several
+        methods which we do not want to implement and <classname>BaseFieldFactory</classname> has
+        good default implementations of these. Later we'll use the same field factory to tune the
+        form fields even more.
+      </para> 
+      
+      <para>
+        We start by adding a <classname>ComboBox</classname> field to our
+        <classname>PersonForm</classname>:
+      </para>
+
+      <programlisting>
+<![CDATA[private final ComboBox cities = new ComboBox("City");]]>
       </programlisting>
       
       <para>
-        Note that we are using the same column name for this column that is actually a property
-        id in the person container. This way the generated column will override the column that
-        only contained the <literal>CityID</literal>s.
+        We make adding new items possible and populate the <classname>ComboBox</classname> with
+        existing cities from our data source. We will also set the <classname>ComboBox</classname>
+        into immediate mode. Add the following code to the <classname>PersonForm</classname>
+        constructor:
+      </para>
+
+      <programlisting>
+<![CDATA[/* Allow the user to enter new cities */
+cities.setNewItemsAllowed(true);
+/* We do not want to use null values */
+cities.setNullSelectionAllowed(false);
+/* Cities selection */
+cities.setContainerDataSource(app.getDbHelp().getCityContainer());
+cities.setItemCaptionPropertyId("NAME");
+cities.setImmediate(true);]]>
+      </programlisting>
+
+      <para>
+        Finally we'll make a field factory extending <classname>BaseFieldFactory</classname>. Using
+        the field factory we can choose what kind of field to use for each property. For the
+        <literal>city</literal> property we'll return the cities <classname>ComboBox</classname>,
+        for all other properties we'll let the <classname>BaseFieldFactory</classname> take care of
+        creating the field.
+      </para>
+
+      <programlisting>
+<![CDATA[setFormFieldFactory(new DefaultFieldFactory() {
+   @Override
+   public Field createField(Item item, Object propertyId,
+      Component uiContext) {
+       Field field;
+       if (propertyId.equals("CITYID")) {
+           field = cities;
+       } else {
+           field = super.createField(item, propertyId, uiContext);
+       }
+       return field;
+   }
+});]]>
+      </programlisting>
+      
+      <para>
+        Now that we have the cities nicely listed in a <classname>ComboBox</classname>, we need to
+        allow the user to add cities that are not yet present in the <classname>City</classname>
+        database table. This is easy to implement using a <classname>NewItemHandler</classname>
+        from the <classname>AbstractSelect</classname> class. In this case, our
+        <classname>NewItemHandler</classname> will call the <methodname>addCity()</methodname>
+        method of the <classname>DatabaseHelper</classname> class. Due to the temporary row IDs
+        used in the SQLContainer, we will also need add a listener to the <classname>City</classname>
+        container to receive notifications about the automatically generated IDs of added items.
+        Add the following code to the end of the <classname>PersonForm</classname> constructor:
       </para>
       
+      <programlisting>
+<![CDATA[/* NewItemHandler to add new cities */
+cities.setNewItemHandler(new AbstractSelect.NewItemHandler() {
+    public void addNewItem(String newItemCaption) {
+        app.getDbHelp().addCity(newItemCaption);
+    }
+});
+/* Add PersonForm as RowIdChangeListener to the CityContainer */
+app.getDbHelp().getCityContainer().addListener(this);]]>
+      </programlisting>
+      
+      <para>
+        To implement the <classname>RowIdChangeListener</classname>, we first need to declare
+        that the <classname>PersonForm</classname> class implements
+        <classname>QueryDelegate.RowIdChangeListener</classname>. After the declaration, we must
+        provide the implementation. In our implementation, we will make the cities
+        <classname>ComboBox</classname> select the city that was just inserted; this
+        <methodname>setValue()</methodname> call is necessary since the <varname>itemID</varname>
+        of the city has just changed. Finally, we'll set the key of the added city to the person
+        item that we are currently editing, so that its <literal>CITYID</literal> property will
+        reference the correct city. The implementation can be done like this:
+      </para>
+
+      <programlisting>
+<![CDATA[public void rowIdChange(RowIdChangeEvent event) {
+    cities.setValue(event.getNewRowId());
+    getItemDataSource().getItemProperty("CITYID").setValue(
+            event.getNewRowId().getId()[0]);
+}]]>
+      </programlisting>
+
+      <para>
+        The final touch will be done in the <methodname>setItemDataSource()</methodname> method
+        of the <classname>PersonForm</classname> class. Here we will add code that will select
+        the correct city from the <classname>ComboBox</classname> every time a new item is set
+        to the <classname>PersonForm</classname>. Since the item from the person container will
+        only contain the key of the city, but the <classname>ComboBox</classname> requires a
+        complete <classname>RowId</classname>, we will need to generate one. Add the following code
+        to the <classname>PersonForm</classname><methodname>.setItemDataSource()</methodname>
+        method, right after the call to
+        <methodname>super.setItemDataSource(newDataSource, orderedProperties)</methodname>.
+      </para>
+
+      <programlisting>
+<![CDATA[/* Select correct city from the cities ComboBox */
+setReadOnly(false);
+if (newDataSource.getItemProperty("CITYID").getValue() != null) {
+    cities.select(new RowId(new Object[] { newDataSource
+                  .getItemProperty("CITYID").getValue() }));
+} else {
+    cities.select(cities.getItemIds().iterator().next());
+}]]>
+      </programlisting>
+      
+      <para>
+        If the value of the city reference is <literal>null</literal> (e.g. the item is new),
+        the first item will be selected from the cities <classname>ComboBox</classname>.
+      </para>
+      
+      <para>
+        Try it out and make sure that creation of new contacts, editing of old ones and adding
+        new cities works properly.
+      </para>
+    </section>
+    
+    <section>
+      <title>Searching with the SQLContainer</title>
+      
+      <para>
+        In order to make search work with the SQLContainer, we first add two fields to the
+        <classname>SearchFilter</classname> class, after which the class will look like the
+        following:
+      </para>
+      
+      <programlisting>
+<![CDATA[package com.vaadin.demo.tutorial.addressbook.data;
+import java.io.Serializable;
+public class SearchFilter implements Serializable {
+
+      private final String term;
+      private final Object propertyId;
+      private String propertyIdDisplayName;
+      private String termDisplayName;
+      private String searchName;
+
+      public SearchFilter(Object propertyId, String searchTerm, String name) {
+            this.propertyId = propertyId;
+            this.term = searchTerm;
+            this.searchName = name;
+      }
+
+      public SearchFilter(Object propertyId, String searchTerm, String name,
+            String propertyIdDisplayName, String termDisplayName) {
+          this(propertyId, searchTerm, name);
+          setPropertyIdDisplayName(propertyIdDisplayName);
+          setTermDisplayName(termDisplayName);
+      }
+
+      // + getters and setters
+}]]>
+      </programlisting>
+      
+      <para>
+        The <methodname>performSearch()</methodname> method also needs to be updated to check
+        for illegal values that the SQLContainer won't accept.
+      </para>
+      
+      <programlisting>
+<![CDATA[private void performSearch() {
+    String searchTerm = (String) tf.getValue();
+    if (searchTerm == null || searchTerm.equals("")) {
+        getWindow().showNotification("Search term cannot be empty!",
+                Notification.TYPE_WARNING_MESSAGE);
+        return;
+    }
+    List<SearchFilter> searchFilters = new ArrayList<SearchFilter>();
+    searchFilters.add(new SearchFilter(fieldToSearch.getValue(),
+                     searchTerm, (String) searchName.getValue(),                       
+                     fieldToSearch.getItemCaption(fieldToSearch.getValue()),
+                     searchTerm));
+
+    /* If Save is checked, save the search through the main app. */
+    if (saveSearch.booleanValue()) {
+        if (searchName.getValue() == null
+                || searchName.getValue().equals("")) {
+            getWindow().showNotification(
+                    "Please enter a name for your search!",
+                    Notification.TYPE_WARNING_MESSAGE);
+            return;
+        }
+        SearchFilter[] sf = {};
+        app.saveSearch(searchFilters.toArray(sf));
+    }
+    SearchFilter[] sf = {};
+    app.search(searchFilters.toArray(sf));
+}]]>
+      </programlisting>
+      
+      <para>
+        Now we need to modify the <methodname>search</methodname> logic in the application
+        class. Note that since the <class>PersonAddress</class> container contains both
+        string and numeric properties, we cannot use the
+        <methodname>addContainerFilter()</methodname> method. Instead, we must fetch the type
+        of the column from the container and create an accordingly typed 
+        <classname>Filter</classname> instance.
+      </para>
+
+      <programlisting>
+<![CDATA[public void search(SearchFilter... searchFilters) {
+    SQLContainer c = getDbHelp().getPersonContainer();
+    /* Clear previous filters */
+    c.removeAllContainerFilters();
+    /* Add the filter(s) to the person container. */
+    for (SearchFilter searchFilter : searchFilters) {
+        Filter f = new Filter((String) searchFilter.getPropertyId(),
+                   ComparisonType.CONTAINS, searchFilter.getTerm());
+        if (Integer.class.equals(c.getType(searchFilter.getPropertyId()))) {
+            try {
+                f = new Filter((String) searchFilter.getPropertyId(),
+                               ComparisonType.EQUALS, 
+                               Integer.parseInt(searchFilter.getTerm()));
+            } catch (NumberFormatException nfe) {
+                return;
+            }
+        }
+        getDbHelp().getPersonContainer().addFilter(f);
+    }
+    showListView();
+}]]>
+      </programlisting>
+      
+      <para>
+        The logic for the "Show All" item in the tree also needs to be changed in order for the
+        functionality to work with SQLContainer. Update the <methodname>itemClick()</methodname>
+        and <methodname>addNewContact()</methodname> methods in the application class to the
+        following:
+      </para>
+
+      <programlisting>
+<![CDATA[[...]
+if (NavigationTree.SHOW_ALL.equals(itemId)) {
+    /* Clear all filters from person container */
+    getDbHelp().getPersonContainer().removeAllContainerFilters();
+    showListView();
+}
+[...]
+
+private void addNewContact() {
+    showListView();
+    tree.select(NavigationTree.SHOW_ALL);
+    /* Clear all filters from person container */
+    getDbHelp().getPersonContainer().removeAllContainerFilters();
+    personForm.addContact();
+}]]>
+      </programlisting>
+      
+      <section>
+        <title>Implementing search based on a Foreign Key</title>
+        
+        <para>
+          We have previously created a simple search view, implemented the search functionality
+          and support for saving the searches. However you may have noted that currently only
+          city Ids will be searched if the <classname>City</classname> field is used in the search,
+          not the actual city names. Therefore we need to modify the search to first look up the
+          correct IDs from the city container, and after that create the required amount of search
+          filters for the person container. Now you will also see why earlier the search filters
+          were passed around and saved in an array.
+        </para>
+        
+        <para>
+          We start from the <classname>SearchView</classname><methodname>.performSearch()</methodname>
+          method and replace this:
+        </para>
+
+        <programlisting>
+<![CDATA[searchFilters.add(new SearchFilter(fieldToSearch.getValue(),
+        searchTerm, (String) searchName.getValue(), 
+		    fieldToSearch.getItemCaption(fieldToSearch.getValue()),
+        searchTerm));]]>
+        </programlisting>
+
+        <para>with this:</para>
+        
+        <programlisting>
+<![CDATA[if (!"CITYID".equals(fieldToSearch.getValue())) {
+   /* If this is NOT a City search, one filter is enough. */
+   searchFilters.add(new SearchFilter(fieldToSearch.getValue(),
+           searchTerm, (String) searchName.getValue(), fieldToSearch
+                   .getItemCaption(fieldToSearch.getValue()),
+           searchTerm));
+} else {
+   SQLContainer cc = app.getDbHelp().getCityContainer();
+   cc.addContainerFilter("NAME", searchTerm, true, false);
+   for (Object cityItemId : cc.getItemIds()) {
+       searchFilters.add(new SearchFilter("CITYID",
+               cc.getItem(cityItemId).getItemProperty("ID").getValue()
+                       .toString(), (String) searchName.getValue(),
+               fieldToSearch.getItemCaption(fieldToSearch.getValue()),
+               searchTerm));
+   }
+   cc.removeAllContainerFilters();
+}]]>
+        </programlisting>
+
+        <para>
+          In the above code all the other fields are handled exactly as before, except for
+          the <classname>City</classname> field. If a <classname>City</classname> search is made,
+          we will fetch the city container and add a container filter to it. This filter will
+          search for the term the user entered. Once the results are in we will generate
+          <classname>SearchFilters</classname> with each of the matching cities' IDs.
+        </para>
+        
+        <para>
+          Finally the search method of the application class also requires a slight modification.
+          The search mode of the person SQLContainer must be changed from inclusive
+          (<literal>AND</literal>) to exclusive (<literal>OR</literal>) in order to get any results
+          at all. This is done simply by adding the following code to the method, right before
+          the for-loop which adds the containerfilters.
+        </para>
+
+        <programlisting>
+<![CDATA[getDbHelp().getPersonContainer().setFilteringMode(
+            FilteringMode.FILTERING_MODE_EXCLUSIVE);
+]]>
+        </programlisting>
+
+      </section>
     </section>
     
     <section>
