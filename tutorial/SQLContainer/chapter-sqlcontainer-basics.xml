@@ -1,0 +1,360 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<chapter xml:id="sqlcontainer-basics">
+	<title>SQLContainer basics</title>
+
+	<para>
+		SQLContainer is an add-on to Vaadin, implementing the Container interface for standard SQL
+		database servers. SQLContainer allows you to easily display data stored in an SQL database
+		in Tables and Select components, as well as edit the data using Forms.
+	</para>
+	
+	<para>
+	  SQLContainer has two modes of operation, enabled by which <classname>QueryDelegate</classname>
+	  implementation is given at construction time. The TableQuery implementation reads all contents
+	  from a normal database table and automatically supports writing, filtering, sorting and lazy
+	  loading for a variety of database engines (See the SQLContainer manual for a list). The second
+	  provided implementation is the <classname>FreeformQuery</classname> implementation, which
+	  allows any complex SQL query (e.g. joining many tables, etc) to be contained in the SQLContainer.
+	  <classname>FreeformQuery</classname> requires the developer to implement the
+	  <classname>FreeformQueryDelegate</classname> interface in order to support writing, filtering,
+	  sorting and/or lazy loading. This tutorial will only use <classname>TableQuery</classname>. For
+	  more information on <classname>FreeformQuery</classname>, see the SQLContainer manual.
+  </para>
+  
+  <para>
+    For those interested in more information, such as the architecture of the SQLContainer, see
+    the SQLContainer manual included in the add-on distribution package.
+  </para>
+
+  <section xml:id="sqlcontainer-basics.replacing-indexedcontainer">
+    <title>
+      Replacing <classname>IndexedContainer</classname> with <classname>SQLContainer</classname>
+    </title>
+
+    <para>
+      We will walk through the procedure of switching out the <classname>IndexedContainer</classname>s
+      used in the Address book tutorial to <classname>SQLContainer</classname>s.
+    </para>
+    
+    <section>
+      <title>Database connection and initialization</title>
+      <para>
+        In the scope of the address book application we will create a database connection helper
+        class called DatabaseHelper. The purpose of this class is to handle database connections,
+        dummy data generation, container creation and other datasource-related tasks.
+      </para>
+      
+      <para>
+        We begin by creating the helper class and by adding a method that creates a connection pool,
+        which will be used to connect to the database of your choice. Note that the driver name,
+        connection url, username and password will vary depending on your choice of database and
+        the database settings. In this example we will be connecting to an in-memory HSQLDB database
+        using a <classname>SimpleJDBCConnectionPool</classname> with between two and five open
+        connections.
+      </para>
+      
+      <programlisting>
+<![CDATA[public class DatabaseHelper {
+    private JDBCConnectionPool connectionPool = null;
+
+    public DatabaseHelper() {
+  	  initConnectionPool();
+    }
+
+    private void initConnectionPool() {
+      	try {
+          	connectionPool = new SimpleJDBCConnectionPool(
+                  	"org.hsqldb.jdbc.JDBCDriver",
+                  	"jdbc:hsqldb:mem:sqlcontainer", "SA", "", 2, 5);
+      	} catch (SQLException e) {
+        	  e.printStackTrace();
+        }
+    }
+}]]>
+      </programlisting>
+      
+      <para>
+        We want to base our table data on two interrelated tables in a database. We will call
+        these tables <classname>PersonAddress</classname> and <classname>City</classname> (note
+        that the case-sensitivity of the table identifiers depends on the database used).
+      </para>
+      
+      <para>
+        The PersonAddress table will hold the most important data of the address book application.
+        Each row corresponds to an entry in the address book and contains the following columns:
+        <literal>firstname</literal>, <literal>lastname</literal>, <literal>email</literal>,
+        <literal>phonenumber</literal>, <literal>streetaddress</literal> and <literal>postalcode</literal>.
+        In addition to these, the table will also contain an <literal>ID</literal> column, a
+        <literal>version</literal> column for optimistic locking and a <literal>cityid</literal>
+        column which contains a foreign key reference to the <classname>City</classname> table.
+      </para>
+      
+      <para>
+        The <classname>City</classname> table contains only three columns: an <literal>ID</literal>
+        column, a <literal>version</literal> column and a <literal>name</literal> column that will
+        hold the name of the city.
+      </para>
+      
+      <para>
+        With HSQLDB we can use the following SQL queries to create these tables. The complete Java
+        method for this can be found in <classname>DatabaseHelper</classname>
+        <methodname>.initDatabase()</methodname>, but the code is omitted here for clarity.
+      </para>
+      
+      <programlisting>
+<![CDATA[create table city (id integer generated always as identity, name varchar(64), version integer default 0 not null, primary key (id));
+
+create table personaddress (id integer generated always as identity, firstname varchar(64), lastname varchar(64), email varchar(64), phonenumber varchar(64), streetaddress varchar(128), postalcode integer, cityId integer not null, version integer default 0 not null , FOREIGN KEY (cityId) REFERENCES city(id), primary key(id));]]>
+      </programlisting>
+    </section>
+
+    <section xml:id="sqlcontainer-basics.replacing-indexedcontainer.initializing">
+      <title>Initializing the containers</title>
+      <para>
+        When the database connection is functional and the two tables are created successfully, we
+        can create two <classname>SQLContainers</classname>; one connected to each table. The
+        container initialization is really simple, we only need to create a
+        <classname>QueryDelegate</classname> that the container will use. In this application, one
+        instance of <classname>TableQuery</classname> will be created for each container. The
+        <classname>TableQuery</classname> constructor requires the name of the table to fetch the
+        data from, and a connection pool that it will use to get the database connections it needs.
+      </para>
+      
+      <para>
+        Next we'll set the version column for the <classname>TableQuery</classname>. The version
+        column in this application is not actually functional, but <classname>TableQuery</classname>
+        is designed in a way that requires a version column to be defined in order to support writing
+        (see optimistic locking in the SQLContainer manual).
+      </para>
+      
+      <para>
+        Finally the <classname>SQLContainer</classname> is instantiated, given the
+        <classname>TableQuery</classname> as its only parameter. The following method of
+        <classname>DatabaseHelper</classname> contains all the code required to create the two
+        containers:
+      </para>
+
+      <programlisting>
+<![CDATA[private SQLContainer personContainer = null;
+private SQLContainer cityContainer = null;
+
+private void initContainers() {
+    try {
+        /* TableQuery and SQLContainer for personaddress -table */
+        TableQuery q1 = new TableQuery("personaddress", connectionPool);
+        q1.setVersionColumn("VERSION");
+        personContainer = new SQLContainer(q1);
+
+        /* TableQuery and SQLContainer for city -table */
+        TableQuery q2 = new TableQuery("city", connectionPool);
+        q2.setVersionColumn("VERSION");
+        cityContainer = new SQLContainer(q2);
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+}]]>
+      </programlisting>
+
+      <para>
+        After the containers are created, the <classname>DatabaseHelper</classname> constructor
+        will call the <methodname>fillContainers()</methodname> -method, which will add some
+        generated data to the database for demonstration purposes.
+      </para>
+      
+      <para>
+        Finally, we create a few simple helper methods in the <classname>DatabaseHelper</classname>
+        class to assist us later when we are processing data from the two containers. These methods
+        are listed below and their operation should be quite self-explanatory by their signatures.
+        Full definitions for these methods can be found in the AddressBook - SQLContainer demo
+        application.
+      </para>
+      
+      <programlisting>
+<![CDATA[public String getCityName(int cityId)
+public boolean addCity(String cityName)
+public SQLContainer getPersonContainer()
+public SQLContainer getCityContainer()]]>
+      </programlisting>
+      
+    </section>
+    
+    <section>
+      <title>Basics of the Data Model with respect to SQLContainer</title>
+      
+      <para>
+        In this case we are using an <classname>SQLContainer</classname> as the container for
+        the data shown in the table. The <classname>SQLContainer</classname> can maintain a
+        list of our database contents and supply the table with information fetched directly
+        from the database table when needed.
+      </para>
+      
+      <para>The nice thing with this container is that we can simply</para>
+      
+      <itemizedlist>
+    		<listitem>
+    		  Instantiate the <classname>SQLContainer</classname> with a proper 
+    		  <classname>QueryDelegate</classname>
+    		</listitem>
+    		<listitem>Assign the container to a table as a data source</listitem>
+    		<listitem>VOILA, the information is displayed in the table</listitem>
+    	</itemizedlist>
+    	
+    </section>
+    
+    <section>
+      <title>Binding <classname>Table</classname> to an <classname>SQLContainer</classname></title>
+      <para>
+        To access the database helper class and our newly created containers in our application
+        we add a new field to our <classname>AddressBookApplication</classname> together with a getter:
+      </para>
+      <programlisting>
+<![CDATA[private DatabaseHelper dbHelp = new DatabaseHelper();
+public DatabaseHelper getDbHelp() {
+    return dbHelp;
+}]]>
+      </programlisting>
+      
+      <para>
+        In addition to this we need to change the <classname>PersonList</classname> constructor
+        so that we pass the application instance to it. This allows the
+        <classname>PersonList</classname> to acquire its data source. Remember to modify the
+        call to the constructor in <classname>AddressBookApplication</classname> as well. We can
+        also remove the dummy test data creation from the previous step, leaving the
+        <classname>PersonList</classname> class as:
+      </para>
+      
+      <programlisting>
+<![CDATA[public class PersonList extends Table {
+    public PersonList(final AddressBookApplication app) {
+        setSizeFull();
+        setContainerDataSource(app.getDbHelp().getPersonContainer());
+    }
+}]]>
+      </programlisting>
+
+      <para>
+        The <methodname>setContainerDataSource()</methodname> sets the
+        <classname>SQLContainer</classname> which we created in
+        <xref linkend="sqlcontainer-basics.replacing-indexedcontainer.initializing"/> to be the
+        data source for the <classname>PersonList</classname> table.
+      </para>
+      
+      <para>
+        We now have a data source connected to the table and running the application will show
+        that the <classname>PersonList</classname> contains 100 rows of data, based on 100 rows
+        of generated dummy data in the database.
+      </para>
+      
+      <!-- TODO: CONNECTED TABLE FIGURE -->
+      
+      <para>
+        The order of the columns is still wrong, we at least want the name to come first.
+        Additionally the field names extracted from the <classname>PersonAddress</classname>
+        -table aren't all that human-friendly. We can handle this by first adding two static
+        arrays to the <classname>DatabaseHelper</classname> class. Note that the order of the
+        column headers must correspond to the specified column order.
+      </para>
+
+      <programlisting>
+<![CDATA[public static final Object[] NATURAL_COL_ORDER = new Object[] {
+        "FIRSTNAME", "LASTNAME", "EMAIL", "PHONENUMBER", "STREETADDRESS",
+        "POSTALCODE", "CITYID" };
+public static final String[] COL_HEADERS_ENGLISH = new String[] {
+        "First name", "Last name", "Email", "Phone number",
+        "Street Address", "Postal Code", "City" };]]>
+      </programlisting>
+
+      <para>
+        Next we'll add the following two rows to the constructor of the
+        <classname>PersonList</classname> class to sort the columns and make the headers nicer.
+      </para>
+      <programlisting>
+<![CDATA[setVisibleColumns(DatabaseHelper.NATURAL_COL_ORDER);
+setColumnHeaders(DatabaseHelper.COL_HEADERS_ENGLISH);]]>
+      </programlisting>
+      
+      <para>The table will now look nicer:</para>
+      
+      <!-- TODO: TABLE COLUMN NAMES FIGURE -->
+
+    </section>
+    
+    <section>
+      <title>Replacing the CityID with the name of the city</title>
+      <para>
+        As you have probably noticed, the <literal>City</literal> column of the table currently
+        shows only the <literal>CityID</literal> (actually the foreign key reference) and not
+        the name of the city. This happens because the city data is stored in another database
+        table and so far we have not even touched it. Therefore we need to modify the
+        <literal>City</literal> column of the <classname>PersonList</classname> table to fetch
+        the human-readable name of the city from the <classname>City</classname> table and display
+        it to the user.
+      </para>
+      
+      <para>
+        The easiest way to do this is to add a generated column to the table. When the column
+        is generated we will fetch the city name using the <classname>DatabaseHelper</classname>
+        and create a <classname>Label</classname> that will be rendered to the column. The code
+        to do this can be seen below; add the code to the constructor of the
+        <classname>PersonList</classname> class.
+      </para>
+
+      <programlisting>
+<![CDATA[addGeneratedColumn("CITYID", new ColumnGenerator() {
+    public Component generateCell(Table source, Object itemId,
+              Object columnId) {
+        if (getItem(itemId).getItemProperty("CITYID").getValue() != null) {
+            Label l = new Label();
+            int cityId = (Integer) getItem(itemId).getItemProperty(
+                  "CITYID").getValue();
+            l.setValue(app.getDbHelp().getCityName(cityId));
+            l.setSizeUndefined();
+            return l;
+        }
+        return null;
+    }
+});]]>
+      </programlisting>
+      
+      <para>
+        Note that we are using the same column name for this column that is actually a property
+        id in the person container. This way the generated column will override the column that
+        only contained the <literal>CityID</literal>s.
+      </para>
+      
+    </section>
+    
+    <section>
+      <title>Summary</title>
+      <para>
+        We first created a connection to a database and created two tables for the items that
+        will be shown in the address book. We then introduced the SQLContainer and used it to
+        easily link the database tables with our application. We created some dummy data and
+        added it to the database tables using the SQLContainer. Finally we made the table a bit
+        more readable and better looking. 
+      </para>
+    </section>
+  </section>
+
+</chapter>
+
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: xml
+sgml-omittag:nil
+sgml-shorttag:nil
+sgml-namecase-general:nil
+sgml-general-insert-case:lower
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:4
+sgml-indent-data:t
+sgml-parent-document:nil
+sgml-exposed-tags:nil
+sgml-local-catalogs:("/etc/sgml/catalog" "/usr/share/xemacs21/xemacs-packages/etc/psgml-dtds/CATALOG")
+sgml-local-ecat-files:("ECAT" "~/sgml/ECAT" "/usr/share/sgml/ECAT" "/usr/local/share/sgml/ECAT" "/usr/local/lib/sgml/ECAT")
+End:
+-->
+
