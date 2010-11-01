@@ -435,7 +435,20 @@
 		</jar>
 	</target>
 
-	<target name="manual-eclipse" depends="manual-eclipse-plugin, manual-eclipse-feature">
+    <!-- Sign resulting plugin and feature -->
+    <target name="sign-plugin-and-feature" if="jarsigner.bin">
+        <!-- Sign the plugin -->
+        <exec executable="${jarsigner.bin}">
+            <arg path="${output-dir}/eclipse/plugins/${eclipse.plugin.manual.jar-name}" />
+        </exec>
+
+        <!-- Sign the feature -->
+        <exec executable="${jarsigner.bin}">
+            <arg path="${output-dir}/eclipse/features/${eclipse.manual.feature.jar}" />
+        </exec>
+    </target>
+
+	<target name="manual-eclipse" depends="manual-eclipse-plugin, manual-eclipse-feature, sign-plugin-and-feature">
 		<echo>##teamcity[publishArtifacts '${output-dir}/eclipse/**/*.jar']</echo>
 	</target>
 
