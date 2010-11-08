@@ -605,6 +605,138 @@
         </copy>
     </target>
 
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+    <!-- Targets for the SQLContainer Tutorial                               -->
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+    <target name="init-sqltutorial" depends="">
+        <!-- Sets the current date as the publication date of the Tutorial. -->
+        <tstamp>
+            <format property="tutorial.pubdate" pattern="yyyy-MM-dd"/>
+        </tstamp>
+        <property name="sqlcontainer-version" value="1.0" />
+
+        <mkdir dir="${output-dir}/WebContent/docs/sqltutorial" />
+    </target>
+    
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+    <!-- HTML Version of the SQLContainer Tutorial                           -->
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+    <target name="sqltutorial-html" depends="init, init-sqltutorial">
+        <echo>SQLContainer Tutorial: HTML</echo>
+        <echo>Publication date is ${tutorial.pubdate}</echo>
+
+        <delete file="build/docbook/conf/temp.xsl" />
+        <copy file="build/docbook/conf/custom-html-docbook.xsl" tofile="build/docbook/conf/temp.xsl">
+            <filterchain>
+                <replacetokens>
+                    <token key="BODYHEADER" value="${html.body.start1}${docbook.head.title}${html.body.start2}" />
+                     <token key="BODYFOOTER" value="${html.body.end}" />
+                </replacetokens>
+            </filterchain>
+        </copy>
+        <path id="docbook-xsl.classpath">
+            <pathelement path="build/lib/fserializer.jar" />
+            <pathelement path="build/lib/xalan.jar" />
+            <pathelement path="build/lib/xercesImpl.jar" />
+            <pathelement path="build/lib/xml-apis.jar" />
+        </path>
+        <java classname="org.apache.xalan.xslt.Process" failonerror="yes" fork="yes" maxmemory="512m">
+            <arg value="-in" />
+            <arg value="tutorial/SQLContainer/tutorial.xml" />
+            <arg value="-xsl" />
+            <arg value="build/docbook/conf/temp.xsl" />
+            <arg value="-out" />
+            <arg value="${output-dir}/WebContent/docs/sqltutorial/index.html" />
+            <arg value="-param" />
+            <arg value="section.autolabel" />
+            <arg value="1" />
+            <arg value="-param" />
+            <arg value="section.label.includes.component.label" />
+            <arg value="1" />
+            <arg value="-param" />
+            <arg value="section.autolabel.max.depth" />
+            <arg value="2" />
+            <arg value="-param" />
+            <arg value="use.extensions" />
+            <arg value="1" />
+            <arg value="-param" />
+            <arg value="manual.pubdate" />
+            <arg value="${tutorial.pubdate}" />
+            <arg value="-param" />
+            <arg value="manual.version" />
+            <arg value="${sqlcontainer-version}" />
+            <classpath refid="docbook-xsl.classpath" />
+        </java>
+        <delete file="build/docbook/conf/temp.xsl" />
+    </target>
+
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+    <!-- Build PDF tutorial with XEP FO processor                            -->
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+    <target name="build-sqltutorial-pdf" if="xep.license.available">
+        <echo>PDF Tutorial: processing images (TBD)</echo>
+        <!-- TBD -->
+        <echo>PDF Tutorial: converting xml to fo</echo>
+
+        <echo>Publication date is ${tutorial.pubdate}</echo>
+
+        <java classname="org.apache.xalan.xslt.Process" failonerror="yes" fork="yes" maxmemory="512m">
+            <arg value="-xsl" />
+            <arg value="build/docbook/conf/custom-fo-docbook.xsl" />
+            <arg value="-in" />
+            <arg value="tutorial/SQLContainer/tutorial.xml" />
+            <arg value="-out" />
+            <arg value="${result-path}/vaadin-sqltutorial.fo" />
+            <arg value="-param" />
+            <arg value="section.autolabel" />
+            <arg value="1" />
+            <arg value="-param" />
+            <arg value="section.label.includes.component.label" />
+            <arg value="1" />
+            <arg value="-param" />
+            <arg value="section.autolabel.max.depth" />
+            <arg value="2" />
+            <arg value="-param" />
+            <arg value="draft.watermark.image" />
+            <arg value="''" />
+            <arg value="-param" />
+            <arg value="draft.mode" />
+            <arg value="'no'" />
+            <arg value="-param" />
+            <arg value="double.sided" />
+            <arg value="1" />
+            <arg value="-param" /> <!-- PDF bookmarks support. -->
+            <arg value="xep.extensions" />
+            <arg value="1" />
+            <arg value="-param" />
+            <arg value="manual.pubdate" />
+            <arg value="${tutorial.pubdate}" />
+            <arg value="-param" />
+            <arg value="manual.version" />
+            <arg value="${sqlcontainer-version}" />
+            <classpath>
+                <pathelement location="build/lib/xalan.jar" />
+                <pathelement location="build/lib/xercesImpl.jar" />
+                <pathelement location="build/lib/xml-apis.jar" />
+            </classpath>
+        </java>
+        <echo>PDF Tutorial: converting fo to pdf</echo>
+        <!-- Run XEP FO processor to convert FO to PDF -->
+        <java classname="com.renderx.xep.XSLDriver" error="${result-path}/xep-error.log" failonerror="yes" fork="yes" maxmemory="512m" input="${result-path}/vaadin-sqltutorial.fo" output="${output-dir}/WebContent/docs/vaadin-sqlcontainer-tutorial.pdf">
+            <arg value="-Dcom.renderx.xep.CONFIG=build/lib/XEP/xep.xml" />
+            <classpath>
+                <pathelement location="build/lib/XEP/lib/tools.jar" />
+                <pathelement location="build/lib/XEP/lib/xep.jar" />
+                <pathelement location="build/lib/XEP/lib/saxon.jar" />
+                <pathelement location="build/lib/XEP/lib/xt.jar" />
+            </classpath>
+        </java>
+    </target>
+
+    <!-- Build PDF tutorial from sources or just copy it. -->
+    <target name="sqltutorial-pdf" depends="init, init-sqltutorial, build-sqltutorial-pdf">
+    </target>
+
 </project>
 
 <!-- Keep this comment at the end of the file
