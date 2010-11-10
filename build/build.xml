@@ -33,6 +33,13 @@
         <!-- Can run XEP only if license is available. -->
         <available file="build/lib/XEP/license.xml" property="xep.license.available" />
 
+        <!-- Path to installed XEP license. -->
+        <property name="xep.license.path.installed" value="/opt/RenderX/XEP/license.xml"/>
+        <echo>XEP license expected to be installed as ${xep.license.path.installed}</echo>
+
+        <!-- Can copy XEP license only if it is available. -->
+        <available file="${xep.license.path.installed}" property="xep.license.installed"/>
+
         <!-- Create result dir unless already exists -->
         <mkdir dir="${result-path}" />
 
@@ -54,6 +61,11 @@
         <condition property="manual.source.dir" value="${result-path}/translations/${locale}">
 			<isset property="locale"/>
 		</condition>
+
+    <!-- If the XEP is installed, copy it to proper place. -->
+    <target name="xep-license-copy" if="xep.license.installed">
+        <copy file="${xep.license.path.installed}" todir="build/lib/XEP"/>
+    </target>
 
 		<!-- The language string for DocBook. -->
 		<property name="manual.language.docbook" value="en"/>
@@ -117,7 +129,7 @@
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
     <!-- Build PDF manual from sources or just copy it. -->
-    <target name="manual-pdf" depends="init, init-manual, init-manual-pdf, build-manual-pdf, copy-manual-pdf">
+    <target name="manual-pdf" depends="init, xep-license-copy, init-manual, init-manual-pdf, build-manual-pdf, copy-manual-pdf">
     </target>
 
     <target name="init-manual-pdf" depends="">
@@ -467,7 +479,7 @@
     </target>
 
     <!-- Build PDF tutorial from sources or just copy it. -->
-    <target name="tutorial-pdf" depends="init, init-tutorial, build-tutorial-pdf, copy-tutorial-pdf">
+    <target name="tutorial-pdf" depends="init, xep-license-copy, init-tutorial, build-tutorial-pdf, copy-tutorial-pdf">
     </target>
 
     <!-- Just copy a prebuilt PDF tutorial. -->
@@ -734,7 +746,7 @@
     </target>
 
     <!-- Build PDF tutorial from sources or just copy it. -->
-    <target name="sqltutorial-pdf" depends="init, init-sqltutorial, build-sqltutorial-pdf">
+    <target name="sqltutorial-pdf" depends="init, xep-license-copy, init-sqltutorial, build-sqltutorial-pdf">
     </target>
 
 </project>
