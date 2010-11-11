@@ -247,6 +247,8 @@
     </target>
 
     <target name="manual-html-build" depends="init-manual-html, init-manual-html-common">
+        <echo>Building manual to ${manual.html.output.dir}</echo>
+        <echo>Index file: ${manual.html.output.index}</echo>
         <java classname="org.apache.xalan.xslt.Process" failonerror="yes" fork="yes" maxmemory="512m">
             <arg value="-in" />
             <arg value="${manual.source.xml}" />
@@ -359,8 +361,12 @@
 		</antcall>
 	</target>
 
-    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+    <!-- =================================================================== -->
     <!-- Eclipse Manual                                                      -->
+    <!-- =================================================================== -->
+    <!-- Note: The Eclipse Manual must not be built in the same build        -->
+    <!--       as the HTML manual (manual-html-build), as it reuses the      -->
+    <!--       same build target with different parameters.                  -->
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
     <target name="init-manual-eclipse" depends="">
@@ -382,9 +388,6 @@
     <!-- Builds Eclipse Help plugin. Uses the manual-html-build target  -->
     <!-- to build the HTML content of the manual.                       -->
     <target name="manual-eclipse-plugin" depends="init, init-manual, init-manual-eclipse, init-manual-html-common, manual-html-build">
-        <!-- The index-eclipse.html file is empty. -->
-        <delete file="${manual.html.output.index}" />
-
         <!-- Plugin JAR filename -->
         <property name="eclipse.plugin.manual.jar-name"
                  value="com.vaadin.manual_${eclipse.plugin.manual.version}.jar" />
@@ -396,6 +399,9 @@
             <fileset dir="${manual.html.output.dir}">
                 <patternset>
                     <include name="**/*" />
+
+                    <!-- The index file is empty. -->
+                    <exclude name="index-eclipse.html"/>
                 </patternset>
             </fileset>
             <manifest>
