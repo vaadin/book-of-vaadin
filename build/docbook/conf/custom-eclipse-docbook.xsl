@@ -10,7 +10,7 @@
   <!-- Eclipse Help parameters. -->
   <xsl:param name="eclipse.plugin.name" select="'Vaadin Help'"/>
   <xsl:param name="eclipse.plugin.id" select="'com.vaadin.manual'"/>
-  <xsl:param name="eclipse.plugin.provider" select="'IT Mill'"/>
+  <xsl:param name="eclipse.plugin.provider" select="'Vaadin Ltd'"/>
   
   <!-- Custom Eclipse Help parameters. -->
   <xsl:param name="eclipse.plugin.version">x.x.x-vyyyymmddhhmm</xsl:param>
