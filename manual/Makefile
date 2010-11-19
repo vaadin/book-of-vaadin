@@ -30,6 +30,7 @@ IMAGES =	intro/architecture intro/architecture-detailed intro/toolchain intro/to
 			components/tooltip-plain-withpointer components/tooltip-richtext-withpointer \
 			components/field-diagram components/field-interface \
 			components/slider-example1 \
+			components/textfield-diagram \
 			application/application-architecture application/resource_classdiagram \
 			advanced/liferay-display \
 			themes/theme-contents themes/eclipse-theme-created-annotated \
