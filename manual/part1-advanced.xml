@@ -4699,6 +4699,118 @@ pos.setTopValue(pos.getTopValue() + yChange);]]></programlisting>
         </para>
     </section>
 
+    <section xml:id="advanced.logging">
+        <title>Logging</title>
+
+        <para>
+            You can do logging in Vaadin application using the standard
+            <package>java.util.logging</package> facilities. Configuring logging is as
+            easy as putting a file named <filename>logging.properties</filename> in the
+            default package of your Vaadin application. This file is read by the
+            <classname>Logger</classname> class when a new instance of it is initialize.
+        </para>
+
+        <simplesect xml:id="advanced.logging.tomcat">
+            <title>Logging in Apache Tomcat</title>
+
+            <para>
+                For logging Vaadin applications deployed in Apache Tomcat, you do not need
+                to do anything special to log to the same place as Tomcat itself. If you
+                need to write the Vaadin application related messages elsewhere, just add
+                a custom <filename>logging.properties</filename> file to the default
+                package of your Vaadin application.
+            </para>
+
+            <para>
+                If you would like to pipe the log messages through another logging
+                solution, see <xref linkend="advanced.logging.slf4j"/> below.
+            </para>
+        </simplesect>
+
+        <simplesect xml:id="advanced.logging.liferay">
+            <title>Logging in Liferay</title>
+
+            <para>
+                Liferay mutes logging through <package>java.util.logging</package> by
+                default. In order to enable logging, you need to add a
+                <filename>logging.properties</filename> file of your own to the default
+                package of your Vaadin application. This file should define at least one
+                destination where to save the log messages.
+            </para>
+
+            <para>
+                You can also log through SLF4J, which is used in and bundled with
+                Liferay. Follow the instructions in <xref
+                linkend="advanced.logging.slf4j"/>.
+            </para>
+        </simplesect>
+
+        <simplesect xml:id="advanced.logging.slf4j">
+            <title>Piping to Log4j using SLF4J</title>
+
+            <para>
+                Piping output from <package>java.util.logging</package> to Log4j is easy
+                with SLF4J (<link
+                xlink:href="http://slf4j.org/">http://slf4j.org/</link>). The basic way to
+                go about this is to add the SLF4J JAR file as well as the
+                <filename>jul-to-slf4j.jar</filename> file, which implements the bridge
+                from <package>java.util.logging</package>, to SLF4J. You will also need to
+                add a third logging implementation JAR file, that is,
+                <filename>slf4j-log4j12-x.x.x.jar</filename>, to log the actual messages
+                using Log4j. For more info on this, please visit the SLF4J site.
+            </para>
+
+            <para>
+                In order to get the <package>java.util.logging</package> to SLF4J
+                bridge installed, you need to add the following snippet of code to your
+                <classname>Application</classname> class at the very top:
+            </para>
+
+            <programlisting><![CDATA[  static {
+    SLF4JBridgeHandler.install();
+  }]]></programlisting>
+
+            <para>
+                This will make sure that the bridge handler is installed and working
+                before Vaadin starts to process any logging calls.
+            </para>
+
+            <warning>
+                <title>Please note!</title>
+
+                <para>
+                    This can seriously impact on the cost of disabled logging statements
+                    (60-fold increase) and a measurable impact on enabled log statements
+                    (20% overall increase). However, Vaadin doesn't log very much, so the
+                    effect on performance will be negligible.
+                </para>
+            </warning>
+        </simplesect>
+
+        <simplesect xml:id="advanced.logging.core">
+            <title>Logging in Vaadin core and add-ons</title>
+
+            <para>
+                The pattern for logging in the core of Vaadin and in server-side add-ons
+                is that you register a static final logger for each class that does
+                logging, and then just use this logger. For example:
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[public class MyClass {
+  private static final Logger logger =
+          Logger.getLogger(MyClass.class.getName());
+  
+  public void myMethod() {
+    try {
+      // do something that might fail
+    } catch (Exception e) {
+      logger.log(Level.SEVERE, "FAILED CATASTROPHICALLY!", e);
+    } 
+  }
+}]]></programlisting>
+        </simplesect>
+    </section>
+
     <!-- TODO
     <section xml:id="advanced.browserinfo">
         <title>Browser Information</title>
