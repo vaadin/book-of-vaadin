@@ -36,7 +36,7 @@ IMAGES =	intro/architecture intro/architecture-detailed intro/toolchain intro/to
 			themes/theme-contents themes/eclipse-theme-created-annotated \
 			gwt/gwt-widgets gwt/gwt-widget-files gwt/gwt-hostedmode-project-annotated\
 			gwt/gwt-custom-architecture \
-			vaadin-logo \
+			vaadin-logo book-example \
 			eclipse/editor-design-2-crop eclipse/widgetset-compiling-toolbar \
 			datamodel/datamodel-interfaces
 

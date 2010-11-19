@@ -114,4 +114,74 @@
   <xsl:template match="headerdata|headericon">
   </xsl:template>
 
+  <!-- ==================================================================== -->
+  <!-- Book Example References                                              -->
+  <!-- ==================================================================== -->
+
+  <!-- URL to the Book Examples application -->
+  <xsl:param name="book.examples.url" select="'http://demo.vaadin.com/book-examples/book/'"/>
+
+  <xsl:template match="book-example">
+    <xsl:element name="div">
+      <xsl:attribute name="class">
+        <xsl:value-of select="'book-example'"/>
+      </xsl:attribute>
+      
+      <!-- Optional style attribute -->
+      <xsl:if test="@style != ''">
+        <xsl:attribute name="style">
+          <xsl:value-of select="@style"/>
+        </xsl:attribute>
+      </xsl:if>
+
+      <!-- Use table to valign the icon and possible caption -->
+      <table>
+        <tr valign="middle">
+          <td>
+            <xsl:element name="a">
+              <xsl:attribute name="href">
+                <xsl:value-of select="concat($book.examples.url, '#', @id)"/>
+              </xsl:attribute>
+
+              <!-- Open in new window -->
+              <xsl:attribute name="target">
+                <xsl:value-of select="'_blank'"/>
+              </xsl:attribute>
+              
+              <xsl:element name="img">
+                <xsl:attribute name="src">
+                  <xsl:value-of select="'img/book-example-lo.png'"/>
+                </xsl:attribute>
+                <xsl:attribute name="border">
+                  <xsl:value-of select="0"/>
+                </xsl:attribute>
+
+                <!-- Height is needed for proper vertical-align with text -->
+                <xsl:attribute name="width">
+                  <xsl:value-of select="227"/>
+                </xsl:attribute>
+                <xsl:attribute name="height">
+                  <xsl:value-of select="38"/>
+                </xsl:attribute>
+          
+                <xsl:attribute name="align">
+                  <xsl:value-of select="'absmiddle'"/>
+                </xsl:attribute>
+              </xsl:element>
+            </xsl:element>
+          </td>
+
+          <!-- Text content in the element is optional -->
+          <xsl:if test="text() != ''">
+            <td>
+              <span style="font-style: italic">
+                <xsl:value-of select="text()"/>
+              </span>
+            </td>
+          </xsl:if>
+        </tr>
+      </table>
+    </xsl:element>
+  </xsl:template>
+
 </xsl:stylesheet>

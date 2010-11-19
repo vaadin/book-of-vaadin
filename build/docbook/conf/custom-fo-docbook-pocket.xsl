@@ -886,5 +886,11 @@
   </fo:external-graphic>
 </xsl:template>
 
+  <!-- ==================================================================== -->
+  <!-- Dummy custom elements not visible in PDF book                        -->
+  <!-- ==================================================================== -->
 
+  <xsl:template match="example-ref">
+    <!-- Do nothing -->
+  </xsl:template>
 </xsl:stylesheet>
