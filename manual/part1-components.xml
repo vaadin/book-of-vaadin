@@ -2120,6 +2120,141 @@ value.setCaption("Current Value:");]]></programlisting>
             </para>
         </section -->
 
+        <section xml:id="components.textfield.textchangeevents">
+            <title>Text Change Events</title>
+
+            <indexterm xml:id="term:components.textfield.textchangeevents" class="startofrange">
+                <primary><classname>Text change events</classname></primary>
+            </indexterm>
+
+            <para>
+                Often you want to receive a change event immediately when the text field
+                value changes. The <emphasis>immediate</emphasis> mode is not literally
+                immediate, as the changes are transmitted only after the field loses
+                focus. In the other extreme, using keyboard events for every keypress
+                would make typing unbearably slow and also processing the keypresses is
+                too complicated for most purposes. <emphasis>Text change events</emphasis>
+                are transmitted asynchronously soon after typing and do not block typing
+                while an event is being processed.
+            </para>
+
+            <para>
+                Text change events are received with a
+                <classname>TextChangeListener</classname>, as is done in the following
+                example that demonstrates how to create a text length counter:
+            </para>
+
+            <book-example id="component.textfield.textchangeevents" style="float: right"/>
+            <programlisting><?pocket-size 65% ?><![CDATA[// Text field with maximum length
+final TextField tf = new TextField("My Eventful Field");
+tf.setValue("Initial content");
+tf.setMaxLength(20);
+
+// Counter for input length
+final Label counter = new Label();
+counter.setValue(tf.toString().length() +
+                 " of " + tf.getMaxLength());
+        
+// Display the current length interactively in the counter
+tf.addListener(new TextChangeListener() {
+    public void textChange(TextChangeEvent event) {
+        int len = event.getText().length();
+        counter.setValue(len + " of " + tf.getMaxLength());
+    }
+});
+
+// This is actually the default
+tf.setTextChangeEventMode(TextChangeEventMode.LAZY);]]></programlisting>
+
+            <para>
+                The result is shown in <xref linkend="figure:components.textfield.textchangeevents"/>.
+            </para>
+
+            <figure xml:id="figure:components.textfield.textchangeevents">
+                <title>Text Change Events</title>
+                <mediaobject>
+                    <imageobject role="html">
+                        <imagedata align="center" fileref="img/components/textfield-textchangeevents.png"/>
+                    </imageobject>
+                    <imageobject role="fo">
+                        <imagedata smallscale="70%" align="center" fileref="img/components/textfield-textchangeevents.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+
+            <para>
+                The <emphasis>text change event mode</emphasis> defines how quickly the
+                changes are transmitted to the server and cause a server-side
+                event. Lazier change events allow sending larger changes in one event if
+                the user is typing fast, thereby reducing server requests.
+            </para>
+
+            <para>
+                You can set the text change event mode of a
+                <classname>TextField</classname> with
+                <methodname>setTextChangeEventMode()</methodname>. The allowed modes are
+                defined in <classname>TextChangeEventMode</classname> class and are the
+                following:
+            </para>
+
+            <variablelist>
+                <varlistentry>
+                    <term><parameter>TextChangeEventMode.LAZY</parameter> (default)</term>
+                    <listitem>
+                        <para>
+                            An event is triggered when there is a pause in editing the
+                            text. The length of the pause can be modified with
+                            <methodname>setInputEventTimeout()</methodname>. As with the
+                            <parameter>TIMEOUT</parameter> mode, a text change event is
+                            forced before a possible
+                            <classname>ValueChangeEvent</classname>, even if the user did
+                            not keep a pause while entering the text.
+                        </para>
+
+                        <para>
+                            This is the default mode.
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>TextChangeEventMode.TIMEOUT</parameter></term>
+                    <listitem>
+                        <para>
+                            A text change in the user interface causes the event to be
+                            communicated to the application after a timeout period. If
+                            more changes are made during this period, the event sent to
+                            the server-side includes the changes made up to the last
+                            change. The length of the timeout can be set with
+                            <methodname>setInputEventTimeout()</methodname>.
+                        </para>
+
+                        <para>
+                            If a <classname>ValueChangeEvent</classname> would occur
+                            before the timeout period, a
+                            <classname>TextChangeEvent</classname> is triggered before it,
+                            on the condition that the text content has changed since the
+                            previous <classname>TextChangeEvent</classname>.
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>TextChangeEventMode.EAGER</parameter></term>
+                    <listitem>
+                        <para>
+                            An event is triggered immediately for every change in the text
+                            content, typically caused by a key press. The requests are
+                            separate and are processed sequentially one after
+                            another. Change events are nevertheless communicated
+                            asynchronously to the server, so further input can be typed
+                            while event requests are being processed.
+                        </para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+
+            <indexterm startref="term:components.textfield.textchangeevents" class="endofrange"/>
+        </section>
+
         <section xml:id="components.textfield.css">
             <title>CSS Style Rules</title>
 
@@ -2146,7 +2281,7 @@ value.setCaption("Current Value:");]]></programlisting>
             </para>
 
             <figure xml:id="figure:components.textfield.css">
-                <title>Null Value Representation</title>
+                <title>Styling TextField with CSS</title>
                 <mediaobject>
                     <imageobject role="html">
                         <imagedata align="center" fileref="img/components/textfield-css.png"/>
