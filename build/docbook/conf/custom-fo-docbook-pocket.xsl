@@ -890,7 +890,7 @@
   <!-- Dummy custom elements not visible in PDF book                        -->
   <!-- ==================================================================== -->
 
-  <xsl:template match="example-ref">
+  <xsl:template match="book-example">
     <!-- Do nothing -->
   </xsl:template>
 </xsl:stylesheet>
