@@ -244,17 +244,19 @@ main.addComponent(menuview);]]></programlisting>
         
         <para>
             <classname>VerticalLayout</classname> and
-            <classname>HorizontalLayout</classname> components are containers for laying
-            out components either vertically or horizontally, respectively. Some
-            components, such as <classname>Window</classname> and
-            <classname>Panel</classname>, have a <classname>VerticalLayout</classname> as
-            the root layout, which you can set with <methodname>setContent()</methodname>.
+            <classname>HorizontalLayout</classname> are containers for laying components
+            out either vertically or horizontally, respectively. These are the two most
+            important layout components in Vaadin and some components, such as
+            <classname>Window</classname> and <classname>Panel</classname>, have a
+            <classname>VerticalLayout</classname> as the root layout, which you can set
+            with <methodname>setContent()</methodname>.
         </para>
 
         <para>
             Typical use of the layouts goes as follows:
         </para>
 
+        <book-example id="layout.orderedlayout.basic" style="float: right"/>
         <programlisting><![CDATA[VerticalLayout vertical = new VerticalLayout ();
 vertical.addComponent(new TextField("Name"));
 vertical.addComponent(new TextField("Street address"));
@@ -262,8 +264,8 @@ vertical.addComponent(new TextField("Postal code"));
 main.addComponent(vertical);]]></programlisting>
 
         <para>
-            The text fields have a label attached, which will by default be placed
-            above the field. The layout will look on screen as follows:
+            In these layouts, component captions are placed above the component. The
+            layout will look on screen as follows:
         </para>
 
         <screenshot>
@@ -298,13 +300,7 @@ main.addComponent(vertical);]]></programlisting>
 				linkend="layout.settings.alignment"/>.
         </para>
 
-        <para>
-            You can use <methodname>setWidth()</methodname> and
-            <methodname>setHeight()</methodname> to specify width and height of a
-            component in either fixed units or relatively with a percentage.
-        </para>
-
-        <section>
+        <section xml:id="layout.components.orderedlayout.sizing">
             <title>Sizing Contained Components</title>
 
             <para>
@@ -312,7 +308,7 @@ main.addComponent(vertical);]]></programlisting>
                 number of different ways depending on how you specify their height or
                 width in the primary direction of the layout component.
             </para>
-            
+
             <figure xml:id="figure.layout.orderedlayout.size.summary">
                 <title>Component Widths in <classname>HorizontalLayout</classname></title>
                 <mediaobject>
@@ -325,72 +321,153 @@ main.addComponent(vertical);]]></programlisting>
             <para>
                 <xref linkend="figure.layout.orderedlayout.size.summary"/> above gives a
                 summary of the sizing options for a
-                <classname>HorizontalLayout</classname>. Let us break the figure down as
-                follows.
+                <classname>HorizontalLayout</classname>. The figure is broken down in the
+                following subsections.
             </para>
 
-            <para>
-                If a <classname>VerticalLayout</classname> has undefined height or
-                <classname>HorizontalLayout</classname> undefined width, the layout
-                will shrink to fit the contained components so that there is no extra
-                space between them.
-            </para>
+            <simplesect xml:id="layout.components.orderedlayout.sizing.undefined">
+                <title>Layout with Undefined Size</title>
 
-            <programlisting><![CDATA[HorizontalLayout fittingLayout = new HorizontalLayout();
-fittingLayout.setWidth(Sizeable.SIZE_UNDEFINED, 0);
+                <para>
+                    If a <classname>VerticalLayout</classname> has undefined height or
+                    <classname>HorizontalLayout</classname> undefined width, the layout
+                    will shrink to fit the contained components so that there is no extra
+                    space between them.
+                </para>
+
+                <programlisting><?pocket-size 65% ?><![CDATA[HorizontalLayout fittingLayout = new HorizontalLayout();
+fittingLayout.setWidth(Sizeable.SIZE_UNDEFINED, 0); // Default
 fittingLayout.addComponent(new Button("Small"));
 fittingLayout.addComponent(new Button("Medium-sized"));
 fittingLayout.addComponent(new Button("Quite a big component"));
 parentLayout.addComponent(fittingLayout);]]></programlisting>
 
-            <mediaobject>
-                <imageobject>
-                    <imagedata smallscale="100%" align="center" fileref="img/layout/horizontallayout_width_undefined.png"/>
-                </imageobject>
-            </mediaobject>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata smallscale="100%" align="center" fileref="img/layout/horizontallayout_width_undefined.png"/>
+                    </imageobject>
+                </mediaobject>
 
-            <para>
-                If such a vertical layout continues below the bottom of a window (a
-                <classname>Window</classname> object), the window will pop up a
-                vertical scroll bar on the right side of the window area. This way,
-                you get a "web page".
-            </para>
+                <para>
+                    The both layouts actually have undefined height by default and
+                    <classname>HorizontalLayout</classname> has also undefined width,
+                    while <classname>VerticalLayout</classname> has 100% relative width.
+                </para>
 
-            <para>
-                If you set a <classname>HorizontalLayout</classname> to a defined size
-                horizontally or a <classname>VerticalLayout</classname> vertically,
-                and there is space left over from the contained components, the extra
-                space is distributed equally between the component cells. The
-                components are aligned within these cells according to their
-                alignment setting, top left by default, as in the example below.
-            </para>
+                <para>
+                    If such a vertical layout with undefined height continues below the
+                    bottom of a window (a <classname>Window</classname> object), the
+                    window will pop up a vertical scroll bar on the right side of the
+                    window area. This way, you get a "web page". The same applies to
+                    <classname>Panel</classname>.
+                </para>
 
-            <programlisting><![CDATA[fixedLayout.setWidth("400px");]]></programlisting>
+                <warning>
+                    <title>A layout that contains components with percentual size must have a
+                        defined size!</title>
+                    
+                    <para>
+                        If a layout has undefined size and a contained component has, say,
+                        100% size, the component would fill the space given by the layout,
+                        while the layout would shrink to fit the space taken by the
+                        component, which would be a paradox. This requirement holds for
+                        height and width separately. The debug mode allows detecting such
+                        invalid cases; see <xref
+                        linkend="advanced.debug-production-modes.debug.mode"/>.
+                    </para>
+                </warning>
 
-            <mediaobject>
-                <imageobject>
-                    <imagedata smallscale="100%" align="center" fileref="img/layout/horizontallayout_width_defined.png"/>
-                </imageobject>
-            </mediaobject>
+                <para>
+                    An exception to the above rule is a case where you have a layout with
+                    undefined size that contains a component with a fixed or undefined
+                    size together with one or more components with relative size. In this
+                    case, the contained component with fixed (or undefined) size in a
+                    sense defines the size of the containing layout, removing the
+                    paradox. That size is then used for the relatively sized components.
+                </para>
 
-            <para>
-                Using percentual sizes for components contained in a layout requires
-                answering the question, "Percentage of what?" There is no sensible
-                default answer for this question in the current implementation of the
-                layouts, so in practice, you may not define "100%" size alone.
-            </para>
+                <para>
+                    The technique can be used to define the width of a
+                    <classname>VerticalLayout</classname> or the height of a
+                    <classname>HorizontalLayout</classname>.
+                </para>
 
-            <para>
-                Often, you want to have one component that takes all the available
-                space left over from other components. You need to set its size as
-                100% and set it as <emphasis>expanding</emphasis> with
-                <methodname>setExpandRatio()</methodname>. The second parameter for
-                the method is an expansion ratio, which is relevant if there are more
-                than one expanding component, but its value is irrelevant for a single
-                expanding component.
-            </para>
+                <book-example id="layout.orderedlayout.sizing.sizing-undefined-defining" style="float: right"/>
+<programlisting><?pocket-size 65% ?><![CDATA[// Vertical layout would normally have 100% width
+VerticalLayout vertical = new VerticalLayout();
+        
+// Shrink to fit the width of contained components
+vertical.setWidth(Sizeable.SIZE_UNDEFINED, 0);
+        
+// Label has normally 100% width, but we set it as
+// undefined so that it will take only the needed space
+Label label =
+    new Label("\u2190 The VerticalLayout shrinks to fit "+
+              "the width of this Label \u2192");
+label.setWidth(Sizeable.SIZE_UNDEFINED, 0);
+vertical.addComponent(label);
+        
+// Button has undefined width by default
+Button butt = new Button("\u2190 This Button takes 100% "+
+                         "of the width \u2192");
+butt.setWidth("100%");
+vertical.addComponent(butt);]]></programlisting>
 
-			<programlisting><![CDATA[HorizontalLayout layout = new HorizontalLayout();
+                <figure xml:id="figure:layout.components.orderedlayout.sizing.undefined.defining">
+                    <title>Defining the Size with a Component</title>
+                    <mediaobject>
+                        <imageobject role="html">
+                            <imagedata align="center" fileref="img/layout/orderedlayout-sizing-undefined.png"/>
+                        </imageobject>
+                        <imageobject role="fo">
+                            <imagedata smallscale="70%" align="center" fileref="img/layout/orderedlayout-sizing-undefined.png"/>
+                        </imageobject>
+                    </mediaobject>
+                </figure>
+            </simplesect>
+
+            <simplesect>
+                <title>Layout with Defined Size</title>
+
+                <para>
+                    If you set a <classname>HorizontalLayout</classname> to a defined size
+                    horizontally or a <classname>VerticalLayout</classname> vertically,
+                    and there is space left over from the contained components, the extra
+                    space is distributed equally between the component cells. The
+                    components are aligned within these cells according to their
+                    alignment setting, top left by default, as in the example below.
+                </para>
+
+                <programlisting><![CDATA[fixedLayout.setWidth("400px");]]></programlisting>
+
+                <mediaobject>
+                    <imageobject>
+                        <imagedata smallscale="100%" align="center" fileref="img/layout/horizontallayout_width_defined.png"/>
+                    </imageobject>
+                </mediaobject>
+
+                <para>
+                    Using percentual sizes for components contained in a layout requires
+                    answering the question, "Percentage of what?" There is no sensible
+                    default answer for this question in the current implementation of the
+                    layouts, so in practice, you may not define "100%" size alone.
+                </para>
+            </simplesect>
+
+            <simplesect>
+                <title>Expanding Components</title>
+
+                <para>
+                    Often, you want to have one component that takes all the available
+                    space left over from other components. You need to set its size as
+                    100% and set it as <emphasis>expanding</emphasis> with
+                    <methodname>setExpandRatio()</methodname>. The second parameter for
+                    the method is an expansion ratio, which is relevant if there are more
+                    than one expanding component, but its value is irrelevant for a single
+                    expanding component.
+                </para>
+
+                <programlisting><![CDATA[HorizontalLayout layout = new HorizontalLayout();
 layout.setWidth("400px");
 
 // These buttons take the minimum size.
@@ -411,39 +488,29 @@ layout.setExpandRatio(expandButton, 1.0f);
 
 parentLayout.addComponent(layout);]]></programlisting>
 
-            <mediaobject>
-                <imageobject>
-                    <imagedata smallscale="100%" align="center" fileref="img/layout/horizontallayout_width_expanding.png"/>
-                </imageobject>
-            </mediaobject>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata smallscale="100%" align="center" fileref="img/layout/horizontallayout_width_expanding.png"/>
+                    </imageobject>
+                </mediaobject>
+                
+                <para>
+                    Notice that you must call <methodname>setExpandRatio()</methodname>
+                    <emphasis>after</emphasis> <methodname>addComponent()</methodname>,
+                    because the layout can not operate on an component that it doesn't
+                    (yet) include.
+                </para>
+            </simplesect>
 
-            <para>
-                Notice that you must call <methodname>setExpandRatio()</methodname>
-                <emphasis>after</emphasis> <methodname>addComponent()</methodname>,
-                because the layout can not operate on an component that it doesn't
-                (yet) include.
-            </para>
+            <simplesect>
+                <title>Expand Ratios</title>
 
-			<warning>
-				<title>A layout that contains components with percentual size must have a
-				defined size!</title>
+                <para>
+                    If you specify an expand ratio for multiple components, they will all
+                    try to use the available space according to the ratio.
+                </para>
 
-				<para>
-					 If a layout has undefined size and a contained component has, say,
-					 100% size, the component would fill the space given by the layout,
-					 while the layout would shrink to fit the space taken by the
-					 component, which is a paradox. This requirement holds for height and
-					 width separately. The debug mode allows detecting such invalid cases;
-					 see <xref linkend="advanced.debug-production-modes.debug.mode"/>.
-				</para>
-			</warning>
-
-            <para>
-                If you specify an expand ratio for multiple components, they will all
-                try to use the available space according to the ratio.
-            </para>
-
-            <programlisting><![CDATA[HorizontalLayout layout = new HorizontalLayout();
+                <programlisting><![CDATA[HorizontalLayout layout = new HorizontalLayout();
 layout.setWidth("400px");
 
 // Create three equally expanding components.
@@ -458,46 +525,46 @@ for (int i = 1; i <= 3; i++) {
     layout.setExpandRatio(button, 1.0f);
 }]]></programlisting>
 
-            <mediaobject>
-                <imageobject>
-                    <imagedata smallscale="100%" align="center" fileref="img/layout/horizontallayout_width_expand_uniform.png"/>
-                </imageobject>
-            </mediaobject>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata smallscale="100%" align="center" fileref="img/layout/horizontallayout_width_expand_uniform.png"/>
+                    </imageobject>
+                </mediaobject>
 
-            <para>
-                As the example used the same ratio for all components, the ones with more
-                content may have the content cut. Below, we use differing ratios:
-            </para>
+                <para>
+                    As the example used the same ratio for all components, the ones with more
+                    content may have the content cut. Below, we use differing ratios:
+                </para>
 
-            <programlisting><![CDATA[// Expand ratios for the components are 1:2:3.
+                <programlisting><![CDATA[// Expand ratios for the components are 1:2:3.
 layout.setExpandRatio(button, i * 1.0f);]]></programlisting>
 
-            <mediaobject>
-                <imageobject>
-                    <imagedata smallscale="100%" align="center" fileref="img/layout/horizontallayout_width_expand_ratios.png"/>
-                </imageobject>
-            </mediaobject>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata smallscale="100%" align="center" fileref="img/layout/horizontallayout_width_expand_ratios.png"/>
+                    </imageobject>
+                </mediaobject>
 
-            <para>
-                If the size of the expanding components is defined as a percentage
-                (typically "100%"), the ratio is calculated from the
-                <emphasis>overall</emphasis> space available for the relatively sized
-                components. For example, if you have a 100 pixels wide layout with two
-                cells with 1.0 and 4.0 respective expansion ratios, and both the
-                components in the layout are set as
-                <methodname>setWidth("100%")</methodname>, the cells will have
-                respective widths of 20 and 80 pixels, regardless of the minimum size
-                of the components.
-            </para>
+                <para>
+                    If the size of the expanding components is defined as a percentage
+                    (typically "100%"), the ratio is calculated from the
+                    <emphasis>overall</emphasis> space available for the relatively sized
+                    components. For example, if you have a 100 pixels wide layout with two
+                    cells with 1.0 and 4.0 respective expansion ratios, and both the
+                    components in the layout are set as
+                    <methodname>setWidth("100%")</methodname>, the cells will have
+                    respective widths of 20 and 80 pixels, regardless of the minimum size
+                    of the components.
+                </para>
 
-            <para>
-                However, if the size of the contained components is undefined or
-                fixed, the expansion ratio is of the <emphasis>excess</emphasis>
-                available space. In this case, it is the excess space that expands, not
-                the components.
-            </para>
+                <para>
+                    However, if the size of the contained components is undefined or
+                    fixed, the expansion ratio is of the <emphasis>excess</emphasis>
+                    available space. In this case, it is the excess space that expands, not
+                    the components.
+                </para>
 
-            <programlisting><![CDATA[for (int i = 1; i <= 3; i++) {
+                <programlisting><![CDATA[for (int i = 1; i <= 3; i++) {
     // Button with undefined size.
     Button button = new Button(captions[i - 1]);
     
@@ -507,28 +574,32 @@ layout.setExpandRatio(button, i * 1.0f);]]></programlisting>
     layout4.setExpandRatio(button, i * 1.0f);
 }]]></programlisting>
 
-            <mediaobject>
-                <imageobject>
-                    <imagedata smallscale="100%" align="center" fileref="img/layout/horizontallayout_width_expand_ratios-2.png"/>
-                </imageobject>
-            </mediaobject>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata smallscale="100%" align="center" fileref="img/layout/horizontallayout_width_expand_ratios-2.png"/>
+                    </imageobject>
+                </mediaobject>
 
-            <para>
-                It is not meaningful to combine expanding components with percentually
-                defined size and components with fixed or undefined size. Such
-                combination can lead to a very unexpected size for the percentually
-                sized components.
-            </para>
+                <para>
+                    It is not meaningful to combine expanding components with percentually
+                    defined size and components with fixed or undefined size. Such
+                    combination can lead to a very unexpected size for the percentually
+                    sized components.
+                </para>
+            </simplesect>
 
-            <para>
-                A percentual size of a component defines the size of the component
-                <emphasis>within its cell</emphasis>. Usually, you use "100%", but a
-                smaller percentage or a fixed size (smaller than the cell size) will
-                leave an empty space in the cell and align the component within the
-                cell according to its alignment setting, top left by default.
-            </para>
+            <simplesect>
+                <title>Percentage of Cells</title>
 
-            <programlisting><![CDATA[HorizontalLayout layout50 = new HorizontalLayout();
+                <para>
+                    A percentual size of a component defines the size of the component
+                    <emphasis>within its cell</emphasis>. Usually, you use "100%", but a
+                    smaller percentage or a fixed size (smaller than the cell size) will
+                    leave an empty space in the cell and align the component within the
+                    cell according to its alignment setting, top left by default.
+                </para>
+
+                <programlisting><![CDATA[HorizontalLayout layout50 = new HorizontalLayout();
 layout50.setWidth("400px");
 
 String[] captions1 = { "Small 50%", "Medium 50%",
@@ -543,14 +614,13 @@ for (int i = 1; i <= 3; i++) {
 }
 parentLayout.addComponent(layout50);]]></programlisting>
 
-            <mediaobject>
-                <imageobject>
-                    <imagedata smallscale="100%" align="center" fileref="img/layout/horizontallayout_width_expand_percentage.png"/>
-                </imageobject>
-            </mediaobject>
-
+                <mediaobject>
+                    <imageobject>
+                        <imagedata smallscale="100%" align="center" fileref="img/layout/horizontallayout_width_expand_percentage.png"/>
+                    </imageobject>
+                </mediaobject>
+            </simplesect>
         </section>
-        
     </section>
     
     <section xml:id="layout.components.gridlayout">
