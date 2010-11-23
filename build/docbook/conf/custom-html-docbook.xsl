@@ -102,18 +102,4 @@
   <xsl:template match="headerdata|headericon">
   </xsl:template>
 
-  <!-- ==================================================================== -->
-  <!-- Book Example References                                              -->
-  <!-- ==================================================================== -->
-
-  <xsl:template match="example-ref">
-    <div>
-      See an
-      <xsl:element name="a">
-        <xsl:attribute name="href" value="cat('http://demo.vaadin.com/book-examples/book/#', @id)"/>
-        on-line example.
-      </xsl:element>
-    </div>
-  </xsl:template>
-
 </xsl:stylesheet>
