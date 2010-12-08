@@ -1138,7 +1138,7 @@ main.addWindow(window);]]></programlisting>
             components. <classname>HorizontalSplitPanel</classname> makes the split
             horizontally with a vertical splitter bar, and
             <classname>VerticalSplitPanel</classname> vertically with a horizontal
-            splitter bar.
+            splitter bar. The user can drag the bar to adjust its position.
         </para>
 
         <para>
@@ -1148,7 +1148,8 @@ main.addWindow(window);]]></programlisting>
             <methodname>addComponent()</methodname> method.
         </para>
 
-<programlisting><?pocket-size 65% ?><![CDATA[// Have a panel to put stuff in
+        <book-example id="layout.splitpanel.basic" style="float: right"/>
+        <programlisting><?pocket-size 65% ?><![CDATA[// Have a panel to put stuff in
 Panel panel = new Panel("Split Panels Inside This Panel");
 
 // Have a horizontal split panel as its root layout
@@ -1168,64 +1169,75 @@ vsplit.addComponent(new Label("Here's the upper panel"));
 vsplit.addComponent(new Label("Here's the lower panel"));]]></programlisting>
 
         <para>
-            A split bar that divides the two panels is enabled by default. The user can
-            drag the bar with mouse to change the split position. To disable the bar, lock
-            the split position with <methodname>setLocked(true)</methodname>.
-        </para>
-        
-        <para>
-            The following example shows how you can create a layout with two nested split
-            panels (one of which has a locked split position):
+            The result is shown in <xref linkend="figure:splitpanel.basic"/>. Observe that
+            the tree is cut horizontally as it can not fit in the layout. If its height
+            exceeds the height of the panel, a vertical scroll bar will appear
+            automatically. If horizontal scroll bar is necessary, you could put the
+            content in a <classname>Panel</classname>, which can have scroll bars in both
+            directions.
         </para>
 
-        <programlisting><?pocket-size 65% ?><![CDATA[// A top-level panel to put everything in.
-Panel panel = new Panel("Nested SplitPanels");
-
-// Allow it to shrink to the size of the contained SplitPanel.
-panel.setSizeUndefined();
-
-// Have a vertical SplitPanel as the main component.
-SplitPanel vertical = new SplitPanel();
-panel.addComponent(vertical);
-
-// Set the size of the SplitPanel rather than the containing Panel,
-// because then we know how much space we have for the panels.
-vertical.setHeight("150px");
-vertical.setWidth("250px");
-
-// Set the split position to 50 pixels, which is more than
-// enough height for the Label in the upper panel.
-vertical.setSplitPosition(50, SplitPanel.UNITS_PIXELS);
-
-// Put a label in the upper panel.
-vertical.addComponent(new Label("The contents of the upper area."));
-
-// Put a horizontal SplitPanel in the lower area.
-SplitPanel horizontal = new SplitPanel();
-horizontal.setOrientation(SplitPanel.ORIENTATION_HORIZONTAL);
-horizontal.setSplitPosition(65); // percent
-vertical.addComponent(horizontal);
-
-// The lower SplitPanel is locked, so the user cannot move
-// the split position.
-horizontal.setLocked(true);
-
-// Component in the left panel:
-horizontal.addComponent(new Label("Lower left area. "+
-              "The text on the left wraps around as needed."));
-
-// Component in the right panel:
-horizontal.addComponent(new Label("Lower right area. "+
-              "The text on the right also wraps around."));]]></programlisting>
-
-        <figure xml:id="figure.splitpanel.example1">
-            <title>A Layout With Nested SplitPanels</title>
+        <figure xml:id="figure:splitpanel.basic">
+            <title><classname>HorizontalSplitPanel</classname> and <classname>VerticalSplitPanel</classname></title>
             <mediaobject>
                 <imageobject>
-                    <imagedata align="center" fileref="img/layout/splitpanel-example1.png"/>
+                    <imagedata smallscale="100%" align="center" fileref="img/layout/splitpanel-example1.png"/>
                 </imageobject>
             </mediaobject>
         </figure>
+
+        <para>
+            You can set the split position with
+            <methodname>setSplitPosition()</methodname>. It accepts any units defined in
+            the <classname>Sizeable</classname> interface, with percentual size relative
+            to the size of the component.
+        </para>
+
+        <book-example id="layout.splitpanel.splitposition" style="float: right"/>
+        <programlisting><?pocket-size 65% ?><![CDATA[// Have a horizontal split panel
+HorizontalSplitPanel hsplit = new HorizontalSplitPanel();
+hsplit.setFirstComponent(new Label("75% wide panel"));
+hsplit.setSecondComponent(new Label("25% wide panel"));
+
+// Set the position of the splitter as percentage
+hsplit.setSplitPosition(75, Sizeable.UNITS_PERCENTAGE);]]></programlisting>
+
+        <para>
+            Another version of the <methodname>setSplitPosition()</methodname> method
+            allows leaving out the unit, using the same unit as previously. The method
+            also has versions take take a boolean parameter,
+            <parameter>reverse</parameter>, which allows defining the size of the right or
+            bottom panel instead of the left or top panel.
+        </para>
+
+        <para>
+            The split bar allows the user to adjust the split position by dragging the bar
+            with mouse. To lock the split bar, use
+            <methodname>setLocked(true)</methodname>. When locked, the move handle in the
+            middle of the bar is disabled.
+        </para>
+        
+        <programlisting><?pocket-size 65% ?><![CDATA[// Lock the splitter
+hsplit.setLocked(true);]]></programlisting>
+
+        <para>
+            Setting the split position programmatically and locking the split bar is
+            illustrated in <xref linkend="figure:component.splitpanel.splitposition"/>.
+        </para>
+
+        <figure xml:id="figure:component.splitpanel.splitposition">
+            <title>A Layout With Nested SplitPanels</title>
+            <mediaobject>
+                <imageobject>
+                    <imagedata smallscale="70%" align="center" fileref="img/layout/splitpanel-splitposition.png"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
+
+        <para>
+            Notice that the size of a split panel must not be undefined in the split
+            direction.
+        </para>
 
 		<simplesect>
 			<title>CSS Style Rules</title>
@@ -1245,11 +1257,11 @@ horizontal.addComponent(new Label("Lower right area. "+
 .v-splitpanel-second-container {} /* Bottom or right panel. */</programlisting>
 
             <para>
-                The entire accordion has the style
+                The entire split panel has the style
                 <literal>v-splitpanel-horizontal</literal> or
-                <literal>v-splitpanel-vertical</literal>. The split bar or
-                <emphasis>splitter</emphasis> between the two content panels has either
-                the <literal>...-splitter</literal> or
+                <literal>v-splitpanel-vertical</literal>, depending on the panel direction. The
+                split bar or <emphasis>splitter</emphasis> between the two content panels
+                has either the <literal>...-splitter</literal> or
                 <literal>...-splitter-locked</literal> style, depending on whether its
                 position is locked or not.
             </para>
