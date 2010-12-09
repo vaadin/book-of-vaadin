@@ -2,35 +2,31 @@
 
 <chapter xml:id="update-ui">
 
-	<title>Update the UI to use SQLContainer</title>
+	<title>Update the UI to Use SQLContainer</title>
 
   <section>
     <title>Binding <classname>Table</classname> to an <classname>SQLContainer</classname></title>
     <para>
-      To access the database helper class and our newly created containers in our application
+      To access the database helper class and the newly created containers in our application,
       we add a new field to our <classname>AddressBookApplication</classname> together with a getter:
     </para>
-    <programlisting>
-<![CDATA[private DatabaseHelper dbHelp = new DatabaseHelper();
+    <programlisting><![CDATA[private DatabaseHelper dbHelp = new DatabaseHelper();
 public DatabaseHelper getDbHelp() {
   return dbHelp;
-}]]>
-    </programlisting>
+}]]></programlisting>
 
     <para>
-      In addition to this we need to change the <classname>PersonList</classname> constructor
+      In addition, we need to change the <classname>PersonList</classname> constructor
       so that it gets the person container from the <classname>DatabaseHelper</classname>
       instance. The <classname>PersonList</classname> constructor should look like this:
     </para>
 
-    <programlisting>
-<![CDATA[public class PersonList extends Table {
+    <programlisting><![CDATA[public class PersonList extends Table {
   public PersonList(final AddressBookApplication app) {
       setSizeFull();
       setContainerDataSource(app.getDbHelp().getPersonContainer());
   }
-}]]>
-    </programlisting>
+}]]></programlisting>
 
     <para>
       The <methodname>setContainerDataSource()</methodname> sets the
@@ -41,18 +37,16 @@ public DatabaseHelper getDbHelp() {
 
     <para>
       The <varname>NATURAL_COL_ORDER</varname> in the <classname>DatabaseHelper</classname>
-      class should also be updated for the SQLContainer. The result should be:
+      class should also be updated for the SQLContainer. The definition should be:
     </para>
 
-    <programlisting>
-<![CDATA[public static final Object[] NATURAL_COL_ORDER = new Object[] {
+    <programlisting><![CDATA[public static final Object[] NATURAL_COL_ORDER = new Object[] {
       "FIRSTNAME", "LASTNAME", "EMAIL", "PHONENUMBER", "STREETADDRESS",
-      "POSTALCODE", "CITYID" };]]>
-    </programlisting>
+      "POSTALCODE", "CITYID" };]]></programlisting>
 
 
         <section>
-          <title>Replacing the CityID with the name of the city</title>
+          <title>Replacing the CityID with the Name of the City</title>
           <para>
             As you have probably noticed, the <literal>City</literal> column of the table currently
             shows only the <literal>CityID</literal> (actually the foreign key reference) and not
@@ -65,14 +59,13 @@ public DatabaseHelper getDbHelp() {
 
           <para>
             The easiest way to do this is to add a generated column to the table. When the column
-            is generated we will fetch the city name using the <classname>DatabaseHelper</classname>
-            and create a <classname>Label</classname> that will be rendered to the column. The code
-            to do this can be seen below; add the code to the constructor of the
+            is generated, the table will fetch the city name using the
+            <classname>DatabaseHelper</classname> and create a <classname>Label</classname>. The code
+            for this can be seen below; add the code to the constructor of the
             <classname>PersonList</classname> class.
           </para>
 
-          <programlisting>
-<![CDATA[addGeneratedColumn("CITYID", new ColumnGenerator() {
+          <programlisting><![CDATA[addGeneratedColumn("CITYID", new ColumnGenerator() {
   public Component generateCell(Table source, Object itemId,
             Object columnId) {
       if (getItem(itemId).getItemProperty("CITYID").getValue() != null) {
@@ -85,13 +78,12 @@ public DatabaseHelper getDbHelp() {
       }
       return null;
   }
-});]]>
-          </programlisting>
+});]]></programlisting>
 
           <para>
-            Note that we are using the same column name for this column that is actually a property
-            id in the person container. This way the generated column will override the column that
-            only contained the <literal>CityID</literal>s.
+            Note that we are using the same column ID that is actually a property ID in the person
+            container for the generated column. This way the generated column will override the
+            column that only contained the <literal>CityID</literal>s.
           </para>
 
         </section>
@@ -99,25 +91,24 @@ public DatabaseHelper getDbHelp() {
   </section>
 
   <section>
-    <title>Changing the PersonForm to accomodate SQLContainer</title>
+    <title>Changing the PersonForm to Accommodate SQLContainer</title>
 
     <para>
       In order to reflect the changes to the transaction aware SQLContainer, the
       <methodname>commit()</methodname> and <methodname>discard()</methodname> methods need to
-      be overridden in the <classname>PersonForm</classname>. At the very least the
+      be overridden in the <classname>PersonForm</classname>. At the very least, the
       <methodname>commit()</methodname> or <methodname>rollback()</methodname> method of the
       SQLContainer needs to be called so that the changes will be either properly written to
-      the database, or discarded from the container alltogether.
+      the database or discarded from the container alltogether.
     </para>
 
     <para>
       Our overridden <methodname>commit()</methodname> and <methodname>discard()</methodname>
       methods look like the following:
     </para>
-    <programlisting>
-<![CDATA[@Override
+    <programlisting><![CDATA[@Override
 public void commit() throws Buffered.SourceException {
-  /* Commit the data entered to the person form to the actual item. */
+  /* Commit the data entered in the person form to the actual item. */
   super.commit();
 
   /* Commit changes to the database. */
@@ -134,7 +125,7 @@ public void commit() throws Buffered.SourceException {
 @Override
 public void discard() throws Buffered.SourceException {
   super.discard();
-  /* On discard roll back the changes. */
+  /* On discard, roll back the changes. */
   try {
       app.getDbHelp().getPersonContainer().rollback();
   } catch (UnsupportedOperationException e) {
@@ -145,25 +136,23 @@ public void discard() throws Buffered.SourceException {
   /* Clear the form */
   setItemDataSource(null);
   setReadOnly(true);
-}]]>
-    </programlisting>
+}]]></programlisting>
 
   </section>
 
   <section>
-    <title>Adding a new contact</title>
+    <title>Adding a New Contact</title>
     <para>
-      The Address book tutorial creates a new instance of <classname>Person</classname>,
-      wraps it in a <para>BeanItem</para> and adds the item to the
+      The Address Book Tutorial creates a new instance of <classname>Person</classname>,
+      wraps it in a <classname>BeanItem</classname> and adds the item to the
       <classname>PersonForm</classname>. When using an SQLContainer, we should add a new
       item to the container and then edit that item. When done in this way we get automatic
-      persistence of the new item when running
-      <classname>SQLContainer</classname><methodname>.commit()</methodname>. The updated
-      <classname>PersonForm</classname><methodname>.addContact()</methodname> looks like this:
+      persistence of the new item when running <methodname>commit()</methodname> in
+      <classname>SQLContainer</classname>. The updated <methodname>.addContact()</methodname>
+      in <classname>PersonForm</classname> looks like this:
     </para>
 
-    <programlisting>
-<![CDATA[public void addContact() {
+    <programlisting><![CDATA[public void addContact() {
   /* Roll back changes just in case */
   try {
       app.getDbHelp().getPersonContainer().rollback();
@@ -173,23 +162,22 @@ public void discard() throws Buffered.SourceException {
   setItemDataSource(app.getDbHelp().getPersonContainer().getItem(
           tempItemId));
   setReadOnly(false);
-}]]>
-    </programlisting>
+}]]></programlisting>
 
   </section>
 
-  <section>
-    <title>Map the <classname>City</classname> table to the contacts</title>
+  <section xml:id="update-ui.map-city-to-contacts">
+    <title>Map the <classname>City</classname> Table to the Contacts</title>
 
     <para>
-      Adding and editing contacts should now work but you will notice that the city of a contact
+      Adding and editing contacts should now work, but you will notice that the city of a contact
       is shown only by its ID, not by the actual city name. Since this is not very usable, we need
       to create a mapping from the city ID to the name of the city and display that instead.
     </para>
 
     <para>
-      For this purpose we will constuct a <classname>ComboBox</classname> which will contain the
-      existing cities as well as allow the user to enter new ones. This way selecting an existing
+      For this purpose, we will constuct a <classname>ComboBox</classname> which will contain the
+      existing cities as well as allow the user to enter new ones. This way, selecting an existing
       city becomes much easier.
     </para>
 
@@ -197,14 +185,14 @@ public void discard() throws Buffered.SourceException {
       Replacing the normal text field with a combo box will introduce you to the system used
       in Vaadin for populating a form. The same mechanism can be used in tables if you put the
       table into editable mode. Fields are generated using the factory pattern by a class
-      implementing the FieldFactory interface.
+      implementing the <classname>FieldFactory</classname> interface.
     </para>
 
     <para>
-      By default the <classname>BaseFieldFactory</classname> class is used and is generally a
+      By default, the <classname>BaseFieldFactory</classname> class is used and is generally a
       good base for customizations. The <classname>FieldFactory</classname> interface has several
       methods which we do not want to implement and <classname>BaseFieldFactory</classname> has
-      good default implementations of these. Later we'll use the same field factory to tune the
+      good default implementations of these. Later, we'll use the same field factory to tune the
       form fields even more.
     </para> 
 
@@ -213,38 +201,35 @@ public void discard() throws Buffered.SourceException {
       <classname>PersonForm</classname>:
     </para>
 
-    <programlisting>
-<![CDATA[private final ComboBox cities = new ComboBox("City");]]>
-    </programlisting>
+    <programlisting><![CDATA[private final ComboBox cities = new ComboBox("City");]]></programlisting>
 
     <para>
       We make adding new items possible and populate the <classname>ComboBox</classname> with
       existing cities from our data source. We will also set the <classname>ComboBox</classname>
-      into immediate mode. Add the following code to the <classname>PersonForm</classname>
+      to immediate mode. Add the following code to the <classname>PersonForm</classname>
       constructor:
     </para>
 
-    <programlisting>
-<![CDATA[/* Allow the user to enter new cities */
+    <programlisting><![CDATA[/* Allow the user to enter new cities */
 cities.setNewItemsAllowed(true);
+
 /* We do not want to use null values */
 cities.setNullSelectionAllowed(false);
+
 /* Cities selection */
 cities.setContainerDataSource(app.getDbHelp().getCityContainer());
 cities.setItemCaptionPropertyId("NAME");
-cities.setImmediate(true);]]>
-    </programlisting>
+cities.setImmediate(true);]]></programlisting>
 
     <para>
-      Finally we'll make a field factory extending <classname>BaseFieldFactory</classname>. Using
-      the field factory we can choose what kind of field to use for each property. For the
-      <literal>city</literal> property we'll return the cities <classname>ComboBox</classname>,
-      for all other properties we'll let the <classname>BaseFieldFactory</classname> take care of
-      creating the field.
+      Finally, we'll make a field factory that extends <classname>BaseFieldFactory</classname>. Using
+      the field factory, we can choose what kind of field to use for each property. For the
+      <literal>city</literal> property, we'll return the <varname>cities</varname> combo box. For
+      all other properties, we let the <classname>BaseFieldFactory</classname> take care of creating
+      the field.
     </para>
 
-    <programlisting>
-<![CDATA[setFormFieldFactory(new DefaultFieldFactory() {
+    <programlisting><![CDATA[setFormFieldFactory(new DefaultFieldFactory() {
  @Override
  public Field createField(Item item, Object propertyId,
     Component uiContext) {
@@ -256,8 +241,7 @@ cities.setImmediate(true);]]>
      }
      return field;
  }
-});]]>
-    </programlisting>
+});]]></programlisting>
 
     <para>
       Now that we have the cities nicely listed in a <classname>ComboBox</classname>, we need to
@@ -271,63 +255,56 @@ cities.setImmediate(true);]]>
       Add the following code to the end of the <classname>PersonForm</classname> constructor:
     </para>
 
-    <programlisting>
-<![CDATA[/* NewItemHandler to add new cities */
+    <programlisting><![CDATA[/* NewItemHandler to add new cities */
 cities.setNewItemHandler(new AbstractSelect.NewItemHandler() {
   public void addNewItem(String newItemCaption) {
       app.getDbHelp().addCity(newItemCaption);
   }
 });
 /* Add PersonForm as RowIdChangeListener to the CityContainer */
-app.getDbHelp().getCityContainer().addListener(this);]]>
-    </programlisting>
+app.getDbHelp().getCityContainer().addListener(this);]]></programlisting>
 
     <para>
       To implement the <classname>RowIdChangeListener</classname>, we first need to declare
       that the <classname>PersonForm</classname> class implements
       <classname>QueryDelegate.RowIdChangeListener</classname>. After the declaration, we must
-      provide the implementation. In our implementation, we will make the cities
-      <classname>ComboBox</classname> select the city that was just inserted; this
-      <methodname>setValue()</methodname> call is necessary since the <varname>itemID</varname>
-      of the city has just changed. Finally, we'll set the key of the added city to the person
-      item that we are currently editing, so that its <literal>CITYID</literal> property will
-      reference the correct city. The implementation can be done like this:
+      provide the implementation. In our implementation, we will make the <varname>cities</varname>
+      combo box select the city that was just inserted; this <methodname>setValue()</methodname>
+      call is necessary since the <varname>itemID</varname> of the city has just changed. Finally,
+      we'll set the key of the added city to the person item that we are currently editing, so that
+      its <literal>CITYID</literal> property will reference the correct city. The implementation
+      can be done like this:
     </para>
 
-    <programlisting>
-<![CDATA[public void rowIdChange(RowIdChangeEvent event) {
+    <programlisting><![CDATA[public void rowIdChange(RowIdChangeEvent event) {
   cities.setValue(event.getNewRowId());
   getItemDataSource().getItemProperty("CITYID").setValue(
           event.getNewRowId().getId()[0]);
-}]]>
-    </programlisting>
+}]]></programlisting>
 
     <para>
       The final touch will be done in the <methodname>setItemDataSource()</methodname> method
       of the <classname>PersonForm</classname> class. Here we will add code that will select
-      the correct city from the <classname>ComboBox</classname> every time a new item is set
-      to the <classname>PersonForm</classname>. Since the item from the person container will
-      only contain the key of the city, but the <classname>ComboBox</classname> requires a
-      complete <classname>RowId</classname>, we will need to generate one. Add the following code
-      to the <classname>PersonForm</classname><methodname>.setItemDataSource()</methodname>
-      method, right after the call to
-      <methodname>super.setItemDataSource(newDataSource, orderedProperties)</methodname>.
+      the correct city from the combo box every time a new item is set to the
+      <classname>PersonForm</classname>. Since the item from the person container will
+      only contain the key of the city, but the combo box requires a complete
+      <classname>RowId</classname>, we will need to generate one. Add the following code
+      to the <methodname>setItemDataSource()</methodname> method in <classname>PersonForm</classname>,
+      right after the call to <methodname>super.setItemDataSource(newDataSource, orderedProperties)</methodname>.
     </para>
 
-    <programlisting>
-<![CDATA[/* Select correct city from the cities ComboBox */
+    <programlisting><![CDATA[/* Select correct city from the cities ComboBox */
 setReadOnly(false);
 if (newDataSource.getItemProperty("CITYID").getValue() != null) {
   cities.select(new RowId(new Object[] { newDataSource
                 .getItemProperty("CITYID").getValue() }));
 } else {
   cities.select(cities.getItemIds().iterator().next());
-}]]>
-    </programlisting>
+}]]></programlisting>
 
     <para>
       If the value of the city reference is <literal>null</literal> (e.g. the item is new),
-      the first item will be selected from the cities <classname>ComboBox</classname>.
+      the first item will be selected from the <varname>cities</varname> combo box.
     </para>
 
     <para>
@@ -341,12 +318,10 @@ if (newDataSource.getItemProperty("CITYID").getValue() != null) {
 
     <para>
       In order to make search work with the SQLContainer, we first add two fields to the
-      <classname>SearchFilter</classname> class, after which the class will look like the
-      following:
+      <classname>SearchFilter</classname> class, after which the class will look as follows:
     </para>
 
-    <programlisting>
-<![CDATA[package com.vaadin.demo.tutorial.addressbook.data;
+    <programlisting><![CDATA[package com.vaadin.demo.tutorial.addressbook.data;
 import java.io.Serializable;
 public class SearchFilter implements Serializable {
 
@@ -370,16 +345,14 @@ public class SearchFilter implements Serializable {
     }
 
     // + getters and setters
-}]]>
-    </programlisting>
+}]]></programlisting>
 
     <para>
       The <methodname>performSearch()</methodname> method also needs to be updated to check
       for illegal values that the SQLContainer won't accept.
     </para>
 
-    <programlisting>
-<![CDATA[private void performSearch() {
+    <programlisting><![CDATA[private void performSearch() {
   String searchTerm = (String) tf.getValue();
   if (searchTerm == null || searchTerm.equals("")) {
       getWindow().showNotification("Search term cannot be empty!",
@@ -406,23 +379,22 @@ public class SearchFilter implements Serializable {
   }
   SearchFilter[] sf = {};
   app.search(searchFilters.toArray(sf));
-}]]>
-    </programlisting>
+}]]></programlisting>
 
     <para>
-      Now we need to modify the <methodname>search</methodname> logic in the application
-      class. Note that since the <class>PersonAddress</class> container contains both
-      string and numeric properties, we cannot use the
-      <methodname>addContainerFilter()</methodname> method. Instead, we must fetch the type
-      of the column from the container and create an accordingly typed 
-      <classname>Filter</classname> instance.
+      Now we need to modify the <methodname>search()</methodname> logic in the application
+      class. Note that since the <classname>PersonAddress</classname> container contains both
+      string and numeric properties, we cannot use the <methodname>addContainerFilter()</methodname>
+      method. Instead, we must fetch the type of the column from the container and create an
+      accordingly typed <classname>Filter</classname> instance.
     </para>
 
-    <programlisting>
-<![CDATA[public void search(SearchFilter... searchFilters) {
+    <programlisting><![CDATA[public void search(SearchFilter... searchFilters) {
   SQLContainer c = getDbHelp().getPersonContainer();
+  
   /* Clear previous filters */
   c.removeAllContainerFilters();
+  
   /* Add the filter(s) to the person container. */
   for (SearchFilter searchFilter : searchFilters) {
       Filter f = new Filter((String) searchFilter.getPropertyId(),
@@ -439,8 +411,7 @@ public class SearchFilter implements Serializable {
       getDbHelp().getPersonContainer().addFilter(f);
   }
   showListView();
-}]]>
-    </programlisting>
+}]]></programlisting>
 
     <para>
       The logic for the "Show All" item in the tree also needs to be changed in order for the
@@ -449,8 +420,7 @@ public class SearchFilter implements Serializable {
       following:
     </para>
 
-    <programlisting>
-<![CDATA[[...]
+    <programlisting><![CDATA[[...]
 if (NavigationTree.SHOW_ALL.equals(itemId)) {
   /* Clear all filters from person container */
   getDbHelp().getPersonContainer().removeAllContainerFilters();
@@ -461,14 +431,14 @@ if (NavigationTree.SHOW_ALL.equals(itemId)) {
 private void addNewContact() {
   showListView();
   tree.select(NavigationTree.SHOW_ALL);
+  
   /* Clear all filters from person container */
   getDbHelp().getPersonContainer().removeAllContainerFilters();
   personForm.addContact();
-}]]>
-    </programlisting>
+}]]></programlisting>
 
     <section>
-      <title>Implementing search based on a Foreign Key</title>
+      <title>Implementing Search Based on a Foreign Key</title>
 
       <para>
         We have previously created a simple search view, implemented the search functionality
@@ -485,38 +455,35 @@ private void addNewContact() {
         method and replace this:
       </para>
 
-      <programlisting>
-<![CDATA[searchFilters.add(new SearchFilter(fieldToSearch.getValue(),
-      searchTerm, (String) searchName.getValue(), 
-	    fieldToSearch.getItemCaption(fieldToSearch.getValue()),
-      searchTerm));]]>
-      </programlisting>
+      <programlisting><![CDATA[searchFilters.add(new SearchFilter(fieldToSearch.getValue(),
+                                   searchTerm, (String) searchName.getValue(), 
+	                                 fieldToSearch.getItemCaption(fieldToSearch.getValue()),
+                                   searchTerm));]]></programlisting>
 
       <para>with this:</para>
 
-      <programlisting>
-<![CDATA[if (!"CITYID".equals(fieldToSearch.getValue())) {
+      <programlisting><![CDATA[if (!"CITYID".equals(fieldToSearch.getValue())) {
  /* If this is NOT a City search, one filter is enough. */
  searchFilters.add(new SearchFilter(fieldToSearch.getValue(),
-         searchTerm, (String) searchName.getValue(), fieldToSearch
-                 .getItemCaption(fieldToSearch.getValue()),
-         searchTerm));
+                                    searchTerm, (String) searchName.getValue(),
+                                    fieldToSearch.getItemCaption(fieldToSearch.getValue()),
+                                    searchTerm));
 } else {
  SQLContainer cc = app.getDbHelp().getCityContainer();
  cc.addContainerFilter("NAME", searchTerm, true, false);
  for (Object cityItemId : cc.getItemIds()) {
-     searchFilters.add(new SearchFilter("CITYID",
-             cc.getItem(cityItemId).getItemProperty("ID").getValue()
-                     .toString(), (String) searchName.getValue(),
-             fieldToSearch.getItemCaption(fieldToSearch.getValue()),
-             searchTerm));
+     searchFilters.add(
+          new SearchFilter("CITYID",
+                           cc.getItem(cityItemId).getItemProperty("ID").getValue().toString(),
+                           (String) searchName.getValue(),
+                           fieldToSearch.getItemCaption(fieldToSearch.getValue()),
+                           searchTerm));
  }
  cc.removeAllContainerFilters();
-}]]>
-      </programlisting>
+}]]></programlisting>
 
       <para>
-        In the above code all the other fields are handled exactly as before, except for
+        In the above code, all the other fields are handled exactly as before, except for
         the <classname>City</classname> field. If a <classname>City</classname> search is made,
         we will fetch the city container and add a container filter to it. This filter will
         search for the term the user entered. Once the results are in we will generate
@@ -524,31 +491,28 @@ private void addNewContact() {
       </para>
 
       <para>
-        Finally the search method of the application class also requires a slight modification.
+        Finally, the search method of the application class also requires a slight modification.
         The search mode of the person SQLContainer must be changed from inclusive
         (<literal>AND</literal>) to exclusive (<literal>OR</literal>) in order to get any results
         at all. This is done simply by adding the following code to the method, right before
-        the for-loop which adds the containerfilters.
+        the for-loop which adds the container filters.
       </para>
 
-      <programlisting>
-<![CDATA[getDbHelp().getPersonContainer().setFilteringMode(
+      <programlisting><![CDATA[getDbHelp().getPersonContainer().setFilteringMode(
           FilteringMode.FILTERING_MODE_EXCLUSIVE);
-]]>
-      </programlisting>
+]]></programlisting>
 
     </section>
     
     <section>
-      <title>The e-mail address to link generator</title>
+      <title>The E-mail Address to Link Generator</title>
       
       <para>
         The <classname>ColumnGenerator</classname> used to display e-mail addresses as links also
         needs updating for use with the SQLContainer, since it currently relies on having an
         instance of <classname>Person</classname>, which is not present with the SQLContainer.
       </para>
-      <programlisting>
-<![CDATA[// customize email column to have mailto: links using column generator
+      <programlisting><![CDATA[// customize email column to have mailto: links using column generator
 addGeneratedColumn("EMAIL", new ColumnGenerator() {
     public Component generateCell(Table source, Object itemId,
                                   Object columnId) {
@@ -562,33 +526,28 @@ addGeneratedColumn("EMAIL", new ColumnGenerator() {
         }
         return null;
     }
-});]]>
-      </programlisting>
+});]]></programlisting>
 
     </section>
     
     <section>
-      <title>The search notification</title>
+      <title>The Search Notification</title>
       <para>
-        The notification showing information about the search needs to be refactored a little bit.
+        The notification that shows information about the search needs to be refactored a little bit.
         Change this:
       </para>
-      <programlisting>
-<![CDATA[getMainWindow().showNotification(
+      <programlisting><![CDATA[getMainWindow().showNotification(
        "Searched for " + searchFilter.getPropertyId() + "=*"
        + searchFilter.getTerm() + "*, found "
        + getDataSource().size() + " item(s).",
-       Notification.TYPE_TRAY_NOTIFICATION);]]>
-      </programlisting>
-      <para>Into the following:</para>
-      <programlisting>
-<![CDATA[getMainWindow().showNotification(
+       Notification.TYPE_TRAY_NOTIFICATION);]]></programlisting>
+      <para>To the following:</para>
+      <programlisting><![CDATA[getMainWindow().showNotification(
       "Searched for:<br/> "
               + searchFilters[0].getPropertyIdDisplayName() + " = *"
               + searchFilters[0].getTermDisplayName()
               + "*<br/>Found " + c.size() + " item(s).",
-      Notification.TYPE_TRAY_NOTIFICATION);]]>
-      </programlisting>
+      Notification.TYPE_TRAY_NOTIFICATION);]]></programlisting>
       
       <para>
         In addition to the successful search notification, we can also add a notification
@@ -597,37 +556,33 @@ addGeneratedColumn("EMAIL", new ColumnGenerator() {
         right before the return statement.
       </para>
 
-      <programlisting>
-<![CDATA[getMainWindow().showNotification("Invalid search term!");]]>
-      </programlisting>
+      <programlisting><![CDATA[getMainWindow().showNotification("Invalid search term!");]]></programlisting>
     </section>
     
     <section>
-      <title>Fixing the captions of form fields</title>
+      <title>Fixing the Captions of Form Fields</title>
 
       <para>
         One small detail that catches the eye are the captions of the
-        <classname>PersonForm</classname>. As can be seen, they are not of the nice
+        <classname>PersonForm</classname>. As you can see, they are not of the nice
         human-friendly type we used in the table, but they are once again the column
-        names directly from the database. Luckily we can fix this very easily by adding
+        names directly from the database. Luckily, we can fix this very easily by adding
         the following code to the field factory created at the end of the previous
         chapter. The code should be inserted right before the '<literal>return field;</literal>'
         statement.
       </para>
 
-      <programlisting>
-<![CDATA[/* Set the correct caption to each field */
+      <programlisting><![CDATA[/* Set the correct caption to each field */
 for (int i = 0; i < DatabaseHelper.NATURAL_COL_ORDER.length; i++) {
     if (DatabaseHelper.NATURAL_COL_ORDER[i].equals(propertyId)) {
         field.setCaption(DatabaseHelper.COL_HEADERS_ENGLISH[i]);
     }
-}]]>
-      </programlisting>
+}]]></programlisting>
       
     </section>
     
     <section>
-      <title>Null representation</title>
+      <title>Null Representation</title>
       <para>
         You may have noticed that a lot of the text fields have the text "null" when no value
         has yet been written in them. This can be made more user friendly by changing the
@@ -635,17 +590,15 @@ for (int i = 0; i < DatabaseHelper.NATURAL_COL_ORDER.length; i++) {
         to the <methodname>createField()</methodname> method.
       </para>
 
-      <programlisting>
-<![CDATA[/* Set null representation of all text fields to empty */
+      <programlisting><![CDATA[/* Set null representation of all text fields to empty */
 if (field instanceof TextField) {
     ((TextField) field).setNullRepresentation("");
-}]]>
-      </programlisting>
+}]]></programlisting>
       
     </section>
     
     <section>
-      <title>Making table row selection more intuitive</title>
+      <title>Making Table Row Selection More Intuitive</title>
       
       <para>
         You may have noticed that the selected row of the main <classname>Table</classname>
@@ -656,8 +609,7 @@ if (field instanceof TextField) {
         Add the following method:
       </para>
 
-      <programlisting>
-<![CDATA[public void fixVisibleAndSelectedItem() {
+      <programlisting><![CDATA[public void fixVisibleAndSelectedItem() {
     if ((getValue() == null || !containsId(getValue())) && size() > 0) {
         Object itemId = getItemIds().iterator().next();
         select(itemId);
@@ -665,8 +617,7 @@ if (field instanceof TextField) {
     } else {
         setCurrentPageFirstItemId(getValue());
     }
-}]]>
-      </programlisting>
+}]]></programlisting>
       
       <para>
         This method will scroll the current selection into view, or if no selection is made,
@@ -680,55 +631,49 @@ if (field instanceof TextField) {
       </para>
       
       <itemizedlist>
-    		<listitem>After moving from a search result view to the Show All view</listitem>
-    		<listitem>After moving from the Show All view to a search result view</listitem>
+    		<listitem>After moving from a search result view to the <uilabel>Show All</uilabel> view</listitem>
+    		<listitem>After moving from the <uilabel>Show All</uilabel> view to a search result view</listitem>
     		<listitem>After a new contact has been added</listitem>
     	</itemizedlist>
 
     	<para>
-    	  For the first two cases the fix is easy. We'll only need to add a call to the method
+    	  For the first two cases the fix is easy. We only need to add a call to the method
     	  we just created into the <methodname>showListView()</methodname> and
     	  <methodname>showSearchView()</methodname> methods of the
     	  <classname>AddressBookApplication</classname>, for example like this:
     	</para>
 
-      <programlisting>
-<![CDATA[private void showSearchView() {
+      <programlisting><![CDATA[private void showSearchView() {
     setMainComponent(getSearchView());
     personList.fixVisibleAndSelectedItem();
-}]]>
-      </programlisting>
+}]]></programlisting>
       
       <para>
         The third case is a bit more problematic, since we need to get the
         <classname>RowId</classname> of the added contact to be able to select it from the
         <classname>PersonList</classname>. The trick is to use the
-        <classname>RowIdChangeListener</classname> like we did in chapter 5.6. with the
-        <classname>City</classname> container. First, we'll make the
-        <classname>AddressBookApplication</classname> implement the
-        <classname>QueryDelegate.RowIdChangeListener</classname> interface, and implement
-        the <methodname>rowIdChange()</methodname> method as follows. We'll also add a call
-        to the <methodname>fixVisibleAndSelectedItem()</methodname> method.
+        <classname>RowIdChangeListener</classname> like we did in
+        <xref linkend="update-ui.map-city-to-contacts" />. with the <classname>City</classname>
+        container. First, we make the <classname>AddressBookApplication</classname> implement the
+        <classname>QueryDelegate.RowIdChangeListener</classname> interface, and implement the
+        <methodname>rowIdChange()</methodname> method as follows. We also add a call to the
+        <methodname>fixVisibleAndSelectedItem()</methodname> method.
       </para>
       
-      <programlisting>
-<![CDATA[public void rowIdChange(RowIdChangeEvent event) {
+      <programlisting><![CDATA[public void rowIdChange(RowIdChangeEvent event) {
     /* Select the added item and fix the table scroll position */
     personList.select(event.getNewRowId());
     personList.fixVisibleAndSelectedItem();
-}]]>
-      </programlisting>
+}]]></programlisting>
       
       <para>
-        Finally we should register the main application class as a listener to the
+        Finally, we should register the main application class as a listener to the
         <classname>PersonAddress</classname> container, and we should be all done!
-        The following statement at the end of the <classname>AddressBookApplication</classname>
-        <methodname>init()</methodname> method will do the job:
+        The following statement at the end of the <methodname>init()</methodname> method in
+        <classname>AddressBookApplication</classname> will do the job:
       </para>
 
-      <programlisting>
-<![CDATA[dbHelp.getPersonContainer().addListener(this);]]>
-      </programlisting>
+      <programlisting><![CDATA[dbHelp.getPersonContainer().addListener(this);]]></programlisting>
 
       <para>
         Go ahead and see if the table row selections make more sense after these enhancements.

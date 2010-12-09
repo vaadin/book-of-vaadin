@@ -1,31 +1,68 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <chapter xml:id="sqlcontainer-basics">
-	<title>SQLContainer basics</title>
+	<title>SQLContainer Basics</title>
 
-	<para>
-		SQLContainer is an add-on to Vaadin, implementing the Container interface for standard SQL
-		database servers. SQLContainer allows you to easily display data stored in an SQL database
-		in Tables and Select components, as well as edit the data using Forms.
-	</para>
-	
-	<para>
-	  SQLContainer has two modes of operation, enabled by which <classname>QueryDelegate</classname>
-	  implementation is given at construction time. The TableQuery implementation reads all contents
-	  from a normal database table and automatically supports writing, filtering, sorting and lazy
-	  loading for a variety of database engines (See the SQLContainer manual for a list). The second
-	  provided implementation is the <classname>FreeformQuery</classname> implementation, which
-	  allows any complex SQL query (e.g. joining many tables, etc) to be contained in the SQLContainer.
-	  <classname>FreeformQuery</classname> requires the developer to implement the
-	  <classname>FreeformQueryDelegate</classname> interface in order to support writing, filtering,
-	  sorting and/or lazy loading. This tutorial will only use <classname>TableQuery</classname>. For
-	  more information on <classname>FreeformQuery</classname>, see the SQLContainer manual.
-  </para>
+  <section xml:id="sqlcontainer-basics.overview">
+    <title>Overview</title>
+
+  	<para>
+  		The purpose of this tutorial is to give an overall idea of how to use the SQLContainer add-on
+  		when developing applications with Vaadin. This tutorial explores some basic use cases and how
+  		to build a Vaadin application with basic database usage.
+  	</para>
+
+  	<para>
+  		This tutorial will add persistency to the Address book tutorial using the SQLContainer
+  		add-on. Visually, the application will stay exactly the same. We will add or change the following
+  		things with respect to the original Address Book Tutorial:
+  	</para>
+
+  	<itemizedlist>
+  		<listitem>Storing items in an SQL database</listitem>
+  		<listitem>Handling relations between SQL tables when displaying them in a Vaadin table</listitem>
+  		<listitem>Editing data through the SQLContainer</listitem>
+  		<listitem>Searching and filtering in the SQLContainer</listitem>
+  	</itemizedlist>
+
+  	<para>
+  	  The source code for this tutorial is available for download at:
+  	</para>
+
+  	<itemizedlist>
+  		<listitem><link href="http://vaadin.com/addon/vaadin-sqlcontainer"/></listitem>
+  		<listitem><link href="http://vaadin.com/download/current/docs/tutorial/projects/"/></listitem>
+  	</itemizedlist>
+  </section>
   
-  <para>
-    For those interested in more information, such as the architecture of the SQLContainer, see
-    the SQLContainer manual included in the add-on distribution package.
-  </para>
+  <section xml:id="sqlcontainer-basics.background">
+    <title>Background</title>
+    <para>
+  		SQLContainer is an add-on for Vaadin, implementing the <classname>Container</classname>
+  		interface for standard SQL database servers. SQLContainer allows you to easily display
+  		data stored in an SQL database in <classname>Table</classname> and <classname>Select</classname>
+  		components, as well as edit the data using <classname>Forms</classname>.
+  	</para>
+
+  	<para>
+  	  <classname>SQLContainer</classname> has two modes of operation, selected by giving a
+  	  <classname>QueryDelegate</classname> implementation at construction time. The
+  	  <classname>TableQuery</classname> implementation reads all contents from a normal database
+  	  table and automatically supports writing, filtering, sorting and lazy loading for a variety
+  	  of database engines (see the SQLContainer Manual for a list). The second provided implementation
+  	  is the <classname>FreeformQuery</classname> implementation, which allows any complex SQL query
+  	  (e.g. joining many tables, etc) to be contained in the <classname>SQLContainer</classname>.
+  	  <classname>FreeformQuery</classname> requires the developer to implement the
+  	  <classname>FreeformQueryDelegate</classname> interface in order to support writing, filtering,
+  	  sorting and/or lazy loading. This tutorial will only use <classname>TableQuery</classname>. For
+  	  more information on <classname>FreeformQuery</classname>, see the SQLContainer Manual.
+    </para>
+
+    <para>
+      For those interested in more information, such as the architecture of the SQLContainer, see
+      the SQLContainer manual included in the add-on distribution package.
+    </para>
+  </section>
 
   <section xml:id="sqlcontainer-basics.replacing-indexedcontainer">
     <title>
@@ -33,29 +70,30 @@
     </title>
 
     <para>
-      We will walk through the procedure of switching out the <classname>IndexedContainer</classname>s
-      used in the Address book tutorial to <classname>SQLContainer</classname>s.
+      This section will walk through the procedure of switching out the
+      <classname>IndexedContainer</classname>s used in the Address book tutorial to
+      <classname>SQLContainer</classname>s.
     </para>
     
     <section>
-      <title>Connecting to and initializing the database</title>
+      <title>Connecting to and Initializing the Database</title>
       <para>
-        In the scope of the address book application we will create a database connection helper
-        class called DatabaseHelper. The purpose of this class is to handle database connections,
-        dummy data generation, container creation and other datasource-related tasks.
+        In the scope of the Address Book application, we will create a database connection helper
+        class called <classname>DatabaseHelper</classname>. The purpose of this class is to handle
+        database connections, dummy data generation, container creation and other datasource-related
+        tasks.
       </para>
       
       <para>
         We begin by creating the helper class and by adding a method that creates a connection pool,
         which will be used to connect to the database of your choice. Note that the driver name,
-        connection url, username and password will vary depending on your choice of database and
-        the database settings. In this example we will be connecting to an in-memory HSQLDB database
+        connection URL, username and password will vary depending on your choice of database and
+        the database settings. In this example, we will be connecting to an in-memory HSQLDB database
         using a <classname>SimpleJDBCConnectionPool</classname> with between two and five open
         connections.
       </para>
       
-      <programlisting>
-<![CDATA[public class DatabaseHelper {
+      <programlisting><![CDATA[public class DatabaseHelper {
     private JDBCConnectionPool connectionPool = null;
 
     public DatabaseHelper() {
@@ -71,8 +109,7 @@
         	  e.printStackTrace();
         }
     }
-}]]>
-      </programlisting>
+}]]></programlisting>
       
       <para>
         We want to base our table data on two interrelated tables in a database. We will call
@@ -81,13 +118,14 @@
       </para>
       
       <para>
-        The PersonAddress table will hold the most important data of the address book application.
+        The <classname>PersonAddress</classname> table will hold the most important data of the
+        Address Book application.
         Each row corresponds to an entry in the address book and contains the following columns:
         <literal>firstname</literal>, <literal>lastname</literal>, <literal>email</literal>,
         <literal>phonenumber</literal>, <literal>streetaddress</literal> and <literal>postalcode</literal>.
         In addition to these, the table will also contain an <literal>ID</literal> column, a
         <literal>version</literal> column for optimistic locking and a <literal>cityid</literal>
-        column which contains a foreign key reference to the <classname>City</classname> table.
+        column, which contains a foreign key reference to the <classname>City</classname> table.
       </para>
       
       <para>
@@ -98,15 +136,14 @@
       
       <para>
         With HSQLDB we can use the following SQL queries to create these tables. The complete Java
-        method for this can be found in <classname>DatabaseHelper</classname>
-        <methodname>.initDatabase()</methodname>, but the code is omitted here for clarity.
+        method for this can be found in
+        <classname>DatabaseHelper</classname><methodname>.initDatabase()</methodname>, but the code
+        is omitted here for clarity.
       </para>
       
-      <programlisting>
-<![CDATA[create table city (id integer generated always as identity, name varchar(64), version integer default 0 not null, primary key (id));
+      <programlisting><![CDATA[CREATE TABLE city (id INTEGER GENERATED ALWAYS AS IDENTITY, name VARCHAR(64), version INTEGER DEFAULT 0 NOT NULL, PRIMARY KEY (id));
 
-create table personaddress (id integer generated always as identity, firstname varchar(64), lastname varchar(64), email varchar(64), phonenumber varchar(64), streetaddress varchar(128), postalcode integer, cityId integer not null, version integer default 0 not null , FOREIGN KEY (cityId) REFERENCES city(id), primary key(id));]]>
-      </programlisting>
+CREATE TABLE personaddress (id INTEGER GENERATED ALWAYS AS IDENTITY, firstname VARCHAR(64), lastname VARCHAR(64), email VARCHAR(64), phonenumber VARCHAR(64), streetaddress VARCHAR(128), postalcode INTEGER, cityId INTEGER NOT NULL, version INTEGER DEFAULT 0 NOT NULL , FOREIGN KEY (cityId) REFERENCES city(id), PRIMARY KEY(id));]]></programlisting>
     </section>
 
     <section xml:id="sqlcontainer-basics.replacing-indexedcontainer.initializing">
@@ -122,21 +159,20 @@ create table personaddress (id integer generated always as identity, firstname v
       </para>
       
       <para>
-        Next we'll set the version column for the <classname>TableQuery</classname>. The version
+        Next, we'll set the version column for the <classname>TableQuery</classname>. The version
         column in this application is not actually functional, but <classname>TableQuery</classname>
         is designed in a way that requires a version column to be defined in order to support writing
-        (see optimistic locking in the SQLContainer manual).
+        (see <emphasis>optimistic locking</emphasis> in the SQLContainer Manual).
       </para>
       
       <para>
-        Finally the <classname>SQLContainer</classname> is instantiated, given the
+        Finally, the <classname>SQLContainer</classname> is instantiated, given the
         <classname>TableQuery</classname> as its only parameter. The following method of
         <classname>DatabaseHelper</classname> contains all the code required to create the two
         containers:
       </para>
 
-      <programlisting>
-<![CDATA[private SQLContainer personContainer = null;
+      <programlisting><![CDATA[private SQLContainer personContainer = null;
 private SQLContainer cityContainer = null;
 
 private void initContainers() {
@@ -153,12 +189,11 @@ private void initContainers() {
     } catch (SQLException e) {
         e.printStackTrace();
     }
-}]]>
-      </programlisting>
+}]]></programlisting>
 
       <para>
         After the containers are created, the <classname>DatabaseHelper</classname> constructor
-        will call the <methodname>fillContainers()</methodname> -method, which will add some
+        will call the <methodname>fillContainers()</methodname> method, which will add some
         generated data to the database for demonstration purposes.
       </para>
       
@@ -170,20 +205,18 @@ private void initContainers() {
         application.
       </para>
       
-      <programlisting>
-<![CDATA[public String getCityName(int cityId)
+      <programlisting><![CDATA[public String getCityName(int cityId)
 public boolean addCity(String cityName)
 public SQLContainer getPersonContainer()
-public SQLContainer getCityContainer()]]>
-      </programlisting>
+public SQLContainer getCityContainer()]]></programlisting>
       
     </section>
     
     <section>
-      <title>Basics of the Data Model with respect to SQLContainer</title>
+      <title>Basics of the Data Model with Respect to SQLContainer</title>
       
       <para>
-        In this case we are using an <classname>SQLContainer</classname> as the container for
+        In this case, we are using an <classname>SQLContainer</classname> as the container for
         the data shown in the table. The <classname>SQLContainer</classname> can maintain a
         list of our database contents and supply the table with information fetched directly
         from the database table when needed.
@@ -197,7 +230,7 @@ public SQLContainer getCityContainer()]]>
     		  <classname>QueryDelegate</classname>
     		</listitem>
     		<listitem>Assign the container to a table as a data source</listitem>
-    		<listitem>VOILA, the information is displayed in the table</listitem>
+    		<listitem>Voilá, the information is displayed in the table</listitem>
     	</itemizedlist>
     	
     </section>

@@ -1,7 +1,7 @@
 all: vaadin-sqlcontainer-tutorial.pdf
 
 DATE = `date +'%Y-%m-%d'`
-VERSION = `cat ../../build/VERSION.properties|sed -e 's/^version=\([0-9\.]\+\).\+/\1/'`
+VERSION = 1.0.0.pre1
 
 # Command-line parameters for Docbook
 DBPARS =	-param section.autolabel 1 \
