@@ -1493,26 +1493,43 @@ mycomponent.setHeight("400px");]]></programlisting>
 		<title><classname>Label</classname></title>
 
 		<para>
-			<classname>Label</classname> is a text component that you can use to
-			display non-editable text. The text will wrap
-			around if the width of the containing component limits the length of the
-			lines (except for preformatted text).
+			<classname>Label</classname> is a text component that you can use to display
+			non-editable text. In addition to regular text, you can also display
+			preformatted text and HTML, depending on the <emphasis>content mode</emphasis>
+			of the label.
 		</para>
-		
-		<programlisting><?pocket-size 65% ?><![CDATA[// A container for the Label.
-Panel panel = new Panel("Panel Containing a Label");
-panel.setWidth("200px"); // Defined width.
-main.addComponent(panel);
 
-panel.addComponent(
-    new Label("This is a Label inside a Panel. There is enough " +
-              "text in the label to make the text wrap if it " +
-              "exceeds the width of the panel."));]]></programlisting>
+		<book-example id="component.label.basic" style="float: right"/>
+        <programlisting><?pocket-size 75% ?><![CDATA[// A container that is 100% wide by default
+VerticalLayout layout = new VerticalLayout();
+
+Label label = new Label("Labeling can be dangerous");
+layout.addComponent(label);]]></programlisting>
 
         <para>
-            As the size of the <classname>Panel</classname> in the above example is fixed,
-            the text in the <classname>Label</classname> will wrap to fit the panel, as
-            shown in <xref linkend="figure.components.label"/>.
+            The text will wrap around and continue on the next line if it exceeds the
+            width of the <classname>Label</classname>. The default width is 100%, so the
+            containing layout must also have a defined width. Some layout components have
+            undefined width by default, such as <classname>HorizontalLayout</classname>,
+            so you need to pay special care with them.
+        </para>
+
+		<book-example id="component.label.wrap" style="float: right"/>
+        <programlisting><?pocket-size 65% ?><![CDATA[// A container with a defined width. The default content layout
+// of Panel is VerticalLayout, which has 100% default width.
+Panel panel = new Panel("Panel Containing a Label");
+panel.setWidth("300px");
+
+panel.addComponent(
+    new Label("This is a Label inside a Panel. There is " +
+              "enough text in the label to make the text " +
+              "wrap when it exceeds the width of the panel."));]]></programlisting>
+
+        <para>
+            As the size of the <classname>Panel</classname> in the above example is fixed
+            and the width of <classname>Label</classname> is the default 100%, the text in
+            the <classname>Label</classname> will wrap to fit the panel, as shown in <xref
+            linkend="figure.components.label"/>.
         </para>
 
 		<figure xml:id="figure.components.label">
@@ -1527,113 +1544,129 @@ panel.addComponent(
 			</mediaobject>
 		</figure>
 
-		<para>
-			The contents of a label are formatted depending on the content mode. By
-			default, the text is assumed to be plain text and any contained XML-specific
-			characters will be quoted appropriately to allow rendering the contents of a
-			label in XHTML in a web browser. The content mode can be set in the constructor
-			or with <methodname>setContentMode()</methodname>, and can have the following
-			values:
-		</para>
+        <para>
+            Setting <classname>Label</classname> to undefined width will cause it to not
+            wrap at the end of the line, as the width of the content defines the width. If
+            placed inside a layout with defined width, the <classname>Label</classname>
+            will overflow the layout horizontally and, normally, be truncated.
+        </para>
 
-		<variablelist>
-			<varlistentry>
-				<term><constant>CONTENT_DEFAULT</constant></term>
-				<listitem>
-					<para>
-                        The default content mode is <varname>CONTENT_TEXT</varname> (see
-                        below).
-                    </para>
-                </listitem>
-            </varlistentry>
-			<varlistentry>
+        <para>
+            Even though <classname>Label</classname> is text and often used as a caption,
+            it also has a caption, just like any other component. As with other
+            components, the caption is managed by the containing layout.
+        </para>
+
+        <section xml:id="components.label.content-mode">
+            <title>Content Mode</title>
+
+            <para>
+                The contents of a label are formatted depending on the content mode. By
+                default, the text is assumed to be plain text and any contained XML-specific
+                characters will be quoted appropriately to allow rendering the contents of a
+                label in XHTML in a web browser. The content mode can be set in the constructor
+                or with <methodname>setContentMode()</methodname>, and can have the following
+                values:
+            </para>
+
+            <variablelist>
+                <varlistentry>
+                    <term><constant>CONTENT_DEFAULT</constant></term>
+                    <listitem>
+                        <para>
+                            The default content mode is <varname>CONTENT_TEXT</varname> (see
+                            below).
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
 				<term><constant>CONTENT_PREFORMATTED</constant></term>
-				<listitem>
-					<para>
-                        Content mode, where the label contains preformatted text. It will
-                        be, by default, rendered with a fixed-width typewriter
-                        font. Preformatted text can contain line breaks, written in Java
-                        with the <literal>\n</literal> escape sequence for a newline
-                        character (ASCII 0x0a), or tabulator characters written with
-                        <literal>\t</literal> (ASCII 0x08).
-                    </para>
-                </listitem>
-            </varlistentry>
-			<varlistentry>
-				<term><constant>CONTENT_RAW</constant></term>
-				<listitem>
-					<para>
-                        Content mode, where the label contains raw text. Output is not
-                        required to be valid XML. It can be, for example, HTML, which can
-                        be unbalanced or otherwise invalid XML. The example below uses the
-                        &lt;br&gt; tag in HTML. While XHTML should be preferred in most
-                        cases, this can be useful for some specific purposes where you may
-                        need to display loosely formatted HTML content. The raw mode also
-                        preserves character entities, some of which might otherwise be
-                        interpreted incorrectly.
-                    </para>
-                </listitem>
-            </varlistentry>
-			<varlistentry>
-				<term><constant>CONTENT_TEXT</constant></term>
-				<listitem>
-					<para>
-                        Content mode, where the label contains only plain text. All
-                        characters are allowed, including the special
-                        <literal>&lt;</literal>, <literal>&gt;</literal>, and
-                        <literal>&amp;</literal> characters in XML or HTML, which are
-                        quoted properly in XHTML while rendering the component. This is
-                        the default mode.
-                    </para>
-                </listitem>
-            </varlistentry>
-			<varlistentry>
-				<term><constant>CONTENT_XHTML</constant></term>
-				<listitem>
-					<para>
-                        Content mode, where the label contains XHTML. The content will be
-                        enclosed in a DIV element having the namespace
-                        "<uri>http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd</uri>".
-                    </para>
-                </listitem>
-            </varlistentry>
-			<varlistentry>
-				<term><constant>CONTENT_XML</constant></term>
-				<listitem>
-					<para>
-                        Content mode, where the label contains well-formed and
-                        well-balanced XML. Each of the root elements must have their
-                        default namespace specified.
-                    </para>
-                </listitem>
-            </varlistentry>
-			<varlistentry>
-				<term><constant>CONTENT_UIDL</constant></term>
-				<listitem>
-					<para>
-                        Formatted content mode, where the contents are XML that is
-                        restricted to UIDL 1.0, the internal language of Vaadin for AJAX
-                        communications between the server and the browser. Obsolete since
-                        IT Mill Toolkit 5.0.
-                    </para>
-                </listitem>
-            </varlistentry>
-        </variablelist>
+                    <listitem>
+                        <para>
+                            Content mode, where the label contains preformatted text. It will
+                            be, by default, rendered with a fixed-width typewriter
+                            font. Preformatted text can contain line breaks, written in Java
+                            with the <literal>\n</literal> escape sequence for a newline
+                            character (ASCII 0x0a), or tabulator characters written with
+                            <literal>\t</literal> (ASCII 0x08).
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><constant>CONTENT_RAW</constant></term>
+                    <listitem>
+                        <para>
+                            Content mode, where the label contains raw text. Output is not
+                            required to be valid XML. It can be, for example, HTML, which can
+                            be unbalanced or otherwise invalid XML. The example below uses the
+                            &lt;br&gt; tag in HTML. While XHTML should be preferred in most
+                            cases, this can be useful for some specific purposes where you may
+                            need to display loosely formatted HTML content. The raw mode also
+                            preserves character entities, some of which might otherwise be
+                            interpreted incorrectly.
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><constant>CONTENT_TEXT</constant></term>
+                    <listitem>
+                        <para>
+                            Content mode, where the label contains only plain text. All
+                            characters are allowed, including the special
+                            <literal>&lt;</literal>, <literal>&gt;</literal>, and
+                            <literal>&amp;</literal> characters in XML or HTML, which are
+                            quoted properly in XHTML while rendering the component. This is
+                            the default mode.
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><constant>CONTENT_XHTML</constant></term>
+                    <listitem>
+                        <para>
+                            Content mode, where the label contains XHTML. The content will be
+                            enclosed in a DIV element having the namespace
+                            "<uri>http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd</uri>".
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><constant>CONTENT_XML</constant></term>
+                    <listitem>
+                        <para>
+                            Content mode, where the label contains well-formed and
+                            well-balanced XML. Each of the root elements must have their
+                            default namespace specified.
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><constant>CONTENT_UIDL</constant></term>
+                    <listitem>
+                        <para>
+                            Formatted content mode, where the contents are XML that is
+                            restricted to UIDL 1.0, the internal language of Vaadin for AJAX
+                            communications between the server and the browser. Obsolete since
+                            IT Mill Toolkit 5.0.
+                        </para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
 
-		<warning>
-			<para>
-				Notice that the validity of XML or XHTML in a <classname>Label</classname>
-				is not checked in the server when rendering the component and any errors
-				can result in an error in the browser! You should validate the content
-				before displaying it in the component, especially if it comes from an
-				uncertain source.
-			</para>
-		</warning>
+            <warning>
+                <para>
+                    Notice that the validity of XML or XHTML in a <classname>Label</classname>
+                    is not checked in the server when rendering the component and any errors
+                    can result in an error in the browser! You should validate the content
+                    before displaying it in the component, especially if it comes from an
+                    uncertain source.
+                </para>
+            </warning>
 
-		<para>
-			The following example demonstrates the use of
-			<classname>Label</classname> in different modes.
-		</para>
+            <para>
+                The following example demonstrates the use of
+                <classname>Label</classname> in different modes.
+            </para>
 
 			<programlisting><?pocket-size 65% ?><![CDATA[GridLayout labelgrid = new GridLayout (2,1);
 
@@ -1672,72 +1705,76 @@ labelgrid.addComponent (
 
 main.addComponent(labelgrid);]]></programlisting>
 
-		<para>
-			The rendering will look as follows:
-		</para>
+            <para>
+                The rendering will look as follows:
+            </para>
 
-		<figure>
-			<title>Label Modes Rendered on Screen</title>
-			<mediaobject>
-				<imageobject role="html">
-					<imagedata align="center" fileref="img/components/label-modes.png"/>
-				</imageobject>
-				<imageobject role="fo">
-					<imagedata scale="60" smallscale="100%" align="center" fileref="img/components/label-modes.png"/>
-				</imageobject>
-			</mediaobject>
-		</figure>
+            <figure>
+                <title>Label Modes Rendered on Screen</title>
+                <mediaobject>
+                    <imageobject role="html">
+                        <imagedata align="center" fileref="img/components/label-modes.png"/>
+                    </imageobject>
+                    <imageobject role="fo">
+                        <imagedata scale="60" smallscale="100%" align="center" fileref="img/components/label-modes.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+        </section>
 
-		<para>
-			Using the XHTML, XML, or raw modes allow inclusion of, for example,
-			images within the text flow, which is not possible with any regular
-			layout components.  The following example includes an image within
-			the text flow, with the image coming from a class loader resource.
-		</para>
+        <section xml:id="components.label.html-mode">
+            <title>Making Use of the XHTML Mode</title>
 
-        <programlisting><?pocket-size 65% ?><![CDATA[ClassResource labelimage = new ClassResource ("labelimage.jpg",
+            <para>
+                Using the XHTML, XML, or raw modes allow inclusion of, for example,
+                images within the text flow, which is not possible with any regular
+                layout components. The following example includes an image within
+                the text flow, with the image coming from a class loader resource.
+            </para>
+            
+            <programlisting><?pocket-size 65% ?><![CDATA[ClassResource labelimage = new ClassResource ("labelimage.jpg",
                                               this);
 main.addComponent(new Label("Here we have an image <img src=\"" +
                             this.getRelativeLocation(labelimage) +
                             "\"/> within text.",
                             Label.CONTENT_XHTML));]]></programlisting>
 
-		<para>
-			When you use a class loader resource, the image has to be included in
-			the JAR of the web application. In this case, the
-			<filename>labelimage.jpg</filename> needs to be in the default
-			package. When rendered in a web browser, the output will look as
-			follows:
-		</para>
+            <para>
+                When you use a class loader resource, the image has to be included in
+                the JAR of the web application. In this case, the
+                <filename>labelimage.jpg</filename> needs to be in the default
+                package. When rendered in a web browser, the output will look as
+                follows:
+            </para>
 
-		<figure>
-			<title>Referencing An Image Resource in Label</title>
-			<mediaobject>
-				<imageobject>
-					<imagedata align="center" fileref="img/components/label-withimage.png"/>
-				</imageobject>
-			</mediaobject>
-		</figure>
+            <figure>
+                <title>Referencing An Image Resource in Label</title>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata align="center" fileref="img/components/label-withimage.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+            
+            <para>
+                Another solution would be to use the
+                <classname>CustomLayout</classname> component, where you can write
+                the component content as an XHTML fragment in a theme, but such a
+                solution may be too heavy for most cases.
+            </para>
 
-		<para>
-			Another solution would be to use the
-			<classname>CustomLayout</classname> component, where you can write
-			the component content as an XHTML fragment in a theme, but such a
-			solution may be too heavy for most cases, and not flexible enough if
-			the content needs to be dynamically generated.
-		</para>
+            <para>
+                Notice that the rendering of XHTML depends on the assumption that the
+                client software and the terminal adapter are XHTML based. It is
+                possible to write a terminal adapter for a custom thin client
+                application, which may not be able to render XHTML at all. There are
+                also differences between web browsers in their support of XHTML.
+            </para>
+        </section>
 
-		<para>
-			Notice that the rendering of XHTML depends on the assumption that the
-			client software and the terminal adapter are XHTML based. It is
-			possible to write a terminal adapter for a custom thin client
-			application, which may not be able to render XHTML at all. There are
-			also differences between web browsers in their support of XHTML.
-		</para>
-
-        <simplesect>
+        <section xml:id="components.label.spacing">
             <title>Spacing with a <classname>Label</classname></title>
-
+                
             <para>
                 You can use a <classname>Label</classname> to create vertical or
                 horizontal space in a layout. If you need a empty "line" in a vertical
@@ -1790,10 +1827,10 @@ horizontal.setExpandRatio(expandingGap, 1.0f);
 // A component after the gap (a collapsing cell)
 Button button2 = new Button("I'm on the right");
 horizontal.addComponent(button2);]]></programlisting>
-        </simplesect>
+        </section>
 
 
-		<simplesect>
+		<section xml:id="components.label.css">
 			<title>CSS Style Rules</title>
 
             <para>
@@ -1809,7 +1846,7 @@ horizontal.addComponent(button2);]]></programlisting>
                 "<literal>light</literal>" (<methodname>Reindeer.LABEL_SMALL</methodname>)
                 style.
             </para>
-        </simplesect>
+        </section>
 	</section>
 
 	<section xml:id="components.link">
