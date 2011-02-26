@@ -95,9 +95,19 @@
 		</para>
 
 		<para>
-            In addition to the interfaces, Vaadin library provides a number of built-in
-            implementations of the interfaces. The built-in implementations are used as
-            the default data models in many field components.
+            Vaadin provides a number of built-in implementations of the data model
+            interfaces. The built-in implementations are used as the default data models
+            in many field components.
+        </para>
+
+		<para>
+            In addition to the built-in implementations, many data model implementations,
+            such as containers, are available as add-ons, either from the Vaadin Directory
+            or from independent sources. Both commercial and free implementations
+            exist. The installation of add-ons is described in <xref
+            linkend="advanced.addons"/>. Notice that, unlike with most regular add-on
+            components, you do not need to compile a widget set for add-ons that include
+            just data model implementations.
         </para>
 	</section>
 
@@ -493,23 +503,23 @@ form.setItemDataSource(item);]]></programlisting>
 	</section>
 
 	<section xml:id="datamodel.container">
-		<title>Collecting items in Containers</title>
+		<title>Collecting Items in Containers</title>
 
 		<para>
 			<classname>Container</classname> is the highest-level of the data model
 			interfaces supported by Vaadin. It provides a very flexible way of managing a
-			set of items that share common properties. Each item is identified by an
-			<emphasis>item identifier</emphasis> or <emphasis>IID</emphasis>.
+			set of items that share common properties. Contained items are identified by
+			an <emphasis>item identifier</emphasis> or <emphasis>IID</emphasis>.
         </para>
 
         <para>
             Items can be added to a container with the <methodname>addItem()</methodname>
             method.  Notice that the actual item is not passed as a parameter to the
-            method, only the item ID, as the interface assumes that the implementation
-            knows how to create the item. The parameterless version of the method uses an
-            automatically generated item ID. Implementations can provide methods to add
-            externally created items, or they can assume that the item ID is also the item
-            itself.
+            method, only the item ID, as the interface assumes that the container
+            implementation knows how to create the item. The parameterless version of the
+            method uses an automatically generated item ID. Implementations can provide
+            methods to add externally created items, or they can assume that the item ID
+            is also the item itself.
         </para>
 
         <para>
@@ -565,6 +575,188 @@ form.setItemDataSource(item);]]></programlisting>
 			(beans) to items of an indexed container. In addition, the built-in containers
 			include a hierarchical container for direct file system browsing.
 		</para>
+
+        <section xml:id="datamodel.container.beancontainer">
+            <title><classname>BeanContainer</classname></title>
+
+            <para>
+                The <classname>BeanContainer</classname> is an in-memory container for
+                JavaBean objects. Each contained bean is wrapped inside a
+                <classname>BeanItem</classname> wrapper. The item properties are
+                determined automatically by inspecting the getter and setter methods of
+                the class. This requires that the bean class has public visibility, local
+                classes for example are not allowed. Only beans of the same type can be
+                added to the container.
+            </para>
+
+            <para>
+                The generic has two parameters: a bean type and an item identifier type.
+                The item identifiers can be obtained by defining a custom resolver, using
+                a specific item property for the IDs, or by giving item IDs explicitly. As
+                such, it is more general than the
+                <classname>BeanItemContainer</classname>, which uses the bean object
+                itself for item identifier. Managing the item IDs makes
+                <classname>BeanContainer</classname> more complex to use, but it is
+                necessary in some cases where the <methodname>equals()</methodname> or
+                <methodname>hashCode()</methodname> methods have been reimplemented in the
+                bean.
+            </para>
+
+            <book-example id="datamodel.container.beancontainer.basic" style="float: right"/>
+            <programlisting><?pocket-size 65% ?><![CDATA[// Here is a JavaBean
+public class Bean implements Serializable {
+    String name;
+    double energy; // Energy content in kJ/100g
+    
+    public Bean(String name, double energy) {
+        this.name   = name;
+        this.energy = energy;
+    }
+    
+    public String getName() {
+        return name;
+    }
+    
+    public void setName(String name) {
+        this.name = name;
+    }
+    
+    public double getEnergy() {
+        return energy;
+    }
+    
+    public void setEnergy(double energy) {
+        this.energy = energy;
+    }
+}
+
+void basic(VerticalLayout layout) {
+    // Create a container for such beans with
+    // strings as item IDs.
+    BeanContainer<String, Bean> beans =
+        new BeanContainer<String, Bean>(Bean.class);
+    
+    // Use the name property as the item ID of the bean
+    beans.setBeanIdProperty("name");
+
+    // Add some beans to it
+    beans.addBean(new Bean("Mung bean",   1452.0));
+    beans.addBean(new Bean("Chickpea",    686.0));
+    beans.addBean(new Bean("Lentil",      1477.0));
+    beans.addBean(new Bean("Common bean", 129.0));
+    beans.addBean(new Bean("Soybean",     1866.0));
+
+    // Bind a table to it
+    Table table = new Table("Beans of All Sorts", beans);
+    layout.addComponent(table);
+}]]></programlisting>
+            
+            <para>
+                To use explicit item IDs, use the methods <methodname>addItem(Object,
+                Object)</methodname>, <methodname>addItemAfter(Object, Object,
+                Object)</methodname>, and <methodname>addItemAt(int, Object,
+                Object)</methodname>.
+            </para>
+
+            <para>
+                It is not possible to add additional properties to the container and
+                nested bean properties are not supported.
+            </para>
+
+            <section xml:id="datamodel.container.beancontainer.idresolver">
+                <title>Defining a Bean ID Resolver</title>
+
+                <para>
+                    If a bean ID resolver is set using
+                    <methodname>setBeanIdResolver()</methodname> or
+                    <methodname>setBeanIdProperty()</methodname>, the methods
+                    <methodname>addBean()</methodname>,
+                    <methodname>addBeanAfter()</methodname>,
+                    <methodname>addBeanAt()</methodname> and
+                    <methodname>addAll()</methodname> can be used to add items to the
+                    container. If one of these methods is called, the resolver is used to
+                    generate an identifier for the item (must not return
+                    <parameter>null</parameter>).
+                </para>
+
+                <para>
+                    Note that explicit item identifiers can also be used when a resolver has
+                    been set by calling the <methodname>addItem*()</methodname> methods - the
+                    resolver is only used when adding beans using the
+                    <methodname>addBean*()</methodname> or
+                    <methodname>addAll(Collection)</methodname> methods.
+                </para>
+            </section>
+        </section>
+
+        <section xml:id="datamodel.container.beanitemcontainer">
+            <title><classname>BeanItemContainer</classname></title>
+
+            <para>
+                <classname>BeanItemContainer</classname> is a container for JavaBean
+                objects. Each contained bean is wrapped inside a
+                <classname>BeanItem</classname> wrapper. The item properties are
+                determined automatically by inspecting the getter and setter methods of
+                the class. This requires that the bean class has public visibility, local
+                classes for example are not allowed. Only beans of the same type can be
+                added to the container.
+            </para>
+
+            <para>
+                <classname>BeanItemContainer</classname> is a specialized version of the
+                <classname>BeanContainer</classname> described in <xref
+                linkend="datamodel.container.beancontainer"/>. It uses the bean itself as
+                the item identifier, which makes it a bit easier to use than
+                <classname>BeanContainer</classname> in many cases. The latter is,
+                however, needed if the bean has reimplemented the
+                <methodname>equals()</methodname> or <methodname>hashCode()</methodname>
+                methods.
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[// Here is a bean
+public class Bean implements Serializable {
+    String name;
+    double energy; // Energy content in kJ/100g
+    
+    public Bean(String name, double energy) {
+        this.name   = name;
+        this.energy = energy;
+    }
+    
+    public String getName() {
+        return name;
+    }
+    
+    public void setName(String name) {
+        this.name = name;
+    }
+    
+    public double getEnergy() {
+        return energy;
+    }
+    
+    public void setEnergy(double energy) {
+        this.energy = energy;
+    }
+}
+    
+void basic(VerticalLayout layout) {
+    // Create a container for such beans
+    BeanItemContainer<Bean> beans =
+        new BeanItemContainer<Bean>(Bean.class);
+    
+    // Add some beans to it
+    beans.addBean(new Bean("Mung bean",   1452.0));
+    beans.addBean(new Bean("Chickpea",    686.0));
+    beans.addBean(new Bean("Lentil",      1477.0));
+    beans.addBean(new Bean("Common bean", 129.0));
+    beans.addBean(new Bean("Soybean",     1866.0));
+
+    // Bind a table to it
+    Table table = new Table("Beans of All Sorts", beans);
+    layout.addComponent(table);]]></programlisting>
+
+        </section>
 
         <section>
             <title>Iterating Over a Container</title>

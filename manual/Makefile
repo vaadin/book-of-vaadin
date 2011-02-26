@@ -30,12 +30,13 @@ IMAGES =	intro/architecture intro/architecture-detailed intro/toolchain intro/to
 			components/tooltip-plain-withpointer components/tooltip-richtext-withpointer \
 			components/field-diagram components/field-interface \
 			components/slider-example1 \
+			components/textfield-diagram \
 			application/application-architecture application/resource_classdiagram \
 			advanced/liferay-display \
 			themes/theme-contents themes/eclipse-theme-created-annotated \
 			gwt/gwt-widgets gwt/gwt-widget-files gwt/gwt-hostedmode-project-annotated\
 			gwt/gwt-custom-architecture \
-			vaadin-logo \
+			vaadin-logo book-example \
 			eclipse/editor-design-2-crop eclipse/widgetset-compiling-toolbar \
 			datamodel/datamodel-interfaces
 

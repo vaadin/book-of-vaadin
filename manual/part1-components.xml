@@ -388,13 +388,13 @@
 						<term><methodname>required</methodname></term>
 						<listitem>
 							<para>
-								A field can be marked as required and a required
-								indicator marker (usually * character) is displayed in
-								front of the field. If such fields are validated but
-								are empty, the error indicator is shown and the
-								component error is set to the text defined with the
-								<methodname>requiredError</methodname> attribute (see
-								below). Without validation, the required indicator is
+								When enabled, a required indicator (usually the asterisk *
+								character) is displayed in front of the field. If such
+								fields are validated but are empty and the
+								<methodname>requiredError</methodname> property (see
+								below) is set, an error indicator is shown and the
+								component error is set to the text defined with the error
+								property. Without validation, the required indicator is
 								merely a visual guide.
 							</para>
 						</listitem>
@@ -404,11 +404,12 @@
 						<listitem>
 							<para>
 								Defines the error message to show when a value is
-								required for a field but no value is given. The error
-								message is set as the component error for the field
-								and is usually displayed in a tooltip. The
-								<classname>Form</classname> component can display the
-								error message in a special error indicator area.
+								required, but none is entered. The error message is set as
+								the component error for the field and is usually displayed
+								in a tooltip when the mouse pointer hovers over the error
+								indicator. The <classname>Form</classname> component can
+								display the error message in a special error indicator
+								area.
 							</para>
 						</listitem>
 					</varlistentry>
@@ -1493,26 +1494,43 @@ mycomponent.setHeight("400px");]]></programlisting>
 		<title><classname>Label</classname></title>
 
 		<para>
-			<classname>Label</classname> is a text component that you can use to
-			display non-editable text. The text will wrap
-			around if the width of the containing component limits the length of the
-			lines (except for preformatted text).
+			<classname>Label</classname> is a text component that you can use to display
+			non-editable text. In addition to regular text, you can also display
+			preformatted text and HTML, depending on the <emphasis>content mode</emphasis>
+			of the label.
 		</para>
-		
-		<programlisting><?pocket-size 65% ?><![CDATA[// A container for the Label.
-Panel panel = new Panel("Panel Containing a Label");
-panel.setWidth("200px"); // Defined width.
-main.addComponent(panel);
 
-panel.addComponent(
-    new Label("This is a Label inside a Panel. There is enough " +
-              "text in the label to make the text wrap if it " +
-              "exceeds the width of the panel."));]]></programlisting>
+		<book-example id="component.label.basic" style="float: right"/>
+        <programlisting><?pocket-size 75% ?><![CDATA[// A container that is 100% wide by default
+VerticalLayout layout = new VerticalLayout();
+
+Label label = new Label("Labeling can be dangerous");
+layout.addComponent(label);]]></programlisting>
 
         <para>
-            As the size of the <classname>Panel</classname> in the above example is fixed,
-            the text in the <classname>Label</classname> will wrap to fit the panel, as
-            shown in <xref linkend="figure.components.label"/>.
+            The text will wrap around and continue on the next line if it exceeds the
+            width of the <classname>Label</classname>. The default width is 100%, so the
+            containing layout must also have a defined width. Some layout components have
+            undefined width by default, such as <classname>HorizontalLayout</classname>,
+            so you need to pay special care with them.
+        </para>
+
+		<book-example id="component.label.wrap" style="float: right"/>
+        <programlisting><?pocket-size 65% ?><![CDATA[// A container with a defined width. The default content layout
+// of Panel is VerticalLayout, which has 100% default width.
+Panel panel = new Panel("Panel Containing a Label");
+panel.setWidth("300px");
+
+panel.addComponent(
+    new Label("This is a Label inside a Panel. There is " +
+              "enough text in the label to make the text " +
+              "wrap when it exceeds the width of the panel."));]]></programlisting>
+
+        <para>
+            As the size of the <classname>Panel</classname> in the above example is fixed
+            and the width of <classname>Label</classname> is the default 100%, the text in
+            the <classname>Label</classname> will wrap to fit the panel, as shown in <xref
+            linkend="figure.components.label"/>.
         </para>
 
 		<figure xml:id="figure.components.label">
@@ -1527,113 +1545,129 @@ panel.addComponent(
 			</mediaobject>
 		</figure>
 
-		<para>
-			The contents of a label are formatted depending on the content mode. By
-			default, the text is assumed to be plain text and any contained XML-specific
-			characters will be quoted appropriately to allow rendering the contents of a
-			label in XHTML in a web browser. The content mode can be set in the constructor
-			or with <methodname>setContentMode()</methodname>, and can have the following
-			values:
-		</para>
+        <para>
+            Setting <classname>Label</classname> to undefined width will cause it to not
+            wrap at the end of the line, as the width of the content defines the width. If
+            placed inside a layout with defined width, the <classname>Label</classname>
+            will overflow the layout horizontally and, normally, be truncated.
+        </para>
 
-		<variablelist>
-			<varlistentry>
-				<term><constant>CONTENT_DEFAULT</constant></term>
-				<listitem>
-					<para>
-                        The default content mode is <varname>CONTENT_TEXT</varname> (see
-                        below).
-                    </para>
-                </listitem>
-            </varlistentry>
-			<varlistentry>
+        <para>
+            Even though <classname>Label</classname> is text and often used as a caption,
+            it also has a caption, just like any other component. As with other
+            components, the caption is managed by the containing layout.
+        </para>
+
+        <section xml:id="components.label.content-mode">
+            <title>Content Mode</title>
+
+            <para>
+                The contents of a label are formatted depending on the content mode. By
+                default, the text is assumed to be plain text and any contained XML-specific
+                characters will be quoted appropriately to allow rendering the contents of a
+                label in XHTML in a web browser. The content mode can be set in the constructor
+                or with <methodname>setContentMode()</methodname>, and can have the following
+                values:
+            </para>
+
+            <variablelist>
+                <varlistentry>
+                    <term><constant>CONTENT_DEFAULT</constant></term>
+                    <listitem>
+                        <para>
+                            The default content mode is <varname>CONTENT_TEXT</varname> (see
+                            below).
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
 				<term><constant>CONTENT_PREFORMATTED</constant></term>
-				<listitem>
-					<para>
-                        Content mode, where the label contains preformatted text. It will
-                        be, by default, rendered with a fixed-width typewriter
-                        font. Preformatted text can contain line breaks, written in Java
-                        with the <literal>\n</literal> escape sequence for a newline
-                        character (ASCII 0x0a), or tabulator characters written with
-                        <literal>\t</literal> (ASCII 0x08).
-                    </para>
-                </listitem>
-            </varlistentry>
-			<varlistentry>
-				<term><constant>CONTENT_RAW</constant></term>
-				<listitem>
-					<para>
-                        Content mode, where the label contains raw text. Output is not
-                        required to be valid XML. It can be, for example, HTML, which can
-                        be unbalanced or otherwise invalid XML. The example below uses the
-                        &lt;br&gt; tag in HTML. While XHTML should be preferred in most
-                        cases, this can be useful for some specific purposes where you may
-                        need to display loosely formatted HTML content. The raw mode also
-                        preserves character entities, some of which might otherwise be
-                        interpreted incorrectly.
-                    </para>
-                </listitem>
-            </varlistentry>
-			<varlistentry>
-				<term><constant>CONTENT_TEXT</constant></term>
-				<listitem>
-					<para>
-                        Content mode, where the label contains only plain text. All
-                        characters are allowed, including the special
-                        <literal>&lt;</literal>, <literal>&gt;</literal>, and
-                        <literal>&amp;</literal> characters in XML or HTML, which are
-                        quoted properly in XHTML while rendering the component. This is
-                        the default mode.
-                    </para>
-                </listitem>
-            </varlistentry>
-			<varlistentry>
-				<term><constant>CONTENT_XHTML</constant></term>
-				<listitem>
-					<para>
-                        Content mode, where the label contains XHTML. The content will be
-                        enclosed in a DIV element having the namespace
-                        "<uri>http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd</uri>".
-                    </para>
-                </listitem>
-            </varlistentry>
-			<varlistentry>
-				<term><constant>CONTENT_XML</constant></term>
-				<listitem>
-					<para>
-                        Content mode, where the label contains well-formed and
-                        well-balanced XML. Each of the root elements must have their
-                        default namespace specified.
-                    </para>
-                </listitem>
-            </varlistentry>
-			<varlistentry>
-				<term><constant>CONTENT_UIDL</constant></term>
-				<listitem>
-					<para>
-                        Formatted content mode, where the contents are XML that is
-                        restricted to UIDL 1.0, the internal language of Vaadin for AJAX
-                        communications between the server and the browser. Obsolete since
-                        IT Mill Toolkit 5.0.
-                    </para>
-                </listitem>
-            </varlistentry>
-        </variablelist>
+                    <listitem>
+                        <para>
+                            Content mode, where the label contains preformatted text. It will
+                            be, by default, rendered with a fixed-width typewriter
+                            font. Preformatted text can contain line breaks, written in Java
+                            with the <literal>\n</literal> escape sequence for a newline
+                            character (ASCII 0x0a), or tabulator characters written with
+                            <literal>\t</literal> (ASCII 0x08).
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><constant>CONTENT_RAW</constant></term>
+                    <listitem>
+                        <para>
+                            Content mode, where the label contains raw text. Output is not
+                            required to be valid XML. It can be, for example, HTML, which can
+                            be unbalanced or otherwise invalid XML. The example below uses the
+                            &lt;br&gt; tag in HTML. While XHTML should be preferred in most
+                            cases, this can be useful for some specific purposes where you may
+                            need to display loosely formatted HTML content. The raw mode also
+                            preserves character entities, some of which might otherwise be
+                            interpreted incorrectly.
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><constant>CONTENT_TEXT</constant></term>
+                    <listitem>
+                        <para>
+                            Content mode, where the label contains only plain text. All
+                            characters are allowed, including the special
+                            <literal>&lt;</literal>, <literal>&gt;</literal>, and
+                            <literal>&amp;</literal> characters in XML or HTML, which are
+                            quoted properly in XHTML while rendering the component. This is
+                            the default mode.
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><constant>CONTENT_XHTML</constant></term>
+                    <listitem>
+                        <para>
+                            Content mode, where the label contains XHTML. The content will be
+                            enclosed in a DIV element having the namespace
+                            "<uri>http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd</uri>".
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><constant>CONTENT_XML</constant></term>
+                    <listitem>
+                        <para>
+                            Content mode, where the label contains well-formed and
+                            well-balanced XML. Each of the root elements must have their
+                            default namespace specified.
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><constant>CONTENT_UIDL</constant></term>
+                    <listitem>
+                        <para>
+                            Formatted content mode, where the contents are XML that is
+                            restricted to UIDL 1.0, the internal language of Vaadin for AJAX
+                            communications between the server and the browser. Obsolete since
+                            IT Mill Toolkit 5.0.
+                        </para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
 
-		<warning>
-			<para>
-				Notice that the validity of XML or XHTML in a <classname>Label</classname>
-				is not checked in the server when rendering the component and any errors
-				can result in an error in the browser! You should validate the content
-				before displaying it in the component, especially if it comes from an
-				uncertain source.
-			</para>
-		</warning>
+            <warning>
+                <para>
+                    Notice that the validity of XML or XHTML in a <classname>Label</classname>
+                    is not checked in the server when rendering the component and any errors
+                    can result in an error in the browser! You should validate the content
+                    before displaying it in the component, especially if it comes from an
+                    uncertain source.
+                </para>
+            </warning>
 
-		<para>
-			The following example demonstrates the use of
-			<classname>Label</classname> in different modes.
-		</para>
+            <para>
+                The following example demonstrates the use of
+                <classname>Label</classname> in different modes.
+            </para>
 
 			<programlisting><?pocket-size 65% ?><![CDATA[GridLayout labelgrid = new GridLayout (2,1);
 
@@ -1672,72 +1706,76 @@ labelgrid.addComponent (
 
 main.addComponent(labelgrid);]]></programlisting>
 
-		<para>
-			The rendering will look as follows:
-		</para>
+            <para>
+                The rendering will look as follows:
+            </para>
 
-		<figure>
-			<title>Label Modes Rendered on Screen</title>
-			<mediaobject>
-				<imageobject role="html">
-					<imagedata align="center" fileref="img/components/label-modes.png"/>
-				</imageobject>
-				<imageobject role="fo">
-					<imagedata scale="60" smallscale="100%" align="center" fileref="img/components/label-modes.png"/>
-				</imageobject>
-			</mediaobject>
-		</figure>
+            <figure>
+                <title>Label Modes Rendered on Screen</title>
+                <mediaobject>
+                    <imageobject role="html">
+                        <imagedata align="center" fileref="img/components/label-modes.png"/>
+                    </imageobject>
+                    <imageobject role="fo">
+                        <imagedata scale="60" smallscale="100%" align="center" fileref="img/components/label-modes.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+        </section>
 
-		<para>
-			Using the XHTML, XML, or raw modes allow inclusion of, for example,
-			images within the text flow, which is not possible with any regular
-			layout components.  The following example includes an image within
-			the text flow, with the image coming from a class loader resource.
-		</para>
+        <section xml:id="components.label.html-mode">
+            <title>Making Use of the XHTML Mode</title>
 
-        <programlisting><?pocket-size 65% ?><![CDATA[ClassResource labelimage = new ClassResource ("labelimage.jpg",
+            <para>
+                Using the XHTML, XML, or raw modes allow inclusion of, for example,
+                images within the text flow, which is not possible with any regular
+                layout components. The following example includes an image within
+                the text flow, with the image coming from a class loader resource.
+            </para>
+            
+            <programlisting><?pocket-size 65% ?><![CDATA[ClassResource labelimage = new ClassResource ("labelimage.jpg",
                                               this);
 main.addComponent(new Label("Here we have an image <img src=\"" +
                             this.getRelativeLocation(labelimage) +
                             "\"/> within text.",
                             Label.CONTENT_XHTML));]]></programlisting>
 
-		<para>
-			When you use a class loader resource, the image has to be included in
-			the JAR of the web application. In this case, the
-			<filename>labelimage.jpg</filename> needs to be in the default
-			package. When rendered in a web browser, the output will look as
-			follows:
-		</para>
+            <para>
+                When you use a class loader resource, the image has to be included in
+                the JAR of the web application. In this case, the
+                <filename>labelimage.jpg</filename> needs to be in the default
+                package. When rendered in a web browser, the output will look as
+                follows:
+            </para>
 
-		<figure>
-			<title>Referencing An Image Resource in Label</title>
-			<mediaobject>
-				<imageobject>
-					<imagedata align="center" fileref="img/components/label-withimage.png"/>
-				</imageobject>
-			</mediaobject>
-		</figure>
+            <figure>
+                <title>Referencing An Image Resource in Label</title>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata align="center" fileref="img/components/label-withimage.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+            
+            <para>
+                Another solution would be to use the
+                <classname>CustomLayout</classname> component, where you can write
+                the component content as an XHTML fragment in a theme, but such a
+                solution may be too heavy for most cases.
+            </para>
 
-		<para>
-			Another solution would be to use the
-			<classname>CustomLayout</classname> component, where you can write
-			the component content as an XHTML fragment in a theme, but such a
-			solution may be too heavy for most cases, and not flexible enough if
-			the content needs to be dynamically generated.
-		</para>
+            <para>
+                Notice that the rendering of XHTML depends on the assumption that the
+                client software and the terminal adapter are XHTML based. It is
+                possible to write a terminal adapter for a custom thin client
+                application, which may not be able to render XHTML at all. There are
+                also differences between web browsers in their support of XHTML.
+            </para>
+        </section>
 
-		<para>
-			Notice that the rendering of XHTML depends on the assumption that the
-			client software and the terminal adapter are XHTML based. It is
-			possible to write a terminal adapter for a custom thin client
-			application, which may not be able to render XHTML at all. There are
-			also differences between web browsers in their support of XHTML.
-		</para>
-
-        <simplesect>
+        <section xml:id="components.label.spacing">
             <title>Spacing with a <classname>Label</classname></title>
-
+                
             <para>
                 You can use a <classname>Label</classname> to create vertical or
                 horizontal space in a layout. If you need a empty "line" in a vertical
@@ -1790,10 +1828,10 @@ horizontal.setExpandRatio(expandingGap, 1.0f);
 // A component after the gap (a collapsing cell)
 Button button2 = new Button("I'm on the right");
 horizontal.addComponent(button2);]]></programlisting>
-        </simplesect>
+        </section>
 
 
-		<simplesect>
+		<section xml:id="components.label.css">
 			<title>CSS Style Rules</title>
 
             <para>
@@ -1809,7 +1847,7 @@ horizontal.addComponent(button2);]]></programlisting>
                 "<literal>light</literal>" (<methodname>Reindeer.LABEL_SMALL</methodname>)
                 style.
             </para>
-        </simplesect>
+        </section>
 	</section>
 
 	<section xml:id="components.link">
@@ -1875,47 +1913,597 @@ horizontal.addComponent(button2);]]></programlisting>
 	<section xml:id="components.textfield">
 		<title><classname>TextField</classname></title>
 
+        <indexterm xml:id="term:components.textfield" class="startofrange">
+            <primary><classname>TextField</classname></primary>
+        </indexterm>
+
 		<para>
-			<classname>TextField</classname> is one of the most common user
-			interface components and is highly versatile. It supports both
-			single- and multi-line editing, password input, and buffering.
+			<classname>TextField</classname> is one of the most commonly used user
+			interface components. It is a <classname>Field</classname> component that
+			allows entering textual values using keyboard.
 		</para>
 
 		<para>
-			The following example creates two simple text fields: a single-line
-			and a multi-line <classname>TextField</classname>.
+			The following example creates a simple text field:
 		</para>
 
-		<programlisting><![CDATA[/* Add a single-line text field. */
-TextField subject = new TextField("Subject");
-subject.setColumns(40);
-main.addComponent(subject);
+        <book-example id="component.textfield.basic" style="float: right"/>
 
-/* Add a multi-line text field. */
-TextField message = new TextField("Message");
-message.setRows(7);
-message.setColumns(40);
-main.addComponent(message);]]></programlisting>
+        <programlisting><?pocket-size 65% ?><![CDATA[// Create a text field
+TextField tf = new TextField("A Field");
+        
+// Put some initial content in it
+tf.setValue("Stuff in the field");]]></programlisting>
 
-		<figure>
-			<title>Single- and Multi-Line Text Field Example</title>
+        <para>
+            See the result in <xref linkend="figure:components.textfield.basic"/>.
+        </para>
+
+		<figure xml:id="figure:components.textfield.basic">
+			<title><classname>TextField</classname> Example</title>
 			<mediaobject>
 				<imageobject role="html">
 					<imagedata align="center" fileref="img/components/textfield-example.png"/>
 				</imageobject>
 				<imageobject role="fo">
-					<imagedata smallscale="130" align="center" fileref="img/components/textfield-example.png"/>
+					<imagedata smallscale="90%" align="center" fileref="img/components/textfield-example.png"/>
 				</imageobject>
 			</mediaobject>
 		</figure>
 
+        <para>
+            Value changes are handled with a
+            <classname>Property.ValueChangeListener</classname>, as in most other
+            fields. The value can be acquired with <methodname>getValue()</methodname>
+            directly from the text field, as is done in the example below, or from the
+            property reference of the event.
+        </para>
+
+        <book-example id="component.textfield.inputhandling" style="float: right"/>
+
+        <programlisting><?pocket-size 65% ?><![CDATA[// Handle changes in the value
+tf.addListener(new Property.ValueChangeListener() {
+    public void valueChange(ValueChangeEvent event) {
+        // Assuming that the value type is a String
+        String value = (String) tf.getValue();
+
+        // Do something with the value
+        getWindow().showNotification("Value is:", value);
+    }
+});
+        
+// Fire value changes immediately when the field loses focus
+tf.setImmediate(true);]]></programlisting>
+
+        <para>
+            Much of the API of <classname>TextField</classname> is defined in
+            <classname>AbstractTextField</classname>, which allows different kinds of text
+            input fields, such as rich text editors, which do not share all the features
+            of the single-line text fields.
+        </para>
+
+		<figure xml:id="figure:components.textfield.api">
+			<title>Text Field Class Relationships</title>
+			<mediaobject>
+				<imageobject role="html">
+					<imagedata align="center" fileref="img/components/textfield-diagram-lo.png"/>
+				</imageobject>
+				<imageobject role="fo">
+					<imagedata smallscale="75%" align="center" fileref="img/components/textfield-diagram-lo.png"/>
+				</imageobject>
+			</mediaobject>
+		</figure>
+
+        <section xml:id="components.textfield.databinding">
+            <title>Data Binding</title>
+
+            <book-example id="component.textfield.valuetype" style="float: right"/>
+            <para>
+                You can bind a <classname>TextField</classname> to any property type that
+                allows conversion of the value to and from <classname>String</classname> with
+                the <methodname>getValue()</methodname> and
+                <methodname>setValue()</methodname> methods.
+            </para>
+
+            <book-example id="component.textfield.databinding" style="float: right"/>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[// Have an initial data model. As Double is unmodificable and
+// doesn't support assignment from String, the object is
+// reconstructed in the wrapper when the value is changed.
+Double trouble = 42.0;
+        
+// Wrap it in a property data source
+final ObjectProperty<Double> property =
+    new ObjectProperty<Double>(trouble);
+        
+// Create a text field bound to it
+TextField tf = new TextField("The Answer", property);
+tf.setImmediate(true);
+
+// Show that the value is really written back to the
+// data source when edited by user.
+Label feedback = new Label(property);
+feedback.setCaption("The Value");]]></programlisting>
+
+            <para>
+                When you put values in a <classname>Form</classname> or
+                <classname>Table</classname>, the
+                <classname>DefaultFieldFactory</classname> creates a
+                <classname>TextField</classname> for almost every property type by
+                default. However, you often need to make a custom factory that sets the
+                text field description, immediateness, validation, formatting, and so on.
+            </para>
+
+            <para>
+                See <xref linkend="datamodel"/> for more details on data binding, field
+                factories for <classname>Table</classname> in <xref
+                linkend="components.table.editing"/>, and for <classname>Form</classname>
+                in <xref linkend="components.form.binding.fieldfactory"/>.
+            </para>
+
+            <book-example id="component.textfield.beanbinding">
+                Bean Binding
+            </book-example>
+        </section>
+
+        <section xml:id="components.textfield.length">
+            <title>String Length</title>
+
+            <para>
+                The <methodname>setMaxLength()</methodname> method sets the maximum length
+                of the input string so that the browser prevents the user from entering a
+                longer one. As a security feature, the input value is automatically
+                truncated on the server-side, as the maximum length setting could be
+                bypassed on the client-side. The maximum length property is defined at
+                <classname>AbstractTextField</classname> level.
+            </para>
+
+            <para>
+                Notice that the maximum length setting does not affect the width of the
+                field. You can set the width with <methodname>setWidth()</methodname>, as
+                with other components. Using <emphasis>em</emphasis> widths is recommended
+                to better approximate the proper width in relation to the size of the used
+                font. There is no standard way in HTML for setting the width exactly to a
+                number of letters (in a monospaced font). You can trick your way around
+                this restriction by putting the text field in an undefined-width
+                <classname>VerticalLayout</classname> together with an undefined-width
+                <classname>Label</classname> that contains a sample text, and setting the
+                width of the text field as 100%. The layout will get its width from the
+                label, and the text field will use that.
+            </para>
+
+            <book-example id="component.textfield.widthfitting">
+                Fitting TextField width to fixed input length
+            </book-example>
+        </section>
+
+        <section xml:id="components.textfield.nullvalues">
+            <title>Handling Null Values</title>
+
+            <indexterm xml:id="term:components.textfield.nullvalues" class="startofrange">
+                <primary>Null representation</primary>
+            </indexterm>
+
+            <para>
+                <indexterm><primary><methodname>setNullRepresentation()</methodname></primary></indexterm>
+
+                As with any field, the value of a <classname>TextField</classname> can be
+                set as <parameter>null</parameter>. This occurs most commonly when you
+                create a new field without setting a value for it or bind the field value
+                to a data source that allows null values. In such case, you might want to
+                show a special value that stands for the null value. You can set the null
+                representation with the <methodname>setNullRepresentation()</methodname>
+                method. Most typically, you use an empty string for the null
+                representation, unless you want to differentiate from a string that is
+                explicitly empty. The default null representation is
+                "<literal>null</literal>", which essentially warns that you may have
+                forgotten to initialize your data objects properly. 
+            </para>
+
+            <para>
+                <indexterm><primary><methodname>setNullSettingAllowed()</methodname></primary></indexterm>
+
+                The <methodname>setNullSettingAllowed()</methodname> controls whether the
+                user can actually input a null value by using the null value
+                representation. If the setting is <literal>false</literal>, which is the
+                default, inputting the null value representation string sets the value as
+                the literal value of the string, not null. This default assumption is a
+                safeguard for data sources that may not allow null values.
+            </para>
+
+            <book-example id="component.textfield.nullvaluerepresentation" style="float: right"/>
+
+<programlisting><?pocket-size 75% ?><![CDATA[// Create a text field without setting its value
+TextField tf = new TextField("Field Energy (J)");
+tf.setNullRepresentation("-- null-point energy --");
+
+// The null value is actually the default
+tf.setValue(null);
+        
+// Allow user to input the null value by
+// its representation
+tf.setNullSettingAllowed(true);
+
+// Feedback to see the value
+Label value = new Label(tf);
+value.setCaption("Current Value:");]]></programlisting>
+
+            <para>
+                The <classname>Label</classname>, which is bound to the value of the
+                <classname>TextField</classname>, displays a null value as empty. The
+                resulting user interface is shown in <xref
+                linkend="figure:components.textfield.nullvalues"/>.
+            </para>
+
+            <figure xml:id="figure:components.textfield.nullvalues">
+                <title>Null Value Representation</title>
+                <mediaobject>
+                    <imageobject role="html">
+                        <imagedata align="center" fileref="img/components/textfield-nullrepresentation.png"/>
+                    </imageobject>
+                    <imageobject role="fo">
+                        <imagedata smallscale="90%" align="center" fileref="img/components/textfield-nullrepresentation.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+
+            <indexterm startref="term:components.textfield.nullvalues" class="endofrange"/>
+        </section>
+
+        <!--section>
+            <title>Formatting Text Field Values</title>
+
+            <para>
+        TODO
+            </para>
+        </section -->
+
+        <section xml:id="components.textfield.textchangeevents">
+            <title>Text Change Events</title>
+
+            <indexterm xml:id="term:components.textfield.textchangeevents" class="startofrange">
+                <primary><classname>Text change events</classname></primary>
+            </indexterm>
+
+            <para>
+                Often you want to receive a change event immediately when the text field
+                value changes. The <emphasis>immediate</emphasis> mode is not literally
+                immediate, as the changes are transmitted only after the field loses
+                focus. In the other extreme, using keyboard events for every keypress
+                would make typing unbearably slow and also processing the keypresses is
+                too complicated for most purposes. <emphasis>Text change events</emphasis>
+                are transmitted asynchronously soon after typing and do not block typing
+                while an event is being processed.
+            </para>
+
+            <para>
+                Text change events are received with a
+                <classname>TextChangeListener</classname>, as is done in the following
+                example that demonstrates how to create a text length counter:
+            </para>
+
+            <book-example id="component.textfield.textchangeevents" style="float: right"/>
+            <programlisting><?pocket-size 65% ?><![CDATA[// Text field with maximum length
+final TextField tf = new TextField("My Eventful Field");
+tf.setValue("Initial content");
+tf.setMaxLength(20);
+
+// Counter for input length
+final Label counter = new Label();
+counter.setValue(tf.toString().length() +
+                 " of " + tf.getMaxLength());
+        
+// Display the current length interactively in the counter
+tf.addListener(new TextChangeListener() {
+    public void textChange(TextChangeEvent event) {
+        int len = event.getText().length();
+        counter.setValue(len + " of " + tf.getMaxLength());
+    }
+});
+
+// This is actually the default
+tf.setTextChangeEventMode(TextChangeEventMode.LAZY);]]></programlisting>
+
+            <para>
+                The result is shown in <xref linkend="figure:components.textfield.textchangeevents"/>.
+            </para>
+
+            <figure xml:id="figure:components.textfield.textchangeevents">
+                <title>Text Change Events</title>
+                <mediaobject>
+                    <imageobject role="html">
+                        <imagedata align="center" fileref="img/components/textfield-textchangeevents.png"/>
+                    </imageobject>
+                    <imageobject role="fo">
+                        <imagedata smallscale="70%" align="center" fileref="img/components/textfield-textchangeevents.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+
+            <para>
+                The <emphasis>text change event mode</emphasis> defines how quickly the
+                changes are transmitted to the server and cause a server-side
+                event. Lazier change events allow sending larger changes in one event if
+                the user is typing fast, thereby reducing server requests.
+            </para>
+
+            <para>
+                You can set the text change event mode of a
+                <classname>TextField</classname> with
+                <methodname>setTextChangeEventMode()</methodname>. The allowed modes are
+                defined in <classname>TextChangeEventMode</classname> class and are the
+                following:
+            </para>
+
+            <variablelist>
+                <varlistentry>
+                    <term><parameter>TextChangeEventMode.LAZY</parameter> (default)</term>
+                    <listitem>
+                        <para>
+                            An event is triggered when there is a pause in editing the
+                            text. The length of the pause can be modified with
+                            <methodname>setInputEventTimeout()</methodname>. As with the
+                            <parameter>TIMEOUT</parameter> mode, a text change event is
+                            forced before a possible
+                            <classname>ValueChangeEvent</classname>, even if the user did
+                            not keep a pause while entering the text.
+                        </para>
+
+                        <para>
+                            This is the default mode.
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>TextChangeEventMode.TIMEOUT</parameter></term>
+                    <listitem>
+                        <para>
+                            A text change in the user interface causes the event to be
+                            communicated to the application after a timeout period. If
+                            more changes are made during this period, the event sent to
+                            the server-side includes the changes made up to the last
+                            change. The length of the timeout can be set with
+                            <methodname>setInputEventTimeout()</methodname>.
+                        </para>
+
+                        <para>
+                            If a <classname>ValueChangeEvent</classname> would occur
+                            before the timeout period, a
+                            <classname>TextChangeEvent</classname> is triggered before it,
+                            on the condition that the text content has changed since the
+                            previous <classname>TextChangeEvent</classname>.
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>TextChangeEventMode.EAGER</parameter></term>
+                    <listitem>
+                        <para>
+                            An event is triggered immediately for every change in the text
+                            content, typically caused by a key press. The requests are
+                            separate and are processed sequentially one after
+                            another. Change events are nevertheless communicated
+                            asynchronously to the server, so further input can be typed
+                            while event requests are being processed.
+                        </para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+
+            <indexterm startref="term:components.textfield.textchangeevents" class="endofrange"/>
+        </section>
+
+        <section xml:id="components.textfield.css">
+            <title>CSS Style Rules</title>
+
+			<programlisting><![CDATA[.v-textfield { }]]></programlisting>
+
+            <para>
+                The HTML structure of <classname>TextField</classname> is extremely simple,
+                consisting only of an element with <literal>v-textfield</literal> style.
+            </para>
+
+            <para>
+                For example, the following custom style uses dashed border:
+            </para>
+
+            <book-example id="component.textfield.css" style="float: right"/>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[.v-textfield-dashing {
+    border:     thin dashed;
+    background: white; /* Has shading image by default */
+}]]></programlisting>
+
+            <para>
+                The result is shown in <xref linkend="figure:components.textfield.css"/>.
+            </para>
+
+            <figure xml:id="figure:components.textfield.css">
+                <title>Styling TextField with CSS</title>
+                <mediaobject>
+                    <imageobject role="html">
+                        <imagedata align="center" fileref="img/components/textfield-css.png"/>
+                    </imageobject>
+                    <imageobject role="fo">
+                        <imagedata smallscale="100%" align="center" fileref="img/components/textfield-css.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+
+            <para>
+                The style name for <classname>TextField</classname> is also used in
+                several components that contain a text input field, even if the text input
+                is not an actual <classname>TextField</classname>. This ensures that the
+                style of different text input boxes is similar.
+            </para>
+        </section>
+
+        <indexterm startref="term:components.textfield" class="endofrange"/>
+	</section>
+
+	<section xml:id="components.textarea">
+		<title><classname>TextArea</classname></title>
+
 		<para>
-			Notice how font size affects the width of the text fields even though
-			the width was set with the same number of columns. This is a feature
-			of HTML.
+			<classname>TextArea</classname> is a multi-line version of the
+			<classname>TextField</classname> component described in <xref
+			linkend="components.textfield"/>.
 		</para>
 
+		<para>
+			The following example creates a simple text area:
+		</para>
+
+        <book-example id="component.textarea.basic" style="float: right"/>
+
+<programlisting><?pocket-size 65% ?><![CDATA[// Create the area
+TextArea area = new TextArea("Big Area");
+        
+// Put some content in it
+area.setValue("A row\n"+
+              "Another row\n"+
+              "Yet another row");]]></programlisting>
+
+        <para>
+            The result is shown in <xref linkend="figure:components.textarea"/>.
+        </para>
+
+		<figure xml:id="figure:components.textarea">
+			<title><classname>TextArea</classname> Example</title>
+			<mediaobject>
+				<imageobject role="html">
+					<imagedata align="center" fileref="img/components/textarea-basic.png"/>
+				</imageobject>
+				<imageobject role="fo">
+					<imagedata smallscale="100%" align="center" fileref="img/components/textarea-basic.png"/>
+				</imageobject>
+			</mediaobject>
+		</figure>
+
+        <para>
+            You can set the number of visible rows with <methodname>setRows()</methodname>
+            or use the regular <methodname>setHeight()</methodname> to define the height
+            in other units. If the actual number of rows exceeds the number, a vertical
+            scrollbar will appear. Setting the height with
+            <methodname>setRows()</methodname> leaves space for a horizontal scrollbar, so
+            the actual number of visible rows may be one higher if the scrollbar is not
+            visible.
+        </para>
+
+        <para>
+            You can set the width with the regular <methodname>setWidth()</methodname>
+            method. Setting the size with the <emphasis>em</emphasis> unit, which is
+            relative to the used font size, is recommended.
+        </para>
+
+        <simplesect xml:id="components.textarea.wordwrap">
+            <title>Word Wrap</title>
+
+            <para>
+                The <methodname>setWordwrap()</methodname> sets whether long lines are
+                wrapped (<literal>true</literal> - default) when the line length reaches
+                the width of the writing area. If the word wrap is disabled
+                (<literal>false</literal>), a vertical scrollbar will appear instead. The
+                word wrap is only a visual feature and wrapping a long line does not
+                insert line break characters in the field value; shortening a wrapped line
+                will undo the wrapping.
+            </para>
+            
+            <book-example id="component.textarea.wordwrap" style="float: right"/>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[TextArea area1 = new TextArea("Wrapping");
+area1.setWordwrap(true); // The default
+area1.setValue("A quick brown fox jumps over the lazy dog");
+
+TextArea area2 = new TextArea("Nonwrapping");
+area2.setWordwrap(false);
+area2.setValue("Victor jagt zw&ouml;lf Boxk&auml;mpfer quer "+
+               "&uuml;ber den Sylter Deich");]]></programlisting>
+
+            <para>
+                The result is shown in <xref linkend="figure:components.textarea.wordwrap"/>.
+            </para>
+
+            <figure xml:id="figure:components.textarea.wordwrap">
+                <title>Word Wrap in <classname>TextArea</classname></title>
+                <mediaobject>
+                    <imageobject role="html">
+                        <imagedata align="center" fileref="img/components/textarea-wordwrap.png"/>
+                    </imageobject>
+                    <imageobject role="fo">
+                        <imagedata smallscale="100%" align="center" fileref="img/components/textarea-wordwrap.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+        </simplesect>
+
+        <simplesect xml:id="components.textarea.css">
+            <title>CSS Style Rules</title>
+
+			<programlisting><![CDATA[.v-textarea { }]]></programlisting>
+
+            <para>
+                The HTML structure of <classname>TextArea</classname> is extremely simple,
+                consisting only of an element with <literal>v-textarea</literal> style.
+            </para>
+
+            <book-example id="component.textarea.css">CSS Styling</book-example>
+        </simplesect>
 	</section>
+
+	<section xml:id="components.passwordfield">
+		<title><classname>PasswordField</classname></title>
+
+        <para>
+            The <classname>PasswordField</classname> is a variant of
+            <classname>TextField</classname> that hides the typed input from visual
+            inspection.
+        </para>
+
+        <book-example id="component.passwordfield.basic" style="float: right"/>
+
+        <programlisting><?pocket-size 65% ?><![CDATA[PasswordField tf = new PasswordField("Keep it secret");]]></programlisting>
+
+        <para>
+            The result is shown in <xref linkend="figure:components.passwordfield.basic"/>.
+        </para>
+
+        <figure xml:id="figure:components.passwordfield.basic">
+            <title><classname>PasswordField</classname></title>
+            <mediaobject>
+                <imageobject role="html">
+                    <imagedata align="center" fileref="img/components/passwordfield-basic.png"/>
+                </imageobject>
+                <imageobject role="fo">
+                    <imagedata smallscale="100%" align="center" fileref="img/components/passwordfield-basic.png"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
+
+        <para>
+            You should note that the <classname>PasswordField</classname> hides the input
+            only from "over the shoulder" visual observation. Unless the server connection
+            is encrypted with a secure connection, such as HTTPS, the input is transmitted
+            in clear text and may be intercepted by anyone with low-level access to the
+            network. Also phishing attacks that intercept the input in the browser may be
+            possible by exploiting JavaScript execution security holes in the browser.
+        </para>
+
+        <simplesect xml:id="components.passwordfield.css">
+            <title>CSS Style Rules</title>
+
+			<programlisting><![CDATA[.v-textfield { }]]></programlisting>
+
+            <para>
+                The <classname>PasswordField</classname> does not have its own CSS style
+                name but uses the same <literal>v-textfield</literal> style as the regular
+                <classname>TextField</classname>. See <xref
+                linkend="components.textfield.css"/> for information on styling it.
+            </para>
+
+            <book-example id="component.passwordfield.css">CSS Styling</book-example>
+        </simplesect>
+    </section>
 
 	<section xml:id="components.richtextarea">
 		<title><classname>RichTextArea</classname></title>
@@ -3366,14 +3954,42 @@ group.setItemEnabled("Two", false);]]></programlisting>
                 <para>
                     The options are normally laid out vertically. You can use horizontal
                     layout by setting <literal>display: inline-block</literal> for the
-                    options. Notice, however, that the options will wrap when they reach
-                    the available width in the containing layout, and the layout must not
-                    have an undefined width.
+                    options. The <literal>nowrap</literal> setting for the overall element
+                    prevents wrapping if there is not enough horizontal space in the
+                    layout, or if the horizontal width is undefined.
                 </para>
 
-                <programlisting><?pocket-size 65% ?><![CDATA[.v-select-option {
+                <programlisting><?pocket-size 65% ?><![CDATA[/* Lay the options horizontally */
+.v-select-optiongroup-horizontal .v-select-option {
     display: inline-block;
+}
+
+/* Avoid wrapping if the layout is too tight */
+.v-select-optiongroup-horizontal {
+    white-space: nowrap;
+}
+
+/* Some extra spacing is needed */
+.v-select-optiongroup-horizontal
+  .v-select-option.v-radiobutton {
+    padding-right: 10px;
 }]]></programlisting>
+
+                <para>
+                    Use of the above rules requires setting a custom
+                    <literal>horizontal</literal> style name for the component. The result
+                    is shown in <xref
+                    linkend="figure.components.selecting.optiongroup.horizontal"/>.
+                </para>
+
+                <figure xml:id="figure.components.selecting.optiongroup.horizontal">
+                    <title>Horizontal <classname>OptionGroup</classname></title>
+                    <mediaobject>
+                        <imageobject>
+                            <imagedata smallscale="70%" align="center" fileref="img/components/optiongroup-horizontal.png"/>
+                        </imageobject>
+                    </mediaobject>
+                </figure>
 
 			</simplesect>
 		</section>
@@ -3381,30 +3997,99 @@ group.setItemEnabled("Two", false);]]></programlisting>
 		<section xml:id="components.selecting.twincolselect">
 			<title>Twin Column Selection with <classname>TwinColSelect</classname></title>
 			<para>
-				The <classname>TwinColSelect</classname> class provides a multiple
-				selection component that shows two lists side by side. The user can select
-				items from the list on the left and click on the "&gt;&gt;" button to move
-				them to the list on the right. Items can be moved back by selecting them
-				and clicking on the "&lt;&lt;" button.
+				The <classname>TwinColSelect</classname> field provides a multiple
+				selection component that shows two lists side by side, with the left
+				column containing unselected items and the right column the selected
+				items. The user can select items from the list on the left and click on
+				the "&gt;&gt;" button to move them to the list on the right. Items can be
+				deselected by selecting them in the right list and clicking on the
+				"&lt;&lt;" button.
 			</para>
 
-			<figure>
+			<para>
+                <classname>TwinColSelect</classname> is always in multi-select mode, so
+                its property value is always a collection of the item IDs of the selected
+                items, that is, the items in the right column.
+            </para>
+
+            <para>
+                The selection columns can have their own captions, separate from the
+                overall component caption, which is managed by the containing layout. You
+                can set the column captions with
+                <methodname>setLeftColumnCaption()</methodname> and
+                <methodname>setRightColumnCaption()</methodname>.
+            </para>
+
+            <book-example id="component.select.twincolselect.captions" style="float: right"/>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[final TwinColSelect select =
+    new TwinColSelect("Select Targets to Destroy");
+
+// Set the column captions (optional)
+select.setLeftColumnCaption("These are left");
+select.setRightColumnCaption("These are done for");
+        
+// Put some data in the select
+String planets[] = {"Mercury", "Venus", "Earth", "Mars",
+        "Jupiter", "Saturn", "Uranus", "Neptune"};
+for (int pl=0; pl<planets.length; pl++)
+    select.addItem(planets[pl]);
+
+// Set the number of visible items
+select.setRows(planets.length);]]></programlisting>
+
+            <para>
+                The resulting component is shown in <xref
+                linkend="figure:components.selecting.twincolselect.captions"/>.
+            </para>
+
+			<figure xml:id="figure:components.selecting.twincolselect.captions">
 				<title>Twin Column Selection</title>
 				<mediaobject>
 					<imageobject>
-						<imagedata smallscale="130" align="center" fileref="img/components/select-twincol.png"/>
+						<imagedata smallscale="100%" align="center" fileref="img/components/select-twincol.png"/>
 					</imageobject>
 				</mediaobject>
 			</figure>
 
+            <para>
+                The <methodname>setRows()</methodname> method sets the height of the
+                component by the number of visible items in the selection boxes. Setting
+                the height with <methodname>setHeight()</methodname> to a defined value
+                overrides the rows setting.
+            </para>
+            
 			<simplesect>
 				<title>CSS Style Rules</title>
 				
 				<programlisting><![CDATA[.v-select-twincol {}
-.v-select-twincol-options {}
-.v-select-twincol-selections {}
-.v-select-twincol-buttons {}
-.v-select-twincol-deco {}]]></programlisting>
+  .v-select-twincol-options-caption {}
+  .v-select-twincol-selections-caption {}
+  .v-select-twincol-options {}
+  .v-select-twincol-buttons {}
+    .v-button {}
+      .v-button-wrap {}
+        .v-button-caption {}
+    .v-select-twincol-deco {}
+  .v-select-twincol-selections {}]]></programlisting>
+
+                <para>
+                    The <classname>TwinColSelect</classname> component has an overall
+                    <literal>v-select-twincol</literal> style. If set, the left and right
+                    column captions have
+                    <literal>v-select-twincol-options-caption</literal> and
+                    <literal>v-select-twincol-options-caption</literal> style names,
+                    respectively. The left box, which displays the unselected items, has
+                    <literal>v-select-twincol-options-caption</literal> style and the
+                    right box, which displays the selected items, has
+                    <literal>v-select-twincol-options-selections</literal> style. Between
+                    them is the button area, which has overall
+                    <literal>v-select-twincol-buttons</literal> style; the actual buttons
+                    reuse the styles for the <classname>Button</classname>
+                    component. Between the buttons is a divider element with
+                    <literal>v-select-twincol-deco</literal> style.
+                </para>
+
 			</simplesect>
 		</section>
 
@@ -6724,6 +7409,315 @@ protected byte[] getLoginHTML() {
             components is covered in <xref linkend="gwt"/>.
 		</para>
 	</section>
+
+    <section xml:id="advanced.addons">
+        <title>Using Add-on Components</title>
+
+		<para>
+            In addition to the built-in components, layouts, themes, and data sources,
+            many others are available as add-ons, either from the Vaadin Directory or from
+            independent sources. Both commercial and free components exist.
+        </para>
+
+		<para>
+            Installation of themes, data sources, and components built with server-side
+            component composition is simple, just dropping a JAR package in a project
+            and, usually, compiling the included widget set (the client-side
+            implementation).
+        </para>
+
+        <section xml:id="advanced.addons.downloading">
+            <title>Downloading Add-ons from Vaadin Directory</title>
+
+            <para>
+                Vaadin Directory at <uri>http://vaadin.com/directory/</uri> provides a
+                rich collection of add-ons for Vaadin. You can download Directory add-on
+                packages from the details page of an add-on.
+            </para>
+
+            <orderedlist>
+                <listitem>
+                    <para>
+                        Select the version; some add-ons have several versions available.
+                        The latest is shown by default, but you can choose another the
+                        version to download from the dropdown menu in the header of the
+                        details page.
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        Click <guibutton>Download Now</guibutton> and save the JAR or Zip
+                        file on your computer.
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        If the add-on is packaged in a Zip package, unzip the package and
+                        follow any instructions provided inside the package. Typically,
+                        you just need to copy a JAR file to your web project under the
+                        <filename>WEB-INF/lib</filename> directory.
+                    </para>
+                </listitem>
+
+                <listitem>
+                    <para>
+                        Update and recompile your project. In Eclipse, select the project
+                        and press F5.
+                    </para>
+                </listitem>
+
+                <listitem>
+                    <para>
+                        You need to compile the client-side implementations of the add-on
+                        components, that is, a <emphasis>widget set</emphasis>. This is
+                        the case for majority of add-ons, except for pure server-side,
+                        theme, or data binding add-ons. You must recompile the widget set
+                        if you install a new version of the add-on or the Vaadin
+                        library. See the subsequent sections for detailed instructions for
+                        compiling widget sets.
+                    </para>
+                </listitem>
+
+                <listitem>
+                    <para>
+                        Update the project in web server and possibly restart the server.
+                    </para>
+                </listitem>
+            </orderedlist>
+
+            <para>
+                After trying out an add-on, you can give some feedback to the author of
+                the add-on by rating the add-on with one to five stars and optionally
+                leaving a comment.
+            </para>
+
+            <para>
+                Please note the add-on license. While most commercial add-ons can be
+                downloaded directly, you should note their license and other terms and
+                conditions. Many are offered under a dual licensing agreement so that they
+                can be used in open source projects for free, and many have a trial period
+                for closed-source development.
+            </para>
+        </section>
+
+        <section xml:id="advanced.addons.compiling-eclipse">
+            <title>Compiling Add-on Widget Sets in Eclipse</title>
+
+            <para>
+                To be able to compile widget sets in Eclipse, you need to have the Vaadin
+                Plugin for Eclipse installed, as instructed in <xref
+                linkend="getting-started.environment.eclipse-plugin"/>.
+            </para>
+
+            <para>
+                An application can only have one widget set, so if you use multiple
+                add-ons and possibly your own custom widgets, they need to be combined to
+                a single widget set that inherits them. You can create the combining
+                widget set manually and the Eclipse plugin simply update it when you add
+                new add-ons. Otherwise, the Eclipse plugin automatically creates a
+                project-specific widget set under the project root source folder.
+            </para>
+
+            <para>
+                The Eclipse plugin compiles widget sets automatically by default. They do
+                not normally need to be recompiled after changes to server-side classes,
+                so if the automatic recompilation get annoying, disable it from the
+                project settings.
+            </para>
+
+            <para>
+                To compile the widget set(s) manually, click the <guilabel>Compile Vaadin
+                widgets</guilabel> button in Eclipse toolbar or press
+                <keycombo><keycap>Ctrl</keycap><keycap>6</keycap></keycombo>. You must
+                recompile the widget set(s) always when you install a new version of the
+                add-on or of the Vaadin library.
+            </para>
+
+            <!-- TODO: Better icon as requested in #3692. -->
+            <figure xml:id="figure.advanced.addons.compiling-eclipse.toolbar">
+				<title>The <guibutton>Compile Vaadin widgets</guibutton> Button in Eclipse Toolbar</title>
+				<mediaobject>
+					<imageobject role="html">
+						<imagedata align="center" fileref="img/eclipse/widgetset-compiling-toolbar-lo.png"/>
+					</imageobject>
+					<imageobject role="fo">
+						<imagedata scale="100" smallscale="70%" align="center" fileref="img/eclipse/widgetset-compiling-toolbar-hi.png"/>
+					</imageobject>
+				</mediaobject>
+			</figure>
+
+            <para>
+                Further information on defining and compiling widget sets is given in
+                <xref linkend="gwt.eclipse.compiling"/>, <xref linkend="gwt.widgetset"/>,
+                and <xref linkend="gwt.development.compiler"/>.
+            </para>
+        </section>
+
+        <section xml:id="advanced.addons.compiling-ant">
+            <title>Compiling Add-on Widget Sets with an Ant Script</title>
+
+            <para>
+                The Vaadin installation package (the Zip package) includes an example Ant
+                build script for compiling a widget set. The script is located in
+                <filename>WebContent/docs/example-source/build-widgetset.xml</filename>. Once
+                you have unpacked the installation package and changed to the directory in
+                a command-line window, you can enter:
+            </para>
+
+			<screen><prompt>$</prompt> <command>ant -f WebContent/docs/example-source/build-widgetset.xml</command></screen>
+
+            <para>
+                You can copy the build script to your project. See <xref
+                linkend="gwt.development.compiler"/> for details on configuring the build
+                script and the available build targets, and <xref
+                linkend="gwt.widgetset"/> for information on the widget set definition
+                file.
+            </para>
+
+            <para>
+                If you are using an IDE such as Eclipse, <emphasis>always</emphasis>
+                remember to refresh the project after compiling the widget set.
+            </para>
+        </section>
+
+        <section xml:id="advanced.addons.troubleshooting">
+            <title>Troubleshooting</title>
+
+            <para>
+                If you experience problems, do the following:
+            </para>
+
+            <itemizedlist>
+                <listitem>
+                    <para>
+                        Check the <filename>.gwt.xml</filename> widget set definition file
+                        under the widget set folder in the project root package. For
+                        example, if the project root package is
+                        <filename>com.example.myproject</filename>, the widget set
+                        definition file would be
+                        <filename>com.example.myproject.widgetset.MyprojectWidgetset.gwt.xml</filename>. See
+                        <xref linkend="gwt.widgetset"/> for details on the contents of the
+                        widget set definition file.
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        Check the <filename>WEB-INF/web.xml</filename> deployment
+                        descriptor and see that the servlet for your application has a
+                        widget set parameter, such as the following:
+                    </para>
+
+                    <programlisting><?pocket-size 65% ?><![CDATA[<init-param>
+  <description>Application widgetset</description>
+  <param-name>widgetset</param-name>
+  <param-value>com.example.myproject.widgetset.MyprojectWidgetset</param-value>
+</init-param>]]></programlisting>
+                </listitem>
+                <listitem>
+                    <para>
+                        See the <filename>VAADIN/widgetsets</filename> directory and check
+                        that the widget set appears there. You can remove it and recompile
+                        to see that compilation works properly.
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        Use the <guilabel>Net</guilabel> tab in Firebug to see that the
+                        widget set (and theme) is loaded properly.
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        Use the <uri>?debug</uri> parameter for the application to see if
+                        there is any version conflict between the widget set and the
+                        Vaadin library, or the themes. See <xref
+                        linkend="advanced.debug-production-modes.debug.mode"/> for
+                        details.
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        Refresh and recompile the project. In Eclipse, select the project
+                        and press <keycap>F5</keycap>, stop the server, clean the server
+                        temporary directories, and restart it.
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        Check the Error Log view in Eclipse (or the IDE you use).
+                    </para>
+                </listitem>
+            </itemizedlist>
+
+            <para>
+                For more specific problems related to widget sets definition and
+                compilation, see <xref linkend="gwt.development.troubleshooting"/>.
+            </para>
+        </section>
+
+        <section xml:id="advanced.addons.removing">
+            <title>Removing Widget Sets</title>
+
+            <para>
+                Version mismatch problems with custom widget sets are a common source of
+                grief for many beginners in Vaadin. If you need add-ons or your own custom
+                components that include widget sets, you of course need to compile them,
+                but otherwise it is unnecessary.
+            </para>
+
+            <para>
+                If you do not use any such add-ons or your own custom components, do the
+                following:
+            </para>
+
+            <orderedlist>
+                <listitem>
+                    <para>
+                        If you are using the Eclipse plugin, disable automatic widget set
+                        compilation from project preferences, in the
+                        <guilabel>Vaadin</guilabel> category, by selecting
+                        <guilabel>Suspend automatic widgetset builds</guilabel>. This
+                        prevents accidental compilation of the unnecessary widget
+                        sets. You may want to do this anyhow as the automatic builds can
+                        be annoying. You can still always build the widget set with the
+                        button in the toolbar.
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        Remove all widget set folders from under the
+                        <filename>VAADIN/widgetsets</filename> folder.
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        Edit the <filename>WEB-INF/web.xml</filename> file and remove the
+                        <parameter>widgetset</parameter> init parameter from the
+                        servlet. It looks as follows:
+                    </para>
+
+                    <programlisting><?pocket-size 65% ?><![CDATA[<init-param>
+  <description>Application widgetset</description>
+  <param-name>widgetset</param-name>
+  <param-value>com.vaadin.demo.colorpicker.widgetset.ColorPickerWidgetSet</param-value>
+</init-param>]]></programlisting>
+                </listitem>
+                <listitem>
+                    <para>
+                        Refresh the project. In Eclipse, select the project and press F5,
+                        stop the server, clean the server temporary directories, and
+                        restart it.
+                    </para>
+                </listitem>
+            </orderedlist>
+        </section>
+
+        <para>
+            At least in development environments, if you have extracted Vaadin themes to
+            the <filename>VAADIN/themes</filename> folder, you should remove them and let
+            them be loaded dynamically from the Vaadin JAR.
+        </para>
+    </section>
 </chapter>
 	
 <!-- Keep this comment at the end of the file
