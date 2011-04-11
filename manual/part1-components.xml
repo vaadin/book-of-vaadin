@@ -725,8 +725,12 @@ layout.addComponent(disabled);]]></programlisting>
             <para>
                 A disabled component is automatically put in read-only state. No client
                 interaction with such a component is sent to the server and, as an
-                important security feature, the server-side component does not receive
-                state updates from the client.
+                important security feature, the server-side components do not receive
+                state updates from the client in the read-only state. This feature exists
+                in all built-in components in Vaadin and is automatically handled for all
+                <classname>Field</classname> components for the field property value. For
+                custom widgets, you need to make sure that the read-only state is checked
+                on the server-side for all safety-critical variables.
             </para>
 
             <simplesect>
@@ -1082,14 +1086,21 @@ layout.addComponent(readonly);]]></programlisting>
 
             <para>
                 Client-side state modifications will not be communicated to the
-                server-side and, more important, server-side field components will not
-                accept changes to the value of a read-only component. This is an important
-                security feature, because a malicious user can not fabricate state changes
-                in a read-only component. Notice that this occurs at the level of
-                <classname>AbstractField</classname> in
-                <methodname>setValue()</methodname> and therefore only applies to the
-                property value of the component; a component could itself accept some
-                variable changes from the client-side.
+                server-side and, more importantly, server-side field components will not
+                accept changes to the value of a read-only <classname>Field</classname>
+                component. The latter is an important security feature, because a
+                malicious user can not fabricate state changes in a read-only field. This
+                is handled occurs at the level of <classname>AbstractField</classname> in
+                <methodname>setValue()</methodname> and therefore applies automatically to
+                the property value of the component, but not to all other component
+                variables. A read-only component could accept some other variable changes
+                from the client-side and some of such changes could be acceptable, such as
+                change in a scroll bar position of a <classname>Table</classname>. Custom
+                widgets should check the read-only state for variables bound to business
+                data.
+
+                <!-- TODO: Note this also in the Advanced: Security section and
+                   possibly also in the GWT chapter. -->
             </para>
 
             <simplesect>
