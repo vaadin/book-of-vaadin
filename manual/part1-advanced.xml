@@ -3531,7 +3531,7 @@ login.addListener(new Button.ClickListener() {
     public void buttonClick(ClickEvent event) {
         Object value = newuser.getValue(); 
         if (value != null &&
-            !((String)value).equals("")) {
+            ! "".equals((String)value)) {
             username = (String) value;
 
             Cookie cookie = new Cookie("username",
@@ -3584,7 +3584,7 @@ response.addCookie(cookie);]]></programlisting>
         if (username == null) {
             Cookie[] cookies = request.getCookies();
             for (int i=0; i<cookies.length; i++) {
-                if (cookies[i].getName().equals("username"))
+                if ("username".equals(cookies[i].getName()))
                     // Log the user in automatically
                     username = cookies[i].getValue();
             }
@@ -4201,17 +4201,25 @@ tree.setDropHandler(new DropHandler() {
                 </para>
 
                 <para>
-                    You can disable the accept indicators or <emphasis>drag
-                    hints</emphasis> with the
-                    <parameter>no-vertical-drag-hints</parameter>,
+                    For <classname>DragAndDropWrapper</classname> drop targets, you can
+                    disable the accept indicators or <emphasis>drag hints</emphasis> with
+                    the <parameter>no-vertical-drag-hints</parameter>,
                     <parameter>no-horizontal-drag-hints</parameter>, and
-                    <parameter>no-box-drag-hints</parameter> styles, as shown in the
-                    following example.
+                    <parameter>no-box-drag-hints</parameter> styles. You need to add the
+                    styles to the <emphasis>layout that contains</emphasis> the wrapper,
+                    not to the wrapper itself.
                 </para>
 
-                <programlisting><?pocket-size 65% ?><![CDATA[wrapper.addStyleName("no-vertical-drag-hints");
-wrapper.addStyleName("no-horizontal-drag-hints");
-wrapper.addStyleName("no-box-drag-hints");]]></programlisting>
+                <programlisting><?pocket-size 65% ?><![CDATA[// Have a wrapper
+DragAndDropWrapper wrapper = new DragAndDropWrapper(c);
+layout.addComponent(wrapper);
+
+// Disable the hints
+layout.addStyleName("no-vertical-drag-hints");
+layout.addStyleName("no-horizontal-drag-hints");
+layout.addStyleName("no-box-drag-hints");]]></programlisting>
+
+                <!-- TODO: Document also styles for the Tree and Table. -->
             </section>
 
             <indexterm startref="term:advanced.dragndrop.acceptcriteria" class="endofrange"/>
@@ -4492,6 +4500,337 @@ pos.setTopValue(pos.getTopValue() + yChange);]]></programlisting>
   }
 }]]></programlisting>
         </simplesect>
+    </section>
+
+    <section xml:id="advanced.global">
+        <title>Accessing Session-Global Data</title>
+
+        <para>
+            Applications typically need to access some objects from practically all user
+            interface code, such as a user object, a business data model, or a database
+            connection. This data is typically initialized and managed in the application
+            class. Some such data is built-in into the <classname>Application</classname>
+            class, such as the locale.
+        </para>
+
+        <para>
+            You can access the application object from any user interface component using
+            the <methodname>getApplication()</methodname> method. For example:
+        </para>
+
+        <programlisting><?pocket-size 65% ?><![CDATA[class MyApplication extends Application {
+    UserData userData;
+
+    public void init() {
+        userData = new UserData();
+    }
+
+    public UserData getUserData() {
+        return userData;
+    }
+}
+
+...
+data = ((MyApplication)component.getApplication()).getUserData();]]></programlisting>
+
+        <simplesect xml:id="advanced.global.passing.problem">
+            <title>The Problem</title>
+
+            <para>
+                The basic problem in accessing session-global data is that the
+                <methodname>getApplication()</methodname> method works only after the
+                component has been attached to the application. Before that, it returns
+                <parameter>null</parameter>. This is the case in constructors of
+                components, such as a <classname>CustomComponent</classname>:
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[class MyComponent extends CustomComponent {
+    public MyComponent() {
+        // This fails with NullPointerException
+        Label label = new Label("Country: " +
+            getApplication().getLocale().getCountry());
+
+        setCompositionRoot(label);
+    }
+}]]></programlisting>
+
+            <para>
+                Using a static variable or a singleton implemented with such to give a
+                global access to user session data is not possible, because static
+                variables are global in the entire web application, not just the user
+                session. This can be handy for communicating data between the concurrent
+                sessions, but creates a problem within a session.
+            </para>
+
+            <para>
+                For example, the following would not work:
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[class MyApplication extends Application {
+    static UserData userData;
+
+    public void init() {
+        userData = new UserData();
+    }
+
+    public static UserData getUserData() {
+        return userData;
+    }
+}]]></programlisting>
+
+            <para>
+                The data would be shared by all users and be reinitialized every time a
+                new user opens the application.
+            </para>
+        </simplesect>
+
+        <simplesect xml:id="advanced.global.passing.solutions-overview">
+            <title>Overview of Solutions</title>
+
+            <para>
+                To get the application object or any other global data, you have the
+                following solutions:
+            </para>
+
+            <itemizedlist>
+                <listitem>
+                    <para>
+                        Pass a reference to the global data as a parameter.
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        Initialize components in <methodname>attach()</methodname> method.
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        Store a reference to global data using the <emphasis>ThreadLocal Pattern</emphasis>.
+                    </para>
+                </listitem>
+            </itemizedlist>
+
+            <para>
+                Each solution is described in the following sections.
+            </para>
+        </simplesect>
+
+        <section xml:id="advanced.global.passing">
+            <title>Passing References Around</title>
+
+            <para>
+                You can pass references to objects as parameters. This is the normal way
+                in object-oriented programming.
+            </para>
+
+        <programlisting><?pocket-size 65% ?><![CDATA[class MyApplication extends Application {
+    UserData userData;
+
+    public void init() {
+        Window mainWindow = new Window("My Window");
+        setMainWindow(mainWindow);
+
+        userData = new UserData();
+        
+        mainWindow.addComponent(new MyComponent(this));
+    }
+
+    public UserData getUserData() {
+        return userData;
+    }
+}
+
+class MyComponent extends CustomComponent {
+    public MyComponent(MyApplication app) {
+        Label label = new Label("Name: " +
+            app.getUserData().getName());
+
+        setCompositionRoot(label);
+    }
+}]]></programlisting>
+
+            <para>
+                If you need the reference in other methods, you either have to pass it
+                again as a parameter or store it in a member variable.
+            </para>
+
+            <para>
+                The problem with this solution is that practically all constructors in the
+                application need to get a reference to the application object, and passing
+                it further around in the classes is another hard task.
+            </para>
+        </section>
+        
+        <section xml:id="advanced.global.attach">
+            <title>Overriding <methodname>attach()</methodname></title>
+
+            <para>
+                The <methodname>attach()</methodname> method is called when the component
+                is attached to the application component through containment
+                hierarchy. The <methodname>getApplication()</methodname> method always
+                works.
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[class MyComponent extends CustomComponent {
+    public MyComponent() {
+        // Must set a dummy root in constructor
+        setCompositionRoot(new Label(""));
+    }
+
+    @Override
+    public void attach() {    
+        Label label = new Label("Name: " +
+            ((MyApplication)component.getApplication())
+                .getUserData().getName());
+
+        setCompositionRoot(label);
+    }
+}]]></programlisting>
+
+            <para>
+                While this solution works, it is slightly messy. You may need to do some
+                initialization in the constructor, but any construction requiring the
+                global data must be done in the <methodname>attach()</methodname> method.
+                Especially, <classname>CustomComponent</classname> requires that the
+                <methodname>setCompositionRoot()</methodname> method is called in the
+                constructor. If you can't create the actual composition root component in
+                the constructor, you need to use a temporary dummy root, as is done in the
+                example above.
+            </para>
+            
+            <para>
+                Using <methodname>getApplication()</methodname> also needs casting if you
+                want to use methods defined in your application class.
+            </para>
+        </section>
+        
+        <section xml:id="advanced.global.threadlocal">
+            <title>ThreadLocal Pattern</title>
+
+            <indexterm xml:id="term:advanced.global.threadlocal" class="startofrange"><primary>ThreadLocal pattern</primary></indexterm>
+
+            <para>
+                The ThreadLocal pattern gives a solution for the global access problem by
+                solving two sub-problems. First, the servlet container processes requests
+                for many sessions (users) sequentially, so if a static variable is set in
+                a request belonging one session, it could be read or re-set by the next
+                incoming request belonging to another session. This can be solved by
+                setting the global reference at the beginning of each HTTP request to
+                point to data of the current session. You can do this with a
+                <classname>HttpServletRequestListener</classname> by setting the reference
+                in <methodname>onRequestStart()</methodname>. The second problem is that
+                servlet containers have multiple worker threads that process
+                requests. Therefore, setting a static reference would change it in all
+                threads running concurrently. The solution is to store the reference in a
+                thread-local variable instead of a static. This is done using the
+                <classname>ThreadLocal</classname> class in Java.
+            </para>
+
+            <para>
+                We end up with the following code. Here, we have put the application data
+                to a class separate from the application class.
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[/** Holds data for one user session. */
+public class AppData
+       implements TransactionListener, Serializable {
+    private Locale locale;   // Current locale
+    private ResourceBundle bundle;
+    
+    private String userData; // Trivial data model for the user
+    
+    private static ThreadLocal<AppData> instance =
+        new ThreadLocal<AppData>();
+
+    public static void create(Application app) {
+        // Create the session-specific instance here
+        AppData sessionData = new AppData();
+
+        // It's usable globally from now on in this request
+        instance.set(sessionData);
+
+        // Register to get transaction events
+        app.getContext().addTransactionListener(sessionData);
+    }
+    
+    @Override
+    public void transactionStart(Application application,
+                                 Object transactionData) {
+        instance.set(this);
+    }
+
+    @Override
+    public void transactionEnd(Application application,
+                               Object transactionData) {
+        instance.set(null);
+    }
+
+    public static void initLocale(Locale locale,
+                                  String bundleName) {
+        instance.get().locale = locale;
+        instance.get().bundle =
+            ResourceBundle.getBundle(bundleName, locale);
+    }
+    
+    public static Locale getLocale() {
+        return instance.get().locale;
+    }
+
+    public static String getMessage(String msgId) {
+        return instance.get().bundle.getString(msgId);
+    }
+
+    public static String getUserData() {
+        return instance.get().userData;
+    }
+
+    public static void setUserData(String userData) {
+        instance.get().userData = userData;
+    }
+}]]></programlisting>
+
+            <para>
+                We can then use it in the application as follows.
+            </para>
+
+<programlisting><?pocket-size 65% ?><![CDATA[public class ThreadLocalApplication extends Application {
+    class MyComponent extends CustomComponent {
+        public MyComponent() {
+            VerticalLayout layout = new VerticalLayout();
+            
+            layout.addComponent(new Label("Hello, " +
+                AppData.getUserData()));
+            layout.addComponent(new Label("Your locale is " +
+                AppData.getLocale().getDisplayLanguage()));
+            
+            Button cancel = new Button (
+                AppData.getMessage(MyAppCaptions.CancelKey));
+            layout.addComponent(cancel);
+            
+            setCompositionRoot(layout);
+        }
+    }
+    
+    public void init() { 
+        Window main = new Window("Hello window"); 
+        setMainWindow(main);
+        
+        // Create the application data instance
+        AppData.create(this);
+        
+        // Initialize the session-global data
+        AppData.initLocale(getLocale(),
+                           MyAppCaptions.class.getName());
+        
+        // Also set the user data model
+        AppData.setUserData("Billy");
+        
+        main.addComponent(new MyComponent());
+    }
+}]]></programlisting>
+
+            <indexterm startref="term:advanced.global.threadlocal" class="endofrange"/>
+        </section>
     </section>
 
     <!-- TODO
