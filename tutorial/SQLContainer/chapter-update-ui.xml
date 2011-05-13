@@ -383,10 +383,9 @@ public class SearchFilter implements Serializable {
 
     <para>
       Now we need to modify the <methodname>search()</methodname> logic in the application
-      class. Note that since the <classname>PersonAddress</classname> container contains both
-      string and numeric properties, we cannot use the <methodname>addContainerFilter()</methodname>
-      method. Instead, we must fetch the type of the column from the container and create an
-      accordingly typed <classname>Filter</classname> instance.
+      class. Using the new filtering API in Vaadin 6.6.0, we can use the
+      <methodname>addContainerFilter()</methodname> method to add an <classname>Or</classname>
+      filter wrapping all other filters.
     </para>
 
     <programlisting><![CDATA[public void search(SearchFilter... searchFilters) {
@@ -395,21 +394,26 @@ public class SearchFilter implements Serializable {
   /* Clear previous filters */
   c.removeAllContainerFilters();
   
-  /* Add the filter(s) to the person container. */
+  /* Build an array of filters */
+  Filter[] filters = new Filter[searchFilters.length];
+  int ix = 0;
   for (SearchFilter searchFilter : searchFilters) {
-      Filter f = new Filter((String) searchFilter.getPropertyId(),
-                 ComparisonType.CONTAINS, searchFilter.getTerm());
       if (Integer.class.equals(c.getType(searchFilter.getPropertyId()))) {
           try {
-              f = new Filter((String) searchFilter.getPropertyId(),
-                             ComparisonType.EQUALS, 
-                             Integer.parseInt(searchFilter.getTerm()));
+              filters[ix] = new Equal(searchFilter.getPropertyId(),
+                      Integer.parseInt(searchFilter.getTerm()));
           } catch (NumberFormatException nfe) {
+              getMainWindow().showNotification("Invalid search term!");
               return;
           }
+      } else {
+          filters[ix] = new Like((String) searchFilter.getPropertyId(),
+                  "%" + searchFilter.getTerm() + "%");
       }
-      getDbHelp().getPersonContainer().addFilter(f);
+      ix++;
   }
+  /* Add the filter(s) to the person container. */
+  c.addContainerFilter(new Or(filters));
   showListView();
 }]]></programlisting>
 
@@ -489,18 +493,6 @@ private void addNewContact() {
         search for the term the user entered. Once the results are in we will generate
         <classname>SearchFilters</classname> with each of the matching cities' IDs.
       </para>
-
-      <para>
-        Finally, the search method of the application class also requires a slight modification.
-        The search mode of the person SQLContainer must be changed from inclusive
-        (<literal>AND</literal>) to exclusive (<literal>OR</literal>) in order to get any results
-        at all. This is done simply by adding the following code to the method, right before
-        the for-loop which adds the container filters.
-      </para>
-
-      <programlisting><![CDATA[getDbHelp().getPersonContainer().setFilteringMode(
-          FilteringMode.FILTERING_MODE_EXCLUSIVE);
-]]></programlisting>
 
     </section>
     
