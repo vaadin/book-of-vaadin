@@ -2,6 +2,113 @@
 
 <section xml:id="rapid.auth">
     <title>Authentication and Authorization</title>
+    
+    <section xml:id="rapid.auth.goals">
+        <title>Goals</title>
+        
+        <para>
+            The goals of authentication and authorization are to prevent unauthorized viewing and editing of data. In
+            the case of this example, only administrators should be allowed to view and edit hours and projects entered
+            by users other than themselves.
+        </para>
+    </section>
+    
+    <section xml:id="rapid.auth.authentication">
+        <title>Implementing Authentication and Authorization</title>
+
+        <para>
+            Authentication and authorization are handled by the <classname>Authenticator</classname> class. Since the
+            requirements of the example project are simple, the implementation of the authenticator is also fairly
+            straight forward. The authenticator has two responsibilities:
+            
+            <orderedList>
+                <listitem>
+                    <para>
+                        Authenticate users based on a username / password pair.
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        Keep track of views that require administrator privileges to access and answer the simple
+                        question of: "Is this view accessible in the current session?"
+                    </para>
+                </listitem>
+            </orderedList>
+            For a real project, this approach is too simplistic but the basics, of at least authorization, should be
+            similar.
+        </para>
+        
+        <para>
+            To authenticate users, the system needs to show a login view before letting users view any possibly
+            sensitive data. For the example project, the Vaadin composite <classname>LoginView</classname> was created
+            using Vaadin Visual Designer. By default the Visual Designer creates a
+            <classname>AbsoluteLayout</classname> as the root layout. This was changed into a
+            <classname>VerticalLayout</classname> and a <classname>LoginForm</classname> was placed inside of it. The
+            login form was then aligned to the middle center, making it appear in the middle of the browser window when
+            the login view is the only visible layout in the main window.
+        </para>
+        
+        <para>
+            In order to display the login view before anything else, the main window, which is defined by the
+            <classname>RapidWindow</classname> class has to be edited. Instead of setting the content of the window to
+            a new <classname>RapidEntityManagerView</classname>, the content is set to the login view and a
+            <classname>LoginListener</classname> is registered to the login view. The login listener is called when
+            the "Login" button is clicked, and passed the values of the text fields in the login form. By default,
+            a username and a password is passed in and these are passed off to the authenticator for authentication. If
+            the authentication succeeds, the content of the <classname>RapidWindow</classname> is replaced with a new
+            <classname>RapidEntityManagerView</classname>, just as before introducing the login view.
+        </para>
+        
+        <programlisting><? pocket-size 65% ?><![CDATA[public class RapidWindow extends Window implements LoginListener {
+
+        	public RapidWindow() {
+        		setContent(new LoginView(this));
+
+        		// select window theme
+        		setTheme("rapid");
+        	}
+
+        	public void showMainUI() {
+        		// entity manager
+        		setContent(new RapidEntityManagerView());
+        	}
+
+        	@Override
+        	public void onLogin(LoginEvent event) {
+        		String username = event.getLoginParameter("username");
+        		String password = event.getLoginParameter("password");
+        		if (Authenticator.login(username, password)) {
+        			showMainUI();
+        		}
+        	}
+        }]]></programlisting>
+        
+        <para>
+            Authorization is handled, a.k.a the "is this view accessible in the current session?" question is asked, in
+            the <classname>RapidEntityManagerView</classname> class in the
+            <methodname>addEntityViewsToList()</methodname> method. Before the view is added to the list, the
+            authenticator is asked whether we are allowed access to the view and only adds the view if the answer is
+            <literal>true</literal>.
+        </para>
+        
+        <programlisting><? pocket-size 65% ?><![CDATA[private void addEntityViewsToList() {
+            final Map<String, Class> entityViews = listEntityViews();
+            navigator.addView("welcome", WelcomeView.class);
+            for (final String key : entityViews.keySet()) {
+                Class viewClass = entityViews.get(key);
+
+                if (Authenticator.isViewAccessible(viewClass) && Navigator.View.class.isAssignableFrom(viewClass)) {
+                    navigator.addView(key, viewClass);
+
+                    EntitySidebarItem menuItem = new EntitySidebarItem(key, viewClass);
+                    menuItems.add(menuItem);
+                    viewList.addComponent(menuItem);
+                }
+            }
+            navigator.setMainView("welcome");
+        }]]></programlisting>
+    </section>
+    
 </section>
 
 <!-- Keep this comment at the end of the file
