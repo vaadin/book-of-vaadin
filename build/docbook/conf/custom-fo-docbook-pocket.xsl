@@ -18,6 +18,10 @@
 
   <xsl:param name="manual.fonts.custom" select="false"/>
 
+  <!-- The Symbol font is disabled because it can't be embedded and the Helvetica
+       font doesn't include the arrow, so must use some other font for it. -->
+  <xsl:param name="menuchoice.menu.separator"><fo:inline font-family="Times New Roman"> &#x2192; </fo:inline></xsl:param>
+
   <!-- Indentation and spacing. -->
   <xsl:param name="body.start.indent" select="'0'"/>
 
