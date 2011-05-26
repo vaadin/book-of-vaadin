@@ -38,7 +38,8 @@ IMAGES =	intro/architecture intro/architecture-detailed intro/toolchain intro/to
 			gwt/gwt-custom-architecture \
 			vaadin-logo book-example \
 			eclipse/editor-design-2-crop eclipse/widgetset-compiling-toolbar \
-			datamodel/datamodel-interfaces
+			datamodel/datamodel-interfaces \
+			rapid/domain-model
 
 # List of source XML files
 XMLFILES =  book.xml \
@@ -122,10 +123,13 @@ XEPPARS = -Dcom.renderx.xep.CONFIG=build/lib/XEP/xep-vaadinfonts.xml -quiet
 # Run XEP FO processor to convert FO to PDF.
 book.pdf: book.fo
 	cd $(DOCROOT) ; /opt/RenderX/XEP/xep $(XEPPARS) <manual/book.fo >manual/book.pdf
-#	rm book.fo
+	cp book.pdf /var/www/book.pdf
+	rm book.fo
 
 book-pocket.pdf: book-pocket.fo
 	cd $(DOCROOT) ; /opt/RenderX/XEP/xep $(XEPPARS) <manual/book-pocket.fo >manual/book-pocket.pdf
+	cp book-pocket.pdf /var/www/book-pocket.pdf
+	rm book-pocket.fo
 
 # View the result
 viewbook: book.pdf FORCE
