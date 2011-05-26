@@ -3,7 +3,9 @@
 <section xml:id="rapid.viewcustomization">
     <title>Customizing Views</title>
     
-    <para>Blaah...</para>
+    <para>
+        For basic use the entity views created by Roo work just fine. In some cases modifying the form or changing visible properties in the table component may be needed to satisfy critical end users. But when we aim for better usability we might want to build something custom solutions. In this section we discuss some methods how the Roo generated application skeleton can be modified.
+    </para>
     
     <section xml:id="rapid.viewcustomization.modify">
         <title>Modifying Roo generated entity form</title>
@@ -14,10 +16,52 @@
     
     <section xml:id="rapid.viewcustomization.calendarview">
         <title>Creating a sleek calendar based view for filling WorkEntries</title>
+        
+        <para>
+            In this section we will build an alternative view for WorkEntry entities built around the Vaadin Calendar add-on. The calendar displays filled entries for the end user in a nice graphical presentation. User can get a quick overview of what he has done during the week and it is also easy to spot if there is some missing entries. The user can also select and modify time ranges visually with the calendar, which speeds up the daily tasks.</para>
+        
+        <para>
+            Start by sketching the view with Visual Editor. Choose <literal>File->New->Vaadin->Composite</literal> and fill in proper package and class (e.g. ~web.ui and CalendarView). Vaadin Eclipse Plugin now creates you a class that extend CustomComponent. Switch to the <literal>Design</literal> tab using the tab selector below the source code and the visual editor opens. 
+        </para>
+        
+        <para>
+            For our view we will need three components: two ComboBoxes to select Project and Employee and a Calendar add-on which we installed previously. Filtering may help you to find them from the component list. Drag them to the the composite and sketch the view according to your preferences. Also use the <literal>Properties</literal> tab to give components more meaningful names and possibly fill in a suitable caption. When you return to the source code view, you can see the generated code by design view.</para>
+        
+        <para>
+            The constructor has a comment to indicate the place where you ought to add your own custom code. To make our view display some data we need to connect ComboBoxes to the data sources and provide events to the Calendar component via its CalendarEventProvider interface. For project and employee selectors the easiest option is to use JpaContainer. When implementing CalendarEventProvider you will need to extend the data model with a method that lists WorkEntry objects within a specific time ranges and also implement a light-weight wrapper for WorkEntry to make them compatible with the Calendar component.</para>
 
-        <para>Describe creating a new custom component</para>
-        <para>Describe adding calendar and comboboxes for project and user</para>
-        <para>Describe how the work entry form modified in the last chapter is recycled in this view (popup window that contains the form)</para>
+        <para>
+            Once you have some data sources connected, you most probably want to check out how your new view looks in the application. The Roo generated Vaadin application uses Navigator add-on and a generated <literal>RapidEntityManagerView</literal> (where Rapid is the application base name) class as the view controller. For complex applications you might want to build your own navigation system, but for this application we can just modify the RapidEntityManagerView to include our custom tailored views. Let the composite implement <literal>org.vaadin.navigator.Navigator.View</literal> interface and modify <literal>addEntityViewsToList</literal> method in RapidEntityManagerView to include your custom view to the navigation. After that, deploy the application and verify the view is shown. Via the Roo generated WorkEntry views you may add some test data and check that it gets shown to the CalendarView.
+        </para>
+        
+        <para>
+            To allow users to add new entries via Calendar, implement RangeSelectHandler and register it to the Calendar. In the handler you can create an new instance of WorkEntry. Fill in the time range from the provided event object and default values for project and employee fields you can find via the comboboxes we created earlier.
+        </para>
+        
+        <para>
+            The new WorkEntry object now contains the most essential information, but it still has the default comment field. The user might also want to review the new entry. Here we can use the previously fine-tuned WorkEntry form that was originally automatically created by the Roo. Wrap the WorkEntry object in a BeanItem and pass it to a WorkEntryForm instance. As our Calendar component consumes quite a lot of space on the screen, it is best to show the editor form in a modal Window. Again use your existing Java know-how and extract the recyclable parts to helper methods (e.g. <literal>showEditorPopup(WorkEntry)</literal>).
+        </para>
+        
+        <para>To fine tune the usability of the view you may add more hooks the the Calendar:</para>
+        <itemizedlist>
+            <listitem>EventClickHandler to open editor for existing event</listitem>
+            <listitem>EventMoveHandler to adjust the time range</listitem>
+            <listitem>EventResizeHandler to adjust the time range</listitem>
+        </itemizedlist>   
+
+    </section>
+    
+    <section xml:id="rapid.viewcustomization.reportview">
+        
+        <title>Creating a custom view for reporting</title>
+        
+        <para>
+            Our example project also has a report view for easy listing of work entries. The query can be filtered by project, employee and the time range. Most of the process is similar to creating the Calendar view, but in the ReportView one can survive with just standard Vaadin components. The table component at the bottom of the view lists entries matching the criteria defined by the controls above it.
+        </para>
+
+        <para>
+            When you have sketched the view connect selects to the data sources. Also hook a JpaContainer to the Table. Add ChangeListener to all fields and update filters in the JpaContainer instance hooked to the result table.
+        </para>
 
     </section>
 
