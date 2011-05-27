@@ -4,103 +4,220 @@
     <title>Testing the Application</title>
     
     <para>
-        In the data model section we already discussed briefly about automatic tests that Roo generates for the domain objects. They are a good start, but only proof that simple crud methods work from domain model to the persistency layer. In serious application development one should write tests for any additional business logic and the UI layers as well.
-    </para>
-    
-    <para>
-        Writing unit tests for the UI layer can be time consuming task. Still they don't necessary prove that the GUI works properly. Deployment problems, timing issues and the browser layer may still cause issues that brake the UI. In this tutorial we'll use Vaadin TestBench to test the UI layer. TestBench tests application running in the server via real browsers by simulating user actions in the browser. This way we don't just test the UI layer, but the whole stack from Javascripts running in the browser to the database.
-    </para>
-    
-    <para>
-        TestBench tests are most commonly just recorded with a browser plugin. Advanced users may fine tune tests by hand and e.g. configure tests with parameters. Tests scripts are then converted into JUnit test cases which can be integrated into existing testing environment. Roo projects are based on Maven build, so we will in this case configure projects pom.xml so that TestBench tests are run automatically. The TestBench setup and usage is discussed briefly. Refer to the TestBench manual in case you face problems.
-    </para>
-    
-    <para>To help the integration tests we use Maven Failsafe plugin. It is a testing plugin that automatically runs test named e.g. *ITCase.java in the test sources with goal <literal>verify</literal>. Failsafe plugin also provides necessary hooks where we can configure our application server to be started and stopped. If you want to test on a separate server, you can do just deployment and un-deployment at these phases. The necessary Maven snippet can be found from Failsafe project page.
-    </para>
-    
-    <para>Jetty plugin should be already installed to your pom.xml, but we will configure Jetty to start automatically before the integration test phase and cleanly close when the tests have been run. Add following xml snippet inside the definition of your Jetty plugin:</para>
-    
-    <programlisting><?pocket-size 65% ?><![CDATA[
-        <executions>
-            <!-- start and stop jetty (running our app) when running integration 
-                tests -->
-            <execution>
-                <id>start-jetty</id>
-                <phase>pre-integration-test</phase>
-                <goals>
-                    <goal>run-exploded</goal>
-                </goals>
-                <configuration>
-                    <scanIntervalSeconds>0</scanIntervalSeconds>
-                    <daemon>true</daemon>
-                    <stopKey>STOP</stopKey>
-                    <stopPort>8866</stopPort>
-                </configuration>
-            </execution>
-            <execution>
-                <id>stop-jetty</id>
-                <phase>post-integration-test</phase>
-                <goals>
-                    <goal>stop</goal>
-                </goals>
-                <configuration>
-                    <stopPort>8866</stopPort>
-                    <stopKey>STOP</stopKey>
-                </configuration>
-            </execution>
-        </executions>
-]]></programlisting>
-
-    
-    <para>To verify the integration test system work, you can create a simple smoke test. Create a JUnit test case and name it as SmokeTestITCase.java and create a test method that connects to the test server. Verify that a proper kickstart page is returned. This verifies that the application is properly deployed for more advanced tests. Run your integration test with <literal>mvn verify</literal>. If this basic integration test passes fine, you are ready to continue setting up the TestBench.
-    </para>
-    
-    <para>
-        TestBench is not available in any public Maven repository. Unless you have TestBench already installed, download it from vaadin.com/directory. Install the jar to your local repository (or Maven proxy) by executing following command in the TestBench install directory:
-    </para>
-    
-    <programlisting><?pocket-size 65% ?><![CDATA[
-mvn install::install-file -Dfile=vaadin-testbench-2.2.1.jar -DgroupId=com.vaadin -DartifactId=testbench -Dversion=2.2.1 -Dpackaging=jar -DgeneratePom=true]]></programlisting>
-    
-    <para>
-        Next the dependency needs to be specified in the projects pom.xml file. Use the <literal>test</literal> scope as the jar file is not needed in the actual application execution. We will need it when compiling test scripts from html to JUnit test cases and also when executing the actual JUnit tests.
-    </para>
-    
-    <para>
-    Now we want to automate JUnit generation from native TestBench scripts (special .html files). Native scripts are kept in source repository as they are more maintainable than the compiled JUnit tests. The conversion is done by com.vaadin.testbenc.TestConverter tool.  The Maven Exec plugin is a perfect match to use it. The TestConverter currently needs exact script filenames as a parameter. For convenience you might want to use the helper class DecentTestConverter from the example project that accepts a directory as a parameter and compiles all html files in it to JUnit test. Configure it to be run at e.g. <literal>generate-test-sources</literal> and add generated java files to test sources. The Exec plugin has an option to do this, but use build-helper-maven-plugin in case it doesn't work (It didn't for the author).
+        In the data model section, we already discussed briefly about automatic
+        integration tests that Roo generates for the domain objects. They are a good
+        start, but only ensure that simple CRUD methods work from domain model to the
+        persistency layer. In serious application development, you should write tests for
+        any additional business logic, as well for the UI layers.
     </para>
 
-    <para>    
-    The test setup is now almost ready. As a last step we need to provide some system properties to be defined for TestBench generated JUnit tests. Add following configuration snippet to failsafe plugins configuration:
-    </para>
+    <section xml:id="rapid.testing">
+        <title>Overview of Testing</title>
     
-    <programlisting><?pocket-size 65% ?><![CDATA[
-            <configuration>
-                <!-- Define some necessary system properties for testbench junit tests -->
-                <systemPropertyVariables>
-                    <com.vaadin.testbench.tester.host>${testbench.hubhost}</com.vaadin.testbench.tester.host>
-                    <com.vaadin.testbench.deployment.url>${testbench.appurl}</com.vaadin.testbench.deployment.url>
-                    <com.vaadin.testbench.screenshot.directory>${project.build.directory}/testbench-generated</com.vaadin.testbench.screenshot.directory>
-                </systemPropertyVariables>
-                <encoding>UTF-8</encoding>
-            </configuration>
-]]></programlisting>
+        <para>
+            Writing unit tests for the user interface layer of an application can be a
+            time consuming task. Yet, they do not necessary ensure that the UI works
+            properly. Deployment problems, timing issues, and the browser layer may still
+            cause issues that break the UI. In this step of the tutorial, we will use the
+            Vaadin TestBench to test the user interface layer. TestBench executes tests
+            with real browsers, by simulating user actions in the browser. This way, we do
+            not just test the UI layer, but the entire stack from JavaScripts running in
+            the browser down to the database.
+        </para>
+    
+        <para>
+            Vaadin TestBench tests are normally recorded with a browser plugin. Advanced
+            users may fine tune the tests by hand and, for example, configure tests with
+            parameters. Tests scripts are then converted into JUnit test cases, which can
+            be integrated into an existing testing environment. Roo projects are based on
+            the Maven build system, so we will configure the <filename>pom.xml</filename>
+            of the project so that TestBench tests are run automatically. The TestBench
+            setup and usage is discussed briefly. Please refer to the TestBench manual in
+            case you face problems.
+        </para>
+    
+        <para>
+            To help the integration tests, we use the Maven Failsafe plugin. It is a
+            testing plugin that automatically runs all tests named, for example,
+            <filename>*ITCase.java</filename> in the test sources with the
+            <literal>verify</literal> goal. The Failsafe plugin also provides necessary
+            hooks where we can configure how our application server is started and
+            stopped. If you want to test on a separate server, you can do just deploy and
+            un-deploy at these phases. The necessary Maven snippet can be found from the
+            Failsafe project page.
+        </para>
+    </section>
 
-    <para>
-        Define the used parameters in the above snippet and you are ready to go. <literal>localhost</literal> and <literal>http://localhost:8080/${project.name}</literal> will work fine for local testing. Save your scripts under src/test/resources/ with filename ending ITCase.html and they will be automatically executed when <literal>mvn verify</literal> is issued. Your first test can simply login as admin user and then assert some text to verify the initial screen gets rendered. The current version of TestBench has a bug 
-    </para>
+    <section xml:id="rapid.testing.server">
+        <title>Running Test Server</title>
     
-    <para>Note that we did not configure the TestBench hub (nor remote control) to start and stop via Maven. Instead we just defined the host where the hub is running. So before actually executing the integration tests, be sure that the TestBench is up and running. Commonly TestBench is used so that the hub and its slaves are running in a separate cluster, rather than on developers workstations. If you have access to this kind of external hub you can give its address as <literal>com.vaadin.testbench.tester.host</literal>. <literal>localhost</literal> don't work as deployment url in this case, but you should use an url which the test machines can access. If no separate test cluster is used, you might want to customize your Maven build to start and stop TestBench similar to Jetty.
-    </para>
+        <para>
+            The Jetty plugin should be already installed in your
+            <filename>pom.xml</filename>, but we will configure Jetty to start
+            automatically before the integration test phase and close cleanly when the
+            tests have been run. Add the following XML snippet inside the definition of
+            your Jetty plugin:
+        </para>
+    
+        <programlisting><?pocket-size 65% ?><![CDATA[<executions>
+    <!-- start and stop jetty (running our app) when running integration 
+        tests -->
+    <execution>
+        <id>start-jetty</id>
+        <phase>pre-integration-test</phase>
+        <goals>
+            <goal>run-exploded</goal>
+        </goals>
+        <configuration>
+            <scanIntervalSeconds>0</scanIntervalSeconds>
+            <daemon>true</daemon>
+            <stopKey>STOP</stopKey>
+            <stopPort>8866</stopPort>
+        </configuration>
+    </execution>
+    <execution>
+        <id>stop-jetty</id>
+        <phase>post-integration-test</phase>
+        <goals>
+            <goal>stop</goal>
+        </goals>
+        <configuration>
+            <stopPort>8866</stopPort>
+            <stopKey>STOP</stopKey>
+        </configuration>
+    </execution>
+</executions>]]></programlisting>
 
-    <para>
-        Your more advanced tests can then use the login test as a base and test various features. Record tests for at least basic CRUD actions for all entity types. To verify authorization code to work, you can also create a non-admin user in one test and verify with the new user that admin only features are not visible. Most actions can be recorded with the TestBench Recorder automatically, but there are some limitations. E.g. selecting a time range in the Calendar view needs to be manually built using Selenium methods. The latest TestBench version also has a regression that adds an excess <literal>selectWindow</literal> command when logging in with LoginForm, so remove that command manually in case your test seems to fail in the very beginning.
-    </para>
+        <para>
+            To verify that the integration test system works, you can create a simple
+            smoke test. Create a JUnit test case and name it as
+            <filename>SmokeTestITCase.java</filename> and create a test method that
+            connects to the test server. Verify that a proper kickstart page is
+            returned. This verifies that the application is properly deployed for more
+            advanced tests. Run your integration test with <command>mvn
+            verify</command>. If this basic integration test passes fine, you are ready to
+            continue setting up the TestBench.
+        </para>
+    </section>
+
+    <section xml:id="rapid.testing.testbench">
+        <title>Installing TestBench with Maven</title>
+
+        <para>
+            TestBench is not available in any public Maven repository. Unless you have
+            TestBench already installed, download it from vaadin.com/directory. Install
+            the JAR to your local repository (or Maven proxy) by executing the following
+            command in the install directory of TestBench:
+        </para>
     
-    <para>
-        When building tests, note that integration tests use the same database by default. Data filled in the previous test will be visible during the next test. Tests are run in alphabetical order so you may use a naming convention to control the test execution order.
-    </para>
+    <screen><?pocket-size 65% ?><command>mvn install::install-file</command> -Dfile=vaadin-testbench-2.2.1.jar
+-DgroupId=com.vaadin -DartifactId=testbench -Dversion=2.2.1
+-Dpackaging=jar -DgeneratePom=true</screen>
+
+        <para>
+            You also need to specify the dependency <filename>pom.xml</filename> file of
+            the project. Use the <literal>test</literal> scope as the JAR file is not
+            needed in the actual application execution. We will need it when compiling
+            test scripts from HTML to JUnit test cases, and also when executing the actual
+            JUnit tests.
+        </para>
+    </section>
     
+    <section xml:id="rapid.testing.generating">
+        <title>Generating JUnit Tests</title>
+
+        <para>
+            The test cases for Vaadin TestBench are recorded as HTML files and need to be
+            compiled to JUnit tests. This needs to be automated.
+        </para>
+
+        <para>
+            Native scripts are kept in source repository as they are more maintainable
+            than the compiled JUnit tests. The conversion is done by
+            <classname>com.vaadin.testbenc.TestConverter</classname> tool. You can use it
+            most conveniently through the Maven Exec plugin. The
+            <classname>TestConverter</classname> currently needs exact script filenames as
+            a parameter. For convenience, you might want to use the helper class
+            <classname>DecentTestConverter</classname> from the example project that
+            accepts a directory as a parameter and compiles all HTML files in the
+            directory to JUnit test. Configure it to be run at, for example,
+            <filename>generate-test-sources</filename> and add generated java files to
+            test sources. The Exec plugin has an option to do this, but you may need to
+            use <literal>build-helper-maven-plugin</literal> instead.
+        </para>
+    </section>
+
+    <section xml:id="rapid.testing.system-properties">
+        <title>Configuring System Properties</title>
+
+        <para>
+            The test setup is now almost ready. As the last step, we need to provide some
+            system properties to be defined for the JUnit tests generated by
+            TestBench. Add the following configuration snippet to the configuration of the
+            Failsafe plugin:
+        </para>
+    
+        <programlisting><?pocket-size 65% ?><![CDATA[<configuration>
+    <!-- Define some necessary system properties for testbench junit tests -->
+    <systemPropertyVariables>
+        <com.vaadin.testbench.tester.host>${testbench.hubhost}</com.vaadin.testbench.tester.host>
+        <com.vaadin.testbench.deployment.url>${testbench.appurl}</com.vaadin.testbench.deployment.url>
+        <com.vaadin.testbench.screenshot.directory>${project.build.directory}/testbench-generated</com.vaadin.testbench.screenshot.directory>
+    </systemPropertyVariables>
+    <encoding>UTF-8</encoding>
+</configuration>]]></programlisting>
+
+        <para>
+            Define the used parameters in the above snippet and you are ready to
+            go. <literal>localhost</literal> and
+            <literal>http://localhost:8080/${project.name}</literal> will work fine for local
+            testing. Save your scripts under <filename>src/test/resources/</filename> with the
+            filenames ending with <filename>ITCase.html</filename>, and they will be
+            automatically executed when you issue <command>mvn verify</command>. Your first
+            test can simply login as the admin user and then assert some text to verify that
+            the initial screen gets rendered.
+        </para>
+    </section>
+
+
+    <section xml:id="rapid.testing.notes">
+        <title>Notes</title>
+
+        <para>
+            Note that we did not configure the TestBench hub (nor the remote control) to
+            start and stop from Maven. Instead, we just defined the host where the hub is
+            running. So, before actually executing the integration tests, make sure that
+            the TestBench is up and running. Commonly, TestBench is used so that the hub
+            and its slaves are running in a separate cluster, rather than on developer's
+            workstations. If you have access to this kind of external hub, you can give
+            its address as <literal>com.vaadin.testbench.tester.host</literal>. The
+            <literal>localhost</literal> does not work as the deployment URL in this case,
+            but you should use an URL which the test machines can access. If no separate
+            test cluster is used, you might want to customize your Maven build to start
+            and stop TestBench in a way similar to Jetty.
+        </para>
+
+        <para>
+            Your more advanced tests can then use the login test as a base and test
+            various features. Record tests for at least basic CRUD actions for all entity
+            types. To verify authorization code to work, you can also create a non-admin
+            user in one test and verify with the new user that admin only features are not
+            visible. Most actions can be recorded with the TestBench Recorder
+            automatically, but there are some limitations. E.g. selecting a time range in
+            the Calendar view needs to be manually built using Selenium methods. The
+            latest TestBench version also has a regression that adds an excess
+            <literal>selectWindow</literal> command when logging in with LoginForm, so
+            remove that command manually in case your test seems to fail in the very
+            beginning.
+        </para>
+    
+        <para>
+            When building tests, note that integration tests use the same database by
+            default. Data filled in the previous test will be visible during the next
+            test. Tests are run in alphabetical order so you may use a naming convention
+            to control the test execution order.
+        </para>
+    </section>
 </section>
 
 <!-- Keep this comment at the end of the file
