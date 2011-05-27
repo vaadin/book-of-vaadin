@@ -2,55 +2,103 @@
 
 <section xml:id="rapid.i18n">
     <title>Internationalization</title>
+
     <para>
-    In this application we want the user interface to be available in different languages, and we also want the formatting of dates to change depending on the selected language.
+        We want the user interface to be available in different languages, and we also
+        want the formatting of dates to change depending on the selected language.
+    </para>
 
-In the login view there is a dropdown select that allows the user to choose language. The application attempts to detect the users preferred language that the browser reports, and defaults to English if the preferred language is not available. In the application class, the preferred language is detected, and the locale set, like so:
-</para>
+    <para>
+        The login view has a drop-down select that allows the user to choose the
+        language. The application attempts to detect the user's preferred language
+        reported by the browser, and defaults to English if the preferred language is not
+        available. The preferred language is detected and the
+        locale set in the application class, as follows:
+    </para>
 
-<programlisting><?pocket-size 65% ?><![CDATA[public void init() {
-.
-.
-.
+    <programlisting><?pocket-size 65% ?><![CDATA[public void init() {
+    ...
     // Use the locale from the request as default (login uses this later)
     setLocale(((WebApplicationContext)getContext()).getBrowser().getLocale());
-.
-.
-.
+    ...
 }]]></programlisting>
 
-<para>
-Now that we know the users preferred language, we can start translating. Vaadin does not have a preferred way of doing translations, instead we're free to choose whichever method we prefer. Quite often the common Java practice of using ResourceBundles and .properties -files is sufficient, and this suits our application perfectly. Please refer to Java documentation if Java internationalization is not familiar.
-The IDEs "Externalize Strings" -feature will handle most of the boilerplate generation - highlight the package that holds the UI classes (com.vaadin.rapid.web) and select Source &gt; Externalize Strings. The dialog shows a list of files that contains strings that are yet to be translated - we'll open one at a time and externalize the strings. In the externalize dialog, first make sure the location of the messages.properties is suitable (and stays the same for all files you go trough), in our case we want it in the com.vaadin.rapid.web -package. The IDE will generate the messages.properties and a Messages -class the first time we run it. In the "String to externalize" -list, make sure strings that do not need to be translated have an X and that strings that should be translated have a check mark. Also change all keys for translated strings to something descriptive.
-</para>
+    <para>
+        Now that we know the user's preferred language, we can start translating. Vaadin
+        does not have a preferred way of doing translations, so you are free to choose
+        whichever method you prefer. Quite often, the common Java practice of using
+        <classname>ResourceBundle</classname>s and <filename>.properties</filename> files
+        is sufficient, and this suits our application perfectly. Please refer to Java
+        documentation for more details regarding internationalization in Java.
+    </para>
 
-<figure xml:id="figure:rapid.i18n.externalize-screenshot">
-            <title>The Externalize Strings dialog</title>
-            <mediaobject>
-                <imageobject>
-                    <imagedata smallscale="80%" scale="70" align="center" fileref="img/rapid/i18n-externalize-strings.png"/>
-                </imageobject>
-            </mediaobject>
-        </figure>
-        
-<para>
-Externalize Strings marks strings that should not be translated (using a special comment in the code), so that the next time you run the function, it will only show new strings, or strings you have forgotten. 
+    <para>
+        The "Externalize Strings" feature in the Eclipse IDE (and STS) will handle most of
+        the boilerplate generation. In the <guilabel>Package Explorer</guilabel>, select
+        the package that holds the UI classes (<package>com.vaadin.rapid.web</package>)
+        and select <menuchoice><guimenu>Source</guimenu><guimenuitem>Externalize
+        Strings</guimenuitem></menuchoice>. The dialog shows a list of files that contains
+        strings that are yet to be translated - you need to open one at a time and
+        externalize the strings. In the externalize dialog, first make sure the location
+        of the <filename>messages.properties</filename> is suitable (and stays the same
+        for all files you go trough), in our case we want it in the
+        <package>com.vaadin.rapid.web</package> package. The IDE will generate the
+        <filename>messages.properties</filename> and a <classname>Messages</classname>
+        class the first time you run it. In the <guilabel>String to externalize</guilabel>
+        list, make sure that strings that do not need to be translated have an X mark and
+        that strings that should be translated have a check mark. Also, change all keys
+        for translated strings to something descriptive.
+    </para>
 
-Note that if you externalize strings from a visually editable component, the Visual Editor can no longer open the component, because the generated code has been changed. This will probably be fixed in a future release of the Visual Editor, but for now you can go ahead and move the code rows that contain translations to the constructor.
+    <figure xml:id="figure:rapid.i18n.externalize-screenshot">
+        <title>The Externalize Strings Dialog</title>
+        <mediaobject>
+            <imageobject>
+                <imagedata smallscale="100%" scale="50" align="center" fileref="img/rapid/i18n-externalize-strings.png"/>
+            </imageobject>
+        </mediaobject>
+    </figure>
 
-Next we'll translate the names of the Views. We'll do this dynamically in the RapidEntityManagerView by prefixing the translation key with "View." and appending the view name (with spaces removed).
+    <para>
+        Externalize Strings marks strings that should not be translated using a special
+        comment in the code, so that the next time you run the function, it will only show
+        the new strings or strings you have forgotten.
+    </para>
 
-    final String viewCaption = Messages.getString("View." + viewName);
+    <para>
+        Note that if you externalize strings from a visually editable component, the
+        Visual Editor can no longer open the component, because the generated code has
+        been changed. This will probably be fixed in a future release of the Visual
+        Editor, but for now you can go ahead and move the code rows that contain
+        translations to the constructor.
+    </para>
 
-In this application we do not want to translate the URI fragment that is shown in the browser, so we  make some small changes to keep the viewName and the translated viewCaption separate throughout the code. Whether or not one wants to translate depends on the application - if you translate the fragment, it will be more descriptive in the users own language, but users with different language settings will not be able to share deep links.
+    <para>
+        Next, we will translate the names of the Views. We'll do this dynamically in the
+        <classname>RapidEntityManagerView</classname> by prefixing the translation key
+        with "<literal>View.</literal>" and appending the view name (with spaces removed).
+    </para>
 
-To translate the column headers of the various tables, we add some code to the end of AbstractEntityView.refresh() - this will allow us to translate the headers after the content has been set:
-</para>
+    <programlisting><?pocket-size 65% ?><![CDATA[final String viewCaption = Messages.getString("View." + viewName);]]></programlisting>
+
+    <para>
+        In this application we do not want to translate the URI fragment that is shown in
+        the browser, so we make some small changes to keep the viewName and the translated
+        viewCaption separate throughout the code. Whether or not one wants to translate
+        depends on the application - if you translate the fragment, it will be more
+        descriptive in the users own language, but users with different language settings
+        will not be able to share deep links.
+    </para>
+
+    <para>
+        To translate the column headers of the various tables, we add some code to the end
+        of the <methodname>refresh()</methodname> in
+        <classname>AbstractEntityView</classname>. This will allow us to translate the
+        headers after the content has been set:
+    </para>
 
 <programlisting><?pocket-size 65% ?><![CDATA[protected void refresh() {
-.
-.
-.
+...
 // Translate column headers
 Object[] columns = getTableColumns();
 String[] headers = new String[columns.length];
@@ -58,14 +106,16 @@ for (int i = 0; i < headers.length; i++) {
     headers[i] = Messages.getString(getClass().getSimpleName() + "." + columns[i].toString());
 }
 table.setColumnHeaders(headers);
-.
-.
-.
+...
 }]]></programlisting>
 
-<para>
-To translate boolean values and localize dates in the various tables, we modify AbstractEntityView.createTable() so that it returns our own RapidTable, which overrides formatPropertyValue():
-</para>
+    <para>
+        To translate boolean values and localize dates in the various tables, we modify
+        the <methodname>createTable()</methodname> in
+        <classname>AbstractEntityView</classname> so that it returns our own
+        <classname>RapidTable</classname>, which overrides
+        <methodname>formatPropertyValue()</methodname>:
+    </para>
 
 <programlisting><?pocket-size 65% ?><![CDATA[protected String formatPropertyValue(Object rowId, Object colId,
 			Property property) {
@@ -83,25 +133,33 @@ To translate boolean values and localize dates in the various tables, we modify 
 		return super.formatPropertyValue(rowId, colId, property);
 	}]]></programlisting>
 
-<para>
-There is one more translation task to do: BeansValidation (JSR 303) is used for validating values according to annotations on the entities. This process produces some messages that originate from the BeansValidation, and need to be translated separately. BeansValidation also uses properties -files, namely ValidationMessages.properties that should be placed in the src/main/resources folder. To tell BeansValidation which locale to use we currently need some boilerplate - this will hopefully be fixed soon. In each Form class (ProjectForm, RapidUserForm, WorkEntryForm) we'll call a helper that goes trough our validators and sets the locale:
+    <para>
+        There is one more translation task to do: <classname>BeansValidation</classname>
+        (JSR 303) is used for validating values according to annotations on the
+        entities. This process produces some messages that originate from the
+        <classname>BeansValidation</classname>, and need to be translated
+        separately. <classname>BeansValidation</classname> also uses property files,
+        namely <filename>ValidationMessages.properties</filename>, that should be placed
+        in the <filename>src/main/resources</filename> folder. To tell
+        <classname>BeansValidation</classname> which locale to use we currently need some
+        boilerplate - this will hopefully be fixed soon. In each
+        <classname>Form</classname> class (<classname>ProjectForm</classname>,
+        <classname>RapidUserForm</classname>, <classname>WorkEntryForm</classname>) we
+        need to call a helper that goes trough our validators and sets the locale:
 </para>
 
 <programlisting><?pocket-size 65% ?><![CDATA[public void setItemDataSource(Item item) {
-.
-.
-.
+    ...
     for (Object propertyId : getBeanPropertyIds()) {
         ValidatorMessageUtil.updateValidators(getField(propertyId));
     }
-.
-.
-.
+    ...
 }]]></programlisting>
 
-<para>
-The helper can be found in ValidatorMessageUtil - it iterates trough the validators for the field, updating the locale.
-</para>
+    <para>
+        The helper can be found in <classname>ValidatorMessageUtil</classname>. It
+        iterates trough the validators for the field, updating the locale.
+    </para>
 </section>
 
 <!-- Keep this comment at the end of the file
