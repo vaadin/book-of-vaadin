@@ -84,7 +84,48 @@
     <section xml:id="rapid.cloudfoundry.mysql">
         <title>Binding to the MySQL Service</title>
         <para>
-            TODO - haven't gotten this to work yet, waiting for an answer to a support request.
+            - Bind a mysql database to the application in the cloud foundry view 
+                - doubleclick deployed application
+                - open 'Services' and click add in the upper right corner
+                    - give a name
+                    - choose MySQL db
+                - drag the resulting service from the services panel to the application services table
+            - Remove HSQLDB dependency from pom.xml
+            - Add mysql connector dependency
+                <dependency>
+                    <groupId>mysql</groupId>
+                    <artifactId>mysql-connector-java</artifactId>
+                    <version>5.1.15</version>
+                </dependency>
+            - Add cloud foundry runtime dependency
+                   <dependency>
+                           <groupId>org.cloudfoundry</groupId>
+                           <artifactId>cloudfoundry-runtime</artifactId>
+                           <version>0.6.1</version>
+                   </dependency>
+            - persistence.xml, change org.eclipse.persistence.platform.database.HSQLPlatform to
+                org.eclipse.persistence.platform.database.MySQLPlatform
+            - applicationContext.xml change:
+                -<beans xmlns="http://www.springframework.org/schema/beans" xmlns:aop= ...
+                to
+                +<beans xmlns="http://www.springframework.org/schema/beans"
+                +               xmlns:aop="http://www.springframework.org/schema/aop"
+                +               xmlns:context="http://www.springframework.org/schema/context"
+                +               xmlns:jee="http://www.springframework.org/schema/jee"
+                +               xmlns:tx="http://www.springframework.org/schema/tx"
+                +               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                +               xmlns:cloud="http://schema.cloudfoundry.org/spring"
+                +               xsi:schemaLocation="http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd         http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd         http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd         http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-3.0.xsd         http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd		http://schema.cloudfoundry.org/spring http://schema.cloudfoundry.org/spring/cloudfoundry-spring.xsd">
+        		
+            - applicationContext.xml change:
+                <bean class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close" id="dataSource">
+                    <property name="driverClassName" value="${database.driverClassName}"/>
+                    <property name="url" value="${database.url}"/>
+                    <property name="username" value="${database.username}"/>
+                    <property name="password" value="${database.password}"/>
+                </bean>
+                to
+                <cloud:data-source id="dataSource" />
         </para>
     </section>
 </section>
