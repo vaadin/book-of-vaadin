@@ -83,50 +83,132 @@
     
     <section xml:id="rapid.cloudfoundry.mysql">
         <title>Binding to the MySQL Service</title>
+
         <para>
-            - Bind a mysql database to the application in the cloud foundry view 
-                - doubleclick deployed application
-                - open 'Services' and click add in the upper right corner
-                    - give a name
-                    - choose MySQL db
-                - drag the resulting service from the services panel to the application services table
-            - Remove HSQLDB dependency from pom.xml
-            - Add mysql connector dependency
-                <dependency>
-                    <groupId>mysql</groupId>
-                    <artifactId>mysql-connector-java</artifactId>
-                    <version>5.1.15</version>
-                </dependency>
-            - Add cloud foundry runtime dependency
-                   <dependency>
-                           <groupId>org.cloudfoundry</groupId>
-                           <artifactId>cloudfoundry-runtime</artifactId>
-                           <version>0.6.1</version>
-                   </dependency>
-            - persistence.xml, change org.eclipse.persistence.platform.database.HSQLPlatform to
-                org.eclipse.persistence.platform.database.MySQLPlatform
-            - applicationContext.xml change:
-                -<beans xmlns="http://www.springframework.org/schema/beans" xmlns:aop= ...
-                to
-                +<beans xmlns="http://www.springframework.org/schema/beans"
-                +               xmlns:aop="http://www.springframework.org/schema/aop"
-                +               xmlns:context="http://www.springframework.org/schema/context"
-                +               xmlns:jee="http://www.springframework.org/schema/jee"
-                +               xmlns:tx="http://www.springframework.org/schema/tx"
-                +               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                +               xmlns:cloud="http://schema.cloudfoundry.org/spring"
-                +               xsi:schemaLocation="http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd         http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd         http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd         http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-3.0.xsd         http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd		http://schema.cloudfoundry.org/spring http://schema.cloudfoundry.org/spring/cloudfoundry-spring.xsd">
-        		
-            - applicationContext.xml change:
-                <bean class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close" id="dataSource">
-                    <property name="driverClassName" value="${database.driverClassName}"/>
-                    <property name="url" value="${database.url}"/>
-                    <property name="username" value="${database.username}"/>
-                    <property name="password" value="${database.password}"/>
-                </bean>
-                to
-                <cloud:data-source id="dataSource" />
+            The final part of our demonstration is to bind the application deployed in the
+            Cloud Foundry to a real DBMS. In the following, we describe how you can bind
+            the application to a MySQL database.
         </para>
+
+        <orderedlist>
+            <listitem>
+                <para>
+                    Bind a MySQL database to the application in Eclipse. In the
+                    <guilabel>Cloud Foundry</guilabel> view:
+                </para>
+            </listitem>
+
+            <orderedlist>
+                <listitem>
+                    <para>
+                        Double-click the application deployed in Cloud Foundry
+                    </para>
+                </listitem>
+
+                <listitem>
+                    <para>
+                        Select <guilabel>Services</guilabel> and click <guibutton>Add</guibutton>
+                        in the upper-right corner
+                    </para>
+                </listitem>
+                
+                <listitem>
+                    <para>
+                        Give the connection a name and choose a MySQL database
+                    </para>
+                </listitem>
+
+                <listitem>
+                    <para>
+                        Drag the created service from the <guilabel>Services</guilabel> panel
+                        to the <guilabel>Services</guilabel> table in the application
+
+                        <!-- TODO: Is this correct? Sounds suspicious. Verify. -->
+                    </para>
+                </listitem>
+            </orderedlist>
+
+            <listitem>
+                <para>
+                    Remove the dependency to the HSQLDB that we used at first from <filename>pom.xml</filename>
+                </para>
+            </listitem>
+
+            <listitem>
+                <para>
+                    Add the MySQL connector dependency as follows:
+                </para>
+
+                <programlisting><?pocket-size 65% ?><![CDATA[<dependency>
+  <groupId>mysql</groupId>
+  <artifactId>mysql-connector-java</artifactId>
+  <version>5.1.15</version>
+</dependency>]]></programlisting>
+            </listitem>
+
+            <listitem>
+                <para>
+                    Add the Cloud Foundry runtime dependency as follows:
+                </para>
+
+                <programlisting><?pocket-size 65% ?><![CDATA[<dependency>
+  <groupId>org.cloudfoundry</groupId>
+  <artifactId>cloudfoundry-runtime</artifactId>
+  <version>0.6.1</version>
+</dependency>]]></programlisting>
+            </listitem>
+
+            <listitem>
+                <para>
+                    Edit the <filename>persistence.xml</filename> file and change the
+                    <classname>org.eclipse.persistence.platform.database.HSQLPlatform</classname>
+                    class name to
+                    <classname>org.eclipse.persistence.platform.database.MySQLPlatform</classname>.
+                </para>
+            </listitem>
+
+            <listitem>
+                <para>
+                    Edit the <filename>applicationContext.xml</filename> file and change the following line:
+                </para>
+
+                <programlisting><?pocket-size 65% ?><![CDATA[<beans xmlns="http://www.springframework.org/schema/beans" xmlns:aop= ...]]></programlisting>
+
+                <para>
+                    to the following:
+                </para>
+
+                <programlisting><?pocket-size 65% ?><![CDATA[<beans xmlns="http://www.springframework.org/schema/beans"
+  xmlns:aop="http://www.springframework.org/schema/aop"
+  xmlns:context="http://www.springframework.org/schema/context"
+  xmlns:jee="http://www.springframework.org/schema/jee"
+  xmlns:tx="http://www.springframework.org/schema/tx"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:cloud="http://schema.cloudfoundry.org/spring"
+  xsi:schemaLocation="http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-3.0.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd http://schema.cloudfoundry.org/spring http://schema.cloudfoundry.org/spring/cloudfoundry-spring.xsd">]]></programlisting>
+            </listitem>
+
+            <listitem>
+                <para>
+                    Also in the <filename>applicationContext.xml</filename> replace the following:
+                </para>
+
+                <programlisting><?pocket-size 65% ?><![CDATA[<bean class="org.apache.commons.dbcp.BasicDataSource"
+      destroy-method="close" id="dataSource">
+  <property name="driverClassName"
+            value="${database.driverClassName}"/>
+  <property name="url" value="${database.url}"/>
+  <property name="username" value="${database.username}"/>
+  <property name="password" value="${database.password}"/>
+</bean>]]></programlisting>
+
+                <para>
+                    with the following:
+                </para>
+
+                <programlisting><?pocket-size 65% ?><![CDATA[<cloud:data-source id="dataSource" />]]></programlisting>
+            </listitem>
+        </orderedlist>
     </section>
 </section>
 
