@@ -39,7 +39,8 @@ IMAGES =	intro/architecture intro/architecture-detailed intro/toolchain intro/to
 			vaadin-logo book-example \
 			eclipse/editor-design-2-crop eclipse/widgetset-compiling-toolbar \
 			datamodel/datamodel-interfaces \
-			rapid/domain-model
+			rapid/domain-model \
+			mobile/navigationview
 
 # List of source XML files
 XMLFILES =  book.xml \
