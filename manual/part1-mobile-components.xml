@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <section xml:id="mobile.components">
-	<title>Available Mobile UI Components</title>
+	<title>Mobile User Interface Components</title>
 
     <para>
         TouchKit introduces a number of components special to mobile device user
@@ -26,10 +26,15 @@
                     <imagedata align="center" fileref="img/mobile/navigationview-lo.png"/>
                 </imageobject>
                 <imageobject role="fo">
-                    <imagedata smallscale="100%" align="center" fileref="img/mobile/navigationview-hi.png"/>
+                    <imagedata smallscale="100%" scale="70" align="center" fileref="img/mobile/navigationview-hi.png"/>
                 </imageobject>
             </mediaobject>
         </figure>
+
+        <para>
+            You typically use <classname>NavigationView</classname> inside a
+            <classname>NavigationPanel</classname> to get view change animations.
+        </para>
 
         <para>
             The navigation bar is a <classname>NavigationBar</classname> component, which
@@ -45,9 +50,10 @@
 
         <para>
             The optional toolbar is located at the bottom of the view. It can be any
-            component, typically a <classname>HorizontalLayout</classname> or
-            <classname>CssLayout</classname> with <classname>Button</classname>s in
-            it. You set the toolbar component with <methodname>setToolbar()</methodname>.
+            component, typically a <classname>Toolbar</classname>, but can also be
+            <classname>HorizontalLayout</classname> or <classname>CssLayout</classname>.
+            It typically has <classname>Button</classname>s in it. You set the toolbar
+            component with <methodname>setToolbar()</methodname>.
         </para>
 
         <para>
@@ -56,36 +62,23 @@
         </para>
     </section>
 
-    <section xml:id="mobile.components.navigationbar">
+    <!-- TODO <section xml:id="mobile.components.navigationbar">
         <title><classname>NavigationBar</classname></title>
 
         <para>
             
         </para>
-    </section>
-
-    <section xml:id="mobile.components.navigationpanel">
-        <title><classname>NavigationPanel</classname></title>
-
-        <para>
-            The <classname>NavigationPanel</classname> is visual effect component that
-            gives sliding animation when switching between views. This is done by
-            registering three different components in the panel: the currently displayed
-            and the previous and next component. You can set these components with
-            <methodname>setCurrentComponent()</methodname>,
-            <methodname>setPreviousComponent()</methodname>, and
-            <methodname>setNextComponent()</methodname>, respectively.
-        </para>
-    </section>
+    </section> -->
 
     <section xml:id="mobile.components.toolbar">
         <title><classname>Toolbar</classname></title>
 
         <para>
-            The <classname>Toolbar</classname> is a horizontal layout, usually containing
+            The <classname>Toolbar</classname> is a layout component that extends
+            <classname>HorizontalLayout</classname>, usually containing
             <classname>Button</classname> components. The toolbar has by default 100%
-            horizontal width and fixed 40 pixel height, which is common in many mobile
-            devices. The buttons are spread evenly in the horizontal direction.
+            horizontal width and a fixed 40 pixel height. The components are spread evenly
+            in the horizontal direction.
         </para>
 
         <para>
@@ -95,16 +88,274 @@
         </para>
 
         <para>
-            The <classname>Toolbar</classname> has <literal>v-toolbar</literal> CSS style
-            name.
+            For a more detailed description of the inherited features, please refer to
+            <xref linkend="layout.components.orderedlayout"/>.
         </para>
+
+        <section xml:id="mobile.components.toolbar.css">
+            <title>Styling with CSS</title>
+
+            <programlisting><![CDATA[.v-toolbar { }]]></programlisting>
+
+            <para>
+                The component has an overall <literal>v-toolbar</literal> style in
+                addition to the <literal>v-horizontallayout</literal> style of the
+                superclass. Other style names, such as for margins and spacing, are as for
+                <classname>HorizontalLayout</classname>.
+            </para>
+        </section>
     </section>
 
-    <section xml:id="mobile.components.x">
-        <title><classname></classname></title>
+    <section xml:id="mobile.components.navigationpanel">
+        <title><classname>NavigationPanel</classname></title>
 
         <para>
+            The <classname>NavigationPanel</classname> is visual effect component that
+            gives sliding animation when switching between views. You need to register
+            three different components in the panel: the currently displayed component,
+            the previous one on the left, and the next component on the right. You can set
+            these components with <methodname>setCurrentComponent()</methodname>,
+            <methodname>setPreviousComponent()</methodname>, and
+            <methodname>setNextComponent()</methodname>, respectively.
         </para>
+
+        <para>
+            The <classname>NavigationPanel</classname> component is illustrated in <xref
+            linkend="figure:mobile.components.navigationpanel"/>.
+        </para>
+
+        <figure xml:id="figure:mobile.components.navigationpanel">
+            <title><classname>NavigationPanel</classname> with Three <classname>NavigationView</classname>s</title>
+            <mediaobject>
+                <imageobject role="html">
+                    <imagedata align="center" fileref="img/mobile/navigationpanel-lo.png"/>
+                </imageobject>
+                <imageobject role="fo">
+                    <imagedata smallscale="100%" scale="80" align="center" fileref="img/mobile/navigationpanel-hi.png"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
+
+        <para>
+            The navigation panel is important for responsiveness, because the previous and
+            next components are cached and the slide animation started before server is
+            contacted to load the new next or previous views.
+        </para>
+
+        <para>
+            Switching between the views is done programmatically according to user
+            interaction; swipe gestures are not supported at the moment.
+        </para>
+
+        <section xml:id="mobile.components.navigationpanel.breadcrump">
+            <title>Handling View Changes</title>
+
+            <para>
+                While you can put any components in the panel, some special features are
+                enabled when using the <classname>NavigationView</classname>. When a view
+                becomes visible, the <methodname>onBecomingVisible()</methodname> method
+                in the view is called. You can override it, just remember to call the
+                superclass method.
+            </para>
+
+            <programlisting><![CDATA[@Override
+protected void onBecomingVisible() {
+    super.onBecomingVisible();
+
+    ...
+}]]></programlisting>
+        </section>
+
+        <section xml:id="mobile.components.navigationpanel.breadcrump">
+            <title>Tracking Breadcrumps</title>
+
+            <para>
+                <classname>NavigationPanel</classname> also handles
+                <emphasis>breadcrump</emphasis> tracking. The
+                <methodname>navigateTo()</methodname> pushes the current view on the top
+                of the breadcrump stack and <methodname>navigateBack()</methodname> can be
+                called to return to the previous breadcrump level.
+            </para>
+
+            <para>
+                Notice that calling <methodname>navigateTo()</methodname> with the
+                "previous" component is equivalent to calling
+                <methodname>navigateBack()</methodname>.
+            </para>
+        </section>
+    </section>
+
+    <section xml:id="mobile.components.popover">
+        <title><classname>Popover</classname></title>
+
+        <para>
+            <classname>Popover</classname> is much like a regular Vaadin sub-window,
+            useful for quickly displaying some options or a small form related to an
+            action. Unlike regular sub-windows, it does not support dragging or resizing
+            by the user. It can have a caption, but usually does not. As sub-windows
+            usually require a rather large screen size, the <classname>Popover</classname>
+            is mainly applicable to tablet devices, but can be used also in phones with
+            full size with <methodname>setSizeFull()</methodname>.
+        </para>
+
+        <para>
+            In the following, we extend <classname>Popover</classname> to use it. It is
+            modal by default. Notice that the screen size is not available in the
+            constructor, so we have to postpone using it to the
+            <methodname>attach()</methodname> method.
+        </para>
+
+        <programlisting><?pocket-size 65% ?><![CDATA[public class ComposeView extends Popover {
+    ...
+    public ComposeView(boolean smartphone) {
+        setClosable(false);
+
+        if (smartphone)
+            setSizeFull();
+        else
+            setHeight("100%"); // width & position set on attach()
+
+        ... lay out the popover content ...
+    }
+
+    @Override
+    public void attach() {
+        super.attach();
+
+        // Center the popover in tablet devices
+        if (!smartphone) {
+            float screenWidth = getParent().getWidth();
+            float screenHeight = getParent().getHeight();
+            float width = Math.min(screenHeight, screenWidth);
+            setWidth(width, UNITS_PIXELS);
+            setPositionX((int) Math.abs((screenHeight - screenWidth) / 2));
+        }
+    }
+    ...
+}]]></programlisting>
+
+        <para>
+            You add popover windows to an application-level <classname>Window</classname>
+            object with <methodname>addWindow()</methodname>, just like sub-windows in a
+            regular Vaadin application.
+        </para>
+
+        <programlisting><?pocket-size 65% ?><![CDATA[if (event.getButton() == emailButton) {
+    ComposeView composeView = new ComposeView(smartphone);
+    getWindow().addWindow(composeView);
+    return;
+}]]></programlisting>
+
+        <para>
+            The resulting user interface in a tablet device is shown in <xref
+            linkend="figure:mobile.components.popover"/>.
+        </para>
+
+        <figure xml:id="figure:mobile.components.popover">
+            <title><classname>Popover</classname> in a Tablet Device</title>
+            <mediaobject>
+                <imageobject>
+                    <imagedata smallscale="100%" scale="70" align="center" fileref="img/mobile/touchkitsubwindow.png"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
+
+        <para>
+            Alternatively, you can call the <methodname>showRelativeTo()</methodname>,
+            which displays the sub-window relative to an existing component in the user
+            interface.
+        </para>
+
+        <programlisting><?pocket-size 65% ?><![CDATA[Popover popover = new Popover();
+popover.setContent(mailboxHierarchyView);
+popover.setClosable(true);
+popover.showRelativeTo(showMailboxHierarchyButton);
+popover.setHeight(getParent().getHeight() - 100, UNITS_PIXELS);]]></programlisting>
+
+        <para>
+            In this case, you should not call <methodname>addWindow()</methodname>
+            explicitly.
+        </para>
+
+        <section xml:id="mobile.components.popover.css">
+            <title>Styling with CSS</title>
+
+            <programlisting><![CDATA[.v-touchkit-window .v-touchkit-fullscreen { }
+  .v-touchkit-window .v-touchkit-popover { }]]></programlisting>
+
+            <para>
+                The component has an overall <literal>v-touchkit-window</literal>
+                style. If full-screen, it also has the
+                <literal>v-touchkit-fullscreen</literal> style and normally if not, the
+                <literal>v-touchkit-popover</literal> style.
+            </para>
+        </section>
+    </section>
+
+    <section xml:id="mobile.components.switch">
+        <title><classname>Switch</classname></title>
+
+        <para>
+            The <classname>Switch</classname> component is a
+            <classname>CheckBox</classname> that looks like the switch button in Apple
+            iOS.
+        </para>
+
+        <programlisting><![CDATA[Switch switch = new Switch();
+switch.setCaption("Do I look like iOS?");
+layout.addComponent(switch);]]></programlisting>
+
+        <section xml:id="mobile.components.switch.css">
+            <title>Styling with CSS</title>
+
+            <programlisting><![CDATA[.v-switch { }
+  .v-switch-slider { }]]></programlisting>
+
+            <para>
+                The component has an overall <literal>v-switch</literal> style. The slider
+                element has <literal>v-switch-slider</literal> style.
+            </para>
+        </section>
+    </section>
+
+    <section xml:id="mobile.components.componentgroup">
+        <title><classname>ComponentGroup</classname></title>
+
+        <para>
+            The <classname>ComponentGroup</classname> is a layout component for grouping
+            components. It uses margins, background color, and rounded corners to
+            visualize the grouping. It extends <classname>CssLayout</classname> and
+            behaves otherwise as such, except in having 100% default width.
+        </para>
+
+        <programlisting><![CDATA[ComponentGroup componentGroup = new ComponentGroup();
+
+// Name field
+Component textField = new TextField("Name");
+textField.setWidth("100%");
+componentGroup.addComponent(textField);
+
+// Email field
+EmailField emailField = new EmailField("Email");
+emailField.setWidth("100%");
+componentGroup.addComponent(emailField);
+
+// Number field
+NumberField numberField = new NumberField("Age");
+numberField.setWidth("100%");
+componentGroup.addComponent(numberField);]]></programlisting>
+
+        <section xml:id="mobile.components.componentgroup.css">
+            <title>Styling with CSS</title>
+
+            <programlisting><![CDATA[.v-optionlayout { }]]></programlisting>
+
+            <para>
+                The component has an overall <literal>v-optionlayout</literal> style. If
+                the component has a caption, the <literal>tk-has-caption</literal> style
+                is added.
+            </para>
+        </section>
     </section>
 
     <section xml:id="mobile.components.emailfield">

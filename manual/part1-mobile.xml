@@ -11,16 +11,16 @@
         <title>Overview</title>
 
         <para>
-            Computing is becoming ever increasingly mobile and web applications need to
+            Web browsing is becoming ever increasingly mobile and web applications need to
             satisfy users with both computers and mobile devices, such as phones and
             tablets. While the mobile browsers can show the pages just like in regular
             browsers, the screen size, finger accuracy, and mobile browser features need
             to be considered to make the experience more pleasant. Vaadin TouchKit gives
-            the power of Vaadin to mobile user interfaces that complement the regular web
-            user interfaces of your web applications. Just like the purpose of the Vaadin
-            Framework is to make desktop-like web applications, the purpose of TouchKit is
-            to allow creation of web applications that give the look and feel of native
-            mobile applications.
+            the power of Vaadin for creating mobile user interfaces that complement the
+            regular web user interfaces of your applications. Just like the purpose of the
+            Vaadin Framework is to make desktop-like web applications, the purpose of
+            TouchKit is to allow creation of web applications that give the look and feel
+            of native mobile applications.
         </para>
 
         <para>
@@ -37,17 +37,84 @@
         <para>
             Vaadin TouchKit is a commercial product licensed under a dual-licensing
             scheme. The AGPL license allows open-source development, while the CVAL
-            license needs to be purchased for closed-source use, including internal use.
+            license needs to be purchased for closed-source use, including web deployments
+            and internal use. Commercial licenses can be purchased from the Vaadin
+            Directory, where you can also find the license details and download Vaadin
+            TouchKit.
         </para>
     </section>
 
     &book.part1.mobile.considerations;
     &book.part1.mobile.project;
     &book.part1.mobile.components;
-    &book.part1.mobile.phone;
-    &book.part1.mobile.tablet;
+
+    <section xml:id="mobile.features">
+        <title>Mobile Features</title>
+
+        <section xml:id="mobile.considerations.geolocation">
+            <title>Geolocation</title>
+
+            <para>
+                The geolocation feature in TouchKit allows receiving the geographical
+                location from the mobile device. The browser will ask the user to confirm
+                that the web site is allowed to get the location information. Tapping
+                <guibutton>Share Location</guibutton> gives the permission. The browser
+                will give the position acquired by GPS, cellular positioning, or Wi-Fi
+                positioning, as enabled in the device.
+            </para>
+
+            <para>
+                Geolocation is requested by calling
+                <methodname>detectCurrentPosition()</methodname> in the
+                <classname>TouchKitWindow</classname> main window of the application. You
+                need to give a <classname>PositionCallback</classname> handler that
+                receives the location in <methodname>onSuccess()</methodname> if acquired
+                from the device successfully. The position is given in
+                a <classname>Position</classname> object.
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[mainWindow.detectCurrentPosition(new PositionCallback() {
+    public void onSuccess(Position position) {
+        double latitude  = position.getLatitude();
+        double longitude = position.getLongitude();
+        double accuracy  = position.getAccuracy();
+
+        ...
+    }
+
+    public void onFailure(int errorCode) {
+        ...
+    }
+});]]></programlisting>
+
+            <para>
+                The position is given as degrees with fractions. The longitude is positive
+                to East and negative to West of the Prime Meridian passing through
+                Greenwich, following the convention for coordinate systems. The accuracy
+                is given in meters.
+            </para>
+
+            <para>
+                The <methodname>onFailure()</methodname> is called if the positioning
+                fails for some reason. The <parameter>errorCode</parameter> explains the
+                reason. Error 1 is returned if the permission was denied, 2 if the
+                position is unavailable, 3 on positioning timeout, and 0 on an unknown
+                error.
+            </para>
+
+            <para>
+                Notice that geolocation can take significant time, depending on the
+                location method used by the device. With Wi-Fi and cellular positioning,
+                the time is usually less than 30 seconds. With GPS, this can reach minutes
+                or longer, especially if the reception is bad.
+            </para>
+        </section>
+    </section>
+
+    <!-- &book.part1.mobile.phone; -->
+    <!-- &book.part1.mobile.tablet; -->
     &book.part1.mobile.testing;
-    &book.part1.mobile.limitations;
+    <!-- &book.part1.mobile.limitations; -->
 </chapter>
 
 <!-- Keep this comment at the end of the file

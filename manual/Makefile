@@ -40,7 +40,7 @@ IMAGES =	intro/architecture intro/architecture-detailed intro/toolchain intro/to
 			eclipse/editor-design-2-crop eclipse/widgetset-compiling-toolbar \
 			datamodel/datamodel-interfaces \
 			rapid/domain-model \
-			mobile/navigationview
+			mobile/navigationview mobile/navigationpanel
 
 # List of source XML files
 XMLFILES =  book.xml \
