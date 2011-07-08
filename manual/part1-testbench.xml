@@ -1,0 +1,2002 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<chapter xml:id="testbench">
+	<title>Vaadin TestBench</title>
+
+    <para>
+        This chapter describes the installation and use of the commercial Vaadin TestBench
+        product.
+    </para>
+
+    <section xml:id="testbench.overview">
+        <title>Overview</title>
+
+        <para>
+            Quality assurance is one of the cornerstones of modern software
+            development. Extending throughout the entire development process, quality
+            assurance is the thread that binds the end product to the requirements. In
+            iterative development processes, with ever shorter release cycles and
+            continuous integration, the role of regression testing is central. The special
+            nature of web applications creates many unique requirements for regression
+            testing.
+        </para>
+
+        <para>
+            Vaadin TestBench makes it possible to automate the regression testing of web
+            applications that use Vaadin. You record test cases by interacting with your
+            application. After recording, you can compile the tests as JUnit tests and run
+            them for as many times as you want, on multiple platforms and browsers. The
+            test results can be collected for later analysis and quality assurance.
+        </para>
+
+		<figure xml:id="figure:testbench.workflow">
+			<title>TestBench Workflow</title>
+			<mediaobject>
+				<imageobject role="html">
+					<imagedata align="center" fileref="img/testbench/tt-workflow-lo.png"/>
+				</imageobject>
+				<imageobject role="fo">
+					<imagedata scale="60" smallscale="80%" align="center" fileref="img/testbench/tt-workflow-hi.png"/>
+				</imageobject>
+			</mediaobject>
+		</figure>
+
+        <para>The main features of Vaadin TestBench are:</para>
+
+        <itemizedlist>
+            <listitem>
+                <para>Recording and playing back test cases using a recorder in browser</para>
+            </listitem>
+            <listitem>
+                <para>Validating UI state by assertion points and screen capture comparison</para>
+            </listitem>
+            <listitem>
+                <para>Screen capture comparison with difference highlighting</para>
+            </listitem>
+            <listitem>
+                <para>Execution of tests through JUnit</para>
+            </listitem>
+            <listitem>
+                <para>Distributed test grid for running tests</para>
+            </listitem>
+            <listitem>
+                <para>Integration with unit testing</para>
+            </listitem>
+        </itemizedlist>
+
+        <para>
+            Execution of tests are distributed over a grid of test nodes, which speeds up
+            testing. The grid nodes can run different operating systems and have different
+            browsers installed. In a minimal setup, such as for recording the tests, you
+            can use Vaadin TestBench on just a single computer.</para> <para>Vaadin
+            TestBench is based on the Selenium testing framework and Selenium Grid for
+            distributed testing. Selenium is augmented with Vaadin-specific extensions,
+            such as the screen capture feature.
+        </para>
+
+
+        <simplesect>
+            <title>Licensing and Trial Period</title>
+
+            <para>
+                Vaadin TestBench is a commercial product sold under the Commercial Vaadin
+                Add-On License (CVAL) version 1.0. You can purchase and download TestBench
+                from the Vaadin Directory.
+            </para>
+
+            <para>
+                You may try out the product for a free 30-day trial period, after which
+                you are required to acquire the needed licenses.
+            </para>
+        </simplesect>
+    </section>
+
+    <section xml:id="testbench.components">
+        <title>TestBench Components</title>
+
+        <para>
+            The main components of Vaadin TestBench are:
+        </para>
+
+        <itemizedlist>
+            <listitem>
+                <para>Vaadin TestBench Recorder</para>
+            </listitem>
+            <listitem>
+                <para>Vaadin TestBench Library</para>
+            </listitem>
+            <listitem>
+                <para>Vaadin TestBench Grid Hub</para>
+            </listitem>
+            <listitem>
+                <para>Vaadin TestBench Grid Remote Control</para>
+            </listitem>
+        </itemizedlist>
+
+        <para>
+            The components and a basic setup are illustrated in <xref
+            linkend="figure:testbench.architecture"/>.
+        </para>
+
+		<figure xml:id="figure:testbench.architecture">
+			<title>Vaadin TestBench Architecture</title>
+			<mediaobject>
+				<imageobject role="html">
+					<imagedata align="center" fileref="img/testbench/tt-architecture-simple-lo.png"/>
+				</imageobject>
+				<imageobject role="fo">
+					<imagedata scale="60" smallscale="100%" align="center" fileref="img/testbench/tt-architecture-simple-hi.png"/>
+				</imageobject>
+			</mediaobject>
+		</figure>
+
+        <para>
+            Recording test cases requires Vaadin TestBench Recorder, which is a Mozilla
+            Firefox extension that you install in your browser. It provides a control
+            panel to record test cases and play them back. You can play test cases right
+            in the recorder and later automatically by the Grid Node Remote Control, which
+            opens a browser and starts the recorder in playback mode.
+        </para>
+
+        <para>
+            The test suite and results from test runs are stored on a test server. A test
+            suite includes recorded test cases and possible reference images for
+            similarity tests.
+        </para>
+
+        <para>
+            Vaadin TestBench Library provides the central control logic for:
+        </para>
+
+        <itemizedlist>
+            <listitem>
+                <para>
+                    Converting tests from recordings to JUnit tests
+                </para>
+            </listitem>
+            <listitem>
+                <para>
+                    Comparing screen captures with reference images
+                </para>
+            </listitem>
+            <listitem>
+                <para>
+                    Controlling the execution of tests on the VaadinTestBench Grid Hub
+                </para>
+            </listitem>
+        </itemizedlist>
+
+        <para>
+            Vaadin TestBench Grid Hub is a service that distributes testing tasks to nodes
+            on the test grid. It contacts a Grid Node Controller on a node and asks it to
+            open a browser to run the current test on. The Grid Hub runs on a server which
+            can be dedicated, one of the grid nodes, or the test server itself.
+        </para>
+
+        <para>
+            Vaadin TestBench Grid Node Controller is a service that runs on each grid
+            node. It is able to open any of the browsers installed in a node and run
+            commands for tests on the browsers. It receives requests to execute test
+            commands from the Grid Hub and reports the results back.
+        </para>
+
+        <para>
+            A basic Vaadin TestBench environment consists of:
+        </para>
+
+        <itemizedlist>
+            <listitem>
+                <para>
+                    A workstation with Firefox and the TestBench Recorder for recording tests
+                </para>
+            </listitem>
+            <listitem>
+                <para>
+                    A build/test server used to build, launch, and test the web application
+                </para>
+            </listitem>
+            <listitem>
+                <para>
+                    A server running the Grid Hub
+                </para>
+            </listitem>
+            <listitem>
+                <para>
+                    One or more servers running Grid Remote Controls
+                </para>
+            </listitem>
+        </itemizedlist>
+
+        <para>
+            The workstation and servers can be separate computers or one computer can work in multiple roles.
+        </para>
+    </section>
+
+    <section xml:id="testbench.requirements">
+        <title>Requirements</title>
+
+        <sect3>
+            <title>Requirements for Vaadin TestBench Recorder</title>
+
+            <para>
+                For recording and playback with Vaadin TestBench Recorder:
+            </para>
+
+            <itemizedlist>
+                <listitem>
+                    <para>Mozilla Firefox 3.x or newer</para>
+                </listitem>
+            </itemizedlist>
+        </sect3>
+
+        <sect3>
+            <title>Requirements for Automated Testing</title>
+
+            <para>
+                For running tests:
+            </para>
+
+            <itemizedlist>
+                <listitem>
+                    <para>Java JDK 1.5 or newer</para>
+                </listitem>
+                <listitem>
+                    <para>Browsers installed on test nodes</para>
+                </listitem>
+                <listitem>
+                    <para>Apache Ant or some other way to run Ant scripts (recommended)</para>
+                </listitem>
+            </itemizedlist>
+        </sect3>
+
+        <sect3>
+            <title>Continuous Integration Compatibility</title>
+
+            <para>
+                Vaadin TestBench works with continuous integration systems that support
+                JUnit testing. It is tested to work on the TeamCity build management and
+                continuous integration server.
+            </para>
+        </sect3>
+
+        <sect3>
+            <title>Known Compatibility Problems</title>
+
+            <para>
+                Firebug should be disabled
+            </para>
+
+            <para>
+                In some cases, Firebug injects a <literal>&lt;div
+                id="_firebugConsole"&gt;</literal> element under the
+                <literal>&lt;body&gt;</literal> element (the element is invisible in the
+                Firebug's HTML structure browser). This can disturb recording of test
+                cases, especially when closing notifications. Firebug 1.6 should fix this
+                issue, but we still encourage TestBench users to disable Firebug when
+                recording or playing test cases.
+            </para>
+
+            <para>
+                Screenshots when running Internet Explorer 9 in Compatibility Mode
+            </para>
+
+            <para>
+                Internet Explorer versions prior to 9 add a two pixel border around the
+                content area. Version 9 no longer does this and as a result screenshots
+                taken using Internet Explorer 9 running in compatibility mode (IE7/IE8)
+                will include the two pixel border, contrary to what the older versions of
+                Internet Explorer do.
+            </para>
+        </sect3>
+    </section>
+
+    <section xml:id="testbench.installation">
+        <title>Installing Vaadin TestBench</title>
+
+        <para>
+            Installation of Vaadin TestBench covers the following tasks:
+        </para>
+
+        <itemizedlist>
+            <listitem>
+                <para>Download and unpack the Vaadin TestBench installation package</para>
+            </listitem>
+            <listitem>
+                <para>Install Vaadin TestBench Recorder</para>
+            </listitem>
+            <listitem>
+                <para>Install Vaadin TestBench Library and launch scripts</para>
+            </listitem>
+            <listitem>
+                <para>Install Vaadin TestBench Grid Hub</para>
+            </listitem>
+            <listitem>
+                <para>Install Vaadin TestBench Grid Remote Controls</para>
+            </listitem>
+        </itemizedlist>
+
+        <para>
+            At first, you only need to install the Recorder. It allows you to record and play
+            back tests in the browser. The rest of the installation tasks are for running
+            automated tests from a test server using a grid.
+        </para>
+
+        <para>
+            Two basic installation types are covered in these instructions:
+        </para>
+
+        <itemizedlist>
+            <listitem>
+                <para>Test development installation on a workstation</para>
+            </listitem>
+            <listitem>
+                <para>Distributed grid installation</para>
+            </listitem>
+        </itemizedlist>
+
+        <section xml:id="testbench.installation.development">
+            <title>Test Development Installation</title>
+
+            <para>
+                In a typical small test development setup, you will install all the
+                components on a single workstation. See <!-- TODO LINK Section 2.4: Quick
+                Setup for Playback on a Workstation --> for a quick test development
+                setup.
+            </para>
+
+            <para>
+                The default values in the <filename>example/test.xml</filename> Ant script
+                in the installation package assumes that the hub is installed on the
+                localhost where the script is executed. With the base setup the hub and
+                remote control are launched on the localhost.
+            </para>
+        </section>
+
+        <section xml:id="testbench.installation.distributed">
+            <title>A Distributed Test Environment</title>
+
+            <para>
+                A Vaadin TestBench grid consists of two categories of components:
+            </para>
+
+            <itemizedlist>
+                <listitem>
+                    <para>Vaadin TestBench Grid Hub service</para>
+                </listitem>
+                <listitem>
+                    <para>Grid nodes running Vaadin TestBench Grid Remote Control</para>
+                </listitem>
+            </itemizedlist>
+
+            <para>
+                The hub is a service that handles communication between the JUnit test runner and
+                the node controllers. The node controllers are services that can launch a browser
+                and perform the actual execution of test commands in the browser.
+            </para>
+
+            <para>
+                The hub requires very little resources, so you would typically run it either in
+                the test server or on one of the nodes.
+            </para>
+
+            <para>
+                In a fully distributed setup, you install the Vaadin TestBench components on
+                separate hosts. <!-- TODO -->
+            </para>
+        </section>
+
+        <section xml:id="testbench.installation.downloading">
+            <title>Downloading and Unpacking the Installation Package</title>
+
+            <para>
+                First, download the installation package vaadin-testbench-2.2.0.zip  and extract
+                the installation package where you can find it.
+            </para>
+
+            <simplesect>
+                <title>Windows</title>
+
+                <para>
+                    In Windows, use the default ZIP decompression feature to extract the
+                    package into your chosen directory, for example,
+                    <filename>C:\dev</filename>.
+                </para>
+
+                <warning>
+                    <para>
+                        The default decompression program in Windows XP and Vista as well
+                        as some versions of WinRAR cannot unpack the installation package
+                        properly in certain cases. Decompression can result in an error
+                        such as: "The system cannot find the file specified." This can
+                        happen because the default decompression program is unable to
+                        handle long file paths where the total length exceeds 256
+                        characters. This occurs, for example, if you try to unpack the
+                        package under Desktop. You should unpack the package directly into
+                        <filename>C:\dev</filename> or some other short path or use
+                        another decompression program.
+                    </para>
+                </warning>
+            </simplesect>
+
+            <simplesect>
+                <title>Linux, MacOS X, and other UNIX</title>
+
+                <para>
+                    In Linux, Mac OS X, and other UNIX-like systems, use Info-ZIP or other ZIP
+                    software with the command:
+                </para>
+
+                <screen><prompt>$</prompt> <command>unzip</command> <parameter>vaadin-testbench-2.2.0.zip</parameter></screen>
+
+                <para>
+                    The contents of the installation package will be extracted under the
+                    <filename>vaadin-testbench</filename> installation directory in the
+                    chosen directory.
+                </para>
+            </simplesect>
+        </section>
+
+        <section xml:id="testbench.installation.recorder">
+            <title>Installing the Recorder</title>
+
+            <para>
+                An environment for developing tests require you to use the Vaadin TestBench
+                Recorder for recording test cases and to play them back.
+            </para>
+
+            <para>
+                After extracting the files from the installation package, do the following:
+            </para>
+
+            <orderedlist>
+                <listitem>
+                    <para>Enter the testbench-recorder directory under the installation directory.</para>
+                </listitem>
+                <listitem>
+                    <para>Open Mozilla Firefox</para>
+                </listitem>
+                <listitem>
+                    <para>
+                        Either drag and drop the
+                        <filename>vaadin-testbench-recorder-2.2.0.xpi</filename> to an
+                        open Firefox window or open it from the <guimenu>File</guimenu>
+                        menu.
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        Firefox will ask if you want to install the TestBench Recorder extension. Click
+                        <guibutton>Install Now</guibutton>.
+                    </para>
+
+                    <figure xml:id="figure:testbench.architecture">
+                        <title>Installing Vaadin TestBench Recorder</title>
+                        <mediaobject>
+                            <imageobject role="html">
+                                <imagedata align="center" fileref="img/testbench/screenshots/tt-recorder-install.png"/>
+                            </imageobject>
+                            <imageobject role="fo">
+                                <imagedata scale="60" smallscale="100%" align="center" fileref="img/testbench/screenshots/tt-recorder-install.png"/>
+                            </imageobject>
+                        </mediaobject>
+                    </figure>
+                </listitem>
+                <listitem>
+                    <para>
+                        After the installation of the add-on is finished, Firefox offers
+                        to restart. Click <guibutton>Restart Now</guibutton>.
+                    </para>
+                </listitem>
+            </orderedlist>
+
+            <para>
+                Installation of a new version of Vaadin TestBench Recorder will
+                overwrite an existing previous version.
+            </para>
+
+            <para>
+                After Firefox has restarted, navigate to a Vaadin application for which
+                you want to record test cases, such as <ulink
+                url="http://demo.vaadin.com/colorpicker">http://demo.vaadin.com/colorpicker</ulink>.
+            </para>
+        </section>
+
+        <section xml:id="testbench.installation.workstation-playback">
+            <title>Quick Setup for Playback on a Workstation</title>
+
+            <para>
+                You can run the grid hub and a remote control on your workstation when developing
+                tests. The configuration uses the localhost as default, so you do not need to edit
+                the configuration files at this point.
+            </para>
+
+            <simplesect>
+                <title>Windows</title>
+
+                <orderedlist>
+                    <listitem>
+                        <para>
+                            Navigate to <filename>grid/hub/</filename> in the installation
+                            directory and run <filename>hub.bat</filename> to start the
+                            hub on port 4444.
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                            Navigate to <filename>grid/remote-control/</filename> in the
+                            installation directory and run <filename>rc.bat</filename> to
+                            start the remote control on the local machine and have it
+                            connect to the hub.
+                        </para>
+                    </listitem>
+                </orderedlist>
+            </simplesect>
+
+            <simplesect>
+                <title>Linux, Mac OS X, and other UNIX</title>
+
+                <orderedlist>
+                    <listitem>
+                        <para>
+                            Open a terminal window and change to grid/hub/ under the
+                            installation directory
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                            Edit hub configuration file
+                            <filename>grid_configuration.yml</filename> and check that it
+                            includes your environment, as described in <!-- TODO: Section
+                            2.5.2: Predefined Target Environments -->. Especially in
+                            Linux, if using Firefox, edit the path to the
+                            <filename>firefox-bin</filename> executable.
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                            Run <filename>hub.sh</filename> to start the hub on port 4444.
+                        </para>
+
+                        <screen><prompt>$</prompt> <command>cd</command> vaadin-testbench-2.2.0/grid/hub
+<prompt>$</prompt> <command>sh</command> hub.sh</screen>
+                    </listitem>
+                    <listitem>
+                        <para>
+                            Open a second terminal window and change to
+                            <filename>grid/node-controller/</filename> under the
+                            installation directory
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                            Edit the remote configuration file
+                            <filename>rc_configuration.xml</filename>, disable the Windows
+                            targets and enable the targets for your environment, as
+                            described in <!-- TODO LINK Section 2.6.1: Configuring the
+                            Remote Control -->.
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                            Run <filename>rc.bat</filename> to start the node controller
+                            on the local machine and have it connect to the hub.
+                        </para>
+
+                        <screen><prompt>$</prompt> <command>cd</command> vaadin-testbench-2.2.0/grid/remote-control
+<prompt>$</prompt> <command>sh</command> rc.sh</screen>
+
+                    </listitem>
+                </orderedlist>
+
+                <para>
+                    Check that the remote control registers correctly by opening <ulink
+                        url="http://localhost:4444/console">http://localhost:4444/console</ulink> in a web
+                    browser.
+                </para>
+
+                <para>
+                    Next, change to the <filename>example/</filename> directory.
+                </para>
+
+                <screen><prompt>$</prompt> <command>cd</command> vaadin-testbench-2.2.0/example</screen>
+
+                <para>
+                    Open the <filename>test.xml</filename> file in an editor and edit the
+                    list of browsers (target environments names) to match your system and
+                    the installed browsers.
+                </para>
+
+                <programlisting><![CDATA[<property name="browsers"
+          value="winxp-ie8,winxp-firefox3" />]]></programlisting>
+
+                <para>
+                    The value must be a comma-separated list of target names. A complete
+                    list of predefined browsers (target environments) is given in <!--
+                    TODO LINK Section 2.5.1: Configuring the Hub -->. If your environment
+                    is not included in the predefined entries, you need to edit the hub
+                    and remote control configurations before starting them. Notice that
+                    the target name is merely an alias for a browser identifier, and you
+                    could use "winxp-firefox3" in Linux or Mac OS X as well, assuming that
+                    Firefox is installed on the host.
+                </para>
+
+                <para>
+                    When you feel that the configuration is OK, run the script:
+                </para>
+
+                <screen><prompt>$</prompt> <command>ant</command> -f test.xml</screen>
+
+                <para>
+                    The script will convert, compile, run the recorded test and give a brief output on
+                    the success or failure of the test.
+                </para>
+            </simplesect>
+        </section>
+
+        <section xml:id="testbench.installation.hub">
+            <title>Setting Up a Grid Hub</title>
+
+            <para>
+                The grid hub can be installed in the same server where the tests are run, in one
+                of the grid nodes, or on a dedicated server. In a test development installation,
+                you can install it on the same workstation or server with all the other
+                components.
+            </para>
+
+            <para>
+                You can find the grid hub from the full installation package and from the
+                vaadin-testbench-grid package.
+            </para>
+
+            <section xml:id="testbench.installation.hub.configuration">
+                <title>Configuring the Hub</title>
+
+                <para>
+                    The hub is configured in the
+                    <filename>grid_configuration.yml</filename> file. You need to edit
+                    this file if the predefined list of targets does not cover all the
+                    wanted targets, that is, the operating system + browser combinations
+                    that you wish to test.
+                </para>
+
+                <para>
+                    The first line contains the "hub" tag, after which should come the
+                    port definition. A hub uses the port 4444 by default. After the
+                    "environments:" tag comes a list of name-browser pairs that each
+                    define a target.
+                </para>
+
+                <informaltable frame="all">
+                    <tgroup cols="2">
+                        <thead>
+                            <row>
+                                <entry>
+                                    <para>Parameter</para>
+                                </entry>
+                                <entry>
+                                    <para>Description</para>
+                                </entry>
+                            </row>
+                        </thead>
+                        <tbody>
+                            <row>
+                                <entry><para>name</para></entry>
+                                <entry>
+                                    <para>
+                                        Corresponds to the Target value in a remote
+                                        control in a node. The name can be defined as
+                                        anything, but may not contain commas, which act as
+                                        separator characters in the environment variable
+                                        of the remote control configuration.
+                                    </para>
+                                </entry>
+                            </row>
+                            <row>
+                                <entry><para>browser</para></entry>
+                                <entry>
+                                    <para>
+                                        Identifies a browser run by this target. The
+                                        browser identifiers are prefixed with an asterisk
+                                        and can be appended with an exact path to the
+                                        browser executable. A list of allowed browser
+                                        identifiers and a description of the executable
+                                        paths is given in <!-- TODO LINK Section 2.5.3: Browser
+                                        Identifiers -->.
+                                    </para>
+                                </entry>
+                            </row>
+                        </tbody>
+                    </tgroup>
+                </informaltable>
+
+                <para>
+                    For example:
+                </para>
+
+        <programlisting><?pocket-size 70% ?><![CDATA[hub:
+    port: 4444
+    remoteControlPollingIntervalInSeconds: 120
+    sessionMaxIdleTimeInSeconds: 90
+    newSessionMaxWaitTimeInSeconds: 5
+    environments:
+        - name:     "winxp-ie7"
+          browser:  "*iexplore"
+        - name:     "winxp-firefox3"
+          browser:  "*firefox"
+        - name:     "winxp-googlechrome4"
+          browser:  "*googlechrome"
+
+        - name:     "linux-firefox3"
+          browser:  "*firefox /usr/lib/firefox/firefox-bin"
+
+        - name:     "osx-firefox35"
+          browser:  "*firefox"
+        - name:     "osx-safari4"
+          browser:  "*safari"]]></programlisting>
+
+                <para>
+                    A list of the predefined target environments is given in <!-- TODO LINK Section 2.5.2:
+                    Predefined Target Environments.-->
+                </para>
+            </section>
+
+            <section xml:id="testbench.installation.hub.predefined-targets">
+                <title>Predefined Target Environments</title>
+
+                <para>
+                    The predefined targets are system-browser combinations mapped to a
+                    browser identifier. They are as follows:
+                </para>
+
+                <informaltable frame="all">
+                    <tgroup cols="2">
+                        <thead>
+                            <row>
+                                <entry><para>Target Name</para></entry>
+                                <entry><para>Browser</para></entry>
+                            </row>
+                        </thead>
+                        <tbody>
+                            <row>
+                                <entry><para>winxp-ie6</para></entry>
+                                <entry><para>*iexplore</para></entry>
+                            </row>
+                            <row>
+                                <entry><para>winxp-ie7</para></entry>
+                                <entry><para>*iexplore</para></entry>
+                            </row>
+                            <row>
+                                <entry><para>winxp-ie8</para></entry>
+                                <entry><para>*iexplore</para></entry>
+                            </row>
+                            <row>
+                                <entry><para>winxp-firefox3</para></entry>
+                                <entry><para>*firefox</para></entry>
+                            </row>
+                            <row>
+                                <entry><para>winxp-firefox36</para></entry>
+                                <entry><para>*firefox</para></entry>
+                            </row>
+                            <row>
+                                <entry><para>winxp-safari4</para></entry>
+                                <entry><para>*safari</para></entry>
+                            </row>
+                            <row>
+                                <entry><para>winxp-safari5</para></entry>
+                                <entry><para>*safariproxy</para></entry>
+                            </row>
+                            <row>
+                                <entry><para>winxp-opera10</para></entry>
+                                <entry><para>*opera</para></entry>
+                            </row>
+                            <row>
+                                <entry><para>winxp-googlechrome6</para></entry>
+                                <entry><para>*googlechrome</para></entry>
+                            </row>
+                            <row>
+                                <entry><para>linux-firefox3</para></entry>
+                                <entry><para>*firefox</para></entry>
+                            </row>
+                            <row>
+                                <entry><para>linux-firefox36</para></entry>
+                                <entry><para>*firefox</para></entry>
+                            </row>
+                            <row>
+                                <entry><para>linux-opera10</para></entry>
+                                <entry><para>*opera</para></entry>
+                            </row>
+                            <row>
+                                <entry><para>osx-firefox35</para></entry>
+                                <entry><para>*firefox</para></entry>
+                            </row>
+                            <row>
+                                <entry><para>osx-safari4</para></entry>
+                                <entry><para>*safari</para></entry>
+                            </row>
+                            <row>
+                                <entry><para>osx-opera10</para></entry>
+                                <entry><para>*opera</para></entry>
+                            </row>
+                        </tbody>
+                    </tgroup>
+                </informaltable>
+            </section>
+
+            <section xml:id="testbench.installation.hub.browser-identifiers">
+                <title>Browser Identifiers</title>
+
+                <para>
+                    Vaadin TestBench supports the following browser identifiers:
+                </para>
+
+                <informaltable frame="all">
+                    <tgroup cols="2">
+                        <thead>
+                            <row>
+                                <entry><para>Browser Identifier</para></entry>
+                                <entry><para>Browser</para></entry>
+                            </row>
+                        </thead>
+                        <tbody>
+                            <row>
+                                <entry><para><literal>*firefox</literal></para></entry>
+                                <entry><para>Mozilla Firefox 2 or 3 (prefers 2)</para></entry>
+                            </row>
+                            <row>
+                                <entry><para><literal>*firefox2</literal></para></entry>
+                                <entry><para>Mozilla Firefox 2.x</para></entry>
+                            </row>
+                            <row>
+                                <entry><para><literal>*firefox3</literal></para></entry>
+                                <entry><para>Mozilla Firefox 3.x</para></entry>
+                            </row>
+                            <row>
+                                <entry><para><literal>*firefoxchrome</literal></para></entry>
+                                <entry><para>Mozilla Firefox</para></entry>
+                            </row>
+                            <row>
+                                <entry><para><literal>*chromec</literal></para></entry>
+                                <entry><para>Mozilla Firefox (not Google Chrome!)</para></entry>
+                            </row>
+                            <row>
+                                <entry><para><literal>*iexplore</literal></para></entry>
+                                <entry><para>Internet Explorer</para></entry>
+                            </row>
+                            <row>
+                                <entry><para><literal>*safari</literal></para></entry>
+                                <entry><para>Apple Safari and other WebKit based browsers</para></entry>
+                            </row>
+                            <row>
+                                <entry><para><literal>*safariproxy</literal></para></entry>
+                                <entry><para>Apple Safari 5 requires this identifier</para></entry>
+                            </row>
+                            <row>
+                                <entry><para><literal>*opera</literal></para></entry>
+                                <entry><para>Opera</para></entry>
+                            </row>
+                            <row>
+                                <entry><para><literal>*googlechrome</literal></para></entry>
+                                <entry><para>Google Chrome</para></entry>
+                            </row>
+                        </tbody>
+                    </tgroup>
+                </informaltable>
+
+                <para>
+                    The above list does not include incompatible or otherwise irrelevant browsers.
+                </para>
+
+                <para>
+                    Notice that the target <literal>*firefox3</literal> is defined so that, if both Firefox 2 and 3 are
+                    installed on the system, preference is given to the version 2. This may cause an
+                    unexpected mix-up, as one would expect Firefox 3 to be launched.
+                </para>
+
+                <simplesect>
+                    <title>Browser Path</title>
+
+                    <para>
+                        In cases where
+                    </para>
+
+                    <itemizedlist>
+                        <listitem>
+                            <para>
+                                multiple browsers with the same name are installed, or
+                            </para>
+                        </listitem>
+                        <listitem>
+                            <para>
+                                the remote controller can not find the browser because it is not installed to the
+                                default location,
+                            </para>
+                        </listitem>
+                    </itemizedlist>
+
+                    <para>
+                        the browser identifier can be appended with the absolute path to the browser
+                        executable, separated by a space from the identifier. For example, "<literal>*firefox
+                        /opt/firefox3.6/firefox-bin</literal>".
+                    </para>
+
+                    <para>
+                        If you specify the absolute path to the browser, it must be same on all grid nodes
+                        (remote controls) that support the target environment. If such a browser is
+                        installed in a different location on different nodes, you need to have a separate
+                        target environment specified for each.
+                    </para>
+                </simplesect>
+
+                <simplesect>
+                <title>Firefox in Linux</title>
+
+                    <para>
+                        Using the absolute path for Firefox is necessary in Linux, because
+                        the "firefox" program is just a script that launches the actual
+                        executable. Stopping the launch script does not close the browser,
+                        so the Firefox window will not close after the tests are done. If
+                        your Firefox installation directory is
+                        <filename>/opt/firefox</filename>, for example, you need to use
+                        "<filename>*firefox /opt/firefox/firefox-bin</filename>" in the
+                        configuration to start Firefox.
+                    </para>
+
+                    <para>
+                        The exact installation directory of Firefox depends on the system and used
+                        installation method (package management or manual installation). Typical locations
+                        include the following paths:
+                    </para>
+
+                    <itemizedlist>
+                        <listitem>
+                            <para><filename>/opt/firefox/firefox-bin</filename></para>
+                        </listitem>
+                        <listitem>
+                            <para><filename>/usr/lib/firefox/firefox-bin</filename></para>
+                        </listitem>
+                        <listitem>
+                            <para><filename>/usr/local/firefox/firefox-bin</filename></para>
+                        </listitem>
+                        <listitem>
+                            <para><filename>/usr/local/lib/firefox/firefox-bin</filename></para>
+                        </listitem>
+                    </itemizedlist>
+
+                    <para>
+                        The binary itself can also be named something else that firefox-bin.
+                    </para>
+                </simplesect>
+            </section>
+
+            <section xml:id="testbench.installation.hub.starting">
+                <title>Starting the Hub</title>
+
+                <para>
+                    The grid hub is a service bound to a port, 4444 by default.
+                </para>
+
+                <simplesect>
+                    <title>Windows</title>
+
+                    <para>
+                        Navigate to <filename>grid/hub/</filename> folder in the
+                        installation folder and run <filename>hub.bat</filename> to start
+                        the hub on port 4444.
+                    </para>
+
+                    <para>
+                        Closing the console window will stop the service.
+                    </para>
+                </simplesect>
+
+                <simplesect>
+                    <title>Linux, Mac OS X, and other UNIX</title>
+
+                    <orderedlist>
+                        <listitem>
+                            <para>
+                                Open a terminal window and change to <filename>grid/hub/</filename>
+                            </para>
+                        </listitem>
+                        <listitem>
+                            <para>
+                                Run <filename>hub.sh</filename> to start the hub on port 4444.
+                            </para>
+
+                            <screen><prompt>$</prompt> <command>cd</command> vaadin-testbench-2.2.0/grid/hub
+<prompt>$</prompt> <command>sh</command> hub.sh</screen>
+                        </listitem>
+                    </orderedlist>
+
+                    <para>
+                        The hub service starts attached to the terminal and writes its log
+                        to standard output. Press
+                        <keycombo><keycap>Ctrl</keycap><keycap>C</keycap></keycombo> to
+                        stop the service. You can also daemonize the service.
+                    </para>
+                </simplesect>
+            </section>
+        </section>
+
+        <section xml:id="testbench.installation.rc">
+            <title>Setting Up a Grid Node</title>
+
+            <para>
+                A grid node is a server, a desktop computer, or a virtual machine running a
+                windowed operating system. It needs to have:
+            </para>
+
+            <itemizedlist>
+                <listitem>
+                    <para>Java 1.5 JRE (or newer) installed</para>
+                </listitem>
+                <listitem>
+                    <para>One or more web browsers installed</para>
+                </listitem>
+                <listitem>
+                    <para>Vaadin TestBench Remote Control installed and configured</para>
+                </listitem>
+            </itemizedlist>
+
+            <para>
+                A <emphasis>remote control</emphasis> is a service running on a grid
+                node. It acts as a "remote control" for controlling the web browsers
+                installed on the node: it can launch and stop browser applications and
+                execute test commands in them. A remote control is itself "remote
+                controlled" by the grid hub, which delegates the tests to the available
+                remote controls.
+            </para>
+
+            <para>
+                The installation of web browsers is not covered in this manual.
+            </para>
+
+            <section xml:id="testbench.installation.rc.configuration">
+                <title>Configuring a Remote Control</title>
+
+                <para>
+                    A remote control should be configured before starting it. The
+                    configuration is done by editing the
+                    <filename>rc_configuration.xml</filename> file. Values given in the
+                    XML configuration file override the default values defined in the run
+                    script.
+                </para>
+
+                <informaltable frame="all">
+                    <tgroup cols="2">
+                        <thead>
+                            <row>
+                                <entry><para>Parameter</para></entry>
+                                <entry><para>Description</para></entry>
+                            </row>
+                        </thead>
+                        <tbody>
+                            <row>
+                                <entry><para>port</para></entry>
+                                <entry>
+                                    <para>
+                                        The port this remote control listens to for
+                                        commands from the hub. Default port is 5555.
+                                    </para>
+                                </entry>
+                            </row>
+                            <row>
+                                <entry><para>hubURL</para></entry>
+                                <entry><para>The address of the hub as a URL. Local host by default.</para></entry>
+                            </row>
+                            <row>
+                                <entry><para>environment</para></entry>
+                                <entry>
+                                    <para>An environment target (system-browser
+                                    combination) that this remote control supports. The
+                                    target must match one of the target names defined in
+                                    the hub configuration. You can define multiple
+                                    environments. See 2.5.1: Configuring the Hub for more
+                                    information about the targets and a list of predefined
+                                    targets.</para>
+                                </entry>
+                            </row>
+                            <row>
+                                <entry><para>host</para></entry>
+                                <entry>
+                                    <para>The host name or IP address of this node
+                                    controller. If the host name is not defined, the hub
+                                    tries to determine it from the registration request.</para>
+                                </entry>
+                            </row>
+                        </tbody>
+                    </tgroup>
+                </informaltable>
+
+                <para>
+                    If the hub is running on the same host as the remote control, only the
+                    environment targets need to be defined.
+                </para>
+            </section>
+
+            <section xml:id="testbench.installation.rc.runscript">
+                <title>Configuring the Run Script</title>
+
+                <para>
+                    A remote control can also be configured in the run scripts
+                    (<filename>rc.sh</filename> or <filename>rc.bat</filename>) by
+                    defining:
+                </para>
+
+                <informaltable frame="all">
+                    <tgroup cols="2">
+                        <thead>
+                            <row>
+                                <entry><para>Environment Variable</para></entry>
+                                <entry><para>Description</para></entry>
+                            </row>
+                        </thead>
+                        <tbody>
+                            <row>
+                                <entry><para>ENVIRONMENT</para></entry>
+                                <entry>
+                                    <para>Environment targets (system-browser
+                                    combinations) supported by this remote control. The
+                                    targets in the comma-separated list must match one of
+                                    the target names defined in the hub configuration.</para>
+                                </entry>
+                            </row>
+                            <row>
+                                <entry><para>USEREXTENSIONS</para></entry>
+                                <entry><para>Where user-extensions.js is located.</para></entry>
+                            </row>
+                        </tbody>
+                    </tgroup>
+                </informaltable>
+
+                <para>
+                    In this case, you will also need to add the following parameters after
+                    the <literal>SelfRegisteringRemoteControlLauncher</literal>.
+                </para>
+
+                <informaltable frame="all">
+                    <tgroup cols="2">
+                        <thead>
+                            <row>
+                                <entry><para>Parameter</para></entry>
+                                <entry><para>Description</para></entry>
+                            </row>
+                        </thead>
+                        <tbody>
+                            <row>
+                                <entry><para>hubUrl</para></entry>
+                                <entry><para>Address of the hub.</para></entry>
+                            </row>
+                            <row>
+                                <entry><para>port</para></entry>
+                                <entry><para>The port that this node controller should listen to.</para></entry>
+                            </row>
+                        </tbody>
+                    </tgroup>
+                </informaltable>
+                
+                <para>
+                    On a windows machine, a <literal>-ensureCleanSession</literal> can
+                    be in the <filename>rc.bat</filename> to have the remote control
+                    close all running <filename>iexplore.exe</filename> processes.
+                </para>
+            </section>
+
+            <section xml:id="testbench.installation.rc.starting">
+                <title>Starting the Remote Control</title>
+
+                <para>
+                    A remote control is a service bound to a port, 5555 by default.
+                </para>
+
+                <simplesect>
+                    <title>Windows</title>
+
+                    <para>
+                        Navigate to <filename>grid/remote-control/</filename> folder under
+                        the installation folder and run <filename>rc.bat</filename> to
+                        start the remote control.
+                    </para>
+
+                    <para>
+                        Closing the console window will stop the service.
+                    </para>
+                </simplesect>
+
+                <simplesect>
+                    <title>Linux, Mac OS X, and other UNIX</title>
+
+                    <orderedlist>
+                        <listitem>
+                            <para>
+                                Open a terminal window and change to grid/remote-control/
+                            </para>
+                        </listitem>
+                        <listitem>
+                            <para>
+                                Run rc.sh to start the remote control.
+                            </para>
+
+                            <screen><prompt>$</prompt> <command>cd</command> vaadin-testbench-2.2.0/grid/remote-control
+<prompt>$</prompt> <command>sh</command> rc.sh</screen>
+                        </listitem>
+                    </orderedlist>
+
+                    <para>
+                        The remote control service starts attached to the terminal and
+                        writes its log to standard output. Press
+                        <keycombo><keycap>Ctrl</keycap><keycap>C</keycap></keycombo> to
+                        stop the service. You can daemonize the service.
+                    </para>
+                </simplesect>
+            </section>
+
+            <section xml:id="testbench.installation.rc.nohub">
+                <title>Running Tests Without a Grid Hub</title>
+
+                <para>
+                    You can run tests on a single testing node also without a grid hub,
+                    with just a remote control installed. The used remote control needs to
+                    be a clean Selenium remote control that is started with the command:
+                </para>
+
+                <screen><prompt>$</prompt> <command>java</command> -jar selenium-server.jar -userExtensions user-extensions.js</screen>
+
+                <para>
+                    The <filename>user-extensions.js</filename> file can be found in the
+                    <filename>grid/remote-control/</filename> folder.
+                </para>
+
+                <para>
+                    When running the tests through JUnit, as described in <!-- TODO LINK
+                    Chapter 4: Compiling and Executing JUnit Tests -->, you need to:
+                </para>
+
+                <orderedlist>
+                    <listitem>
+                        <para>
+                            Set the <literal>com.vaadin.testbench.tester.host</literal>
+                            property to point to the server on which the remote control
+                            runs instead of a hub host.
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                            You need to list the browsers installed in the RC host in the
+                            browsers property, either in the Ant script or in
+                            command-line. See the list of allowed browser identifiers in
+                            <!-- TODO LINK Section 2.5.1: Configuring the Hub -->.
+                        </para>
+
+                        <programlisting><?pocket-size 75% ?><![CDATA[<property name="browsers" value="*firefox"/>]]></programlisting>
+
+                        <para>
+                            You can also specify the browser executable path here, as
+                            described in the <!-- TODO LINK Section 2.5.1. -->
+                        </para>
+
+                        <programlisting><?pocket-size 75% ?><![CDATA[<property name="browsers"
+          value="*firefox /opt/firefox/firefox-bin"/>]]></programlisting>
+                    </listitem>
+                </orderedlist>
+            </section>
+
+            <section xml:id="testbench.installation.rc.browser-settings">
+                <title>Browser settings</title>
+
+                <para>
+                    Turn off pop-up blockers for all browsers.
+                </para>
+
+                <variablelist>
+                    <varlistentry>
+                        <term>Internet Explorer</term>
+                        <listitem>
+                            <para>
+                                Make the settings in
+                                <menuchoice><guimenu>Tools</guimenu><guisubmenu>Pop-up
+                                Blocker</guisubmenu><guimenuitem>Turn Off Pop-up
+                                Blocker</guimenuitem></menuchoice>
+                            </para>
+                        </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                        <term>Safari</term>
+                        <listitem>
+                            <para>
+                                Make the settings in
+                                <menuchoice><guimenu>Edit</guimenu><guimenuitem>Block
+                                Pop-up Windows</guimenuitem></menuchoice>
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                </variablelist>
+
+                <para>
+                    Also turn off default browser checks for all browsers.
+                </para>
+            </section>
+
+            <section xml:id="testbench.installation.rc.os-settings">
+                <title>Operating system settings</title>
+
+                <para>
+                    Make any operating system settings that might interfere with the browser and how
+                    it is opened or closed. Typical problems include crash handler dialogs.
+                </para>
+
+                <simplesect>
+                    <title>Windows</title>
+
+                    <para>
+                        Disable error reporting in case a browser crashes.
+                    </para>
+
+                    <orderedlist>
+                        <listitem>
+                            <para>
+                                Open <menuchoice><guimenu>control panel</guimenu><guimenuitem>System</guimenuitem></menuchoice>
+                            </para>
+                        </listitem>
+                        <listitem>
+                            <para>
+                                Select <guilabel>Advanced</guilabel> tab
+                            </para>
+                        </listitem>
+                        <listitem>
+                            <para>
+                                Select <guilabel>Error reporting</guilabel>
+                            </para>
+                        </listitem>
+                        <listitem>
+                            <para>
+                                Check that <guilabel>Disable error reporting</guilabel> is selected
+                            </para>
+                        </listitem>
+                        <listitem>
+                            <para>
+                                Check that <guilabel>But notify me when critical errors occur</guilabel> is not selected
+                            </para>
+                        </listitem>
+                    </orderedlist>
+                </simplesect>
+            </section>
+
+            <section xml:id="testbench.installation.rc.screenshot-settings">
+                <title>Settings for Screenshots</title>
+
+                <para>
+                    The screenshot comparison feature requires that the user interface of
+                    the browser stays constant. The exact features that interfere with
+                    testing depend on the browser and the operating system.
+                </para>
+
+                <para>
+                    In general:
+                </para>
+
+                <orderedlist>
+                    <listitem>
+                        <para>
+                            Disable the auto-hide function for the toolbar
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                            Check that the toolbar is either locked or unlocked on all test hosts
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                            Disable blinking cursor
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                            Use the same screen resolution on all test machines and check
+                            that the maximized window is always the same size
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                            Configure browsers in the same manner on all machines (same toolbars visible, same
+                            themes, etc)
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                            Use identical operating system themeing on every host
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                            Turn off any software that may suddenly pop up a new window
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                            Turn off screen saver
+                        </para>
+                    </listitem>
+                </orderedlist>
+
+                <simplesect>
+                    <title>Platform-Specific Settings</title>
+
+                    <para>
+                        Windows / Internet Explorer:
+                    </para>
+
+                    <orderedlist>
+                        <listitem>
+                            <para>
+                                Turn on <guilabel>Allow active content to run in files on
+                                My Computer</guilabel> under <guilabel>Security settings</guilabel>
+                            </para>
+
+                        </listitem>
+                    </orderedlist>
+                </simplesect>
+            </section>
+        </section>
+    </section>
+
+    <section xml:id="testbench.recorder">
+        <title>Using Vaadin TestBench Recorder</title>
+
+        <para>
+            Tests are recorded using the Vaadin TestBench Recorder. You can play back
+            recoded test cases and use the Recorder to make assertions and take
+            screenshots for screen capture comparison.
+        </para>
+        
+		<figure xml:id="figure:testbench.recorder.workflow">
+			<title>Recorder Workflow</title>
+			<mediaobject>
+				<imageobject role="html">
+					<imagedata align="center" fileref="img/testbench/tt-recorder-workflow-lo.png"/>
+				</imageobject>
+				<imageobject role="fo">
+					<imagedata scale="60" smallscale="100%" align="center" fileref="img/testbench/tt-recorder-workflow-hi.png"/>
+				</imageobject>
+			</mediaobject>
+		</figure>
+
+        <para>
+            The Recorder is available only for Mozilla Firefox. To run the recorded tests
+            in other browsers, you need to compile them as JUnit tests and run them with
+            JUnit, as described in <!-- TODO LINK Chapter 4: Compiling and Executing JUnit
+            Tests -->. It also allows automating the testing.
+        </para>
+
+        <section xml:id="testbench.recorder.starting">
+            <title>Starting the Recorder</title>
+
+            <para>
+                To start the Recorder:
+            </para>
+
+            <orderedlist>
+                <listitem>
+                    <para>Open Mozilla Firefox</para>
+                </listitem>
+                <listitem>
+                    <para>Open the page with the application that you want to test</para>
+                </listitem>
+                <listitem>
+                    <para>Select <menuchoice><guimenu>Tools</guimenu><guimenuitem>Vaadin
+                    TestBench Recorder</guimenuitem></menuchoice> in the Firefox
+                    menu</para>
+        
+                    <figure xml:id="figure:testbench.recorder.open">
+                    <title>Starting Vaadin TestBench Recorder</title>
+                        <mediaobject>
+                            <imageobject role="html">
+                                <imagedata align="center" fileref="img/testbench/screenshots/tt-recorder-open.png"/>
+                            </imageobject>
+                            <imageobject role="fo">
+                                <imagedata scale="60" smallscale="100%" align="center" fileref="img/testbench/screenshots/tt-recorder-open.png"/>
+                            </imageobject>
+                        </mediaobject>
+                    </figure>
+                </listitem>
+            </orderedlist>
+            
+            <para>
+                The Vaadin TestBench Recorder window will open, as shown in Figure 4.
+            </para>
+
+            <figure xml:id="figure:testbench.recorder.calc-1">
+                <title>Vaadin TestBench Recorder running with the Calc demo</title>
+                <mediaobject>
+                    <imageobject role="html">
+                        <imagedata align="center" fileref="img/testbench/screenshots/tt-recorder-calc-1.png"/>
+                    </imageobject>
+                    <imageobject role="fo">
+                        <imagedata scale="60" smallscale="100%" align="center" fileref="img/testbench/screenshots/tt-recorder-calc-1.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+
+            <para>
+                Recording is automatically enabled when the Recorder starts. This is
+                indicated by the pressed <inlinegraphic
+                fileref="img/testbench/inline/inline-record-button.png" width="0.398cm"
+                depth="0.424cm"/> <guibutton>Record</guibutton> button.
+            </para>
+        </section>
+
+        <section xml:id="testbench.recorder.recording">
+            <title>Recording</title>
+
+            <para>
+                While recording, you can interact with the application in (almost) any way
+                you like. The Recorder records the interaction as commands in a test
+                script, which is shown in tabular format in the Table tab and as HTML
+                source code in the Source tab.
+            </para>
+
+            <figure xml:id="figure:testbench.recorder.recording">
+                <title>User interaction recorded as commands</title>
+                <mediaobject>
+                    <imageobject role="html">
+                        <imagedata align="center" fileref="img/testbench/screenshots/tt-recorder-recording.png"/>
+                    </imageobject>
+                    <imageobject role="fo">
+                        <imagedata scale="60" smallscale="100%" align="center" fileref="img/testbench/screenshots/tt-recorder-recording.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+
+            <para>
+                Please note the following:
+            </para>
+
+            <itemizedlist>
+                <listitem>
+                    <para>
+                        Changing browser tabs or opening a new browser window is not
+                        recommended, as any clicks and other actions will be recorded
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        Passwords are considered to be normal text input and are stored in
+                        plain text
+                    </para>
+                </listitem>
+            </itemizedlist>
+
+            <para>
+                While recording, you can insert various commands such as assertions or
+                take a screenshot by selecting the command from the Command list.
+            </para>
+
+            <para>
+                When you are finished, click the <inlinegraphic
+                fileref="img/testbench/inline/inline-record-button.png" width="0.398cm"
+                depth="0.424cm"/> <guibutton>Record</guibutton> button to stop recording.
+            </para>
+        </section>
+
+        <section xml:id="testbench.recorder.playback">
+            <title>Playing Back Tests</title>
+
+            <para>
+                After you have stopped recording, reset the application to the initial
+                state and press <inlinegraphic fileref="img/testbench/inline/inline-play-button.png"
+                width="0.424cm" depth="0.266cm"/> <guibutton>Play current test</guibutton>
+                to run the test again. You can use the
+                <literal>&amp;restartApplication</literal> parameter for an application in
+                the URL to restart it.
+            </para>
+
+            <para>
+                You can also play back saved tests by opening a target test in the
+                Recorder with
+                <menuchoice><guimenu>File</guimenu><guimenuitem>Open</guimenuitem></menuchoice>.
+            </para>
+
+            <para>
+                You can use the <inlinegraphic
+                fileref="img/testbench/inline/inline-slider-fastslow.png" width="2.171cm"
+                depth="0.557cm"/> slider to control the playback speed, click
+                <guibutton>Pause</guibutton> to interrupt the execution and
+                <guibutton>Resume</guibutton> to continue. While paused, you can click
+                <guibutton>Step</guibutton> to execute the script step-by-step.
+            </para>
+
+            <para>
+                Check that the test works as intended and no unintended or invalid commands are
+                found; a test should run without errors.
+            </para>
+        </section>
+
+        <section xml:id="testbench.recorder.editing">
+            <title>Editing Tests</title>
+
+            <para>
+                You can insert various commands, such as assertions or taking a
+                screenshot, in the test script during or after recording,
+            </para>
+
+            <para>
+                You insert a command by selecting an insertion point in the test script
+                and right-clicking an element in the browser. A context menu opens and
+                shows a selection of Recorder commands at the bottom. Selecting
+                <guimenuitem>Show All Available Commands</guimenuitem> shows more
+                commands. Commands inserted from the sub-menu are automatically added to
+                the top-level context menu.
+            </para>
+
+            <para>
+                <xref linkend="figure:testbench.recorder.inserting"/> shows adding an
+                assertion after calculating "6*7=" with the Calc demo.
+            </para>
+
+            <figure xml:id="figure:testbench.recorder.inserting">
+                <title>Inserting commands in a test script</title>
+                <mediaobject>
+                    <imageobject role="html">
+                        <imagedata align="center" fileref="img/testbench/screenshots/tt-recorder-inserting.png"/>
+                    </imageobject>
+                    <imageobject role="fo">
+                        <imagedata scale="60" smallscale="75%" align="center" fileref="img/testbench/screenshots/tt-recorder-inserting.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+
+            <para>
+                Inserting a command from the context menu automatically selects the
+                command in the <guilabel>Command</guilabel> field and fills in the target
+                and value parameters.
+            </para>
+
+            <para>
+                You can also select the command manually from the
+                <guilabel>Command</guilabel> list. The new command or comment will be
+                added at the selected location, moving the selected location down. If the
+                command requires a target element, click <guilabel>Select</guilabel> and
+                then click an element in your application. A reference to the element is
+                shown in the <guilabel>Target</guilabel> field and you can highlight the
+                element by clicking <guilabel>Find</guilabel>. If the command expects some
+                value, such as for comparing the element value, give it in the
+                <guilabel>Value</guilabel> field.
+            </para>
+
+            <para>
+                Commands in a test script can be changed by selecting a command and
+                changing the command, target, or value.
+            </para>
+        </section>
+
+        <section xml:id="testbench.recorder.commands">
+            <title>Test Script Commands</title>
+
+            <para>
+                Vaadin TestBench Recorder is based on the Selenium IDE, so the Selenium
+                documentation provides a complete reference of all the commands available
+                in the Selenium IDE and therefore in the Recorder.
+            </para>
+
+            <para>
+                Vaadin TestBench Recorder has the following special commands:
+            </para>
+
+            <itemizedlist>
+                <listitem>
+                    <para>screenCapture</para>
+                </listitem>
+                <listitem>
+                    <para>showTooltip</para>
+                </listitem>
+                <listitem>
+                    <para>assertText</para>
+                </listitem>
+                <listitem>
+                    <para>assertCSSClass</para>
+                </listitem>
+                <listitem>
+                    <para>includeTest</para>
+                </listitem>
+                <listitem>
+                    <para>expectDialog</para>
+                </listitem>
+                <listitem>
+                    <para>uploadFile</para>
+                </listitem>
+            </itemizedlist>
+
+            <para>
+                These special commands are described next.
+            </para>
+
+            <section xml:id="testbench.recorder.commands.screenCapture">
+                <title>Comparing Screen Capture Images: <command>screenCapture</command></title>
+
+                <para>
+                    The <command>screenCapture</command> command orders the Remote Control
+                    to take a screen capture of the browser view and compare the result
+                    against a reference image, if one is available. If a reference image
+                    is not available, the command will save the screen capture and fail
+                    the test. You can then later copy the captured image as the reference
+                    image.
+                </para>
+
+                <para>
+                    Observe that the screenshots are <emphasis>not</emphasis> taken by the
+                    Recorder, for example when you are playing back a test case in the
+                    Recorder. They are taken by the Remote Control only afterward, when
+                    you run the tests from the test server that controls the Remote
+                    Control (through the hub).
+                </para>
+
+                <para>
+                    The <guilabel>Value</guilabel> field can be used to define an
+                    identifier string for the screenshot. If the value is empty, a running
+                    number starting from 1 will be used as the identifier. Using a given
+                    identifier is more reliable than the numbers if the test is changed
+                    and screenshots are added or removed.
+                </para>
+
+                <para>
+                    The naming convention for screenshot file names is automated and has
+                    the following format:
+                </para>
+
+                <para>
+                    <filename>TestName_OS_BrowserName_BrowserMajorNumber_ID.png</filename>
+                </para>
+
+                <para>
+                    Comparison and storage of screenshots is described in <!-- TODO LINK
+                    Section 4.6: Comparing Screenshots-->.
+                </para>
+            </section>
+
+            <section xml:id="testbench.recorder.commands.shotTooltip">
+                <title>Recording ToolTips: <command>showTooltip</command></title>
+
+                <para>
+                    Clicking <inlinegraphic
+                    fileref="img/testbench/inline/inline-tooltip.png" width="0.583cm"
+                    depth="0.61cm"/> switches Recorder to a tooltip mode that allows
+                    making a tooltip appear. Recording is done by hovering over the target
+                    element until a tooltip appears and then moving the mouse away from
+                    the element. This will insert a <command>showTooltip</command> command
+                    and disable the tooltip button.
+                </para>
+
+                <para>
+                    After this command causes a tooltip to appear, its content can be asserted with
+                    other commands.
+                </para>
+            </section>
+
+            <section xml:id="testbench.recorder.commands.assertText">
+                <title>Recording AssertText: <command>assertText</command></title>
+
+                <para>
+                    Clicking <inlinegraphic
+                    fileref="img/testbench/inline/inline-assert.png" width="0.583cm"
+                    depth="0.61cm"/> allows recording an assertText command on elements
+                    where the context menu (which appears by clicking right mouse button)
+                    does not work for some reason. When the assertText button is active,
+                    the Recorder will record an assertText command for the next mouse
+                    click, with the clicked element as the target.
+                </para>
+            </section>
+
+            <section xml:id="testbench.recorder.commands.assertCSSClass">
+                <title>Asserting element css class: <command>assertCSSClass</command></title>
+
+                <para>
+                    Asserting a CSS class can be useful for determining if a row in a
+                    table is selected, and in other cases where the use of a normal
+                    assertion would be inconvenient. The <command>assertCSSClass</command>
+                    needs to be manually added and the target selected.
+                </para>
+
+                <para>
+                    Note that when selecting the target with the
+                    <guibutton>Select</guibutton> button, the selected target may be a
+                    child to the wanted element. In this case the target needs to be
+                    edited or re-selected so that it points to the correct element.
+                </para>
+            </section>
+
+            <section xml:id="testbench.recorder.commands.assertNotCSSClass">
+                <title>Asserting element CSS class: <command>assertNotCSSClass</command></title>
+
+                <para>
+                    The <command>assertNotCSSClass</command> has the reverse function to
+                    <command>assertCSSClass</command>. This one is useful for detecting
+                    cases where a class should have been removed from an element, but is
+                    not.
+                </para>
+            </section>
+
+            <section xml:id="testbench.recorder.commands.includeTest">
+                <title>Connecting tests together: <command>includeTest</command></title>
+
+                <para>
+                    Vaadin TestBench allows connecting tests together. This is done by
+                    inserting the <command>includeTest</command> command, where
+                    <guilabel>Value</guilabel> is the path to the test to be inserted. The
+                    path can be relative to the directory from which TestConverter is
+                    executed or an absolute path. Target test will be added in full at the
+                    position with <command>includeTest</command>. Inclusion only works
+                    when converting to JUnit tests with TestConverter.
+                </para>
+            </section>
+
+            <section xml:id="testbench.recorder.commands.expectDialog">
+                <title>Handling a confirmation box: <command>expectDialog</command></title>
+
+                <para>
+                    The commands <command>expectDialog</command> +
+                    <command>assertCommand</command> are needed when a click event opens
+                    up a Confirmation dialog.
+                </para>
+            </section>
+
+            <section xml:id="testbench.recorder.commands.uploadFile">
+                <title>Uploading files: <command>uploadFile</command></title>
+
+                <para>
+                    Vaadin TestBench supports uploading of files for the Firefox
+                    browser. File uploads are recorded automatically in the recorder and
+                    can be replayed as such. The <command>uploadFile</command> command
+                    differs from default behavior in Selenium in the way that there is no
+                    need to deploy the file to a URL that is accessible from all remote
+                    controls, but the file is passed along to the remote controls, which
+                    then use the local copy when running the test. The file can be placed
+                    in the same location as your test scripts (see <!-- TODO LINK 3.7
+                    Saving Tests -->) as long as the name is not changed. This file is
+                    sent to the remote controls if found, otherwise the file is read from
+                    the absolute path given in the <guilabel>Value</guilabel> property of
+                    the command.
+                </para>
+
+                <para>
+                    Vaadin TestBench is not aware of when the upload has been completed so
+                    you need to add a command such as
+                    <command>waitForElementVisible</command> if there is a component that
+                    is added after the upload, for example, a <classname>Label</classname>
+                    showing "Upload OK". Otherwise, Vaadin TestBench will continue with
+                    the next command before the upload has finished, which may cause
+                    problems if it is not taken into account.
+                </para>
+
+                <note>
+                    <para>
+                        Playback of the <command>uploadFile</command> command in the
+                        TestBench Recorder will currently not succeed if using Vaadin
+                        locators in Firefox 3.x due to security restrictions in the
+                        browser. This is a restriction in Recorder only and
+                        <command>uploadFile</command> in TestBench Remote Control works
+                        correctly also when using a Vaadin locator. In order for replay to
+                        work in Recorder in Firefox 3.x, the Target should be changed to a
+                        standard XPath selector string by choosing one from the
+                        <guilabel>Target</guilabel> drop down menu. This problem has been
+                        fixed in Firefox 4.
+                    </para>
+                </note>
+            </section>
+
+            <section xml:id="testbench.recorder.commands.keyPressSpecial">
+                <title>Shortcut keys: <command>keyPressSpecial</command></title>
+
+                <para>
+                    For testing shortcut keys (<keycap>Ctrl</keycap>,
+                    <keycap>Alt</keycap>, <keycap>Shift</keycap> + key) the command
+                    <command>keyPressSpecial</command> can be used. Combinations using
+                    arrow keys will be automatically recorded.
+                </para>
+
+                <para>
+                    The value for <command>keyPressSpecial</command> should be a string
+                    with a space-separated list of modifier keys, and finalle the target
+                    key. For example, "<literal>ctrl a</literal>" or "<literal>alt shift
+                    a</literal>".
+                </para>
+
+                <para>
+                    Note that the alphabetical key names are case-dependent and that
+                    Vaadin <classname>ShortcutAction.KeyCode</classname> responds to
+                    uppercase letters.
+
+                    <!-- TODO: So why the above examples use lower-case? -->
+                </para>
+            </section>
+        </section>
+
+        <section xml:id="testbench.recorder.saving">
+            <title>Saving Tests</title>
+
+            <section xml:id="testbench.recorder.saving.individual">
+                <title>Saving Individual Tests</title>
+
+                <para>
+                    You can save a test by selecting
+                    <menuchoice><guimenu>File</guimenu><guimenuitem>Save
+                    Test</guimenuitem></menuchoice>. If you are just learning to use the
+                    Recorder, give the <filename>example/testscripts/</filename> folder
+                    below the Vaadin TestBench installation folder as the target folder.
+                </para>
+
+                <para>
+                    Vaadin TestBench stores the tests and test suites as HTML files. This
+                    makes it easy to review saved test scripts with a web browser and edit
+                    them manually.
+                </para>
+            </section>
+
+            <section xml:id="testbench.recorder.saving.testsuites">
+                <title>Saving Test Suites</title>
+
+                <para>
+                    You can save multiple tests as a test suite with
+                    <menuchoice><guimenu>File</guimenu><guimenuitem>Save Test
+                    Suite</guimenuitem></menuchoice>. If you are just learning to use the
+                    Recorder, give <filename>example/testscripts/</filename> folder below
+                    the Vaadin TestBench installation folder as the target folder.
+                </para>
+
+                <para>
+                    An entire test suite is executed as a single JUnit test. However, the
+                    success or failure is reported for the entire suite, which may be
+                    undesired. It is usually more useful to get the result for each test
+                    separately.
+                </para>
+
+                <para>
+                    Test suites are nevertheless useful for composing larger tests from
+                    separate test phases. For example, you could have all your tests as
+                    test suites, and each would have a "login test" as the first phase,
+                    followed by some test case specific phases. You can also use the
+                    <command>includeTest</command> command for the same purpose
+                </para>
+            </section>
+        </section>
+
+        <section xml:id="testbench.recorder.invalid">
+            <title>Invalid Tests</title>
+
+            <para>
+                Tests can become invalid due to intentional changes to the
+                application. Normally, it involves changes in elements so that the Vaadin
+                TestBench element locator can't find the correct element.
+            </para>
+
+            <para>
+                If the problem is that an element can not be found, press <inlinegraphic
+                fileref="img/testbench/inline/inline-play-button.png" width="0.424cm"
+                depth="0.266cm"/> to play back the test. Find the problem position and
+                check with the <guibutton>Find</guibutton> button that the element can not
+                be found (for example, it is a problem with timing so that the element
+                just is not available yet). You can re-select the element easily with the
+                <guilabel>Select</guilabel> button that will update the target.
+            </para>
+        </section>
+    </section>
+</chapter>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: xml
+sgml-omittag:nil
+sgml-shorttag:nil
+sgml-namecase-general:nil
+sgml-general-insert-case:lower
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:4
+sgml-indent-data:t
+sgml-parent-document:nil
+sgml-exposed-tags:nil
+sgml-local-catalogs:("/etc/sgml/catalog" "/usr/share/xemacs21/xemacs-packages/etc/psgml-dtds/CATALOG")
+sgml-local-ecat-files:("ECAT" "~/sgml/ECAT" "/usr/share/sgml/ECAT" "/usr/local/share/sgml/ECAT" "/usr/local/lib/sgml/ECAT")
+End:
+-->
