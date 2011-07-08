@@ -41,7 +41,8 @@ IMAGES =	intro/architecture intro/architecture-detailed intro/toolchain intro/to
 			datamodel/datamodel-interfaces \
 			rapid/domain-model \
 			mobile/navigationview mobile/navigationpanel \
-			testbench/tt-workflow testbench/tt-architecture-simple testbench/tt-recorder-workflow
+			testbench/tt-workflow testbench/tt-architecture-simple testbench/tt-recorder-workflow \
+			testbench/tt-junit-workflow
 
 # List of source XML files
 XMLFILES =  book.xml \
