@@ -1,0 +1,286 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- ====================================================================== -->
+<!-- Converted from the original Calendar Manual in ODT format in July 2011 -->
+<!-- Original authors Tomi Virtanen (tomi.virtanen@itmill.com) and          -->
+<!-- Risto Yrjana (risto.yrjana@itmill.com)                                 -->
+<!-- ====================================================================== -->
+
+<!-- Please have only one (numbered) section level under the main level
+     and only one (unnumbered) simplesect level. References must be made only
+     to numbered sections. -->
+
+<section xml:id="addons.calendar">
+    <title>Vaadin Calendar</title>
+
+    <para>
+        The Vaadin Calendar is an add-on component for organizing and displaying calendar
+        events. It can be used to view and manage events in monthly and weekly views.
+    </para>
+
+    <section xml:id="addons.calendar.overview">
+        <title>Overview</title>
+
+        <para>
+            The main features of the Vaadin Calendar include:
+        </para>
+
+        <itemizedlist>
+            <listitem>
+                Manage calendar by server side API
+            </listitem>
+            <listitem>
+                Two types of events: "All day" events and events with a time range
+            </listitem>
+            <listitem>
+                One minute accuracy of the timeline
+            </listitem>
+            <listitem>
+                A monthly and a weekly view for showing events
+            </listitem>
+            <listitem>
+                Control the range of the visible dates
+            </listitem>
+            <listitem>
+                Date or time range drag selecting
+            </listitem>
+            <listitem>
+                Draggable and resizable events
+            </listitem>
+            <listitem>
+                Support for localization and timezones
+            </listitem>
+            <listitem>
+                Support for most common browsers
+            </listitem>
+        </itemizedlist>
+
+        <para>
+            The API of the <classname>Calendar</classname> component allows managing its
+            events, date range, styling, localization, and timezone. The data source of
+            the calendar may be practically anything, as its events are queried
+            dynamically by the component. You may use containers, or any other data source
+            by implementing an <emphasis>event provider</emphasis> for the calendar.
+        </para>
+
+        <figure xml:id="figure:addons.calendar.overview.views.monthly" float="center" floatstyle="before">
+            <title>Monthly view with All-Day and Normal Events</title>
+            <mediaobject>
+                <imageobject role="html">
+                    <imagedata align="center" fileref="img/addons/calendar-monthly.png"/>
+                </imageobject>
+                <imageobject role="fo">
+                    <imagedata scale="100" smallscale="100%" align="center" fileref="img/addons/calendar-monthly.png"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
+
+        <para>
+            Vaadin Calendar is a commercial product licensed under a dual-licensing
+            scheme. The AGPL license allows open-source development, while the CVAL
+            license needs to be purchased for closed-source use, including web
+            deployments and internal use. Commercial licenses can be purchased from
+            the Vaadin Directory, where you can also find the license details and
+            download Vaadin Calendar.
+        </para>
+
+        <simplesect xml:id="addons.calendar.overview.views">
+            <title>Views</title>
+
+            <para>
+                The Vaadin Calendar has two different type of views that are shown
+                depending on the Calendar's date range. The Calendar displays a week by
+                default. Calendar will be shown in a monthly view when date range is over
+                than one week (seven days) long. Date range is always calculated in a
+                accuracy of one millisecond.
+            </para>
+
+            <para>
+                The monthly view, shown in <xref
+                linkend="figure:addons.calendar.overview.views.monthly"/>, can easily be
+                used to control all events, but it is best suited for longer
+                events. Events that last for several days can easily be displayed and
+                moved in the monthly view. In the figure, you can see two longer events
+                that are highlighted with a blue and green background color. Other
+                markings are shorter day events that last less than a 24 hours. These
+                events cant be moved.
+            </para>
+
+            <figure xml:id="figure:addons.calendar.overview.views.weekly" float="center" floatstyle="before">
+                <title>Weekly View</title>
+                <mediaobject>
+                    <imageobject role="html">
+                        <imagedata align="center" fileref="img/addons/calendar-weekly.png"/>
+                    </imageobject>
+                    <imageobject role="fo">
+                        <imagedata scale="100" smallscale="100%" align="center" fileref="img/addons/calendar-weekly.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+
+            <para>
+                When date range is over seven days long, the weekly view will be used.
+                Weekly view can show any number of days from one to seven.
+            </para>
+
+            <para>
+                In <xref linkend="figure:addons.calendar.overview.views.weekly"/>, you can
+                see four normal day events and also all-day events at the top of the time
+                line grid.
+            </para>
+        </simplesect>
+
+        <simplesect xml:id="addons.calendar.overview.event">
+            <title>Calendar Event</title>
+
+            <para>
+                The Vaadin Calendar handles displayed events through the
+                <classname>CalendarEvent</classname> interface. The concrete class of the
+                event is decided by the implementor of the specific
+                <classname>CalendarEventProvider</classname> used. By default,
+                <classname>Calendar</classname> uses a
+                <classname>BasicEventProvider</classname> to provide events. The
+                <classname>BasicEventProvider</classname> uses
+                <classname>BasicEvent</classname> instances.
+            </para>
+
+            <para>
+                The Vaadin Calendar does not depend on any particular data source
+                implementation. Events are queried by the <classname>Calendar</classname>
+                from the provider that just has to implement the
+                <classname>CalendarEventProvider</classname>. It is up to the event
+                provider that <classname>Calendar</classname> gets the correct events.
+            </para>
+
+            <para>
+                Event queries are done by asking the event provider for all the events
+                between two given dates. The range of these dates is guaranteed to be at
+                least as long as the start and end dates set for the component. The
+                component can, however, ask for a longer range to ensure correct
+                rendering. In particular, all start dates are expanded to the start of the
+                day, and all end dates are expanded to the end of the day.
+            </para>
+
+            <para>
+                A calendar event requires a start time and an end time. These are the only
+                mandatory properties. In addition, an event can also be set as an all-day
+                event by setting the <literal>all-day</literal> property of the event. You
+                can also set the <literal>description</literal> of an event, which is
+                displayed as a tooltip in the user interface.
+            </para>
+
+            <para>
+                If the <literal>all-day</literal> field of the event is
+                <literal>true</literal>, then the event is always rendered as an all-day
+                event. In the monthly view, this means that no start time is displayed in
+                the user interface and the event has an colored background. In the weekly
+                view, all-day events are displayed in the upper part of the screen, and
+                rendered similarly to the monthly view. In addition, when the time range
+                of an event is 24 hours or longer, it is rendered as an all-day event in
+                the monthly view.
+            </para>
+
+            <para>
+                When the time range of an event is equal or less than 24 hours, with the
+                accuracy of one millisecond, the event is considered as a normal day
+                event. Normal event has a start and end times that may be on different
+                days.
+            </para>
+        </simplesect>
+
+        <simplesect xml:id="addons.calendar.overview.interaction">
+            <title>Interaction</title>
+
+            <para>
+                The date and week captions, as well as events, are clickable and the
+                clicks can be listened for by the server. Also date/time range selections,
+                event dragging, and event resizing can be listened by the server. Using
+                the API, you have full control over the events caused by user interaction.
+            </para>
+
+            <para>
+                The weekly view has navigation buttons to navigate forward and backward in
+                time. These actions are also listened by the server. Custom navigating is
+                can be implemented using event handlers<!-- TODO LINK which are described
+                in section 2.7.2-->.
+            </para>
+
+            <para>
+                Most of the handlers related to calendar events have sensible default
+                handlers. These are found in the <package>com.vaadin.ui.handler</package>
+                package. The default handlers and their functionalities are described
+                below.
+            </para>
+
+            <itemizedlist>
+                <listitem>
+                    <classname>BasicBackwardHandler</classname>. Handles clicking the
+                    back-button of the weekly view so that the viewed month is changed to
+                    the previous one.
+                </listitem>
+
+                <listitem>
+                    <classname>BasicForwardHandler</classname>. Handles clicking the
+                    forward-button of the weekly view so that the viewed month is changed
+                    to the next one.
+                </listitem>
+
+                <listitem>
+                    <classname>BasicWeekClickHandler</classname>. Handles clicking the
+                    week numbers int the monthly view so that the viewable date range is
+                    changed to the clicked week.
+                </listitem>
+
+                <listitem>
+                    <classname>BasicDateClickHandler</classname>. Handles clicking the
+                    dates on both the monthly view and the weekly view. Changes the
+                    viewable date range so that only the clicked day is visible.
+                </listitem>
+
+                <listitem>
+                    <classname>BasicEventMoveHandler</classname>. Handles moving the
+                    events in both monthly view and the weekly view. Events can be moved
+                    and their start and end dates are changed correctly, but only if the
+                    event implements <classname>CalendarEventEditor</classname>
+                    (implemented by <classname>BasicEvent</classname>).
+                </listitem>
+
+                <listitem>
+                    <classname>BasicEventResizeHandler</classname>. Handles resizing the
+                    events in the weekly view. Events can be resized and their start and
+                    end dates are changed correctly, but only if the event implements
+                    <classname>CalendarEventEditor</classname> (implemented by the
+                    <classname>BasicEvent</classname>).
+                </listitem>
+            </itemizedlist>
+
+            <para>
+                All of these handlers are automatically set when creating a new
+                <classname>Calendar</classname>. If you wish to disable some of the
+                default functionality, you can simply set the corresponding handler to
+                <literal>null</literal>. This will prevent the functionality from ever
+                appearing on the user interface. For example, if you set the
+                <classname>EventMoveHandler</classname> to <literal>null</literal>, the
+                user will be unable to move events in the browser.
+            </para>
+        </simplesect>
+    </section>
+</section>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: xml
+sgml-omittag:nil
+sgml-shorttag:nil
+sgml-namecase-general:nil
+sgml-general-insert-case:lower
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:4
+sgml-indent-data:t
+sgml-parent-document:nil
+sgml-exposed-tags:nil
+sgml-local-catalogs:("/etc/sgml/catalog" "/usr/share/xemacs21/xemacs-packages/etc/psgml-dtds/CATALOG")
+sgml-local-ecat-files:("ECAT" "~/sgml/ECAT" "/usr/share/sgml/ECAT" "/usr/local/share/sgml/ECAT" "/usr/local/lib/sgml/ECAT")
+End:
+-->
