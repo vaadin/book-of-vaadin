@@ -359,6 +359,11 @@
             requirements, limitations and further development ideas are also discussed.
         </para>
 
+        <para>
+            SQLContainer is available from the Vaadin Directory under the same
+            unrestrictive Apache License 2.0 as the Vaadin Framework itself.
+        </para>
+
         <section xml:id="addons.sqlcontainer.architecture">
             <title>Architecture</title>
 
@@ -418,15 +423,19 @@
                 database servers.
             </para>
 
-            <para>
+            <!-- para>
                 A class diagram of SQLContainer and its supporting classes as well as
-                connections to Vaadin interfaces is provided in Figure 1 <!-- TODO
-                -->. Note that not every method is shown in the diagram due to space
-                constraints. For further detail, please refer to the SQLContainer API
-                documentation.
-            </para>
+                connections to Vaadin interfaces is provided in Figure 1 TODO
+                . Note that not every method is shown in the diagram due to space
+                constraints.
+            </para -->
 
             <!-- TODO FIGURE! -->
+
+            <para>
+                For further details, please refer to the SQLContainer API
+                documentation.
+            </para>
         </section>
 
         <section xml:id="addons.sqlcontainer.getting-started">
@@ -470,7 +479,7 @@
                     defined database table and supports reading and writing data
                     out-of-the-box. The primary key(s) of the table may be anything that
                     the database engine supports, and are found automatically by querying
-                    the database when a new <classame>TableQuery</classame> is
+                    the database when a new <classname>TableQuery</classname> is
                     instantiated. We create the <classname>TableQuery</classname> with the
                     following statement:
                 </para>
@@ -987,6 +996,253 @@ public boolean removeReference(SQLContainer refdCont)]]></programlisting>
                 anything in the database; it merely removes the logical relation that
                 exists only on the Java-side.
             </para>
+        </section>
+
+        <section xml:id="addons.sqlcontainer.freeform">
+            <title>Using <classname>FreeformQuery</classname> and <classname>FreeformStatementDelegate</classname></title>
+
+            <para>
+                In most cases, the provided <classname>TableQuery</classname> will be
+                enough to allow a developer to gain effortless access to an SQL data
+                source. However there may arise situations when a more complex query with,
+                for example, join expressions is needed. Or perhaps you need to redefine
+                how the writing or filtering should be done. The
+                <classname>FreeformQuery</classname> query delegate is provided for this
+                exact purpose. Out of the box the <classname>FreeformQuery</classname>
+                supports read-only access to a database, but it can be extended to allow
+                writing also.
+            </para>
+
+            <simplesect xml:id="addons.sqlcontainer.freeform.getting-started">
+                <title>Getting started</title>
+
+                <para>
+                    Getting started with the <classname>FreeformQuery</classname> may be
+                    done as shown in the following. The connection pool initialization is
+                    similar to the <classname>TableQuery</classname> example so it is
+                    omitted here. Note that the name(s) of the primary key column(s) must
+                    be provided to the <classname>FreeformQuery</classname> manually. This
+                    is required because depending on the query the result set may or may
+                    not contain data about primary key columns. In this example, there is
+                    one primary key column with a name 'ID'.
+                </para>
+
+            <programlisting><![CDATA[FreeformQuery query = new FreeformQuery(
+        "SELECT * FROM SAMPLE", pool, "ID");
+SQLContainer container = new SQLContainer(query);]]></programlisting>
+            </simplesect>
+
+            <simplesect xml:id="addons.sqlcontainer.freeform.limitations">
+                <title>Limitations</title>
+
+                <para>
+                    While this looks just as easy as with the
+                    <classname>TableQuery</classname>, do note that there are some
+                    important caveats here. Using <classname>FreeformQuery</classname>
+                    like this (without providing
+                    <classname>FreeformQueryDelegate</classname> or
+                    <classname>FreeformStatementDelegate</classname> implementation) it
+                    can only be used as a read-only window to the resultset of the
+                    query. Additionally filtering, sorting and lazy loading features will
+                    not be supported, and the row count will be fetched in quite an
+                    inefficient manner. Bearing these limitations in mind, it becomes
+                    quite obvious that the developer is in reality meant to implement the
+                    <classname>FreeformQueryDelegate</classname> or
+                    <classname>FreeformStatementDelegate</classname> interface.
+                </para>
+
+                <para>
+                    The <classname>FreeformStatementDelegate</classname> interface is an
+                    extension of the <classname>FreeformQueryDelegate</classname>
+                    interface, which returns <classname>StatementHelper</classname>
+                    objects instead of pure query <classname>String</classname>s. This
+                    enables the developer to use prepared statetemens instead of regular
+                    statements. It is highly recommended to use the
+                    <classname>FreeformStatementDelegate</classname> in all
+                    implementations. From this chapter onwards, we will only refer to the
+                    <classname>FreeformStatementDelegate</classname> in cases where
+                    <classname>FreeformQueryDelegate</classname> could also be applied.
+                </para>
+            </simplesect>
+                
+            <simplesect xml:id="addons.sqlcontainer.freeform.limitations">
+                <title>Creating your own <classname>FreeformStatementDelegate</classname></title>
+
+                <para>
+                    To create your own delegate for <classname>FreeformQuery</classname>
+                    you must implement some or all of the methods from the
+                    <classname>FreeformStatementDelegate</classname> interface, depending
+                    on which ones your use case requires. The interface contains eight
+                    methods which are shown below. For more detailed requirements, see the
+                    JavaDoc documentation of the interface.
+                </para>
+
+                <programlisting><?pocket-size 65% ?><![CDATA[// Read-only queries
+public StatementHelper getCountStatement()
+public StatementHelper getQueryStatement(int offset, int limit)
+public StatementHelper getContainsRowQueryStatement(Object... keys)
+
+// Filtering and sorting
+public void setFilters(List<Filter> filters)
+public void setFilters(List<Filter> filters,
+                       FilteringMode filteringMode)
+public void setOrderBy(List<OrderBy> orderBys)
+
+// Write support
+public int storeRow(Connection conn, RowItem row)
+public boolean removeRow(Connection conn, RowItem row)]]></programlisting>
+
+                <para>
+                    A simple demo implementation of this interface can be found in the
+                    SQLContainer package, more specifically in the class
+                    <classname>com.vaadin.addon.sqlcontainer.demo.DemoFreeformQueryDelegate</classname>.
+                </para>
+            </simplesect>
+        </section>
+
+        <section xml:id="addons.sqlcontainer.nonimplemented">
+            <title>Non-implemented methods of Vaadin container interfaces</title>
+
+            <para>
+                Due to the database connection inherent to the SQLContainer, some of the
+                methods from the container interfaces of Vaadin can not (or would not make
+                sense to) be implemented. These methods are listed below, and they will
+                throw an <classname>UnsupportedOperationException</classname> on
+                invocation.
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[public boolean addContainerProperty(Object propertyId,
+                                    Class<?> type,
+                                    Object defaultValue)
+public boolean removeContainerProperty(Object propertyId)
+public Item addItem(Object itemId)
+public Object addItemAt(int index)
+public Item addItemAt(int index, Object newItemId)
+public Object addItemAfter(Object previousItemId)
+public Item addItemAfter(Object previousItemId, Object newItemId)]]></programlisting>
+
+            <para>
+                Additionally, the following methods of the <classname>Item</classname>
+                interface are not supported in the <classname>RowItem</classname> class:
+            </para>
+	
+            <programlisting><?pocket-size 65% ?><![CDATA[public boolean addItemProperty(Object id, Property property)
+public boolean removeItemProperty(Object id)]]></programlisting>
+
+            <simplesect xml:id="addons.sqlcontainer.nonimplemented.getitemids">
+                <title>About the getItemIds() method</title>
+
+                <para>
+                    To properly implement the Vaadin <classname>Container</classname>
+                    interface, a <methodname>getItemIds()</methodname> method has been
+                    implented in the <classname>SQLContainer</classname>. By definition,
+                    this method returns a collection of all the item IDs present in the
+                    container. What this means in the <classname>SQLContainer</classname>
+                    case is that the container has to query the database for the primary
+                    key columns of all the rows present in the connected database
+                    table.
+                </para>
+
+                <para>
+                    It is obvious that this could potentially lead to fetching tens or
+                    even hundreds of thousands of rows in an effort to satisfy the method
+                    caller. This will effectively kill the lazy loading properties of
+                    <classname>SQLContainer</classname> and therefore the following
+                    warning is expressed here:
+                </para>
+
+                <warning>
+                    <para>
+                        It is highly recommended not to call the
+                        <methodname>getitemIds()</methodname> method, unless it is known
+                        that in the use case in question the item ID set will always be of
+                        reasonable size.
+                    </para>
+                </warning>
+            </simplesect>
+        </section>
+
+        <section xml:id="addons.sqlcontainer.limitations">
+            <title>Known Issues and Limitations</title>
+
+            <para>
+                At this point, there are still some known issues and limitations affecting
+                the use of SQLContainer in certain situations. The known issues and brief
+                explanations are listed below:
+            </para>
+
+            <itemizedlist>
+                <listitem>
+                    Some SQL data types do not have write support when using TableQuery:
+                    <itemizedlist>
+                        <listitem>All binary types</listitem>
+                        <listitem>All custom types</listitem>
+
+                        <listitem>
+                            CLOB (if not converted automatically to a
+                            <classname>String</classname> by the JDBC driver in
+                            use)
+                        </listitem>
+
+                        <listitem>
+                            See
+                            <classname>com.vaadin.addon.sqlcontainer.query.generator.StatementHelper</classname>
+                            for details.
+                        </listitem>
+                    </itemizedlist>
+                </listitem>
+
+                <listitem>
+                    <para>
+                        When using Oracle or MS SQL database, the column name
+                        "<parameter>rownum</parameter>" can not be used as a column name
+                        in a table connected to <classname>SQLContainer</classname>.
+                    </para>
+                    <para>
+                        This limitation exists because the databases in question do not
+                        support limit/offset clauses required for paging. Instead, a
+                        generated column named 'rownum' is used to implement paging
+                        support.
+                    </para>
+                </listitem>
+            </itemizedlist>
+
+            <para>
+                The permanent limitations are listed below. These can not or most probably
+                will not be fixed in future versions of SQLContainer.
+            </para>
+
+            <itemizedlist>
+                <listitem>
+                    The <methodname>getItemIds()</methodname> method is very inefficient -
+                    avoid calling it unless absolutely required!
+                </listitem>
+
+                <listitem>
+                    When using <classname>FreeformQuery</classname> without providing a
+                    <classname>FreeformStatementDelegate</classname>, the row count query
+                    is very inefficient - avoid using <classname>FreeformQuery</classname>
+                    without implementing at least the count query properly.
+                </listitem>
+
+                <listitem>
+                    When using <classname>FreeformQuery</classname> without providing a
+                    <classname>FreeformStatementDelegate</classname>, writing, sorting and
+                    filtering will not be supported.
+                </listitem>
+
+                <listitem>
+                    <para>
+                        When using Oracle database most or all of the numeric types are
+                        converted to <classname>java.math.BigDecimal</classname> by the
+                        Oracle JDBC Driver.
+                    </para>
+                    <para>
+                        This is a feature of how Oracle DB and the Oracle JDBC Driver
+                        handles data types.
+                    </para>
+                </listitem>
+            </itemizedlist>
         </section>
     </section>
 </chapter>
