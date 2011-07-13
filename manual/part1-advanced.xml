@@ -93,22 +93,32 @@
 		<title>Application-Level Windows</title>
 
 		<para>
-			Vaadin Release 5 introduces support for multiple application-level
-			windows that can be used just like the main window. All such windows use the
-			same application session. Each window is identified with a URL that is used to
-			access it. This makes it possible to bookmark application-level windows. Such
-			windows can even be created dynamically based on URLs.
+            Vaadin supports two types of windows: <emphasis>application-level
+            windows</emphasis> and <emphasis>sub-windows</emphasis>. The application-level
+            windows are native browser windows or tabs.  The <emphasis>main
+            window</emphasis> is the special initial application-level window created when
+            the user first started the application session by opening the URL in the
+            browser. Sub-windows are freely floating HTML windows inside a browser window,
+            as described in <xref linkend="application.child-windows"/>.
+        </para>
+
+        <para>
+            Application-level windows of the same application use the same
+            <classname>Application</classname> object and therefore share the same
+            session. Each window is identified with a URL that is used to access it. This
+            makes it possible to bookmark application-level windows. Such windows can even
+            be created dynamically based on the URLs.
 		</para>
 
 		<para>
-			Application-level windows allow several uses important for the usability of
-			browser-based applications.
+			Application-level windows allow several common use cases for browser-based
+			applications.
 		</para>
 
 		<itemizedlist>
 			<listitem>
-				<emphasis>Native child windows</emphasis>. An application can open child
-				windows that are not floating windows inside a parent window.
+				<emphasis>Native popup windows</emphasis>. An application can open popup
+				windows for sub-tasks.
 			</listitem>
 			<listitem>
 				<emphasis>Page-based browsing</emphasis>. The application can allow the
@@ -264,29 +274,29 @@ main.addComponent(
 
 		</section>
 
-		<section xml:id="application.windows.dynamic">
-			<title>Creating Windows Dynamically</title>
+		<section xml:id="application.windows.adhoc">
+			<title>Creation of Windows When Requested</title>
 			
 			<para>
-				You can create a window object dynamically by its URL path by overriding
-				the <methodname>getWindow()</methodname> method of the
-				<classname>Application</classname> class. The method gets a window name as
-				its parameter and must return the corresponding
+				You can create a window object dynamically by its URL sub-path when it is
+				first requested by overriding the <methodname>getWindow()</methodname>
+				method of the <classname>Application</classname> class. The method gets a
+				window name as its parameter and must return the corresponding
 				<classname>Window</classname> object. The window name is determined from
-				the first URL path element after the application URL (window name may not
+				the first URL path element after the application URL (the name may not
 				contain slashes). See the notes below for setting the actual name of the
 				dynamically created windows below.
 			</para>
 
-			<para>
-				The following example allows opening windows with a window name that
-				begins with "<literal>planet-</literal>" prefix. Since the method is
-				called for <emphasis>every</emphasis> browser request for the application,
-				we filter only the requests where a window with the given name does not
-				yet exist.
-			</para>
+            <para>
+                The following example allows opening windows with a window name that
+                begins with "<literal>planet-</literal>" prefix. Since the method is
+                called for <emphasis>every</emphasis> browser request for the
+                application, we filter only the requests where a window with the given
+                name does not yet exist.
+            </para>
 
-			<programlisting><?pocket-size 65% ?><![CDATA[public class WindowTestApplication extends Application {
+            <programlisting><?pocket-size 65% ?><![CDATA[public class WindowTestApplication extends Application {
     ...
 
     @Override
@@ -324,91 +334,106 @@ main.addComponent(
         return super.getWindow(name);
     }]]></programlisting>
 
-			<para>
-				The window name is and must be a unique indentifier for each
-				<classname>Window</classname> object instance. If you use
-				<methodname>setName()</methodname> to set the window name explicitly, as
-				we did above, any browser window that has the same URL (within the same
-				browser) would open the <emphasis>same</emphasis> window object. This is
-				dangerous and <emphasis>generally not recommended</emphasis>, because the
-				browser windows would share the same window object. Opening two windows
-				with the same static name would immediately lead to a synchronization
-				error, as is shown in <xref
-				linkend="figure.application.window.dynamic.error"/> below. (While also the
-				window captions are same, they are irrelevant for this problem.)
-			</para>
+            <para>
+                The window name must be a unique indentifier for each
+                <classname>Window</classname> object instance. If you use
+                <methodname>setName()</methodname> to set the window name explicitly, as
+                we did above, any browser window that has the same URL (within the same
+                browser) would open the <emphasis>same</emphasis> window object. This is
+                dangerous and <emphasis>generally not recommended</emphasis>, because the
+                browser windows would share the same window object. Opening two windows
+                with the same static name would immediately lead to a synchronization
+                error, as is shown in <xref
+                linkend="figure.application.window.dynamic.error"/> below. (While also the
+                window captions are same, they are irrelevant for this problem.)
+            </para>
 
-			<figure xml:id="figure.application.window.dynamic.error">
-				<title>Synchronization Error Between Windows with the Same Name</title>
-				<mediaobject>
-					<imageobject role="html">
-						<imagedata align="center" fileref="img/application/window-application-dynamic-3.png"/>
-					</imageobject>
-					<imageobject role="fo">
-						<imagedata scale="70" smallscale="100%" align="center" fileref="img/application/window-application-dynamic-3.png"/>
-					</imageobject>
-				</mediaobject>
-			</figure>
+            <figure xml:id="figure.application.window.dynamic.error">
+                <title>Synchronization Error Between Windows with the Same Name</title>
+                <mediaobject>
+                    <imageobject role="html">
+                        <imagedata align="center" fileref="img/application/window-application-dynamic-3.png"/>
+                    </imageobject>
+                    <imageobject role="fo">
+                        <imagedata scale="70" smallscale="100%" align="center" fileref="img/application/window-application-dynamic-3.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
 
-			<para>
-				There are some cases where setting the name explicitly is useful. The
-				launch application below is one example, as it always opens the other
-				windows in a window target that is specific to the window name, thereby
-				never creating two windows with the same URL. Similarly, if you had
-				embedded the application in a browser frame and the link would open the
-				window in a frame, you would not have problems. Having a single window
-				instance for a URL is also useful if the browser crashes and the user
-				opens the window again, as it will have kept its previous (server-side)
-				state.
-			</para>
+            <para>
+                <!-- TODO: "below" -->
+                There are some cases where setting the name explicitly is useful. The
+                launch application below is one example, as it always opens the other
+                windows in a window target that is specific to the window name, thereby
+                never creating two windows with the same URL. Similarly, if you had
+                embedded the application in a browser frame and the link would open the
+                window in a frame, you would not have problems. Having a single window
+                instance for a URL is also useful if the browser crashes and the user
+                opens the window again, as it will have kept its previous (server-side)
+                state.
+            </para>
+        </section>
 
-			<para>
-				Leaving the window name to be automatically generated allows opening
-				multiple windows with the same URL, while each of the windows will have a
-				separate state. The URL in the location bar stays unchanged and the
-				generated window name is used only for the Ajax communications to identify
-				the window object. A generated name is a string representation of a unique
-				random number, such as "<literal>1928676448</literal>". You should be
-				aware of the generated window names when overriding the
-				<methodname>getWindow()</methodname> method (and not unintentionally
-				create a new window instance dynamically for each such request). The
-				condition in the above example would also filter out the requests for an
-				already existing window with a generated name.
-			</para>
+        <section xml:id="application.windows.dynamic">
+            <title>Dynamic Multi-Window Applications</title>
+            
+            <para>
+                Having multiple browser windows or tabs open in the same website and even
+                the same page is one of the basic use cases of web browsing. The creation
+                of <classname>Window</classname> objects described in the previous section
+                allows opening multiple special-purpose windows with different URLs, but
+                how to open multiple windows with the same URL? The solution is based on
+                the fact that Vaadin doesn't identify windows only by their URL subpath,
+                but also by an invisible window name.
+            </para>
 
-			<para>
-				<xref linkend="figure.application.window.dynamic.new"/> shows a
-				dynamically created application-level window with the URL shown in the
-				address bar. The URL for the application is here
-				<uri>http://localhost:8080/tk5/windowexample/</uri>, including the
-				application context, and the dynamically created window's name is
-				<uri>planet-mars</uri>.
-			</para>
+            <para>
+                Leaving the window name to be automatically generated allows opening
+                multiple windows with the same URL, while each of the windows will have a
+                separate state. The URL in the location bar stays unchanged and the
+                generated window name is used only for the Ajax communications to identify
+                the window object. A generated name is a string representation of a unique
+                random number, such as "<literal>1928676448</literal>". You should be
+                aware of the generated window names when overriding the
+                <methodname>getWindow()</methodname> method (and not unintentionally
+                create a new window instance dynamically for each such request). The
+                condition in the above example would also filter out the requests for an
+                already existing window with a generated name.
+            </para>
 
-			<figure xml:id="figure.application.window.dynamic.new">
-				<title>A Dynamically Created Window</title>
-				<mediaobject>
-					<imageobject role="html">
-						<imagedata align="center" fileref="img/application/window-application-dynamic-1.png"/>
-					</imageobject>
-					<imageobject role="fo">
-						<imagedata scale="90" smallscale="100%" align="center" fileref="img/application/window-application-dynamic-1.png"/>
-					</imageobject>
-				</mediaobject>
-			</figure>
+            <para>
+                <xref linkend="figure.application.window.dynamic.new"/> shows a
+                dynamically created application-level window with the URL shown in the
+                address bar. The URL for the application is here
+                <uri>http://localhost:8080/book-examples/windowexample/</uri>, including
+                the application context, application path. The dynamically created
+                window's name is <uri>planet-mars</uri>.
+            </para>
 
-			<para>
-				The application knows the windows it already has and can return them after
-				the creation. The application also handles closing and destruction of
-				application-level window objects, as discussed in <xref
-				linkend="application.windows.closing"/>.
-			</para>
+            <figure xml:id="figure.application.window.dynamic.new">
+                <title>A Dynamically Created Window</title>
+                <mediaobject>
+                    <imageobject role="html">
+                        <imagedata align="center" fileref="img/application/window-application-dynamic-1.png"/>
+                    </imageobject>
+                    <imageobject role="fo">
+                        <imagedata scale="90" smallscale="100%" align="center" fileref="img/application/window-application-dynamic-1.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
 
-			<para>
-				Such dynamic windows could be opened as in the following example:
-			</para>
+            <para>
+                The application knows the windows it already has and can return them
+                after the creation. The application also handles closing and
+                destruction of application-level window objects, as discussed in <xref
+                    linkend="application.windows.closing"/>.
+            </para>
+
+            <para>
+                Such dynamic windows could be opened as in the following example:
+            </para>
 			
-			<programlisting><?pocket-size 65% ?><![CDATA[public void init() {
+            <programlisting><?pocket-size 65% ?><![CDATA[public void init() {
     final Window main = new Window("Window Test");
     setMainWindow(main);
 
