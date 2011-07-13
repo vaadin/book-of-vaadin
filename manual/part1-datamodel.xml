@@ -3,6 +3,10 @@
 <chapter xml:id="datamodel">
 	<title>Binding Components to Data</title>
 
+    <indexterm xml:id="term:datamodel" class="startofrange">
+        <primary>Vaadin Data Model</primary>
+    </indexterm>
+
     <para>
         This chapter describes the Vaadin Data Model and shows how you can use it to bind
         components directly to data sources, such as database queries.
@@ -506,6 +510,10 @@ form.setItemDataSource(item);]]></programlisting>
 	<section xml:id="datamodel.container">
 		<title>Collecting Items in Containers</title>
 
+        <indexterm xml:id="term:datamodel.container" class="startofrange">
+            <primary><classname>Container</classname></primary>
+        </indexterm>
+
 		<para>
 			<classname>Container</classname> is the highest-level of the data model
 			interfaces supported by Vaadin. It provides a very flexible way of managing a
@@ -596,9 +604,9 @@ form.setItemDataSource(item);]]></programlisting>
                 a specific item property for the IDs, or by giving item IDs explicitly. As
                 such, it is more general than the
                 <classname>BeanItemContainer</classname>, which uses the bean object
-                itself for item identifier. Managing the item IDs makes
-                <classname>BeanContainer</classname> more complex to use, but it is
-                necessary in some cases where the <methodname>equals()</methodname> or
+                itself as the item identifier, making the use usually simpler. Managing the item
+                IDs makes <classname>BeanContainer</classname> more complex to use, but it
+                is necessary in some cases where the <methodname>equals()</methodname> or
                 <methodname>hashCode()</methodname> methods have been reimplemented in the
                 bean.
             </para>
@@ -660,9 +668,131 @@ void basic(VerticalLayout layout) {
             </para>
 
             <para>
-                It is not possible to add additional properties to the container and
-                nested bean properties are not supported.
+                It is not possible to add additional properties to the container, except
+                properties in a nested bean.
             </para>
+
+            <section xml:id="datamodel.container.beancontainer.nestedproperties">
+                <title>Nested Properties</title>
+
+                <indexterm xml:id="term:datamodel.container.beancontainer.nestedproperties" class="startofrange">
+                    <primary>nested bean properties</primary>
+                </indexterm>
+
+                <para>
+                    If you have a nested bean with a 1:1 relationship inside a bean type
+                    contained in a <classname>BeanContainer</classname> or
+                    <classname>BeanItemContainer</classname>, you can add its properties
+                    to the container by specifying them with
+                    <methodname>addNestedContainerProperty()</methodname>. The feature is
+                    defined at the level of <classname>AbstractBeanContainer</classname>.
+
+                    <indexterm><primary><methodname>addNestedContainerProperty()</methodname></primary></indexterm>
+                </para>
+
+                <para>
+                    As with a top-level bean in a bean container, also a nested bean must
+                    have public visibility or otherwise an access exception is
+                    thrown. Intermediary getters returning a nested bean must always
+                    return a non-null value.
+                </para>
+
+                <para>
+                    For example, assume that we have the following two beans with the
+                    first one nested inside the second one.
+                </para>
+ 
+                <book-example id="datamodel.container.beanitemcontainer.nestedbean" style="float: right"/>
+                <programlisting><?pocket-size 65% ?><![CDATA[/** Bean to be nested */
+public class EqCoord implements Serializable {
+    double rightAscension; /* In angle hours */
+    double declination;    /* In degrees     */
+
+    ... constructor and setters and getters for the properties ...
+}
+
+/** Bean containing a nested bean */
+public class Star implements Serializable {
+    String  name;
+    EqCoord equatorial; /* Nested bean */
+
+    ... constructor and setters and getters for the properties ...
+}]]></programlisting>
+
+                <para>
+                    After creating the container, you can declare the nested properties by
+                    specifying their property identifiers with the
+                    <methodname>addNestedContainerProperty()</methodname> in dot
+                    notation.
+                </para>
+
+                <book-example id="datamodel.container.beanitemcontainer.nestedbean" style="float: right"/>
+                <programlisting><?pocket-size 65% ?><![CDATA[// Create a container for beans
+final BeanItemContainer<Star> stars =
+    new BeanItemContainer<Star>(Star.class);
+
+// Declare the nested properties to be used in the container
+stars.addNestedContainerProperty("equatorial.rightAscension");
+stars.addNestedContainerProperty("equatorial.declination");
+
+// Add some items
+stars.addBean(new Star("Sirius",  new EqCoord(6.75, 16.71611)));
+stars.addBean(new Star("Polaris", new EqCoord(2.52, 89.26417)));]]></programlisting>
+
+                <para>
+                    If you bind such a container to a <classname>Table</classname>, you
+                    probably also need to set the column headers. Notice that the entire
+                    nested bean itself is still a property in the container and would be
+                    displayed in its own column. The <methodname>toString()</methodname>
+                    method is used for obtaining the displayed value, which is by default
+                    an object reference. You normally do not want this, so you can hide
+                    the column with <methodname>setVisibleColumns()</methodname>.
+
+                    <indexterm><primary><methodname>setVisibleColumns()</methodname></primary></indexterm>
+                </para>
+
+                <book-example id="datamodel.container.beanitemcontainer.nestedbean" style="float: right"/>
+                <programlisting><?pocket-size 65% ?><![CDATA[// Put them in a table
+Table table = new Table("Stars", stars);
+table.setColumnHeader("equatorial.rightAscension", "RA");
+table.setColumnHeader("equatorial.declination",    "Decl");
+table.setPageLength(table.size());
+
+// Have to set explicitly to hide the "equatorial" property
+table.setVisibleColumns(new Object[]{"name",
+    "equatorial.rightAscension", "equatorial.declination"});]]></programlisting>
+
+                <para>
+                    The resulting table is shown in <xref
+                    linkend="figure:datamodel.container.beancontainer.nestedproperties"/>.
+                </para>
+
+                <figure xml:id="figure:datamodel.container.beancontainer.nestedproperties">
+                    <title><classname>Table</classname> Bound to a <classname>BeanContainer</classname> with Nested Properties</title>
+                    <mediaobject>
+                        <imageobject role="html">
+                            <imagedata align="center" fileref="img/datamodel/beanitemcontainer-nested-beans.png"/>
+                        </imageobject>
+                        <imageobject role="fo">
+                            <imagedata scale="100" smallscale="70%" align="center" fileref="img/datamodel/beanitemcontainer-nested-beans.png"/>
+                        </imageobject>
+                    </mediaobject>
+                </figure>
+
+                <para>
+                    The bean binding in <classname>AbstractBeanContainer</classname>
+                    normally uses the <classname>MethodProperty</classname> implementation
+                    of the <classname>Property</classname> interface to access the bean
+                    properties using the setter and getter methods. For nested properties,
+                    the <classname>NestedMethodProperty</classname> implementation is
+                    used.
+                    
+                    <indexterm><primary><classname>MethodProperty</classname></primary></indexterm>
+                    <indexterm><primary><classname>NestedMethodProperty</classname></primary></indexterm>
+                </para>
+
+                <indexterm startref="term:datamodel.container.beancontainer.nestedproperties" class="endofrange"/>
+            </section>
 
             <section xml:id="datamodel.container.beancontainer.idresolver">
                 <title>Defining a Bean ID Resolver</title>
@@ -695,7 +825,7 @@ void basic(VerticalLayout layout) {
 
             <para>
                 <classname>BeanItemContainer</classname> is a container for JavaBean
-                objects. Each contained bean is wrapped inside a
+                objects where each bean is wrapped inside a
                 <classname>BeanItem</classname> wrapper. The item properties are
                 determined automatically by inspecting the getter and setter methods of
                 the class. This requires that the bean class has public visibility, local
@@ -714,49 +844,34 @@ void basic(VerticalLayout layout) {
                 methods.
             </para>
 
-            <programlisting><?pocket-size 65% ?><![CDATA[// Here is a bean
-public class Bean implements Serializable {
-    String name;
-    double energy; // Energy content in kJ/100g
-    
-    public Bean(String name, double energy) {
-        this.name   = name;
-        this.energy = energy;
-    }
-    
-    public String getName() {
-        return name;
-    }
-    
-    public void setName(String name) {
-        this.name = name;
-    }
-    
-    public double getEnergy() {
-        return energy;
-    }
-    
-    public void setEnergy(double energy) {
-        this.energy = energy;
-    }
-}
-    
-void basic(VerticalLayout layout) {
-    // Create a container for such beans
-    BeanItemContainer<Bean> beans =
-        new BeanItemContainer<Bean>(Bean.class);
-    
-    // Add some beans to it
-    beans.addBean(new Bean("Mung bean",   1452.0));
-    beans.addBean(new Bean("Chickpea",    686.0));
-    beans.addBean(new Bean("Lentil",      1477.0));
-    beans.addBean(new Bean("Common bean", 129.0));
-    beans.addBean(new Bean("Soybean",     1866.0));
+            <para>
+                Let us revisit the example given in <xref
+                linkend="datamodel.container.beancontainer"/> using the
+                <classname>BeanItemContainer</classname>.
+            </para>
 
-    // Bind a table to it
-    Table table = new Table("Beans of All Sorts", beans);
-    layout.addComponent(table);]]></programlisting>
+            <book-example id="datamodel.container.beanitemcontainer.basic" style="float: right"/>
+            <programlisting><?pocket-size 75% ?><![CDATA[// Create a container for the beans
+BeanItemContainer<Bean> beans =
+    new BeanItemContainer<Bean>(Bean.class);
+    
+// Add some beans to it
+beans.addBean(new Bean("Mung bean",   1452.0));
+beans.addBean(new Bean("Chickpea",    686.0));
+beans.addBean(new Bean("Lentil",      1477.0));
+beans.addBean(new Bean("Common bean", 129.0));
+beans.addBean(new Bean("Soybean",     1866.0));
 
+// Bind a table to it
+Table table = new Table("Beans of All Sorts", beans);]]></programlisting>
+
+            <para>
+                It is not possible to add additional properties to a
+                <classname>BeanItemContainer</classname>, except properties in a nested
+                bean, as described in <xref linkend="datamodel.container.beancontainer"/>.
+
+                <indexterm><primary>nested bean properties</primary></indexterm>
+            </para>
         </section>
 
         <section>
@@ -814,7 +929,248 @@ layout.addComponent (new Label("Selected items: " + items));]]></programlisting>
             </para>
         </section>
 
+        <section xml:id="datamodel.container.filtered">
+            <title><classname>Filterable</classname> Containers</title>
+
+            <indexterm xml:id="term:datamodel.container.filtered/filterable" class="startofrange">
+                <primary>Container</primary>
+                <secondary>Filterable</secondary>
+            </indexterm>
+            <indexterm xml:id="term:datamodel.container.filtered/filters" class="startofrange">
+                <primary><classname>Filter</classname> (in <classname>Container</classname>)</primary>
+            </indexterm>
+
+            <para>
+                Containers that implement the <classname>Container.Filterable</classname>
+                interface can be filtered. For example, the built-in
+                <classname>IndexedContainer</classname> and the bean item containers
+                implement it. Filtering is typically used for filtering the content of a
+                <classname>Table</classname>.
+
+                <indexterm><primary><classname>IndexedContainer</classname></primary></indexterm>
+                <indexterm><primary><classname>Table</classname></primary></indexterm>
+            </para>
+
+            <para>
+                Filters implement the <classname>Filter</classname> interface and you add
+                them to a filterable container with the
+                <methodname>addContainerFilter()</methodname> method. Container items that
+                pass the filter condition are kept and shown in the filterable component.
+
+                <indexterm><primary><methodname>addContainerFilter()</methodname></primary></indexterm>
+            </para>
+
+            <book-example id="datamodel.container.filter.basic" style="float: right"/>
+
+            <programlisting><![CDATA[Filter filter = new SimpleStringFilter("name",
+        "Douglas", true, false);
+table.addContainerFilter(filter);]]></programlisting>
+
+            <para>
+                If multiple filters are added to a container, they are evaluated using the
+                logical AND operator so that only items that are passed by all the filters
+                are kept.
+            </para>
+
+            <section xml:id="datamodel.container.filtered.composite">
+                <title>Atomic and Composite Filters</title>
+
+                <para>
+                    Filters can be classified as <emphasis>atomic</emphasis> and
+                    <emphasis>composite</emphasis>. Atomic filters, such as
+                    <classname>SimpleStringFilter</classname>, define a single condition,
+                    usually for a specific container property. Composite filters make
+                    filtering decisions based on the result of one or more other
+                    filters. The built-in composite filters implement the logical
+                    operators AND, OR, or NOT.
+                </para>
+
+                <para>
+                    For example, the following composite filter would filter out items where
+                    the <literal>name</literal> property contains the name "Douglas" somewhere
+                    <emphasis>and</emphasis> where the <literal>age</literal> property has
+                    value less than 42. The properties must have <classname>String</classname>
+                    and <classname>Integer</classname> types, respectively.
+                </para>
+
+                <programlisting><![CDATA[
+filter = new Or(new SimpleStringFilter("name",
+        "Douglas", true, false),
+        new Compare.Less("age", 42));]]></programlisting>
+            </section>
+
+            <section xml:id="datamodel.container.filtered.builtin">
+                <title>Built-In Filter Types</title>
+
+                <para>
+                    The built-in filter types are the following:
+                </para>
+
+                <variablelist>
+                    <varlistentry>
+                        <term><classname>SimpleStringFilter</classname></term>
+                        <listitem>
+                            <indexterm><primary><classname>SimpleStringFilter</classname></primary></indexterm>
+                            <para>
+                                Passes items where the specified property, that must be of
+                                <classname>String</classname> type, contains the given
+                                <parameter>filterString</parameter> as a substring. If
+                                <parameter>ignoreCase</parameter> is
+                                <parameter>true</parameter>, the search is case
+                                insensitive. If the <parameter>onlyMatchPrefix</parameter> is
+                                <parameter>true</parameter>, the substring may only be in the
+                                beginning of the string, otherwise it may be elsewhere as
+                                well.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><classname>IsNull</classname></term>
+                        <indexterm><primary><classname>IsNull</classname> (filter)</primary></indexterm>
+                        <listitem>
+                            <para>
+                                Passes items where the specified property has null value. For
+                                in-memory filtering, a simple <literal>==</literal> check is
+                                performed. For other containers, the comparison implementation
+                                is container dependent, but should correspond to the in-memory
+                                null check.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><classname>Equal</classname>,
+                            <classname>Greater</classname>,
+                            <classname>Less</classname>,
+                            <classname>GreaterOrEqual</classname>, and
+                            <classname>LessOrEqual</classname></term>
+                        <listitem>
+                            <indexterm><primary><classname>Equal</classname> (filter)</primary></indexterm>
+                            <indexterm><primary><classname>Greater</classname> (filter)</primary></indexterm>
+                            <indexterm><primary><classname>Less</classname> (filter)</primary></indexterm>
+                            <indexterm><primary><classname>GreaterOrEqual</classname> (filter)</primary></indexterm>
+                            <indexterm><primary><classname>LessOrEqual</classname> (filter)</primary></indexterm>
+                            <para>
+                                The comparison filter implementations compare the specified
+                                property value to the given constant and pass items for which
+                                the comparison result is true. The comparison operators are
+                                included in the abstract <classname>Compare</classname> class.
+                            </para>
+                            <para>
+                                For the <classname>Equal</classname> filter, the
+                                <methodname>equals()</methodname> method for the property is
+                                used in built-in in-memory containers. In other types of
+                                containers, the comparison is container dependent and may use,
+                                for example, database comparison operations.
+                            </para>
+                            <para>
+                                For the other filters, the property value type must implement
+                                the <classname>Comparable</classname> interface to work with
+                                the built-in in-memory containers. Again for the other types
+                                of containers, the comparison is container dependent.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><classname>And</classname> and <classname>Or</classname></term>
+                        <listitem>
+                            <indexterm><primary><classname>And</classname> (filter)</primary></indexterm>
+                            <indexterm><primary><classname>Or</classname> (filter)</primary></indexterm>
+                            <para>
+                                These logical operator filters are composite filters that
+                                combine multiple other filters.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><classname>Not</classname></term>
+                        <listitem>
+                            <indexterm><primary><classname>Not</classname> (filter)</primary></indexterm>
+                            <para>
+                                The logical unary operator filter negates which items are
+                                passed by the filter given as the parameter.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                </variablelist>
+            </section>
+
+            <section xml:id="datamodel.container.filtered.custom">
+                <title>Implementing Custom Filters</title>
+
+                <para>
+                    A custom filter needs to implement the
+                    <classname>Container.Filter</classname> interface.
+                </para>
+
+                <para>
+                    A filter can use a single or multiple properties for the filtering
+                    logic. The properties used by the filter must be returned with the
+                    <methodname>appliesToProperty()</methodname> method. If the filter
+                    applies to a user-defined property or properties, it is customary to
+                    give the properties as the first argument for the constructor of the
+                    filter.
+                </para>
+
+                <book-example id="datamodel.container.filter.custom" style="float: right"/>
+                <programlisting><?pocket-size 65% ?><![CDATA[class MyCustomFilter implements Container.Filter {
+    protected String propertyId;
+    protected String regex;
+    
+    public MyCustomFilter(String propertyId, String regex) {
+        this.propertyId = propertyId;
+        this.regex      = regex;
+    }
+
+    /** Tells if this filter works on the given property. */
+    @Override
+    public boolean appliesToProperty(Object propertyId) {
+        return propertyId != null &&
+               propertyId.equals(this.propertyId);
+    }]]></programlisting>
+
+                <para>
+                    The actual filtering logic is done in the
+                    <methodname>passesFilter()</methodname> method, which simply returns
+                    <literal>true</literal> if the item should pass the filter and
+                    <literal>false</literal> if it should be filtered out.
+                </para>
+
+                <book-example id="datamodel.container.filter.custom" style="float: right"/>
+                <programlisting><?pocket-size 65% ?><![CDATA[    /** Apply the filter on an item to check if it passes. */
+    @Override
+    public boolean passesFilter(Object itemId, Item item)
+            throws UnsupportedOperationException {
+        // Acquire the relevant property from the item object
+        Property p = item.getItemProperty(propertyId);
+        
+        // Should always check validity
+        if (p == null || !p.getType().equals(String.class))
+            return false;
+        String value = (String) p.getValue();
+        
+        // The actual filter logic
+        return value.matches(regex);
+    }
+}]]></programlisting>
+
+				<?dbfo-need height="4cm" ?>
+                <para>
+                    You can use such a custom filter just like any other:
+                </para>
+
+                <programlisting><?pocket-size 75% ?><![CDATA[c.addContainerFilter(
+    new MyCustomFilter("Name", (String) tf.getValue()));]]></programlisting>
+
+            </section>
+
+            <indexterm startref="term:datamodel.container.filtered/filters" class="endofrange"/>
+            <indexterm startref="term:datamodel.container.filtered/filterable" class="endofrange"/>
+        </section>
+
+        <indexterm startref="term:datamodel.container" class="endofrange"/>
 	</section>
+
+    <indexterm startref="term:datamodel" class="endofrange"/>
 
 <!-- TODO more/examples on IndexedContainer and BeanItemContainer? -->
 

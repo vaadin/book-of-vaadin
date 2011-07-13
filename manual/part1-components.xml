@@ -1045,11 +1045,9 @@ select.setImmediate(true);]]></programlisting>
             </indexterm>
 
             <para>
-                The property defines whether the user can change the value of a
-                component. As only <classname>Field</classname> components have a value
-                that can be input or edited by the user, this method is mainly applicable
-                to field components. The read-only property does not prevent changing the
-                value of a component programmatically.
+                The property defines whether the value of a component can be changed. The
+                property is mainly applicable to <classname>Field</classname> components,
+                as they have a value that can be edited by the user.
             </para>
 
             <programlisting><?pocket-size 65% ?><![CDATA[TextField readwrite = new TextField("Read-Write");
@@ -1080,8 +1078,20 @@ layout.addComponent(readonly);]]></programlisting>
 			</figure>
 
             <para>
-                Even when a component is read-only, the user may be able to interact with
-                some component features, such as scrolling.
+                Setting a layout or some other component container as read-only does not
+                usually make the contained components read-only recursively. This is
+                different from, for example, the disabled state, which is usually applied
+                recursively. The <classname>Form</classname> component is an exception, as
+                it applies the read-only state to the form fields.
+            </para>
+
+            <para>
+                Notice that the value of a selection component is the selection, not its
+                items. A read-only selection component doesn't therefore allow its
+                selection to be changed, but other changes are possible. For example, if
+                you have a read-only <classname>Table</classname> in editable mode, its
+                contained fields and the underlying data model can still be edited, and
+                the user could sort it or reorder the columns.
             </para>
 
             <para>
@@ -1090,14 +1100,21 @@ layout.addComponent(readonly);]]></programlisting>
                 accept changes to the value of a read-only <classname>Field</classname>
                 component. The latter is an important security feature, because a
                 malicious user can not fabricate state changes in a read-only field. This
-                is handled occurs at the level of <classname>AbstractField</classname> in
-                <methodname>setValue()</methodname> and therefore applies automatically to
-                the property value of the component, but not to all other component
-                variables. A read-only component could accept some other variable changes
+                is handled at the level of <classname>AbstractField</classname> in
+                <methodname>setValue()</methodname>, so you can not change the value
+                programmatically either. Calling <methodname>setValue()</methodname> on a
+                read-only field results in
+                <classname>Property.ReadOnlyException</classname>. 
+            </para>
+
+            <para>
+                Also notice that while the read-only status applies automatically to the
+                property value of a field, it does not apply to other component
+                variables. A read-only component can accept some other variable changes
                 from the client-side and some of such changes could be acceptable, such as
-                change in a scroll bar position of a <classname>Table</classname>. Custom
-                widgets should check the read-only state for variables bound to business
-                data.
+                change in the scroll bar position of a
+                <classname>Table</classname>. Custom widgets should check the read-only
+                state for variables bound to business data.
 
                 <!-- TODO: Note this also in the Advanced: Security section and
                    possibly also in the GWT chapter. -->
@@ -1107,23 +1124,22 @@ layout.addComponent(readonly);]]></programlisting>
                 <title>CSS Style Rules</title>
 
                 <para>
-                    The appearance of the component can change to indicate that the value
-                    is not editable. A read-only component will have the
-                    <literal>v-readonly</literal> style. The following CSS rule would make
-                    the text in all read-only <classname>TextField</classname> components
-                    appear in italic.
+                    Setting a normally editable component to read-only state can change
+                    its appearance to disallow editing the value. In addition to CSS
+                    styling, also the HTML structure can change. For example,
+                    <classname>TextField</classname> loses the edit box and appears much
+                    like a <classname>Label</classname>.
+                </para>
+
+                <para>
+                    A read-only component will have the <literal>v-readonly</literal>
+                    style. The following CSS rule would make the text in all read-only
+                    <classname>TextField</classname> components appear in italic.
                 </para>
 
                 <programlisting><?pocket-size 65% ?><![CDATA[.v-textfield.v-readonly {
     font-style: italic;
 }]]></programlisting>
-                
-                <para>
-                    An icon will be rendered inside an HTML element that has the
-                    <literal>v-icon</literal> CSS style class. The containing layout may
-                    enclose an icon and a caption inside elements related to the caption,
-                    such as <literal>v-caption</literal>.
-                </para>
             </simplesect>
         </section>
 
@@ -1243,6 +1259,14 @@ layout.addComponent(readonly);]]></programlisting>
 					</imageobject>
 				</mediaobject>
 			</figure>
+
+            <para>
+                Notice, however, that invisible beings can leave footprints. The
+                containing layout cell that holds the invisible component will not go
+                away, but will show in the layout as extra empty space. Also expand ratios
+                work just like if the component was visible - it is the layout cell that
+                expands, not the component.
+            </para>
 
             <para>
                 If you need to make a component only cosmetically invisible, you should
@@ -4289,6 +4313,10 @@ select.setRows(planets.length);]]></programlisting>
 	<section xml:id="components.table">
 		<title><classname>Table</classname></title>
 
+        <indexterm xml:id="term:components.table" class="startofrange">
+            <primary><classname>Table</classname></primary>
+        </indexterm>
+
 		<para>
 			The <classname>Table</classname> component is intended for presenting tabular
 			data organized in rows and columns. The <classname>Table</classname> is one of
@@ -4753,6 +4781,18 @@ table.setPageLength(3);]]></programlisting>
 				</para>
 			</section>
 
+            <section>
+                <title>Filtering Table Contents</title>
+
+                <para>
+                    A table can be filtered if its container data source implements the
+                    <classname>Filterable</classname> interface, as the default
+                    <classname>IndexedContainer</classname> does. See <xref
+                    linkend="datamodel.container.filtered"/>.
+                    
+                    <indexterm><primary>Container</primary><secondary>Filterable</secondary></indexterm>
+                </para>
+            </section>
 		</section>
 
         <section xml:id="components.table.editing">
@@ -5653,6 +5693,7 @@ table.setCellStyleGenerator(new Table.CellStyleGenerator() {
 		</section>
 
 		<!-- programlisting><![CDATA[]]></programlisting -->
+        <indexterm startref="term:components.table" class="endofrange"/>
 	</section>
 
 	<section xml:id="components.tree">
@@ -6286,7 +6327,7 @@ form.setDescription("This is a description of the Form that is " +
 			<para>
 				<classname>Form</classname> has <classname>FormLayout</classname>
 				as its default layout, but you can set any other layout with
-				<methodname>setContent()</methodname>. See
+				<methodname>setLayout()</methodname>. See
 				<xref linkend="layout.components.formlayout"/> for more information.
 				Note that the <classname>Form</classname> itself handles layout for
 				the description, the footer and other common elements of the form.
@@ -7132,11 +7173,12 @@ loginPanel.addComponent(login);]]></programlisting>
         </para>
 
         <para>
-            The login form expands to fill the containing layout as with
-            <methodname>setSizeFull()</methodname>; the containing layout must not have an
-            undefined size in either dimension. How the actual form uses this space
-            depends on the static HTML; the <literal>iframe</literal> element in which the
-            form is contained has fixed size.
+            The login form has by default 100%x100% relative size, taking all the space
+            given by the containing layout. You may set the size to fixed values, but not
+            undefined in either direction, because the contained <literal>iframe</literal>
+            element takes all of this size (it also has 100%x100% size). How the actual
+            form uses this space depends on the static HTML. Giving too little space for
+            the form results in scroll bars.
         </para>
 
         <section>
