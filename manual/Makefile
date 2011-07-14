@@ -33,13 +33,14 @@ IMAGES =	intro/architecture intro/architecture-detailed intro/toolchain intro/to
 			components/textfield-diagram \
 			application/application-architecture application/resource_classdiagram \
 			advanced/liferay-display \
+			advanced/threadlocal-sequentiality advanced/threadlocal-concurrency \
 			themes/theme-contents themes/eclipse-theme-created-annotated \
 			gwt/gwt-widgets gwt/gwt-widget-files gwt/gwt-hostedmode-project-annotated\
 			gwt/gwt-custom-architecture \
 			vaadin-logo book-example \
 			eclipse/editor-design-2-crop eclipse/widgetset-compiling-toolbar \
 			datamodel/datamodel-interfaces \
-			datamodel/datamodel-interfaces datamodel/beanitem-doublebinding
+			datamodel/datamodel-interfaces datamodel/beanitem-doublebinding \
 			rapid/domain-model \
 			mobile/navigationview mobile/navigationpanel \
 			testbench/tt-workflow testbench/tt-architecture-simple testbench/tt-recorder-workflow \

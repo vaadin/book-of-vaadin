@@ -4735,25 +4735,129 @@ class MyComponent extends CustomComponent {
             <indexterm xml:id="term:advanced.global.threadlocal" class="startofrange"><primary>ThreadLocal pattern</primary></indexterm>
 
             <para>
-                The ThreadLocal pattern gives a solution for the global access problem by
-                solving two sub-problems. First, the servlet container processes requests
-                for many sessions (users) sequentially, so if a static variable is set in
-                a request belonging one session, it could be read or re-set by the next
-                incoming request belonging to another session. This can be solved by
-                setting the global reference at the beginning of each HTTP request to
-                point to data of the current session. You can do this with a
-                <classname>HttpServletRequestListener</classname> by setting the reference
-                in <methodname>onRequestStart()</methodname>. The second problem is that
-                servlet containers have multiple worker threads that process
-                requests. Therefore, setting a static reference would change it in all
-                threads running concurrently. The solution is to store the reference in a
-                thread-local variable instead of a static. This is done using the
-                <classname>ThreadLocal</classname> class in Java.
+                The ThreadLocal pattern gives a solution to the global access problem by
+                solving two sub-problems.
             </para>
 
             <para>
-                We end up with the following code. Here, we have put the application data
-                to a class separate from the application class.
+                As the first problem, the servlet container processes requests for many
+                users (sessions) sequentially, so if a static variable is set in a request
+                belonging one user, it could be read or re-set by the next incoming
+                request belonging to another user. This can be solved by setting the
+                global reference at the beginning of each HTTP request to point to data of
+                the current user, as illustrated in Figure <xref
+                linkend="figure:advanced.global.threadlocal.sequentiality"
+                xrefstyle="select:labelnumber"/>.
+            </para>
+
+            <figure xml:id="figure:advanced.global.threadlocal.sequentiality">
+                <title>Switching a static (or ThreadLocal) reference during sequential
+                processing of requests</title>
+
+                <mediaobject>
+                    <imageobject role="html">
+                        <imagedata align="center" fileref="img/advanced/threadlocal-sequentiality-lo.png"/>
+                    </imageobject>
+                    <imageobject role="fo">
+                        <imagedata scale="100" smallscale="100%" align="center" fileref="img/advanced/threadlocal-sequentiality-hi.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+
+            <para>
+                You can implement such switching either with the
+                <classname>TransactionListener</classname> or
+                <classname>HttpServletRequestListener</classname> interface by setting the
+                reference in <methodname>transactionStart()</methodname> or
+                <methodname>onRequestStart()</methodname>, respectively. We use the former
+                interface in the example code in this section, as the latter interface has
+                to be implemented in the application class.
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[public class AppData
+    implements TransactionListener, Serializable {
+...
+    // Use of a static variable like this should not be done
+    // because of threading, as explained next.
+    private static AppData instance = null;
+
+    @Override
+    public void transactionStart(Application application,
+                                 Object transactionData) {
+        // Switch the global reference to the current
+        // application instance
+        instance = this; // But do not do it like this for real
+    }]]></programlisting>
+
+            <para>
+                The second problem is that servlet containers have multiple worker threads
+                that process requests. Therefore, setting a static reference would change
+                it in all threads running concurrently, possibly just when another thread
+                is processing a request for another user. The solution is to store the
+                reference in a thread-local variable instead of a static. You can do so by
+                using the <classname>ThreadLocal</classname> class in Java for the switch
+                reference.
+            </para>
+
+            <figure xml:id="figure:advanced.global.threadlocal.concurrency">
+                <title>Switching <classname>ThreadLocal</classname> references during
+                concurrent processing of requests</title>
+
+                <mediaobject>
+                    <imageobject role="html">
+                        <imagedata align="center" fileref="img/advanced/threadlocal-concurrency-lo.png"/>
+                    </imageobject>
+                    <imageobject role="fo">
+                        <imagedata scale="100" smallscale="100%" align="center" fileref="img/advanced/threadlocal-concurrency-hi.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[    ...
+    private static ThreadLocal<AppData> instance =
+        new ThreadLocal<AppData>();
+
+    @Override
+    public void transactionStart(Application application,
+                                 Object transactionData) {
+        instance.set(this); // This is not enough (see below)
+    }]]></programlisting>
+
+            <para>
+                Notice that if you use a <classname>TransactionListener</classname>, the
+                listeners are attached to the web application context (in practice a user
+                session), not the application instance. The problem is that an application
+                context can have multiple different Vaadin applications that share the
+                same user session. If two of these applications add a transaction listener
+                to the context to listen for requests, both are called and without any
+                checks they would both set the reference to themselves. Therefore, the
+                application data object needs to know which application it belongs to and
+                check that when the transaction begins and ends, as was done in the
+                previous example.
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[    ...
+    private Application app; // For distinguishing between apps
+
+    public AppData(Application app) {
+        this.app = app;
+    ...
+
+    public void transactionStart(Application application,
+                                 Object transactionData) {
+        if (this.app == application) // This check is needed
+            instance.set(this);
+    }]]></programlisting>
+
+            <para>
+                Using the <classname>HttpServletRequestListener</classname> frees you from
+                these checks.
+            </para>
+
+            <para>
+                We end up with the following code. As we put the application data to a
+                class separate from the application class, we have to make it a
+                <classname>TransactionListener</classname>.
             </para>
 
             <programlisting><?pocket-size 65% ?><![CDATA[/** Holds data for one user session. */
@@ -4764,30 +4868,33 @@ public class AppData
     
     private String userData; // Trivial data model for the user
     
+    private Application app; // For distinguishing between apps
+
     private static ThreadLocal<AppData> instance =
         new ThreadLocal<AppData>();
-
-    public static void create(Application app) {
-        // Create the session-specific instance here
-        AppData sessionData = new AppData();
-
-        // It's usable globally from now on in this request
-        instance.set(sessionData);
-
-        // Register to get transaction events
-        app.getContext().addTransactionListener(sessionData);
-    }
     
+    public AppData(Application app) {
+        this.app = app;
+
+        // It's usable from now on in the current request
+        instance.set(this);
+    }
+
     @Override
     public void transactionStart(Application application,
                                  Object transactionData) {
-        instance.set(this);
+        // Set this data instance of this application
+        // as the one active in the current thread. 
+        if (this.app == application)
+            instance.set(this);
     }
 
     @Override
     public void transactionEnd(Application application,
                                Object transactionData) {
-        instance.set(null);
+        // Mark this instance as inactive in the current thread 
+        if (this.app == application)
+            instance.set(null);
     }
 
     public static void initLocale(Locale locale,
@@ -4815,33 +4922,44 @@ public class AppData
 }]]></programlisting>
 
             <para>
-                We can then use it in the application as follows.
+                We can then use it in the application as follows. Observe that we do not
+                have a reference to the application object in the constructor of the
+                <classname>MyComponent</classname> class.
             </para>
 
-<programlisting><?pocket-size 65% ?><![CDATA[public class ThreadLocalApplication extends Application {
-    class MyComponent extends CustomComponent {
-        public MyComponent() {
-            VerticalLayout layout = new VerticalLayout();
-            
-            layout.addComponent(new Label("Hello, " +
-                AppData.getUserData()));
-            layout.addComponent(new Label("Your locale is " +
-                AppData.getLocale().getDisplayLanguage()));
-            
-            Button cancel = new Button (
-                AppData.getMessage(MyAppCaptions.CancelKey));
-            layout.addComponent(cancel);
-            
-            setCompositionRoot(layout);
-        }
+<programlisting><?pocket-size 65% ?><![CDATA[/** 
+ * We can now nicely access the session-global data
+ * in the constuctor of this class.
+ */
+class MyComponent extends CustomComponent {
+    public MyComponent() {
+        VerticalLayout layout = new VerticalLayout();
+        
+        // Get stuff from the application data object            
+        layout.addComponent(new Label("Hello, " +
+            AppData.getUserData()));
+
+        layout.addComponent(new Label("Your locale is " +
+            AppData.getLocale().getDisplayLanguage()));
+        
+        layout.addComponent(new Button(
+            AppData.getMessage(MyAppCaptions.CancelKey)));
+        
+        setCompositionRoot(layout);
     }
-    
+}
+
+/** The application class. */
+public class ThreadLocalApplication extends Application {
     public void init() { 
         Window main = new Window("Hello window"); 
         setMainWindow(main);
         
         // Create the application data instance
-        AppData.create(this);
+        AppData sessionData = new AppData(this);
+        
+        // Register it as a listener in the application context
+        getContext().addTransactionListener(sessionData);
         
         // Initialize the session-global data
         AppData.initLocale(getLocale(),
@@ -4850,6 +4968,9 @@ public class AppData
         // Also set the user data model
         AppData.setUserData("Billy");
         
+        // Now, we do not pass this application object
+        // in the constructor, so it couldn't access the
+        // app data otherwise.
         main.addComponent(new MyComponent());
     }
 }]]></programlisting>
