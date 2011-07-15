@@ -39,7 +39,6 @@ IMAGES =	intro/architecture intro/architecture-detailed intro/toolchain intro/to
 			gwt/gwt-custom-architecture \
 			vaadin-logo book-example \
 			eclipse/editor-design-2-crop eclipse/widgetset-compiling-toolbar \
-			datamodel/datamodel-interfaces \
 			datamodel/datamodel-interfaces datamodel/beanitem-doublebinding \
 			rapid/domain-model \
 			mobile/navigationview mobile/navigationpanel \

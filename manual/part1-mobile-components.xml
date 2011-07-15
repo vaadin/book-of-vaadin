@@ -210,25 +210,28 @@ protected void onBecomingVisible() {
     public ComposeView(boolean smartphone) {
         setClosable(false);
 
-        if (smartphone)
-            setSizeFull();
-        else
-            setHeight("100%"); // width & position set on attach()
+        ...
 
-        ... lay out the popover content ...
+        // In phones use all space, in tablets just vertically
+        if (smartphone) {
+            setSizeFull();
+        } else {
+            setHeight("100%");
+            center();
+        }
     }
 
     @Override
     public void attach() {
         super.attach();
 
-        // Center the popover in tablet devices
+        // If tablet is wide, leave some space horizontally
         if (!smartphone) {
-            float screenWidth = getParent().getWidth();
-            float screenHeight = getParent().getHeight();
-            float width = Math.min(screenHeight, screenWidth);
-            setWidth(width, UNITS_PIXELS);
-            setPositionX((int) Math.abs((screenHeight - screenWidth) / 2));
+            if (getParent().getWidth() > 800) {
+                setWidth("80%");
+            } else {
+                setWidth("100%");
+            }
         }
     }
     ...
