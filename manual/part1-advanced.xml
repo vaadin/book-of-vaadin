@@ -4774,21 +4774,6 @@ class MyComponent extends CustomComponent {
                 to be implemented in the application class.
             </para>
 
-            <programlisting><?pocket-size 65% ?><![CDATA[public class AppData
-    implements TransactionListener, Serializable {
-...
-    // Use of a static variable like this should not be done
-    // because of threading, as explained next.
-    private static AppData instance = null;
-
-    @Override
-    public void transactionStart(Application application,
-                                 Object transactionData) {
-        // Switch the global reference to the current
-        // application instance
-        instance = this; // But do not do it like this for real
-    }]]></programlisting>
-
             <para>
                 The second problem is that servlet containers typically do thread pooling
                 with multiple worker threads that process requests. Therefore, setting a
@@ -4813,16 +4798,6 @@ class MyComponent extends CustomComponent {
                 </mediaobject>
             </figure>
 
-            <programlisting><?pocket-size 65% ?><![CDATA[    ...
-    private static ThreadLocal<AppData> instance =
-        new ThreadLocal<AppData>();
-
-    @Override
-    public void transactionStart(Application application,
-                                 Object transactionData) {
-        instance.set(this); // This is not enough (see below)
-    }]]></programlisting>
-
             <para>
                 Notice that if you use a <classname>TransactionListener</classname>, the
                 listeners are attached to the web application context (in practice a user
@@ -4832,43 +4807,18 @@ class MyComponent extends CustomComponent {
                 to the context to listen for requests, both are called and without any
                 checks they would both set the reference to themselves. Therefore, the
                 application data object needs to know which application it belongs to and
-                check that when the transaction begins and ends, as was done in the
-                previous example.
-            </para>
-
-            <programlisting><?pocket-size 65% ?><![CDATA[    ...
-    private Application app; // For distinguishing between apps
-
-    public AppData(Application app) {
-        this.app = app;
-    ...
-
-    public void transactionStart(Application application,
-                                 Object transactionData) {
-        if (this.app == application) // This check is needed
-            instance.set(this);
-    }
-
-    @Override
-    public void transactionEnd(Application application,
-                               Object transactionData) {
-        // Do also this to avoid potential problems
-        if (this.app == application) 
-            instance.set(null);
-    }]]></programlisting>
-
-            <para>
-                Using the <classname>HttpServletRequestListener</classname> frees you from
-                these checks.
+                check that when the transaction begins and ends. Using the
+                <classname>HttpServletRequestListener</classname> frees you from these
+                checks.
             </para>
 
             <para>
-                While you may not absolutely need to clear the reference at the end of the
-                transaction, you are probably on the safer side if you do. Setting such
-                unneeded references to <literal>null</literal> can help avoid memory
-                leakage and it could also be a good security precaution not to leave a
-                reference to session data so that it can be seen by another user session
-                in the next request.
+                While you may not absolutely need to clear the reference in
+                <methodname>transactionEnd()</methodname>, you are probably on the safer
+                side if you do. Setting such unneeded references to
+                <literal>null</literal> can help avoid memory leaks and it could also be a
+                good security precaution not to leave a reference to session data so that
+                it could be seen by another user session in the next request.
             </para>
 
             <para>
@@ -4880,9 +4830,8 @@ class MyComponent extends CustomComponent {
             <programlisting><?pocket-size 65% ?><![CDATA[/** Holds data for one user session. */
 public class AppData
        implements TransactionListener, Serializable {
-    private Locale locale;   // Current locale
     private ResourceBundle bundle;
-    
+    private Locale locale;   // Current locale
     private String userData; // Trivial data model for the user
     
     private Application app; // For distinguishing between apps
@@ -4944,7 +4893,7 @@ public class AppData
                 <classname>MyComponent</classname> class.
             </para>
 
-<programlisting><?pocket-size 65% ?><![CDATA[/** 
+            <programlisting><?pocket-size 65% ?><![CDATA[/** 
  * We can now nicely access the session-global data
  * in the constuctor of this class.
  */
