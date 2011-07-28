@@ -9,18 +9,19 @@
     </para>
 
     <section xml:id="mobile.components.navigationview">
-        <title><classname>NavigationManager</classname></title>
+        <title><classname>NavigationView</classname></title>
 
         <para>
-            The <classname>NavigationManager</classname> is a layout component that consists
+            The <classname>NavigationView</classname> is a layout component that consists
             of a <classname>NavigationBar</classname> and a content area. The content area
             is scrollable, so there is no need to use an inner panel component. In
             addition, there can be an optional toolbar component at the bottom of the
-            view.
+            view. <classname>NavigationView</classname> is normally used inside a
+            <classname>NavigationManager</classname> to get view change animations.
         </para>
 
         <figure xml:id="figure:mobile.components.navigationview">
-            <title>Layout of the <classname>NavigationManager</classname></title>
+            <title>Layout of the <classname>NavigationView</classname></title>
             <mediaobject>
                 <imageobject role="html">
                     <imagedata align="center" fileref="img/mobile/navigationview-lo.png"/>
@@ -32,15 +33,10 @@
         </figure>
 
         <para>
-            You typically use <classname>NavigationManager</classname> inside a
-            <classname>NavigationView</classname> to get view change animations.
-        </para>
-
-        <para>
             The navigation bar is a <classname>NavigationBar</classname> component<!--, which
             is described in <xref linkend="mobile.components.navigationbar"/>-->. You can get
             it with <methodname>getNavigationBar()</methodname> to access its manipulator
-            methods. <classname>NavigationManager</classname> also offers some shorthand
+            methods. <classname>NavigationView</classname> also offers some shorthand
             methods: <methodname>setNavigationBarComponent()</methodname>,
             <methodname>setLeftNavigationBarComponent()</methodname>,
             <methodname>getPreviousComponent()</methodname>,
@@ -78,18 +74,14 @@
             <classname>HorizontalLayout</classname>, usually containing
             <classname>Button</classname> components. The toolbar has by default 100%
             horizontal width and a fixed 40 pixel height. The components are spread evenly
-            in the horizontal direction.
+            in the horizontal direction. <classname>Toolbar</classname> is typically used
+            in a <classname>NavigationView</classname>, as described in <xref
+            linkend="mobile.components.navigationview" xrefstyle="select:label"/>.
         </para>
 
         <para>
-            <classname>Toolbar</classname> is typically used in a
-            <classname>NavigationManager</classname>, as described in <xref
-            linkend="mobile.components.navigationview"/>.
-        </para>
-
-        <para>
-            For a more detailed description of the inherited features, please refer to
-            <xref linkend="layout.components.orderedlayout"/>.
+            For a description of the inherited features, please refer to <xref
+            linkend="layout.components.orderedlayout"/>.
         </para>
 
         <section xml:id="mobile.components.toolbar.css">
@@ -107,10 +99,10 @@
     </section>
 
     <section xml:id="mobile.components.navigationpanel">
-        <title><classname>NavigationView</classname></title>
+        <title><classname>NavigationManager</classname></title>
 
         <para>
-            The <classname>NavigationView</classname> is visual effect component that
+            The <classname>NavigationManager</classname> is a visual effect component that
             gives sliding animation when switching between views. You need to register
             three different components in the panel: the currently displayed component,
             the previous one on the left, and the next component on the right. You can set
@@ -120,12 +112,12 @@
         </para>
 
         <para>
-            The <classname>NavigationView</classname> component is illustrated in <xref
+            The <classname>NavigationManager</classname> component is illustrated in <xref
             linkend="figure:mobile.components.navigationpanel"/>.
         </para>
 
         <figure xml:id="figure:mobile.components.navigationpanel">
-            <title><classname>NavigationView</classname> with Three <classname>NavigationManager</classname>s</title>
+            <title><classname>NavigationManager</classname> with Three <classname>NavigationView</classname>s</title>
             <mediaobject>
                 <imageobject role="html">
                     <imagedata align="center" fileref="img/mobile/navigationpanel-lo.png"/>
@@ -152,7 +144,7 @@
 
             <para>
                 While you can put any components in the panel, some special features are
-                enabled when using the <classname>NavigationManager</classname>. When a view
+                enabled when using the <classname>NavigationView</classname>. When a view
                 becomes visible, the <methodname>onBecomingVisible()</methodname> method
                 in the view is called. You can override it, just remember to call the
                 superclass method.
@@ -170,7 +162,7 @@ protected void onBecomingVisible() {
             <title>Tracking Breadcrumps</title>
 
             <para>
-                <classname>NavigationView</classname> also handles
+                <classname>NavigationManager</classname> also handles
                 <emphasis>breadcrump</emphasis> tracking. The
                 <methodname>navigateTo()</methodname> pushes the current view on the top
                 of the breadcrump stack and <methodname>navigateBack()</methodname> can be
@@ -181,6 +173,54 @@ protected void onBecomingVisible() {
                 Notice that calling <methodname>navigateTo()</methodname> with the
                 "previous" component is equivalent to calling
                 <methodname>navigateBack()</methodname>.
+            </para>
+        </section>
+    </section>
+
+    <section xml:id="mobile.components.navigationbutton">
+        <title><classname>NavigationButton</classname></title>
+
+        <para>
+            The <classname>NavigationButton</classname> is a special version of the
+            regular <classname>Button</classname> designed for navigation inside a
+            <classname>NavigationManager</classname>, as described in <xref
+            linkend="mobile.components.navigationpanel"
+            xrefstyle="select:label"/>. Clicking the button will automatically navigate to
+            a defined target view. The view change animation does not need to make a
+            server request first, but starts immediately after clicking the button.
+        </para>
+
+        <para>
+            You can give the target view either in the constructor or with
+            <methodname>setTargetView()</methodname>.
+        </para>
+
+        <programlisting><?pocket-size 75% ?><![CDATA[
+NavigationView view = new NavigationView("A View");
+...
+NavigationButton button = new NavigationButton("Click");
+button.setTargetView(view);
+...]]></programlisting>
+
+        <para>
+            Notice that the automatic navigation will only work if the button is inside a
+            <classname>NavigationManager</classname> (in a view inside it). If you just
+            want to use the button as a visual element, you can use it like a regular
+            <classname>Button</classname> by handling click events manually.
+        </para>
+
+        <section xml:id="mobile.components.navigationbutton.css">
+            <title>Styling with CSS</title>
+
+            <programlisting><![CDATA[.v-tk-navbutton { }
+  .v-tk-navbutton-desc { }]]></programlisting>
+
+            <para>
+                The component has an overall <literal>v-tk-navbutton</literal> style. If
+                the component description is set with
+                <methodname>setDescription()</methodname>, it is shown in a separate
+                <literal>&lt;span&gt;</literal> element with the
+                <literal>v-tk-navbutton-desc</literal> style.
             </para>
         </section>
     </section>
