@@ -1887,59 +1887,164 @@ horizontal.addComponent(button2);]]></programlisting>
 		<title><classname>Link</classname></title>
 
 		<para>
-			The <classname>Link</classname> component allows making references to
-			resources that are either external or provided by the web server or by the
-			application itself. While a <classname>Link</classname> appears like a
-			hyperlink, it is not handled in the web browser. When a user clicks a link,
-			the server receives an event and typically opens the referenced resource in
-			the target window of the link. Resources are explained in <xref
-			linkend="application.resources"/>.
+			The <classname>Link</classname> component allows making hyperlinks. References
+			to locations are represented as resource objects, explained in <xref
+			linkend="application.resources"/>. The <classname>Link</classname> is a
+			regular HTML hyperlink, that is, an <literal>&lt;a href&gt;</literal> anchor
+			element that is handled natively by the browser. Unlike when clicking a
+			<classname>Button</classname>, clicking a <classname>Link</classname> does not
+			cause an event on the server-side.
 		</para>
 
 		<para>
-			Links to external resources can be made by using a URI as follows:
+			Links to an arbitrary URL can be made by using an
+			<classname>ExternalResource</classname> as follows:
 		</para>
 
-		<programlisting><![CDATA[Link link = new Link ("link to a resource",
-      new ExternalResource("http://www.vaadin.com/")));]]></programlisting>
+		<programlisting><![CDATA[// Textual link
+Link link = new Link("Click Me!",
+        new ExternalResource("http://vaadin.com/"));]]></programlisting>
+
+        <para>
+            You can use <methodname>setIcon()</methodname> to make image links as follows:
+        </para>
+
+		<programlisting><?pocket-size 65% ?><![CDATA[// Image link
+Link iconic = new Link(null,
+        new ExternalResource("http://vaadin.com/"));
+iconic.setIcon(new ThemeResource("img/nicubunu_Chain.png"));
+
+// Image + caption
+Link combo = new Link("To appease both literal and visual",
+        new ExternalResource("http://vaadin.com/"));
+combo.setIcon(new ThemeResource("img/nicubunu_Chain.png"));]]></programlisting>
+
+        <para>
+            The resulting links are shown in <xref
+            linkend="figure:components.link.basic"/>. You could add a "<literal>display:
+            block</literal>" style for the icon element to place the caption below it.
+        </para>
+
+		<figure xml:id="figure:components.link.basic">
+			<title><classname>Link</classname> Example</title>
+			<mediaobject>
+				<imageobject role="html">
+					<imagedata align="center" fileref="img/components/link.png"/>
+				</imageobject>
+				<imageobject role="fo">
+					<imagedata smallscale="80%" align="center" fileref="img/components/link.png"/>
+				</imageobject>
+			</mediaobject>
+		</figure>
 
 		<para>
             With the simple constructor used in the above example, the resource is opened
             in the current window. Using the constructor that takes the target window as a
             parameter, or by setting the target window with
-            <methodname>setWindow()</methodname>, you can open the resource in another
-            window, such as a native popup window. As the target window can be defined as
-            a target string managed by the browser, the target can be any window,
-            including windows not managed by the application itself.
+            <methodname>setTargetName()</methodname>, you can open the resource in another
+            window, such as a native popup window. As the target name is an HTML
+            <literal>target</literal> string managed by the browser, the target can be any
+            window, including windows not managed by the application itself. You can use
+            the special underscored target names, such as <literal>_blank</literal> to
+            open the link to a new browser window or tab.
 		</para>
+
+        <programlisting><?pocket-size 65% ?><![CDATA[// Hyperlink to a given URL
+Link link = new Link("Take me a away to a faraway land",
+        new ExternalResource("http://vaadin.com/"));
+
+// Open the URL in a new window/tab
+link.setTargetName("_blank");
+        
+// Indicate visually that it opens in a new window/tab
+link.setIcon(new ThemeResource("icons/external-link.png"));
+link.addStyleName("icon-after-caption");]]></programlisting>
+
+        <para>
+            Normally, the link icon is before the caption. You can have it right of the
+            caption by reversing the text direction in the containing element.
+        </para>
+
+<programlisting><?pocket-size 65% ?><![CDATA[/* Position icon right of the link caption. */
+.icon-after-caption {
+    direction: rtl;
+}
+/* Add some padding around the icon. */
+.icon-after-caption .v-icon {
+    padding: 0 3px;
+}]]></programlisting>
+
+        <para>
+            The resulting link is shown in <xref linkend="figure:components.link.new-window"/>.
+        </para>
+
+		<figure xml:id="figure:components.link.new-window">
+			<title>Link That Opens a New Window</title>
+			<mediaobject>
+				<imageobject role="html">
+					<imagedata align="center" fileref="img/components/link-new.png"/>
+				</imageobject>
+				<imageobject role="fo">
+					<imagedata smallscale="100%" align="center" fileref="img/components/link-new.png"/>
+				</imageobject>
+			</mediaobject>
+		</figure>
+
+        <para>
+            With the <literal>_blank</literal> target, a normal new browser window is
+            opened. If you wish to open it in a popup window, you need to give a size for
+            the window with <methodname>setTargetWidth()</methodname> and
+            <methodname>setTargetHeight()</methodname>. You can control the window border
+            style with <methodname>setTargetBorder()</methodname>, which takes any of the
+            defined border styles <parameter>TARGET_BORDER_DEFAULT</parameter>,
+            <parameter>TARGET_BORDER_MINIMAL</parameter>, and
+            <parameter>TARGET_BORDER_NONE</parameter>. The exact result depends on the
+            browser.
+        </para>
+
+        <programlisting><?pocket-size 65% ?><![CDATA[// Open the URL in a popup
+link.setTargetName("_blank");
+link.setTargetBorder(Link.TARGET_BORDER_NONE);
+link.setTargetHeight(300);
+link.setTargetWidth(400);]]></programlisting>
 
         <!-- TODO: Describe _new, _black, etc. targets and give an example. -->
 
 		<para>
-			When the user clicks the link, the application will receive an event regarding
-			the click and handle it to provide the resource. The link is therefore not an
-			<literal>&lt;a href&gt;</literal> element in HTML and it does not have an
-			URI. This has some additional consequences, such as that a link can not be
-			marked as "visited" by the browser, unlike normal hyperlinks. If you wish to
-			have an actual HTML anchor element, you either need to customize how the
-			<classname>Link</classname> component is rendered or use a
-			<classname>Label</classname> in XHTML content mode and write the anchor
-			element in (X)HTML.
+            In addition to the <classname>Link</classname> component, Vaadin allows
+            alternative ways to make hyperlinks. The <classname>Button</classname>
+            component has a <parameter>Reindeer.BUTTON_LINK</parameter> style name that
+            makes it look like a hyperlink, while handling clicks in a server-side click
+            listener instead of in the browser. Also, you can make hyperlinks (or any
+            other HTML) in a <classname>Label</classname> in XHTML content mode.
 		</para>
 
 		<simplesect>
 			<title>CSS Style Rules</title>
 
-			<para>
-				The <classname>Link</classname> component has
-				<parameter>v-link</parameter> style by default.
-			</para>
-			
-			<programlisting><![CDATA[.v-link { }]]></programlisting>
+			<programlisting><?dbfo-need height="3cm" ?><![CDATA[.v-link { }
+  a { }
+    .v-icon {}
+    span {}]]></programlisting>
 
 			<para>
-				When the mouse pointer hovers over the link, it will also have the
-				<varname>over</varname> style.
+                The overall style for the <classname>Link</classname> component is
+                <literal>v-link</literal>. The root element contains the <literal>&lt;a
+                href&gt;</literal> hyperlink anchor. Inside the anchor are the icon, with
+                <literal>v-icon</literal> style, and the caption in a text span.
+            </para>
+
+            <para>
+                Hyperlink anchors have a number of <emphasis>pseudo-classes</emphasis>
+                that are active at different times. An unvisited link has
+                <literal>a:link</literal> class and a visited link
+                <literal>a:visited</literal>. When the mouse pointer hovers over the link,
+                it will have <varname>a:hover</varname>, and when the mouse button is
+                being pressed over the link, the <literal>a:active</literal> class. When
+                combining the pseudo-classes in a selector, please notice that
+                <literal>a:hover</literal> must come after an <literal>a:link</literal>
+                and <literal>a:visited</literal>, and <literal>a:active</literal> after
+                the <literal>a:hover</literal>.
 			</para>
 		</simplesect>
 	</section>
