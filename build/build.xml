@@ -757,6 +757,49 @@
     <target name="sqltutorial-pdf" depends="xep-license-copy, init, init-sqltutorial, build-sqltutorial-pdf">
     </target>
 
+    <!-- Packages the HTML files to a Zip package -->
+    <target name="zip-all" depends="init, init-manual-html">
+        <property name="manual.package.zip" value="${result-path}/book-of-vaadin.zip"/>
+        <echo>Packaging HTML: ${manual.package.zip}</echo>
+
+        <zip zipfile="${manual.package.zip}">
+            <zipfileset prefix="html" dir="${manual.html.output.dir}">
+                <patternset>
+                    <include name="**/*" />
+                </patternset>
+            </zipfileset>
+            <zipfileset prefix="tutorial" dir="${output-dir}/WebContent/docs/tutorial/">
+                <patternset>
+                    <include name="**/*" />
+                </patternset>
+            </zipfileset>
+            <zipfileset prefix="pdf" dir="${output-dir}/WebContent/docs/">
+                <patternset>
+                    <include name="*.pdf" />
+                </patternset>
+            </zipfileset>
+        </zip>
+    </target>
+
+    <!-- Publishes the book in the web server -->
+    <target name="publish" depends="init, zip-all">
+    	<fail unless="manual.publish" message="Manual publish target must be defined in manual.publish"/>
+
+        <!-- Copy the linux installation package and the JAR. -->
+        <echo>Copying package to server...</echo>
+        <exec executable="scp" searchpath="true" resultproperty="publish.scp.result">
+            <arg value="-B"/>
+            <arg value="${manual.package.zip}"/>
+            <arg value="${manual.publish}"/>
+        </exec>
+
+        <!-- Unpackage the documentation on the target server. -->
+        <echo>Extracting package on server...</echo>
+        <exec executable="ssh" searchpath="true" resultproperty="publish.ssh.result">
+            <arg value="${manual.publish.address}"/>
+            <arg value="${manual.publish.script}"/>
+        </exec>
+    </target>
 </project>
 
 <!-- Keep this comment at the end of the file
