@@ -625,18 +625,19 @@ main.addComponent(poller);]]></programlisting>
 	<section xml:id="application.embedding">
 		<title>Embedding Applications in Web Pages</title>
 
+        <!-- TODO: Is this up-to-date? -->
+
 		<para>
-			Many web applications and especially web sites are not all AJAX, but AJAX is
-			used only for specific functionalities. In practice, many web applications are
-			a mixture of dynamic web pages and AJAX applications embedded to such
-			pages.
+			Many web sites are not all Ajax, but Ajax is used only for specific
+			functionalities. In practice, many web applications are a mixture of dynamic
+			web pages and Ajax applications embedded in such pages.
 		</para>
 
 		<para>
-			Embedding Vaadin applications is easy. There are two basic ways to
+			Embedding Vaadin applications is easy and there are several different ways to
 			embed them. One is to have a <literal>&lt;div&gt;</literal> placeholder for
-			the web application and load the Vaadin Client-Side Engine with a
-			simple JavaScript code. The second method is even easier, which is to simply use the
+			the web application and load the Vaadin Client-Side Engine with a simple
+			JavaScript code. Another method is even easier, which is to simply use the
 			<literal>&lt;iframe&gt;</literal> element.  Both of these methods have
 			advantages and disadvantages. The <literal>&lt;div&gt;</literal> method can
 			only embed one application in a page, while the
@@ -645,23 +646,12 @@ main.addComponent(poller);]]></programlisting>
 			of the <literal>&lt;iframe&gt;</literal> element is not flexible according to
 			the content while the <literal>&lt;div&gt;</literal> method allows such
 			flexibility. The following sections look closer into these two embedding
-			methods.
+			methods. Additionally, the Vaadin XS add-on allows embedding Vaadin
+			applications in websites running in another server.
 		</para>
 
-		<section>
+		<section xml:id="application.embedding.div">
 			<title>Embedding Inside a <literal>div</literal> Element</title>
-
-			<!-- OUTDATED? Check that this is current. -->
-
-			<para>
-                <emphasis>The loading code for the Client-Side Engine changed in IT Mill
-                toolkit version 5.1.2 and the explanation below is no longer compatible
-                with Vaadin. Please view the source code of the initial page of your
-                application in your browser.</emphasis>
-
-                <!-- TODO: ... or see the <filename>WebContent/multiapp.html</filename>
-                for an example -->
-            </para>
 
 			<para>
 				You can embed a Vaadin application inside a web page with a
@@ -682,16 +672,6 @@ main.addComponent(poller);]]></programlisting>
 				 <methodname>document.write()</methodname> calls, which is useful only
 				 when you are running the application as a portlet in a portal. The method
 				 outlined below is much simpler.
-			</para>
-
-			<para>
-				The <filename>WebContent/multiapp.html</filename> file included in the
-				Vaadin installation package provides an example of embedding (multiple)
-				Vaadin applications in a page. After launching the demo application, you
-				can view the example at URL
-				<uri>http://localhost:8888/multiapp.html</uri>. Notice that the example
-				assumes the use of root context for the applications
-				(<parameter>/</parameter>).
 			</para>
 
 			<!-- figure xml:id="figure.embedding.source">
@@ -925,7 +905,7 @@ main.addComponent(poller);]]></programlisting>
 
 		</section>
 
-		<section>
+		<section xml:id="application.embedding.iframe">
 			<title>Embedding Inside an <literal>iframe</literal> Element</title>
 
 			<para>
@@ -1004,7 +984,87 @@ main.addComponent(poller);]]></programlisting>
 					</imageobject>
 				</mediaobject>
 			</figure>
+
+            <para>
+                You can embed almost anything in an iframe, which essentially acts as a
+                browser window. However, this creates various problems. The iframe must
+                have a fixed size, inheritance of CSS from the embedding page is not
+                possible, and neither is interaction with JavaScript, which makes mashups
+                impossible, and so on. Even bookmarking with URI fragments will not work.
+            </para>
+
+            <para>
+                Note also that websites can forbid iframe embedding by specifying an
+                <literal>X-Frame-Options: SAMEORIGIN</literal> header in the HTTP
+                response.
+            </para>
 		</section>
+
+		<section xml:id="application.embedding.xs">
+            <title>Cross-Site Embedding with the Vaadin XS Add-on</title>
+
+            <para>
+                In the previous sections, we described the two basic methods for embedding
+                Vaadin applications: in a <literal>&lt;div&gt;</literal> element and in an
+                <literal>&lt;iframe&gt;</literal>. One problem with div embedding is that
+                it does not work between different Internet domains, which is a problem if
+                you want to have your website running in one server and your Vaadin
+                application in another. The security model in browsers effectively
+                prevents such cross-site embedding of Ajax applications by enforcing the
+                <emphasis>same origin policy</emphasis> for XmlHttpRequest calls, even if
+                the server is running in the same domain but different port. While iframe
+                is more permissive, allowing embedding almost anything in anywhere, it has
+                many disadvantanges, as described earlier.
+            </para>
+
+            <para>
+                The Vaadin XS (Cross-Site) add-on works around the limitation in div
+                embedding by using JSONP-style communication instead of the standard
+                XmlHttpRequests.
+            </para>
+
+            <para>
+                Embedding is done simply with:
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[  <script src="http://demo.vaadin.com/xsembed/getEmbedJs"
+          type="text/javascript"></script>]]></programlisting>
+
+            <para>
+                This includes an automatically generated embedding script in the page,
+                thereby making embedding effortless.
+            </para>
+
+            <para>
+                This assumes that the main layout of the application has undefined
+                height. If the height is 100%, you have to wrap it inside an element with
+                a defined height. For example:
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[ <div style="height: 500px;">
+  <script src="http://demo.vaadin.com/xsembed/getEmbedJs"
+          type="text/javascript"></script>
+</div>]]></programlisting>
+
+            <para>
+                It is possible to restrict where the application can be embedded by using
+                a whitelist. The add-on also encrypts the client-server communication,
+                which is more important for embedded applications than usual.
+            </para>
+
+            <para>
+                You can get the Vaadin XS add-on from Vaadin Directory. It is provided as
+                a Zip package. Download and extract the installation package to a local
+                folder. Instructions for installation and further information is given in
+                the <filename>README.html</filename> file in the package.
+            </para>
+
+            <para>
+                Some restrictions apply. You can have only one embedded application in one
+                page. Also, some third-party libraries may interfere with the
+                communication. Other notes are given in the README.
+            </para>
+        </section>
 	</section>
 
 	<section xml:id="advanced.debug-production-modes">
