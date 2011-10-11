@@ -1527,10 +1527,9 @@ mycomponent.setHeight("400px");]]></programlisting>
 		<title><classname>Label</classname></title>
 
 		<para>
-			<classname>Label</classname> is a text component that you can use to display
-			non-editable text. In addition to regular text, you can also display
-			preformatted text and HTML, depending on the <emphasis>content mode</emphasis>
-			of the label.
+			<classname>Label</classname> is a text component that displays non-editable
+			text. In addition to regular text, you can also display preformatted text and
+			HTML, depending on the <emphasis>content mode</emphasis> of the label.
 		</para>
 
 		<book-example id="component.label.basic" style="float: right"/>
@@ -1630,14 +1629,19 @@ panel.addComponent(
                     <term><constant>CONTENT_RAW</constant></term>
                     <listitem>
                         <para>
-                            Content mode, where the label contains raw text. Output is not
-                            required to be valid XML. It can be, for example, HTML, which can
-                            be unbalanced or otherwise invalid XML. The example below uses the
-                            &lt;br&gt; tag in HTML. While XHTML should be preferred in most
-                            cases, this can be useful for some specific purposes where you may
-                            need to display loosely formatted HTML content. The raw mode also
-                            preserves character entities, some of which might otherwise be
-                            interpreted incorrectly.
+                            Content mode where the label contains raw text. Output is not
+                            required to be valid XML. It can be, for example, HTML, which
+                            can be unbalanced or otherwise invalid XML. The example below
+                            uses the &lt;br&gt; tag in HTML. While XHTML should be
+                            preferred in most cases, this can be useful for some specific
+                            purposes where you may need to display loosely formatted HTML
+                            content. The raw mode also preserves character entities, some
+                            of which might otherwise be interpreted incorrectly.
+                        </para>
+
+                        <para>
+                            Please note the security and validity warnings regarding the
+                            content mode later in this section.
                         </para>
                     </listitem>
                 </varlistentry>
@@ -1658,9 +1662,14 @@ panel.addComponent(
                     <term><constant>CONTENT_XHTML</constant></term>
                     <listitem>
                         <para>
-                            Content mode, where the label contains XHTML. The content will be
-                            enclosed in a DIV element having the namespace
+                            Content mode where the label contains XHTML. The content will
+                            be enclosed in a DIV element having the namespace
                             "<uri>http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd</uri>".
+                        </para>
+
+                        <para>
+                            Please note the security and validity warnings regarding the
+                            content mode later in this section.
                         </para>
                     </listitem>
                 </varlistentry>
@@ -1671,6 +1680,11 @@ panel.addComponent(
                             Content mode, where the label contains well-formed and
                             well-balanced XML. Each of the root elements must have their
                             default namespace specified.
+                        </para>
+
+                        <para>
+                            Please note the security and validity warnings regarding the
+                            content mode later in this section.
                         </para>
                     </listitem>
                 </varlistentry>
@@ -1688,12 +1702,22 @@ panel.addComponent(
             </variablelist>
 
             <warning>
+                <title>Cross-Site Scripting Warning</title>
+
                 <para>
-                    Notice that the validity of XML or XHTML in a <classname>Label</classname>
-                    is not checked in the server when rendering the component and any errors
-                    can result in an error in the browser! You should validate the content
-                    before displaying it in the component, especially if it comes from an
-                    uncertain source.
+                    Having <classname>Label</classname> in <constant>RAW</constant>,
+                    <constant>XHTML</constant>, or <constant>XML</constant> content modes
+                    allows pure HTML content. If the content comes from user input, you
+                    should always carefully sanitize it to prevent cross-site scripting
+                    (XSS) attacks. Please see <xref
+                    linkend="advanced.security.sanitizing"/>.
+                </para>
+
+                <para>
+                    Also, the validity of the XML content is not checked when rendering
+                    the component and any errors can result in an error in the browser. If
+                    the content comes from an uncertain source, you should always validate
+                    it before displaying it in the component.
                 </para>
             </warning>
 
