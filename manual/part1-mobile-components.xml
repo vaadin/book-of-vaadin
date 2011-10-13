@@ -13,10 +13,10 @@
 
         <para>
             The <classname>NavigationView</classname> is a layout component that consists
-            of a <classname>NavigationBar</classname> and a content area. The content area
-            is scrollable, so there is no need to use an inner panel component. In
-            addition, there can be an optional toolbar component at the bottom of the
-            view. <classname>NavigationView</classname> is normally used inside a
+            of a navigation bar and a content area. The content area is scrollable, so
+            there is no need to use an inner panel component. In addition, there can be an
+            optional toolbar component at the bottom of the
+            view. <classname>NavigationView</classname> is often used inside a
             <classname>NavigationManager</classname> to get view change animations.
         </para>
 
@@ -33,34 +33,83 @@
         </figure>
 
         <para>
-            The navigation bar is a <classname>NavigationBar</classname> component<!--, which
-            is described in <xref linkend="mobile.components.navigationbar"/>-->. You can get
-            it with <methodname>getNavigationBar()</methodname> to access its manipulator
-            methods. <classname>NavigationView</classname> also offers some shorthand
-            methods: <methodname>setNavigationBarComponent()</methodname>,
-            <methodname>setLeftNavigationBarComponent()</methodname>,
-            <methodname>setRightNavigationBarComponent()</methodname>,
-            <methodname>getPreviousComponent()</methodname>,
-            <methodname>setPreviousComponent()</methodname>, and a setter and getter for
-            the caption.
+            <classname>NavigationView</classname> has a full size by default. The content
+            area is expanding, so that it takes all the space left over from the navigation
+            bar and toolbar.
         </para>
 
-        <para>
-            The optional toolbar is located at the bottom of the view. It can be any
-            component, typically a <classname>Toolbar</classname>, but can also be
-            <classname>HorizontalLayout</classname> or <classname>CssLayout</classname>.
-            It typically has <classname>Button</classname>s in it. You set the toolbar
-            component with <methodname>setToolbar()</methodname>.
-        </para>
+        <section xml:id="mobile.components.navigationview.navigationbar">
+            <title>Navigation Bar</title>
 
-        <para>
-            The layout has a full size by default. The content are is expanding, so that
-            it takes all the space left over from the navigation bar and toolbar.
-        </para>
+            <para>
+                The navigation bar at the top of <classname>NavigationView</classname> is
+                a <classname>NavigationBar</classname> component. It has two component
+                slots, with one on the left and one on the right. On the middle, there is
+                a caption. You can use the <classname>NavigationBar</classname> elsewhere
+                as well, such as for the toolbar.
+            </para>
+
+            <para>
+                The left slot is automatically filled with a <guibutton>Back</guibutton>
+                button if you set the previous component with
+                <methodname>setPreviousComponent()</methodname>. If you use the
+                <classname>NavigationView</classname> inside a
+                <classname>NavigationManager</classname>, the manager automaticaly sets
+                the previous view when you navigate to it from another managed view.
+            </para>
+
+            <para>
+                You can get access to the navigation bar component with
+                <methodname>getNavigationBar()</methodname> to use its manipulator methods
+                directly, but <classname>NavigationView</classname> also offers some
+                shorthand methods: <methodname>setLeftComponent()</methodname>,
+                <methodname>setRightComponent()</methodname>, and a setter and a getter
+                for the caption.
+            </para>
+        </section>
+
+        <section xml:id="mobile.components.navigationview.toolbar">
+            <title>Toolbar</title>
+
+            <para>
+                A slot for an optional toolbar is located at the bottom of the
+                <classname>NavigationView</classname>. The toolbar can be any component,
+                but a <classname>Toolbar</classname> component made for this purpose is
+                included in TouchKit. It is described in <xref
+                linkend="mobile.components.toolbar"/>. You could also use a
+                <classname>HorizontalLayout</classname> or
+                <classname>CssLayout</classname>.
+            </para>
+
+            <para>
+                You usually fill the tool bar with <classname>Button</classname>
+                components with an icon and no textual caption. You set the toolbar with
+                <methodname>setToolbar()</methodname>.
+            </para>
+        </section>
+
+        <section xml:id="mobile.components.navigationview.css">
+            <title>Styling with CSS</title>
+
+            <programlisting><![CDATA[.v-touchkit-navview { }
+  .v-touchkit-navview-wrapper {}
+  .v-touchkit-navview-toolbar {}
+.v-touchkit-navview .v-touchkit-navview-notoolbar {}]]></programlisting>
+
+            <para>
+                The root element has the <literal>v-touchkit-navview</literal> class. The
+                content area is wrapped inside a
+                <literal>v-touchkit-navview-wrapper</literal> element. If the view has a
+                toolbar, the toolbar slot has the
+                <literal>v-touchkit-navview-toolbar</literal> style, but if not, the
+                top-level element has the <literal>v-touchkit-navview-notoolbar</literal>
+                style.
+            </para>
+        </section>
     </section>
 
     <!-- TODO <section xml:id="mobile.components.navigationbar">
-        <title><classname>NavigationBar</classname></title>
+    <title><classname>NavigationBar</classname></title>
 
         <para>
             
@@ -187,8 +236,10 @@ protected void onBecomingVisible() {
             <classname>NavigationManager</classname>, as described in <xref
             linkend="mobile.components.navigationpanel"
             xrefstyle="select:label"/>. Clicking the button will automatically navigate to
-            a defined target view. The view change animation does not need to make a
-            server request first, but starts immediately after clicking the button.
+            the defined target view. The view change animation does not need to make a
+            server request first, but starts immediately after clicking the button. If you
+            leave the target view empty, an empty placeholder view is shown in the
+            animation. The view is filled after it gets the content from the server.
         </para>
 
         <para>
@@ -207,7 +258,8 @@ button.setTargetView(view);
             Notice that the automatic navigation will only work if the button is inside a
             <classname>NavigationManager</classname> (in a view inside it). If you just
             want to use the button as a visual element, you can use it like a regular
-            <classname>Button</classname> by handling click events manually.
+            <classname>Button</classname> and handle the click events with a
+            <classname>ClickListener</classname>.
         </para>
 
         <section xml:id="mobile.components.navigationbutton.css">
