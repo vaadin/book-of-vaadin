@@ -16,6 +16,8 @@
   <xsl:param name="page.margin.top" select="'1.0cm'"/>
   <xsl:param name="page.margin.bottom" select="'0.8cm'"/>
 
+  <xsl:param name="title.margin.left" select="'0.8cm'"/>
+
   <xsl:param name="manual.fonts.custom" select="false"/>
 
   <!-- The Symbol font is disabled because it can't be embedded and the Helvetica
