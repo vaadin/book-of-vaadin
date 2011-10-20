@@ -248,7 +248,7 @@
         </copy>
     </target>
 
-    <target name="manual-html-build" depends="init-manual-html, init-manual-html-common">
+    <target name="manual-html-build" depends="init-manual-html-common">
         <echo>Building manual to ${manual.html.output.dir}</echo>
         <echo>Index file: ${manual.html.output.index}</echo>
         <java classname="org.apache.xalan.xslt.Process" failonerror="yes" fork="yes" maxmemory="512m">
@@ -303,8 +303,6 @@
         <property name="manual.html.output.dir" value="${output-dir}/WebContent/docs/book${manual.language.extension}"/>
         <property name="manual.html.output.index" value="${manual.html.output.dir}/index.html"/>
 
-        <property name="output-dir-manual" value="${output-dir}/WebContent/docs/book" />
-
         <echo>Manual: HTML</echo>
         <echo>Published: ${manual.pubdate}</echo>
 	</target>
@@ -318,6 +316,23 @@
             <pathelement location="build/lib/ant-contrib-1.0b3.jar" />
         </classpath>
     </taskdef>
+
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+    <!-- EPub Manual                                                         -->
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+    <!-- Configuration for building the EPub manual. -->
+    <target name="init-manual-epub" depends="init, init-manual">
+        <property name="manual.html.xsl" value="build/docbook/conf/manual-epub.xsl"/>
+        <property name="manual.html.output.dir" value="${output-dir}/WebContent/docs/epub${manual.language.extension}"/>
+        <property name="manual.html.output.index" value="${manual.html.output.dir}/index.html"/>
+
+        <echo>Manual: EPub</echo>
+        <echo>Published: ${manual.pubdate}</echo>
+	</target>
+
+    <target name="manual-epub" depends="init, init-manual, init-manual-epub, init-manual-html-common, manual-html-build">
+    </target>
 
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <!-- Translations                                                        -->
