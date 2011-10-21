@@ -16,7 +16,7 @@
   <xsl:param name="page.margin.top" select="'1.0cm'"/>
   <xsl:param name="page.margin.bottom" select="'0.8cm'"/>
 
-  <xsl:param name="title.margin.left" select="'0.8cm'"/>
+  <xsl:param name="title.margin.left" select="'0cm'"/>
 
   <xsl:param name="manual.fonts.custom" select="false"/>
 
@@ -136,7 +136,7 @@
 
       <!-- Vaadin customization: -->
       <xsl:choose>
-        <xsl:when test="self::chapter">
+        <xsl:when test="self::chapter and name($toc-context) != 'part'">
           <xsl:attribute name="font-weight">bold</xsl:attribute>
           <xsl:attribute name="margin-top">2.5mm</xsl:attribute>
         </xsl:when>
@@ -144,34 +144,53 @@
 
       <fo:inline keep-with-next.within-line="always">
         <fo:basic-link internal-destination="{$id}">
+          <!-- Have Chapter titles in part ToC-->
+          <xsl:if test="self::chapter and name($toc-context) = 'part'">
+            <xsl:text>Chapter </xsl:text>
+          </xsl:if>
+
+          <!-- Number + separator -->
           <xsl:if test="$label != ''">
             <xsl:copy-of select="$label"/>
-            <xsl:value-of select="$autotoc.label.separator"/>
+
+            <!-- No separator dot in part ToC, just space -->
+            <xsl:choose>
+              <xsl:when test="self::chapter and name($toc-context) = 'part'">
+                <xsl:text> </xsl:text>
+              </xsl:when>
+              <xsl:otherwise>
+                <xsl:value-of select="$autotoc.label.separator"/>
+              </xsl:otherwise>
+            </xsl:choose>
           </xsl:if>
+
+          <!-- The title -->
           <xsl:apply-templates select="." mode="titleabbrev.markup"/>
         </fo:basic-link>
       </fo:inline>
+
+      <!-- Dots and page number -->
       <fo:inline keep-together.within-line="always">
         <xsl:text> </xsl:text>
         <fo:leader leader-pattern="dots"
           leader-pattern-width="3pt"
           leader-alignment="reference-area"
           keep-with-next.within-line="always"/>
-      <xsl:text> </xsl:text>
-      <fo:basic-link internal-destination="{$id}">
-        <fo:page-number-citation ref-id="{$id}"/>
-      </fo:basic-link>
-    </fo:inline>
-  </fo:block>
+        <xsl:text> </xsl:text>
+        <fo:basic-link internal-destination="{$id}">
+          <fo:page-number-citation ref-id="{$id}"/>
+        </fo:basic-link>
+      </fo:inline>
+    </fo:block>
   </xsl:template>
-
-  <!-- Only generate ToC of chapters/sections. -->
+  
+  <!-- Only generate ToC title of chapters/sections. -->
   <xsl:param name="generate.toc">
     appendix  nop
-    article   toc,title
-    book      toc,title
+    article   toc
+    book      toc
     chapter   toc
-    part      nop
+    part      toc
     preface   nop
     qandadiv  nop
     qandaset  nop
@@ -180,7 +199,9 @@
     set       toc
   </xsl:param>
 
-  <!-- Only first level section titles in chapter ToC. From autotoc.xsl. -->  
+  <!-- Only first level section titles in chapter ToC.
+       Only chapter titles in part ToC.
+       From autotoc.xsl. -->  
   <xsl:template match="section" mode="toc">
     <xsl:param name="toc-context" select="."/>
     
@@ -200,14 +221,10 @@
 
     <xsl:variable name="depth.from.context" select="count(ancestor::*)-count($toc-context/ancestor::*)"/>
 
-    <!-- xsl:message>
-      <xsl:text>toc-context: </xsl:text>
-      <xsl:value-of select="local-name($toc-context)"/>
-    </xsl:message -->
-
     <xsl:variable name="toc.section.depth.vaadin">
       <xsl:choose>
         <xsl:when test="local-name($toc-context) = 'chapter'">1</xsl:when>
+        <xsl:when test="local-name($toc-context) = 'part'">0</xsl:when>
         <xsl:otherwise>
           <xsl:value-of select="$toc.section.depth"/>
         </xsl:otherwise>
@@ -344,6 +361,86 @@
   </xsl:attribute-set>
 
   <!-- ==================================================================== -->
+  <!-- Custom part title.                                                   -->
+  <!-- ==================================================================== -->
+
+  <!-- Enable ToC for Part -->
+  <xsl:template name="part.titlepage.before.verso" priority="1">
+    <xsl:variable name="toc.params">
+      <xsl:call-template name="find.path.params">
+        <xsl:with-param name="table"
+          select="normalize-space($generate.toc)"/>
+      </xsl:call-template>
+    </xsl:variable>
+    <xsl:if test="contains($toc.params, 'toc')">
+      <xsl:call-template name="division.toc">
+        <xsl:with-param name="toc.context" select="."/>
+      </xsl:call-template>
+    </xsl:if>
+  </xsl:template>
+
+  <!-- Custom Part title -->
+  <xsl:template match="title" mode="part.titlepage.recto.auto.mode">  
+    <fo:block xmlns:fo="http://www.w3.org/1999/XSL/Format" 
+      xsl:use-attribute-sets="part.titlepage.recto.style" 
+      margin-left="{$title.margin.left}" 
+      font-size="16.0pt" 
+      font-weight="bold" 
+      font-family="{$title.font.family}">
+      <xsl:call-template name="vaadinpart.title">
+        <xsl:with-param name="node" select="ancestor-or-self::part[1]"/>
+      </xsl:call-template>
+    </fo:block>
+  </xsl:template>
+
+  <!-- Part title -->
+  <xsl:template name="vaadinpart.title">
+    <xsl:param name="node" select="."/>
+    <xsl:variable name="id">
+      <xsl:call-template name="object.id">
+        <xsl:with-param name="object" select="$node"/>
+      </xsl:call-template>
+    </xsl:variable>
+    
+    <fo:block id="{$id}"
+      xsl:use-attribute-sets="part.label.properties">
+      <xsl:call-template name="gentext">
+        <xsl:with-param name="key">part</xsl:with-param>
+      </xsl:call-template>
+      <xsl:text> </xsl:text>
+      <xsl:apply-templates select="$node" mode="label.markup"/>
+    </fo:block>
+    <fo:block xsl:use-attribute-sets="part.title.properties">
+      <xsl:apply-templates select="$node" mode="title.markup"/>
+    </fo:block>
+  </xsl:template>
+
+  <!-- The formatting properties for the chapter label. -->
+  <xsl:attribute-set name="part.label.properties">
+    <xsl:attribute name="font-size">18pt</xsl:attribute>
+    <xsl:attribute name="font-family">sans-serif</xsl:attribute>
+    <xsl:attribute name="text-align">left</xsl:attribute>
+    <xsl:attribute name="space-before.minimum">2cm</xsl:attribute>
+    <xsl:attribute name="space-before.optimum">3cm</xsl:attribute>
+    <xsl:attribute name="space-before.maximum">4cm</xsl:attribute>
+  </xsl:attribute-set>
+
+  <!-- The formatting properties for the chapter title. -->
+  <xsl:attribute-set name="part.title.properties">
+    <xsl:attribute name="font-size">24pt</xsl:attribute>
+    <xsl:attribute name="font-family">sans-serif</xsl:attribute>
+
+    <xsl:attribute name="text-align">left</xsl:attribute>
+    <xsl:attribute name="space-before.minimum">1cm</xsl:attribute>
+    <xsl:attribute name="space-before.optimum">2cm</xsl:attribute>
+    <xsl:attribute name="space-before.maximum">3cm</xsl:attribute>
+    <xsl:attribute name="space-after.minimum">1cm</xsl:attribute>
+    <xsl:attribute name="space-after.optimum">1.5cm</xsl:attribute>
+    <xsl:attribute name="space-after.maximum">2cm</xsl:attribute>
+    <xsl:attribute name="hyphenate">false</xsl:attribute>
+  </xsl:attribute-set>
+  
+  <!-- ==================================================================== -->
   <!-- Custom chapter title.                                                -->
   <!-- ==================================================================== -->
 
@@ -387,6 +484,7 @@
       <xsl:call-template name="gentext">
         <xsl:with-param name="key">
           <xsl:choose>
+            <xsl:when test="$node/self::part">part</xsl:when>
             <xsl:when test="$node/self::chapter">chapter</xsl:when>
             <xsl:when test="$node/self::appendix">appendix</xsl:when>
           </xsl:choose>
