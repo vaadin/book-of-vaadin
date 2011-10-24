@@ -1,0 +1,920 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<chapter xml:id="sqlcontainer">
+    <title>Vaadin SQLContainer</title>
+
+    <para>
+        Vaadin SQLContainer is a container implementation that allows easy and
+        customizable access to data stored in various SQL-speaking databases.
+    </para>
+
+    <para>
+        SQLContainer supports two types of database access. Using
+        <classname>TableQuery</classname>, the pre-made query generators will enable
+        fetching, updating, and inserting data directly from the container into a database
+        table - automatically, whereas <classname>FreeformQuery</classname> allows the
+        developer to use their own, probably more complex query for fetching data and
+        their own optional implementations for writing, filtering and sorting support -
+        item and property handling as well as lazy loading will still be handled
+        automatically.
+    </para>
+
+    <para>
+        In addition to the customizable database connection options, SQLContainer also
+        extends the Vaadin <classname>Container</classname> interface to implement more
+        advanced and more database-oriented filtering rules. Finally, the add-on also
+        offers connection pool implementations for JDBC connection pooling and JEE
+        connection pooling, as well as integrated transaction support; auto-commit mode is
+        also provided.
+    </para>
+
+    <para>
+        The purpose of this section is to briefly explain the architecture and some of the
+        inner workings of SQLContainer. It will also give the readers some examples on how
+        to use SQLContainer in their own applications. The requirements, limitations and
+        further development ideas are also discussed.
+    </para>
+
+    <para>
+        SQLContainer is available from the Vaadin Directory under the same unrestrictive
+        Apache License 2.0 as the Vaadin Framework itself.
+    </para>
+
+    <section xml:id="sqlcontainer.architecture">
+        <title>Architecture</title>
+
+        <para>
+            The architecture of SQLContainer is relatively
+            simple. <classname>SQLContainer</classname> is the class implementing the
+            Vaadin <classname>Container</classname> interfaces and providing access to
+            most of the functionality of this add-on. The standard Vaadin
+            <classname>Property</classname> and <classname>Item</classname> interfaces
+            have been implementd as the <classname>ColumnProperty</classname> and
+            <classname>RowItem</classname> classes. Item IDs are represented by
+            <classname>RowId</classname> and <classname>TemporaryRowId</classname>
+            classes. The <classname>RowId</classname> class is built based on the primary
+            key columns of the connected database table or query result.
+        </para>
+
+        <para>
+            In the <package>connection</package> package, the
+            <classname>JDBCConnectionPool</classname> interface defines the requirements
+            for a connection pool implementation. Two implementations of this interface
+            are provided: <classname>SimpleJDBCConnectionPool</classname> provides a
+            simple yet very usable implementation to pool and access JDBC
+            connections. <classname>J2EEConnectionPool</classname> provides means to
+            access J2EE DataSources.
+        </para>
+
+        <para>
+            The <package>query</package> package contains the
+            <classname>QueryDelegate</classname> interface, which defines everything the
+            SQLContainer needs to enable reading and writing data to and from a
+            database. As discussed earlier, two implementations of this interface are
+            provided: <classname>TableQuery</classname> for automatic read-write support
+            for a database table, and <classname>FreeformQuery</classname> for customizing
+            the query, sorting, filtering and writing; this is done by implementing
+            relevant methods of the <classname>FreeformStatementDelegate</classname>
+            interface.
+        </para>
+
+        <para>
+            The <package>query</package> package also contains
+            <classname>Filter</classname> and <classname>OrderBy</classname> classes which
+            have been written to provide an alternative to the standard Vaadin container
+            filtering and make sorting non-String properties a bit more user friendly.
+        </para>
+
+        <para>
+            Finally, the <package>generator</package> package contains a
+            <classname>SQLGenerator</classname> interface, which defines the kind of
+            queries that are required by the <classname>TableQuery</classname> class. The
+            provided implementations include support for HSQLDB, MySQL, PostgreSQL
+            (<classname>DefaultSQLGenerator</classname>), Oracle
+            (<classname>OracleGenerator</classname>) and Microsoft SQL Server
+            (<classname>MSSQLGenerator</classname>). A new or modified implementations may
+            be provided to gain compatibility with older versions or other database
+            servers.
+        </para>
+
+            <!-- para>
+                A class diagram of SQLContainer and its supporting classes as well as
+                connections to Vaadin interfaces is provided in Figure 1 TODO
+                . Note that not every method is shown in the diagram due to space
+                constraints.
+            </para -->
+
+            <!-- TODO FIGURE! -->
+        
+        <para>
+            For further details, please refer to the SQLContainer API documentation.
+        </para>
+    </section>
+
+    <section xml:id="sqlcontainer.getting-started">
+        <title>Getting Started with SQLContainer</title>
+
+        <para>
+            Getting development going with the SQLContainer is easy and quite
+            straight-forward. The purpose of this section is to describe how to create the
+            required resources and how to fetch data from and write data to a database
+            table attached to the container.
+        </para>
+
+        <section xml:id="sqlcontainer.getting-started.connection-pool">
+            <title>Creating a connection pool</title>
+
+            <para>
+                First, we need to create a connection pool to allow the SQLContainer to
+                connect to a database. Here we will use the
+                <classname>SimpleJDBCConnectionPool</classname>, which is a basic
+                implementation of connection pooling with JDBC data sources. In the
+                following code, we create a connection pool that uses the HSQLDB driver
+                together with an in-memory database. The initial amount of connections is
+                2 and the maximum amount is set at 5. Note that the database driver,
+                connection url, username, and password parameters will vary depending on
+                the database you are using.
+            </para>
+
+            <programlisting><?pocket-size 75% ?><![CDATA[JDBCConnectionPool pool = new SimpleJDBCConnectionPool(
+        "org.hsqldb.jdbc.JDBCDriver",
+        "jdbc:hsqldb:mem:sqlcontainer", "SA", "", 2, 5);]]></programlisting>
+        </section>
+
+        <section xml:id="sqlcontainer.getting-started.query-delegate">
+            <title>Creating the <classname>TableQuery</classname> Query Delegate</title>
+
+            <para>
+                After the connection pool is created, we'll need a query delegate for the
+                SQLContainer. The simplest way to create one is by using the built-in
+                <classname>TableQuery</classname> class. The
+                <classname>TableQuery</classname> delegate provides access to a defined
+                database table and supports reading and writing data out-of-the-box. The
+                primary key(s) of the table may be anything that the database engine
+                supports, and are found automatically by querying the database when a new
+                <classname>TableQuery</classname> is instantiated. We create the
+                <classname>TableQuery</classname> with the following statement:
+            </para>
+
+            <programlisting><?pocket-size 70% ?><![CDATA[TableQuery tq = new TableQuery("tablename", connectionPool);]]></programlisting>
+
+            <para>
+                In order to allow writes from several user sessions concurrently, we must
+                set a version column to the <classname>TableQuery</classname> as well. The
+                version column is an integer- or timestamp-typed column which will either
+                be incremented or set to the current time on each modification of the
+                row. <classname>TableQuery</classname> assumes that the database will take
+                care of updating the version column; it just makes sure the column value
+                is correct before updating a row. If another user has changed the row and
+                the version number in the database does not match the version number in
+                memory, an <classname>OptimisticLockException</classname> is thrown and
+                you can recover by refreshing the container and allow the user to merge
+                the data. The following code will set the version column:
+            </para>
+
+            <programlisting><![CDATA[tq.setVersionColumn("OPTLOCK");]]></programlisting>
+        </section>
+
+        <section xml:id="sqlcontainer.getting-started.container-creation">
+            <title>Creating the Container</title>
+            
+            <para>
+                Finally, we may create the container itself. This is as simple as stating:
+            </para>
+
+            <programlisting><![CDATA[SQLContainer container = new SQLContainer(tq);]]></programlisting>
+
+            <para>
+                After this statement, the <classname>SQLContainer</classname> is connected
+                to the table tablename and is ready to use for example as a data source
+                for a Vaadin <classname>Table</classname> or a Vaadin
+                <classname>Form</classname>.
+            </para>
+        </section>
+    </section>
+
+    <section xml:id="sqlcontainer.filteringsorting">
+        <title>Filtering and Sorting</title>
+
+        <para>
+            Filtering and sorting the items contained in an SQLContainer is, by design,
+            always performed in the database. In practice this means that whenever the
+            filtering or sorting rules are modified, at least some amount of database
+            communication will take place (the minimum is to fetch the updated row count
+            using the new filtering/sorting rules).
+        </para>
+
+        <section xml:id="sqlcontainer.filteringsorting.filtering">
+            <title>Filtering</title>
+
+            <para>
+                Filtering is performed using the filtering API in Vaadin, which allows for
+                very complex filtering to be easily applied. More information about the
+                filtering API can be found in <!-- TODO LINK -->.
+            </para>
+
+            <para>
+                In addition to the filters provided by Vaadin, SQLContainer also
+                implements the <classname>Like</classname> filter as well as the
+                <classname>Between</classname> filter. Both of these map to the equally
+                named WHERE-operators in SQL. The filters can also be applied on items
+                that reside in memory, for example, new items that have not yet been
+                stored in the database or rows that have been loaded and updated, but not
+                yet stored.
+            </para>
+
+            <para>
+                The following is an example of the types of complex filtering that are
+                possible with the new filtering API. We want to find all people named Paul
+                Johnson that are either younger than 18 years or older than 65 years and
+                all Johnsons whose first name starts with the letter "A":
+            </para>
+
+            <programlisting><?pocket-size 75% ?><![CDATA[mySQLContainer.addContainerFilter(
+    new Or(new And(new Equal("NAME", "Paul"),
+                   new Or(new Less("AGE", 18),
+                          new Greater("AGE", 65))),
+           new Like("NAME", "A%")));
+mySQLContainer.addContainerFilter(
+    new Equal("LASTNAME", "Johnson"));]]></programlisting>
+
+            <para>
+                This will produce the following WHERE clause:
+            </para>
+
+            <programlisting><?pocket-size 75% ?><![CDATA[WHERE (("NAME" = "Paul" AND ("AGE" < 18 OR "AGE" > 65)) OR "NAME" LIKE "A%") AND "LASTNAME" = "Johnson"]]></programlisting>
+        </section>
+
+        <section xml:id="sqlcontainer.filteringsorting.sorting">
+            <title>Sorting</title>
+
+            <para>
+                Sorting can be performed using standard Vaadin, that is, using the sort
+                method from the <classname>Container.Sortable</classname> interface. The
+                <parameter>propertyId</parameter> parameter refers to column names.
+            </para>
+
+            <programlisting><?pocket-size 75% ?><![CDATA[public void sort(Object[] propertyId, boolean[] ascending)]]></programlisting>
+
+            <para>
+                In addition to the standard method, it is also possible to directly add an
+                <classname>OrderBy</classname> to the container via the
+                <methodname>addOrderBy()</methodname> method. This enables the developer
+                to insert sorters one by one without providing the whole array of them at
+                once.
+            </para>
+
+            <para>
+                All sorting rules can be cleared by calling the sort method with null or
+                an empty array as the first argument.
+            </para>
+        </section>
+    </section>
+
+    <section xml:id="sqlcontainer.editing">
+        <title>Editing</title>
+
+        <para>
+            Editing the items (<classname>RowItem</classname>s) of SQLContainer can be
+            done similarly to editing the items of any Vaadin
+            container. <classname>ColumnProperties</classname> of a
+            <classname>RowItem</classname> will automatically notify SQLContainer to make
+            sure that changes to the items are recorded and will be applied to the
+            database immediately or on commit, depending on the state of the auto-commit
+            mode.
+        </para>
+
+        <section xml:id="sqlcontainer.editing.adding">
+            <title>Adding items</title>
+
+            <para>
+                Adding items to an <classname>SQLContainer</classname> object can only be
+                done via the <methodname>addItem()</methodname> method. This method will
+                create a new <classname>Item</classname> based on the connected database
+                table column properties. The new item will either be buffered by the
+                container or committed to the database through the query delegate
+                depending on whether the auto commit mode (see the next section) has been
+                enabled.
+            </para>
+
+            <para>
+                When an item is added to the container it is impossible to precisely know
+                what the primary keys of the row will be, or will the row insertion
+                succeed at all. This is why the SQLContainer will assign an instance of
+                <classname>TemporaryRowId</classname> as a <classname>RowId</classname>
+                for the new item. We will later describe how to fetch the actual key after
+                the row insertion has succeeded.
+            </para>
+
+            <para>
+                If auto-commit mode is enabled in the <classname>SQLContainer</classname>,
+                the <methodname>addItem()</methodname> methot will return the final
+                <classname>RowId</classname> of the new item.
+                </para>
+        </section>
+
+        <section xml:id="sqlcontainer.editing.fetching">
+            <title>Fetching generated row keys</title>
+
+            <para>
+                Since it is a common need to fetch the generated key of a row right after
+                insertion, a listener/notifier has been added into the
+                <classname>QueryDelegate</classname> interface. Currently only the
+                <classname>TableQuery</classname> class implements the
+                <classname>RowIdChangeNotifier</classname> interface, and thus can notify
+                interested objects of changed row IDs. The events fill be fired after
+                <methodname>commit()</methodname> in <classname>TableQuery</classname> has
+                finished; this method is called by <classname>SQLContainer</classname>
+                when necessary.
+            </para>
+
+            <para>
+                To receive updates on the row IDs, you might use the following code
+                (assuming container is an instance of
+                <classname>SQLContainer</classname>). Note that these events are not fired
+                if auto commit mode is enabled.
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[app.getDbHelp().getCityContainer().addListener(
+    new QueryDelegate.RowIdChangeListener() {
+        public void rowIdChange(RowIdChangeEvent event) {
+            System.err.println("Old ID: " + event.getOldRowId());
+            System.err.println("New ID: " + event.getNewRowId());
+        }
+    });]]></programlisting>
+        </section>
+
+        <section xml:id="sqlcontainer.editing.version-column">
+            <title>Version column requirement</title>
+
+            <para>
+                If you are using the <classname>TableQuery</classname> class as the query
+                delegate to the <classname>SQLContainer</classname> and need to enable
+                write support, there is an enforced requirement of specifying a version
+                column name to the <classname>TableQuery</classname> instance. The column
+                name can be set to the <classname>TableQuery</classname> using the
+                following statement:
+            </para>
+                        
+            <programlisting><![CDATA[tq.setVersionColumn("OPTLOCK");]]></programlisting>
+
+            <para>
+                The version column is preferrably an integer or timestamp typed column in
+                the table that is attached to the <classname>TableQuery</classname>. This
+                column will be used for optimistic locking; before a row modification the
+                <classname>TableQuery</classname> will check before that the version
+                column value is the same as it was when the data was read into the
+                container. This should ensure that no one has modified the row inbetween
+                the current user's reads and writes.
+            </para>
+
+            <para>
+                Note! <classname>TableQuery</classname> assumes that the database will
+                take care of updating the version column by either using an actual
+                <literal>VERSION</literal> column (if supported by the database in
+                question) or by a trigger or a similar mechanism.
+            </para>
+
+            <para>
+                If you are certain that you do not need optimistic locking, but do want to
+                enable write support, you may point the version column to, for example, a
+                primary key column of the table.
+            </para>
+        </section>
+
+        <section xml:id="sqlcontainer.editing.autocommit">
+            <title>Auto-commit mode</title>
+
+            <para>
+                <classname>SQLContainer</classname> is by default in transaction mode,
+                which means that actions that edit, add or remove items are recorded
+                internally by the container. These actions can be either committed to the
+                database by calling <methodname>commit()</methodname> or discarded by
+                calling <methodname>rollback()</methodname>.
+            </para>
+
+            <para>
+                The container can also be set to auto-commit mode. When this mode is
+                enabled, all changes will be committed to the database immediately. To
+                enable or disable the auto-commit mode, call the following method:
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[public void setAutoCommit(boolean autoCommitEnabled)]]></programlisting>
+
+            <para>
+                It is recommended to leave the auto-commit mode disabled, as it ensures
+                that the changes can be rolled back if any problems are noticed within the
+                container items. Using the auto-commit mode will also lead to failure in
+                item addition if the database table contains non-nullable columns.
+            </para>
+        </section>
+
+        <section xml:id="sqlcontainer.editing.modified-state">
+            <title>Modified state</title>
+
+            <para>
+                When used in the transaction mode it may be useful to determine whether
+                the contents of the <classname>SQLContainer</classname> have been modified
+                or not. For this purpose the container provides an
+                <methodname>isModified()</methodname> method, which will tell the state of
+                the container to the developer. This method will return true if any items
+                have been added to or removed from the container, as well as if any value
+                of an existing item has been modified.
+            </para>
+
+            <para>
+                Additionally, each <classname>RowItem</classname> and each
+                <classname>ColumnProperty</classname> have
+                <methodname>isModified()</methodname> methods to allow for a more detailed
+                view over the modification status. Do note that the modification statuses
+                of <classname>RowItem</classname> and
+                <classname>ColumnProperty</classname> objects only depend on whether or
+                not the actual <classname>Property</classname> values have been
+                modified. That is, they do not reflect situations where the whole
+                <classname>RowItem</classname> has been marked for removal or has just
+                been added to the container.
+            </para>
+        </section>
+    </section>
+
+    <section xml:id="sqlcontainer.caching">
+        <title>Caching, Paging and Refreshing</title>
+
+        <para>
+            To decrease the amount of queries made to the database, SQLContainer uses
+            internal caching for database contents. The caching is implemented with a
+            size-limited <classname>LinkedHashMap</classname> containing a mapping from
+            <classname>RowId</classname>s to <classname>RowItem</classname>s. Typically
+            developers do not need to modify caching options, although some fine-tuning
+            can be done if required.
+        </para>
+
+        <section xml:id="sqlcontainer.caching.container-size">
+            <title>Container Size</title>
+
+            <para>
+                The <classname>SQLContainer</classname> keeps continuously checking the
+                amount of rows in the connected database table in order to detect external
+                addition or removal of rows. By default, the table row count is assumed to
+                remain valid for 10 seconds. This value can be altered from code; with
+                <methodname>setSizeValidMilliSeconds()</methodname> in
+                <classname>SQLContainer</classname>.
+            </para>
+
+            <para>
+                If the size validity time has expired, the row count will be automatically
+                updated on:
+            </para>
+
+            <itemizedlist>
+                <listitem><para>A call to <methodname>getItemIds()</methodname> method</para></listitem>
+                <listitem><para>A call to <methodname>size()</methodname> method</para></listitem>
+                <listitem><para>Some calls to <methodname>indexOfId(Object itemId)</methodname> method</para></listitem>
+                <listitem><para>A call to <methodname>firstItemId()</methodname> method</para></listitem>
+                <listitem><para>When the container is fetching a set of rows to the item cache (lazy loading)</para></listitem>
+            </itemizedlist>
+        </section>
+
+        <section xml:id="sqlcontainer.caching.page-length">
+            <title>Page Length and Cache Size</title>
+
+            <para>
+                The page length of the <classname>SQLContainer</classname> dictates the
+                amount of rows fetched from the database in one query. The default value
+                is 100, and it can be modified with the
+                <methodname>setPageLength()</methodname> method. To avoid constant queries
+                it is recommended to set the page length value to at least 5 times the
+                amount of rows displayed in a Vaadin <classname>Table</classname>;
+                obviously, this is also dependent on the cache ratio set for the
+                <classname>Table</classname> component.
+            </para>
+
+            <para>
+                The size of the internal item cache of the
+                <classname>SQLContainer</classname> is calculated by multiplying the page
+                lenght with the cache ratio set for the container. The cache ratio can
+                only be set from the code, and the default value for it is 2. Hence with
+                the default page length of 100 the internal cache size becomes 200
+                items. This should be enough even for larger <classname>Table</classname>s
+                while ensuring that no huge amounts of memory will be used on the cache.
+            </para>
+        </section>
+
+        <section xml:id="sqlcontainer.caching.refreshing">
+            <title>Refreshing the Container</title>
+
+            <para>
+                Normally, the <classname>SQLContainer</classname> will handle refreshing
+                automatically when required. However, there may be situations where an
+                implicit refresh is needed, for example, to make sure that the version
+                column is up-to-date prior to opening the item for editing in a form. For
+                this purpose a <methodname>refresh()</methodname> method is provided. This
+                method simply clears all caches, resets the current item fetching offset
+                and sets the container size dirty. Any item-related call after this will
+                inevitably result into row count and item cache update.
+            </para>
+
+            <para>
+                <emphasis>Note that a call to the refresh method will not affect or reset
+                the following properties of the container:</emphasis>
+            </para>
+
+            <itemizedlist>
+                <listitem>The <classname>QueryDelegate</classname> of the container</listitem>
+                <listitem>Auto-commit mode</listitem>
+                <listitem>Page length</listitem>
+                <listitem>Filters</listitem>
+                <listitem>Sorting</listitem>
+            </itemizedlist>
+        </section>
+
+        <section xml:id="sqlcontainer.caching.flush-notification">
+            <title>Cache Flush Notification Mechanism</title>
+
+            <para>
+                Cache usage with databases in multiuser applications always results in
+                some kind of a compromise between the amount of queries we want to execute
+                on the database and the amount of memory we want to use on caching the
+                data; and most importantly, risking the cached data becoming stale.
+            </para>
+
+            <para>
+                SQLContainer provides an experimental remedy to this problem by
+                implementing a simple cache flush notification mechanism. Due to its
+                nature these notifications are disabled by default but can be easily
+                enabled for a container instance by calling
+                <methodname>enableCacheFlushNotifications()</methodname> at any time
+                during the lifetime of the container.
+            </para>
+
+            <para>
+                The notification mechanism functions by storing a weak reference to all
+                registered containers in a static list structure. To minimize the risk of
+                memory leaks and to avoid unlimited growing of the reference list, dead
+                weak references are collected to a reference queue and removed from the
+                list every time a <classname>SQLContainer</classname> is added to the
+                notification reference list or a container calls the notification method.
+            </para>
+
+            <para>
+                When a <classname>SQLContainer</classname> has its cache notifications set
+                enabled, it will call the static
+                <methodname>notifyOfCacheFlush()</methodname> method giving itself as a
+                parameter. This method will compare the notifier-container to all the
+                others present in the reference list. To fire a cache flush event, the
+                target container must have the same type of
+                <classname>QueryDelegate</classname> (either
+                <classname>TableQuery</classname> or <classname>FreeformQuery</classname>)
+                and the table name or query string must match with the container that
+                fired the notification. If a match is found the
+                <methodname>refresh()</methodname> method of the matching container is
+                called, resulting in cache flushing in the target container.
+            </para>
+
+            <para>
+                <emphasis>Note: Standard Vaadin issues apply; even if the
+                <classname>SQLContainer</classname> is refreshed on the server side, the
+                changes will not be reflected to the UI until a server round-trip is
+                performed, or unless a push mechanism is used.</emphasis>
+            </para>
+        </section>
+    </section>
+
+    <section xml:id="sqlcontainer.referencing">
+        <title>Referencing Another <classname>SQLContainer</classname></title>
+
+        <para>
+            When developing a database-connected application, there is usually a need to
+            retrieve data related to one table from one or more other tables. In most
+            cases, this relation is achieved with a foreign key reference, where a column
+            of the first table contains a primary key or candidate key of a row in another
+            table.
+        </para>
+
+        <para>
+            SQLContainer offers limited support for this kind of referencing relation,
+            although all referencing is currently done on the Java side so no
+            constraints need to be made in the database. A new reference can be
+            created by calling the following method:
+        </para>
+
+        <programlisting><?pocket-size 70% ?><![CDATA[public void addReference(SQLContainer refdCont,
+                         String refingCol, String refdCol);]]></programlisting>
+
+        <para>
+            This method should be called on the source container of the reference. The
+            target container should be given as the first parameter. The
+            <parameter>refingCol</parameter> is the name of the 'foreign key' column in
+            the source container, and the <parameter>refdCol</parameter> is the name of
+            the referenced key column in the target container.
+        </para>
+
+        <para>
+            <emphasis>Note: For any <classname>SQLContainer</classname>, all the
+            referenced target containers must be different. You can not reference the same
+            container from the same source twice.</emphasis>
+        </para>
+
+        <para>
+            Handling the referenced item can be done through the three provided set/get
+            methods, and the reference can be completely removed with the
+            <methodname>removeReference()</methodname> method. Signatures of these methods
+            are listed below:
+        </para>
+
+        <programlisting><?pocket-size 70% ?><![CDATA[public boolean setReferencedItem(Object itemId,
+        Object refdItemId, SQLContainer refdCont)
+public Object getReferencedItemId(Object itemId,
+                                  SQLContainer refdCont)
+public Item getReferencedItem(Object itemId,
+                              SQLContainer refdCont)
+public boolean removeReference(SQLContainer refdCont)]]></programlisting>
+
+        <para>
+            The setter method should be given three parameters:
+            <parameter>itemId</parameter> is the ID of the referencing item (from the
+            source container), <parameter>refdItemId</parameter> is the referenced
+            <parameter>itemID</parameter> (from the target container) and
+            <parameter>refdCont</parameter> is a reference to the target container that
+            identifies the reference. This method returns true if the setting of the
+            referenced item was successful. After setting the referenced item you must
+            normally call <methodname>commit()</methodname> on the source container to
+            persist the changes to the database.
+        </para>
+
+        <para>
+            The <methodname>getReferencedItemId()</methodname> method will return the item
+            ID of the referenced item. As parameters this method needs the item ID of the
+            referencing item and a reference to the target container as an
+            identifier. <classname>SQLContainer</classname> also provides a convenience
+            method <methodname>getReferencedItem()</methodname>, which directly returns
+            the referenced item from the target container.
+        </para>
+
+        <para>
+            Finally, the referencing can be removed from the source container by calling
+            the <methodname>removeReference()</methodname> method with the target
+            container as parameter. Note that this does not actually change anything in
+            the database; it merely removes the logical relation that exists only on the
+            Java-side.
+        </para>
+    </section>
+
+    <section xml:id="sqlcontainer.freeform">
+        <title>Using <classname>FreeformQuery</classname> and <classname>FreeformStatementDelegate</classname></title>
+
+        <para>
+            In most cases, the provided <classname>TableQuery</classname> will be enough
+            to allow a developer to gain effortless access to an SQL data source. However
+            there may arise situations when a more complex query with, for example, join
+            expressions is needed. Or perhaps you need to redefine how the writing or
+            filtering should be done. The <classname>FreeformQuery</classname> query
+            delegate is provided for this exact purpose. Out of the box the
+            <classname>FreeformQuery</classname> supports read-only access to a database,
+            but it can be extended to allow writing also.
+        </para>
+
+        <simplesect xml:id="sqlcontainer.freeform.getting-started">
+            <title>Getting started</title>
+
+            <para>
+                Getting started with the <classname>FreeformQuery</classname> may be done
+                as shown in the following. The connection pool initialization is similar
+                to the <classname>TableQuery</classname> example so it is omitted
+                here. Note that the name(s) of the primary key column(s) must be provided
+                to the <classname>FreeformQuery</classname> manually. This is required
+                because depending on the query the result set may or may not contain data
+                about primary key columns. In this example, there is one primary key
+                column with a name 'ID'.
+            </para>
+
+            <programlisting><![CDATA[FreeformQuery query = new FreeformQuery(
+        "SELECT * FROM SAMPLE", pool, "ID");
+SQLContainer container = new SQLContainer(query);]]></programlisting>
+            </simplesect>
+
+        <simplesect xml:id="sqlcontainer.freeform.limitations">
+            <title>Limitations</title>
+
+            <para>
+                While this looks just as easy as with the
+                <classname>TableQuery</classname>, do note that there are some important
+                caveats here. Using <classname>FreeformQuery</classname> like this
+                (without providing <classname>FreeformQueryDelegate</classname> or
+                <classname>FreeformStatementDelegate</classname> implementation) it can
+                only be used as a read-only window to the resultset of the
+                query. Additionally filtering, sorting and lazy loading features will not
+                be supported, and the row count will be fetched in quite an inefficient
+                manner. Bearing these limitations in mind, it becomes quite obvious that
+                the developer is in reality meant to implement the
+                <classname>FreeformQueryDelegate</classname> or
+                <classname>FreeformStatementDelegate</classname> interface.
+            </para>
+
+            <para>
+                The <classname>FreeformStatementDelegate</classname> interface is an
+                extension of the <classname>FreeformQueryDelegate</classname> interface,
+                which returns <classname>StatementHelper</classname> objects instead of
+                pure query <classname>String</classname>s. This enables the developer to
+                use prepared statetemens instead of regular statements. It is highly
+                recommended to use the <classname>FreeformStatementDelegate</classname> in
+                all implementations. From this chapter onwards, we will only refer to the
+                <classname>FreeformStatementDelegate</classname> in cases where
+                <classname>FreeformQueryDelegate</classname> could also be applied.
+            </para>
+        </simplesect>
+                
+        <simplesect xml:id="sqlcontainer.freeform.limitations">
+            <title>Creating your own <classname>FreeformStatementDelegate</classname></title>
+
+            <para>
+                To create your own delegate for <classname>FreeformQuery</classname> you
+                must implement some or all of the methods from the
+                <classname>FreeformStatementDelegate</classname> interface, depending on
+                which ones your use case requires. The interface contains eight methods
+                which are shown below. For more detailed requirements, see the JavaDoc
+                documentation of the interface.
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[// Read-only queries
+public StatementHelper getCountStatement()
+public StatementHelper getQueryStatement(int offset, int limit)
+public StatementHelper getContainsRowQueryStatement(Object... keys)
+
+// Filtering and sorting
+public void setFilters(List<Filter> filters)
+public void setFilters(List<Filter> filters,
+                       FilteringMode filteringMode)
+public void setOrderBy(List<OrderBy> orderBys)
+
+// Write support
+public int storeRow(Connection conn, RowItem row)
+public boolean removeRow(Connection conn, RowItem row)]]></programlisting>
+
+            <para>
+                A simple demo implementation of this interface can be found in the
+                SQLContainer package, more specifically in the class
+                <classname>com.vaadin.addon.sqlcontainer.demo.DemoFreeformQueryDelegate</classname>.
+            </para>
+        </simplesect>
+    </section>
+
+    <section xml:id="sqlcontainer.nonimplemented">
+        <title>Non-implemented methods of Vaadin container interfaces</title>
+
+        <para>
+            Due to the database connection inherent to the SQLContainer, some of the
+            methods from the container interfaces of Vaadin can not (or would not make
+            sense to) be implemented. These methods are listed below, and they will throw
+            an <classname>UnsupportedOperationException</classname> on invocation.
+        </para>
+
+        <programlisting><?pocket-size 65% ?><![CDATA[public boolean addContainerProperty(Object propertyId,
+                                    Class<?> type,
+                                    Object defaultValue)
+public boolean removeContainerProperty(Object propertyId)
+public Item addItem(Object itemId)
+public Object addItemAt(int index)
+public Item addItemAt(int index, Object newItemId)
+public Object addItemAfter(Object previousItemId)
+public Item addItemAfter(Object previousItemId, Object newItemId)]]></programlisting>
+
+        <para>
+            Additionally, the following methods of the <classname>Item</classname>
+            interface are not supported in the <classname>RowItem</classname> class:
+        </para>
+	
+        <programlisting><?pocket-size 65% ?><![CDATA[public boolean addItemProperty(Object id, Property property)
+public boolean removeItemProperty(Object id)]]></programlisting>
+
+        <simplesect xml:id="sqlcontainer.nonimplemented.getitemids">
+            <title>About the getItemIds() method</title>
+
+            <para>
+                To properly implement the Vaadin <classname>Container</classname>
+                interface, a <methodname>getItemIds()</methodname> method has been
+                implented in the <classname>SQLContainer</classname>. By definition, this
+                method returns a collection of all the item IDs present in the
+                container. What this means in the <classname>SQLContainer</classname> case
+                is that the container has to query the database for the primary key
+                columns of all the rows present in the connected database table.
+            </para>
+
+            <para>
+                It is obvious that this could potentially lead to fetching tens or even
+                hundreds of thousands of rows in an effort to satisfy the method
+                caller. This will effectively kill the lazy loading properties of
+                <classname>SQLContainer</classname> and therefore the following warning is
+                expressed here:
+            </para>
+
+            <warning>
+                <para>
+                    It is highly recommended not to call the
+                    <methodname>getitemIds()</methodname> method, unless it is known that
+                    in the use case in question the item ID set will always be of
+                    reasonable size.
+                </para>
+            </warning>
+        </simplesect>
+    </section>
+
+    <section xml:id="sqlcontainer.limitations">
+        <title>Known Issues and Limitations</title>
+
+        <para>
+            At this point, there are still some known issues and limitations affecting the
+            use of SQLContainer in certain situations. The known issues and brief
+            explanations are listed below:
+        </para>
+
+        <itemizedlist>
+            <listitem>
+                Some SQL data types do not have write support when using TableQuery:
+                <itemizedlist>
+                    <listitem>All binary types</listitem>
+                    <listitem>All custom types</listitem>
+
+                    <listitem>
+                        CLOB (if not converted automatically to a
+                        <classname>String</classname> by the JDBC driver in use)
+                    </listitem>
+
+                    <listitem>
+                        See
+                        <classname>com.vaadin.addon.sqlcontainer.query.generator.StatementHelper</classname>
+                        for details.
+                    </listitem>
+                </itemizedlist>
+            </listitem>
+
+            <listitem>
+                <para>
+                    When using Oracle or MS SQL database, the column name
+                    "<parameter>rownum</parameter>" can not be used as a column name in a
+                    table connected to <classname>SQLContainer</classname>.
+                </para>
+                <para>
+                    This limitation exists because the databases in question do not
+                    support limit/offset clauses required for paging. Instead, a generated
+                    column named 'rownum' is used to implement paging support.
+                </para>
+            </listitem>
+        </itemizedlist>
+
+        <para>
+            The permanent limitations are listed below. These can not or most probably
+            will not be fixed in future versions of SQLContainer.
+        </para>
+
+        <itemizedlist>
+            <listitem>
+                The <methodname>getItemIds()</methodname> method is very inefficient -
+                avoid calling it unless absolutely required!
+            </listitem>
+
+            <listitem>
+                When using <classname>FreeformQuery</classname> without providing a
+                <classname>FreeformStatementDelegate</classname>, the row count query is
+                very inefficient - avoid using <classname>FreeformQuery</classname>
+                without implementing at least the count query properly.
+            </listitem>
+
+            <listitem>
+                When using <classname>FreeformQuery</classname> without providing a
+                <classname>FreeformStatementDelegate</classname>, writing, sorting and
+                filtering will not be supported.
+            </listitem>
+
+            <listitem>
+                <para>
+                    When using Oracle database most or all of the numeric types are
+                    converted to <classname>java.math.BigDecimal</classname> by the Oracle
+                    JDBC Driver.
+                </para>
+                <para>
+                    This is a feature of how Oracle DB and the Oracle JDBC Driver
+                    handles data types.
+                </para>
+            </listitem>
+        </itemizedlist>
+    </section>
+</chapter>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: xml
+sgml-omittag:nil
+sgml-shorttag:nil
+sgml-namecase-general:nil
+sgml-general-insert-case:lower
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:4
+sgml-indent-data:t
+sgml-parent-document:nil
+sgml-exposed-tags:nil
+sgml-local-catalogs:("/etc/sgml/catalog" "/usr/share/xemacs21/xemacs-packages/etc/psgml-dtds/CATALOG")
+sgml-local-ecat-files:("ECAT" "~/sgml/ECAT" "/usr/share/sgml/ECAT" "/usr/local/share/sgml/ECAT" "/usr/local/lib/sgml/ECAT")
+End:
+-->
