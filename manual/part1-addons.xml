@@ -323,6 +323,263 @@
             them be loaded dynamically from the Vaadin JAR.
         </para>
     </section>
+
+    <section xml:id="addons.maven">
+        <title>Using Add-ons in a Maven Project</title>
+
+        <indexterm xml:id="term.addons.maven" class="startofrange">
+            <primary>Maven</primary>
+            <secondary>using add-ons</secondary>
+        </indexterm>
+
+        <para>
+            To use add-ons in a project that uses Maven, you simply have to add them as
+            dependencies in the POM. If the add-ons includes widget sets, as at least most
+            component add-ons do, you also need to define and compile a project widget
+            set.
+        </para>
+
+        <para>
+            Creating, compiling, and packaging a Vaadin project using Maven was described
+            in <xref linkend="getting-started.maven"/>.
+        </para>
+
+        <section xml:id="addons.maven.dependency">
+            <title>Adding a Dependency</title>
+
+            <para>
+                Vaadin Directory provides a Maven repository for all the add-ons in the
+                Directory. You can view needed Maven dependency definitions by clicking
+                the <guibutton>Maven POM</guibutton> button at the right side of the
+                add-on view, as illustrated in <xref
+                linkend="figure.addons.maven.pombutton"/>.
+            </para>
+
+            <figure xml:id="figure.addons.maven.pombutton">
+                <title>Maven POM Definitions in Vaadin Directory</title>
+                <mediaobject>
+                    <imageobject role="html">
+                        <imagedata align="center" fileref="img/addons/directory-maven-pom.png"/>
+                    </imageobject>
+                    <imageobject role="fo">
+                        <imagedata smallscale="70%" align="center" fileref="img/addons/directory-maven-pom.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+
+            <para>
+                You need to copy the dependency declaration to the
+                <filename>pom.xml</filename> file in your project, under the
+                <filename>/project/dependencies</filename> element.
+            </para>
+
+			<programlisting>  ...
+  &lt;dependencies&gt;
+    &lt;dependency&gt;
+      &lt;groupId&gt;com.vaadin&lt;/groupId&gt;
+      &lt;artifactId&gt;vaadin&lt;/artifactId&gt;
+      &lt;version&gt;${vaadin.version}&lt;/version&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+      &lt;groupId&gt;org.vaadin.addons&lt;/groupId&gt;
+      &lt;artifactId&gt;<emphasis role="bold">vaadin-sqlcontainer</emphasis>&lt;/artifactId&gt;
+      &lt;version&gt;<emphasis role="bold">1.1.0</emphasis>&lt;/version&gt;
+   &lt;/dependency&gt;
+   ...></programlisting>
+
+            <para>
+                You can use the exact version number, as is done in the example above, or
+                <literal>LATEST</literal> to always use the latest version of the add-on.
+            </para>
+
+            <para>
+                The POM excerpt given in Directory includes also a repository definition,
+                but if you have used the <literal>vaadin-archetype-clean</literal>
+                archetype when creating your project, it should already include the
+                definition.
+            </para>
+        </section>
+
+        <section xml:id="addons.maven.widgetset">
+            <title>Enabling Widget Set Compilation</title>
+
+            <para>
+                Most add-on components in Vaadin Directory include a <emphasis>widget
+                set</emphasis> which must be compiled before using the add-on. Some
+                add-ons, such as data binding add-ons or themes, do not include a widget
+                set.
+            </para>
+
+            <simplesect xml:id="addons.maven.widgetset.pom">
+                <title>Configuring the POM</title>
+
+                <para>
+                    The configuration needed for compiling widget sets is included in the
+                    <filename>pom.xml</filename> created with the
+                    <literal>vaadin-archetype-clean</literal> archetype, but the elements are
+                    commented out. You just need to enable the configuration.
+                </para>
+
+                <programlisting>&lt;!-- Compile custom GWT components or widget dependencies with the GWT compiler --&gt;
+<emphasis role="bold">&lt;!--</emphasis>
+&lt;plugin&gt;
+  &lt;groupId&gt;org.codehaus.mojo&lt;/groupId&gt;
+  ...
+&lt;/plugin&gt;
+<emphasis role="bold">--&gt;</emphasis>
+
+...
+
+<emphasis role="bold">&lt;!--</emphasis>
+&lt;pluginRepositories&gt;
+&lt;/pluginRepositories&gt;
+<emphasis role="bold">--&gt;</emphasis>
+
+...
+
+&lt;dependencies&gt;
+...
+  <emphasis role="bold">&lt;!--</emphasis>
+  &lt;dependency&gt;
+    ...
+  &lt;/dependency&gt;
+  <emphasis role="bold">--&gt;</emphasis>
+&lt;/dependencies&gt;</programlisting>
+            </simplesect>
+
+            <simplesect xml:id="addons.maven.widgetset.module">
+                <title>Creating a Widget Set Definition File</title>
+
+                <indexterm xml:id="term.addons.maven.widgetset.module" class="startofrange">
+                    <primary>Google Web Toolkit</primary>
+                    <secondary>GWT Module Descriptor</secondary>
+                </indexterm>
+
+                <para>
+                    Your project needs a widget set that combines the default widget set
+                    in the Vaadin core library with any widget sets from add-ons. This
+                    requires creating an empty <emphasis>widget set definition
+                    file</emphasis> (or <emphasis>module file</emphasis> in GWT
+                    terminology). The actual content of the file is generated
+                    automatically by searching the class path for widget sets (with the
+                    <literal>vaadin:update-widgetset</literal> as explained later), but
+                    you need to create an empty file.
+                </para>
+
+                <para>
+                    Create a widget set directory in your project source directory.
+                </para>
+
+                <screen><prompt>$</prompt> <command>mkdir</command> <parameter>project-name/src/main/java/your/company/gwt</parameter></screen>
+
+                <para>
+                    Then create a <filename>ProjectNameWidgetSet.gwt.xml</filename> file
+                    in the directory with an empty <literal>&lt;module&gt;</literal>
+                    element as follows:
+                </para>
+
+                <programlisting><![CDATA[<module>
+</module>]]></programlisting>
+
+                <indexterm startref="term.addons.maven.widgetset.module" class="endofrange"/>
+            </simplesect>
+
+            <simplesect xml:id="addons.maven.widgetset.web">
+                <title>Enabling the Widget Set in the Application</title>
+
+                <para>
+                    The project widget set needs to be enabled in the
+                    <filename>web.xml</filename> deployment descriptor in the application.
+                    Edit the <filename>src/main/webapp/WEB-INF/web.xml</filename> file and
+                    add or modify the <literal>widgetset</literal> parameter for the
+                    servlet as follows.
+                </para>
+
+                <programlisting>&lt;servlet&gt;
+  ...
+  &lt;init-param&gt;
+    &lt;description&gt;Widget Set to Use&lt;/description&gt;
+    &lt;param-name&gt;widgetset&lt;/param-name&gt;
+    &lt;param-value&gt;<emphasis role="bold">your.company.gwt.ProjectNameWidgetSet</emphasis>&lt;/param-value&gt;
+  &lt;/init-param&gt;
+&lt;/servlet&gt;</programlisting>
+
+                <para>
+                    The parameter is the class name of the widget set, that is, without
+                    the <filename>.gwt.xml</filename> extension and with the Java dot
+                    notation for class names that include the package name.
+                </para>
+            </simplesect>
+
+            <para>
+                This should complete the task of enabling a widget set compilation and use
+                in your project. Next, you need to update the project widget set, as
+                described in the next section.
+            </para>
+        </section>
+
+        <section xml:id="addons.maven.update-widgetset">
+            <title>Updating and Compiling the Project Widget Set</title>
+
+            <para>
+                If you have enabled widget set compilation as described earlier and
+                created the project widget set, you need to update the widget set to
+                include the default widget set and any widget sets included in
+                add-ons. You can do this simply by running the
+                <literal>vaadin:update-widgetset</literal> goal in the project directory.
+            </para>
+
+            <screen><prompt>$</prompt> <command>mvn</command> <parameter>vaadin:update-widgetset</parameter>
+...
+[INFO] auto discovered modules [your.company.gwt.ProjectNameWidgetSet]
+[INFO] Updating widgetset your.company.gwt.ProjectNameWidgetSet
+[ERROR] 27.10.2011 19:22:34 com.vaadin.terminal.gwt.widgetsetutils.ClassPathExplorer getAvailableWidgetSets
+[ERROR] INFO: Widgetsets found from classpath:
+[ERROR]         your.company.gwt.ProjectNameWidgetSet in file:/home/magi/itmill/maventest/project-name/src/main/java
+[ERROR]         com.vaadin.terminal.gwt.DefaultWidgetSet in jar:file:/home/magi/.m2/repository/com/vaadin/vaadin/6.7.1/vaadin-6.7.1.jar!/
+[ERROR] 
+[ERROR] 27.10.2011 19:22:34 com.vaadin.terminal.gwt.widgetsetutils.ClassPathExplorer getAvailableWidgetSets
+[ERROR] INFO: Search took 8ms
+...
+</screen>
+
+            <para>
+                Do not mind the "ERROR" labels, they are just an issue with the Vaadin
+                Plugin for Maven.
+            </para>
+
+            <para>
+                If you later add other add-ons in the project, or remove some, you need to
+                run the widget set update again.
+            </para>
+
+            <para>
+                The project widget set also needs to be compiled using the GWT
+                Compiler. We enabled the Maven add-ons for GWT compilation in the previous
+                section. You can compile the widget set with the
+                <literal>gwt:compile</literal> goal as follows:
+            </para>
+
+            <screen><prompt>$</prompt> <command>mvn</command> <parameter>gwt:compile</parameter></screen>
+
+            <para>
+                You need to recompile the widget set if you upgrade to a new version of
+                Vaadin or any of the included widget sets. It is <emphasis>not</emphasis>
+                done automatically by the <literal>package</literal> goal. If you have
+                added or removed add-ons, you also need to run the
+                <literal>vaadin:update-widgetset</literal> goal before the compilation.
+            </para>
+
+            <para>
+                This concludes the compilation of add-on widget sets. You still need to
+                compile and package the actual application with the
+                <literal>package</literal> goal, as described in <xref
+                linkend="getting-started.maven"/>.
+            </para>
+        </section>
+
+        <indexterm startref="term.addons.maven" class="endofrange"/>
+    </section>
 </chapter>
 
 <!-- Keep this comment at the end of the file
