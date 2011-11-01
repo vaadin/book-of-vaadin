@@ -1,0 +1,1343 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<chapter xml:id="jpacontainer">
+    <title>Vaadin JPAContainer</title>
+
+    <section xml:id="jpacontainer.overview">
+        <title>Overview</title>
+
+        <para>
+            Vaadin JPAContainer is a <link xlink:href="http://vaadin.com">Vaadin</link> data
+            container that uses the Java Persistence API 1.0 (JPA) for retrieving and
+            storing data.  It supports the most common features required by JEE
+            applications out of the box, such as lazy loading, advanced filtering, nested
+            property names and caching.  It will probably not solve all the container
+            problems that you might face as a Java EE application developer, but it will
+            hopefully make your life a little easier.
+        </para>
+
+        <para>
+            JPAContainer does not require any specific JPA implementation or database. It
+            generates standard JPA-QL queries that should execute properly on any
+            compliant JPA 1.0 implementation. However, it has only been tested on
+            Hibernate and EclipseLink.
+        </para>
+
+        <para>
+            It is possible to customize JPAContainer to use a completely different object
+            persistence framework than JPA, as long as the entity classes are annotated
+            with JPA annotations (JPAContainer deduces primary keys and
+            persistent/filterable fields from these annotations).
+        </para>
+
+        <para>
+            JPAContainer currently has limited support for joins in the form of a special
+            kind of filter that can be applied to joined properties.  JPAContainer
+            implements the <interfacename>Container.Hierarchical</interfacename>
+            interface, but the implementation should be considered experimental in the
+            current version. IdClass primary keys are not supported.
+        </para>
+
+        <para>
+            The purpose of this chapter is to briefly explain how JPAContainer works and
+            how you can use it in your applications. The chapter describes the
+            architecture of JPAContainer and the idea behind the components that it
+            consists of. The chapter also covers the most important features of
+            JPAContainer and points out some potential issues that developers should be
+            aware of when using JPAContainer.
+        </para>
+
+        <simplesect>
+            <title>Future Plans</title>
+            <para>
+                The following features are currently not implemented, but may be added in
+                a future version, depending on the feedback received on version 1.0:
+            </para>
+            <itemizedlist>
+                <listitem>
+                    <para>JEE 6 / JPA 2.0</para>
+                </listitem>
+                <listitem>
+                    <para>Improved support for joined queries</para>
+                </listitem>
+                <listitem>
+                    <para>Improved implementation of the
+                    <interfacename>Container.Hierarchical</interfacename> interface</para>
+                </listitem>
+                <listitem>
+                    <para>Support for displaying query results that do not consist of
+                    entire entities, but arrays of property values</para>
+                </listitem>
+                <listitem>
+                    <para>Support for IdClass primary keys</para>
+                </listitem>
+                <listitem>
+                    <para>Support for buffered master-detail editing, where the master
+                    container gets its data from a data store (like JPAContainer does now)
+                    and the detail container from a
+                    <interfacename>Collection</interfacename> property of one of the
+                    entities in the master container.</para>
+                </listitem>
+            </itemizedlist>
+        </simplesect>
+    </section>
+
+    <section xml:id="jpacontainer.architecture">
+        <title>Architecture</title>
+
+        <para>
+            The architecture of JPAContainer consists of two main interfaces: an
+            <interfacename>EntityContainer</interfacename> and an
+            <interfacename>EntityProvider</interfacename>. The role of the latter is
+            illustrated in <xref linkend="figure.jpacontainer.architecture.entityprovider"/>.
+        </para>
+
+		<figure xml:id="figure.jpacontainer.architecture.entityprovider">
+			<title>EntityProvider for JPAContainer</title>
+
+            <mediaobject>
+                <imageobject role="html">
+                    <imagedata align="center" fileref="img/jpacontainer/provider.png"/>
+                </imageobject>
+                <imageobject role="fo">
+                    <imagedata scale="60" smallscale="100%" align="center" fileref="img/jpacontainer/provider.png"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
+
+        <para>
+            The <interfacename>EntityContainer</interfacename> is an extended version of
+            the standard Vaadin <interfacename>Container</interfacename> and can be used
+            directly to power, for example, tables or combo boxes. The container gets its
+            data from an <interfacename>EntityProvider</interfacename>, which in turn
+            loads the data from some data source. You can have several containers that use
+            the same provider, which makes it possible to, for example, add a second-level
+            cache to the provider. It is even possible to deploy the containers and the
+            provider to different JVMs, provided that detached entities are used instead
+            of managed ones.
+        </para>
+
+		<figure xml:id="figure.jpacontainer.architecture.distributed">
+			<title>Distributed Processing Model for JPAContainer</title>
+
+            <mediaobject>
+                <imageobject role="html">
+                    <imagedata align="center" fileref="img/jpacontainer/distributed.png"/>
+                </imageobject>
+                <imageobject role="fo">
+                    <imagedata scale="60" smallscale="100%" align="center" fileref="img/jpacontainer/distributed.png"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
+
+		<para>
+			Entity providers are stateless in the sense that their behaviour should not
+			depend on the entity container that accesses them. If two entity containers
+			invoke an entity provider with the same arguments, both containers should get
+			the same result, provided that the actual data in the entity provider has not
+			changed between the invocations. This also means that it is possible to export
+			entity providers as services using a stateless protocol such as HTTP.
+		</para>
+
+        <para>
+            Most of the public API of JPAContainer is defined as interfaces. <xref
+            linkend="figure.jpacontainer.architecture.interfaces"/> shows the most
+            important classes, interfaces, and their relations. The gray interfaces are
+            part of the Vaadin core framework.
+        </para>
+
+		<figure xml:id="figure.jpacontainer.architecture.interfaces">
+			<title>JPAContainer API</title>
+
+            <mediaobject>
+                <imageobject role="html">
+                    <imagedata align="center" fileref="img/jpacontainer/interfaces.png"/>
+                </imageobject>
+                <imageobject role="fo">
+                    <imagedata scale="60" smallscale="100%" align="center" fileref="img/jpacontainer/interfaces.png"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
+
+		<para>
+			JPAContainer is both the name of the product and the name of the default
+			implementation of the <interfacename>EntityContainer</interfacename>
+			interface. In this book, sections that refer to an "entity container" applies
+			to any implementation of the <interfacename>EntityContainer</interfacename>
+			interface, although there is only one currently. Sections that refer to the
+			<classname>JPAContainer</classname> class applies only to this particular
+			entity container implementation, or to the product as a whole, depending on
+			the context.
+		</para>
+
+        <section xml:id="jpacontainer.architecture.filtering">
+            <title>Filtering</title>
+            <para>
+                Filtering an entity container is defined with the
+                <interfacename>AdvancedFilterable</interfacename> interface. The filtering
+                API in JPAContainer is more advanced than filtering with the standard
+                Vaadin <interfacename>Container.Filterable</interfacename>. Although
+                standard Vaadin filtering is also supported, we recommended that you use
+                the new filtering API. The new filtering API only applies to entity
+                containers, however.
+            </para>
+
+			<note>
+				<para>
+					It is likely that a future JPA 2.0 version of JPAContainer will
+					deprecate the advanced filtering API in favor of JPA 2.0 criteria.
+				</para>
+			</note>
+
+            <para>
+                Filters are specified by adding instances of the
+                <interfacename>Filter</interfacename>-interface to the container using the
+                <methodname>AdvancedFilterable.addFilter(..)</methodname> method. As
+                filters are intended to be applied in the database, only persistent
+                properties can be filtered. All filters generate standard JPA QL-language
+                that can be used by entity providers when constructing queries to be
+                passed to an <interfacename>EntityManager</interfacename>.  Entity
+                providers that do not use JPA can analyze the object graph of
+                <interfacename>Filter</interfacename>s instead of using the generated JPA
+                QL.
+            </para>
+            <note>
+                <para>
+                    All filtering is done in the database. Therefore special care should be taken to make sure filterable columns are indexed properly, especially
+                    if the number of records is large.
+                </para>
+            </note>
+        </section>
+
+        <section xml:id="jpacontainer.architecture.editing">
+            <title>Editing</title>
+            <para>
+                The entity container supports editing, but it uses a slightly different
+                API than the default <classname>Container</classname> API. In order to
+                make an entity container editable, the entity provider must implement the
+                <interfacename>MutableEntityProvider</interfacename> interface. In
+                addition, the container must not be marked as read-only. Attempts to a
+                read-only entity container will result in an exception.
+            </para>
+
+            <para>
+                There is only one way to add new items to the container and that is by
+                using <methodname>addEntity()</methodname> method in
+                <interfacename>EntityContainer</interfacename>. Note that this method
+                takes the entity instance and not the
+                <interfacename>EntityItem</interfacename> as a parameter. The returned
+                value is an identifier that can be used to get
+                <interfacename>EntityItem</interfacename> of the the newly added entity by
+                passing it to <methodname>getItem()</methodname> of the
+                <interfacename>EntityContainer</interfacename>.
+            </para>
+
+            <para>
+                Changes made to existing <interfacename>EntityItem</interfacename>s will
+                automatically be propagated back to their container, which in turn will
+                decide what to do with the change (see the next section about buffering).
+                Existing items can be removed from the container using the standard
+                <methodname>removeItem()</methodname> method defined in
+                <interfacename>Container</interfacename>.
+            </para>
+
+			<note>
+				<para>
+					All entity items are bound to their specific containers. Thus, it is
+					not possible to move an entity item from one container to another!
+				</para>
+			</note>
+        </section>
+
+        <section xml:id="jpacontainer.architecture.transactions">
+            <title>Transactions</title>
+
+            <para>
+                Transactions are handled by the entity providers. Depending on how they
+                are deployed, transaction can be either handled by an external container
+                such as Spring or EJB, or internally by using the transaction methods of
+                JPA. The JavaDoc API documentation contains more detailed information
+                about which methods need to run inside a transaction and which ones need
+                not. However, the scope of a transaction must always be limited to a
+                single method invocation. In other words, a transaction may not begin
+                before the method invocation begins and it must be either committed or
+                rolled back before the method invocation ends. The reason for this is to
+                keep the entity providers stateless.
+            </para>
+
+			<para>
+				Some examples of how to use container managed transactions can be found in
+				<xref linkend="jpacontainer.using"/>.
+			</para>
+        </section>
+
+        <section xml:id="jpacontainer.architecture.buffered-mode">
+            <title>Buffered Mode</title>
+
+            <para>
+                Both <interfacename>EntityContainer</interfacename> and
+                <interfacename>EntityItem</interfacename> extend the
+                <interfacename>Buffered</interfacename> interface.  This means that it is
+                possible to buffer changes made to either individual items or changes to
+                the container as a whole.
+            </para>
+
+            <para>
+                The <interfacename>Buffered</interfacename> interface can be used to
+                control both how data is read and how changes are written:
+            </para>
+
+            <variablelist>
+                <varlistentry>
+                    <term>Write-Through</term>
+                    <listitem>
+                        <para>
+                            Controls whether changes should be written directly (on) or
+                            buffered (off).
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>Read-Through</term>
+                    <listitem>
+                        <para>
+                            Controls whether changes should be read from the original data
+                            store (on) or from a buffer or cache (off).
+                        </para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+
+			<section xml:id="jpacontainer.architecture.buffered-mode.batching">
+				<title>Batching Entity Providers</title>
+
+				<para>
+					Before moving on to container and item buffering, some words should be
+					said about the <interfacename>BatchableEntityProvider</interfacename>
+					interface. It extends the
+					<interfacename>MutableEntityProvider</interfacename> interface with an
+					API for performing update operations (add, update, and remove) in
+					batches. The method in question is defined as follows:
+				</para>
+
+	            <programlisting language="java"><?pocket-size 65% ?><![CDATA[public void batchUpdate(BatchUpdateCallback<T> callback)
+    throws UnsupportedOperationException;]]></programlisting>
+
+				<para>
+					A callback object is used to perform the actual batch as follows:
+				</para>
+
+	            <programlisting language="java"><?pocket-size 65% ?><![CDATA[public interface BatchUpdateCallback<T>
+       extends Serializable {
+    public void batchUpdate(
+        MutableEntityProvider<T> batchEnabledEntityProvider);
+}]]></programlisting>
+
+				<para>
+					The <varname>batchEnabledEntityProvider</varname> parameter is a
+					<interfacename>MutableEntityProvider</interfacename> that is aware of
+					the fact that all the operations are being performed inside a batch.
+				</para>
+
+				<para>
+					For example, the following code could be used to add a list of
+					entities to the entity provider inside a single batch:
+				</para>
+
+	            <programlisting language="java"><?pocket-size 65% ?><![CDATA[provider.batchUpdate(new BatchUpdateCallback<MyEntity>() {
+    public void batchUpdate(MutableEntityProvider<MyEntity>
+            batchEnabledEntityProvider) {
+        for (Entity e : myListOfEntitiesToAdd) {
+            batchEnabledEntityProvider.addEntity(e);
+        }
+    }
+});]]></programlisting>
+
+				<para>
+					The reason for using a callback instead of directly performing the
+					modifications on the entity provider is the stateless nature of entity
+					providers and the requirement on a transaction to be limited to a
+					single method invocation. If the batch were performed without a
+					callback, each individual operation would run inside its own
+					transaction that would be committed before moving on to the next next
+					operation. This in turn would make it more difficult to roll the
+					entire batch back if something went wrong.
+				</para>
+
+                <para>
+                    There are a few potential issues to keep in mind while using batching
+                    entities that contain references to other entities inside the same
+                    batch.  The first thing to keep in mind is how cascading has been
+                    configured. Let us say that two entities have been added to the list
+                    in the example above and that the first entity contains a reference to
+                    the second entity. If cascading is turned on, both entities will be
+                    persisted when the first entity is added to the entity manager. If
+                    this has not been detected by the batch enabled entity provider (as in
+                    the example above), it might proceed by adding the second entity to
+                    the entity manager.  As a result, there might now be two copies of the
+                    second entity in the database (though with different entity IDs).
+                </para>
+
+                <para>
+                    A similar problem might occur if some entity references a newly
+                    created entity that is not a part of the batch. Let us say that
+                    EntityA and EntityB have both intitially been added to the list of
+                    entities in the example above. EntityA is then updated to reference
+                    EntityB. However, the user realizes that he or she has made a mistake
+                    and removes EntityB from the list. EntityA will, however, still hold a
+                    reference to EntityB.  When EntityA is persisted, the operation will
+                    cascade to EntityB, and suddenly EntityB is in the database although
+                    it was never included in the batch.
+                </para>
+
+                <para>
+                    If you think your application might run into problems like these,
+                    there are a few things you could do. First, make sure you perform
+                    enough validation every time you remove or edit an entity so that any
+                    illegal references are cleaned up. Second, implement your own batching
+                    entity provider so that it is aware of the potential problem
+                    situations and is able to deal with them.
+                </para>
+			</section>
+
+			<section xml:id="jpacontainer.architecture.buffered-mode.container">
+                <title>Container Buffering</title>
+                <para>
+                    The buffering capabilities of the container heavily depend on the
+                    capabilities of the underlying entity provider:
+                </para>
+
+                <variablelist>
+                    <varlistentry>
+                        <term>Write-Through</term>
+                        <listitem>
+                            <para>
+                                When turned on, any changes are directly propagated to the
+                                entity provider. When turned off, all changes are buffered
+                                in the container and sent to the entity provider only when
+                                <methodname>commit()</methodname> is called.  The changes
+                                can also be rolled back using
+                                <methodname>discard()</methodname>.
+                            </para>
+
+                            <para>
+                                It is important to remember that buffered changes are
+                                <emphasis>not</emphasis> considered when the data is
+                                filtered or sorted, as these operations are performed by
+                                the entity provider. Thus, newly added items always show
+                                up at the top of the container regardless of any sorting
+                                applied, and modified items are filtered and sorted
+                                according to their "unmodified state". Only after the
+                                changes have been committed, filtering and sorting will be
+                                applied to the new values.
+                            </para>
+
+                            <para>
+                                By default, write-through is turned off if the entity
+                                provider supports it. To support buffering of changes, the
+                                entity provider must implement the
+                                <interfacename>BatchableEntityProvider</interfacename>
+                                interface (see the previous
+                                section). <classname>JPAContainer</classname> will keep a
+                                log of all the changes that have been made and will then
+                                pass these changes on to the entity provider in the same
+                                order as they were made. If an entity is added and later
+                                removed before the changes are committed, the entity will
+                                not be included in the change log.  It might still turn up
+                                in the database if it is referenced by other entities that
+                                are in the changelog, due to the cascading problems
+                                described in the previous section.
+                            </para>
+
+                            <para>
+                                Write-through is also called Auto Commit.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                        <term>Read-Through</term>
+                        <listitem>
+                            <para>
+                                Read-through cannot be explicitly changed by the
+                                user. Read-through is off if the entity provider
+                                implements the
+                                <interfacename>CachingEntityProvider</interfacename> and
+                                the cache is in use. Otherwise, read-through is always on,
+                                i.e. the data is read directly from the data store.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                </variablelist>
+            </section>
+
+			<section xml:id="jpacontainer.architecture.buffered-mode.item">
+                <title>Item Buffering</title>
+
+                <para>
+                    The buffering capabilities of
+                    <interfacename>EntityItem</interfacename> are always the same
+                    regardless of the entity provider. One of the drawbacks when using
+                    write-through in the container is that every time a property of an
+                    item is changed, the change is sent directly to the database and
+                    saved. This means a lot of database round-trips and no way of
+                    discarding the changes. The solution to this problem is to either turn
+                    on buffering in the container or, if the container does not support
+                    buffering, use buffering on the item level instead.
+                </para>
+
+                <variablelist>
+                    <varlistentry>
+                        <term>Write-Through</term>
+                        <listitem>
+                            <para>
+                                When write-through is on (default), all changes made to a
+                                property are directly propagated back to the underlying
+                                entity object and the container.  When write-through is
+                                off, all changes are buffered inside the item and are only
+                                propagated to the underlying entity (and the container)
+                                when <methodname>Buffered.commit()</methodname> is
+                                called. <methodname>Buffered.discard()</methodname>
+                                discards the changes and reloads the item with the
+                                original property values. Write-through has to be
+                                explicitly turned off for each
+                                <interfacename>EntityItem</interfacename> instance that
+                                requires it.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                        <term>Read-Through</term>
+                        <listitem>
+                            <para>
+                                When read-through is on (default), all data is read
+                                directly from the underlying entity object. This is
+                                possible even when write-through is off and there are
+                                buffered changes. When read-through is off, data is read
+                                both from the underlying entity object (unchanged
+                                properties) and the item buffer (changed
+                                properties). Read-through has to be explicitly turned off
+                                for each <interfacename>EntityItem</interfacename>
+                                instance that requires it.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                </variablelist>
+
+                <note>
+                    <para>
+                        Item-level buffering does not work properly with collections,
+                        unless the entire collection instance is replaced with another
+                        collection instance when items are added or modified. The same
+                        goes for other mutable objects that are not modified via nested
+                        properties.
+                    </para>
+                </note>
+            </section>
+        </section>
+
+        <section xml:id="jpacontainer.architecture.hierarchical">
+            <title>Experimental Hierarchical Support</title>
+
+            <para>
+                It is possible to use JPAContainer as a hierarchical container if the
+                entities in the container can be related to each other by means of a
+                parent property. For example:
+            </para>
+
+            <programlisting language="java"><![CDATA[@Entity
+public class Node {
+    ...
+    @ManyToOne
+    private Node parent;
+    ...
+}]]></programlisting>
+
+            <para>
+                The API is defined in the
+                <interfacename>HierarchicalEntityContainer</interfacename> interface.
+            </para>
+
+            <note>
+                <title>Experimental Implementation</title>
+
+                <para>
+                    The <classname>JPAContainer</classname> class contains a limited and
+                    <emphasis>experimental</emphasis> implementation of this interface.
+                    When it is used as a hierarchical container, the data is always read
+                    directly from the entity provider regardless of whether it is using
+                    buffering or not.  Therefore, this feature should be used with care in
+                    production systems!
+                </para>
+            </note>
+        </section>
+
+        <section xml:id="jpacontainer.architecture.managed">
+            <title>Managed Entities</title>
+
+            <para>
+                Normally, it is easier to use detached entities in an entity container, as
+                this means that no changes will be automatically propagated back to the
+                database unless explicitly requested. On the other hand, this also means
+                that any references or collections that will be accessed by the container
+                have to be eagerly fetched before the entity is detached, which in turn
+                can lead to some serious performance problems.
+            </para>
+
+            <para>
+                If desired, JPAContainer is able to use managed entities, that is,
+                entities that are managed by a persistence context. This makes it possible
+                to lazily load both references and collections. It also means that any
+                changes made to the entities show up in the persistence context directly
+                and are persisted to the database when the entity manager is flushed.
+            </para>
+
+            <para>
+                However, there are a few things to keep in mind when using managed entities:
+            </para>
+
+            <orderedlist>
+                <listitem>
+                    <para>
+                        The persistence context must be configured to use extended scope
+                        instead of transaction scope. That way, the persistence context
+                        will be available for several transactions, which is a requirement
+                        if lazy loading is to be used in a web application.
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        The entities returned from the entity provider must not be
+                        serialized and deserialized before they reach the container. In
+                        practice, this means that the entity provider and the container
+                        must run inside the same JVM.
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        If editing entities is allowed, the entity provider should take
+                        care of flushing the entity manager when needed.
+                    </para>
+                </listitem>
+            </orderedlist>
+
+            <para>
+                It is possible to ask the entity provider to explicitly detach the
+                entities before they are returned to an entity container. If the
+                <methodname>EntityProvider.isEntitiesDetached()</methodname> method
+                returns true, it is safe to assume that all entities returned by the
+                provider are detached. If the method returns false, the entities may or
+                may not be detached, depending on how the entity provider is
+                implemented. For example, if an entity provider uses a transaction-scoped
+                persistence context and each method runs inside its own transaction, the
+                entities returned by the provider will be automatically detached.
+            </para>
+        </section>
+
+        <section xml:id="jpacontainer.architecture.multiuser">
+            <title>Multi-User Environments</title>
+            <section>
+                <para>
+                    When used in read-only mode, JPAContainer works great in multi-user
+                    environments. However, as soon as data editing is introduced, there
+                    are a few things to keep in mind.<!-- , especially if the entity
+                    provider reads all data directly from the database without using a
+                    cache or a snapshot.-->
+                </para>
+
+                <para>
+                    JPAContainer implements the
+                    <interfacename>EntityProviderChangeListener</interfacename>
+                    interface. If the entity provider implements the
+                    <interfacename>EntityProviderChangeNotifier</interfacename>,
+                    JPAContainer will register itself as a listener. Every time the entity
+                    provider notifies JPAContainer that an entity has been added, updated
+                    or removed, JPAContainer will fire an item set change event. Note,
+                    however, that as Vaadin currently does not support server push, the
+                    client will not be updated until the browser sends a request to the
+                    server, for example, when the user clicks on something or selects an
+                    item. If the item set change causes the previously mentioned selection
+                    to change, the user may experience some strange behaviour as the item
+                    he or she selected suddenly becomes unselected without warning. It is
+                    possible to turn off this functionality by using the
+                    <methodname>setFireContainerItemSetChangeEvents()</methodname> method
+                    in <classname>JPAContainer</classname>.
+                </para>
+
+                <para>
+                    When using a Vaadin table to show the contents of a container, there
+                    is a risk of the view and the model becoming out of synch with each
+                    other.  Everytime an item is selected in a table, the table will check
+                    with the container if such an item exists before the selection is
+                    changed. However, in the user interface, the selection will change
+                    regardless of this check. This means that if a user selects an item
+                    that has been deleted, the user interface will look like it has
+                    selected the deleted item, when the underlying model in fact contains
+                    the previous selection.
+                </para>
+
+                <para>
+                    To work around this, there is a property in JPAContainer called
+                    <varname>containsIdFiresItemSetChangeIfNotFound</varname>. If this
+                    property is true, the container will fire an item set change event
+                    every time <methodname>containsId()</methodname> is called for an
+                    <classname>EntityContainer</classname> and the result is false. Thus,
+                    if the user tries to select a deleted item, the table will
+                    automatically be updated and the deleted item(s) removed from the
+                    view.
+                </para>
+
+				<note>
+					<para>
+						This is a hack that will hopefully be removed in the future once
+						the problem has been solved in a better way.
+					</para>
+				</note>
+
+                <para>
+                    If JPAContainer will be used for data that is changed frequently
+                    (especially if existing data is updated or removed), it would probably
+                    be best to implement a custom entity provider that takes a snapshot of
+                    the data to be displayed and serves information from the
+                    snapshot. Otherwise, runtime errors might occur, for example, if the
+                    data is removed between a call to
+                    <methodname>getEntityCount()</methodname> or
+                    <methodname>getEntityIdentifierAt()</methodname> in an
+                    <interfacename>EntityProvider</interfacename>.
+                </para>
+            </section>
+        </section>
+    </section>
+
+    <section xml:id="jpacontainer.providers">
+        <title>Built-in Entity Providers</title>
+
+        <para>
+            There are two kinds of built-in entity providers. The
+            <classname>LocalEntityProvider</classname> is the simplest one, which reads
+            all the information directly from an
+            <interfacename>EntityManager</interfacename>. In applications where the amount
+            of data is small and database round-trips are fast, this provider is the
+            safest choice.
+        </para>
+
+        <para>
+            If the number of database round-trips should be reduced,
+            <classname>CachingLocalEntityProvider</classname> should be used instead. It
+            maintains a local cache of entities and query results and hence performs
+            faster than <classname>LocalEntityProvider</classname> if database round-trips
+            are slow.  However, it also requires more memory than
+            <classname>LocalEntityProvider</classname>.
+        </para>
+
+        <section xml:id="jpacontainer.providers.localentityprovider">
+            <title>The <classname>LocalEntityProvider</classname></title>
+
+            <figure xml:id="figure.jpacontainer.providers.localentityprovider">
+                <title>JPAContainer API</title>
+                <mediaobject>
+                    <imageobject role="html">
+                        <imagedata align="center" fileref="img/jpacontainer/localentityprovider.png"/>
+                    </imageobject>
+                    <imageobject role="fo">
+                        <imagedata scale="60" smallscale="100%" align="center" fileref="img/jpacontainer/localentityprovider.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+
+            <section>
+                <title>LocalEntityProvider</title>
+                <para>
+                    A read-only, lazy loading entity provider that performs no caching and
+                    reads its data directly from an
+                    <interfacename>EntityManager</interfacename>. In other words,
+                    basically all calls to the entity provider result in a query being
+                    sent to the <interfacename>EntityManager</interfacename>.
+                </para>
+            </section>
+
+            <section>
+                <title>MutableLocalEntityProvider</title>
+                <para>
+                    Extends <classname>LocalEntityProvider</classname> with write
+                    support. All changes are directly sent to the entity
+                    manager. Transactions can be handled either internally by the provider
+                    (default) or by the container (such as by extending the class and
+                    annotating the methods as shown in <xref
+                    linkend="jpacontainer.using"/>). The class also implements the
+                    <interfacename>EntityProviderChangeNotifier</interfacename> interface,
+                    which means that it will notify any listening clients everytime an
+                    entity is added, updated or removed.
+                </para>
+            </section>
+            <section>
+                <title>BatchableLocalEntityProvider</title>
+                <para>
+                    The simplest possible implementation of the
+                    <interfacename>BatchableEntityProvider</interfacename> interface - an
+                    extension of <classname>MutableLocalEntityProvider</classname> that
+                    simply passes itself to the <methodname>batchUpdate(..)</methodname>
+                    method. This will work properly if the entities do not contain any
+                    references to other entities that are managed by the same container
+                    (see <xref linkend="jpacontainer.architecture.buffered-mode.batching"/>).
+                </para>
+            </section>
+        </section>
+
+        <section xml:id="jpacontainer.providers.cachinglocalentityprovider">
+            <title>The <classname>CachingLocalEntityProvider</classname></title>
+
+            <para>
+                All the caching entity providers are basically extensions of the local
+                entity providers, with caching support added by a delegate class
+                <classname>CachingSupport</classname>.
+            </para>
+
+            <figure xml:id="figure.jpacontainer.providers.cachinglocalentityprovider">
+                <title>JPAContainer API</title>
+                <mediaobject>
+                    <imageobject role="html">
+                        <imagedata align="center" fileref="img/jpacontainer/cachinglocalentityprovider.png"/>
+                    </imageobject>
+                    <imageobject role="fo">
+                        <imagedata scale="60" smallscale="100%" align="center" fileref="img/jpacontainer/cachinglocalentityprovider.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+            
+            <section>
+                <title>CachingLocalEntityProvider</title>
+                <para>
+                    A read-only, lazy loading entity provider that caches both entities
+                    and query results for different filter/sortBy combinations.  When the
+                    cache gets full, the oldest entries in the cache are removed. The
+                    maximum number of entities to cache and the maximum number of
+                    entityIds to cache for each filter/sortBy combination can be manually
+                    set. The cache can also be manually flushed. When the cache grows
+                    full, the oldest items are removed.
+                </para>
+            </section>
+            <section>
+                <title>CachingMutableLocalEntityProvider</title>
+                <para>
+                    A caching entity-provider with caching support. When an entity is
+                    added or updated, the cache is flushed in order to make sure the added
+                    or updated entity shows up correctly when using filters and/or
+                    sorting. When an entity is removed, only the filter/sortBy-caches that
+                    actually contain the item are flushed. Otherwise, this class works
+                    just like <classname>MutableLocalEntityProvider</classname>.
+                </para>
+            </section>
+            <section>
+                <title>CachingBatchableLocalEntityProvider</title>
+                <para>
+                    An extension of
+                    <classname>CachableMutableLocalEntityProvider</classname> that
+                    implements the <interfacename>BatchableEntityProvider</interfacename>
+                    and passes itself to the <methodname>batchUpdate()</methodname>
+                    method. This will work properly if the entities do not contain any
+                    references to other entities that are managed by the same container
+                    (see <xref linkend="jpacontainer.architecture.buffered-mode.batching"/>).
+                </para>
+            </section>
+        </section>
+    </section>
+
+    <section xml:id="jpacontainer.using">
+        <title>Using JPAContainer in Applications</title>
+
+        <para>
+            In this section, we are going to look at how to use JPAContainer in your own
+            applications. First of all, you have to add
+            <filename>vaadin-jpacontainer-VERSION.jar</filename> to the classpath of your
+            application. Then, all you need is the following code:
+        </para>
+
+        <programlisting language="java"><?pocket-size 65% ?><![CDATA[
+EntityContainer<MyEntity> container = new JPAContainer<MyEntity>(
+    MyEntity.class);
+container.setEntityProvider(myEntityProvider);
+        ]]></programlisting>
+
+        <para>
+            The entity provider can be any of the built-in entity providers (see <xref
+            linkend="jpacontainer.providers"/>) or your own custom built entity provider (see <xref
+            linkend="jpacontainer.custom-entity-providers"/>).  If you use the built-in entity
+            provider, you also have to have JPA configured correctly in your application
+            (e.g. a <filename>persistence.xml</filename> file). For example, to use the
+            <classname>MutableLocalEntityProvider</classname> to provide entities of class
+            <classname>Customer</classname> from an existing entity manager, you could use
+            the following code:
+        </para>
+
+		<programlisting language="java"><?pocket-size 75% ?><![CDATA[
+MutableLocalEntityProvider<Customer> myEntityProvider =
+    new MutableLocalEntityProvider<Customer>(
+        Customer.class, entityManager);
+        ]]></programlisting>
+
+        <para>
+            One thing to keep in mind when working with JPAContainer is that it is
+            centered around <emphasis>entities</emphasis>, for example, POJOs annotated
+            with JPA annotations.  JPAContainer will analyze the class definition and the
+            annotations to access properties, determine which properties are sortable,
+            etc. JPAContainer will <emphasis>not</emphasis> work with objects of classes
+            that lack JPA annotations.
+        </para>
+
+        <para>
+            JPAContainer makes a difference between persistent properties and transient
+            properties. Persistent properties are determined from the JPA annotations. If
+            an entity class uses field annotations, the names of the persistent properties
+            are the names of the non-transient fields. This is important to remember,
+            especially if the field names and their corresponding getter/setter methods do
+            not have matching names.
+        </para>
+
+        <para>
+            If an entity class uses method annotations, the names of the persistent
+            properties are the JavaBean names of the non-transient getter methods. This
+            also applies to transient properties, which are all the transient JavaBean
+            properties of the entity class. Transient properties may be read-only, whereas
+            persistent properties are always writable.
+        </para>
+
+        <section xml:id="jpacontainer.using.nested">
+            <title>Nested Properties</title>
+            <para>
+                JPAContainer supports nested properties. You define nested properties using the <methodname>EntityContainer.addNestedContainerProperty(..)</methodname> method. For example,
+                let's say you have an entity class that looks like this:
+            </para>
+
+            <programlisting language="java"><?pocket-size 75% ?><![CDATA[@Entity
+public class Person implements Serializable {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
+    @Version
+    private Long version;
+    private String firstName;
+    private String lastName;
+    @Temporal(TemporalType.DATE)
+    private Date dateOfBirth;
+    @Embedded
+    private Address address;
+
+    // Getter and setter methods omitted
+}
+
+@Embeddable
+public class Address implements Serializable, Cloneable {
+
+    private String street;
+    private String postalCode;
+    private String postOffice;
+
+    // Getter and setter methods omitted
+}
+            ]]></programlisting>
+
+            <para>
+                Now, let's say you want to show a list of persons, together with their
+                addresses, in a Vaadin table. You also want to be able to filter and sort
+                by street, postal code and post office. All you need to do to make this
+                possible is the following:
+            </para>
+
+            <programlisting language="java"><?pocket-size 75% ?><![CDATA[myContainer.addNestedContainerProperty("address.*");]]></programlisting>
+
+            <para>
+                The wildcard asterisk will expand to all the properties of the
+                <classname>Address</classname> class. After this method call, the
+                container will contain the following new properties, in addition to the
+                existing ones: <varname>address.street</varname>,
+                <varname>address.postalCode</varname> and
+                <varname>address.postOffice</varname>.  These properties are no different
+                from the other properties and can be used in the same way.
+            </para>
+
+			<note>
+				<para>
+					Although the <varname>address</varname> property used in the example
+					is embedded, this is not a requirement. The property could just as
+					easily have been a ManyToOne reference or even a transient
+					property. However, transient nested properties cannot be used for
+					filtering and sorting.
+				</para>
+			</note>
+
+            <para>
+                It is also possible to add individual nested properties. In that case,
+                simply replace the wildcard asterisk with the property name.
+            </para>
+
+            <para>
+                Nested properties can be removed from the container using the
+                <methodname>EntityContainer.removeContainerProperty(..)</methodname>
+                method. Removing a property from the container does not affect the
+                property value, but prevents the container from accessing its value.
+            </para>
+
+            <para>
+                Nested properties can also be defined on the item level. Normally, the
+                properties accessible from an item is all the available properties of the
+                entity class and any nested properties defined in the owning container. If
+                these are not enough, additional nested properties can be added to a
+                specific item by using the
+                <methodname>EntityItem.addNestedContainerProperty(..)</methodname>
+                method. Nested properties added this way will not show up in the
+                container.
+            </para>
+        </section>
+
+        <section xml:id="jpacontainer.using.predefined-filters">
+            <title>Predefined Filters</title>
+
+            <para>
+                There are several predefined filters available in the
+                <classname>Filters</classname> class, found in the
+                <package>com.vaadin.addon.jpacontainer.filter</package> package:
+            </para>
+
+            <programlisting language="java"><![CDATA[
+container.addFilter(Filters.like("firstName", "Jo%", false));
+container.addFilter(Filters.or(
+    Filters.eq("lastName", "Smith", false),
+    Filters.eq("lastName", "Cool", false)
+));
+            ]]></programlisting>
+
+            <para>
+                The above example would accept all entites whose first names start with
+                "Jo" and last names are either "Smith" or "Cool" (case ignored). Filters
+                can be applied to other data types as well, such as integers and
+                timestamps. It is also possible to create custom filters by implementing
+                the <interfacename>Filter</interfacename> interface.
+            </para>
+
+            <para>
+                Filters can be either applied immediately or explicitly, depending on the
+                state of the <varname>isApplyFiltersImmediately</varname> flag in
+                <classname>AdvancedFilterable</classname>.  When applied immediately, each
+                call to <methodname>addFilter()</methodname> in
+                <classname>AdvancedFilterable</classname> forces the container to refresh
+                itself. If only one filter is to be added, this may be desirable. However,
+                if several filters are to be added it may be better to wait until all the
+                filters have been defined before applying them. In this case,
+                <methodname>applyFilters()</methodname> has to be called for the
+                <classname>AdvancedFilterable</classname> to apply the filters.
+            </para>
+
+            <section xml:id="jpacontainer.using.predefined-filters.joined">
+                <title>Filtering Joined Properties</title>
+                <para>
+                    The <interfacename>JoinFilter</interfacename> is treated in a
+                    different way than the other filters. The filter is used to apply
+                    filters to a joined property. The alias of the joined property is
+                    always the name of the joined property. For example, the following
+                    filter applied to a container of <classname>Person</classname>
+                    entities:
+                </para>
+
+                <programlisting language="java"><![CDATA[
+Filters.joinFilter("skills", Filters.eq("skill", s));]]></programlisting>
+
+                <para>
+                    This generates a JPA-QL query similar to the following:
+                </para>
+
+                <programlisting><![CDATA[SELECT obj.id
+    FROM Person AS obj
+    JOIN obj.skills AS skills
+    WHERE skills.skill = :someparametername]]></programlisting>
+
+                <note>
+                    <para>
+                        The queries are not distinct. The reason for this is that some JPA
+                        implementations require the properties used in the order by clause
+                        to be distinct, which is not possible in JPAContainer.
+                    </para>
+                </note>
+
+                <para>
+                    A <interfacename>JoinFilter</interfacename> may not contain other
+                    <interfacename>JoinFilter</interfacename>s.
+                </para>
+            </section>
+        </section>
+
+        <section xml:id="jpacontainer.using.editing-items">
+            <title>Editing Items Without Adding Them to the Container</title>
+            <para>
+                Especially when using a Vaadin form for editing items, it might be
+                necessary to wrap an entity object inside an
+                <interfacename>EntityItem</interfacename> before the entity has been added
+                to the container. This can be done by using the
+                <methodname>EntityContainer.createEntityItem(..)</methodname> method. This
+                method will create a new <interfacename>EntityItem</interfacename> that
+                has access to all the fields defined in the container, but is not
+                contained in the container yet.  The following code example demonstrates
+                its usage:
+            </para>
+
+            <programlisting language="java"><?pocket-size 65% ?><![CDATA[EntityItem<Customer> myNewItem =
+    customerContainer.createEntityItem(new Customer());
+
+// Do something with the item, for example, open a modal dialog
+Object id = customerContainer.addEntity(myNewItem.getEntity());
+item = customerContainer.getItem(id);]]></programlisting>
+        </section>
+
+        <section xml:id="jpacontainer.using.spring-beans">
+            <title>EntityProviders as Spring-managed Beans</title>
+
+            <para>
+                If you are creating an enterprise application using the Spring Framework,
+                you might want to configure your entity providers as Spring managed beans.
+                In the demo application, this is done by subclassing one of the built-in
+                entity providers and adding the appropriate annotations to the
+                subclass. For example:
+            </para>
+
+            <programlisting language="java"><?pocket-size 75% ?><![CDATA[@Repository(value = "myEntityProvider")
+public class MyEntityProviderBean
+    extends MutableLocalEntityProvider<MyEntity> {
+
+    @PersistenceContext
+    private EntityManager em;
+
+    protected LocalEntityProviderBean() {
+        super(MyEntity.class);
+		setTransactionsHandledByProvider(false);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED)
+    public MyEntity updateEntity(MyEntity entity) {
+        return super.updateEntity(entity);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED)
+    public MyEntity addEntity(MyEntity entity) {
+        return super.addEntity(entity);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void removeEntity(Object entityId) {
+        super.removeEntity(entityId);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void updateEntityProperty(Object entityId,
+            String propertyName, Object propertyValue)
+            throws IllegalArgumentException {
+        super.updateEntityProperty(entityId, propertyName,
+            propertyValue);
+    }
+
+    @PostConstruct
+    public void init() {
+        setEntityManager(em);
+        /*
+         * The entity manager is transaction scoped, which means that
+         * the entities will be automatically detached when the
+         * transaction is closed. Therefore, we do not need to
+         * explicitly detach them.
+         */
+        setEntitiesDetached(false);
+    }
+}]]></programlisting>
+        </section>
+
+        <section>
+            <title>EntityProviders as Stateless Session Beans</title>
+            <para>
+                You can also deploy your entity providers as stateless session beans (or,
+                if you are using one of the caching providers, as stateful session beans).
+                The idea is the same as for Spring managed beans:
+            </para>
+
+            <programlisting language="java"><?pocket-size 70% ?><![CDATA[@Stateless
+@TransactionManagement
+public class MyEntityProviderBean extends
+    MutableLocalEntityProvider<MyEntity> {
+
+    @PersistenceContext
+    private EntityManager em;
+
+    protected LocalEntityProviderBean() {
+        super(MyEntity.class);
+		setTransactionsHandledByProvider(false);
+    }
+
+    @Override
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public MyEntity updateEntity(MyEntity entity) {
+        return super.updateEntity(entity);
+    }
+
+    @Override
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public MyEntity addEntity(MyEntity entity) {
+        return super.addEntity(entity);
+    }
+
+    @Override
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public void removeEntity(Object entityId) {
+        super.removeEntity(entityId);
+    }
+
+    @Override
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public void updateEntityProperty(Object entityId,
+            String propertyName, Object propertyValue)
+            throws IllegalArgumentException {
+        super.updateEntityProperty(entityId, propertyName,
+            propertyValue);
+    }
+
+    @PostConstruct
+    public void init() {
+        setEntityManager(em);
+        /*
+         * The entity manager is transaction scoped, which means that
+         * the entities will be automatically detached when the
+         * transaction is closed. Therefore, we do not need to
+         * explicitly detach them.
+         */
+        setEntitiesDetached(false);
+    }
+}]]></programlisting>
+        </section>
+    </section>
+
+    <!--    <section xml:id="demo">
+        <title>The Hitchhiker's Guide to The Demo Application</title>
+        <para>
+            TODO Write about the demo application
+        </para>
+    </section>-->
+
+    <section xml:id="jpacontainer.custom-entity-providers">
+        <title>Developing Custom Entity Providers</title>
+        <para>
+            Although the built-in entity providers should be sufficient in every-day
+            usage, there are use cases where you might have to develop a custom entity
+            provider.  These include customized queries, complex object structures that
+            require special handling, or loading data from a different data store.
+            Although JPAContainer requires JPA annotations in order to properly analyze
+            the classes and extract the available properties, the entities themselves need
+            not necessarily come from an EntityManager. In fact, by implementing your own
+            entity provider, you can store them in any way you like.
+        </para>
+
+        <para>
+            Before you start to implement your own entity provider, there are a few things
+            you need to think of:
+        </para>
+
+        <itemizedlist>
+            <listitem>
+                <para>Do you need read-only or read-write support?</para>
+            </listitem>
+            <listitem>
+                <para>Do you need caching?</para>
+            </listitem>
+            <listitem>
+                <para>Do you need filtering and/or sorting?</para>
+            </listitem>
+            <listitem>
+                <para>Do you need container-level buffering?</para>
+            </listitem>
+            <listitem>
+                <para>How are you going to handle transactions?</para>
+            </listitem>
+            <listitem>
+                <para>Will you load data directly from the data store or from a snapshot taken of the data store?</para>
+            </listitem>
+            <listitem>
+                <para>How are you going to handle concurrent editing?</para>
+            </listitem>
+        </itemizedlist>
+
+        <para>
+            Once you know what you need to build, you have to pick the interfaces to
+            implement:
+        </para>
+
+        <variablelist>
+            <varlistentry>
+                <term>EntityProvider</term>
+                <listitem>
+                    <para>
+                        Basic interface for all entity providers, provides read-only support.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>MutableEntityProvider</term>
+                <listitem>
+                    <para>
+                        If you entity provider requires read-write support.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>CachingEntityProvider</term>
+                <listitem>
+                    <para>
+                        If your entity provider uses caching or loads its data from a
+                        snapshot of the data store.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>BatchableEntityProvider</term>
+                <listitem>
+                    <para>
+                        If you require container level buffering.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>EntityProviderChangeNotifier</term>
+                <listitem>
+                    <para>
+                        If you want the containers to refresh themselves when data is
+                        changed.
+                    </para>
+                </listitem>
+            </varlistentry>
+        </variablelist>
+
+        <para>
+            Please check the JavaDocs for more information about how the interfaces should
+            be implemented.
+        </para>
+    </section>
+</chapter>
+
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: xml
+sgml-omittag:nil
+sgml-shorttag:nil
+sgml-namecase-general:nil
+sgml-general-insert-case:lower
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:4
+sgml-indent-data:t
+sgml-parent-document:nil
+sgml-exposed-tags:nil
+sgml-local-catalogs:("/etc/sgml/catalog" "/usr/share/xemacs21/xemacs-packages/etc/psgml-dtds/CATALOG")
+sgml-local-ecat-files:("ECAT" "~/sgml/ECAT" "/usr/share/sgml/ECAT" "/usr/local/share/sgml/ECAT" "/usr/local/lib/sgml/ECAT")
+End:
+-->
