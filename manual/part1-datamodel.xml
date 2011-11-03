@@ -430,7 +430,7 @@ final TextField tf = new TextField("Name", property);]]></programlisting>
             <classname>PropertySetChangeListener</classname> interface.
         </para>
 
-        <section>
+        <section xml:id="datamodel.items.propertysetitem">
             <title>The <classname>PropertysetItem</classname> Implementation</title>
 
             <para>
@@ -456,7 +456,7 @@ form.setItemDataSource(item);]]></programlisting>
 
         </section>
 
-        <section>
+        <section xml:id="datamodel.items.beanitem">
             <title>Wrapping a Bean in a <classname>BeanItem</classname></title>
 
             <para>
@@ -504,6 +504,112 @@ form.setItemDataSource(item);]]></programlisting>
                 reference to the underlying bean.
             </para>
 
+            <section xml:id="datamodel.items.beanitem.nested">
+                <title>Nested Beans</title>
+
+                <para>
+                    You may often have composite classes where one class "has a" another
+                    class. For example, consider the following
+                    <classname>Planet</classname> class which "has a" discoverer:
+                </para>
+
+                <programlisting><?pocket-size 65% ?><![CDATA[// Here is a bean with two nested beans
+public class Planet implements Serializable {
+    String name;
+    Person discoverer;
+    
+    public Planet(String name, Person discoverer) {
+        this.name = name;
+        this.discoverer = discoverer;
+    }
+
+    public String getName() {
+        return name;
+    }
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Person getDiscoverer() {
+        return discoverer;
+    }
+    public void setDiscoverer(Person discoverer) {
+        this.discoverer = discoverer;
+    }
+}
+
+...
+// Create an instance of the bean
+Planet planet = new Planet("Uranus",
+                    new Person("William Herschel", 1738));]]></programlisting>
+
+                <para>
+                    When shown in a <classname>Form</classname>, for example, you would
+                    want to list the properties of the nested bean along the properties of
+                    the composite bean. You can do that by binding the properties of the
+                    nested bean individually with a <classname>MethodProperty</classname>
+                    or <classname>NestedMethodProperty</classname>. You should usually
+                    hide the nested bean from binding as a property by listing only the
+                    bound properties in the constructor.
+                </para>
+
+                <programlisting><?pocket-size 65% ?><![CDATA[// Wrap it in a BeanItem and hide the nested bean property
+BeanItem<Planet> item = new BeanItem<Planet>(planet,
+        new String[]{"name"});
+    
+// Bind the nested properties.
+// Use NestedMethodProperty to bind using dot notation.
+item.addItemProperty("discoverername",
+    new NestedMethodProperty(planet, "discoverer.name"));
+    
+// The other way is to use regular MethodProperty.
+item.addItemProperty("discovererborn",
+     new MethodProperty<Person>(planet.getDiscoverer(),
+                                "born"));]]></programlisting>
+
+                <para>
+                    The difference is that <classname>NestedMethodProperty</classname>
+                    does not access the nested bean immediately but only when accessing
+                    the property values, while when using
+                    <classname>MethodProperty</classname> the nested bean is accessed when
+                    creating the method property. The difference is only significant if
+                    the nested bean can be null or be changed later.
+                </para>
+
+                <para>
+                    You can use such a bean item for example in a
+                    <classname>Form</classname> as follows:
+                </para>
+
+                <programlisting><?pocket-size 65% ?><![CDATA[// Bind it to a component
+Form form = new Form();
+form.setItemDataSource(item);
+    
+// Nicer captions
+form.getField("discoverername").setCaption("Discoverer");
+form.getField("discovererborn").setCaption("Born");]]></programlisting>
+
+                <para>
+                </para>
+
+                <figure xml:id="figure:datamodel.items.beanitem.nested">
+                    <title>A <classname>Form</classname> with Nested Bean Properties</title>
+                    <mediaobject>
+                        <imageobject>
+                            <imagedata smallscale="70%" align="center" fileref="img/datamodel/beanitem-nested-beans.png"/>
+                        </imageobject>
+                    </mediaobject>
+                </figure>
+
+
+                <para>
+                    The <classname>BeanContainer</classname> and
+                    <classname>BeanItemContainer</classname> allow easy definition of
+                    nested bean properties with
+                    <methodname>addNestedContainerProperty()</methodname>, as described in
+                    <xref linkend="datamodel.container.beancontainer.nestedproperties"/>.
+                </para>
+            </section>
         </section>
 	</section>
 
