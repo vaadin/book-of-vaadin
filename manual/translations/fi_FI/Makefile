@@ -1,5 +1,5 @@
 LANGUAGE =	fi
-POFILES  =	book.po
+POFILES  =	book.po part1-introduction.po
 XMLFILES =  book.xml \
 			part1-advanced.xml part1-architecture.xml part1-datamodel.xml \
 			part1-getting-started.xml part1-introduction.xml part1-themes.xml \
@@ -15,7 +15,7 @@ all:
 merge: $(POFILES)
 
 %.po: ../pot/%.pot
-	msgmerge -U $< $@
+	msgmerge -U $@ $<
 
 
 ################################################################################
@@ -25,7 +25,7 @@ WORKDIR = result
 TRANSLATED_XMLFILES := $(foreach file, $(POFILES), $(patsubst %.po, $(WORKDIR)/%.xml, $(file)))
 
 compile: create-workdir copy-images copy-source-xml include-translated
-	cd $(WORKDIR) ; make -f ../../../Makefile book.pdf DOCROOT=../../../.. DBLANGUAGE=$(LANGUAGE)
+	cd $(WORKDIR) ; make -f ../../../Makefile book.pdf DOCROOT=../../../.. MANUALPATH=manual/translations/fi_FI/result DBLANGUAGE=$(LANGUAGE)
 
 create-workdir:
 	mkdir -p $(WORKDIR)

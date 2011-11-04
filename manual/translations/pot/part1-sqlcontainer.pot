@@ -1,0 +1,898 @@
+# SOME DESCRIPTIVE TITLE.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: http://bugs.kde.org\n"
+"POT-Creation-Date: 2011-11-03 16:13+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <kde-i18n-doc@kde.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#. Tag: title
+#: part1-sqlcontainer.xml:4
+#, no-c-format
+msgid "Vaadin SQLContainer"
+msgstr ""
+
+#. Tag: para
+#: part1-sqlcontainer.xml:6
+#, no-c-format
+msgid "Vaadin SQLContainer is a container implementation that allows easy and customizable access to data stored in various SQL-speaking databases."
+msgstr ""
+
+#. Tag: para
+#: part1-sqlcontainer.xml:11
+#, no-c-format
+msgid "SQLContainer supports two types of database access. Using <classname>TableQuery</classname>, the pre-made query generators will enable fetching, updating, and inserting data directly from the container into a database table - automatically, whereas <classname>FreeformQuery</classname> allows the developer to use their own, probably more complex query for fetching data and their own optional implementations for writing, filtering and sorting support - item and property handling as well as lazy loading will still be handled automatically."
+msgstr ""
+
+#. Tag: para
+#: part1-sqlcontainer.xml:22
+#, no-c-format
+msgid "In addition to the customizable database connection options, SQLContainer also extends the Vaadin <classname>Container</classname> interface to implement more advanced and more database-oriented filtering rules. Finally, the add-on also offers connection pool implementations for JDBC connection pooling and JEE connection pooling, as well as integrated transaction support; auto-commit mode is also provided."
+msgstr ""
+
+#. Tag: para
+#: part1-sqlcontainer.xml:31
+#, no-c-format
+msgid "The purpose of this section is to briefly explain the architecture and some of the inner workings of SQLContainer. It will also give the readers some examples on how to use SQLContainer in their own applications. The requirements, limitations and further development ideas are also discussed."
+msgstr ""
+
+#. Tag: para
+#: part1-sqlcontainer.xml:38
+#, no-c-format
+msgid "SQLContainer is available from the Vaadin Directory under the same unrestrictive Apache License 2.0 as the Vaadin Framework itself."
+msgstr ""
+
+#. Tag: title
+#: part1-sqlcontainer.xml:44
+#, no-c-format
+msgid "Architecture"
+msgstr ""
+
+#. Tag: para
+#: part1-sqlcontainer.xml:46
+#, no-c-format
+msgid "The architecture of SQLContainer is relatively simple. <classname>SQLContainer</classname> is the class implementing the Vaadin <classname>Container</classname> interfaces and providing access to most of the functionality of this add-on. The standard Vaadin <classname>Property</classname> and <classname>Item</classname> interfaces have been implementd as the <classname>ColumnProperty</classname> and <classname>RowItem</classname> classes. Item IDs are represented by <classname>RowId</classname> and <classname>TemporaryRowId</classname> classes. The <classname>RowId</classname> class is built based on the primary key columns of the connected database table or query result."
+msgstr ""
+
+#. Tag: para
+#: part1-sqlcontainer.xml:59
+#, no-c-format
+msgid "In the <package>connection</package> package, the <classname>JDBCConnectionPool</classname> interface defines the requirements for a connection pool implementation. Two implementations of this interface are provided: <classname>SimpleJDBCConnectionPool</classname> provides a simple yet very usable implementation to pool and access JDBC connections. <classname>J2EEConnectionPool</classname> provides means to access J2EE DataSources."
+msgstr ""
+
+#. Tag: para
+#: part1-sqlcontainer.xml:69
+#, no-c-format
+msgid "The <package>query</package> package contains the <classname>QueryDelegate</classname> interface, which defines everything the SQLContainer needs to enable reading and writing data to and from a database. As discussed earlier, two implementations of this interface are provided: <classname>TableQuery</classname> for automatic read-write support for a database table, and <classname>FreeformQuery</classname> for customizing the query, sorting, filtering and writing; this is done by implementing relevant methods of the <classname>FreeformStatementDelegate</classname> interface."
+msgstr ""
+
+#. Tag: para
+#: part1-sqlcontainer.xml:81
+#, no-c-format
+msgid "The <package>query</package> package also contains <classname>Filter</classname> and <classname>OrderBy</classname> classes which have been written to provide an alternative to the standard Vaadin container filtering and make sorting non-String properties a bit more user friendly."
+msgstr ""
+
+#. Tag: para
+#: part1-sqlcontainer.xml:88
+#, no-c-format
+msgid "Finally, the <package>generator</package> package contains a <classname>SQLGenerator</classname> interface, which defines the kind of queries that are required by the <classname>TableQuery</classname> class. The provided implementations include support for HSQLDB, MySQL, PostgreSQL (<classname>DefaultSQLGenerator</classname>), Oracle (<classname>OracleGenerator</classname>) and Microsoft SQL Server (<classname>MSSQLGenerator</classname>). A new or modified implementations may be provided to gain compatibility with older versions or other database servers."
+msgstr ""
+
+#. Tag: para
+#: part1-sqlcontainer.xml:109
+#, no-c-format
+msgid "For further details, please refer to the SQLContainer API documentation."
+msgstr ""
+
+#. Tag: title
+#: part1-sqlcontainer.xml:115
+#, no-c-format
+msgid "Getting Started with SQLContainer"
+msgstr ""
+
+#. Tag: para
+#: part1-sqlcontainer.xml:117
+#, no-c-format
+msgid "Getting development going with the SQLContainer is easy and quite straight-forward. The purpose of this section is to describe how to create the required resources and how to fetch data from and write data to a database table attached to the container."
+msgstr ""
+
+#. Tag: title
+#: part1-sqlcontainer.xml:125
+#, no-c-format
+msgid "Creating a connection pool"
+msgstr ""
+
+#. Tag: para
+#: part1-sqlcontainer.xml:127
+#, no-c-format
+msgid "First, we need to create a connection pool to allow the SQLContainer to connect to a database. Here we will use the <classname>SimpleJDBCConnectionPool</classname>, which is a basic implementation of connection pooling with JDBC data sources. In the following code, we create a connection pool that uses the HSQLDB driver together with an in-memory database. The initial amount of connections is 2 and the maximum amount is set at 5. Note that the database driver, connection url, username, and password parameters will vary depending on the database you are using."
+msgstr ""
+
+#. Tag: programlisting
+#: part1-sqlcontainer.xml:139
+#, no-c-format
+msgid ""
+      "<?pocket-size 75% ?><![CDATA[JDBCConnectionPool pool = new SimpleJDBCConnectionPool(\n"
+      "        \"org.hsqldb.jdbc.JDBCDriver\",\n"
+      "        \"jdbc:hsqldb:mem:sqlcontainer\", \"SA\", \"\", 2, 5);]]>"
+msgstr ""
+
+#. Tag: title
+#: part1-sqlcontainer.xml:143
+#, no-c-format
+msgid "Creating the <classname>TableQuery</classname> Query Delegate"
+msgstr ""
+
+#. Tag: para
+#: part1-sqlcontainer.xml:145
+#, no-c-format
+msgid "After the connection pool is created, we'll need a query delegate for the SQLContainer. The simplest way to create one is by using the built-in <classname>TableQuery</classname> class. The <classname>TableQuery</classname> delegate provides access to a defined database table and supports reading and writing data out-of-the-box. The primary key(s) of the table may be anything that the database engine supports, and are found automatically by querying the database when a new <classname>TableQuery</classname> is instantiated. We create the <classname>TableQuery</classname> with the following statement:"
+msgstr ""
+
+#. Tag: programlisting
+#: part1-sqlcontainer.xml:157
+#, no-c-format
+msgid "<?pocket-size 70% ?><![CDATA[TableQuery tq = new TableQuery(\"tablename\", connectionPool);]]>"
+msgstr ""
+
+#. Tag: para
+#: part1-sqlcontainer.xml:159
+#, no-c-format
+msgid "In order to allow writes from several user sessions concurrently, we must set a version column to the <classname>TableQuery</classname> as well. The version column is an integer- or timestamp-typed column which will either be incremented or set to the current time on each modification of the row. <classname>TableQuery</classname> assumes that the database will take care of updating the version column; it just makes sure the column value is correct before updating a row. If another user has changed the row and the version number in the database does not match the version number in memory, an <classname>OptimisticLockException</classname> is thrown and you can recover by refreshing the container and allow the user to merge the data. The following code will set the version column:"
+msgstr ""
+
+#. Tag: programlisting
+#: part1-sqlcontainer.xml:173 part1-sqlcontainer.xml:345
+#, no-c-format
+msgid "<![CDATA[tq.setVersionColumn(\"OPTLOCK\");]]>"
+msgstr ""
+
+#. Tag: title
+#: part1-sqlcontainer.xml:177
+#, no-c-format
+msgid "Creating the Container"
+msgstr ""
+
+#. Tag: para
+#: part1-sqlcontainer.xml:179
+#, no-c-format
+msgid "Finally, we may create the container itself. This is as simple as stating:"
+msgstr ""
+
+#. Tag: programlisting
+#: part1-sqlcontainer.xml:183
+#, no-c-format
+msgid "<![CDATA[SQLContainer container = new SQLContainer(tq);]]>"
+msgstr ""
+
+#. Tag: para
+#: part1-sqlcontainer.xml:185
+#, no-c-format
+msgid "After this statement, the <classname>SQLContainer</classname> is connected to the table tablename and is ready to use for example as a data source for a Vaadin <classname>Table</classname> or a Vaadin <classname>Form</classname>."
+msgstr ""
+
+#. Tag: title
+#: part1-sqlcontainer.xml:195
+#, no-c-format
+msgid "Filtering and Sorting"
+msgstr ""
+
+#. Tag: para
+#: part1-sqlcontainer.xml:197
+#, no-c-format
+msgid "Filtering and sorting the items contained in an SQLContainer is, by design, always performed in the database. In practice this means that whenever the filtering or sorting rules are modified, at least some amount of database communication will take place (the minimum is to fetch the updated row count using the new filtering/sorting rules)."
+msgstr ""
+
+#. Tag: title
+#: part1-sqlcontainer.xml:206
+#, no-c-format
+msgid "Filtering"
+msgstr ""
+
+#. Tag: para
+#: part1-sqlcontainer.xml:208
+#, no-c-format
+msgid "Filtering is performed using the filtering API in Vaadin, which allows for very complex filtering to be easily applied. More information about the filtering API can be found in ."
+msgstr ""
+
+#. Tag: para
+#: part1-sqlcontainer.xml:214
+#, no-c-format
+msgid "In addition to the filters provided by Vaadin, SQLContainer also implements the <classname>Like</classname> filter as well as the <classname>Between</classname> filter. Both of these map to the equally named WHERE-operators in SQL. The filters can also be applied on items that reside in memory, for example, new items that have not yet been stored in the database or rows that have been loaded and updated, but not yet stored."
+msgstr ""
+
+#. Tag: para
+#: part1-sqlcontainer.xml:224
+#, no-c-format
+msgid "The following is an example of the types of complex filtering that are possible with the new filtering API. We want to find all people named Paul Johnson that are either younger than 18 years or older than 65 years and all Johnsons whose first name starts with the letter \"A\":"
+msgstr ""
+
+#. Tag: programlisting
+#: part1-sqlcontainer.xml:231
+#, no-c-format
+msgid ""
+      "<?pocket-size 75% ?><![CDATA[mySQLContainer.addContainerFilter(\n"
+      "    new Or(new And(new Equal(\"NAME\", \"Paul\"),\n"
+      "                   new Or(new Less(\"AGE\", 18),\n"
+      "                          new Greater(\"AGE\", 65))),\n"
+      "           new Like(\"NAME\", \"A%\")));\n"
+      "mySQLContainer.addContainerFilter(\n"
+      "    new Equal(\"LASTNAME\", \"Johnson\"));]]>"
+msgstr ""
+
+#. Tag: para
+#: part1-sqlcontainer.xml:233
+#, no-c-format
+msgid "This will produce the following WHERE clause:"
+msgstr ""
+
+#. Tag: programlisting
+#: part1-sqlcontainer.xml:237
+#, no-c-format
+msgid "<?pocket-size 75% ?><![CDATA[WHERE ((\"NAME\" = \"Paul\" AND (\"AGE\" < 18 OR \"AGE\" > 65)) OR \"NAME\" LIKE \"A%\") AND \"LASTNAME\" = \"Johnson\"]]>"
+msgstr ""
+
+#. Tag: title
+#: part1-sqlcontainer.xml:241
+#, no-c-format
+msgid "<title>Sorting</title>"
+msgstr ""
+
+#. Tag: para
+#: part1-sqlcontainer.xml:243
+#, no-c-format
+msgid "Sorting can be performed using standard Vaadin, that is, using the sort method from the <classname>Container.Sortable</classname> interface. The <parameter>propertyId</parameter> parameter refers to column names."
+msgstr ""
+
+#. Tag: programlisting
+#: part1-sqlcontainer.xml:249
+#, no-c-format
+msgid "<?pocket-size 75% ?><![CDATA[public void sort(Object[] propertyId, boolean[] ascending)]]>"
+msgstr ""
+
+#. Tag: para
+#: part1-sqlcontainer.xml:251
+#, no-c-format
+msgid "In addition to the standard method, it is also possible to directly add an <classname>OrderBy</classname> to the container via the <methodname>addOrderBy()</methodname> method. This enables the developer to insert sorters one by one without providing the whole array of them at once."
+msgstr ""
+
+#. Tag: para
+#: part1-sqlcontainer.xml:259
+#, no-c-format
+msgid "All sorting rules can be cleared by calling the sort method with null or an empty array as the first argument."
+msgstr ""
+
+#. Tag: title
+#: part1-sqlcontainer.xml:267
+#, no-c-format
+msgid "Editing"
+msgstr ""
+
+#. Tag: para
+#: part1-sqlcontainer.xml:269
+#, no-c-format
+msgid "Editing the items (<classname>RowItem</classname>s) of SQLContainer can be done similarly to editing the items of any Vaadin container. <classname>ColumnProperties</classname> of a <classname>RowItem</classname> will automatically notify SQLContainer to make sure that changes to the items are recorded and will be applied to the database immediately or on commit, depending on the state of the auto-commit mode."
+msgstr ""
+
+#. Tag: title
+#: part1-sqlcontainer.xml:280
+#, no-c-format
+msgid "Adding items"
+msgstr ""
+
+#. Tag: para
+#: part1-sqlcontainer.xml:282
+#, no-c-format
+msgid "Adding items to an <classname>SQLContainer</classname> object can only be done via the <methodname>addItem()</methodname> method. This method will create a new <classname>Item</classname> based on the connected database table column properties. The new item will either be buffered by the container or committed to the database through the query delegate depending on whether the auto commit mode (see the next section) has been enabled."
+msgstr ""
+
+#. Tag: para
+#: part1-sqlcontainer.xml:292
+#, no-c-format
+msgid "When an item is added to the container it is impossible to precisely know what the primary keys of the row will be, or will the row insertion succeed at all. This is why the SQLContainer will assign an instance of <classname>TemporaryRowId</classname> as a <classname>RowId</classname> for the new item. We will later describe how to fetch the actual key after the row insertion has succeeded."
+msgstr ""
+
+#. Tag: para
+#: part1-sqlcontainer.xml:301
+#, no-c-format
+msgid "If auto-commit mode is enabled in the <classname>SQLContainer</classname>, the <methodname>addItem()</methodname> methot will return the final <classname>RowId</classname> of the new item."
+msgstr ""
+
+#. Tag: title
+#: part1-sqlcontainer.xml:309
+#, no-c-format
+msgid "Fetching generated row keys"
+msgstr ""
+
+#. Tag: para
+#: part1-sqlcontainer.xml:311
+#, no-c-format
+msgid "Since it is a common need to fetch the generated key of a row right after insertion, a listener/notifier has been added into the <classname>QueryDelegate</classname> interface. Currently only the <classname>TableQuery</classname> class implements the <classname>RowIdChangeNotifier</classname> interface, and thus can notify interested objects of changed row IDs. The events fill be fired after <methodname>commit()</methodname> in <classname>TableQuery</classname> has finished; this method is called by <classname>SQLContainer</classname> when necessary."
+msgstr ""
+
+#. Tag: para
+#: part1-sqlcontainer.xml:323
+#, no-c-format
+msgid "To receive updates on the row IDs, you might use the following code (assuming container is an instance of <classname>SQLContainer</classname>). Note that these events are not fired if auto commit mode is enabled."
+msgstr ""
+
+#. Tag: programlisting
+#: part1-sqlcontainer.xml:330
+#, no-c-format
+msgid ""
+      "<?pocket-size 65% ?><![CDATA[app.getDbHelp().getCityContainer().addListener(\n"
+      "    new QueryDelegate.RowIdChangeListener() {\n"
+      "        public void rowIdChange(RowIdChangeEvent event) {\n"
+      "            System.err.println(\"Old ID: \" + event.getOldRowId());\n"
+      "            System.err.println(\"New ID: \" + event.getNewRowId());\n"
+      "        }\n"
+      "    });]]>"
+msgstr ""
+
+#. Tag: title
+#: part1-sqlcontainer.xml:334
+#, no-c-format
+msgid "Version column requirement"
+msgstr ""
+
+#. Tag: para
+#: part1-sqlcontainer.xml:336
+#, no-c-format
+msgid "If you are using the <classname>TableQuery</classname> class as the query delegate to the <classname>SQLContainer</classname> and need to enable write support, there is an enforced requirement of specifying a version column name to the <classname>TableQuery</classname> instance. The column name can be set to the <classname>TableQuery</classname> using the following statement:"
+msgstr ""
+
+#. Tag: para
+#: part1-sqlcontainer.xml:347
+#, no-c-format
+msgid "The version column is preferrably an integer or timestamp typed column in the table that is attached to the <classname>TableQuery</classname>. This column will be used for optimistic locking; before a row modification the <classname>TableQuery</classname> will check before that the version column value is the same as it was when the data was read into the container. This should ensure that no one has modified the row inbetween the current user's reads and writes."
+msgstr ""
+
+#. Tag: para
+#: part1-sqlcontainer.xml:357
+#, no-c-format
+msgid "Note! <classname>TableQuery</classname> assumes that the database will take care of updating the version column by either using an actual <literal>VERSION</literal> column (if supported by the database in question) or by a trigger or a similar mechanism."
+msgstr ""
+
+#. Tag: para
+#: part1-sqlcontainer.xml:364
+#, no-c-format
+msgid "If you are certain that you do not need optimistic locking, but do want to enable write support, you may point the version column to, for example, a primary key column of the table."
+msgstr ""
+
+#. Tag: title
+#: part1-sqlcontainer.xml:372
+#, no-c-format
+msgid "<title>Auto-commit mode</title>"
+msgstr ""
+
+#. Tag: para
+#: part1-sqlcontainer.xml:374
+#, no-c-format
+msgid "<classname>SQLContainer</classname> is by default in transaction mode, which means that actions that edit, add or remove items are recorded internally by the container. These actions can be either committed to the database by calling <methodname>commit()</methodname> or discarded by calling <methodname>rollback()</methodname>."
+msgstr ""
+
+#. Tag: para
+#: part1-sqlcontainer.xml:382
+#, no-c-format
+msgid "The container can also be set to auto-commit mode. When this mode is enabled, all changes will be committed to the database immediately. To enable or disable the auto-commit mode, call the following method:"
+msgstr ""
+
+#. Tag: programlisting
+#: part1-sqlcontainer.xml:388
+#, no-c-format
+msgid "<?pocket-size 65% ?><![CDATA[public void setAutoCommit(boolean autoCommitEnabled)]]>"
+msgstr ""
+
+#. Tag: para
+#: part1-sqlcontainer.xml:390
+#, no-c-format
+msgid "It is recommended to leave the auto-commit mode disabled, as it ensures that the changes can be rolled back if any problems are noticed within the container items. Using the auto-commit mode will also lead to failure in item addition if the database table contains non-nullable columns."
+msgstr ""
+
+#. Tag: title
+#: part1-sqlcontainer.xml:399
+#, no-c-format
+msgid "Modified state"
+msgstr ""
+
+#. Tag: para
+#: part1-sqlcontainer.xml:401
+#, no-c-format
+msgid "When used in the transaction mode it may be useful to determine whether the contents of the <classname>SQLContainer</classname> have been modified or not. For this purpose the container provides an <methodname>isModified()</methodname> method, which will tell the state of the container to the developer. This method will return true if any items have been added to or removed from the container, as well as if any value of an existing item has been modified."
+msgstr ""
+
+#. Tag: para
+#: part1-sqlcontainer.xml:411
+#, no-c-format
+msgid "Additionally, each <classname>RowItem</classname> and each <classname>ColumnProperty</classname> have <methodname>isModified()</methodname> methods to allow for a more detailed view over the modification status. Do note that the modification statuses of <classname>RowItem</classname> and <classname>ColumnProperty</classname> objects only depend on whether or not the actual <classname>Property</classname> values have been modified. That is, they do not reflect situations where the whole <classname>RowItem</classname> has been marked for removal or has just been added to the container."
+msgstr ""
+
+#. Tag: title
+#: part1-sqlcontainer.xml:427
+#, no-c-format
+msgid "Caching, Paging and Refreshing"
+msgstr ""
+
+#. Tag: para
+#: part1-sqlcontainer.xml:429
+#, no-c-format
+msgid "To decrease the amount of queries made to the database, SQLContainer uses internal caching for database contents. The caching is implemented with a size-limited <classname>LinkedHashMap</classname> containing a mapping from <classname>RowId</classname>s to <classname>RowItem</classname>s. Typically developers do not need to modify caching options, although some fine-tuning can be done if required."
+msgstr ""
+
+#. Tag: title
+#: part1-sqlcontainer.xml:439
+#, no-c-format
+msgid "Container Size"
+msgstr ""
+
+#. Tag: para
+#: part1-sqlcontainer.xml:441
+#, no-c-format
+msgid "The <classname>SQLContainer</classname> keeps continuously checking the amount of rows in the connected database table in order to detect external addition or removal of rows. By default, the table row count is assumed to remain valid for 10 seconds. This value can be altered from code; with <methodname>setSizeValidMilliSeconds()</methodname> in <classname>SQLContainer</classname>."
+msgstr ""
+
+#. Tag: para
+#: part1-sqlcontainer.xml:450
+#, no-c-format
+msgid "If the size validity time has expired, the row count will be automatically updated on:"
+msgstr ""
+
+#. Tag: para
+#: part1-sqlcontainer.xml:456
+#, no-c-format
+msgid "A call to <methodname>getItemIds()</methodname> method"
+msgstr ""
+
+#. Tag: para
+#: part1-sqlcontainer.xml:457
+#, no-c-format
+msgid "A call to <methodname>size()</methodname> method"
+msgstr ""
+
+#. Tag: para
+#: part1-sqlcontainer.xml:458
+#, no-c-format
+msgid "Some calls to <methodname>indexOfId(Object itemId)</methodname> method"
+msgstr ""
+
+#. Tag: para
+#: part1-sqlcontainer.xml:459
+#, no-c-format
+msgid "A call to <methodname>firstItemId()</methodname> method"
+msgstr ""
+
+#. Tag: para
+#: part1-sqlcontainer.xml:460
+#, no-c-format
+msgid "When the container is fetching a set of rows to the item cache (lazy loading)"
+msgstr ""
+
+#. Tag: title
+#: part1-sqlcontainer.xml:465
+#, no-c-format
+msgid "Page Length and Cache Size"
+msgstr ""
+
+#. Tag: para
+#: part1-sqlcontainer.xml:467
+#, no-c-format
+msgid "The page length of the <classname>SQLContainer</classname> dictates the amount of rows fetched from the database in one query. The default value is 100, and it can be modified with the <methodname>setPageLength()</methodname> method. To avoid constant queries it is recommended to set the page length value to at least 5 times the amount of rows displayed in a Vaadin <classname>Table</classname>; obviously, this is also dependent on the cache ratio set for the <classname>Table</classname> component."
+msgstr ""
+
+#. Tag: para
+#: part1-sqlcontainer.xml:478
+#, no-c-format
+msgid "The size of the internal item cache of the <classname>SQLContainer</classname> is calculated by multiplying the page lenght with the cache ratio set for the container. The cache ratio can only be set from the code, and the default value for it is 2. Hence with the default page length of 100 the internal cache size becomes 200 items. This should be enough even for larger <classname>Table</classname>s while ensuring that no huge amounts of memory will be used on the cache."
+msgstr ""
+
+#. Tag: title
+#: part1-sqlcontainer.xml:490
+#, no-c-format
+msgid "Refreshing the Container"
+msgstr ""
+
+#. Tag: para
+#: part1-sqlcontainer.xml:492
+#, no-c-format
+msgid "Normally, the <classname>SQLContainer</classname> will handle refreshing automatically when required. However, there may be situations where an implicit refresh is needed, for example, to make sure that the version column is up-to-date prior to opening the item for editing in a form. For this purpose a <methodname>refresh()</methodname> method is provided. This method simply clears all caches, resets the current item fetching offset and sets the container size dirty. Any item-related call after this will inevitably result into row count and item cache update."
+msgstr ""
+
+#. Tag: emphasis
+#: part1-sqlcontainer.xml:504
+#, no-c-format
+msgid "Note that a call to the refresh method will not affect or reset the following properties of the container:"
+msgstr ""
+
+#. Tag: listitem
+#: part1-sqlcontainer.xml:509
+#, no-c-format
+msgid "The <classname>QueryDelegate</classname> of the container"
+msgstr ""
+
+#. Tag: listitem
+#: part1-sqlcontainer.xml:510
+#, no-c-format
+msgid "<listitem>Auto-commit mode</listitem>"
+msgstr ""
+
+#. Tag: listitem
+#: part1-sqlcontainer.xml:511
+#, no-c-format
+msgid "Page length"
+msgstr ""
+
+#. Tag: listitem
+#: part1-sqlcontainer.xml:512
+#, no-c-format
+msgid "Filters"
+msgstr ""
+
+#. Tag: listitem
+#: part1-sqlcontainer.xml:513
+#, no-c-format
+msgid "<listitem>Sorting</listitem>"
+msgstr ""
+
+#. Tag: title
+#: part1-sqlcontainer.xml:518
+#, no-c-format
+msgid "Cache Flush Notification Mechanism"
+msgstr ""
+
+#. Tag: para
+#: part1-sqlcontainer.xml:520
+#, no-c-format
+msgid "Cache usage with databases in multiuser applications always results in some kind of a compromise between the amount of queries we want to execute on the database and the amount of memory we want to use on caching the data; and most importantly, risking the cached data becoming stale."
+msgstr ""
+
+#. Tag: para
+#: part1-sqlcontainer.xml:527
+#, no-c-format
+msgid "SQLContainer provides an experimental remedy to this problem by implementing a simple cache flush notification mechanism. Due to its nature these notifications are disabled by default but can be easily enabled for a container instance by calling <methodname>enableCacheFlushNotifications()</methodname> at any time during the lifetime of the container."
+msgstr ""
+
+#. Tag: para
+#: part1-sqlcontainer.xml:536
+#, no-c-format
+msgid "The notification mechanism functions by storing a weak reference to all registered containers in a static list structure. To minimize the risk of memory leaks and to avoid unlimited growing of the reference list, dead weak references are collected to a reference queue and removed from the list every time a <classname>SQLContainer</classname> is added to the notification reference list or a container calls the notification method."
+msgstr ""
+
+#. Tag: para
+#: part1-sqlcontainer.xml:545
+#, no-c-format
+msgid "When a <classname>SQLContainer</classname> has its cache notifications set enabled, it will call the static <methodname>notifyOfCacheFlush()</methodname> method giving itself as a parameter. This method will compare the notifier-container to all the others present in the reference list. To fire a cache flush event, the target container must have the same type of <classname>QueryDelegate</classname> (either <classname>TableQuery</classname> or <classname>FreeformQuery</classname>) and the table name or query string must match with the container that fired the notification. If a match is found the <methodname>refresh()</methodname> method of the matching container is called, resulting in cache flushing in the target container."
+msgstr ""
+
+#. Tag: emphasis
+#: part1-sqlcontainer.xml:561
+#, no-c-format
+msgid "Note: Standard Vaadin issues apply; even if the <classname>SQLContainer</classname> is refreshed on the server side, the changes will not be reflected to the UI until a server round-trip is performed, or unless a push mechanism is used."
+msgstr ""
+
+#. Tag: title
+#: part1-sqlcontainer.xml:570
+#, no-c-format
+msgid "Referencing Another <classname>SQLContainer</classname>"
+msgstr ""
+
+#. Tag: para
+#: part1-sqlcontainer.xml:572
+#, no-c-format
+msgid "When developing a database-connected application, there is usually a need to retrieve data related to one table from one or more other tables. In most cases, this relation is achieved with a foreign key reference, where a column of the first table contains a primary key or candidate key of a row in another table."
+msgstr ""
+
+#. Tag: para
+#: part1-sqlcontainer.xml:580
+#, no-c-format
+msgid "SQLContainer offers limited support for this kind of referencing relation, although all referencing is currently done on the Java side so no constraints need to be made in the database. A new reference can be created by calling the following method:"
+msgstr ""
+
+#. Tag: programlisting
+#: part1-sqlcontainer.xml:587
+#, no-c-format
+msgid ""
+      "<?pocket-size 70% ?><![CDATA[public void addReference(SQLContainer refdCont,\n"
+      "                         String refingCol, String refdCol);]]>"
+msgstr ""
+
+#. Tag: para
+#: part1-sqlcontainer.xml:589
+#, no-c-format
+msgid "This method should be called on the source container of the reference. The target container should be given as the first parameter. The <parameter>refingCol</parameter> is the name of the 'foreign key' column in the source container, and the <parameter>refdCol</parameter> is the name of the referenced key column in the target container."
+msgstr ""
+
+#. Tag: emphasis
+#: part1-sqlcontainer.xml:598
+#, no-c-format
+msgid "Note: For any <classname>SQLContainer</classname>, all the referenced target containers must be different. You can not reference the same container from the same source twice."
+msgstr ""
+
+#. Tag: para
+#: part1-sqlcontainer.xml:603
+#, no-c-format
+msgid "Handling the referenced item can be done through the three provided set/get methods, and the reference can be completely removed with the <methodname>removeReference()</methodname> method. Signatures of these methods are listed below:"
+msgstr ""
+
+#. Tag: programlisting
+#: part1-sqlcontainer.xml:610
+#, no-c-format
+msgid ""
+      "<?pocket-size 70% ?><![CDATA[public boolean setReferencedItem(Object itemId,\n"
+      "        Object refdItemId, SQLContainer refdCont)\n"
+      "public Object getReferencedItemId(Object itemId,\n"
+      "                                  SQLContainer refdCont)\n"
+      "public Item getReferencedItem(Object itemId,\n"
+      "                              SQLContainer refdCont)\n"
+      "public boolean removeReference(SQLContainer refdCont)]]>"
+msgstr ""
+
+#. Tag: para
+#: part1-sqlcontainer.xml:612
+#, no-c-format
+msgid "The setter method should be given three parameters: <parameter>itemId</parameter> is the ID of the referencing item (from the source container), <parameter>refdItemId</parameter> is the referenced <parameter>itemID</parameter> (from the target container) and <parameter>refdCont</parameter> is a reference to the target container that identifies the reference. This method returns true if the setting of the referenced item was successful. After setting the referenced item you must normally call <methodname>commit()</methodname> on the source container to persist the changes to the database."
+msgstr ""
+
+#. Tag: para
+#: part1-sqlcontainer.xml:624
+#, no-c-format
+msgid "The <methodname>getReferencedItemId()</methodname> method will return the item ID of the referenced item. As parameters this method needs the item ID of the referencing item and a reference to the target container as an identifier. <classname>SQLContainer</classname> also provides a convenience method <methodname>getReferencedItem()</methodname>, which directly returns the referenced item from the target container."
+msgstr ""
+
+#. Tag: para
+#: part1-sqlcontainer.xml:633
+#, no-c-format
+msgid "Finally, the referencing can be removed from the source container by calling the <methodname>removeReference()</methodname> method with the target container as parameter. Note that this does not actually change anything in the database; it merely removes the logical relation that exists only on the Java-side."
+msgstr ""
+
+#. Tag: title
+#: part1-sqlcontainer.xml:643
+#, no-c-format
+msgid "Using <classname>FreeformQuery</classname> and <classname>FreeformStatementDelegate</classname>"
+msgstr ""
+
+#. Tag: para
+#: part1-sqlcontainer.xml:645
+#, no-c-format
+msgid "In most cases, the provided <classname>TableQuery</classname> will be enough to allow a developer to gain effortless access to an SQL data source. However there may arise situations when a more complex query with, for example, join expressions is needed. Or perhaps you need to redefine how the writing or filtering should be done. The <classname>FreeformQuery</classname> query delegate is provided for this exact purpose. Out of the box the <classname>FreeformQuery</classname> supports read-only access to a database, but it can be extended to allow writing also."
+msgstr ""
+
+#. Tag: title
+#: part1-sqlcontainer.xml:657
+#, no-c-format
+msgid "Getting started"
+msgstr ""
+
+#. Tag: para
+#: part1-sqlcontainer.xml:659
+#, no-c-format
+msgid "Getting started with the <classname>FreeformQuery</classname> may be done as shown in the following. The connection pool initialization is similar to the <classname>TableQuery</classname> example so it is omitted here. Note that the name(s) of the primary key column(s) must be provided to the <classname>FreeformQuery</classname> manually. This is required because depending on the query the result set may or may not contain data about primary key columns. In this example, there is one primary key column with a name 'ID'."
+msgstr ""
+
+#. Tag: programlisting
+#: part1-sqlcontainer.xml:670
+#, no-c-format
+msgid ""
+      "<![CDATA[FreeformQuery query = new FreeformQuery(\n"
+      "        \"SELECT * FROM SAMPLE\", pool, \"ID\");\n"
+      "SQLContainer container = new SQLContainer(query);]]>"
+msgstr ""
+
+#. Tag: title
+#: part1-sqlcontainer.xml:674
+#, no-c-format
+msgid "Limitations"
+msgstr ""
+
+#. Tag: para
+#: part1-sqlcontainer.xml:676
+#, no-c-format
+msgid "While this looks just as easy as with the <classname>TableQuery</classname>, do note that there are some important caveats here. Using <classname>FreeformQuery</classname> like this (without providing <classname>FreeformQueryDelegate</classname> or <classname>FreeformStatementDelegate</classname> implementation) it can only be used as a read-only window to the resultset of the query. Additionally filtering, sorting and lazy loading features will not be supported, and the row count will be fetched in quite an inefficient manner. Bearing these limitations in mind, it becomes quite obvious that the developer is in reality meant to implement the <classname>FreeformQueryDelegate</classname> or <classname>FreeformStatementDelegate</classname> interface."
+msgstr ""
+
+#. Tag: para
+#: part1-sqlcontainer.xml:691
+#, no-c-format
+msgid "The <classname>FreeformStatementDelegate</classname> interface is an extension of the <classname>FreeformQueryDelegate</classname> interface, which returns <classname>StatementHelper</classname> objects instead of pure query <classname>String</classname>s. This enables the developer to use prepared statetemens instead of regular statements. It is highly recommended to use the <classname>FreeformStatementDelegate</classname> in all implementations. From this chapter onwards, we will only refer to the <classname>FreeformStatementDelegate</classname> in cases where <classname>FreeformQueryDelegate</classname> could also be applied."
+msgstr ""
+
+#. Tag: title
+#: part1-sqlcontainer.xml:705
+#, no-c-format
+msgid "Creating your own <classname>FreeformStatementDelegate</classname>"
+msgstr ""
+
+#. Tag: para
+#: part1-sqlcontainer.xml:707
+#, no-c-format
+msgid "To create your own delegate for <classname>FreeformQuery</classname> you must implement some or all of the methods from the <classname>FreeformStatementDelegate</classname> interface, depending on which ones your use case requires. The interface contains eight methods which are shown below. For more detailed requirements, see the JavaDoc documentation of the interface."
+msgstr ""
+
+#. Tag: programlisting
+#: part1-sqlcontainer.xml:716
+#, no-c-format
+msgid ""
+      "<?pocket-size 65% ?><![CDATA[// Read-only queries\n"
+      "public StatementHelper getCountStatement()\n"
+      "public StatementHelper getQueryStatement(int offset, int limit)\n"
+      "public StatementHelper getContainsRowQueryStatement(Object... keys)\n"
+      "\n"
+      "// Filtering and sorting\n"
+      "public void setFilters(List<Filter> filters)\n"
+      "public void setFilters(List<Filter> filters,\n"
+      "                       FilteringMode filteringMode)\n"
+      "public void setOrderBy(List<OrderBy> orderBys)\n"
+      "\n"
+      "// Write support\n"
+      "public int storeRow(Connection conn, RowItem row)\n"
+      "public boolean removeRow(Connection conn, RowItem row)]]>"
+msgstr ""
+
+#. Tag: para
+#: part1-sqlcontainer.xml:718
+#, no-c-format
+msgid "A simple demo implementation of this interface can be found in the SQLContainer package, more specifically in the class <classname>com.vaadin.addon.sqlcontainer.demo.DemoFreeformQueryDelegate</classname>."
+msgstr ""
+
+#. Tag: title
+#: part1-sqlcontainer.xml:727
+#, no-c-format
+msgid "Non-implemented methods of Vaadin container interfaces"
+msgstr ""
+
+#. Tag: para
+#: part1-sqlcontainer.xml:729
+#, no-c-format
+msgid "Due to the database connection inherent to the SQLContainer, some of the methods from the container interfaces of Vaadin can not (or would not make sense to) be implemented. These methods are listed below, and they will throw an <classname>UnsupportedOperationException</classname> on invocation."
+msgstr ""
+
+#. Tag: programlisting
+#: part1-sqlcontainer.xml:736
+#, no-c-format
+msgid ""
+      "<?pocket-size 65% ?><![CDATA[public boolean addContainerProperty(Object propertyId,\n"
+      "                                    Class<?> type,\n"
+      "                                    Object defaultValue)\n"
+      "public boolean removeContainerProperty(Object propertyId)\n"
+      "public Item addItem(Object itemId)\n"
+      "public Object addItemAt(int index)\n"
+      "public Item addItemAt(int index, Object newItemId)\n"
+      "public Object addItemAfter(Object previousItemId)\n"
+      "public Item addItemAfter(Object previousItemId, Object newItemId)]]>"
+msgstr ""
+
+#. Tag: para
+#: part1-sqlcontainer.xml:738
+#, no-c-format
+msgid "Additionally, the following methods of the <classname>Item</classname> interface are not supported in the <classname>RowItem</classname> class:"
+msgstr ""
+
+#. Tag: programlisting
+#: part1-sqlcontainer.xml:743
+#, no-c-format
+msgid ""
+      "<?pocket-size 65% ?><![CDATA[public boolean addItemProperty(Object id, Property property)\n"
+      "public boolean removeItemProperty(Object id)]]>"
+msgstr ""
+
+#. Tag: title
+#: part1-sqlcontainer.xml:746
+#, no-c-format
+msgid "About the getItemIds() method"
+msgstr ""
+
+#. Tag: para
+#: part1-sqlcontainer.xml:748
+#, no-c-format
+msgid "To properly implement the Vaadin <classname>Container</classname> interface, a <methodname>getItemIds()</methodname> method has been implented in the <classname>SQLContainer</classname>. By definition, this method returns a collection of all the item IDs present in the container. What this means in the <classname>SQLContainer</classname> case is that the container has to query the database for the primary key columns of all the rows present in the connected database table."
+msgstr ""
+
+#. Tag: para
+#: part1-sqlcontainer.xml:758
+#, no-c-format
+msgid "It is obvious that this could potentially lead to fetching tens or even hundreds of thousands of rows in an effort to satisfy the method caller. This will effectively kill the lazy loading properties of <classname>SQLContainer</classname> and therefore the following warning is expressed here:"
+msgstr ""
+
+#. Tag: para
+#: part1-sqlcontainer.xml:767
+#, no-c-format
+msgid "It is highly recommended not to call the <methodname>getitemIds()</methodname> method, unless it is known that in the use case in question the item ID set will always be of reasonable size."
+msgstr ""
+
+#. Tag: title
+#: part1-sqlcontainer.xml:778
+#, no-c-format
+msgid "Known Issues and Limitations"
+msgstr ""
+
+#. Tag: para
+#: part1-sqlcontainer.xml:780
+#, no-c-format
+msgid "At this point, there are still some known issues and limitations affecting the use of SQLContainer in certain situations. The known issues and brief explanations are listed below:"
+msgstr ""
+
+#. Tag: listitem
+#: part1-sqlcontainer.xml:787
+#, no-c-format
+msgid "Some SQL data types do not have write support when using TableQuery:"
+msgstr ""
+
+#. Tag: listitem
+#: part1-sqlcontainer.xml:790
+#, no-c-format
+msgid "All binary types"
+msgstr ""
+
+#. Tag: listitem
+#: part1-sqlcontainer.xml:791
+#, no-c-format
+msgid "All custom types"
+msgstr ""
+
+#. Tag: listitem
+#: part1-sqlcontainer.xml:793
+#, no-c-format
+msgid "CLOB (if not converted automatically to a <classname>String</classname> by the JDBC driver in use)"
+msgstr ""
+
+#. Tag: listitem
+#: part1-sqlcontainer.xml:798
+#, no-c-format
+msgid "See <classname>com.vaadin.addon.sqlcontainer.query.generator.StatementHelper</classname> for details."
+msgstr ""
+
+#. Tag: para
+#: part1-sqlcontainer.xml:807
+#, no-c-format
+msgid "When using Oracle or MS SQL database, the column name \"<parameter>rownum</parameter>\" can not be used as a column name in a table connected to <classname>SQLContainer</classname>."
+msgstr ""
+
+#. Tag: para
+#: part1-sqlcontainer.xml:812
+#, no-c-format
+msgid "This limitation exists because the databases in question do not support limit/offset clauses required for paging. Instead, a generated column named 'rownum' is used to implement paging support."
+msgstr ""
+
+#. Tag: para
+#: part1-sqlcontainer.xml:820
+#, no-c-format
+msgid "The permanent limitations are listed below. These can not or most probably will not be fixed in future versions of SQLContainer."
+msgstr ""
+
+#. Tag: listitem
+#: part1-sqlcontainer.xml:826
+#, no-c-format
+msgid "The <methodname>getItemIds()</methodname> method is very inefficient - avoid calling it unless absolutely required!"
+msgstr ""
+
+#. Tag: listitem
+#: part1-sqlcontainer.xml:831
+#, no-c-format
+msgid "When using <classname>FreeformQuery</classname> without providing a <classname>FreeformStatementDelegate</classname>, the row count query is very inefficient - avoid using <classname>FreeformQuery</classname> without implementing at least the count query properly."
+msgstr ""
+
+#. Tag: listitem
+#: part1-sqlcontainer.xml:838
+#, no-c-format
+msgid "When using <classname>FreeformQuery</classname> without providing a <classname>FreeformStatementDelegate</classname>, writing, sorting and filtering will not be supported."
+msgstr ""
+
+#. Tag: para
+#: part1-sqlcontainer.xml:845
+#, no-c-format
+msgid "When using Oracle database most or all of the numeric types are converted to <classname>java.math.BigDecimal</classname> by the Oracle JDBC Driver."
+msgstr ""
+
+#. Tag: para
+#: part1-sqlcontainer.xml:850
+#, no-c-format
+msgid "This is a feature of how Oracle DB and the Oracle JDBC Driver handles data types."
+msgstr ""
+
