@@ -4,6 +4,8 @@ all: images icons
 ################################################################################
 
 DOCROOT = ..
+DOCBOOK = docbook-xsl-1.76.1
+MANUALPATH = manual
 
 # Document language; this is the default, translations can override this.
 DBLANGUAGE = en
@@ -43,14 +45,17 @@ IMAGES =	intro/architecture intro/architecture-detailed intro/toolchain intro/to
 			rapid/domain-model \
 			mobile/navigationview mobile/navigationpanel \
 			testbench/tt-workflow testbench/tt-architecture-simple testbench/tt-recorder-workflow \
-			testbench/tt-junit-workflow
+			testbench/tt-junit-workflow \
+			jpacontainer/detailed-architecture
 
 # List of source XML files
 XMLFILES =  book.xml \
-			part1-advanced.xml part1-architecture.xml part1-datamodel.xml \
-			part1-getting-started.xml part1-introduction.xml part1-themes.xml \
-			part1-vaadin.xml part1-application.xml part1-components.xml \
-			part1-eclipse.xml part1-gwt.xml part1-layout.xml part1-uidl.xml
+	part1-addons.xml	part1-datamodel.xml	part1-layout.xml	part1-mobile-tablet.xml	part1-themes.xml \
+	part1-advanced.xml	part1-eclipse.xml	part1-mobile-components.xml	part1-mobile-testing.xml	part1-timeline.xml \
+	part1-application.xml	part1-getting-started.xml	part1-mobile-considerations.xml	part1-mobile.xml	part1-uidl.xml \
+	part1-architecture.xml	part1-gwt.xml	part1-mobile-limitations.xml	part1-rapid.xml	part1-vaadin.xml \
+	part1-calendar.xml	part1-introduction.xml	part1-mobile-phone.xml	part1-sqlcontainer.xml \
+	part1-components.xml	part1-jpacontainer.xml	part1-mobile-project.xml	part1-testbench.xml
 
 
 # List if icons in img/icons
@@ -126,7 +131,7 @@ XEPPARS = -Dcom.renderx.xep.CONFIG=build/lib/XEP/xep-vaadinfonts.xml -quiet
 
 # Run XEP FO processor to convert FO to PDF.
 book.pdf: book.fo
-	cd $(DOCROOT) ; /opt/RenderX/XEP/xep $(XEPPARS) <manual/book.fo >manual/book.pdf
+	cd $(DOCROOT) ; /opt/RenderX/XEP/xep $(XEPPARS) <$(MANUALPATH)/book.fo >$(MANUALPATH)/book.pdf
 	cp book.pdf /var/www/book.pdf
 	rm book.fo
 
