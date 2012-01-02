@@ -1217,9 +1217,574 @@ public class HtmlModePortlet extends AbstractApplicationPortlet {
             that some HTML content (for example, loading the portal-wide Vaadin theme) is
             created by the portlet and not the servlet.
         </para>
-
     </section>
+
+    <section xml:id="portal.control-panel">
+        <title>Vaadin Control Panel for Liferay</title>
+
+        <para>
+            Vaadin portlets, just as all Vaadin applications, use a <emphasis>widget
+            set</emphasis> to render the user interface in the browser and to handle the
+            Ajax communication with the server-side application. While regular Vaadin
+            applications use a widget set for each application, in portals the widget set
+            is shared by all Vaadin portlets running in the portal. Liferay actually comes
+            preinstalled with a precompiled version of the default portal widget
+            set. However, many add-on components come with their own widget set, which
+            needs to be compiled into the portal widget set. The Vaadin Control Panel for
+            Liferay automates this compilation. You can also use it to just install a new
+            version of the Vaadin library.
+        </para>
+
+        <section xml:id="portal.control-panel.installing">
+            <title>Installing</title>
+
+            <para>
+                Vaadin Control Panel for Liferay is available for download from Vaadin
+                Directory. It is a WAR package, which you need to simply drop into Liferay's
+                <filename>deploy</filename> folder. Once the deployment is done, the Vaadin
+                Control Panel should show up in the Liferay Control Panel.
+            </para>
+        </section>
+
+        <section xml:id="portal.control-panel.using">
+            <title>Using the Control Panel</title>
+
+            <para>
+                Open the <guilabel>Vaadin</guilabel> section in the Liferay Control Panel.
+                The initial state with is illustrated in <xref
+                linkend="figure.portal.control-panel.using.initial"/>.
+            </para>
+
+            <figure xml:id="figure.portal.control-panel.using.initial">
+                <title>Initial State of Vaadin Control Panel for Liferay</title>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata smallscale="100%" align="center" fileref="img/portal/liferay-control-panel-1.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+
+            <section xml:id="portal.control-panel.using.upgrade">
+                <title>Upgrading Vaadin</title>
+
+                <para>
+                    Liferay comes with Vaadin preinstalled. To upgrade the preinstalled
+                    version to a newer one, follow the following steps. Notice that the
+                    Vaadin library is upgraded for <emphasis>all</emphasis> Vaadin
+                    portlets, so they must all be compatible with the new version.
+                </para>
+
+                <orderedlist>
+                    <listitem>
+                        <para>
+                            Click <guibutton>Upgrade</guibutton> in the <guilabel>Vaadin
+                            Jar Version</guilabel>.
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                            In the warning dialog that appears, read the message and if
+                            you want to go on with the upgrade, click <guibutton>Change
+                            version</guibutton> to proceed.
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                            Recompile the widget set as instructed below.
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                            Redeploy all Vaadin portlets in Liferay, that is, copy the
+                            WARs to the <filename>deploy</filename> folder in Liferay.
+                        </para>
+                    </listitem>
+                </orderedlist>
+
+                <para>
+                    The Google Web Toolkit (GWT) libraries required for the widget set
+                    compilation are also upgraded automatically.
+                </para>
+            </section>
+
+            <section xml:id="portal.control-panel.using.compile">
+                <title>Compiling Widget Set</title>
+
+                <para>
+                    When you need to compile the widget set, follow the following steps:
+                </para>
+
+                <orderedlist>
+                    <listitem>
+                        <para>
+                            Place any add-on Jars containing widget sets, such as add-on
+                            Jars, in the <filename>WEB-INF/lib</filename> folder of
+                            Liferay. Its exact location depends on the used server; for
+                            example in Tomcat it is under the
+                            <filename>webapps/ROOT</filename> folder.
+                        </para>
+                    </listitem>                        
+                    <listitem>
+                        <para>
+                            Click <guibutton>re-scan</guibutton> in the <guilabel>Add-on
+                            Directory</guilabel> to detect any new add-on libraries.
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                            Select the add-ons which you wish to compile into the widget
+                            set.
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                            Click <guibutton>Manage Additional Dependencies</guibutton> if
+                            the libraries require any special libraries and add them.
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                            Click <guibutton>Compile Widget Set</guibutton> to compile the
+                            widget set. The compilation can take several minutes.
+                        </para>
+                    </listitem>
+                </orderedlist>
+
+                <para>
+                    The compiled widget set is copied automatically to the proper folder
+                    and taken into use.
+                </para>
+            </section>
+        </section>
+    </section>
+
+    <section xml:id="portal.liferay-ipc">
+        <title>Vaadin IPC for Liferay</title>
+
+        <indexterm xml:id="term.portal.liferay-ipc" class="startofrange"><primary>IPC add-on</primary></indexterm>
+
+        <para>
+            Portlets rarely live alone. A page can contain multiple portlets and when the
+            user interacts with one portlet, you may need to have the other portlets react
+            to the change immediately. This is not normally possible with Vaadin portlets,
+            as Vaadin applications need to get an Ajax request from the client-side to
+            change their user interface. On the other hand, the regular inter portlet
+            communication (IPC) mechanism in Portlet 2.0 Specification requires a complete
+            page reload, but that is not appropriate with Vaadin or in general Ajax
+            applications, which do not require a page reload. One solution is to
+            communicate between the portlets on the server-side and then use a server-push
+            mechanism to update the client-side.
+        </para>
+
+        <para>
+            The Vaadin IPC for Liferay Add-on takes another approach by communicating
+            between the portlets through the client-side. Events (messages) are sent
+            through the <classname>LiferayIPC</classname> component and the client-side
+            widget relays them to the other portlets, as illustrated in <xref
+            linkend="figure.portal.liferay-ipc.architecture"/>.
+        </para>
+
+        <figure xml:id="figure.portal.liferay-ipc.architecture">
+            <title>Vaadin IPC for Liferay Architecture</title>
+            <mediaobject>
+                <imageobject role="html">
+                    <imagedata align="center" fileref="img/portal/liferay-ipc-architecture-lo.png"/>
+                </imageobject>
+                <imageobject role="fo">
+                    <imagedata smallscale="80%" align="center" fileref="img/portal/liferay-ipc-architecture-hi.png"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
+
+        <para>
+            <xref linkend="figure.portal.liferay-ipc.demo"/> shows Vaadin IPC for Liferay
+            in action.  Entering a new item in one portlet is updated interactively in the
+            other.
+        </para>
+
+        <figure xml:id="figure.portal.liferay-ipc.demo">
+            <title>Vaadin IPC Add-on Demo with Two Portlets</title>
+            <mediaobject>
+                <imageobject>
+                    <imagedata smallscale="100%" align="center" fileref="img/portal/liferay-ipc-demo-annotated-lo.png"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
+
+        <section xml:id="portal.liferay-ipc.installation">
+            <title>Installing the Add-on</title>
+
+            <para>
+                The Vaadin IPC for Liferay add-on is available from the Vaadin Directory
+                as well as from a Maven repository, as described in <xref
+                linkend="addons"/>. 
+            </para>
+
+            <?dbfo-need height="3cm" ?>
+            <para>
+                The contents of the installation package are as follows:
+            </para>
+
+            <variablelist>
+                <varlistentry>
+                    <term><filename>vaadin-ipc-for-liferay-x.x.x.jar</filename></term>
+                    <listitem>
+                        The add-on JAR in the installation package must be installed in
+                        the <filename>WEB-INF/lib</filename> directory under the root
+                        context. The location depends on the server - for example in
+                        Liferay running in Tomcat it is located under the
+                        <filename>webapps/ROOT</filename> folder of the server.
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><filename>doc</filename></term>
+                    <listitem>
+                        The documentation folder includes a
+                        <filename>README.TXT</filename> file that describes the contents
+                        of the installation package briefly, and
+                        <filename>licensing.txt</filename> and
+                        <filename>license-asl-2.0.txt</filename>, which describe the
+                        licensing under the Apache License 2.0. Under the
+                        <filename>doc/api</filename> folder is included the complete
+                        JavaDoc API documentation for the add-on.
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><filename>vaadin-ipc-for-liferay-x.x.x-demo.war</filename></term>
+                    <listitem>
+                        A WAR containing demo portlets. After installing the add-on
+                        library and compiling the widget set, as described below, you can
+                        deploy the WAR to Liferay and add the two demo portlets to a page,
+                        as shown in <xref linkend="figure.portal.liferay-ipc.demo"/>. The
+                        source of the demo is available at <link
+                        xlink:href="http://dev.vaadin.com/svn/addons/IPCforLiferay/trunk/demo/src/com/vaadin/addon/ipcforliferay/demo/">dev.vaadin.com/svn/addons/IPCforLiferay/trunk/</link>.
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+
+            <simplesect xml:id="portal.liferay-ipc.installation.demo">
+                <title>Compiling the Widget Set</title>
+
+                <para>
+                    The add-on contains a widget set, which you must compile into the Vaadin widget
+                    set installed in the portal. The easiest way you can do this is to use the
+                    Vaadin Control Panel for Liferay to compile the portal widget set, as
+                    described in <xref linkend="portal.control-panel"/>.
+                </para>
+            </simplesect>
+        </section>
+
+        <section xml:id="portal.liferay-ipc.communication">
+            <title>Basic Communication</title>
+
+            <para>
+                <classname>LiferayIPC</classname> is an invisible user interface component
+                that can be used to send messages between two or more Vaadin portlets. You
+                add it to an application layout as you would any regular user interface
+                component.
+            </para>
+
+            <programlisting><![CDATA[LiferayIPC liferayipc = new LiferayIPC();
+layout.addComponent(liferayipc);]]></programlisting>
+
+            <para>
+                The component can be used both for sending and receiving messages, as
+                described next.
+            </para>
+
+            <simplesect xml:id="portal.liferay-ipc.communication.sending">
+                <title>Sending Events</title>
+
+                <para>
+                    You can send an event (a message) with the
+                    <methodname>sendEvent()</methodname> method, which takes an event ID
+                    and the message data as parameters. The event is broadcast to all
+                    listening portlets. The event ID is a string that can be used to
+                    identify the recipient of an event or the event type.
+                </para>
+
+                <programlisting><![CDATA[liferayipc.sendEvent("hello", "This is Data");]]></programlisting>
+
+                <para>
+                    If you need to send more complex data, you need to format or serialize
+                    it to a string representation as described in <xref
+                    linkend="portal.liferay-ipc.serialization"/>.
+                </para>
+            </simplesect>
+
+            <simplesect xml:id="portal.liferay-ipc.communication.receiving">
+                <title>Reveiving Events</title>
+
+                <para>
+                    A portlet wishing to receive events (messages) from other portlets
+                    needs to register a listener in the component with
+                    <methodname>addListener()</methodname>. The listener receives the
+                    messages in a <classname>LiferayIPCEvent</classname> object. Filtering
+                    events by the ID is built in into the listener handler, you give the
+                    listened event ID as the first parameter for the
+                    <methodname>addListener()</methodname>. The actual message data is
+                    held in the <parameter>data</parameter> property, which you can read
+                    with <methodname>getData()</methodname>.
+                </para>
+
+                <programlisting><?pocket-size 65% ?><![CDATA[liferayipc.addListener("hello", new LiferayIPCEventListener() {
+    public void eventReceived(LiferayIPCEvent event) {
+        // Do something with the message data
+        String data = event.getData();
+        getWindow().showNotification(
+           "Received hello: " + data);
+    }
+});]]></programlisting>
+
+                <para>
+                    A listener added to a <classname>LiferayIPC</classname> can be removed
+                    with <methodname>removeListener()</methodname>.
+                </para>
+            </simplesect>
+        </section>
+
+        <section xml:id="portal.liferay-ipc.concerns">
+            <title>Considerations</title>
+
+            <para>
+                Both security and efficiency should be considered with inter-portlet
+                communications when using the Vaadin IPC for Liferay.
+            </para>
+
+            <section xml:id="portal.liferay-ipc.concerns.security">
+                <title>Browser Security</title>
+
+                <para>
+                    As the message data is passed through the client-side (browser), any
+                    code running in the browser has access to the data. You should be
+                    careful not to expose any security-critical data in client-side
+                    messaging. Also, malicious code running in the browser could alter or
+                    fake messages. Sanitization can help with the latter problem and
+                    encryption to solve the both issues. You can also share the sensitive
+                    data through session attributes or a database and use the client-side
+                    IPC only to notify that the data is available.
+                </para>
+            </section>
+
+            <section xml:id="portal.liferay-ipc.concerns.efficiency">
+                <title>Efficiency</title>
+
+                <para>
+                    Sending data through the browser requires loading and sending it in
+                    HTTP requests. The data is held in the memory space of the browser,
+                    and handling large data in the client-side JavaScript code can take
+                    time. Noticeably large message data can therefore reduce the
+                    responsiveness of the application and could, in extreme cases, go over
+                    browser limits for memory consumption or JavaScript execution time.
+                </para>
+            </section>
+        </section>
+
+        <section xml:id="portal.liferay-ipc.attributes">
+            <title>Communication Through Session Attributes</title>
+
+            <para>
+                In many cases, such as when considering security or efficiency, it is best
+                to pass the bulk data on the server-side and use the client-side IPC only
+                for notifying the other portlet(s) that the data is available. Session
+                attributes are a conveninent way of sharing data on the server-side. You
+                can also share objects through them, not just strings.
+            </para>
+
+            <para>
+                The session variables have a <emphasis>scope</emphasis>, which should be
+                <parameter>APPLICATION_SCOPE</parameter>. The "application" refers to the
+                scope of the Java web application (WAR) that contains the portlets.
+            </para>
+
+            <para>
+                If the communicating portlets are in the same Java web application (WAR),
+                no special configuration is needed. You can also communicate between
+                portlets in different WARs, in which case you need to disable the
+                <parameter>private-session-attributes</parameter> parameter in
+                <filename>liferay-portlet.xml</filename> by setting it to
+                <literal>false</literal>. Please see Liferay documentation for more
+                information regarding the configuration.
+            </para>
+
+            <para>
+                You can also share Java objects between the portlets in the same WAR, not
+                just strings. If the portlets are in different WARs, they normally have
+                different class loaders, which could cause incompatibilities, so you can
+                only communicate with strings and any object data needs to be serialized.
+            </para>
+
+            <para>
+                Session attributes are accessible through the
+                <classname>PortletSession</classname> object, which you can access through
+                the portlet context from the Vaadin <classname>Application</classname>
+                class.
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[Person person = new Person(firstname, lastname, age);
+...
+
+PortletSession session =
+        ((PortletApplicationContext2)getContext()).
+            getPortletSession();
+
+// Share the object
+String key = "IPCDEMO_person";
+session.setAttribute(key, person,
+                     PortletSession.APPLICATION_SCOPE);
+
+// Notify that it's available
+liferayipc.sendEvent("ipc_demodata_available", key);]]></programlisting>
+
+            <para>
+                You can then receive the attribute in a
+                <classname>LiferayIPCEventListener</classname> as follows:
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[public void eventReceived(LiferayIPCEvent event) {
+    String key = event.getData();
+
+    PortletSession session =
+            ((PortletApplicationContext2)getContext()).
+                getPortletSession();
+
+    // Get the object reference
+    Person person = (Person) session.getAttribute(key);
+
+    // We can now use the object in our application
+    BeanItem<Person> item = new BeanItem<Person> (person);
+    form.setItemDataSource(item);
+}]]></programlisting>
+
+            <para>
+                Notice that changes to a shared object bound to a user interface component
+                are not updated automatically if it is changed in another portlet. The
+                issue is the same as with double-binding in general.
+            </para>
+        </section>
+
+        <section xml:id="portal.liferay-ipc.serialization">
+            <title>Serializing and Encoding Data</title>
+
+            <para>
+                The IPC events support transmitting only plain strings, so if you have
+                object or other non-string data, you need to format or serialize it to a
+                string representation. For example, the demo application formats the
+                trivial data model as a semicolon-separated list as follows:
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[private void sendPersonViaClient(String firstName,
+                                 String lastName, int age) {
+    liferayIPC_1.sendEvent("newPerson", firstName + ";" +
+                           lastName + ";" + age);
+}]]></programlisting>
+
+            <para>
+                You can use standard Java serialization for any classes that implement the
+                <interfacename>Serializable</interfacename> interface. The transmitted
+                data may not include any control characters, so you also need to encode
+                the string, for example by using Base64 encoding.
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[// Some serializable object
+MyBean mybean = new MyBean();
+...
+
+// Serialize
+ByteArrayOutputStream baostr = new ByteArrayOutputStream();
+ObjectOutputStream oostr;
+try {
+    oostr = new ObjectOutputStream(baostr);
+    oostr.writeObject(mybean); // Serialize the object
+    oostr.close();
+} catch (IOException e) {
+    getWindow().showNotification("IO PAN!"); // Complain
+}
+
+// Encode
+BASE64Encoder encoder = new BASE64Encoder();
+String encoded = encoder.encode(baostr.toByteArray());
+
+// Send the IPC event to other portlet(s)
+liferayipc.sendEvent("mybeanforyou", encoded);]]></programlisting>
+
+            <para>
+                You can then deserialize such a message at the receiving end as follows:
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[public void eventReceived(LiferayIPCEvent event) {
+    String encoded = event.getData();
+
+    // Decode and deserialize it    
+    BASE64Decoder decoder = new BASE64Decoder();
+    try {
+        byte[] data = decoder.decodeBuffer(encoded);
+        ObjectInputStream ois =
+                new ObjectInputStream( 
+                        new ByteArrayInputStream(data));
+
+        // The deserialized bean
+        MyBean deserialized = (MyBean) ois.readObject();
+        ois.close();
+
+        ... do something with the bean ...
+
+    } catch (IOException e) {
+        e.printStackTrace(); // Handle somehow
+    } catch (ClassNotFoundException e) {
+        e.printStackTrace(); // Handle somehow
+    }
+}]]></programlisting>
+        </section>
+
+        <section xml:id="portal.liferay-ipc.nonvaadin">
+            <title>Communicating with Non-Vaadin Portlets</title>
+
+            <para>
+                You can use the Vaadin IPC for Liferay to communicate also between a
+                Vaadin application and other portlets, such as JSP portlets. The demo WAR
+                includes two JSP portlets that demonstrate the communication.
+            </para>
+
+            <?dbfo-need height="3cm" ?>
+            <para>
+                When sending events from a JSP portlet, fire the event using
+                <methodname>Liferay.fire()</methodname> with an event ID and message.
+            </para>
+
+            <programlisting><![CDATA[<%@ taglib uri="http://java.sun.com/portlet_2_0"
+           prefix="portlet" %>
+<portlet:defineObjects />
+
+<script>
+function send_message() {
+    Liferay.fire('hello', "Hello, I'm here!");
+}
+</script>
+
+<input type="button" value="Send message"
+       onclick="send_message()" />]]></programlisting>
+
+            <?dbfo-need height="3cm" ?>
+            <para>
+                You can receive events using a portlet event handler:
+            </para>
+
+            <programlisting><![CDATA[<%@ taglib uri="http://java.sun.com/portlet_2_0"
+           prefix="portlet" %>
+<portlet:defineObjects />
+
+<script>
+Liferay.on('hello', function(event, data) {
+    alert("Hello: " + data);
+});
+</script>]]></programlisting>
+
+        </section>
     
+        <indexterm startref="term.portal.liferay-ipc" class="endofrange"/>
+    </section>
+
     <indexterm startref="term.portal" class="endofrange"/>
 </chapter>
 
@@ -1240,4 +1805,3 @@ sgml-local-catalogs:("/etc/sgml/catalog" "/usr/share/xemacs21/xemacs-packages/et
 sgml-local-ecat-files:("ECAT" "~/sgml/ECAT" "/usr/share/sgml/ECAT" "/usr/local/share/sgml/ECAT" "/usr/local/lib/sgml/ECAT")
 End:
 -->
-
