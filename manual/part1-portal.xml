@@ -1368,7 +1368,7 @@ public class HtmlModePortlet extends AbstractApplicationPortlet {
             user interacts with one portlet, you may need to have the other portlets react
             to the change immediately. This is not normally possible with Vaadin portlets,
             as Vaadin applications need to get an Ajax request from the client-side to
-            change their user interface. On the other hand, the regular inter portlet
+            change their user interface. On the other hand, the regular inter-portlet
             communication (IPC) mechanism in Portlet 2.0 Specification requires a complete
             page reload, but that is not appropriate with Vaadin or in general Ajax
             applications, which do not require a page reload. One solution is to
@@ -1397,6 +1397,17 @@ public class HtmlModePortlet extends AbstractApplicationPortlet {
         </figure>
 
         <para>
+            Vaadin IPC for Liferay uses the Liferay JavaScript event API for client-side
+            inter-portlet communication, so you can communicate just as easily with other
+            Liferay portlets.
+        </para>
+
+        <para>
+            Notice that you can use this communication only between portlets on the same
+            page.
+        </para>
+
+        <para>
             <xref linkend="figure.portal.liferay-ipc.demo"/> shows Vaadin IPC for Liferay
             in action.  Entering a new item in one portlet is updated interactively in the
             other.
@@ -1417,7 +1428,7 @@ public class HtmlModePortlet extends AbstractApplicationPortlet {
             <para>
                 The Vaadin IPC for Liferay add-on is available from the Vaadin Directory
                 as well as from a Maven repository, as described in <xref
-                linkend="addons"/>. 
+                linkend="addons"/>.
             </para>
 
             <?dbfo-need height="3cm" ?>
@@ -1488,6 +1499,11 @@ public class HtmlModePortlet extends AbstractApplicationPortlet {
 layout.addComponent(liferayipc);]]></programlisting>
 
             <para>
+                You should be careful not to remove the invisible component from the
+                portlet later if you modify the layout of the portlet.
+            </para>
+
+            <para>
                 The component can be used both for sending and receiving messages, as
                 described next.
             </para>
@@ -1513,7 +1529,7 @@ layout.addComponent(liferayipc);]]></programlisting>
             </simplesect>
 
             <simplesect xml:id="portal.liferay-ipc.communication.receiving">
-                <title>Reveiving Events</title>
+                <title>Receiving Events</title>
 
                 <para>
                     A portlet wishing to receive events (messages) from other portlets
@@ -1742,14 +1758,16 @@ liferayipc.sendEvent("mybeanforyou", encoded);]]></programlisting>
 
             <para>
                 You can use the Vaadin IPC for Liferay to communicate also between a
-                Vaadin application and other portlets, such as JSP portlets. The demo WAR
+                Vaadin application and other portlets, such as JSP portlets. The add-on
+                passes the events as regular Liferay JavaScript events. The demo WAR
                 includes two JSP portlets that demonstrate the communication.
             </para>
 
             <?dbfo-need height="3cm" ?>
             <para>
-                When sending events from a JSP portlet, fire the event using
-                <methodname>Liferay.fire()</methodname> with an event ID and message.
+                When sending events from non-Vaadin portlet, fire the event using the
+                JavaScript <methodname>Liferay.fire()</methodname> method with an event ID
+                and message. For example, in JSP you could have:
             </para>
 
             <programlisting><![CDATA[<%@ taglib uri="http://java.sun.com/portlet_2_0"
@@ -1767,7 +1785,10 @@ function send_message() {
 
             <?dbfo-need height="3cm" ?>
             <para>
-                You can receive events using a portlet event handler:
+                You can receive events using a Liferay JavaScript event handler. You
+                define the handler with the <methodname>on()</methodname> method in the
+                Liferay object. It takes the event ID and a callback function as its
+                parameters. Again in JSP you could have:
             </para>
 
             <programlisting><![CDATA[<%@ taglib uri="http://java.sun.com/portlet_2_0"
