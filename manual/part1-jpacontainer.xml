@@ -42,9 +42,10 @@
 		</figure>
 
         <para>
-            The domain model is mapped to the database using JPA. The database is
-            typically a relational database. Vaadin JPAContainer binds the user interface
-            components to the JPA.
+            The role of Java Persistence API is to handle persisting the domain model in
+            the database. The database is typically a relational database. Vaadin
+            JPAContainer binds the user interface components to the domain model and
+            handles database access with JPA transparently.
         </para>
 
         <para>
@@ -77,15 +78,57 @@
             <title>Java Persistence API</title>
 
             <para>
-                Java Persistence API (JPA) is an API for object-relational mapping (ORM) of
-                Java objects to a relational database. In JPA and entity-relationship modeling
-                in general, a Java class is considered an entity. Class (or entity) instances
-                correspond with a row in a database table and member variables of a class with
+                Java Persistence API (JPA) is an API for object-relational mapping (ORM)
+                of Java objects to a relational database. In JPA and entity-relationship
+                modeling in general, a Java class is considered an
+                <emphasis>entity</emphasis>. Class (or entity) instances correspond with a
+                row in a database table and member variables of a class with
                 columns. Entities can also have relationships with other entities.
             </para>
 
             <para>
                 Vaadin JPAContainer supports JPA 2.0 (JSR 317). 
+            </para>
+        </simplesect>
+
+        <simplesect xml:id="jpacontainer.overview.metadata">
+            <title>Persistence Metadata</title>
+
+            <para>
+                JPA requires metadata about the entities and their relationships. The
+                metadata can be defined in an XML metadata file or with Java annotations
+                defined in the javax.persistence package. With JPAContainer, you need to
+                provide the metadata as annotations.
+            </para>
+
+            <para>
+                For example, if we look at the Person class in the JPAContainer
+                AddressBook Demo, we define various database-related metadata for the
+                member variables of a class:
+            </para>
+
+			<programlisting><?pocket-size 75% ?><![CDATA[@Entity
+public class Person {
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
+
+    @NotNull
+    @Size(min = 2, max = 24)
+    private String firstName;
+
+    @Size(min = 2, max = 24)
+    private String lastName;
+
+    @NotNull
+    private Department department;
+    $B!D(B]]></programlisting>
+
+            <para>
+                The JPA implementation uses reflection to read the annotations and defines
+                a database model automatically from the class definitions. <!-- TODO JPA
+                annotation is discussed in detail later in Section 4.3: Annotating the
+                Classes for Persistence. -->
             </para>
         </simplesect>
 
@@ -127,14 +170,132 @@
                 <title>Choosing the License</title>
 
                 <para>
-                    Vaadin JPAContainer is a commercial product licensed under a
-                    dual-licensing scheme. The AGPL license allows open-source development,
-                    while the CVAL license needs to be purchased for closed-source use,
-                    including web deployments and internal use. Commercial licenses can be
-                    purchased from the Vaadin Directory, where you can also find the license
-                    details and download Vaadin JPAContainer.
+                    Vaadin JPAContainer is available under two licenses: Affero General
+                    Public License (AGPL) and Commercial Vaadin Add-on License (CVAL). If
+                    your project is compatible with the open-source AGPL, you can use the
+                    add-on for free. Otherwise you must acquire a sufficient number of
+                    CVAL licenses before the 30-day trial period ends. Vaadin JPAContainer
+                    is distributed as a separate installation package for each license.
+                </para>
+
+                <para>
+                    Use of Vaadin JPAContainer with the CVAL license is included in the
+                    Vaadin PRO subscription.
                 </para>
             </simplesect>
+        </section>
+
+        <section xml:id="jpacontainer.installation.package">
+            <title>Installation Package Content</title>
+
+            <para>
+                Once extracted to a local folder, the contents of the installation
+                directory are illustrated in Figure 4.
+            </para>
+
+Figure 4: Installation Package Contents
+
+            <para>
+                The files in the installation package are as follows:
+            </para>
+
+            <variablelist>
+                <varlistentry>
+                    <term><filename>README</filename></term>
+                    <listitem>
+                        <para>
+                            A readme file describing the package contents.
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><filename>licensing.txt</filename></term>
+                    <listitem>
+                        <para>
+                            General information about licensing of JPAContainer.
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><filename>license-xxxx-y.y.txt</filename></term>
+                    <listitem>
+                        <para>
+                            The full license text for the library.
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><filename>vaadin-jpacontainer-xxxx-y.y-z.z.z.jar</filename></term>
+                    <listitem>
+                        <para>
+                            The actual Vaadin JPAContainer library. The xxxx is the
+                            license name and y.y its version number. The final z.z.z is
+                            the version number of the Vaadin JPAContainer.
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><filename>vaadin-jpacontainer-xxxx-y.y-z.z.z-javadoc.jar</filename></term>
+                    <listitem>
+                        <para>
+                            JavaDoc documentation JAR for the library. You can use it for
+                            example in Eclipse by associating the JavaDoc JAR with the
+                            JPAContainer JAR in the build path settings of your project.
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><filename>apidocs</filename></term>
+                    <listitem>
+                        <para>
+                            A folder containing the JavaDoc API documentation in plain
+                            HTML.
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><filename>jpacontainer-tutorial.pdf</filename></term>
+                    <listitem>
+                        <para>
+                            The tutorial in PDF format.
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><filename>jpacontainer-tutorial</filename></term>
+                    <listitem>
+                        <para>
+                            The tutorial in HTML format. The latest version of the
+                            tutorial is always available at
+                            vaadin.com/download/jpacontainer-tutorial/.
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><filename>jpacontainer-addressbook-demo</filename></term>
+                    <listitem>
+                        <para>
+                            The JPAContainer AddressBook Demo project covered in this
+                            tutorial. You can compile and package the application as a WAR
+                            with <screen><command>mvn</command>
+                            <parameter>package</parameter></screen>¡ or launch it in the
+                            Jetty web browser with <screen><command>mvn</command>
+                            <parameter>jetty:run</parameter></screen>.  You can also
+                            import the demo project in Eclipse as described in Section
+                            3.1.2: Importing from Existing Installation Folder.
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><filename>jpacontainer-demo-z.z.z.war</filename></term>
+                    <listitem>
+                        <para>
+                            The basic JPAContainer demo. It is somewhat more extensive
+                            than the AddressBook Demo.
+                        </para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
         </section>
     </section>
 
