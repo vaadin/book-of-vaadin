@@ -46,7 +46,7 @@ IMAGES =	intro/architecture intro/architecture-detailed intro/toolchain intro/to
 			mobile/navigationview mobile/navigationpanel \
 			testbench/tt-workflow testbench/tt-architecture-simple testbench/tt-recorder-workflow \
 			testbench/tt-junit-workflow \
-			jpacontainer/detailed-architecture \
+			jpacontainer/detailed-architecture jpacontainer/three-layer-architecture \
 			portal/liferay-ipc-architecture portal/liferay-ipc-demo-annotated
 
 # List of source XML files
