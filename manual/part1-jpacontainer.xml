@@ -569,6 +569,7 @@ public String getHierarchicalName() {
             </section>
         </section>
     </section>
+
     <section xml:id="jpacontainer.usage">
         <title>Basic Use of JPAContainer</title>
 
@@ -582,14 +583,48 @@ public String getHierarchicalName() {
             described in the previous section.
         </para>
 
+        <section xml:id="jpacontainer.usage.hardway">
+            <title>The Hard Way</title>
+
+            <para>
+                Let us first consider the hard way of creating a
+                <classname>JPAContainer</classname>, as we have to establish the basic
+                concepts: the persistence context (unit) and entity provider.
+            </para>
+
+            <para>
+                Persistent entities are managed by an <emphasis>entity manager</emphasis>,
+                that is, a JPA <classname>EntityManager</classname>. It manages all
+                entities belonging to a <emphasis>persistence context</emphasis> (or
+                unit).
+            </para>
+        </section>
+
         <section xml:id="jpacontainer.usage.jpacontainerfactory">
             <title>Using JPAContainerFactory</title>
 
             <para>
-                The <classname>JPAContainerFactory</classname> provides the easy way to
-                create a <classname>JPAContainer</classname>, as a set of builder methods
-                for most cases you will likely meet.
+                The <classname>JPAContainerFactory</classname> is the easy way to create
+                <classname>JPAContainer</classname>s. It provides a set of
+                <emphasis>make()</emphasis> builder methods for most cases you will likely
+                meet, from either a persistence unit name (persistence context) or from an
+                <classname>EntityManager</classname> instance.
             </para>
+
+            <para>
+                The static <emphasis>make()</emphasis> method creates a new JPAContainer
+                backed by a CachingMutableLocalEntityProvider, using the name of the
+                persistence unit. This particular method can be used if you do not know
+                and do not need or want to know the instance of an EntityManager that is
+                used, which is the case in simple instances. An instance of
+                EntityManagerFactory will be created for the persistence unit and used to
+                build entity managers.
+            </para>
+
+    persons = JPAContainerFactory.make(Person.class,
+            JpaAddressbookApplication.PERSISTENCE_UNIT);
+    $B!D(B
+
         </section>
 
         <section xml:id="jpacontainer.usage.configuration">
