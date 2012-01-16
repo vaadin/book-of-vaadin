@@ -11,10 +11,6 @@
         This chapter describes the use of the Vaadin JPAContainer add-on.
     </para>
 
-    <para>
-        <emphasis></emphasis>
-    </para>
-
     <section xml:id="jpacontainer.overview">
         <title>Overview</title>
 
@@ -114,7 +110,36 @@
             </para>
 
             <para>
+                The main interface in JPA is the
+                <interfacename>EntityManager</interfacename>, which allows making
+                different kinds of queries either with the Java Persistence Query Language
+                (JPQL), native SQL, or the Criteria API in JPA 2.0. You can always use the
+                interface directly as well, using Vaadin JPAContainer only for binding the
+                data to the user interface.
+            </para>
+
+            <para>
                 Vaadin JPAContainer supports JPA 2.0 (JSR 317). 
+            </para>
+        </simplesect>
+
+        <simplesect xml:id="jpacontainer.overview.concepts">
+            <title>JPAContainer Concepts</title>
+
+            <para>
+                The <classname>JPAContainer</classname> is an implementation of the Vaadin
+                <interfacename>Container</interfacename> interface that you can bind to
+                user interface components such as <classname>Table</classname>,
+                <classname>Select</classname>, etc.
+            </para>
+
+            <para>
+                The data access to the persistent entities is handled with a
+                <emphasis>entity provider</emphasis>, as defined in the
+                <interfacename>EntityProvider</interfacename> interface. JPAContainer
+                provides a number of different entity providers for different use cases
+                and optimizations. The built-in providers are described in <xref
+                linkend="jpacontainer.entityprovider"/>.
             </para>
         </simplesect>
 
@@ -182,15 +207,10 @@
         <section xml:id="jpacontainer.installation.package">
             <title>Installation Package Content</title>
 
+            <?dbfo-need height="2cm" ?>
             <para>
                 Once extracted to a local folder, the contents of the installation
-                directory are illustrated in Figure 4.
-            </para>
-
-Figure 4: Installation Package Contents
-
-            <para>
-                The files in the installation package are as follows:
+                directory are as follows:
             </para>
 
             <variablelist>
@@ -381,13 +401,231 @@ Figure 4: Installation Package Contents
                 Validation, such as Hibernate Validator.
             </para>
         </section>
+
+        <section xml:id="jpacontainer.installation.configuration">
+            <title>Persistence Configuration</title>
+
+            <para>
+                Persistence configuration is done in a
+                <filename>persistence.xml</filename> file. In a regular Eclipse project,
+                it should be located in
+                <filename>WebContent/WEB-INF/classes/META-INF</filename>. In a Maven
+                project, it should be in
+                <filename>src/main/resources/META-INF</filename>. The configuration
+                includes the following:
+            </para>
+
+            <itemizedlist>
+                <listitem><para>The persistence unit</para></listitem>
+                <listitem><para>The persistence provider</para></listitem>
+                <listitem><para>The database driver and connection</para></listitem>
+                <listitem><para>Logging</para></listitem>
+            </itemizedlist>
+
+            <para>
+                The <filename>persistence.xml</filename> file is packaged as
+                <filename>WEB-INF/classes/META-INF/persistence.xml</filename> in the
+                WAR. This is done automatically in a Maven build at the package phase.
+            </para>
+
+            <section xml:id="jpacontainer.installation.configuration.schema">
+                <title>Persistence XML Schema</title>
+
+                <para>
+                    The beginning of a <filename>persistence.xml</filename> file defines
+                    the used schema and namespaces:
+                </para>
+
+                <programlisting><?pocket-size 75% ?><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<persistence
+    xmlns="http://java.sun.com/xml/ns/persistence"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="
+      http://java.sun.com/xml/ns/persistence
+      http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd"
+    version="2.0">]]></programlisting>
+            </section>
+
+            <section xml:id="jpacontainer.installation.configuration.unit">
+                <title>Defining the Persistence Unit</title>
+
+                <para>
+                    The root element of the persistence definition is
+                    persistence-unit. The name of the persistence unit is needed for
+                    creating <classname>JPAContainer</classname> instances from a
+                    <classname>JPAContainerFactory</classname>, as described in <xref
+                    linkend="jpacontainer.usage.jpacontainerfactory"/> or when creating a
+                    JPA entity manager.
+                </para>
+
+                <programlisting><?pocket-size 75% ?><![CDATA[<persistence-unit name="addressbook">]]></programlisting>
+
+                <?dbfo-need height="2cm" ?>
+                <para>
+                    Persistence provider is the JPA provider implementation used. For
+                    example, the JPAContainer AddressBook demo uses the EclipseLink JPA,
+                    which is defined as follows:
+                </para>
+
+                <programlisting><?pocket-size 75% ?><![CDATA[<provider>
+    org.eclipse.persistence.jpa.PersistenceProvider
+</provider>]]></programlisting>
+
+                <?dbfo-need height="2cm" ?>
+                <para>
+                    The persistent classes need to be listed with a
+                    <literal>&lt;class&gt;</literal> element. Alternatively, you can allow
+                    including unlisted classes for persistence by overriding the
+                    <literal>exclude-unlisted-classes</literal> default as follows:
+                </para>
+
+                <programlisting><?pocket-size 75% ?><![CDATA[<exclude-unlisted-classes>false</exclude-unlisted-classes>]]></programlisting>
+
+                <?dbfo-need height="2cm" ?>
+                <para>
+                    JPA provider specific parameters are given under the
+                    <literal>properties</literal> element.
+                </para>
+
+                <programlisting><?pocket-size 75% ?><![CDATA[<properties>
+   ...]]></programlisting>
+
+                <para>
+                    In the following section we give parameters for the EclipseLink JPA
+                    and H2 database used in the JPAContainer AddressBook Demo. Please
+                    refer to the documentation of the JPA provider you use for a complete
+                    reference of parameters.
+                </para>
+            </section>
+
+            <section xml:id="jpacontainer.installation.configuration.database">
+                <title>Database Connection</title>
+
+                <?dbfo-need height="2cm" ?>
+                <para>
+                    EclipseLink allows using JDBC for database connection. For example, if
+                    we use the the H2 database, we define its driver here as follows:
+                </para>
+
+                <programlisting><?pocket-size 65% ?><![CDATA[<property name="eclipselink.jdbc.platform"
+ value="org.eclipse.persistence.platform.database.H2Platform"/>
+<property name="eclipselink.jdbc.driver"
+          value="org.h2.Driver" />]]></programlisting>
+
+                <?dbfo-need height="2cm" ?>
+                <para>
+                    Database connection is specified with a URL. For example, using an
+                    embedded H2 database stored in the home directory it would be as
+                    follows:
+                </para>
+
+                <programlisting><?pocket-size 75% ?><![CDATA[<property name="eclipselink.jdbc.url"
+          value="jdbc:h2:~/my-app-h2db"/>]]></programlisting>
+
+                <para>
+                    A hint: when using an embedded H2 database while developing a Vaadin
+                    application in Eclipse, you may want to add
+                    <literal>;FILE_LOCK=NO</literal> to the URL to avoid locking issues
+                    when redeploying.
+                </para>
+
+                <?dbfo-need height="2cm" ?>
+                <para>
+                    We can just use the default user name and password for the H2
+                    database:
+                </para>
+                    
+                <programlisting><?pocket-size 75% ?><![CDATA[<property name="eclipselink.jdbc.user" value="sa"/>
+<property name="eclipselink.jdbc.password" value="sa"/>]]></programlisting>
+            </section>
+
+            <section xml:id="jpacontainer.installation.configuration.logging">
+                <title>Logging Configuration</title>
+
+                <?dbfo-need height="2cm" ?>
+                <para>
+                    JPA implementations as well as database engines like to produce logs
+                    and they should be configured in the persistence configuration. For
+                    example, if using EclipseLink JPA, you can get log that includes all
+                    SQL statements with the <literal>FINE</literal> logging level:
+                </para>
+
+                <programlisting><?pocket-size 75% ?><![CDATA[<property name="eclipselink.logging.level" 
+          value="FINE" />]]></programlisting>
+            </section>
+
+            <section xml:id="jpacontainer.installation.configuration.other">
+                <title>Other Settings</title>
+
+                <para>
+                    The rest is some Data Definition Language settings for
+                    EclipseLink. During development, when we use generated example data,
+                    we want EclipseLink to drop tables before trying to create them. In
+                    production environments, you should use
+                    <literal>create-tables</literal>.
+                </para>
+
+                <programlisting><?pocket-size 75% ?><![CDATA[<property name="eclipselink.ddl-generation" 
+          value="drop-and-create-tables" />]]></programlisting>
+
+                <para>
+                    And there is no need to generate SQL files, just execute them directly
+                    to the database.
+                </para>
+
+                <programlisting><?pocket-size 75% ?><![CDATA[<property name="eclipselink.ddl-generation.output-mode"
+          value="database"/>
+	  </properties>
+ </persistence-unit>
+</persistence>]]></programlisting>
+            </section>
+        </section>
+
+        <section xml:id="jpacontainer.installation.troubleshooting">
+            <title>Troubleshooting</title>
+
+            <para>
+                Below are some typical errors that you might get when using JPA. These are
+                not specific to JPAContainer.
+            </para>
+
+            <variablelist>
+                <varlistentry>
+                    <term><classname>javax.persistence.PersistenceException</classname>: No Persistence provider for EntityManager</term>
+                    <listitem>
+                        <para>
+                            The most typical cases for this error are that the persistence
+                            unit name is wrong in the source code or in the
+                            <filename>persistence.xml</filename> file, or that the
+                            <filename>persistence.xml</filename> is at a wrong place or
+                            has some other problem. Make sure that the persistence unit
+                            name matches and the <filename>persistence.xml</filename> is
+                            in <filename>WEB-INF/classes/META-INF</filename> folder in the
+                            deployment.
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><classname>java.lang.IllegalArgumentException</classname>: The class is not an entity</term>
+                    <listitem>
+                        <para>
+                            The class is missing from the set of persistent entities. If
+                            the <filename>persistence.xml</filename> does not have
+                            <parameter>exclude-unlisted-classes</parameter> defined as
+                            <literal>false</literal>, the persistent entity classes should
+                            be listed with <literal>&lt;class&gt;</literal> elements.
+                        </para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
     </section>
 
     <section xml:id="jpacontainer.domain-model">
         <title>Defining a Domain Model</title>
 
         <para>
-            Developing a persistent application starts with defining a domain model. A
+            Developing a persistent application begins with defining a domain model. A
             domain model consists of a number of entities (classes) and relationships
             between them.
         </para>
@@ -480,11 +718,10 @@ public class Person {
             </para>
 
             <para>
-                Let us look at the basic JPA metadata annotations as they are used in the
-                <classname>Department</classname> class of the JPAContainer AddressBook
-                Demo. The annotations are defined in the
-                <package>javax.persistence</package> package. Please refer to JPA
-                reference documentation for the complete list of possible annotations.
+                Let us look at some of the basic JPA metadata annotations. The annotations
+                are defined in the <package>javax.persistence</package> package. Please
+                refer to JPA reference documentation for the complete list of possible
+                annotations.
             </para>
 
             <section xml:id="jpacontainer.domain-model.metadata.entity">
@@ -496,7 +733,7 @@ public class Person {
                 </para>
 
                 <programlisting><![CDATA[@Entity
-public class Department {]]></programlisting>
+public class Country {]]></programlisting>
             </section>
 
             <section xml:id="jpacontainer.domain-model.annotation.id">
@@ -523,11 +760,13 @@ private Long id;]]></programlisting>
                 <title>Annotation: <literal>@OneToMany</literal></title>
                 
                 <para>
-                    As noted earlier, entities can have relationships. The Department
-                    entity of the domain model has one-to-many relationship with the
-                    <classname>Person</classname> entity (<classname>Department has
-                    persons</classname>). This relationship is represented with the
-                    <literal>@OneToMany</literal> annotation.
+                    The <classname>Country</classname> entity in the domain model has a
+                    <emphasis>one-to-many</emphasis> relationship with the
+                    <classname>Person</classname> entity ("country has persons"). This
+                    relationship is represented with the <literal>@OneToMany</literal>
+                    annotation. The <parameter>mappedBy</parameter> parameter names the
+                    corresponding back-reference in the <classname>Person</classname>
+                    entity.
                 </para>
 
                 <programlisting><![CDATA[@OneToMany(mappedBy = "country")
@@ -536,8 +775,9 @@ private Set<Person> persons;]]></programlisting>
                 <para>
                     When using the JPAContainer <classname>FieldFactory</classname> to
                     automatically create fields for a form, the
-                    <literal>@OneToMany</literal> relationship  See <xref
-                    linkend="jpacontainer.fieldfactory"/> for more details.
+                    <literal>@OneToMany</literal> relationship generates a
+                    <classname>MasterDetailEditor</classname> for editing the items. See
+                    <xref linkend="jpacontainer.fieldfactory"/> for more details.
                 </para>
             </section>
 
@@ -545,12 +785,21 @@ private Set<Person> persons;]]></programlisting>
                 <title>Annotation: <literal>@ManyToOne</literal></title>
                 
                 <para>
-                    Many departments can belong to the same higher-level department,
-                    represented with the <literal>@ManyToOne</literal> annotation.
+                    Many people can live in the same country. This would be represented
+                    with the <literal>@ManyToOne</literal> annotation in the
+                    <classname>Person</classname> class.
                 </para>
 
                 <programlisting><![CDATA[@ManyToOne
-private Country parent;]]></programlisting>
+private Country country;]]></programlisting>
+
+                <para>
+                    When using the JPAContainer <classname>FieldFactory</classname> to
+                    automatically create fields for a form, the
+                    <literal>@ManyToOne</literal> relationship generates a
+                    <classname>NativeSelect</classname> for editing the items. See
+                    <xref linkend="jpacontainer.fieldfactory"/> for more details.
+                </para>
             </section>
 
             <section xml:id="jpacontainer.domain-model.annotation.transient">
@@ -558,7 +807,7 @@ private Country parent;]]></programlisting>
                 
                 <para>
                     JPA assumes that all entity properties are persisted. Properties that
-                    should not be persisted are marked as transient with the
+                    should not be persisted should be marked as transient with the
                     <literal>@Transient</literal> annotation.
                 </para>
 
@@ -577,16 +826,19 @@ public String getHierarchicalName() {
 
         <para>
             Vaadin JPAContainer offers a highly flexible API that makes things easy in
-            simple cases while allowing extensive flexibility in demanding cases.
+            simple cases while allowing extensive flexibility in demanding cases. To begin
+            with, it is a <classname>Container</classname>, as described in <xref
+            linkend="datamodel.container"/>.
         </para>
         
         <para>
-            We assume that you have defined a domain model with JPA annotations, as
-            described in the previous section.
+            In this section, we look how to create and use
+            <classname>JPAContainer</classname> instances. We assume that you have defined
+            a domain model with JPA annotations, as described in the previous section.
         </para>
 
         <section xml:id="jpacontainer.usage.jpacontainerfactory">
-            <title>Using JPAContainerFactory</title>
+            <title>Creating <classname>JPAContainer</classname>s with <classname>JPAContainerFactory</classname></title>
 
             <para>
                 The <classname>JPAContainerFactory</classname> is the easy way to create
@@ -673,22 +925,21 @@ Table personTable = new Table("The Persistent People", persons);]]></programlist
                 access the cache to get a new entity manager with the
                 <methodname>createEntityManagerForPersistenceUnit()</methodname> method.
             </para>
-        </section>
 
-        <section xml:id="jpacontainer.usage.thehardway">
-            <title>The Hard Way</title>
+            <section xml:id="jpacontainer.usage.jpacontainerfactory.thehardway">
+                <title>The Hard Way</title>
 
-            <para>
-                Let us now consider the hard way of creating a
-                <classname>JPAContainer</classname>.
-            </para>
+                <para>
+                    Let us consider the hard way of creating a
+                    <classname>JPAContainer</classname> to see what the
+                    <classname>JPAContainerFactory</classname> actually does.
+                </para>
 
-            <para>
-                First, we need to have an entity manager. TODO: define.
-            </para>
+                <para>
+                    First, we need to have an entity manager. TODO: define.
+                </para>
 
-			<programlisting><?pocket-size 65% ?><![CDATA[
-EntityManagerFactory emf =
+                <programlisting><?pocket-size 65% ?><![CDATA[EntityManagerFactory emf =
    Persistence.createEntityManagerFactory("my-unit-name");
 
 EntityManager entityManager = emf.createEntityManager();
@@ -700,223 +951,74 @@ CachingMutableLocalEntityProvider<Person> entityProvider =
 JPAContainer<Person> container =
     new JPAContainer<Person>(Person.class);
 container.setEntityProvider(cachingEntityProvider);]]></programlisting>
-        </section>
-
-        <section xml:id="jpacontainer.usage.configuration">
-            <title>Persistence Configuration</title>
-
-            <para>
-                Persistence configuration is done in a
-                <filename>persistence.xml</filename> file. In a regular Eclipse project,
-                it should be located in
-                <filename>WebContent/WEB-INF/classes/META-INF</filename>. In a Maven
-                project, it should be in
-                <filename>src/main/resources/META-INF</filename>. The configuration
-                includes the following:
-            </para>
-
-            <itemizedlist>
-                <listitem><para>The persistence unit</para></listitem>
-                <listitem><para>The persistence provider</para></listitem>
-                <listitem><para>The database driver and connection</para></listitem>
-                <listitem><para>Logging</para></listitem>
-            </itemizedlist>
-
-            <para>
-                The <filename>persistence.xml</filename> file is packaged as
-                <filename>WEB-INF/classes/META-INF/persistence.xml</filename> in the
-                WAR. This is done automatically in a Maven build at the package phase.
-            </para>
-
-            <section xml:id="jpacontainer.usage.configuration.schema">
-                <title>Persistence XML Schema</title>
-
-                <para>
-                    The beginning of a <filename>persistence.xml</filename> file defines
-                    the used schema and namespaces:
-                </para>
-
-                <programlisting><?pocket-size 75% ?><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
-<persistence
-    xmlns="http://java.sun.com/xml/ns/persistence"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="
-      http://java.sun.com/xml/ns/persistence
-      http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd"
-    version="2.0">]]></programlisting>
-            </section>
-
-            <section xml:id="jpacontainer.usage.configuration.unit">
-                <title>Defining the Persistence Unit</title>
-
-                <para>
-                    The root element of the persistence definition is
-                    persistence-unit. The name of the persistence unit is needed for
-                    creating <classname>JPAContainer</classname> instances from a
-                    <classname>JPAContainerFactory</classname>, as described in <xref
-                    linkend="jpacontainer.usage.jpacontainerfactory"/> or when creating a
-                    JPA entity manager.
-                </para>
-
-                <programlisting><?pocket-size 75% ?><![CDATA[<persistence-unit name="addressbook">]]></programlisting>
-
-                <?dbfo-need height="2cm" ?>
-                <para>
-                    Persistence provider is the JPA provider implementation used. For
-                    example, the JPAContainer AddressBook demo uses the EclipseLink JPA,
-                    which is defined as follows:
-                </para>
-
-                <programlisting><?pocket-size 75% ?><![CDATA[<provider>
-    org.eclipse.persistence.jpa.PersistenceProvider
-</provider>]]></programlisting>
-
-                <?dbfo-need height="2cm" ?>
-                <para>
-                    The persistent classes need to be listed with a
-                    <literal>&lt;class&gt;</literal> element. Alternatively, you can allow
-                    including unlisted classes for persistence by overriding the
-                    <literal>exclude-unlisted-classes</literal> default as follows:
-                </para>
-
-                <programlisting><?pocket-size 75% ?><![CDATA[<exclude-unlisted-classes>false</exclude-unlisted-classes>]]></programlisting>
-
-                <?dbfo-need height="2cm" ?>
-                <para>
-                    JPA provider specific parameters are given under the
-                    <literal>properties</literal> element.
-                </para>
-
-                <programlisting><?pocket-size 75% ?><![CDATA[<properties>
-   ...]]></programlisting>
-
-                <para>
-                    In the following section we give parameters for the EclipseLink JPA
-                    and H2 database used in the JPAContainer AddressBook Demo. Please
-                    refer to the documentation of the JPA provider you use for a complete
-                    reference of parameters.
-                </para>
-            </section>
-
-            <section xml:id="jpacontainer.usage.configuration.database">
-                <title>Database Connection</title>
-
-                <?dbfo-need height="2cm" ?>
-                <para>
-                    EclipseLink allows using JDBC for database connection. For example, if
-                    we use the the H2 database, we define its driver here as follows:
-                </para>
-
-                <programlisting><?pocket-size 65% ?><![CDATA[<property name="eclipselink.jdbc.platform"
- value="org.eclipse.persistence.platform.database.H2Platform"/>
-<property name="eclipselink.jdbc.driver"
-          value="org.h2.Driver" />]]></programlisting>
-
-                <?dbfo-need height="2cm" ?>
-                <para>
-                    Database connection is specified with a URL. For example, using an
-                    embedded H2 database stored in the home directory it would be as
-                    follows:
-                </para>
-
-                <programlisting><?pocket-size 75% ?><![CDATA[<property name="eclipselink.jdbc.url"
-          value="jdbc:h2:~/my-app-h2db"/>]]></programlisting>
-
-                <para>
-                    A hint: when using an embedded H2 database while developing a Vaadin
-                    application in Eclipse, you may want to add
-                    <literal>;FILE_LOCK=NO</literal> to the URL to avoid locking issues
-                    when redeploying.
-                </para>
-
-                <?dbfo-need height="2cm" ?>
-                <para>
-                    We can just use the default user name and password for the H2
-                    database:
-                </para>
-                    
-                <programlisting><?pocket-size 75% ?><![CDATA[<property name="eclipselink.jdbc.user" value="sa"/>
-<property name="eclipselink.jdbc.password" value="sa"/>]]></programlisting>
-            </section>
-
-            <section xml:id="jpacontainer.usage.configuration.logging">
-                <title>Logging Configuration</title>
-
-                <?dbfo-need height="2cm" ?>
-                <para>
-                    JPA implementations as well as database engines like to produce logs
-                    and they should be configured in the persistence configuration. For
-                    example, if using EclipseLink JPA, you can get log that includes all
-                    SQL statements with the <literal>FINE</literal> logging level:
-                </para>
-
-                <programlisting><?pocket-size 75% ?><![CDATA[<property name="eclipselink.logging.level" 
-          value="FINE" />]]></programlisting>
-            </section>
-
-            <section xml:id="jpacontainer.usage.configuration.other">
-                <title>Other Settings</title>
-
-                <para>
-                    The rest is some Data Definition Language settings for
-                    EclipseLink. During development, when we use generated example data,
-                    we want EclipseLink to drop tables before trying to create them. In
-                    production environments, you should use
-                    <literal>create-tables</literal>.
-                </para>
-
-                <programlisting><?pocket-size 75% ?><![CDATA[<property name="eclipselink.ddl-generation" 
-          value="drop-and-create-tables" />]]></programlisting>
-
-                <para>
-                    And there is no need to generate SQL files, just execute them directly
-                    to the database.
-                </para>
-
-                <programlisting><?pocket-size 75% ?><![CDATA[<property name="eclipselink.ddl-generation.output-mode"
-          value="database"/>
-	  </properties>
- </persistence-unit>
-</persistence>]]></programlisting>
             </section>
         </section>
 
-        <section xml:id="jpacontainer.usage.troubleshooting">
-            <title>Troubleshooting</title>
+        <section xml:id="jpacontainer.usage.entitites">
+            <title>Creating and Accessing Entities</title>
 
             <para>
-                Below are some typical errors that you might get.
+                JPAContainer integrates with the JPA entity manager, which you would
+                normally use to create and access entities with JPA. You can use the
+                entity manager for any purposes you may have, and then
+                <classname>JPAContainer</classname> to bind entities to the user
+                interface.
             </para>
 
-            <variablelist>
-                <varlistentry>
-                    <term><classname>javax.persistence.PersistenceException</classname>: No Persistence provider for EntityManager</term>
-                    <listitem>
-                        <para>
-                            The most typical cases for this error are that the persistence
-                            unit name is wrong in the source code or in the
-                            <filename>persistence.xml</filename> file, or that the
-                            <filename>persistence.xml</filename> is at a wrong place or
-                            has some other problem. Make sure that the persistence unit
-                            name matches and the <filename>persistence.xml</filename> is
-                            in <filename>WEB-INF/classes/META-INF</filename> folder in the
-                            deployment.
-                        </para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term><classname>java.lang.IllegalArgumentException</classname>: The class is not an entity</term>
-                    <listitem>
-                        <para>
-                            The class is missing from the set of persistent entities. If
-                            the <filename>persistence.xml</filename> does not have
-                            <parameter>exclude-unlisted-classes</parameter> defined as
-                            <literal>false</literal>, the persistent entity classes should
-                            be listed with <literal>&lt;class&gt;</literal> elements.
-                        </para>
-                    </listitem>
-                </varlistentry>
-            </variablelist>
+            <para>
+                You can add new entities to a <classname>JPAContainer</classname> with the
+                <methodname>addEntity()</methodname> method. It returns the item ID of the
+                new entity.
+            </para>
+
+			<programlisting><![CDATA[Country france = new Country("France");
+Object itemId = countries.addEntity(france);]]></programlisting>
+
+            <para>
+                The <methodname>addEntity()</methodname> method does not attach the entity
+                instance given as the parameter to the entity context. If you need to use
+                the entity for some purpose, for example for making references to it, you
+                need to get the actual managed entity from the container. You can get it
+                with the item ID returned by <methodname>addEntity()</methodname>.
+            </para>
+
+			<programlisting><![CDATA[// Create a new entity and add it to a container        
+Country france = new Country("France");
+Object itemId = countries.addEntity(france);
+
+// Get the managed entity
+france = countries.getItem(itemId).getEntity();
+
+// Use the managed entity in entity references
+persons.addEntity(new Person("Jeanne Calment", 122, france));]]></programlisting>
+
+            <para>
+                The <methodname>getItem()</methodname> method is defined in the normal
+                Vaadin <interfacename>Container</interfacename> interface. It returns an
+                <classname>EntityItem</classname>, which is a wrapper over the actual
+                entity. You can use <methodname>getEntity()</methodname> to get the actual
+                managed entity.
+            </para>
+
+            <section xml:id="jpacontainer.usage.entitites.refreshing">
+                <title>Refreshing JPAContainer</title>
+
+                <para>
+                    In cases where you change <classname>JPAContainer</classname> items
+                    outside the container, for example by through an
+                    <interfacename>EntityManager</interfacename>, or when they change in the
+                    database, you need to refresh the container.
+                </para>
+
+                <para>
+                    The <interfacename>EntityContainer</interfacename> interface implemented
+                    by <classname>JPAContainer</classname> provides two methods to refresh a
+                    container. The <methodname>refresh()</methodname> discards all container
+                    caches and buffers and refreshes all loaded items in the container. All
+                    changes made to items provided by the container are discarded. The
+                    <methodname>refreshItem()</methodname> refreshes a single item.
+                </para>
+            </section>
         </section>
     </section>
 
@@ -926,9 +1028,8 @@ container.setEntityProvider(cachingEntityProvider);]]></programlisting>
         <para>
             Entity providers provide access to entities persisted in a data store. They
             are essentially wrappers over a JPA entity manager with optimizations and
-            other features. The most important features are caching, buffering, and
-            batching. Using a read-only provider instead of a mutable one can help with
-            performance.
+            other features important when binding persistent data to a user interface. The
+            most important features are caching, buffering, and batching.
         </para>
 
         <section xml:id="jpacontainer.entityprovider.features">
@@ -980,7 +1081,7 @@ container.setEntityProvider(cachingEntityProvider);]]></programlisting>
     </section>
 
     <section xml:id="jpacontainer.filtering">
-        <title>Filtering</title>
+        <title>Filtering <classname>JPAContainer</classname></title>
 
         <para>
             Normally, a <classname>JPAContainer</classname> contains all instances of a
@@ -992,6 +1093,7 @@ container.setEntityProvider(cachingEntityProvider);]]></programlisting>
             implementation uses the JPA 2.0 Criteria API transparently.
         </para>
 
+        <?dbfo-need height="0.6cm" ?>
         <para>
             For example, let us filter all the people older than 117:
         </para>
@@ -999,12 +1101,135 @@ container.setEntityProvider(cachingEntityProvider);]]></programlisting>
         <programlisting><?pocket-size 75% ?><![CDATA[Filter filter = new Compare.Greater("age", 117);
 persons.addContainerFilter(filter);]]></programlisting>
 
+        <?dbfo-need height="0.6cm" ?>
         <para>
-            If you have enabled detailed database logging, you should see a JPQL query
-            somewhat as follows:
+            This should create a JPQL query somewhat as follows:
         </para>
 
         <programlisting><?pocket-size 75% ?><![CDATA[SELECT id FROM Person WHERE (AGE > 117)]]></programlisting>
+
+        <para>
+            When using Hibernate, note that it does not support implicit joins. See <xref
+            linkend="jpacontainer.hibernate.joins"/> for more details.
+        </para>
+
+    </section>
+
+    <section xml:id="jpacontainer.filtering.criteria-api">
+        <title>Querying with the Criteria API</title>
+
+        <para>
+            When the <interfacename>Filterable</interfacename> API is not enough and you
+            need to have more control, you can make queries directly with the JPA Criteria
+            API. You may also need to customize sorting or joins, or otherwise modify the
+            query in some way.  To do so, you need to implement a
+            <interfacename>QueryModifierDelegate</interfacename> that the JPAContainer
+            entity provider calls when making a query. The easiest way to do this is to
+            extend <classname>DefaultQueryModifierDelegate</classname>, which has empty
+            implementations of all the methods so that you can only override the ones you
+            need.
+        </para>
+
+        <para>
+            The entity provider calls specific
+            <interfacename>QueryModifierDelegate</interfacename> methods at different
+            stages while making a query. The stages are:
+        </para>
+
+        <orderedlist>
+            <listitem><para>Start building a query</para></listitem>
+            <listitem><para>Add "<literal>ORDER BY</literal>" expression</para></listitem>
+            <listitem><para>Add "<literal>WHERE</literal>" expression (filter)</para></listitem>
+            <listitem><para>Finish building a query</para></listitem>
+        </orderedlist>
+
+        <?dbfo-need height="2cm" ?>
+        <para>
+            Methods where you can modify the query are called before and after each stage
+            as listed in the following table:
+        </para>
+
+        <table xml:id="table.jpacontainer.filtering.criteria-api.methods">
+            <title><classname>QueryModifierDelegate</classname> Methods</title>
+            <tgroup cols="2" align="left">
+                <tbody>
+                    <row valign="top">
+                        <entry><methodname>queryWillBeBuilt()</methodname></entry>
+                        <entry></entry>
+                    </row>
+                    <row valign="top">
+                        <entry><methodname>orderByWillBeAdded()</methodname></entry>
+                        <entry></entry>
+                    </row>
+                    <row valign="top">
+                        <entry><methodname>orderByWasAdded()</methodname></entry>
+                        <entry></entry>
+                    </row>
+                    <row valign="top">
+                        <entry><methodname>filtersWillBeAdded()</methodname></entry>
+                        <entry></entry>
+                    </row>
+                    <row valign="top">
+                        <entry><methodname>filtersWereAdded()</methodname></entry>
+                        <entry></entry>
+                    </row>
+                    <row valign="top">
+                        <entry><methodname>queryHasBeenBuilt()</methodname></entry>
+                        <entry></entry>
+                    </row>
+                </tbody>
+            </tgroup>
+        </table>
+
+        <para>
+            All the methods get two parameters. The
+            <interfacename>CriteriaBuilder</interfacename> is a builder that you can use
+            to build queries. The <interfacename>CriteriaQuery</interfacename> is the
+            query being built.
+        </para>
+
+        <para>
+            You can use the <methodname>getRoots().iterator().next()</methodname> in
+            <interfacename>CriteriaQuery</interfacename> to get the "root" that is
+            queried, for example, the <literal>PERSON</literal> table, etc.
+        </para>
+
+        <section xml:id="jpacontainer.filtering.criteria-api.filters">
+            <title>Filtering the Query</title>
+
+            <para>
+                Let us consider a case where we modify the query for a
+                <classname>Person</classname> container so that it includes only people
+                over 116. This trivial example is identical to the one given earlier using
+                the <classname>Filterable</classname> interface.
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[
+persons.getEntityProvider().setQueryModifierDelegate(
+        new DefaultQueryModifierDelegate () {
+    @Override
+    public void filtersWillBeAdded(
+            CriteriaBuilder criteriaBuilder,
+            CriteriaQuery<?> query,
+            List<Predicate> predicates) {
+        Root<?> fromPerson = query.getRoots().iterator().next();
+
+        // Add a "WHERE age > 116" expression
+        Path<Integer> age = fromPerson.<Integer>get("age");
+        predicates.add(criteriaBuilder.gt(age, 116));
+    }
+});]]></programlisting>
+        </section>
+
+        <section xml:id="jpacontainer.filtering.criteria-api.compatibility">
+            <title>Compatibility</title>
+
+            <para>
+                When building queries, you should consider the capabilities of the different
+                JPA implementations. Regarding Hibernate, see <xref
+                    linkend="jpacontainer.hibernate.joins"/>.
+            </para>
+        </section>
     </section>
 
     <section xml:id="jpacontainer.fieldfactory">
@@ -1108,24 +1333,26 @@ persons.addContainerFilter(filter);]]></programlisting>
         <section xml:id="jpacontainer.fieldfactory.using">
             <title>Using the Field Factory</title>
 
+            <?dbfo-need height="2cm" ?>
             <para>
                 The basic use of the <classname>FieldFactory</classname> goes as follows:
             </para>
 
-			<programlisting><?pocket-size 75% ?><![CDATA[// Create a form
+			<programlisting><?pocket-size 65% ?><![CDATA[// Create a form
 customerForm = new Form();
 customerForm.setCaption("EditCustomer groups");
 
 // Create a field factory for the form
-FieldFactory jpaContainerFieldFactory = new FieldFactory();
+FieldFactory feldFactory = new FieldFactory();
 
 // Optional configuration:
-jpaContainerFieldFactory.setVisibleProperties(InvoiceRow.class,
-        "product", "description", "unit", "unitPrice");
-jpaContainerFieldFactory.setVisibleProperties(BillingAddress.class, "street", "city", "postalCode");
-jpaContainerFieldFactory.setSingleSelectType(Customer.class, ListSelect.class);
+ffactory.setVisibleProperties(InvoiceRow.class,
+    "product", "description", "unit", "unitPrice");
+ffactory.setVisibleProperties(BillingAddress.class, "street",
+                              "city", "postalCode");
+ffactory.setSingleSelectType(Customer.class, ListSelect.class);
 
-customerForm.setFormFieldFactory(jpaContainerFieldFactory);
+customerForm.setFormFieldFactory(ffactory);
 addComponent(customerForm);]]></programlisting>
         </section>
 
@@ -1137,8 +1364,149 @@ addComponent(customerForm);]]></programlisting>
             If you use Hibernate, you also need to pass an
             <classname>EntityManagerPerRequestHelper</classname>, either for the
             constructor or with
-            <methodname>setEntityManagerPerRequestHelper()</methodname>.
+            <methodname>setEntityManagerPerRequestHelper()</methodname>, as described in
+            <xref linkend="jpacontainer.hibernate.em-per-request"/>.
         </para>
+    </section>
+
+    <section xml:id="jpacontainer.hibernate">
+        <title>Using JPAContainer with Hibernate</title>
+
+        <para>
+            Hibernate needs special handling in some cases.
+        </para>
+
+        <section xml:id="jpacontainer.hibernate.lazyloading">
+            <title>Lazy loading</title>
+
+            <para>
+                In order for lazy loading to work automatically, an entity must be
+                attached to an entity manager. Unfortunately, Hibernate can not keep
+                entity managers for long without problems. To work around the problem, you
+                need to use a special lazy loading delegate for Hibernate.
+            </para>
+
+            <para>
+                JPAContainer entity providers handle lazy loading in delegates defined by
+                the <interfacename>LazyLoadingDelegate</interfacename> interface. The
+                default implementation for Hibernate is defined in
+                <classname>HibernateLazyLoadingDelegate</classname>. You can instantiate
+                one and use it in an entity provider with
+                <methodname>setLazyLoadingDelegate()</methodname>.
+            </para>
+
+            <para>
+                The default implementation works so that whenever a lazy property is
+                accessed through the Vaadin <interface>Property</interface> interface, the
+                value is retrieved with a separate (JPA Criteria API) query using the
+                currently active entity manager. The value is then manually attached to
+                the entity instance, which is detached from the entity manager. If this
+                default implementation is not good enough, you may need to make your own
+                implementation.
+            </para>
+        </section>
+
+        <section xml:id="jpacontainer.hibernate.em-per-request">
+            <title>The EntityManager-Per-Request pattern</title>
+
+            <para>
+                One issue with Hibernate is that it is designed for short-lived
+                sessions. The lifetime of an entity manager is roughly that of a session.
+                However, if an error occurs in a session or entity manager, the manager
+                becomes unuseable. This causes big problems with long-lived sessions that
+                would work fine with EclipseLink.
+            </para>
+
+            <para>
+                The recommended solution is to the
+                <emphasis>EntityManager-per-Request</emphasis> pattern. It is highly
+                recommended always when using Hibernate.
+            </para>
+
+            <para>
+                An entity manager can only be open during the request-response cycle of
+                the Vaadin application servlet, so that one is created at the beginning of
+                the request and closed at the end.
+            </para>
+
+            <para>
+                You can use the <classname>EntityManagerPerRequestHelper</classname> as
+                follows:
+            </para>
+
+            <orderedlist>
+                <listitem>
+                    <para>
+                        Create a new instance in the constructor or
+                        <methodname>init()</methodname> method of your Vaadin application
+                        class.
+                    </para>
+                </listitem>
+
+                <listitem>
+                    <para>
+                        Override <methodname>onRequestStart()</methodname> in the
+                        application class and call <methodname>requestStart()</methodname>
+                        in the helper instance.
+                    </para>
+                </listitem>
+
+                <listitem>
+                    <para>
+                        Override <methodname>onRequestEnd()</methodname> in the
+                        application class and call <methodname>requestEnd()</methodname>
+                        in the helper.
+                    </para>
+                </listitem>
+
+                <listitem>
+                    <para>
+                        Whenever a new <classname>JPAContainer</classname> instance is
+                        created in the application, register it in the helper by calling
+                        <methodname>addContainer()</methodname> with the container.
+                    </para>
+                </listitem>
+
+                <listitem>
+                    <para>
+                        If you use the JPAContainer <classname>FieldFactory</classname>,
+                        as described in <xref linkend="jpacontainer.fieldfactory"/>, you
+                        need to set the helper for the factory either by passing it in the
+                        constructor (<literal>new FieldFactory(myEMPRH)</literal>) or with
+                        <methodname>setEntityManagerPerRequestHelper()</methodname>. The
+                        <classname>FieldFactory</classname> creates
+                        <classname>JPAContainer</classname>s internally and these
+                        instances need to be updated with the entity manager instances
+                        when they change between requests.
+                    </para>
+                </listitem>
+            </orderedlist>
+        </section>
+
+        <section xml:id="jpacontainer.hibernate.joins">
+            <title>Joins in Hibernate vs EclipseLink</title>
+
+            <para>
+                EclipseLink supports implicit joins, while Hibernate requires explicit
+                joins. In SQL terms, an explicit join is a "<literal>FROM a INNER JOIN b
+                ON a.bid = b.id</literal>" expression, while an implicit join is done in a
+                WHERE clause, such as: "<literal>FROM a,b WHERE a.bid = b.id</literal>".
+            </para>
+
+            <para>
+                In a JPAContainer filter with EclipseLink, an implicit join would have
+                form:
+            </para>
+
+			<programlisting><?pocket-size 65% ?><![CDATA[new Equal("skills.skill", s)]]></programlisting>
+
+            <para>
+                In Hibernate you would need to use <classname>JoinFilter</classname> for
+                the explicit join:
+            </para>
+
+			<programlisting><?pocket-size 65% ?><![CDATA[new JoinFilter("skills", new Equal("skill", s))]]></programlisting>
+        </section>
     </section>
 
     <indexterm startref="term.jpacontainer" class="endofrange"/>
