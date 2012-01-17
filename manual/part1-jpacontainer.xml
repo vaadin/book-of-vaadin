@@ -710,6 +710,8 @@ public class Person {
 
     private String  name;
     private Integer age;
+
+    @ManyToOne
     private Country country;]]></programlisting>
 
             <para>
@@ -752,7 +754,55 @@ private Long id;]]></programlisting>
                 <para>
                     The identifier is generated automatically in the database.  The
                     strategy for generating the identifier is defined with the
-                    <literal>@GeneratedValue</literal> annotation.
+                    <literal>@GeneratedValue</literal> annotation. Any generation type
+                    should work.
+                </para>
+            </section>
+
+            <section xml:id="jpacontainer.domain-model.annotation.onetoone">
+                <title>Annotation: <literal>@OneToOne</literal></title>
+
+                <para>
+                    The <literal>@OneToOne</literal> annotation describes a one-to-one
+                    relationship where each entity of one type is associated with exactly
+                    one entity of another type. For example, the postal address of a
+                    person could be given as such.
+                </para>
+
+                <programlisting><![CDATA[@OneToOne
+private Address address;]]></programlisting>
+
+                <para>
+                    When using the JPAContainer <classname>FieldFactory</classname> to
+                    automatically create fields for a form, the
+                    <literal>@OneToOne</literal> relationship generates a nested
+                    <classname>Form</classname> to edit the data. See
+                    <xref linkend="jpacontainer.fieldfactory"/> for more details.
+                </para>
+            </section>
+
+            <section xml:id="jpacontainer.domain-model.annotation.embedded">
+                <title>Annotation: <literal>@Embedded</literal></title>
+
+                <para>
+                    Just as with the <literal>@OneToOne</literal> annotation,
+                    <literal>@Embedded</literal> describes a one-to-one relationship, but
+                    says that the referenced entity should be stored as columns in the
+                    same table as the referencing entity.
+                </para>
+
+                <programlisting><![CDATA[@Embedded
+private Address address;]]></programlisting>
+                
+                <para>
+                    The referenced entity class must have <literal>@Embeddable</literal>
+                    annotation.
+                </para>
+
+                <para>
+                    The JPAContainer <classname>FieldFactory</classname> generates a
+                    nested <classname>Form</classname> for <literal>@Embedded</literal>,
+                    just as with <literal>@OneToOne</literal>.
                 </para>
             </section>
 
@@ -781,6 +831,32 @@ private Set<Person> persons;]]></programlisting>
                 </para>
             </section>
 
+            <section xml:id="jpacontainer.domain-model.annotation.elementcollection">
+                <title>Annotation: <literal>@ElementCollection</literal></title>
+                
+                <para>
+                    The <literal>@ElementCollection</literal> annotation can be used for
+                    one-to-many relationships to a collection of basic values such as
+                    <classname>String</classname> or <classname>Integer</classname>, or to
+                    entities annotated as <literal>@Embeddable</literal>. The referenced
+                    entities are stored in a separate table defined with a
+                    <literal>@CollectionTable</literal> annotation.
+                </para>
+
+                <programlisting><![CDATA[@ElementCollection
+@CollectionTable(
+    name="OLDPEOPLE",
+    joinColumns=@JoinColumn(name="COUNTRY_ID"))
+private Set<Person> persons;]]></programlisting>
+
+                <para>
+                    JPAContainer <classname>FieldFactory</classname> generates a
+                    <classname>MasterDetailEditor</classname> for the
+                    <literal>@ElementCollection</literal> relationship, just as with
+                    <literal>@OneToMany</literal>.
+                </para>
+            </section>
+
             <section xml:id="jpacontainer.domain-model.annotation.manytoone">
                 <title>Annotation: <literal>@ManyToOne</literal></title>
                 
@@ -794,11 +870,9 @@ private Set<Person> persons;]]></programlisting>
 private Country country;]]></programlisting>
 
                 <para>
-                    When using the JPAContainer <classname>FieldFactory</classname> to
-                    automatically create fields for a form, the
-                    <literal>@ManyToOne</literal> relationship generates a
-                    <classname>NativeSelect</classname> for editing the items. See
-                    <xref linkend="jpacontainer.fieldfactory"/> for more details.
+                    JPAContainer <classname>FieldFactory</classname> generates a
+                    <classname>NativeSelect</classname> for selecting an item from the
+                    collection.
                 </para>
             </section>
 
@@ -1445,10 +1519,15 @@ persons.getEntityProvider().setQueryModifierDelegate(
             The JPAContainer <classname>FieldFactory</classname> is an implementation of
             the <interfacename>FormFieldFactory</interfacename> and
             <interfacename>TableFieldFactory</interfacename> interfaces that can generate
-            fields based on the JPA annotations in a POJO. It goes further than the
+            fields based on JPA annotations in a POJO. It goes further than the
             <classname>DefaultFieldFactory</classname>, which only creates simple fields
-            for the basic data types. This way you can create CRUD views easily, in a
-            fashion similar to what the Vaadin Plugin for Spring Roo allows.
+            for the basic data types. This way you can create complete CRUD views easily.
+        </para>
+
+        <para>
+            The result is bit similar to what you can achieve with Spring Roo, as
+            described in <xref linkend="rapid.crudviews"/>. However, the form views are
+            generated dynamically at run-time, whereas Roo generates static form views.
         </para>
 
         <para>
@@ -1469,19 +1548,11 @@ persons.getEntityProvider().setQueryModifierDelegate(
                         <entry><para><classname>NativeSelect</classname></para></entry>
                     </row>
                     <row>
-                        <entry><para><literal>@ElementCollection</literal></para></entry>
-                        <entry><para><classname>NativeSelect</classname></para></entry>
-                    </row>
-                    <row>
-                        <entry><para><literal>@OneToOne</literal></para></entry>
+                        <entry><para><literal>@OneToOne</literal>, <literal>@Embedded</literal></para></entry>
                         <entry><para>Nested <classname>Form</classname></para></entry>
                     </row>
                     <row>
-                        <entry><para><literal>@Embedded</literal></para></entry>
-                        <entry><para>Nested <classname>Form</classname></para></entry>
-                    </row>
-                    <row>
-                        <entry><para><literal>@OneToMany</literal></para></entry>
+                        <entry><para><literal>@OneToMany</literal>, <literal>@ElementCollection</literal></para></entry>
                         <entry><para><classname>MasterDetailEditor</classname> (see below)</para></entry>
                     </row>
                     <row>
