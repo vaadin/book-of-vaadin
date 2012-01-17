@@ -686,7 +686,7 @@ public class Person {
             relationship metadata by annotating the classes.
         </para>
 
-        <section xml:id="jpacontainer.domain-model.metadata">
+        <section xml:id="jpacontainer.domain-model.annotation">
             <title>Persistence Metadata</title>
 
             <para>
@@ -880,8 +880,7 @@ Table personTable = new Table("The Persistent People", persons);]]></programlist
                 When using just the persistence unit name, the factory creates an instance
                 of <classname>EntityManagerFactory</classname> for the persistence unit
                 and uses it to build entity managers. You can also create the entity
-                managers yourself. This behind-the-doors-stuff is explained in <xref
-                linkend="jpacontainer.usage.thehardway"/>.
+                managers yourself, as described later.
             </para>
 
             <?dbfo-need height="2cm" ?>
@@ -896,11 +895,11 @@ Table personTable = new Table("The Persistent People", persons);]]></programlist
 					<tbody>
 						<row valign="top">
 							<entry><methodname>make()</methodname></entry>
-                            <entry><classname>CachedMutableLocalEntityProvider</classname></entry>
+                            <entry><classname>CachingMutableLocalEntityProvider</classname></entry>
                         </row>
 						<row valign="top">
 							<entry><methodname>makeReadOnly()</methodname></entry>
-                            <entry><classname>CachedLocalEntityProvider</classname></entry>
+                            <entry><classname>CachingLocalEntityProvider</classname></entry>
                         </row>
 						<row valign="top">
 							<entry><methodname>makeBatchable()</methodname></entry>
@@ -927,16 +926,19 @@ Table personTable = new Table("The Persistent People", persons);]]></programlist
             </para>
 
             <section xml:id="jpacontainer.usage.jpacontainerfactory.thehardway">
-                <title>The Hard Way</title>
+                <title>The Manual Way</title>
 
                 <para>
-                    Let us consider the hard way of creating a
-                    <classname>JPAContainer</classname> to see what the
-                    <classname>JPAContainerFactory</classname> actually does.
+                    While it is normally easier to use a
+                    <classname>JPAContainerFactory</classname> to create
+                    <classname>JPAContainer</classname> instances, you may need to create
+                    it manually. It is necessary, for example, when you need to use a
+                    custom entity provider.
                 </para>
 
                 <para>
-                    First, we need to have an entity manager. TODO: define.
+                    First, we need to create an entity manager and then the entity
+                    provider, which we bind to a <classname>JPAContainer</classname>.
                 </para>
 
                 <programlisting><?pocket-size 65% ?><![CDATA[EntityManagerFactory emf =
@@ -961,8 +963,10 @@ container.setEntityProvider(cachingEntityProvider);]]></programlisting>
                 JPAContainer integrates with the JPA entity manager, which you would
                 normally use to create and access entities with JPA. You can use the
                 entity manager for any purposes you may have, and then
-                <classname>JPAContainer</classname> to bind entities to the user
-                interface.
+                <classname>JPAContainer</classname> to bind entities to user interface
+                components such as <classname>Table</classname>,
+                <classname>Tree</classname>, any selection components, or a
+                <classname>Form</classname>.
             </para>
 
             <para>
@@ -1028,61 +1032,253 @@ persons.addEntity(new Person("Jeanne Calment", 122, france));]]></programlisting
         <para>
             Entity providers provide access to entities persisted in a data store. They
             are essentially wrappers over a JPA entity manager with optimizations and
-            other features important when binding persistent data to a user interface. The
-            most important features are caching, buffering, and batching.
+            other features important when binding persistent data to a user interface.
         </para>
 
-        <section xml:id="jpacontainer.entityprovider.features">
-            <title>Entity Provider Features and Types</title>
+        <para>
+            The choise and use of entity providers is largely invisible if you create your
+            <classname>JPAContainer</classname> instances with the
+            <classname>JPAContainerFactory</classname>, which hides such details.
+        </para>
+
+        <para>
+            JPAContainer entity providers can be customized, which is necessary for some
+            purposes. Entity providers can be Enterprise JavaBeans (EJBs), which is useful
+            when you use them in a Java EE application server.
+        </para>
+
+        <section xml:id="jpacontainer.entityprovider.built-in">
+            <title>Built-In Entity Providers</title>
                 
             <para>
-                JPAContainer includes two kinds of built-in entity providers:
-                <emphasis>local</emphasis> and <emphasis>caching local</emphasis>
-                providers.
+                JPAContainer includes various kinds of built-in entity providers: caching
+                and non-caching, read-write and read-only, and batchable.
             </para>
 
-            <section xml:id="jpacontainer.entityprovider.local">
-                <title>Local Providers</title>
-                
+            <para>
+                <emphasis>Caching</emphasis> is useful for performance, but takes some
+                memory for the cache and makes the provider
+                stateful. <emphasis>Batching</emphasis>, that is, running updates in
+                larger batches, can also enhance performance and be used together with
+                caching. It is stateless, but doing updates is a bit more complex than
+                otherwise.
+            </para>
+
+            <para>
+                Using a <emphasis>read-only</emphasis> container is preferable if
+                read-write capability is not needed.
+            </para>
+
+            <para>
+                All built-in providers as <emphasis>local</emphasis> in the sense that
+                they provide access to entities using a local JPA entity manager.
+            </para>
+
+            <para>
+                The <classname>CachingMutableLocalEntityProvider</classname> is usually
+                recommended as the first choise for a read-write access and
+                <classname>CachingLocalEntityProvider</classname> for read-only access.
+            </para>
+
+            <section>
+                <title><classname>LocalEntityProvider</classname></title>
+
                 <para>
-                    The local providers are the simplest, as they read data directly from
-                    a JPA entity manager.
+                    A read-only, lazy loading entity provider that does not perform
+                    caching and reads its data directly from an entity manager.
+                </para>
+
+                <para>
+                    You can create the provider with
+                    <methodname>makeNonCachedReadOnly()</methodname> method in
+                    <classname>JPAContainerFactory</classname>.
                 </para>
             </section>
 
-            <section xml:id="jpacontainer.entityprovider.caching">
-                <title>Caching</title>
-                
+            <section>
+                <title><classname>MutableLocalEntityProvider</classname></title>
+
                 <para>
+                    Extends <classname>LocalEntityProvider</classname> with write
+                    support. All changes are directly sent to the entity
+                    manager.
+                </para>
+
+                <para>
+                    Transactions can be handled either internally by the provider, which
+                    is the default, or by the container. In the latter case, you can
+                    extend the class and annotate it, for example, as described in <xref
+                    linkend="jpacontainer.entityprovider.built-in"/>.
+                </para>
+
+                <para>
+                    The provider can notify about updates to entities through the
+                    <interfacename>EntityProviderChangeNotifier</interfacename> interface.
                 </para>
             </section>
 
-            <section xml:id="jpacontainer.entityprovider.buffered">
-                <title>Buffered Mode</title>
-                
+            <section>
+                <title><classname>BatchableLocalEntityProvider</classname></title>
+
                 <para>
-                </para>
-            </section>
-            
-            <section xml:id="jpacontainer.entityprovider.mutable">
-                <title>Mutable</title>
-                
-                <para>
-                    Mutable entity providers allow modifications. Non-mutable providers
-                    give only read-only access to data.
+                    A simple non-caching implementation of the
+                    <interfacename>BatchableEntityProvider</interfacename> interface. It
+                    extends <classname>MutableLocalEntityProvider</classname> and simply
+                    passes itself to the <methodname>batchUpdate()</methodname> callback
+                    method. This will work properly if the entities do not contain any
+                    references to other entities that are managed by the same container.
                 </para>
             </section>
 
-            <section xml:id="jpacontainer.entityprovider.batching">
-                <title>Batching</title>
+            <section>
+                <title><classname>CachingLocalEntityProvider</classname></title>
+
+                <para>
+                    A read-only, lazy loading entity provider that caches both
+                    entities and query results for different filter/sortBy
+                    combinations. When the cache gets full, the oldest entries in
+                    the cache are removed. The maximum number of entities and
+                    entity IDs to cache for each filter/sortBy combination can be
+                    configured in the provider. The cache can also be manually
+                    flushed. When the cache grows full, the oldest items are
+                    removed.
+                </para>
+
+                <para>
+                    You can create the provider with
+                    <methodname>makeReadOnly()</methodname> method in
+                    <classname>JPAContainerFactory</classname>.
+                </para>
+            </section>
+
+            <section>
+                <title><classname>CachingMutableLocalEntityProvider</classname></title>
                 
                 <para>
-                    Batching entity providers are mutable providers that make updates in
-                    <emphasis>batches</emphasis>. This is more efficient for large
-                    updates.
+                    Just like <classname>CachingLocalEntityProvider</classname>, but with
+                    read-write access. For read access, caching works just like in the
+                    read-only provider. When an entity is added or updated, the cache is
+                    flushed in order to make sure the added or updated entity shows up
+                    correctly when using filters and/or sorting. When an entity is
+                    removed, only the filter/sortBy-caches that actually contain the item
+                    are flushed.
+                </para>
+
+                <para>
+                    This is perhaps the most commonly entity provider that you should
+                    consider using for most tasks. You can create it with the
+                    <methodname>make()</methodname> method in
+                    <classname>JPAContainerFactory</classname>.
+                </para>
+            </section>
+
+            <section>
+                <title><classname>CachingBatchableLocalEntityProvider</classname></title>
+
+                <para>
+                    This provider supports making updates in
+                    <emphasis>batches</emphasis>. You need to implement a
+                    <interfacename>BatchUpdateCallback</interfacename> that does
+                    all the updates and execute the batch by calling
+                    <methodname>batchUpdate()</methodname> on the provider.
+                </para>
+
+                <para>
+                    The provider is an extension of the
+                    <classname>CachingMutableLocalEntityProvider</classname> that
+                    implements the
+                    <interfacename>BatchableEntityProvider</interfacename>
+                    interface. This will work properly if the entities do not
+                    contain any references to other entities that are managed by
+                    the same container.
+                </para>
+
+                <para>
+                    You can create the provider with
+                    <methodname>makeBatchable()</methodname> method in
+                    <classname>JPAContainerFactory</classname>.
                 </para>
             </section>
         </section>
+
+        <section xml:id="jpacontainer.entityprovider.ejb">
+            <title>Entity Providers as Enterprise Beans</title>
+
+            <para>
+                Entity providers can be Enterprise JavaBeans (EJB). This is useful if you
+                use JPAContainer in a Java EE application server. In such case, you need
+                to implement a custom entity provider that allows the server to inject the
+                entity manager. 
+            </para>
+
+            <para>
+                For example, if you need to use Java Transaction API (JTA) for JPA
+                transactions, you can implement such entity provider as follows. Just
+                extend a built-in entity provider of your choise and annotate the entity
+                manager member as <literal>@PersistenceContext</literal>. Entity providers
+                can be either stateless or stateful session beans. If you extend a caching
+                entity provider, it has to be stateful.
+            </para>
+
+            <programlisting><?pocket-size 75% ?><![CDATA[
+@Stateless
+@TransactionManagement
+public class MyEntityProviderBean extends
+    MutableLocalEntityProvider<MyEntity> {
+
+    @PersistenceContext
+    private EntityManager em;
+
+    protected LocalEntityProviderBean() {
+        super(MyEntity.class);
+		setTransactionsHandledByProvider(false);
+    }
+
+    @Override
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public MyEntity updateEntity(MyEntity entity) {
+        return super.updateEntity(entity);
+    }
+
+    @Override
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public MyEntity addEntity(MyEntity entity) {
+        return super.addEntity(entity);
+    }
+
+    @Override
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public void removeEntity(Object entityId) {
+        super.removeEntity(entityId);
+    }
+
+    @Override
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public void updateEntityProperty(Object entityId,
+            String propertyName, Object propertyValue)
+            throws IllegalArgumentException {
+        super.updateEntityProperty(entityId, propertyName,
+            propertyValue);
+    }
+
+    @PostConstruct
+    public void init() {
+        setEntityManager(em);
+        /*
+         * The entity manager is transaction scoped, which means that
+         * the entities will be automatically detached when the
+         * transaction is closed. Therefore, we do not need to
+         * explicitly detach them.
+         */
+        setEntitiesDetached(false);
+    }
+}]]></programlisting>
+
+            <para>
+                You can implement an entity provider as a managed bean in Spring Framefork
+                the same way.
+            </para>
+        </section>                
     </section>
 
     <section xml:id="jpacontainer.filtering">
@@ -1094,8 +1290,8 @@ persons.addEntity(new Person("Jeanne Calment", 122, france));]]></programlisting
             a database table or query. Just like with database queries, you often want to
             narrow the results down. <classname>JPAContainer</classname> implements the
             <interfacename>Filterable</interfacename> interface in Vaadin containers,
-            described in <xref linkend="datamodel.container.filtered"/>. The filtering
-            implementation uses the JPA 2.0 Criteria API transparently.
+            described in <xref linkend="datamodel.container.filtered"/>. All filtering is
+            done at the database level with queries, not in the container.
         </para>
 
         <?dbfo-need height="0.6cm" ?>
@@ -1108,16 +1304,21 @@ persons.addContainerFilter(filter);]]></programlisting>
 
         <?dbfo-need height="0.6cm" ?>
         <para>
-            This should create a JPQL query somewhat as follows:
+            This would create a JPQL query somewhat as follows:
         </para>
 
         <programlisting><?pocket-size 75% ?><![CDATA[SELECT id FROM Person WHERE (AGE > 117)]]></programlisting>
 
         <para>
+             The filtering implementation uses the JPA 2.0 Criteria API transparently. As
+             the filtering is done at the database-level, custom filters that use the
+             <interfacename>Filterable</interfacename> API do not work.
+        </para>
+
+        <para>
             When using Hibernate, note that it does not support implicit joins. See <xref
             linkend="jpacontainer.hibernate.joins"/> for more details.
         </para>
-
     </section>
 
     <section xml:id="jpacontainer.filtering.criteria-api">
@@ -1268,7 +1469,15 @@ persons.getEntityProvider().setQueryModifierDelegate(
                         <entry><para><classname>NativeSelect</classname></para></entry>
                     </row>
                     <row>
+                        <entry><para><literal>@ElementCollection</literal></para></entry>
+                        <entry><para><classname>NativeSelect</classname></para></entry>
+                    </row>
+                    <row>
                         <entry><para><literal>@OneToOne</literal></para></entry>
+                        <entry><para>Nested <classname>Form</classname></para></entry>
+                    </row>
+                    <row>
+                        <entry><para><literal>@Embedded</literal></para></entry>
                         <entry><para>Nested <classname>Form</classname></para></entry>
                     </row>
                     <row>
