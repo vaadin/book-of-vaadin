@@ -917,9 +917,10 @@ public String getHierarchicalName() {
             <para>
                 The <classname>JPAContainerFactory</classname> is the easy way to create
                 <classname>JPAContainer</classname>s. It provides a set of
-                <emphasis>make...()</emphasis> factory methods for most cases you will
-                likely meet. Each factory method uses a different type of entity provider,
-                as described in <xref linkend="jpacontainer.entityprovider"/>.
+                <emphasis>make...()</emphasis> factory methods for most cases that you
+                will likely meet. Each factory method uses a different type of entity
+                provider, which are described in <xref
+                linkend="jpacontainer.entityprovider"/>.
             </para>
 
             <para>
@@ -932,14 +933,17 @@ public String getHierarchicalName() {
 JPAContainer<Person> persons =
     JPAContainerFactory.make(Person.class, "book-examples");
 
-// Add some items to it
-persons.addEntity(new Person("Jeanne Calment", 122));
-persons.addEntity(new Person("Sarah Knauss", 119));
-persons.addEntity(new Person("Lucy Hannah", 117));
+// You can add entities to the container as well
 persons.addEntity(new Person("Marie-Louise Meilleur", 117));
 
+// Set up sorting if the natural order is not appropriate
+persons.sort(new String[]{"age", "name"},
+             new boolean[]{false, false});
+
 // Bind it to a component
-Table personTable = new Table("The Persistent People", persons);]]></programlisting>
+Table personTable = new Table("The Persistent People", persons);
+personTable.setVisibleColumns(new String[]{"id","name","age"});
+layout.addComponent(personTable);]]></programlisting>
 
             <para>
                 It's that easy. In fact, if you run the above code multiple times, you'll
@@ -984,7 +988,7 @@ Table personTable = new Table("The Persistent People", persons);]]></programlist
                             <entry><classname>MutableLocalEntityProvider</classname></entry>
                         </row>
 						<row valign="top">
-							<entry><methodname>makeNonCachedReadOnly</methodname></entry>
+							<entry><methodname>makeNonCachedReadOnly()</methodname></entry>
                             <entry><classname>LocalEntityProvider</classname></entry>
                         </row>
                     </tbody>
@@ -999,14 +1003,35 @@ Table personTable = new Table("The Persistent People", persons);]]></programlist
                 <methodname>createEntityManagerForPersistenceUnit()</methodname> method.
             </para>
 
+            <programlisting><?pocket-size 65% ?><![CDATA[// Get an entity manager
+EntityManager em = JPAContainerFactory.
+    createEntityManagerForPersistenceUnit("book-examples");
+
+// Do a query
+em.getTransaction().begin();
+em.createQuery("DELETE FROM Person p").executeUpdate();
+em.persist(new Person("Jeanne Calment", 122));
+em.persist(new Person("Sarah Knauss", 119));
+em.persist(new Person("Lucy Hannah", 117));
+em.getTransaction().commit();
+
+...]]></programlisting>
+
+            <para>
+                Notice that if you use update the persistent data with an entity manager
+                outside a <classname>JPAContainer</classname> bound to the data, you need
+                to refresh the container as described in <xref
+                linkend="jpacontainer.usage.entitites"/>.
+            </para>
+
             <section xml:id="jpacontainer.usage.jpacontainerfactory.thehardway">
                 <title>The Manual Way</title>
 
                 <para>
-                    While it is normally easier to use a
+                    While it is normally easiest to use a
                     <classname>JPAContainerFactory</classname> to create
                     <classname>JPAContainer</classname> instances, you may need to create
-                    it manually. It is necessary, for example, when you need to use a
+                    them manually. It is necessary, for example, when you need to use a
                     custom entity provider.
                 </para>
 
@@ -1098,6 +1123,62 @@ persons.addEntity(new Person("Jeanne Calment", 122, france));]]></programlisting
                 </para>
             </section>
         </section>
+
+        <section xml:id="jpacontainer.usage.nested-properties">
+            <title>Nested Properties</title>
+
+            <para>
+                If you have a one-to-one or many-to-one relationship, you can define the
+                properties of the referenced entity as <emphasis>nested</emphasis> in a
+                <classname>JPAContainer</classname>. This way, you can access the
+                properties directly through the container of the first entity type as if
+                they were its properties. The interface is the same as with
+                <classname>BeanContainer</classname> described in <xref
+                linkend="datamodel.container.beancontainer"/>. You just need to add each
+                nested property with <methodname>addNestedContainerProperty()</methodname>
+                using dot-separated path to the property.
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[// Have a persistent container
+JPAContainer<Person> persons =
+    JPAContainerFactory.make(Person.class, "book-examples");
+
+// Add a nested property to a many-to-one property
+persons.addNestedContainerProperty("country.name");
+        
+// Show the persons in a table, except the "country" column,
+// which is an object - show the nested property instead
+Table personTable = new Table("The Persistent People", persons);
+personTable.setVisibleColumns(new String[]{"name","age",
+                                           "country.name"});
+
+// Have a nicer caption for the country.name column
+personTable.setColumnHeader("country.name", "Nationality");]]></programlisting>
+
+            <para>
+                The result is shown in <xref
+                linkend="figure.jpacontainer.usage.nested-properties"/>. Notice that the
+                <literal>country</literal> property in the container remains after adding
+                the nested property, so we had to make that column
+                invisible. Alternatively, we could have redefined the
+                <methodname>toString()</methodname> method in the country object to show
+                the name instead of an object reference.
+            </para>
+
+            <figure xml:id="figure.jpacontainer.usage.nested-properties">
+                <title>Nested Properties</title>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata smallscale="80%" align="center" fileref="img/jpacontainer/nested-properties.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+
+            <para>
+                You can use the <literal>*</literal> wildcard to add all properties in a
+                nested item, for example, "<literal>country.*</literal>".
+            </para>
+        </section>
     </section>
 
     <section xml:id="jpacontainer.entityprovider">
@@ -1150,7 +1231,7 @@ persons.addEntity(new Person("Jeanne Calment", 122, france));]]></programlisting
 
             <para>
                 The <classname>CachingMutableLocalEntityProvider</classname> is usually
-                recommended as the first choise for a read-write access and
+                recommended as the first choise for read-write access and
                 <classname>CachingLocalEntityProvider</classname> for read-only access.
             </para>
 
@@ -1294,8 +1375,7 @@ persons.addEntity(new Person("Jeanne Calment", 122, france));]]></programlisting
                 entity provider, it has to be stateful.
             </para>
 
-            <programlisting><?pocket-size 75% ?><![CDATA[
-@Stateless
+            <programlisting><?pocket-size 65% ?><![CDATA[@Stateless
 @TransactionManagement
 public class MyEntityProviderBean extends
     MutableLocalEntityProvider<MyEntity> {
@@ -1305,7 +1385,7 @@ public class MyEntityProviderBean extends
 
     protected LocalEntityProviderBean() {
         super(MyEntity.class);
-		setTransactionsHandledByProvider(false);
+        setTransactionsHandledByProvider(false);
     }
 
     @Override
@@ -1339,10 +1419,10 @@ public class MyEntityProviderBean extends
     public void init() {
         setEntityManager(em);
         /*
-         * The entity manager is transaction scoped, which means that
-         * the entities will be automatically detached when the
-         * transaction is closed. Therefore, we do not need to
-         * explicitly detach them.
+         * The entity manager is transaction-scoped, which means
+         * that the entities will be automatically detached when
+         * the transaction is closed. Therefore, we do not need
+         * to explicitly detach them.
          */
         setEntitiesDetached(false);
     }
@@ -1521,7 +1601,8 @@ persons.getEntityProvider().setQueryModifierDelegate(
             <interfacename>TableFieldFactory</interfacename> interfaces that can generate
             fields based on JPA annotations in a POJO. It goes further than the
             <classname>DefaultFieldFactory</classname>, which only creates simple fields
-            for the basic data types. This way you can create complete CRUD views easily.
+            for the basic data types. This way, you can easily create forms to input
+            entities or enable editing in tables.
         </para>
 
         <para>
@@ -1530,6 +1611,7 @@ persons.getEntityProvider().setQueryModifierDelegate(
             generated dynamically at run-time, whereas Roo generates static form views.
         </para>
 
+        <?dbfo-need height="2cm" ?>
         <para>
             The generated defaults are as follows:
         </para>
@@ -1570,18 +1652,6 @@ persons.getEntityProvider().setQueryModifierDelegate(
             one form.
         </para>
 
-        <section xml:id="jpacontainer.fieldfactory.masterdetaileditor">
-            <title>Master-Detail Editor</title>
-
-            <para>
-                The <classname>MasterDetailEditor</classname> is a complete implementation
-                of the Master-Detail pattern where you can add and remove items or select
-                an item to edit it.
-
-                <!-- Removal of entities (actually relationships between entities depending on the cascade rule) -->
-            </para>
-        </section>
-
         <section xml:id="jpacontainer.fieldfactory.configuring">
             <title>Configuring the Field Factory</title>
 
@@ -1610,6 +1680,11 @@ persons.getEntityProvider().setQueryModifierDelegate(
             </para>
 
             <para>
+                The configuration should be done before binding the form to a data source
+                as that is when the field generation is done.
+            </para>
+
+            <para>
                 Further configuration must be done by extending the many protected
                 methods. Please see the API documentation for the complete list.
             </para>
@@ -1620,38 +1695,115 @@ persons.getEntityProvider().setQueryModifierDelegate(
 
             <?dbfo-need height="2cm" ?>
             <para>
-                The basic use of the <classname>FieldFactory</classname> goes as follows:
+                The most basic use case for the JPAContainer
+                <classname>FieldFactory</classname> is with a <classname>Form</classname>
+                bound to a container item:
             </para>
 
-			<programlisting><?pocket-size 65% ?><![CDATA[// Create a form
-customerForm = new Form();
-customerForm.setCaption("EditCustomer groups");
+			<programlisting><?pocket-size 65% ?><![CDATA[// Have a persistent container
+final JPAContainer<Country> countries =
+    JPAContainerFactory.make(Country.class, "book-examples");
 
-// Create a field factory for the form
-FieldFactory feldFactory = new FieldFactory();
+// For selecting an item to edit
+final Select countrySelect = new Select("Select a Country",
+                                        countries);
+countrySelect.setItemCaptionMode(Select.ITEM_CAPTION_MODE_PROPERTY);
+countrySelect.setItemCaptionPropertyId("name");
 
-// Optional configuration:
-ffactory.setVisibleProperties(InvoiceRow.class,
-    "product", "description", "unit", "unitPrice");
-ffactory.setVisibleProperties(BillingAddress.class, "street",
-                              "city", "postalCode");
-ffactory.setSingleSelectType(Customer.class, ListSelect.class);
+// Country Editor
+final Form  countryForm  = new Form();
+countryForm.setCaption("Country Editor");
+countryForm.addStyleName("bordered"); // Custom style
+countryForm.setWidth("420px");
+countryForm.setWriteThrough(false); // Enable buffering
+countryForm.setEnabled(false);
 
-customerForm.setFormFieldFactory(ffactory);
-addComponent(customerForm);]]></programlisting>
+// When an item is selected from the list...
+countrySelect.addListener(new ValueChangeListener() {
+    @Override
+    public void valueChange(ValueChangeEvent event) {
+        // Get the item to edit in the form
+        Item countryItem =
+            countries.getItem(event.getProperty().getValue());
+        
+        // Use a JPAContainer field factory
+        //  - no configuration is needed here
+        final FieldFactory fieldFactory = new FieldFactory();
+        countryForm.setFormFieldFactory(fieldFactory);
+
+        // Edit the item in the form
+        countryForm.setItemDataSource(countryItem);
+        countryForm.setEnabled(true);
+        
+        // Handle saves on the form
+        final Button save = new Button("Save");
+        countryForm.getFooter().removeAllComponents();
+        countryForm.getFooter().addComponent(save);
+        save.addListener(new ClickListener() {
+            @Override
+            public void buttonClick(ClickEvent event) {
+                try {
+                    countryForm.commit();
+                    countryForm.setEnabled(false);
+                } catch (InvalidValueException e) {
+                }
+            }
+        });
+    }
+});
+countrySelect.setImmediate(true);
+countrySelect.setNullSelectionAllowed(false);]]></programlisting>
+
+            <para>
+                This would create a form shown in <xref
+                linkend="figure.jpacontainer.fieldfactory.using"/>.
+            </para>
+
+            <figure xml:id="figure.jpacontainer.fieldfactory.using">
+                <title>Using FieldFactory with One-to-Many Relationship</title>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata smallscale="80%" align="center" fileref="img/jpacontainer/fieldfactory-form.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+
+            <para>
+                If you use Hibernate, you also need to pass an
+                <classname>EntityManagerPerRequestHelper</classname>, either for the
+                constructor or with
+                <methodname>setEntityManagerPerRequestHelper()</methodname>, as described
+                in <xref linkend="jpacontainer.hibernate.em-per-request"/>.
+            </para>
         </section>
 
-        <para>
-            Notice that the configuration should be done before actually binding the form.
-        </para>
+        <section xml:id="jpacontainer.fieldfactory.masterdetaileditor">
+            <title>Master-Detail Editor</title>
 
-        <para>
-            If you use Hibernate, you also need to pass an
-            <classname>EntityManagerPerRequestHelper</classname>, either for the
-            constructor or with
-            <methodname>setEntityManagerPerRequestHelper()</methodname>, as described in
-            <xref linkend="jpacontainer.hibernate.em-per-request"/>.
-        </para>
+            <para>
+                The <classname>MasterDetailEditor</classname> is a field component that
+                allows editing an item property that has one-to-many relationship. The
+                item can be a row in a table or bound to a form. It displays the
+                referenced collection as an editable <classname>Table</classname> and
+                allows adding and removing items in it.
+            </para>
+
+            <para>
+                You can use the <classname>MasterDetailEditor</classname> manually, or
+                perhaps more commonly use a JPAContainer
+                <classname>FieldFactory</classname> to create it automatically. As shown
+                in the example in <xref linkend="figure.jpacontainer.fieldfactory.using"/>, the factory creates a
+                <classname>MasterDetailEditor</classname> for all properties with a
+                <literal>@OneToMany</literal> or an <literal>@ElementCollection</literal>
+                annotation.
+            </para>
+
+			<programlisting><?pocket-size 65% ?><![CDATA[
+]]></programlisting>
+
+            <!-- TODO: Removal of entities (actually relationships between entities depending on the cascade rule) -->
+        </section>
+
     </section>
 
     <section xml:id="jpacontainer.hibernate">
