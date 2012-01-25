@@ -1809,6 +1809,315 @@ Liferay.on('hello', function(event, data) {
         <indexterm startref="term.portal.liferay-ipc" class="endofrange"/>
     </section>
 
+    <section xml:id="portal.wsrp">
+        <title>Remote Portlets with WSRP</title>
+
+        <indexterm xml:id="term.portal.vaadin-wsrp" class="startofrange"><primary>Vaadin WSRP</primary></indexterm>
+        <indexterm xml:id="term.portal.wsrp" class="startofrange"><primary>WSRP</primary></indexterm>
+
+        <para>
+            Web Services for Remote Portlets (WSRP) is a way to deploy a portlet in one
+            portal, a <emphasis>producer</emphasis>, and use it in another, a
+            <emphasis>consumer</emphasis>. The basic WSRP architecture is illustrated in
+            <xref linkend="figure.portal.wsrp.architecture"/>. The <emphasis>Vaadin
+            WSRP</emphasis> add-on gives the ability to run Vaadin applications with WSRP.
+        </para>
+
+        <figure xml:id="figure.portal.wsrp.architecture">
+            <title>Vaadin WSRP Usage Architecture</title>
+            <mediaobject>
+                <imageobject role="html">
+                    <imagedata align="center" fileref="img/portal/wsrp-architecture-lo.png"/>
+                </imageobject>
+                <imageobject role="fo">
+                    <imagedata smallscale="100%" align="center" fileref="img/portal/wsrp-architecture-hi.png"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
+
+        <para>
+            Vaadin WSRP is supported especially on Liferay, but it should work in any
+            other portal that supports WSRP. In the following, we give the instructions
+            only for Liferay. If you use other portal software, please refer to its
+            documentation for the relevant parts of WSRP configuration.
+        </para>
+
+        <section xml:id="portal.wsrp.installation">
+            <title>Installing the Add-on</title>
+
+            <para>
+                The Vaadin WSRP add-on is available as a JAR from the Vaadin Directory as
+                well as from a Maven repository, as described in <xref
+                linkend="addons"/>. At least Vaadin 6.6.0 is required.
+            </para>
+
+            <para>
+                You need to install the Vaadin WSRP JAR at least in producer portals. A
+                consumer only needs the widget set, but no JARs related to your Vaadin
+                portlet, not even the Vaadin JAR.
+            </para>
+
+            <para>
+                You should put the Vaadin WSRP JAR in the <filename>WEB-INF/lib</filename>
+                folder under the root context in the <emphasis>producer</emphasis> portal
+                server. The location of the root context depends on the server, for
+                example in Tomcat it is in <filename>webapps/ROOT</filename>.
+            </para>
+
+            <para>
+                The add-on is licensed under the same Apache License 2.0 as the Vaadin
+                Framework itself.
+            </para>
+
+            <section xml:id="portal.wsrp.installation.widgetset">
+                <title>Compiling the Widget Set</title>
+
+                <para>
+                    The Vaadin WSRP add-on contains a widget set, which you must compile
+                    into the Vaadin widget set installed in the portal. The widget set is
+                    needed in both the producer and consumer portals, but you do not need
+                    the WSRP JAR (or any other Vaadin JARs) in the consumer portal. You
+                    can avoid compiling the widget set by copying it (and the Vaadin
+                    themes) from the producer.
+                </para>
+
+                <para>
+                    If you use Liferay, the easiest way to compile the widget set is to
+                    use the <link
+                    xlink:href="http://vaadin.com/directory#addon/vaadin-control-panel-for-liferay">Vaadin
+                    Control Panel for Liferay</link> add-on (also available from Vaadin
+                    Directory). Its use is described in detail in <xref
+                    linkend="portal.control-panel"/>. You can use the Control Panel to
+                    upgrade Vaadin, if you need, then select the <guilabel>Vaadin
+                    WSRP</guilabel> add-on, and compile the widget set. Once compiled in
+                    the producer, you can copy the <filename>ROOT/html/VAADIN</filename>
+                    folder to the corresponding folder in a consumer, or do the same
+                    compilation in the consumer separately.
+                </para>
+
+                <para>
+                    For other portals than Liferay, a simple manual way to compile the
+                    widget set is to create a Vaadin project in Eclipse, add the WSRP JAR
+                    and any other required JARs to the
+                    <filename>WebContent/WEB-INF/lib</filename> folder, and click the
+                    <guibutton>Compile Vaadin widgets</guibutton> button. You need the
+                    Vaadin Plugin for Eclipse to do this.
+                </para>
+            </section>
+        </section>
+
+        <section xml:id="portal.wsrp.configuring">
+            <title>Configuring a Remote Portlet</title>
+
+            <para>
+                A portlet needs some configuration to be used as a remote portlet.
+            </para>
+
+            <section xml:id="portal.wsrp.configuring.vaadin">
+                <title>Portlet Configuration</title>
+
+                <?dbfo-need height="2cm" ?>
+                <para>
+                    You need to replace the regular Vaadin application portlet in your
+                    project to a WSRP portlet. Edit the
+                    <filename>WEB-INF/portlet.xml</filename> file and change the line:
+                </para>
+
+                <programlisting><?pocket-size 65% ?><![CDATA[<portlet-class>com.vaadin.terminal.gwt.server.ApplicationPortlet2</portlet-class>]]></programlisting>
+
+                <?dbfo-need height="2cm" ?>
+                <para>
+                    to the following:
+                </para>
+
+                <programlisting><?pocket-size 65% ?><![CDATA[<portlet-class>com.vaadin.addon.wsrp.WSRPApplicationPortlet</portlet-class>]]></programlisting>
+
+            </section>
+
+            <section xml:id="portal.wsrp.configuring.other">
+                <title>Other Portlet Configuration</title>
+
+                <?dbfo-need height="2cm" ?>
+                <para>
+                    WSRP support may need to be enabled in the portal-specific
+                    configuration. For example, to enable WSRP in Liferay, you need to
+                    enable the <emphasis>remoteable</emphasis> property in the
+                    <filename>WEB-INF/liferay-portlet.xml</filename> file for a portlet:
+                </para>
+
+                <programlisting><![CDATA[<remoteable>true</remoteable>]]></programlisting>
+            </section>
+        </section>
+
+        <section xml:id="portal.wsrp.producer">
+            <title>Producer Configuration</title>
+
+            <para>
+                Once you have installed and Vaadin WSRP JAR in the producer portal,
+                compiled the widget set, and deployed your portlet, you can configure it
+                as a producer.
+            </para>
+
+            <para>
+                In Liferay, you can configure a WSRP portlet in the Control Panel. In the
+                Control Panel, select <guilabel>WSRP</guilabel> and open the
+                <guilabel>Producers</guilabel> tab. Click <guibutton>Add
+                Producer</guibutton> to create a new producer.
+            </para>
+
+            <figure xml:id="figure.portal.wsrp.producer-config">
+                <title>WSRP Producer Configuration</title>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata smallscale="75%" align="center" fileref="img/portal/wsrp-provider-config.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+
+            <para>
+                Select your portlet from the <guilabel>Available</guilabel> portlets and
+                click the left-arrow to select it as current. Give the producer a
+                <guilabel>Name</guilabel> and click <guibutton>Save</guibutton>. The
+                producer portlet is shown in the list. You need to copy the URL shown in
+                the list when creating a consumer portlet in the consumer portal.
+            </para>
+
+            <para>
+                In other portals than Liferay, follow the instructions for the portal
+                software to set up the portlet as a producer.
+            </para>
+        </section>
+
+        <section xml:id="portal.wsrp.consumer">
+            <title>Consumer Configuration</title>
+
+            <para>
+                Once you have configured a portlet as a producer in the producer portal,
+                you can add it as a consumer portlet in a consumer portal. The consumer
+                portlet is not a Vaadin portlet but a special WSRP portlet that relays the
+                user input to the producer portlet in the other portal.
+            </para>
+
+            <para>
+                This requires that you have copied or compiled the widget set (and themes)
+                in the consumer, as described earlier.
+            </para>
+
+            <para>
+                In Liferay, you first need to configure a WSRP consumer in the Control
+                Panel.
+            </para>
+
+            <orderedlist>
+                <listitem>
+                    <para>
+                        In the Control Panel, select <guilabel>WSRP</guilabel> and open
+                        the <guilabel>Consumers</guilabel> tab.
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        Click <guibutton>Add Consumer</guibutton> to create a new
+                        consumer. The configuration window is shown in <xref
+                        linkend="figure.portal.wsrp.consumer-config"/>.
+                    </para>
+
+                    <figure xml:id="figure.portal.wsrp.consumer-config">
+                        <title>WSRP Consumer Configuration</title>
+                        <mediaobject>
+                            <imageobject>
+                                <imagedata smallscale="70%" align="center" fileref="img/portal/wsrp-consumer-config.png"/>
+                            </imageobject>
+                        </mediaobject>
+                    </figure>
+                </listitem>
+                <listitem>
+                    <para>
+                        Copy and paste the <guilabel>URL</guilabel> for the producer
+                        portlet from the producer portal configuration. Also, give the
+                        consumer a <guilabel>Name</guilabel>. Click
+                        <guibutton>Save</guibutton>.
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        In the consumer list, click
+                        <menuchoice><guimenu>Actions</guimenu><guimenuitem>Manage
+                        Portlets</guimenuitem></menuchoice> for the new consumer.
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        In the <guilabel>Manage Portlets</guilabel> view, click
+                        <guibutton>New Portlet</guibutton>.
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        Give the consumer portlet a <guilabel>Name</guilabel>, select the
+                        <guilabel>Remote Portlet</guilabel>, and click
+                        <guibutton>Save</guibutton>.
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        Go back to Liferay from the Control Panel by clicking
+                        <guibutton>Back to Liferay</guibutton>.
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        In the page in the portal where you want to add the portlet, click
+                        <menuchoice><guimenu>Add</guimenu><guisubmenu>More...</guisubmenu><guimenuitem>WSRP</guimenuitem></menuchoice>.
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        Your remote portlet should show in the list. Click
+                        <guibutton>Add</guibutton> to add it to the page. You need to
+                        reload the page for the portlet to show up.
+                    </para>
+                </listitem>
+            </orderedlist>
+
+            <para>
+                In other portals than Liferay, follow the instructions for the portal
+                software to set up the portlet as a producer.
+            </para>
+        </section>
+
+        <section xml:id="portal.wsrp.advanced">
+            <title>Advanced Configuration</title>
+
+            <section xml:id="portal.wsrp.advanced.alt-vaadin-path">
+                <title>Alternative Path for Vaadin Resources</title>
+
+                <para>
+                    The Vaadin WSRP implementation assumes that the widget set is located
+                    in <filename>/html/VAADIN</filename> URL. If you need to change this
+                    default to serve the <filename>VAADIN</filename> resource directory
+                    from some other URL, you have to extend the
+                    <classname>WSRPApplicationPortlet</classname> class and override the
+                    <methodname>getStaticFilesLocation()</methodname> method, which
+                    normally returns "<literal>/html</literal>". It should return the path
+                    under which the <filename>VAADIN</filename> directory is found.
+                </para>
+
+                <para>
+                    If you extend the portlet class, you need to use your custom class in
+                    <filename>portlet.xml</filename>.
+                </para>
+            </section>
+
+            <section xml:id="portal.wsrp.advanced.alt-vaadin-path">
+                <title></title>
+            </section>
+        </section>
+
+        <indexterm startref="term.portal.wsrp" class="endofrange"/>
+        <indexterm startref="term.portal.vaadin-wsrp" class="endofrange"/>
+    </section>
+
     <indexterm startref="term.portal" class="endofrange"/>
 </chapter>
 

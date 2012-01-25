@@ -48,7 +48,8 @@ IMAGES =	intro/architecture intro/architecture-detailed intro/toolchain intro/to
 			testbench/tt-junit-workflow \
 			jpacontainer/detailed-architecture jpacontainer/three-layer-architecture jpacontainer/jpa-mapping-graphic \
 			jpacontainer/domain-model \
-			portal/liferay-ipc-architecture portal/liferay-ipc-demo-annotated
+			portal/liferay-ipc-architecture portal/liferay-ipc-demo-annotated \
+			portal/wsrp-architecture
 
 # List of source XML files
 XMLFILES =  book.xml \
