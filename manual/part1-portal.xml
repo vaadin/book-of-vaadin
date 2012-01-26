@@ -1815,16 +1815,18 @@ Liferay.on('hello', function(event, data) {
         <indexterm xml:id="term.portal.vaadin-wsrp" class="startofrange"><primary>Vaadin WSRP</primary></indexterm>
         <indexterm xml:id="term.portal.wsrp" class="startofrange"><primary>WSRP</primary></indexterm>
 
+        <?dbfo-need height="10cm" ?>
         <para>
             Web Services for Remote Portlets (WSRP) is a way to deploy a portlet in one
             portal, a <emphasis>producer</emphasis>, and use it in another, a
-            <emphasis>consumer</emphasis>. The basic WSRP architecture is illustrated in
-            <xref linkend="figure.portal.wsrp.architecture"/>. The <emphasis>Vaadin
-            WSRP</emphasis> add-on gives the ability to run Vaadin applications with WSRP.
-        </para>
+            <emphasis>consumer</emphasis>. This is done using a special WSRP portlet that
+            relays the user input from a consumer to an actual portlet running in a
+            producer. The <emphasis>Vaadin WSRP</emphasis> add-on gives you the ability to
+            run Vaadin portlets as remote WSRP portlets. The basic WSRP architecture is
+            illustrated in <xref linkend="figure.portal.wsrp.architecture"/>.
 
         <figure xml:id="figure.portal.wsrp.architecture">
-            <title>Vaadin WSRP Usage Architecture</title>
+            <title>WSRP Architecture</title>
             <mediaobject>
                 <imageobject role="html">
                     <imagedata align="center" fileref="img/portal/wsrp-architecture-lo.png"/>
@@ -1834,12 +1836,18 @@ Liferay.on('hello', function(event, data) {
                 </imageobject>
             </mediaobject>
         </figure>
+        </para>
 
         <para>
-            Vaadin WSRP is supported especially on Liferay, but it should work in any
-            other portal that supports WSRP. In the following, we give the instructions
-            only for Liferay. If you use other portal software, please refer to its
-            documentation for the relevant parts of WSRP configuration.
+            In this documentation, we give the instructions for Liferay, but the Vaadin
+            WSRP add-on should work in any other portal or non-portal server that supports
+            WSRP. If you use other portal software, please refer to its documentation for
+            the relevant parts of WSRP configuration.
+        </para>
+
+        <para>
+            The add-on is licensed under the same Apache License 2.0 as the Vaadin
+            Framework itself.
         </para>
 
         <section xml:id="portal.wsrp.installation">
@@ -1848,13 +1856,13 @@ Liferay.on('hello', function(event, data) {
             <para>
                 The Vaadin WSRP add-on is available as a JAR from the Vaadin Directory as
                 well as from a Maven repository, as described in <xref
-                linkend="addons"/>. At least Vaadin 6.6.0 is required.
+                linkend="addons"/>. Vaadin 6.6.0 or later is required.
             </para>
 
             <para>
-                You need to install the Vaadin WSRP JAR at least in producer portals. A
-                consumer only needs the widget set, but no JARs related to your Vaadin
-                portlet, not even the Vaadin JAR.
+                You need to install the Vaadin WSRP JAR at least in the producer
+                portals. A consumer only needs the widget set, but no JARs related to your
+                Vaadin portlet, not even the Vaadin JAR.
             </para>
 
             <para>
@@ -1862,11 +1870,6 @@ Liferay.on('hello', function(event, data) {
                 folder under the root context in the <emphasis>producer</emphasis> portal
                 server. The location of the root context depends on the server, for
                 example in Tomcat it is in <filename>webapps/ROOT</filename>.
-            </para>
-
-            <para>
-                The add-on is licensed under the same Apache License 2.0 as the Vaadin
-                Framework itself.
             </para>
 
             <section xml:id="portal.wsrp.installation.widgetset">
@@ -1922,6 +1925,7 @@ Liferay.on('hello', function(event, data) {
                     project to a WSRP portlet. Edit the
                     <filename>WEB-INF/portlet.xml</filename> file and change the line:
                 </para>
+                <indexterm><primary>portlet.xml</primary></indexterm>
 
                 <programlisting><?pocket-size 65% ?><![CDATA[<portlet-class>com.vaadin.terminal.gwt.server.ApplicationPortlet2</portlet-class>]]></programlisting>
 
@@ -1945,6 +1949,8 @@ Liferay.on('hello', function(event, data) {
                     <filename>WEB-INF/liferay-portlet.xml</filename> file for a portlet:
                 </para>
 
+                <indexterm><primary>remoteable</primary></indexterm>
+                <indexterm><primary>liferay-portlet.xml</primary></indexterm>
                 <programlisting><![CDATA[<remoteable>true</remoteable>]]></programlisting>
             </section>
         </section>
@@ -1959,32 +1965,56 @@ Liferay.on('hello', function(event, data) {
             </para>
 
             <para>
-                In Liferay, you can configure a WSRP portlet in the Control Panel. In the
-                Control Panel, select <guilabel>WSRP</guilabel> and open the
-                <guilabel>Producers</guilabel> tab. Click <guibutton>Add
-                Producer</guibutton> to create a new producer.
+                In Liferay, you can configure a WSRP portlet in the Control Panel as
+                follows.
             </para>
 
-            <figure xml:id="figure.portal.wsrp.producer-config">
-                <title>WSRP Producer Configuration</title>
-                <mediaobject>
-                    <imageobject>
-                        <imagedata smallscale="75%" align="center" fileref="img/portal/wsrp-provider-config.png"/>
-                    </imageobject>
-                </mediaobject>
-            </figure>
+            <orderedlist>
+                <listitem>
+                    <para>
+                        Open the Control Panel as an administrator and select
+                        <guilabel>WSRP</guilabel>.
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        Open the <guilabel>Producers</guilabel> tab and click
+                        <guibutton>Add Producer</guibutton> to create a new producer.
+                    </para>
+
+                    <figure xml:id="figure.portal.wsrp.producer-config">
+                        <title>WSRP Producer Configuration</title>
+                        <mediaobject>
+                            <imageobject>
+                                <imagedata smallscale="75%" align="center" fileref="img/portal/wsrp-provider-config.png"/>
+                            </imageobject>
+                        </mediaobject>
+                    </figure>
+                </listitem>
+
+                <listitem>
+                    <para>
+                        Select your portlet from the <guilabel>Available</guilabel>
+                        portlets and click the left-arrow to select it as current.
+                    </para>
+                </listitem>
+
+                <listitem>
+                    <para>
+                        Give the producer a <guilabel>Name</guilabel> and click
+                        <guibutton>Save</guibutton>.
+                    </para>
+                </listitem>
+            </orderedlist>
 
             <para>
-                Select your portlet from the <guilabel>Available</guilabel> portlets and
-                click the left-arrow to select it as current. Give the producer a
-                <guilabel>Name</guilabel> and click <guibutton>Save</guibutton>. The
-                producer portlet is shown in the list. You need to copy the URL shown in
-                the list when creating a consumer portlet in the consumer portal.
+                The producer portlet is shown in the list. You need to copy the URL shown
+                in the list when creating a consumer portlet in the consumer portal.
             </para>
 
             <para>
                 In other portals than Liferay, follow the instructions for the portal
-                software to set up the portlet as a producer.
+                software to set up a portlet as a producer.
             </para>
         </section>
 
@@ -2003,22 +2033,24 @@ Liferay.on('hello', function(event, data) {
                 in the consumer, as described earlier.
             </para>
 
+            <?dbfo-need height="2cm" ?>
             <para>
                 In Liferay, you first need to configure a WSRP consumer in the Control
-                Panel.
+                Panel as follows:
             </para>
 
             <orderedlist>
                 <listitem>
                     <para>
-                        In the Control Panel, select <guilabel>WSRP</guilabel> and open
-                        the <guilabel>Consumers</guilabel> tab.
+                        Open the Control Panel as an administrator and open the
+                        <guilabel>WSRP</guilabel> section.
                     </para>
                 </listitem>
                 <listitem>
                     <para>
-                        Click <guibutton>Add Consumer</guibutton> to create a new
-                        consumer. The configuration window is shown in <xref
+                        Select the <guilabel>Consumers</guilabel> tab and click
+                        <guibutton>Add Consumer</guibutton> to create a new consumer. The
+                        configuration window is shown in <xref
                         linkend="figure.portal.wsrp.consumer-config"/>.
                     </para>
 
@@ -2034,8 +2066,12 @@ Liferay.on('hello', function(event, data) {
                 <listitem>
                     <para>
                         Copy and paste the <guilabel>URL</guilabel> for the producer
-                        portlet from the producer portal configuration. Also, give the
-                        consumer a <guilabel>Name</guilabel>. Click
+                        portlet from the producer portal configuration.
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        Give the consumer a <guilabel>Name</guilabel> and click
                         <guibutton>Save</guibutton>.
                     </para>
                 </listitem>
@@ -2067,13 +2103,13 @@ Liferay.on('hello', function(event, data) {
                 </listitem>
                 <listitem>
                     <para>
-                        In the page in the portal where you want to add the portlet, click
+                        In the page where you want to add the portlet, click
                         <menuchoice><guimenu>Add</guimenu><guisubmenu>More...</guisubmenu><guimenuitem>WSRP</guimenuitem></menuchoice>.
                     </para>
                 </listitem>
                 <listitem>
                     <para>
-                        Your remote portlet should show in the list. Click
+                        Your remote portlet should show up in the list. Click
                         <guibutton>Add</guibutton> to add it to the page. You need to
                         reload the page for the portlet to show up.
                     </para>
