@@ -9,4 +9,7 @@
   <xsl:template match="book-example">
     <!-- Simply ignore for now. Links are supported very poorly in readers. -->
   </xsl:template>
+
+  <xsl:template match="releasenumber">
+  </xsl:template>
 </xsl:stylesheet>
