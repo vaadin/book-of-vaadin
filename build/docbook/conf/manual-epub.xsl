@@ -3,7 +3,18 @@
   <xsl:import href="../xsl/epub/docbook.xsl"/>
 
   <!-- ==================================================================== -->
-  <!-- Book Example References                                              -->
+  <!-- Settings                                                             -->
+  <!-- ==================================================================== -->
+
+  <xsl:param name="chapter.autolabel" select="1"/>
+  <xsl:param name="part.autolabel" select="'I'"/>
+  <xsl:param name="section.autolabel" select="1"/>
+  <xsl:param name="section.autolabel.max.depth" select="2"/>
+  <xsl:param name="section.label.includes.component.label" select="1"/>
+  <xsl:param name="toc.max.depth" select="3"/>
+
+  <!-- ==================================================================== -->
+  <!-- Discarded elements                                                   -->
   <!-- ==================================================================== -->
 
   <xsl:template match="book-example">
