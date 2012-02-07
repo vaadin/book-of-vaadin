@@ -872,7 +872,30 @@ private Country country;]]></programlisting>
                 <para>
                     JPAContainer <classname>FieldFactory</classname> generates a
                     <classname>NativeSelect</classname> for selecting an item from the
-                    collection.
+                    collection. You can do so yourself as well in a custom field factory.
+                    Doing so you need to pay notice not to confuse the container between
+                    the referenced entity and its ID, which could even result in insertion
+                    of false entities in the database in some cases. You can translate
+                    between an entity and the entity ID using the
+                    <classname>SingleSelectTranslator</classname> as follows:
+                </para>
+
+                <programlisting><?pocket-size 75% ?><![CDATA[@Override
+public Field createField(Item item, Object propertyId,
+                         Component uiContext) {
+    if (propertyId.equals("station")) {
+        ComboBox box = new ComboBox("Station");
+
+        // Translate between referenced entity and its ID
+        box.setPropertyDataSource(
+                new SingleSelectTranslator(box));
+        
+        boz.setContainerDataSource(stationContainer);
+        ...]]></programlisting>
+
+                <para>
+                    The JPAContainer <classname>FieldFactory</classname> uses the
+                    translator internally, so using it also avoids the problem.
                 </para>
             </section>
 
@@ -1261,7 +1284,7 @@ personTable.setColumnHeader("country.name", "Nationality");]]></programlisting>
             </para>
 
             <book-example id="jpacontainer.hierarchical" style="float: right"/>
-            <programlisting><![CDATA[@Entity
+            <programlisting><?pocket-size 65% ?><![CDATA[@Entity
 public class CelestialBody implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -1322,11 +1345,30 @@ for (Object rootId: bodies.rootItemIds())
 
                 <para>
                     Also, the current implementation does not support
-                    <emphasis>setChildrenAllowed()</emphasis>, as it would require storing
-                    the information outside the entities. You can override
-                    <methodname>areChildrenAllowed()</methodname> in
-                    <classname>JPAContainer</classname> to implement the functionality.
+                    <emphasis>setChildrenAllowed()</emphasis>, which controls whether the
+                    user can expand a node by clicking a toggle. The toggle is by default
+                    visible for all nodes, even if they have no children. The method is
+                    not supported because it would require storing the information outside
+                    the entities. You can override
+                    <methodname>areChildrenAllowed()</methodname> to implement the
+                    functionality using a custom logic.
                 </para>
+
+                <book-example id="jpacontainer.hierarchical" style="float: right"/>
+                <programlisting><?pocket-size 65%?><![CDATA[// Customize JPAContainer to define the logic for
+// displaying the node expansion indicator
+JPAContainer<CelestialBody> bodies =
+        new JPAContainer<CelestialBody>(CelestialBody.class) {
+    @Override
+    public boolean areChildrenAllowed(Object itemId) {
+        // Some simple logic
+        return getChildren(itemId).size() > 0;
+    }
+};
+bodies.setEntityProvider(
+    new CachingLocalEntityProvider<CelestialBody>(
+        CelestialBody.class, em));]]></programlisting>
+
             </section>
         </section>
     </section>
