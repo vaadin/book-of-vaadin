@@ -1421,7 +1421,7 @@ main.showNotification(notif);]]></programlisting>
 			</para>
 
 			<informaltable frame="none">
-				<tgroup cols="2" align="left">
+				<tgroup cols="1" align="left">
 					<tbody>
 						<row valign="top" rowsep="0"><entry colsep="0"><parameter>Window.Notification.POSITION_CENTERED</parameter></entry></row>
 						<row valign="top" rowsep="0"><entry colsep="0"><parameter>Window.Notification.POSITION_CENTERED_TOP</parameter></entry></row>
@@ -1443,6 +1443,120 @@ main.showNotification(notif);]]></programlisting>
 				does not, however, add a close box that the error notification has.
 			</para>
 		</section>
+
+		<section xml:id="application.errors.systemmessages">
+			<title>Customizing System Messages</title>
+
+            <para>
+                System messages are notifications that indicate a major invalid state in
+                an application that usually requires restarting the application. Session
+                timeout is perhaps the most typical such state.
+            </para>
+
+            <para>
+                System messages are strings managed in
+                <classname>SystemMessages</classname> class.
+            </para>
+
+            <variablelist>
+                <varlistentry>
+                    <term>sessionExpired</term>
+                    <listitem>
+                        <para>
+                            Application servlet session expired. A session expires if no
+                            server requests are made during the session timeout
+                            period. The session timeout can be configured with the
+                            <parameter>session-timeout</parameter> parameter in
+                            <filename>web.xml</filename>, as described in <xref
+                            linkend="section.web.web-xml"/>.
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>communicationErrorURL</term>
+                    <listitem>
+                        <para>
+                            An unspecified communication problem between the Vaadin
+                            Client-Side Engine and the application server. The server may
+                            be unavailable or there is some other problem.
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>authenticationError</term>
+                    <listitem>
+                        <para>
+                            This error occurs if 401 (Unauthorized) response to a request
+                            is received from the server.
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>internalError</term>
+                    <listitem>
+                        <para>
+                            A serious internal problem, possibly indicating a bug in
+                            Vaadin Client-Side Engine or in some custom client-side code.
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>outOfSync</term>
+                    <listitem>
+                        <para>
+                            The client-side state is invalid with respect to server-side
+                            state.
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>cookiesDisabled</term>
+                    <listitem>
+                        <para>
+                            Informs the user that cookies are disabled in the browser and
+                            the application does not work without them.
+                        </para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+
+            <para>
+                Each message has four properties: a short caption, the actual message, a
+                URL to which to redirect after displaying the message, and property
+                indicating whether the notification is enabled.
+            </para>
+
+            <para>
+                Additional details may be written (in English) to the debug console window
+                described in <xref linkend="advanced.debug-production-modes"/>.
+            </para>
+
+            <para>
+                You can override the default system messages by implementing the
+                <methodname>getSystemMessages()</methodname> method in the application
+                class. The method should return a
+                <classname>Application.SystemMessages</classname> object. The easiest way
+                to customize the messages is to use a
+                <classname>CustomizedSystemMessages</classname> object as follows:
+            </para>
+
+			<programlisting><?pocket-size 65% ?><![CDATA[// Override the default implementation
+public static SystemMessages getSystemMessages() {
+    CustomizedSystemMessages messages =
+            new CustomizedSystemMessages();
+    messages.setSessionExpiredCaption("Ohno, session expired!");
+    messages.setSessionExpiredMessage("Don't idle!");
+    messages.setSessionExpiredNotificationEnabled(true);
+    messages.setSessionExpiredURL("http://vaadin.com/");
+    return messages;
+}]]></programlisting>
+
+            <para>
+                Notice that the special <methodname>getSystemMessages()</methodname>
+                method is not defined in an interface nor does it exist in the
+                <classname>Application</classname> superclass.
+            </para>
+        </section>
 		
 		<section xml:id="application.errors.unchecked-exceptions">
 			<title>Handling Uncaught Exceptions </title>
@@ -1556,108 +1670,6 @@ public void terminalError(Terminal.ErrorEvent event) {
 			</para>
 
 		</section>
-
-		<section xml:id="application.errors.systemmessages">
-			<title>Customizing System Messages</title>
-
-            <para>
-                System messages indicate a major invalid state in the application that
-                usually requires restarting the application (session). Session timeout is
-                perhaps the most typical such state.
-            </para>
-
-            <para>
-                System messages are strings managed in
-                <classname>SystemMessages</classname> class.
-            </para>
-
-            <variablelist>
-                <varlistentry>
-                    <term>sessionExpired</term>
-                    <listitem>
-                        <para>
-                            User session expired.
-                        </para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term>communicationErrorURL</term>
-                    <listitem>
-                        <para>
-                            An unspecified communication problem between the Vaadin
-                            Client-Side Engine and the application
-                        </para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term>authenticationError</term>
-                    <listitem>
-                        <para>
-                            Session authentication failed for some reason.
-                        </para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term>internalError</term>
-                    <listitem>
-                        <para>
-                            A serious internal problem, possibly indicating a bug in
-                            Vaadin Client-Side Engine or in some custom client-side code.
-                        </para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term>outOfSync</term>
-                    <listitem>
-                        <para>
-                            The client-side state is invalid with respect to server-side
-                            state.
-                        </para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term>cookiesDisabled</term>
-                    <listitem>
-                        <para>
-                            Informs the user that cookies are disabled in the browser and
-                            the application does not work without them.
-                        </para>
-                    </listitem>
-                </varlistentry>
-            </variablelist>
-
-            <para>
-                Each message has four properties: a short caption, the actual message, a
-                URL to which to redirect after displaying the message, and property
-                indicating whether the notification is enabled.
-            </para>
-
-            <para>
-                You can override the default system messages by implementing the
-                <methodname>getSystemMessages()</methodname> method in the application
-                class. The method should return a
-                <classname>Application.SystemMessages</classname> object. The easiest way
-                to customize the messages is to use a
-                <classname>CustomizedSystemMessages</classname> object as follows:
-            </para>
-
-			<programlisting><?pocket-size 65% ?><![CDATA[// Override the default implementation
-public static SystemMessages getSystemMessages() {
-    CustomizedSystemMessages messages =
-            new CustomizedSystemMessages();
-    messages.setSessionExpiredCaption("Ohno, session expired!");
-    messages.setSessionExpiredMessage("Don't idle!");
-    messages.setSessionExpiredNotificationEnabled(true);
-    messages.setSessionExpiredURL("http://vaadin.com/");
-    return messages;
-}]]></programlisting>
-
-            <para>
-                Notice that the special <methodname>getSystemMessages()</methodname>
-                method is not defined in an interface nor does it exist in the
-                <classname>Application</classname> superclass.
-            </para>
-        </section>
 	</section>
 
 	<section xml:id="application.environment">
