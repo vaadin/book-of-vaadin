@@ -27,7 +27,7 @@
                 Manage calendar by server-side API
             </listitem>
             <listitem>
-                Two types of events: "All-day" events and events with a time range
+                Two types of events: "all-day" events and events with a time range
             </listitem>
             <listitem>
                 One minute resolution of the timeline
@@ -270,18 +270,13 @@
         </para>
 
         <para>
-            Installing Vaadin Calendar doesn't differ from installing any other Vaadin
-            add-on: Download the jar from http://vaadin.com/directory#addon/124 Copy it to
-            your web project's WEB-INF/lib directory. Recompile your widgetset. If you are
-            using Eclipse and the Vaadin Eclipse Plugin (available at
-            http://vaadin.com/eclipse) the widgetset should be compiled automatically and
-            you are ready to go. For more instructions and information, refer to
-            http://vaadin.com/directory/help/using-vaadin-add-ons.  Assuming that you
-            already have Vaadin installed in your project, Vaadin Calendar is now
-            installed and available in your project.
+            Vaadin Calendar is available for download from Vaadin Directory and from a
+            Maven repository. Installing the add-on is the same as with Vaadin add-ons in
+            general, so please refer to <xref linkend="addons"/>. Vaadin Calendar includes
+            a widget set, which you need to compile to your project widget set.
         </para>
 
-        <section xml:id="calendar.installing.license">
+        <simplesect xml:id="calendar.installing.license">
             <title>Licensing</title>
 
             <para>
@@ -296,7 +291,7 @@
                 Commercial licenses can be purchased from the Vaadin Directory, where you
                 can also find the license details and download the Vaadin Calendar.
             </para>
-        </section>
+        </simplesect>
     </section>
 
     <section xml:id="calendar.using">
@@ -308,6 +303,25 @@
             providing the calendar events. The time range controls its view mode; whether
             it is a daily, weekly or monthly view.
         </para>
+
+        <para>
+            You can provide calendar events in three different ways:
+        </para>
+
+        <itemizedlist>
+            <listitem>
+                Use the <emphasis>event provider</emphasis> mechanism.
+            </listitem>
+
+            <listitem>
+                Use a <interfacename>Container</interfacename> as a data source.
+            </listitem>
+
+            <listitem>
+                Add events directly to the calendar using the
+                <methodname>addEvent()</methodname>.
+            </listitem>
+        </itemizedlist>
 
         <para>
             Vaadin Calendar uses by default a <classname>BasicEventProvider</classname>
@@ -341,10 +355,42 @@ cal.setEndDate(new Date());]]></programlisting>
 
             <para>
                 The second thing you will probably notice about the Calendar is that it is
-                pretty empty. Lets add some events. At first, the default
-                <classname>BasicEventProvider</classname> may suffice, but later on you
-                will probably want to create your own event provider as described in the
-                next section.
+                pretty empty. The Calendar allows three different ways to add events:
+            </para>
+
+            <itemizedlist>
+                <listitem>
+                    Using the <emphasis>event provider</emphasis> mechanism. This is the
+                    most flexible way of doing things. You need to implement an event
+                    provider and set it to the <classname>Calendar</classname> using the
+                    <methodname>setEventProvider()</methodname> method.
+                </listitem>
+
+                <listitem>
+                    Using a <interfacename>Container</interfacename> as a data source. A
+                    container is attached to <classname>Calendar</classname> with the
+                    <methodname>setContainerDataSource()</methodname> method. You can use
+                    any container that implements the
+                    <interfacename>Indexed</interfacename> interface with
+                    <classname>Calendar</classname>. The container must either use the
+                    default property IDs for event data or provide them as parameters for
+                    the <methodname>setContainerDataSource()</methodname> method. The
+                    <classname>Calendar</classname> will listen to change events from the
+                    container as well as write changes to the container.
+                </listitem>
+
+                <listitem>
+                    You can also add events directly to the calendar using the
+                    <methodname>addEvent()</methodname>. You can remove such events with
+                    the <methodname>removeEvent()</methodname> methods. These methods will
+                    use the underlying event provider as the data source.
+                </listitem>
+            </itemizedlist>
+
+            <para>
+                At first, the default <classname>BasicEventProvider</classname> may
+                suffice, but later on you will probably want to create your own event
+                provider as described in the next section.
             </para>
 
             <para>
@@ -352,25 +398,38 @@ cal.setEndDate(new Date());]]></programlisting>
                 can just retrieve it from the Calendar and add an event to it.
             </para>
 
-        </section>
-    </section>
-
-BasicEvent event = new BasicEvent();
+            <programlisting><?pocket-size 65% ?><![CDATA[BasicEvent event = new BasicEvent();
 java.util.Calendar calendar = java.util.Calendar.getInstance();
 calendar.setTime(new Date());
 event.setStart(calendar.getTime());
         
 calendar.add(java.util.Calendar.HOUR, 3);
-        event.setEnd(calendar.getTime());
-        event.setCaption("FooBar");
+event.setEnd(calendar.getTime());
+event.setCaption("FooBar");
 
-        BasicEventProvider eventProvider = (BasicEventProvider) cal.getEventProvider();
-        eventProvider.addEvent(event);
-This adds a new event that lasts for 3 hours. As the BasicEventProvider and BasicEvent implement some optional event interfaces provided by the calendar package, there is no need to refresh the calendar. Just create events, set their properties and add them to the Event Provider.
-2.4.1.  Customized Events and Event Provider
-To begin customizing the Calendar Events for your project, you should start by creating an event class that implements the CalendarEvent interface. Below is the BasicEvent from the com.vaadin.addon.calendar.event package. It nicely presents the normal work required for an event. 
-public class BasicEvent implements CalendarEventEditor, EventChangeNotifier {
-    
+BasicEventProvider eventProvider =
+        (BasicEventProvider) cal.getEventProvider();
+eventProvider.addEvent(event);]]></programlisting>
+
+            <para>
+                This adds a new event that lasts for 3 hours. As the BasicEventProvider
+                and BasicEvent implement some optional event interfaces provided by the
+                calendar package, there is no need to refresh the calendar. Just create
+                events, set their properties and add them to the Event Provider.
+            </para>
+        </section>
+
+        <section xml:id="calendar.using.customevents">
+            <para>
+                To begin customizing the calendar events for your project, you should
+                start by creating an event class that implements the
+                <interfacename>CalendarEvent</interfacename> interface. Below is the
+                BasicEvent from the com.vaadin.addon.calendar.event package. It nicely
+                presents the normal work required for an event.
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[public class BasicEvent
+       implements CalendarEventEditor, EventChangeNotifier {
    ...
 
    public String getCaption() {
@@ -436,14 +495,52 @@ public class BasicEvent implements CalendarEventEditor, EventChangeNotifier {
     }
 
     protected void fireEventChange() {...}
-}
-You may have noticed that there was some additional code in the BasicEvent that wasn't from the CalendarEvent interface. Namely BasicEvent also implements two additional interfaces:
-CalendarEditor. This adds setters for all the fields, and is required for some of the default handlers to work.
-EventChangeNotifier. This adds the possibility to listen for changes in the event, and enables the Calendar to render the changes immediately.
-Start and end dates are mandatory, but caption, description style name are not. Style name is used as a part of the CSS class name for the event's DOM element.
-Now you can create events for the Calendar. The Calendar needs also a data source which is known as an Event Provider for the Calendar. Lets create an example Event Provider example that implements CalendarEventProvider.
-public class MyEventProvider implements CalendarEventProvider{
+}]]></programlisting>
 
+            <para>
+                You may have noticed that there was some additional code in the
+                <classname>BasicEvent</classname> that was not in the
+                <interfacename>CalendarEvent</interfacename> interface. Namely
+                <classname>BasicEvent</classname> also implements two additional
+                interfaces:
+            </para>
+
+            <variablelist>
+                <varlistentry>
+                    <term><interfacename>CalendarEditor</interfacename></term>
+                    <listitem>
+                        <para>
+                            This interface defines setters for all the fields, and is
+                            required for some of the default handlers to work.
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><interfacename>EventChangeNotifier</interfacename></term>
+                    <listitem>
+                        <para>
+                            This interface adds the possibility to listen for changes in
+                            the event, and enables the <classname>Calendar</classname> to
+                            render the changes immediately.
+                        </para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+
+            <para>
+                The start time and end time are mandatory, but caption, description, and
+                style name are not. The style name is used as a part of the CSS class name
+                for the HTML DOM element of the event.
+            </para>
+
+            <para>
+                Now you can create events for the Calendar. The Calendar needs also a data
+                source which is known as an event provider for the Calendar. Let us create
+                an example event provider example that implements
+                <interfacename>CalendarEventProvider</interfacename>.
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[public class MyEventProvider implements CalendarEventProvider{
     public List<Event> getEvents(Date startDate, Date endDate){
 
         List<Event> events = new ArrayList<Event>();
@@ -462,17 +559,75 @@ public class MyEventProvider implements CalendarEventProvider{
 
         return events;
     }
-}
-CalendarEventProvider has only one method to be implemented. Whenever the Calendar is painted, CalendarEventProvider.getEvents(Date, Date) method is called. In MyEventProvider  example, only one event will be returned, that is five hours long and it starts from the current date and clock time.
-It is important to notice, that the Calendar may query for dates beyond the range defined  by start date and end date. Particularly, the Calendar may expand these dates to make sure the UI is rendered correctly.
-In addition to the basic event interfaces, you can enhance the functionality of your Event and Event Provider classes by using EventChange and EventSetChange events. These will enable the Calendar component to know about changes in events and render itself accordingly. BasicEvent and BasicEventProvider include a simple example implementation of these interfaces.
-2.5.  Sizing
-The Vaadin Calendar supports the dynamic size system of Vaadin, with both defined and undefined sizes. When using defined sizes, the Calendar calculates the correct height for the cells so that it fits to the size given. When using an undefined size Calendar, all the sizes come from CSS. In addition, when height is undefined a scrollbar is displayed in the weekly view to better fit the cells to the UI. See 2.6.1. for information about customizing the undefined sizes.
-2.6.  Styling
-Calendar's default theme comes with the component. You may choose to overwrite the stylenames from the default theme file calendar.css. The Calendar's default theme is located in a folder named -Y´public¡ under the src directory in the JAR file. Vaadin will find the CSS from inside the JAR package.
-2.6.1.  Undefined Style
-Usually you don't need to overwrite any of the default styles, but an undefined size Calendar is a exception of this. Below is a list of stylenames that define the size of an undefined size Calendar (these are the defaults from calendar.css)
-.v-calendar-month-sizedheight .v-calendar-month-day {
+}]]></programlisting>
+
+            <para>
+                <interfacename>CalendarEventProvider</interfacename> has only one method
+                to be implemented. Whenever the calendar is painted,
+                <methodname>getEvents(Date, Date)</methodname> method is called. In the
+                MyEventProvider example, only one event will be returned. It starts from
+                the current time and is five hours long.
+            </para>
+
+            <para>
+                It is important to notice that the <classname>Calendar</classname> may
+                query for dates beyond the range defined by start date and end
+                date. Particularly, it may expand the date range to make sure the user
+                interface is rendered correctly.
+            </para>
+
+            <para>
+                In addition to the basic event interfaces, you can enhance the
+                functionality of your event and event provider classes by using the
+                <classname>EventChange</classname> and
+                <classname>EventSetChange</classname> events. They let the
+                <classname>Calendar</classname> component to know about changes in events
+                and update itself accordingly. The <classname>BasicEvent</classname> and
+                <classname>BasicEventProvider</classname> examples given earlier include a
+                simple implementation of these interfaces.
+            </para>
+        </section>
+    </section>
+
+    <section xml:id="calendar.appearance">
+        <title>Appearance</title>
+
+        <section xml:id="calendar.appearance.sizing">
+            <title>Sizing</title>
+
+            <para>
+                The Vaadin Calendar supports the dynamic size system of Vaadin, with both
+                defined and undefined sizes. When using defined sizes, the Calendar calculates
+                the correct height for the cells so that it fits to the size given. When using
+                an undefined size Calendar, all the sizes come from CSS. In addition, when
+                height is undefined a scrollbar is displayed in the weekly view to better fit
+                the cells to the UI. See 2.6.1. for information about customizing the
+                undefined sizes.
+            </para>
+        </section>
+
+        <section xml:id="calendar.appearance.styling">
+            <title>Styling</title>
+
+            <para>
+                The Calendar has a default theme defined in the widget set. You may choose
+                to overwrite the style names from the default theme file
+                <filename>calendar.css</filename>. The file is located in a folder named
+                <filename>public</filename> under the <filename>src</filename> folder in
+                the JAR file. Vaadin will find the CSS from inside the JAR package.
+            </para>
+
+            <section xml:id="calendar.appearance.styling.undefined">
+                <title>Style for Undefined Size</title>
+
+                <para>
+                    Usually, you do not need to overwrite any of the default styles, but a
+                    Calendar with undefined size is a exception. Below is a list of style
+                    names that define the size of a Calendar with undefined size (these
+                    are the defaults from <filename>calendar.css</filename>):
+                </para>
+
+                <programlisting><?pocket-size 65% ?><![CDATA[.v-calendar-month-sizedheight .v-calendar-month-day {
 	height: 100px;
 }
 
@@ -522,37 +677,104 @@ Usually you don't need to overwrite any of the default styles, but an undefined 
 
 .v-calendar-day-times-Hsized, .v-calendar-day-times-Hsized .v-slot,.v-calendar-day-times-Hsized .v-slot-even {
 	width: 200px;
-}
-2.6.2.  Event's style
-Events can be styled with CSS by setting them some class name like ´color1¡, ´color2¡. Style name is retrieved for the event by CalendarEvent.getStyleName() method. The String returned by that method will be used as a part of the event's main element class name. ´color1¡ would be identified with a class name ´v-calendar-event-color1¡. In CSS, this means that element can be styled with the following example CSS.
-.v-calendar .v-calendar-event-color1 {
-	color: #4f8324;
-	}
+}]]></programlisting>
+            </section>
 
-.v-calendar .v-calendar-event-color1-all-day {
-	background-color: #61c114;
-	}
+            <section xml:id="calendar.appearance.styling.event">
+                <title>Event Style</title>
 
-/* For week/day view */
-.v-calendar .v-calendar-event-color1 .v-calendar-event-caption {
-	color: #4f8324;
-	}
+                <para>
+                    Events can be styled with CSS by setting them a <emphasis>style name
+                    suffix</emphasis>. The suffix is retrieved with the
+                    <methodname>getStyleName()</methodname> method in
+                    <interfacename>CalendarEvent</interfacename>. If you use
+                    <classname>BasicEvent</classname> events, you can set the suffix with
+                    <methodname>setStyleName()</methodname>.
+                </para>
 
-.v-calendar .v-calendar-event-color1 .v-calendar-event-content {
-	border-color: #61c114;
-	background-color: #daff70;
-	}
-2.7.  Visible hours and days
-As we saw in section 2.3., by setting the date range you can change the range of dates that are shown by the Calendar. But what if you wanted to show the whole month but hide weekends, or show only hours from 8 to 16 when viewing a whole week? That's where you can utilize the setVisibleDays and setVisibleHours -methods. To achieve what we just described, see the example code below.
-calendar.setVisibleDays(1,5);
-calendar.setVisibleHours(0,15);
-After these calls, only weekdays from monday to friday will be rendered. And when in the Calendar is in the weekly view, only hours from 00:00 to 16:00 are shown. Note that the excluded times are never rendered so care should be taken when setting the date range. If the date range contains only dates / times that are excluded, nothing will be rendered. Also note that even if a date is not rendered because these settings, the EventProvider may still be queried for events for that date.
-2.8.  Drag and drop
-In Vaadin, it is possible to drag and drop components and certain parts of components. Too see the full explanation of drag and drop in Vaadin, including the terms used in this section, see the chapter 11.13 of the Book of Vaadin.
-The Vaadin Calendar can act as a drop target. In order to do this, it must have a drop handler. When the drop handler is set, the days in the monthly view and the time slots in the weekly view can receive drops. Other places (such as day names in the weekly view) cannot receive drops.
-The Calendar uses its own TargetDetails implementation, CalendarTargetdetails. It holds information about the place (date and time) of the drop location. The drop location can be retrieved via the getDropTime -method. If the drop happened in the monthly view, the returned date doesn't have exact time information. If the drop happened in the weekly view, the returned date also contains the start time of the slot.
-Below is a short example on creating a drop handler and using the drop information to create a new event. The whole source code can be found online with the name CalendarDragAndDropDemo (http://dev.vaadin.com/svn/addons/Calendar). Some of the less important code has been left out to make the code more readable and shorter.
-private Calendar createDDCalendar() {
+                <programlisting><?pocket-size 75% ?><![CDATA[BasicEvent event = new BasicEvent("Wednesday Wonder", ... );
+event.setStyleName("mycolor");
+calendar.addEvent(event);]]></programlisting>
+
+                <para>
+                    Suffix <literal>mycolor</literal> would create
+                    <literal>v-calendar-event-mycolor</literal> class for regular events
+                    and <literal>v-calendar-event-mycolor-add-day</literal> for all-day
+                    events. You could style the events with the following rules:
+                </para>
+
+                <programlisting>.v-calendar .v-calendar-event-mycolor {}
+.v-calendar .v-calendar-event-mycolor-all-day {}
+.v-calendar .v-calendar-event-mycolor .v-calendar-event-caption {}
+.v-calendar .v-calendar-event-mycolor .v-calendar-event-content {}</programlisting>
+
+            </section>
+        </section>
+    </section>
+
+    <section xml:id="calendar.visible-hours-days">
+        <title>Visible hours and days</title>
+
+        <para>
+            As we saw in <xref linkend="calendar.using.daterange"/>, you can set the range
+            of dates that are shown by the Calendar. But what if you wanted to show the
+            entire month but hide weekends? Or show only hours from 8 to 16 when viewing a
+            week? The <methodname>setVisibleDays()</methodname> and
+            <methodname>setVisibleHours()</methodname> methods help you do that.
+        </para>
+
+        <programlisting><?pocket-size 75% ?>calendar.setVisibleDays(1,5);   // Monday to Friday
+calendar.setVisibleHours(0,15); // Midnight until 4 pm</programlisting>
+
+        <para>
+            After the above settings, only weekdays from Monday to Friday would be
+            shown. And when the calendar is in the weekly view, only the time range from
+            00:00 to 16:00 would be shown.
+        </para>
+
+        <para>
+            Note that the excluded times are never shown so you should take care when
+            setting the date range. If the date range contains only dates / times that are
+            excluded, nothing will be displayed. Also note that even if a date is not
+            rendered because these settings, the event provider may still be queried for
+            events for that date.
+        </para>
+    </section>
+
+    <section xml:id="calendar.drag-and-drop">
+        <title>Drag and Drop</title>
+
+        <para>
+            Vaadin Calendar can act as a drop target for drag and drop, described in <xref
+            linkend="advanced.dragndrop"/>. With the functionality, the user could drag
+            events, for example, from a table to a calendar.
+        </para>
+
+        <para>
+            To support dropping, a <classname>Calendar</classname> must have a drop
+            handler. When the drop handler is set, the days in the monthly view and the
+            time slots in the weekly view can receive drops. Other locations, such as day
+            names in the weekly view, can not currently receive drops.
+        </para>
+
+        <para>
+            Calendar uses its own implementation of
+            <interfacename>TargetDetails</interfacename>:
+            <classname>CalendarTargetdetails</classname>. It holds information about the
+            the drop location, which in the context of <classname>Calendar</classname>
+            means the date and time. The drop target location can be retrieved via the
+            <methodname>getDropTime()</methodname> method. If the drop is done in the
+            monthly view, the returned date does not have exact time information. If the
+            drop happened in the weekly view, the returned date also contains the start
+            time of the slot.
+        </para>
+
+        <para>
+            Below is a short example of creating a drop handler and using the drop
+            information to create a new event:
+        </para>
+
+        <programlisting><?pocket-size 65% ?><![CDATA[private Calendar createDDCalendar() {
   Calendar calendar = new Calendar();
   calendar.setDropHandler(new DropHandler() {
     public void drop(DragAndDropEvent event) {
@@ -606,30 +828,125 @@ protected void createEvent(CalendarTargetDetails details,
   BasicEventProvider ep = (BasicEventProvider) details
                        .getTargetCalendar().getEventProvider();
   ep.addEvent(newEvent);
-}
-2.9.  Localization and miscellaneous
-By default, Vaadin Calendar uses the system's default locale for its internal Calendar. Month and weekday names will be translated by the effective locale. Calendar's locale can be set by setLocale(java.util.Locale locale) method. Setting the locale will update also other location specific date and time settings like the first day of the week, timezone and time format. However, timezone and time format can be overridden by the Vaadin Calendar settings.
-cal.setLocale(Locale.US);
+}]]></programlisting>
+    </section>
 
-You may change the format of weekly view's date captions with the setWeeklyCaptionFormat(String dateFormatPattern) method. You may read more about the allowed pattern from the JavaDoc of java.text.SimpleDateFormat class.
-cal.setWeeklyCaptionFormat("dd-MM-yyyy");
+    <section xml:id="calendar.localization">
+        <title>Localization and Formatting</title>
 
-Timezone can be changed by the method setTimeZone(java.util.TimeZone). Setting timezone to null will reset timezone to the locale's default.
-cal.setTimeZone(TimeZone.getTimeZone("Europe/Helsinki"));
+        <section xml:id="calendar.localization.locale">
+            <title>Setting the Locale and Time Zone</title>
 
-Time may be in 24 or 12 hours format. It is defined by the locale, but may also be set by the method setTimeFormat(TimeFormat). Settings it to null will reset time format to the locale's default.
-cal.setTimeFormat(TimeFormat.Format12H);
-2.10.   Code examples for customizing the Vaadin Calendar
-In the following example we will create an application that shows you the features of the Vaadin Calendar. Event provider and styling was described earlier, so now we concentrate on the Calendar API's other features.
-The whole example application source code can be found online with the name CustomizedCalendarDemo (http://dev.vaadin.com/svn/addons/Calendar). Some of the less important code for this document has been left out to make the code more readable and shorter. Three dots are used to mark places for the missing code.
-2.10.1.  Calendar instance
-Create a new Vaadin Calendar instance by the following code snippet. Here we use our own Event Provider, the earlier described MyEventProvider.
-Calendar cal = new Calendar(new MyEventProvider());
-This initializes the Calendar. To customize the viewable date range, we must set a start and end date to it. 
-There is only one visible event on the timeline, starting from the current time. That's what our event provider passes to the client. See the figure 3.
+            <para>
+                Month and weekday names are shown in the language of the locale setting of
+                the <classname>Calendar</classname>. The translations are acquired from
+                the standard Java locale data. By default, <classname>Calendar</classname>
+                uses the system default locale for its internal calendar, but you can
+                change it with <methodname>setLocale(Locale locale)</methodname>. Setting
+                the locale will update also other location specific date and time
+                settings, such as the first day of the week, time zone, and time
+                format. However, time zone and time format can be overridden by settings
+                in the <classname>Calendar</classname>.
+            </para>
 
-Figure 3: Weekly view with  a single visible day and one event.
-It would be nice to also be able to control the navigation forward and backward. The default navigation is provided by the default handlers, but perhaps we want to restrict the users so they can only navigate dates in the current year. Maybe we also want to pose some other restrictions to the clicking week numbers and dates. 
+            <para>
+                For example, the following would set the language to US English:
+            </para>
+
+            <programlisting><![CDATA[cal.setLocale(Locale.US);]]></programlisting>
+
+            <para>
+                The locale defines the default time zone. You can change it with the
+                <methodname>setTimeZone()</methodname> method, which takes a
+                <classname>java.util.TimeZone</classname> object as its parameter. Setting
+                timezone to null will reset timezone to the locale default.
+            </para>
+
+            <para>
+                For example, the following would set the Finnish time zone, which is EET
+            </para>
+
+            <programlisting><![CDATA[cal.setTimeZone(TimeZone.getTimeZone("Europe/Helsinki"));]]></programlisting>
+
+        </section>
+
+        <section xml:id="calendar.localization.datecaption">
+            <title>Time and Date Caption Format</title>
+
+            <para>
+                The time may be shown either in 24 or 12 hour format. The default format
+                is defined by the locale, but you can change it with the
+                <methodname>setTimeFormat()</methodname> method. Giving a
+                <literal>null</literal> setting will reset the time format to the locale
+                default.
+            </para>
+
+            <programlisting><![CDATA[cal.setTimeFormat(TimeFormat.Format12H);]]></programlisting>
+
+            <para>
+                You can change the format of the date captions in the week view with the
+                <methodname>setWeeklyCaptionFormat(String dateFormatPattern)</methodname>
+                method. The date format pattern should follow the format of the standard
+                Java <classname>java.text.SimpleDateFormat</classname> class.
+            </para>
+
+            <para>
+                For example:
+            </para>
+
+            <programlisting><![CDATA[cal.setWeeklyCaptionFormat("dd-MM-yyyy");]]></programlisting>
+        </section>
+    </section>
+
+    <section xml:id="calendar.customizing">
+        <title>Tutorial: Customizing the Vaadin Calendar</title>
+
+        <para>
+            In this section, we present small tutorial application that demonstrates some
+            features of the Vaadin Calendar. The event provider and styling was described
+            earlier, so now we concentrate on other features of the Calendar API.
+        </para>
+
+        <para>
+            The example application source code can be found online with the name
+            <filename>CustomizedCalendarDemo</filename>
+            (<url>http://dev.vaadin.com/svn/addons/Calendar</url>). Some of the less
+            important code for this document has been left out to make the code more
+            readable and shorter. Three dots are used to mark places for the missing code.
+        </para>
+
+        <section xml:id="calendar.customizing.creating">
+            <title>Creating a Calendar</title>
+
+            <para>
+                Let us first create a new <classname>Calendar</classname> instance. Here
+                we use our own event provider, the <classname>MyEventProvider</classname>
+                described earlier in <xref linkend="calendar.using.customevents"/>.
+            </para>
+
+            <programlisting><![CDATA[Calendar cal = new Calendar(new MyEventProvider());]]></programlisting>
+
+            <para>
+                This initializes the Calendar. To customize the viewable date range, we
+                must set a start and end date to it.
+            </para>
+
+            <para>
+                There is only one visible event in the timeline, starting from the current
+                time. That is what our event provider passes to the client. <!-- TODO See
+                the figure 3. -->
+            </para>
+
+            <!-- TODO Figure 3: Weekly view with  a single visible day and one event. -->
+
+            <para>
+                It would be nice to also be able to control the navigation forward and
+                backward. The default navigation is provided by the default handlers, but
+                perhaps we want to restrict the users so they can only navigate dates in
+                the current year. Maybe we also want to pose some other restrictions to
+                the clicking week numbers and dates.
+            </para>
+
 These restrictions and other custom logic can be imposed by using custom handlers. The handlers can be found in the com.vaadin.addon.calendar.ui.handler package and can be easily extended. Note that if you don't want to extend the default handlers, you are free to implement your own. The interfaces are described in CalendarComponentEvents.
 
 2.10.2.  Backward and forward navigation
