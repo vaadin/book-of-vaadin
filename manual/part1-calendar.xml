@@ -899,20 +899,22 @@ protected void createEvent(CalendarTargetDetails details,
     </section>
 
     <section xml:id="calendar.customizing">
-        <title>Tutorial: Customizing the Vaadin Calendar</title>
+        <title>Customizing the Calendar</title>
 
         <para>
-            In this section, we present small tutorial application that demonstrates some
-            features of the Vaadin Calendar. The event provider and styling was described
-            earlier, so now we concentrate on other features of the Calendar API.
+            In this section, we give a tutorial for how to make various basic
+            customizations of the Vaadin Calendar. The event provider and styling was
+            described earlier, so now we concentrate on other features of the Calendar
+            API.
         </para>
 
         <para>
-            The example application source code can be found online with the name
-            <filename>CustomizedCalendarDemo</filename>
-            (<url>http://dev.vaadin.com/svn/addons/Calendar</url>). Some of the less
+            We use example code to demonstrate the customizations. You can find the source
+            code of the example application on-line with the name
+            <filename>CustomizedCalendarDemo</filename> at
+            <uri>http://dev.vaadin.com/svn/addons/Calendar</uri>. Some of the less
             important code for this document has been left out to make the code more
-            readable and shorter. Three dots are used to mark places for the missing code.
+            readable and shorter.
         </para>
 
         <section xml:id="calendar.customizing.creating">
@@ -947,31 +949,66 @@ protected void createEvent(CalendarTargetDetails details,
                 the clicking week numbers and dates.
             </para>
 
-These restrictions and other custom logic can be imposed by using custom handlers. The handlers can be found in the com.vaadin.addon.calendar.ui.handler package and can be easily extended. Note that if you don't want to extend the default handlers, you are free to implement your own. The interfaces are described in CalendarComponentEvents.
+            <para>
+                These restrictions and other custom logic can be defined with custom
+                handlers. You can find the handlers in the
+                <package>com.vaadin.addon.calendar.ui.handler</package> package
+                and they can be easily extended. Note that if you don not want to extend
+                the default handlers, you are free to implement your own. The interfaces
+                are described in <interfacename>CalendarComponentEvents</interfacename>.
+            </para>
+        </section>
 
-2.10.2.  Backward and forward navigation
-In the weekly view, there are navigation buttons in the top left and right corner of the component. See the figure 4. 
+        <section xml:id="calendar.customizing.navigation">
+            <title>Backward and Forward Navigation</title>
 
-Figure 4: Backward and forward navigation buttons.
-Backward and forward navigation is handled via BackwardListener and ForwardListener. 
-cal.setHandler(new BasicBackwardHandler() {
-            
-  protected void setDates(BackwardEvent event, Date start, Date end) {
+            <para>
+                Vaadin Calendar has only limited built-in navigation support. The weekly
+                view has navigation buttons in the top left and top right corners. <!--
+                TODO See the figure 4. -->
+            </para>
 
-    java.util.Calendar calendar = event.getComponent()
-                                  .getInternalCalendar();
-    if (isThisYear(calendar, end) 
-         && isThisYear(calendar, start)) {
-      super.setDates(event, start, end);
-    }
-  }
-});
-The forward-handler can be implemented identically. This handler restricts the setting of dates to the current year.
+            <!-- TODO Figure 4: Backward and forward navigation buttons. -->
+            <para>
+                You can handle backward and forward navigation with a
+                <interfacename>BackwardListener</interfacename> and
+                <interfacename>ForwardListener</interfacename>.
+            </para>
 
-2.10.3.  Date click handling
-Date click handling by default switches the current date range to one day. The date click event is handled by a DateClickHandler . The following code snippet will the handle click event so that when the user clicks the date header in the weekly view, it will either show a single day or whole week depending on the current status.
-cal.setHandler(new BasicDateClickHandler() {
+            <programlisting><?pocket-size 65% ?><![CDATA[cal.setHandler(new BasicBackwardHandler() {
+  protected void setDates(BackwardEvent event,
+                          Date start, Date end) {
 
+      java.util.Calendar calendar = event.getComponent()
+                                    .getInternalCalendar();
+      if (isThisYear(calendar, end) 
+           && isThisYear(calendar, start)) {
+        super.setDates(event, start, end);
+      }
+  }});]]></programlisting>
+
+            <para>
+                The forward navigation handler can be implemented in the same way. The
+                example handler restricts the dates to the current year.
+            </para>
+        </section>
+
+        <section xml:id="calendar.customizing.dateclick">
+            <title>Date Click Handling</title>
+
+            <para>
+                By default, clicking a date either in month or week view switches
+                single-day view. The date click event is handled by a
+                <interfacename>DateClickHandler</interfacename>.
+            </para>
+
+            <para>
+                The following example handles click events so that when the user clicks
+                the date header in the weekly view, it will switch to single-day view, and
+                in the single-day view switch back to the weekly view.
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[cal.setHandler(new BasicDateClickHandler() {
   public void dateClick(DateClickEvent event) {
     Calendar cal = event.getComponent();
     long currentCalDateRange = cal.getEndDate().getTime()
@@ -987,44 +1024,90 @@ cal.setHandler(new BasicDateClickHandler() {
       super.dateClick(event);
     }
   }
-});
+});]]></programlisting>
+        </section>
 
-2.10.4.  Week click handling
-In the monthly view, on the left side of the date grid, there are clickable week numbers. You can handle the click event by setting a WeekClickHandler for the Calendar. The default handler changes the date range to be the clicked week.
-In the following code snippet we add a week click handler that changes the Calendar's date range to one week only if the start and end dates of the week are in the current month.
-cal.setHandler(new BasicWeekClickHandler() {
+        <section xml:id="calendar.customizing.weekclick">
+            <title>Handling Week Clicks</title>
 
-  protected void setDates(WeekClick event, Date start, Date end) {
-    java.util.Calendar calendar = event.getComponent()
+            <para>
+                The monthly view displays week numbers for each week row on the left side
+                of the date grid. The week number are clickable and you can handle the
+                click events by setting a <interfacename>WeekClickHandler</interfacename>
+                for the <classname>Calendar</classname> object. The default handler
+                changes the date range to be the clicked week.
+            </para>
+
+            <para>
+                In the following example, we add a week click handler that changes the
+                date range of the calendar to one week only if the start and end dates of
+                the week are in the current month.
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[cal.setHandler(new BasicWeekClickHandler() {
+    protected void setDates(WeekClick event,
+                          Date start, Date end) {
+        java.util.Calendar calendar = event.getComponent()
                                   .getInternalCalendar();
-    if (isThisMonth(calendar, start) 
-        && isThisMonth(calendar,  end)) {
-      super.setDates(event, start, end);
+        if (isThisMonth(calendar, start) 
+            && isThisMonth(calendar,  end)) {
+            super.setDates(event, start, end);
+        }
     }
-  }
-});
-2.10.5.  Event click handling
-Monthly and weekly view's Calendar events are clickable, but they have no default handler. Just like the date and week click handlers, event click handling is enabled by setting an EventClickHandler  for the Calendar. The clicked event will be available by the EventClick.getCalendarEvent() method. Example code below.
-cal.addListener(new EventClickListener() {
+});]]></programlisting>
+        </section>
 
+        <section xml:id="calendar.customizing.eventclick">
+            <title>Handling Event Clicks</title>
+
+            <para>
+                The calendar events in all views are are clickable. There is no default
+                handler. Just like the date and week click handlers, event click handling
+                is enabled by setting an <interfacename>EventClickHandler</interfacename>
+                for the <classname>Calendar</classname> object.
+            </para>
+
+            <para>
+                You can get hold of the clicked event by the
+                <methodname>getCalendarEvent()</methodname> method in the
+                <classname>EventClick</classname> object passed to the handler, as shown
+                in the following example.
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[cal.addListener(new EventClickListener() {
     public void eventClick(EventClick event) {
         BasicEvent e = (BasicEvent) event.getCalendarEvent();
           getMainWindow().showNotification(
                         "Event clicked: " + e.getCaption(),
                         e.getDescription());
     }
-});
-2.10.6.  Event dragging
-An event can be dragged to change its position. The default handler for event dragging sets the events start and end dates accordingly. To restrict event moving, we can set a customized move handler
-Below we add a EventMoveHandler to the Calendar. The event handler will update the new position to the datasource, if the new dates are in the current month. Also some other changes must be made to our Event Provider class. 
-cal.setHandler(new BasicEventMoveHandler() {
+});]]></programlisting>
+        </section>
+
+        <section xml:id="calendar.customizing.eventdrag">
+            <title>Event Dragging</title>
+
+            <para>
+                The user can drag an event to change its position in time. The default
+                handler sets the start and end time of the event accordingly. You can do
+                many things with a custom move handler, such as restrict moving events.
+            </para>
+
+            <para>
+                In the following example, we add a
+                <interfacename>EventMoveHandler</interfacename> to a
+                <classname>Calendar</classname>. The event handler updates the new
+                position to the datasource, but only if the new dates are in the current
+                month. This requires making some changes to the event provider class.
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[cal.setHandler(new BasicEventMoveHandler() {
   private java.util.Calendar javaCalendar;
 
   public void eventMove(MoveEvent event) {
     javaCalendar = event.getComponent().getInternalCalendar();
     super.eventMove(event);
   }
-
   
   protected void setDates(CalendarEventEditor event,
                           Date start, Date end) {
@@ -1033,11 +1116,18 @@ cal.setHandler(new BasicEventMoveHandler() {
       super.setDates(event, start, end);
     }
   }
-});
-Our Event Provider needs to be slightly changed so that it doesn't always create a new event when getEvents is called.
-public static class MyEventProvider implements CalendarEventProvider {
+});]]></programlisting>
 
-  private List<CalendarEvent> events = new ArrayList<CalendarEvent>();
+            <para>
+                For the above example to work, the example event provider presented
+                earlier needs to be changed slightly so that it doesn't always create a
+                new event when <methodname>getEvents()</methodname> is called.
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[public static class MyEventProvider
+              implements CalendarEventProvider {
+  private List<CalendarEvent> events =
+        new ArrayList<CalendarEvent>();
 
   public MyEventProvider() {
     events = new ArrayList<CalendarEvent>();
@@ -1063,13 +1153,39 @@ public static class MyEventProvider implements CalendarEventProvider {
                                        Date endDate) {
     return events;
   }
-}
-After these changes users can move events around, but when they drop them the start and end dates are checked by the server. Note that as the server-side must move the event in order for it to render to the place it was dropped. The server can also reject moves by not doing anything when the event is received.
-2.10.7.  Drag selection handling
-Drag selection works in both monthly and weekly view. To listen for drag selection, add RangeSelectListener  to the Calendar. There is no default handler for range select.
-In the code example below, we create an new event to the Calendar when any date range is selected. Drag selection will open a window where user is asked for a caption for the new event. After confirming, new event will be passed to our event provider and calendar will be updated. Note that as our Event Provider and Event classes do not implement the event change interface, we must refresh the Calendar manually after changing our events.
-cal.setHandler(new RangeSelectHandler() {
+}]]></programlisting>
 
+            <para>
+                After these changes, the user can move events around as earlier, but
+                dropping an event, the start and end dates are checked by the
+                server. Note that as the server-side must move the event in order for it
+                to render to the place it was dropped. The server can also reject moves by
+                not doing anything when the event is received.
+            </para>
+        </section>
+
+        <section xml:id="calendar.customizing.dragselection">
+            <title>Handling Drag Selection</title>
+
+            <para>
+                Drag selection works both in the monthly and weekly views. To listen for
+                drag selection, you can add a
+                <interfacename>RangeSelectListener</interfacename> to the
+                <classname>Calendar</classname>. There is no default handler for range
+                select.
+            </para>
+
+            <para>
+                In the code example below, we create an new event when any date range is
+                selected. Drag selection opens a window where the user is asked for a
+                caption for the new event. After confirming, the new event is be passed to
+                the event provider and calendar is updated. Note that as our example event
+                provider and event classes do not implement the event change interface, we
+                must refresh the <classname>Calendar</classname> manually after changing
+                the events.
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[cal.setHandler(new RangeSelectHandler() {
   public void rangeSelect(RangeSelectEvent event) {
     BasicEvent calendarEvent = new BasicEvent();
     calendarEvent.setStart(event.getStart());
@@ -1110,11 +1226,27 @@ cal.setHandler(new RangeSelectHandler() {
 
     ...
   }
-});
-2.10.8.  Event resizing
-An Event can be resized from both ends to change its start or end time. This offers the users a convenient way to change event times without the need to type anything. The default resize handler sets the events start and end times according to the resize.
-In the code below, we set a custom handler for resize events. This handler prevents any event to be resized over 12 hours in length. Note that this does not prevent the user from resizing an event over 12 hours in the client. The resize will just be corrected by the server.
-cal.setHandler(new BasicEventResizeHandler() {
+});]]></programlisting>
+        </section>
+
+        <section xml:id="calendar.customizing.eventresizing">
+            <title>Resizing Events</title>
+
+            <para>
+                The user can resize an event by dragging from both ends to change its
+                start or end time. This offers a convenient way to change event times
+                without the need to type anything. The default resize handler sets the
+                start and end time of the event according to the resize.
+            </para>
+
+            <para>
+                In the example below, we set a custom handler for resize events. The
+                handler prevents any event to be resized over 12 hours in length. Note
+                that this does not prevent the user from resizing an event over 12 hours
+                in the client. The resize will just be corrected by the server.
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[cal.setHandler(new BasicEventResizeHandler() {
   private static final long twelveHoursInMs = 12*60*60*1000;
 
   protected void setDates(CalendarEventEditor event, 
@@ -1124,9 +1256,11 @@ cal.setHandler(new BasicEventResizeHandler() {
       super.setDates(event, start, end);
     }
   }
-});
-
+});]]></programlisting>
+        </section>
+    </section>
 </chapter>
+
 
 <!-- Keep this comment at the end of the file
 Local variables:
