@@ -11,8 +11,8 @@
 
     <para>
         The Vaadin Calendar is a commercial add-on component for organizing and displaying
-        calendar events. It can be used to view and manage events in monthly and weekly
-        views.
+        calendar events. It can be used to view and manage events in monthly, weekly, and
+        daily views.
     </para>
 
     <section xml:id="calendar.overview">
@@ -24,69 +24,63 @@
 
         <itemizedlist>
             <listitem>
-                Manage calendar by server-side API
+                Monthly, weekly, and daily views
             </listitem>
             <listitem>
                 Two types of events: "all-day" events and events with a time range
             </listitem>
             <listitem>
-                One minute resolution of the timeline
+                Provide events directly, from a <classname>Container</classname>, or with an event provider
             </listitem>
             <listitem>
-                Monthly, weekly, and daily views
+                One minute resolution of the timeline
             </listitem>
             <listitem>
                 Control the range of the visible dates
             </listitem>
             <listitem>
-                Selecting date or time range by dragging
+                Selecting and editing date or time range by dragging
             </listitem>
             <listitem>
-                Draggable and resizable events
+                Drag and drop events to calendar from outside
             </listitem>
             <listitem>
                 Support for localization and timezones
             </listitem>
-            <listitem>
-                Support for most common browsers
-            </listitem>
         </itemizedlist>
 
         <para>
-            The API of the <classname>Calendar</classname> component allows managing its
-            events, date range, styling, localization, and timezone. The data source of
-            the calendar may be practically anything, as its events are queried
-            dynamically by the component. You may use containers, or any other data source
-            by implementing an <emphasis>event provider</emphasis> for the calendar.
-        </para>
-
-        <figure xml:id="figure.addons.calendar.overview.views.monthly" float="center" floatstyle="before">
-            <title>Monthly view with All-Day and Normal Events</title>
-            <mediaobject>
-                <imageobject role="html">
-                    <imagedata align="center" fileref="img/addons/calendar-monthly.png"/>
-                </imageobject>
-                <imageobject role="fo">
-                    <imagedata scale="100" smallscale="100%" align="center" fileref="img/addons/calendar-monthly.png"/>
-                </imageobject>
-            </mediaobject>
-        </figure>
-
-        <para>
-            Book of Vaadin currently includes only an introduction to Vaadin
-            Calendar. Please refer to the product documentation included in the
-            installation package for further details.
+            The data source of the calendar can be practically anything, as its events are
+            queried dynamically by the component. You can use any Vaadin container
+            directly, or any other data source by implementing an <emphasis>event
+            provider</emphasis> for the calendar.
         </para>
 
         <simplesect xml:id="calendar.overview.views">
-            <title>Views</title>
+            <title>Monthly and Weekly Views</title>
+
+            <figure xml:id="figure.addons.calendar.overview.views.monthly" float="center" floatstyle="before">
+                <title>Monthly view with All-Day and Normal Events</title>
+                <mediaobject>
+                    <imageobject role="html">
+                        <imagedata align="center" fileref="img/addons/calendar-monthly.png"/>
+                    </imageobject>
+                    <imageobject role="fo">
+                        <imagedata scale="100" smallscale="100%" align="center" fileref="img/addons/calendar-monthly.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
 
             <para>
-                The Vaadin Calendar has two different type of views that are shown
-                depending on the Calendar's date range. The Calendar displays a week by
-                default. Calendar will be shown in a monthly view when date range is over
-                than one week (seven days) long. Date range is always calculated in a
-                accuracy of one millisecond.
+                The Vaadin Calendar has two types of views that are shown depending on the
+                date range of the calendar. The <emphasis>weekly view</emphasis> displays
+                a week by default. The week view can display anything between one to seven
+                days a week, and is also used as a single-day view. The view mode is
+                determined from the <emphasis>date range</emphasis> of the calendar,
+                defined by a start and an end date. Calendar will be shown in a
+                <emphasis>monthly view</emphasis> when the date range is over than one
+                week (seven days) long. The date range is always calculated in an accuracy
+                of one millisecond.
             </para>
 
             <para>
@@ -97,7 +91,7 @@
                 moved in the monthly view. In the figure, you can see two longer events
                 that are highlighted with a blue and green background color. Other
                 markings are shorter day events that last less than a 24 hours. These
-                events cant be moved.
+                events can not be moved by dragging in the monthly view.
             </para>
 
             <figure xml:id="figure.addons.calendar.overview.views.weekly" float="center" floatstyle="before">
@@ -113,7 +107,7 @@
             </figure>
 
             <para>
-                When date range is over seven days long, the weekly view will be used.
+                When the date range is over seven days long, the weekly view is used.
                 Weekly view can show any number of days from one to seven.
             </para>
 
@@ -125,16 +119,22 @@
         </simplesect>
 
         <simplesect xml:id="calendar.overview.event">
-            <title>Calendar Event</title>
+            <title>Calendar Events</title>
 
             <para>
-                The Vaadin Calendar handles displayed events through the
-                <classname>CalendarEvent</classname> interface. The concrete class of the
-                event is decided by the implementor of the specific
-                <classname>CalendarEventProvider</classname> used. By default,
-                <classname>Calendar</classname> uses a
-                <classname>BasicEventProvider</classname> to provide events. The
-                <classname>BasicEventProvider</classname> uses
+                All occurrences in a calendar are represented as
+                <emphasis>events</emphasis>. You have three ways to manage the calendar
+                events: add them explicitly, from a Vaadin
+                <interfacename>Container</interfacename>, or with an <emphasis>event
+                provider</emphasis>.
+            </para>
+
+            <para>
+                Events are handled though the <interfacename>CalendarEvent</interfacename>
+                interface. The concrete class of the event depends on the specific
+                <classname>CalendarEventProvider</classname> used in the calendar. By
+                default, <classname>Calendar</classname> uses a
+                <classname>BasicEventProvider</classname> to provide events, which uses
                 <classname>BasicEvent</classname> instances.
             </para>
 
@@ -147,12 +147,11 @@
             </para>
 
             <para>
-                Event queries are done by asking the event provider for all the events
-                between two given dates. The range of these dates is guaranteed to be at
-                least as long as the start and end dates set for the component. The
-                component can, however, ask for a longer range to ensure correct
-                rendering. In particular, all start dates are expanded to the start of the
-                day, and all end dates are expanded to the end of the day.
+                You can bind any Vaadin <classname>Container</classname> to a calendar, in
+                which case a <classname>ContainerEventProvider</classname> is used
+                transparently. The container must be ordered by start date and time of the
+                events. See <xref linkend="datamodel.container"/> for basic information
+                about containers.
             </para>
 
             <para>
@@ -194,80 +193,15 @@
 
             <para>
                 The weekly view has navigation buttons to navigate forward and backward in
-                time. These actions are also listened by the server. Custom navigating is
-                can be implemented using event handlers<!-- TODO LINK which are described
-                in section 2.7.2-->.
-            </para>
-
-            <para>
-                Most of the handlers related to calendar events have sensible default
-                handlers. These are found in the <package>com.vaadin.ui.handler</package>
-                package. The default handlers and their functionalities are described
-                below.
-            </para>
-
-            <itemizedlist>
-                <listitem>
-                    <classname>BasicBackwardHandler</classname>. Handles clicking the
-                    back-button of the weekly view so that the viewed month is changed to
-                    the previous one.
-                </listitem>
-
-                <listitem>
-                    <classname>BasicForwardHandler</classname>. Handles clicking the
-                    forward-button of the weekly view so that the viewed month is changed
-                    to the next one.
-                </listitem>
-
-                <listitem>
-                    <classname>BasicWeekClickHandler</classname>. Handles clicking the
-                    week numbers int the monthly view so that the viewable date range is
-                    changed to the clicked week.
-                </listitem>
-
-                <listitem>
-                    <classname>BasicDateClickHandler</classname>. Handles clicking the
-                    dates on both the monthly view and the weekly view. Changes the
-                    viewable date range so that only the clicked day is visible.
-                </listitem>
-
-                <listitem>
-                    <classname>BasicEventMoveHandler</classname>. Handles moving the
-                    events in both monthly view and the weekly view. Events can be moved
-                    and their start and end dates are changed correctly, but only if the
-                    event implements <classname>CalendarEventEditor</classname>
-                    (implemented by <classname>BasicEvent</classname>).
-                </listitem>
-
-                <listitem>
-                    <classname>BasicEventResizeHandler</classname>. Handles resizing the
-                    events in the weekly view. Events can be resized and their start and
-                    end dates are changed correctly, but only if the event implements
-                    <classname>CalendarEventEditor</classname> (implemented by the
-                    <classname>BasicEvent</classname>).
-                </listitem>
-            </itemizedlist>
-
-            <para>
-                All of these handlers are automatically set when creating a new
-                <classname>Calendar</classname>. If you wish to disable some of the
-                default functionality, you can simply set the corresponding handler to
-                <literal>null</literal>. This will prevent the functionality from ever
-                appearing on the user interface. For example, if you set the
-                <classname>EventMoveHandler</classname> to <literal>null</literal>, the
-                user will be unable to move events in the browser.
+                time. These actions are also listened by the server. Custom navigation can
+                be implemented using event handlers, as described in <xref
+                linkend="calendar.customizing"/>.
             </para>
         </simplesect>
-
     </section>
 
     <section xml:id="calendar.installing">
         <title>Installing Calendar</title>
-
-        <para>
-            It is very easy to get from 0 to ready with the Vaadin Calendar. All you need
-            to do is install the JAR and you are ready to go.
-        </para>
 
         <para>
             Vaadin Calendar is available for download from Vaadin Directory and from a
@@ -280,11 +214,17 @@
             <title>Licensing</title>
 
             <para>
+                When downloading the Vaadin Calendar add-on from Vaadin Directory, you
+                need to choose the license.
+            </para>
+
+            <para>
                 Vaadin Calendar is a commercial product licensed under a dual-licensing
                 scheme. The AGPL (GNU Affero General Public License) allows open-source
                 development, while the CVAL (Commercial Vaadin Add-On License) needs to be
                 purchased for closed-source use, including web deployments and internal
-                use.
+                use. With the CVAL license, you have a free 30-day trial period for
+                evaluating the product.
             </para>
 
             <para>
@@ -304,34 +244,12 @@
             it is a daily, weekly or monthly view.
         </para>
 
-        <para>
-            You can provide calendar events in three different ways:
-        </para>
-
-        <itemizedlist>
-            <listitem>
-                Use the <emphasis>event provider</emphasis> mechanism.
-            </listitem>
-
-            <listitem>
-                Use a <interfacename>Container</interfacename> as a data source.
-            </listitem>
-
-            <listitem>
-                Add events directly to the calendar using the
-                <methodname>addEvent()</methodname>.
-            </listitem>
-        </itemizedlist>
-
-        <para>
-            Vaadin Calendar uses by default a <classname>BasicEventProvider</classname>
-            for events and displays a date range of one week.
-        </para>
-
         <section xml:id="calendar.using.daterange">
             <title>Setting the Date Range</title>
 
             <para>
+                The view mode is controlled by the date range of the calendar.
+
                 One of the first things you'll notice about the Vaadin Calendar is that it
                 only displays one week at a time. We can easily change that by using start
                 and end dates. The date range must be between one and 60 days. Here we set
@@ -350,47 +268,43 @@ cal.setEndDate(new Date());]]></programlisting>
             </para>
         </section>
 
-        <section xml:id="calendar.using.eventprovider">
-            <title>Providing Events</title>
+        <section xml:id="calendar.using.events">
+            <title>Adding and Managing Events</title>
 
             <para>
-                The second thing you will probably notice about the Calendar is that it is
-                pretty empty. The Calendar allows three different ways to add events:
+                The first thing you will probably notice about the Calendar is that it is
+                rather empty at first. The Calendar allows three different ways to add events:
             </para>
-
+        
             <itemizedlist>
                 <listitem>
-                    Using the <emphasis>event provider</emphasis> mechanism. This is the
-                    most flexible way of doing things. You need to implement an event
-                    provider and set it to the <classname>Calendar</classname> using the
-                    <methodname>setEventProvider()</methodname> method.
+                    Add events directly to the <classname>Calendar</classname> object using
+                    the <methodname>addEvent()</methodname>
                 </listitem>
-
+            
                 <listitem>
-                    Using a <interfacename>Container</interfacename> as a data source. A
-                    container is attached to <classname>Calendar</classname> with the
-                    <methodname>setContainerDataSource()</methodname> method. You can use
-                    any container that implements the
-                    <interfacename>Indexed</interfacename> interface with
-                    <classname>Calendar</classname>. The container must either use the
-                    default property IDs for event data or provide them as parameters for
-                    the <methodname>setContainerDataSource()</methodname> method. The
-                    <classname>Calendar</classname> will listen to change events from the
-                    container as well as write changes to the container.
+                    Use a <interfacename>Container</interfacename> as a data source
                 </listitem>
-
+            
                 <listitem>
-                    You can also add events directly to the calendar using the
-                    <methodname>addEvent()</methodname>. You can remove such events with
-                    the <methodname>removeEvent()</methodname> methods. These methods will
-                    use the underlying event provider as the data source.
+                    Use the <emphasis>event provider</emphasis> mechanism
                 </listitem>
             </itemizedlist>
 
             <para>
-                At first, the default <classname>BasicEventProvider</classname> may
-                suffice, but later on you will probably want to create your own event
-                provider as described in the next section.
+                The easiest way to add and manage events in a calendar is to use the basic
+                event management API in the <classname>Calendar</classname>.
+
+                You can add events directly to the calendar using the
+                <methodname>addEvent()</methodname>. You can remove such events with the
+                <methodname>removeEvent()</methodname> methods. These methods will use the
+                underlying event provider as the data source.
+            </para>
+
+            <para>
+                Calendar uses by default a
+                <classname>BasicEventProvider</classname> for events and displays a date range
+                of one week.
             </para>
 
             <para>
@@ -419,13 +333,181 @@ eventProvider.addEvent(event);]]></programlisting>
             </para>
         </section>
 
-        <section xml:id="calendar.using.customevents">
+        <section xml:id="calendar.using.container">
+            <title>Getting Events from a Container</title>
+
             <para>
-                To begin customizing the calendar events for your project, you should
-                start by creating an event class that implements the
-                <interfacename>CalendarEvent</interfacename> interface. Below is the
-                BasicEvent from the com.vaadin.addon.calendar.event package. It nicely
-                presents the normal work required for an event.
+                You can use any Vaadin <interfacename>Container</interfacename> that
+                implements the <interfacename>Indexed</interfacename> interface as the
+                data source for calendar events. The <classname>Calendar</classname> will
+                listen to change events from the container as well as write changes to the
+                container. You can attach a container to a <classname>Calendar</classname>
+                with <methodname>setContainerDataSource()</methodname>.
+            </para>
+
+            <para>
+                In the following example, we bind a
+                <classname>BeanItemContainer</classname> that contains built-in
+                <classname>BasicEvent</classname> events to a calendar.
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[// Create the calendar
+Calendar calendar = new Calendar("Bound Calendar");
+
+// Use a container of built-in BasicEvents
+final BeanItemContainer<BasicEvent> container =
+    new BeanItemContainer<BasicEvent>(BasicEvent.class);        
+
+// Create a meeting in the container
+container.addBean(new BasicEvent("The Event", "Single Event",
+            new GregorianCalendar(2012,1,14,12,00).getTime(),
+            new GregorianCalendar(2012,1,14,14,00).getTime()));
+
+// The container MUST be ordered by the start time. You
+// have to sort the BIC every time after you have added items.        
+container.sort(new Object[]{"start"}, new boolean[]{true});
+
+calendar.setContainerDataSource(container, "caption",
+    "description", "start", "end", "styleName");]]></programlisting>
+
+            <para>
+                The container must either use the default property IDs for event data, as
+                defined in the <interfacename>CalendarEvent</interfacename> interface, or
+                provide them as parameters for the
+                <methodname>setContainerDataSource()</methodname> method, as we did in the
+                example above.
+            </para>
+
+            <section xml:id="calendar.using.container.sorting">
+                <title>Keeping the Container Ordered</title>
+
+                <para>
+                    The events in the container <emphasis>must</emphasis> be ordered by
+                    their start date/time.  Failing to do so may and will result in the
+                    events not showing in the calendar properly.
+                </para>
+
+                <para>
+                    Ordering depends on the container. With some containers, such as
+                    <classname>BeanItemContainer</classname>, you have to sort the
+                    container explicitly every time after you have added events, usually
+                    with the <methodname>sort()</methodname> method, as we did in the
+                    example above. Some container, such as
+                    <classname>JPAContainer</classname>, keep the container in order
+                    automatically if you provider a sorting rule.
+                </para>
+
+                <para>
+                    For example, you could order a <classname>JPAContainer</classname> by
+                    the following rule, assuming that the start date/time is held in the
+                    <literal>startDate</literal> property:
+                </para>
+
+                <programlisting><?pocket-size 65% ?><![CDATA[// The container must be ordered by start date. For JPAContainer
+// we can just set up sorting once and it will stay ordered.
+container.sort(new String[]{"startDate"}, new boolean[]{true});]]></programlisting>
+
+            </section>
+
+            <section xml:id="calendar.using.container.customization">
+                <title>Delegation of Event Management</title>
+
+                <para>
+                    Setting a container as the calendar data source with
+                    <methodname>setContainerDataSource()</methodname> automatically switches
+                    to <classname>ContainerEventProvider</classname>. You can manipulate the
+                    event data through the API in <classname>Calendar</classname> and the user
+                    can move and resize event through the user interface. The event provider
+                    delegates all such calendar operations to the container.
+                </para>
+
+                <para>
+                    If you add events through the <classname>Calendar</classname> API,
+                    notice that you may be unable to create events of the type held in the
+                    container or adding them requires some container-specific
+                    operations. In such case, you may need to customize the
+                    <methodname>addEvent()</methodname> method.
+                </para>
+
+                <para>
+                    For example, <classname>JPAContainer</classname> requires adding new
+                    items with <methodname>addEntity()</methodname>. You could first add
+                    the entity to the container or entity manager directly and then pass
+                    it to the <methodname>addEvent()</methodname>. That does not, however,
+                    work if the entity class does not implement
+                    <interfacename>CalendarEvent</interfacename>. This is actually the
+                    case always if the property names differ from the ones defined in the
+                    interface. You could handle creating the underlying entity objects in
+                    the <methodname>addEvent()</methodname> as follows:
+                </para>
+
+                <programlisting><?pocket-size 65% ?><![CDATA[// Create a JPAContainer
+final JPAContainer<MyCalendarEvent> container =
+    JPAContainerFactory.make(MyCalendarEvent.class,
+                             "book-examples");
+
+// Customize the event provider for adding events
+// as entities
+ContainerEventProvider cep =
+        new ContainerEventProvider(container) {
+    @Override
+    public void addEvent(CalendarEvent event) {
+        MyCalendarEvent entity = new MyCalendarEvent(
+            event.getCaption(), event.getDescription(),
+            event.getStart(), event.getEnd(),
+            event.getStyleName());
+        container.addEntity(entity);
+    }
+}
+
+// Set the container as the data source
+calendar.setEventProvider(cep);
+        
+// Now we can add events to the database through the calendar
+BasicEvent event = new BasicEvent("The Event", "Single Event",
+    new GregorianCalendar(2012,1,15,12,00).getTime(),
+    new GregorianCalendar(2012,1,15,14,00).getTime());
+calendar.addEvent(event);]]></programlisting>
+            </section>
+        </section>
+    </section>
+
+    <section xml:id="calendar.eventprovider">
+        <title>Implementing an Event Provider</title>
+
+        <para>
+            If the two simple ways of storing and managing events for a calendar are not
+            enough, you may need to implement a custom event provider. It is the most
+            flexible way of providing events. You need to attach the event provider to the
+            <classname>Calendar</classname> using the
+            <methodname>setEventProvider()</methodname> method.
+        </para>
+
+        <para>
+            Event queries are done by asking the event provider for all the events
+            between two given dates. The range of these dates is guaranteed to be at
+            least as long as the start and end dates set for the component. The
+            component can, however, ask for a longer range to ensure correct
+            rendering. In particular, all start dates are expanded to the start of the
+            day, and all end dates are expanded to the end of the day.
+        </para>
+
+        <section xml:id="calendar.eventprovider.customevents">
+            <title>Custom Events</title>
+            
+            <para>
+                An event provider could use the built-in
+                <classname>BasicEvent</classname>, but it is usually more proper to define
+                a custom event type that is bound directly to the data source. Custom
+                events may be useful for some other purposes as well, such as when you
+                need to add extra information to an event or customize how it is acquired.
+            </para>
+
+            <para>
+                Custom events must implement the <interfacename>CalendarEvent</interfacename>
+                interface or extend an existing event class. The built-in
+                <classname>BasicEvent</classname> class should serve as a good example of
+                implementing simple events. It keeps the data in member variables.
             </para>
 
             <programlisting><?pocket-size 65% ?><![CDATA[public class BasicEvent
@@ -534,15 +616,34 @@ eventProvider.addEvent(event);]]></programlisting>
             </para>
 
             <para>
-                Now you can create events for the Calendar. The Calendar needs also a data
-                source which is known as an event provider for the Calendar. Let us create
-                an example event provider example that implements
-                <interfacename>CalendarEventProvider</interfacename>.
+                In addition to the basic event interfaces, you can enhance the
+                functionality of your event and event provider classes by using the
+                <classname>EventChange</classname> and
+                <classname>EventSetChange</classname> events. They let the
+                <classname>Calendar</classname> component to know about changes in events
+                and update itself accordingly. The <classname>BasicEvent</classname> and
+                <classname>BasicEventProvider</classname> examples given earlier include a
+                simple implementation of these interfaces.
+            </para>
+        </section>
+        <section xml:id="calendar.eventprovider.eventprovider">
+            <title>Implementing the Event Provider</title>
+
+            <para>
+                An event provider needs to implement the
+                <interfacename>CalendarEventProvider</interfacename> interface. It has
+                only one method to be implemented. Whenever the calendar is painted,
+                <methodname>getEvents(Date, Date)</methodname> method is called and it
+                must return a list of events between the given start and end time.
+            </para>
+
+            <para>
+                The following example implementation returns only one example event. The
+                event starts from the current time and is five hours long.
             </para>
 
             <programlisting><?pocket-size 65% ?><![CDATA[public class MyEventProvider implements CalendarEventProvider{
     public List<Event> getEvents(Date startDate, Date endDate){
-
         List<Event> events = new ArrayList<Event>();
         GregorianCalendar cal = new GregorianCalendar();
         cal.setTime(new Date());
@@ -562,47 +663,41 @@ eventProvider.addEvent(event);]]></programlisting>
 }]]></programlisting>
 
             <para>
-                <interfacename>CalendarEventProvider</interfacename> has only one method
-                to be implemented. Whenever the calendar is painted,
-                <methodname>getEvents(Date, Date)</methodname> method is called. In the
-                MyEventProvider example, only one event will be returned. It starts from
-                the current time and is five hours long.
-            </para>
-
-            <para>
                 It is important to notice that the <classname>Calendar</classname> may
                 query for dates beyond the range defined by start date and end
                 date. Particularly, it may expand the date range to make sure the user
                 interface is rendered correctly.
             </para>
-
-            <para>
-                In addition to the basic event interfaces, you can enhance the
-                functionality of your event and event provider classes by using the
-                <classname>EventChange</classname> and
-                <classname>EventSetChange</classname> events. They let the
-                <classname>Calendar</classname> component to know about changes in events
-                and update itself accordingly. The <classname>BasicEvent</classname> and
-                <classname>BasicEventProvider</classname> examples given earlier include a
-                simple implementation of these interfaces.
-            </para>
         </section>
     </section>
 
     <section xml:id="calendar.appearance">
-        <title>Appearance</title>
+        <title>Configuring the Appearance of the Calendar</title>
+
+        <para>
+            Configuring the appearance of the Vaadin Calendar component is one of the
+            basic tasks. At the least, you need to consider its sizing in your user
+            interface. You also quite probably want to use some color or colors for
+            events.
+        </para>
 
         <section xml:id="calendar.appearance.sizing">
             <title>Sizing</title>
 
             <para>
                 The Vaadin Calendar supports the dynamic size system of Vaadin, with both
-                defined and undefined sizes. When using defined sizes, the Calendar calculates
-                the correct height for the cells so that it fits to the size given. When using
-                an undefined size Calendar, all the sizes come from CSS. In addition, when
-                height is undefined a scrollbar is displayed in the weekly view to better fit
-                the cells to the UI. See 2.6.1. for information about customizing the
-                undefined sizes.
+                defined and undefined sizes. When using defined sizes, the Calendar
+                calculates the correct height for the cells so that it fits to the size
+                given.
+            </para>
+
+            <para>
+                When using an undefined size for the calendar, all the sizes come from
+                CSS. In addition, when the height is undefined, a scrollbar is displayed
+                in the weekly view to better fit the cells to the user interface.
+
+                <!-- TODO See 2.6.1. for information about customizing the
+                undefined sizes. -->
             </para>
         </section>
 
@@ -703,42 +798,42 @@ calendar.addEvent(event);]]></programlisting>
                     events. You could style the events with the following rules:
                 </para>
 
-                <programlisting>.v-calendar .v-calendar-event-mycolor {}
+                <programlisting><?pocket-size 65% ?>.v-calendar .v-calendar-event-mycolor {}
 .v-calendar .v-calendar-event-mycolor-all-day {}
 .v-calendar .v-calendar-event-mycolor .v-calendar-event-caption {}
 .v-calendar .v-calendar-event-mycolor .v-calendar-event-content {}</programlisting>
 
             </section>
         </section>
-    </section>
 
-    <section xml:id="calendar.visible-hours-days">
-        <title>Visible hours and days</title>
+        <section xml:id="calendar.appearance.visible-hours-days">
+            <title>Visible Hours and Days</title>
 
-        <para>
-            As we saw in <xref linkend="calendar.using.daterange"/>, you can set the range
-            of dates that are shown by the Calendar. But what if you wanted to show the
-            entire month but hide weekends? Or show only hours from 8 to 16 when viewing a
-            week? The <methodname>setVisibleDays()</methodname> and
-            <methodname>setVisibleHours()</methodname> methods help you do that.
-        </para>
+            <para>
+                As we saw in <xref linkend="calendar.using.daterange"/>, you can set the
+                range of dates that are shown by the Calendar. But what if you wanted to
+                show the entire month but hide the weekends? Or show only hours from 8 to
+                16 in the weekly view? The <methodname>setVisibleDays()</methodname> and
+                <methodname>setVisibleHours()</methodname> methods allow you to do that.
+            </para>
 
-        <programlisting><?pocket-size 75% ?>calendar.setVisibleDays(1,5);   // Monday to Friday
+            <programlisting><?pocket-size 75% ?>calendar.setVisibleDays(1,5);   // Monday to Friday
 calendar.setVisibleHours(0,15); // Midnight until 4 pm</programlisting>
 
-        <para>
-            After the above settings, only weekdays from Monday to Friday would be
-            shown. And when the calendar is in the weekly view, only the time range from
-            00:00 to 16:00 would be shown.
-        </para>
+            <para>
+                After the above settings, only weekdays from Monday to Friday would be
+                shown. And when the calendar is in the weekly view, only the time range
+                from 00:00 to 16:00 would be shown.
+            </para>
 
-        <para>
-            Note that the excluded times are never shown so you should take care when
-            setting the date range. If the date range contains only dates / times that are
-            excluded, nothing will be displayed. Also note that even if a date is not
-            rendered because these settings, the event provider may still be queried for
-            events for that date.
-        </para>
+            <para>
+                Note that the excluded times are never shown so you should take care when
+                setting the date range. If the date range contains only dates / times that
+                are excluded, nothing will be displayed. Also note that even if a date is
+                not rendered because these settings, the event provider may still be
+                queried for events for that date.
+            </para>
+        </section>
     </section>
 
     <section xml:id="calendar.drag-and-drop">
@@ -917,13 +1012,76 @@ protected void createEvent(CalendarTargetDetails details,
             readable and shorter.
         </para>
 
+        <section xml:id="calendar.customizing.overview">
+            <title>Overview of Handlers</title>
+
+            <para>
+                Most of the handlers related to calendar events have sensible default
+                handlers. These are found in the <package>com.vaadin.ui.handler</package>
+                package. The default handlers and their functionalities are described
+                below.
+            </para>
+
+            <itemizedlist>
+                <listitem>
+                    <classname>BasicBackwardHandler</classname>. Handles clicking the
+                    back-button of the weekly view so that the viewed month is changed to
+                    the previous one.
+                </listitem>
+
+                <listitem>
+                    <classname>BasicForwardHandler</classname>. Handles clicking the
+                    forward-button of the weekly view so that the viewed month is changed
+                    to the next one.
+                </listitem>
+
+                <listitem>
+                    <classname>BasicWeekClickHandler</classname>. Handles clicking the
+                    week numbers int the monthly view so that the viewable date range is
+                    changed to the clicked week.
+                </listitem>
+
+                <listitem>
+                    <classname>BasicDateClickHandler</classname>. Handles clicking the
+                    dates on both the monthly view and the weekly view. Changes the
+                    viewable date range so that only the clicked day is visible.
+                </listitem>
+
+                <listitem>
+                    <classname>BasicEventMoveHandler</classname>. Handles moving the
+                    events in both monthly view and the weekly view. Events can be moved
+                    and their start and end dates are changed correctly, but only if the
+                    event implements <classname>CalendarEventEditor</classname>
+                    (implemented by <classname>BasicEvent</classname>).
+                </listitem>
+
+                <listitem>
+                    <classname>BasicEventResizeHandler</classname>. Handles resizing the
+                    events in the weekly view. Events can be resized and their start and
+                    end dates are changed correctly, but only if the event implements
+                    <classname>CalendarEventEditor</classname> (implemented by the
+                    <classname>BasicEvent</classname>).
+                </listitem>
+            </itemizedlist>
+
+            <para>
+                All of these handlers are automatically set when creating a new
+                <classname>Calendar</classname>. If you wish to disable some of the
+                default functionality, you can simply set the corresponding handler to
+                <literal>null</literal>. This will prevent the functionality from ever
+                appearing on the user interface. For example, if you set the
+                <classname>EventMoveHandler</classname> to <literal>null</literal>, the
+                user will be unable to move events in the browser.
+            </para>
+        </section>
+
         <section xml:id="calendar.customizing.creating">
             <title>Creating a Calendar</title>
 
             <para>
                 Let us first create a new <classname>Calendar</classname> instance. Here
                 we use our own event provider, the <classname>MyEventProvider</classname>
-                described earlier in <xref linkend="calendar.using.customevents"/>.
+                described in <xref linkend="calendar.eventprovider.eventprovider"/>.
             </para>
 
             <programlisting><![CDATA[Calendar cal = new Calendar(new MyEventProvider());]]></programlisting>
