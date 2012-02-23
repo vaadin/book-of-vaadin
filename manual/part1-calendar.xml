@@ -56,18 +56,6 @@
         <simplesect xml:id="calendar.overview.views">
             <title>Monthly and Weekly Views</title>
 
-            <figure xml:id="figure.addons.calendar.overview.views.monthly" float="center" floatstyle="before">
-                <title>Monthly view with All-Day and Normal Events</title>
-                <mediaobject>
-                    <imageobject role="html">
-                        <imagedata align="center" fileref="img/addons/calendar-monthly.png"/>
-                    </imageobject>
-                    <imageobject role="fo">
-                        <imagedata scale="100" smallscale="100%" align="center" fileref="img/addons/calendar-monthly.png"/>
-                    </imageobject>
-                </mediaobject>
-            </figure>
-
             <para>
                 The Vaadin Calendar has two types of views that are shown depending on the
                 date range of the calendar. The <emphasis>weekly view</emphasis> displays
@@ -79,6 +67,18 @@
                 long. The date range is always calculated in an accuracy of one
                 millisecond.
             </para>
+
+            <figure xml:id="figure.addons.calendar.overview.views.monthly" float="center" floatstyle="before">
+                <title>Monthly view with All-Day and Normal Events</title>
+                <mediaobject>
+                    <imageobject role="html">
+                        <imagedata align="center" fileref="img/addons/calendar-monthly.png"/>
+                    </imageobject>
+                    <imageobject role="fo">
+                        <imagedata scale="100" smallscale="100%" align="center" fileref="img/addons/calendar-monthly.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
 
             <para>
                 The monthly view, shown in <xref
@@ -231,22 +231,25 @@
         <title>Basic Use</title>
 
         <para>
-            Use of Calendar requires two things besides creating a
+            Use of Calendar requires two tasks after creating a
             <classname>Calendar</classname> instance: setting a time range for it and
             providing the calendar events. The time range controls its view mode; whether
-            it is a daily, weekly or monthly view.
+            it is a daily, weekly, or monthly view.
         </para>
 
         <section xml:id="calendar.using.daterange">
             <title>Setting the Date Range</title>
 
             <para>
-                The view mode is controlled by the date range of the calendar.
+                The view mode is controlled by the date range of the calendar. The weekly
+                view is the default view mode. You can change the range by setting start
+                and end dates for the calendar. The range must be between one and 60
+                days.
+            </para>
 
-                One of the first things you'll notice about the Vaadin Calendar is that it
-                only displays one week at a time. We can easily change that by using start
-                and end dates. The date range must be between one and 60 days. Here we set
-                the calendar to show only one day, which is the current day.
+            <para>
+                In the following, we set the calendar to show only one day, which is the
+                current day.
             </para>
 
             <programlisting><![CDATA[cal.setStartDate(new Date());
@@ -256,8 +259,8 @@ cal.setEndDate(new Date());]]></programlisting>
                 Notice that although the range we set above is actually zero time long,
                 the calendar still renders the time from 00:00 to 23:59. This is normal,
                 as the Vaadin Calendar is guaranteed to render at least the date range
-                provided, but may expand it. This is more important when we implement our
-                own event providers.
+                provided, but may expand it. This behaviour is important to notice when we
+                implement our own event providers.
             </para>
         </section>
 
@@ -265,8 +268,9 @@ cal.setEndDate(new Date());]]></programlisting>
             <title>Adding and Managing Events</title>
 
             <para>
-                The first thing you will probably notice about the Calendar is that it is
-                rather empty at first. The Calendar allows three different ways to add events:
+                The first thing the you will probably notice about the Calendar is that it
+                is rather empty at first. The Calendar allows three different ways to add
+                events:
             </para>
         
             <itemizedlist>
@@ -286,37 +290,31 @@ cal.setEndDate(new Date());]]></programlisting>
 
             <para>
                 The easiest way to add and manage events in a calendar is to use the basic
-                event management API in the <classname>Calendar</classname>.
-
-                You can add events directly to the calendar using the
-                <methodname>addEvent()</methodname>. You can remove such events with the
-                <methodname>removeEvent()</methodname> methods. These methods will use the
-                underlying event provider as the data source.
+                event management API in the <classname>Calendar</classname>.  You can add
+                events with <methodname>addEvent()</methodname> and remove them with the
+                <methodname>removeEvent()</methodname>. These methods will use the
+                underlying event provider to write the modifications to the data source.
             </para>
 
             <para>
-                Calendar uses by default a
-                <classname>BasicEventProvider</classname> for events and displays a date range
-                of one week.
+                For example, the following adds a two-hour event starting from the current
+                time. The standard Java <classname>GregorianCalendar</classname> provides
+                various ways to manipulate date and time.
             </para>
+
+            <book-example id="calendar.monthlyview" style="float: right"/>
+            <programlisting><?pocket-size 65% ?><![CDATA[// Add a short event
+GregorianCalendar start = new GregorianCalendar();
+GregorianCalendar end   = new GregorianCalendar();
+end.add(java.util.Calendar.HOUR, 2);
+calendar.addEvent(new BasicEvent("Calendar study",
+        "Learning how to use Vaadin Calendar",
+        start.getTime(), end.getTime()));]]></programlisting>
 
             <para>
-                As the <classname>BasicEventProvider</classname> is used by default, we
-                can just retrieve it from the Calendar and add an event to it.
+                Calendar uses by default a <classname>BasicEventProvider</classname>,
+                which keeps the events in memory in an internal reprensetation.
             </para>
-
-            <programlisting><?pocket-size 65% ?><![CDATA[BasicEvent event = new BasicEvent();
-java.util.Calendar calendar = java.util.Calendar.getInstance();
-calendar.setTime(new Date());
-event.setStart(calendar.getTime());
-        
-calendar.add(java.util.Calendar.HOUR, 3);
-event.setEnd(calendar.getTime());
-event.setCaption("FooBar");
-
-BasicEventProvider eventProvider =
-        (BasicEventProvider) cal.getEventProvider();
-eventProvider.addEvent(event);]]></programlisting>
 
             <para>
                 This adds a new event that lasts for 3 hours. As the BasicEventProvider
@@ -344,6 +342,7 @@ eventProvider.addEvent(event);]]></programlisting>
                 <classname>BasicEvent</classname> events to a calendar.
             </para>
 
+            <book-example id="calendar.beanitemcontainer" style="float: right"/>
             <programlisting><?pocket-size 65% ?><![CDATA[// Create the calendar
 Calendar calendar = new Calendar("Bound Calendar");
 
@@ -356,8 +355,9 @@ container.addBean(new BasicEvent("The Event", "Single Event",
             new GregorianCalendar(2012,1,14,12,00).getTime(),
             new GregorianCalendar(2012,1,14,14,00).getTime()));
 
-// The container MUST be ordered by the start time. You
-// have to sort the BIC every time after you have added items.        
+// The container must be ordered by the start time. You
+// have to sort the BIC every time after you have added
+// or modified events.
 container.sort(new Object[]{"start"}, new boolean[]{true});
 
 calendar.setContainerDataSource(container, "caption",
@@ -375,19 +375,19 @@ calendar.setContainerDataSource(container, "caption",
                 <title>Keeping the Container Ordered</title>
 
                 <para>
-                    The events in the container <emphasis>must</emphasis> be ordered by
-                    their start date/time.  Failing to do so may and will result in the
+                    The events in the container <emphasis>must</emphasis> be kept ordered
+                    by their start date/time.  Failing to do so may and will result in the
                     events not showing in the calendar properly.
                 </para>
 
                 <para>
                     Ordering depends on the container. With some containers, such as
                     <classname>BeanItemContainer</classname>, you have to sort the
-                    container explicitly every time after you have added events, usually
-                    with the <methodname>sort()</methodname> method, as we did in the
-                    example above. Some container, such as
-                    <classname>JPAContainer</classname>, keep the container in order
-                    automatically if you provider a sorting rule.
+                    container explicitly every time after you have added or modified
+                    events, usually with the <methodname>sort()</methodname> method, as we
+                    did in the example above. Some container, such as
+                    <classname>JPAContainer</classname>, keep the in container
+                    automatically order if you provide a sorting rule.
                 </para>
 
                 <para>
@@ -396,6 +396,7 @@ calendar.setContainerDataSource(container, "caption",
                     <literal>startDate</literal> property:
                 </para>
 
+                <book-example id="calendar.jpacontainer" style="float: right"/>
                 <programlisting><?pocket-size 65% ?><![CDATA[// The container must be ordered by start date. For JPAContainer
 // we can just set up sorting once and it will stay ordered.
 container.sort(new String[]{"startDate"}, new boolean[]{true});]]></programlisting>
@@ -619,6 +620,7 @@ calendar.addEvent(event);]]></programlisting>
                 simple implementation of these interfaces.
             </para>
         </section>
+
         <section xml:id="calendar.eventprovider.eventprovider">
             <title>Implementing the Event Provider</title>
 
@@ -665,7 +667,7 @@ calendar.addEvent(event);]]></programlisting>
     </section>
 
     <section xml:id="calendar.appearance">
-        <title>Configuring the Appearance of the Calendar</title>
+        <title>Configuring the Appearance</title>
 
         <para>
             Configuring the appearance of the Vaadin Calendar component is one of the
@@ -917,6 +919,31 @@ protected void createEvent(CalendarTargetDetails details,
                        .getTargetCalendar().getEventProvider();
   ep.addEvent(newEvent);
 }]]></programlisting>
+    </section>
+
+    <section xml:id="calendar.contextmenu">
+        <title>Using the Context Menu</title>
+
+        <para>
+            Vaadin Calendar allows the use of context menu (mouse right-click) to manage
+            events. As in other context menus in Vaadin, the menu items are handled in
+            Vaadin as <emphasis>actions</emphasis> by an <emphasis>action
+            handler</emphasis>. To enable a context menu, you have to implement a Vaadin
+            <interfacename>Action.Handler</interfacename> and add it to the calendar with
+            <methodname>addActionHandler()</methodname>.
+        </para>
+
+        <para>
+            An action handler must implement two methods:
+            <methodname>getActions()</methodname> and
+            <methodname>handleAction()</methodname>. The
+            <methodname>getActions()</methodname> is called for each day displayed in the
+            calendar view. It should return a list of allowed actions for that day, that
+            is, the items of the context menu. The <parametername>target</parametername>
+            parameter is a <classname>CalendarDateRange</classname> that spans over the
+            day. The <parametername>sender</parametername> is the
+            <classname>Calendar</classname> object.
+        </para>
     </section>
 
     <section xml:id="calendar.localization">
