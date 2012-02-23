@@ -1547,12 +1547,59 @@ bodies.setEntityProvider(
                 </para>
             </section>
         </section>
+        
+        <section xml:id="jpacontainer.entityprovider.jndi">
+            <title>Using JNDI Entity Providers in JEE6 environment</title>
+
+            <para>
+                JPAContainer 2.0.1 introduced new entity providers that are suggested
+                to be used when working in <literal>JEE6</literal> environment. In JEE 
+                environment one should use the EntityManager provided by the app server
+                and also most often <literal>JTA</literal> transactions instead of 
+                transactions provided by JPA. Entity providers in 
+                package "com.vaadin.addon.jpacontainer.provider.jndijta" work mostly the same
+                as the default providers discussed in previous section, but use JNDI lookups 
+                to get reference to EntityManager and JTA transaction.
+            </para>
+            
+            <para>
+            	JNDI providers work with almost no special configuration at all. The 
+            	<classname>JPAContainerFactory</classname> has methods for various 
+            	JNDI provider types. The only thing that commonly needs to be done 
+            	is to expose the EntityManager to a JNDI address. By default JNDI 
+            	providers look for the EntityManager from "java:comp/env/persistence/em".
+            	This can be done with a following snippet in web.xml or with similar
+            	configuration with annotations. "MYPU" is the identifier of your 
+            	persistence unit defined in your persistence.xml file.
+            </para>
+            
+            <programlisting><?pocket-size 65% ?><![CDATA[<persistence-context-ref>
+    <persistence-context-ref-name>persistence/em</persistence-context-ref-name>
+    <persistence-unit-name>MYPU</persistence-unit-name>
+</persistence-context-ref>]]></programlisting>
+
+            <para>
+            	If you annotate your servlets (instead of using web.xml file) you can 
+            	simply add following annotation to your servlet.
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[@PersistenceContext(name="persistence/em",unitName="MYPU")]]></programlisting>
+
+            <para>
+            	If you wish to use another address for the persistence contex, you can 
+            	define them with <methodname>setJndiAddresses</methodname> method. 
+            	You can also define the location for JTA 
+            	<classname>UserTransaction</classname>, but that should be always accessible 
+            	from "java:comp/UserTransaction"" by the JEE6 specification.
+            </para>
+        </section>
+        
 
         <section xml:id="jpacontainer.entityprovider.ejb">
             <title>Entity Providers as Enterprise Beans</title>
 
             <para>
-                Entity providers can be Enterprise JavaBeans (EJB). This is useful if you
+                Entity providers can be Enterprise JavaBeans (EJB). This may be useful if you
                 use JPAContainer in a Java EE application server. In such case, you need
                 to implement a custom entity provider that allows the server to inject the
                 entity manager. 
@@ -1582,29 +1629,8 @@ public class MyEntityProviderBean extends
 
     @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public MyEntity updateEntity(MyEntity entity) {
-        return super.updateEntity(entity);
-    }
-
-    @Override
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public MyEntity addEntity(MyEntity entity) {
-        return super.addEntity(entity);
-    }
-
-    @Override
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void removeEntity(Object entityId) {
-        super.removeEntity(entityId);
-    }
-
-    @Override
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void updateEntityProperty(Object entityId,
-            String propertyName, Object propertyValue)
-            throws IllegalArgumentException {
-        super.updateEntityProperty(entityId, propertyName,
-            propertyValue);
+    protected void runInTransaction(Runnable operation) {
+        super.runInTransaction(operation);
     }
 
     @PostConstruct
@@ -1621,6 +1647,9 @@ public class MyEntityProviderBean extends
 }]]></programlisting>
 
             <para>
+                If you have more than one EJB provider, you might 
+                want to create an abstract super class of the above 
+                and only define the entity type in implementations. 
                 You can implement an entity provider as a managed bean in Spring Framefork
                 the same way.
             </para>
