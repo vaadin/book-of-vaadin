@@ -1549,51 +1549,61 @@ bodies.setEntityProvider(
         </section>
         
         <section xml:id="jpacontainer.entityprovider.jndi">
-            <title>Using JNDI Entity Providers in JEE6 environment</title>
+            <title>Using JNDI Entity Providers in JEE6 Environment</title>
 
             <para>
-                JPAContainer 2.0.1 introduced new entity providers that are suggested
-                to be used when working in <literal>JEE6</literal> environment. In JEE 
-                environment one should use the EntityManager provided by the app server
-                and also most often <literal>JTA</literal> transactions instead of 
-                transactions provided by JPA. Entity providers in 
-                package "com.vaadin.addon.jpacontainer.provider.jndijta" work mostly the same
-                as the default providers discussed in previous section, but use JNDI lookups 
-                to get reference to EntityManager and JTA transaction.
+                JPAContainer 2.0 introduced a new set of entity providers specifically for
+                working in a <literal>JEE6</literal> environment. In a JEE environment,
+                you should use an entity manager provided by the application server and,
+                usually, <literal>JTA</literal> transactions instead of transactions
+                provided by JPA. Entity providers in
+                <packagename>com.vaadin.addon.jpacontainer.provider.jndijta</packagename>
+                package work mostly the same way as the normal providers discussed
+                earlier, but use JNDI lookups to get reference to an EntityManager and to
+                a JTA transaction.
             </para>
             
             <para>
-            	JNDI providers work with almost no special configuration at all. The 
-            	<classname>JPAContainerFactory</classname> has methods for various 
-            	JNDI provider types. The only thing that commonly needs to be done 
-            	is to expose the EntityManager to a JNDI address. By default JNDI 
-            	providers look for the EntityManager from "java:comp/env/persistence/em".
-            	This can be done with a following snippet in web.xml or with similar
-            	configuration with annotations. "MYPU" is the identifier of your 
-            	persistence unit defined in your persistence.xml file.
+            	The JNDI providers work with almost no special configuration at all. The
+            	<classname>JPAContainerFactory</classname> has factory methods for
+            	creating various JNDI provider types. The only thing that you commonly
+            	need to do is to expose the <interfacename>EntityManager</interfacename>
+            	to a JNDI address. By default, the JNDI providers look for the
+            	<interfacename>EntityManager</interfacename> from
+            	"<url>java:comp/env/persistence/em</url>".  This can be done with the
+            	following snippet in <filename>web.xml</filename> or with similar
+            	configuration with annotations.
             </para>
             
             <programlisting><?pocket-size 65% ?><![CDATA[<persistence-context-ref>
-    <persistence-context-ref-name>persistence/em</persistence-context-ref-name>
-    <persistence-unit-name>MYPU</persistence-unit-name>
+  <persistence-context-ref-name>
+    persistence/em
+  </persistence-context-ref-name>
+  <persistence-unit-name>MYPU</persistence-unit-name>
 </persistence-context-ref>]]></programlisting>
+            
+            <para>
+                The "<literal>MYPU</literal>" is the identifier of your persistence unit
+                defined in your <filename>persistence.xml</filename> file.
+            </para>
 
             <para>
-            	If you annotate your servlets (instead of using web.xml file) you can 
-            	simply add following annotation to your servlet.
+            	If you choose to annotate your servlets (instead of using the
+            	<filename>web.xml</filename> file as described above), you can simply add
+            	the following annotation to your servlet.
             </para>
 
             <programlisting><?pocket-size 65% ?><![CDATA[@PersistenceContext(name="persistence/em",unitName="MYPU")]]></programlisting>
 
             <para>
-            	If you wish to use another address for the persistence contex, you can 
-            	define them with <methodname>setJndiAddresses</methodname> method. 
-            	You can also define the location for JTA 
-            	<classname>UserTransaction</classname>, but that should be always accessible 
-            	from "java:comp/UserTransaction"" by the JEE6 specification.
+            	If you wish to use another address for the persistence context, you can
+            	define them with the <methodname>setJndiAddresses()</methodname>
+            	method. You can also define the location for the JTA
+            	<classname>UserTransaction</classname>, but that should be always
+            	accessible from "<url>java:comp/UserTransaction</url>" by the JEE6
+            	specification.
             </para>
         </section>
-        
 
         <section xml:id="jpacontainer.entityprovider.ejb">
             <title>Entity Providers as Enterprise Beans</title>
