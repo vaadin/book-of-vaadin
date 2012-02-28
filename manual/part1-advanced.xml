@@ -3337,13 +3337,13 @@ pos.setTopValue(pos.getTopValue() + yChange);]]></programlisting>
             <title>Using Logger</title>
 
             <para>
-                You can do logging with a simple pattern where you register a logger
-                instance in each object that needs logging, and use this logger wherever
-                logging is needed in the class. For example:
+                You can do logging with a simple pattern where you register a static
+                logger instance in each class that needs logging, and use this logger
+                wherever logging is needed in the class. For example:
             </para>
 
             <programlisting><?pocket-size 65% ?><![CDATA[public class MyClass {
-  private final Logger logger =
+  private final static Logger logger =
           Logger.getLogger(MyClass.class.getName());
   
   public void myMethod() {
@@ -3360,18 +3360,22 @@ pos.setTopValue(pos.getTopValue() + yChange);]]></programlisting>
                 <indexterm><primary>memory leak</primary></indexterm>
                 <indexterm><primary>PermGen</primary></indexterm>
 
-                Having <literal>static</literal> logger instances, that is, one for each
-                class needing logging, rather than one for every class instance, would
-                save a bit of memory and time. However, it could cause the application to
+                Having a <literal>static</literal> logger instance for each class needing
+                logging saves a bit of memory and time compared to having a logger for
+                every logging class instance. However, it could cause the application to
                 leak PermGen memory with some application servers when redeploying the
-                application. The problem is that the <classname>Logger</classname> library
-                maintains references to its instances. As the library could be loaded with
-                a classloader with a scope wider than the application, the references to
-                classes loaded with an per-application classloader would prevent
-                garbage-collecting the classes after redeploying, hence leaking memory. As
-                the size of the PermGen memory where class object are stored is fixed, the
-                leakage will lead to a server crash after many redeployments. The issue
-                depends on the way how the server manages classloaders.
+                application. The problem is that the <classname>Logger</classname> may
+                maintain hard references to its instances. As the
+                <classname>Logger</classname> class is loaded with a classloader shared
+                between different web applications, references to classes loaded with a
+                per-application classloader would prevent garbage-collecting the classes
+                after redeploying, hence leaking memory. As the size of the PermGen memory
+                where class object are stored is fixed, the leakage will lead to a server
+                crash after many redeployments. The issue depends on the way how the
+                server manages classloaders, on the hardness of the back-references, and
+                may also be different between Java 6 and 7. So, if you experience PermGen
+                issues, or want to play it on the safe side, you should consider using
+                non-static <classname>Logger</classname> instances.
 
                 <!-- As discussed in Forum thread 1175841 (24.2.2012). -->
             </para>
