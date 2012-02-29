@@ -25,9 +25,9 @@ DBPARS =	section.autolabel=1 \
 			$(DBEXTRAPARS)
 
 # List of images to be converted from SVG to PNG
-IMAGES =	intro/architecture intro/architecture-detailed intro/toolchain intro/toolkit-package \
+IMAGES =	intro/architecture intro/toolchain intro/toolkit-package \
 			intro/intro-themes-faded \
-			arch/clientside-arch \
+			arch/architecture-detailed arch/clientside-arch \
 			components/component-diagram components/component-abstractions \
 			components/tooltip-plain-withpointer components/tooltip-richtext-withpointer \
 			components/field-diagram components/field-interface \
