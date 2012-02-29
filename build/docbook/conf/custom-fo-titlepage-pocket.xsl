@@ -57,6 +57,8 @@
   <xsl:apply-templates mode="book.titlepage.verso.auto.mode" select="info/corpauthor"/>
   <xsl:apply-templates mode="book.titlepage.verso.auto.mode" select="bookinfo/othercredit"/>
   <xsl:apply-templates mode="book.titlepage.verso.auto.mode" select="info/othercredit"/>
+  <xsl:apply-templates mode="book.titlepage.verso.auto.mode" select="bookinfo/edition"/>
+  <xsl:apply-templates mode="book.titlepage.verso.auto.mode" select="info/edition"/>
   <xsl:apply-templates mode="book.titlepage.verso.auto.mode" select="bookinfo/pubdate"/>
   <xsl:apply-templates mode="book.titlepage.verso.auto.mode" select="info/pubdate"/>
   <xsl:apply-templates mode="book.titlepage.verso.auto.mode" select="bookinfo/releaseinfo"/>
@@ -194,6 +196,12 @@
 
 <xsl:template match="othercredit" mode="book.titlepage.verso.auto.mode">
 <fo:block xmlns:fo="http://www.w3.org/1999/XSL/Format" xsl:use-attribute-sets="book.titlepage.verso.style">
+<xsl:apply-templates select="." mode="book.titlepage.verso.mode"/>
+</fo:block>
+</xsl:template>
+
+<xsl:template match="edition" mode="book.titlepage.verso.auto.mode">
+<fo:block xmlns:fo="http://www.w3.org/1999/XSL/Format" xsl:use-attribute-sets="book.titlepage.verso.style" space-before="1em">
 <xsl:apply-templates select="." mode="book.titlepage.verso.mode"/>
 </fo:block>
 </xsl:template>

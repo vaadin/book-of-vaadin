@@ -698,6 +698,11 @@
   </xsl:template>
 
   <!-- Get the version number from the command-line arguments. -->
+  <xsl:template match="edition" mode="book.titlepage.verso.mode">
+    <xsl:value-of select="text()"/>
+  </xsl:template>
+
+  <!-- Get the version number from the command-line arguments. -->
   <xsl:param name="manual.version">x.x.x</xsl:param>
   <xsl:template match="releasenumber">
     <xsl:value-of select="$manual.version"/>
