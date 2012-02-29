@@ -23,7 +23,7 @@
 
 		<para>
 			The visual designer feature in the Vaadin Plugin for Eclipse allows you to
-			design the user interface of an entire application or of specific custom
+			design the user interface of an entire application or of specific composite
 			components. The plugin generates the actual Java code, which is designed to be
 			reusable, so you can design the basic layout of the user interface with the
 			visual designer and build the user interaction logic on top of the generated
@@ -32,24 +32,64 @@
 		</para>
 
 		<para>
-			For instructions on installing the plugin, see <xref
+			The designer works with classes that extend the
+			<classname>CustomComponent</classname> class, which is the basic technique in
+			Vaadin for creating composite components. Component composition is described
+			in <xref linkend="components.customcomponent"/>. Any
+			<classname>CustomComponent</classname> will not do for the visual designer;
+			you need to create a new one as instructed below.
+		</para>
+
+		<para>
+			For instructions on installing the Eclipse plugin, see <xref
 			linkend="getting-started.environment.eclipse-plugin"/>.
 		</para>
 
+        <simplesect xml:id="eclipse.new-composite">
+            <title>Using a Composite Component</title>
+
+            <para>
+                You can use a composite component as you would use any Vaadin
+                component. Just remember that the component as well as its root layout,
+                which is an <classname>AbsoluteLayout</classname>, are 100% wide and high
+                by default. A component with full size (expand-to-fit container) may not
+                be inside a layout with undefined size (shrink-to-fit content). The
+                default root layout for <classname>Window</classname> is a
+                <classname>VerticalLayout</classname>, which by default has undefined
+                height, so you have to set it explicitly to a defined size, usually to
+                full (100%) height.
+            </para>
+
+			<programlisting><?pocket-size 75% ?><![CDATA[public class MyApplication extends Application {
+    public void init() {
+        Window mainWindow = new Window("My Application");
+        setMainWindow(mainWindow);
+        
+        // Needed because composites are full size
+        mainWindow.getContent().setSizeFull();
+        
+        MyComposite myComposite = new MyComposite();
+        mainWindow.addComponent(myComposite);
+    }
+}]]></programlisting>
+
+            <para>
+                You could also set the size of the root layout of the composite to a fixed
+                height (in component properties in the visual editor). An
+                <classname>AbsoluteLayout</classname> may not have undefined size.
+            </para>
+        </simplesect>
 	</section>
 
-	<section>
-		<title>Creating a New <classname>CustomComponent</classname></title>
-		
-		<para>
-			The visual designer works with classes that extend the
-			<classname>CustomComponent</classname> class, which is the basic technique in
-			Vaadin for creating composite components. Component composition is described in
-			<xref linkend="components.customcomponent"/>. Any
-			<classname>CustomComponent</classname> will not do for the visual designer; you
-			need to create a new one as instructed below.
-		</para>
+	<section xml:id="eclipse.new-composite">
+		<title>Creating a New Composite</title>
 
+        <?dbfo-need height="3cm" ?>
+        <para>
+            If the Vaadin Plugin is installed in Eclipse, you can create a new composite
+            component as follows.
+        </para>
+		
 		<orderedlist>
 			<listitem>
 				<para>
@@ -66,7 +106,7 @@
 				<para>
 					In the first, <guilabel>Select a wizard</guilabel> step, select
 					<menuchoice><guimenu>Vaadin</guimenu><guimenuitem>Vaadin
-					CustomComponent</guimenuitem></menuchoice> and click
+					Composite</guimenuitem></menuchoice> and click
 					<guibutton>Next</guibutton>.
 				</para>
 				
@@ -82,6 +122,7 @@
 				</screenshot>
 			</listitem>
 
+            <?dbfo-need height="3cm" ?>
 			<listitem>
 				<para>
 					The <guilabel>Source folder</guilabel> is the root source
@@ -145,6 +186,7 @@
             <menuchoice><guimenu>Open With</guimenu><guimenuchoice>Vaadin
             Editor</guimenuchoice></menuchoice>.
         </para>
+
 	</section>
 
 	<section xml:id="eclipse.editor">
@@ -244,9 +286,10 @@
 			<title>Setting Component Properties</title>
 
 			<para>
-				The property setting area of the control panel allows setting component
-				properties. The area is divided into basic properties, size and position
-				settings, and other properties, which includes also styles.
+				The property setting sub-panel of the control panel allows setting
+				component properties. The panel has two tabs: <guilabel>Layout</guilabel>
+				and <guilabel>Properties</guilabel>, where the latter defines the various
+				basic properties.
 			</para>
 
 			<section xml:id="eclipse.editor.component-properties.basic">
@@ -255,7 +298,8 @@
                 <para>
                     The top section of the property panel, shown in <xref
                     linkend="figure.eclipse.editor.component-properties.basic"/>, allows
-                    settings basic component properties.
+                    setting basic component properties. The panel also includes properties
+                    such as field properties for field components.
                 </para>
 
 				<figure xml:id="figure.eclipse.editor.component-properties.basic">
@@ -265,23 +309,33 @@
 							<imagedata align="center" fileref="img/eclipse/editor-properties-basic.png"/>
 						</imageobject>
 						<imageobject role="fo">
-							<imagedata scale="100" smallscale="100%" align="center" fileref="img/eclipse/editor-properties-basic.png"/>
+							<imagedata scale="100" smallscale="75%" align="center" fileref="img/eclipse/editor-properties-basic.png"/>
 						</imageobject>
 					</mediaobject>
 				</figure>
 
                 <para>
-                    The basic properties are:
+                    The properties are as follows:
                 </para>
 
 				<variablelist>
 					<varlistentry>
-						<term>Component name</term>
+						<term>Name</term>
 						<listitem>
 							<para>
 								The name of the component, which is used for the reference
 								to the component, so it must obey Java notation for
 								variable names.
+							</para>
+						</listitem>
+					</varlistentry>
+					<varlistentry>
+						<term>Style Name</term>
+						<listitem>
+							<para>
+								A space-separated list of CSS style class names for the
+								component. See <xref linkend="themes"/> for information on
+								component styles in themes.
 							</para>
 						</listitem>
 					</varlistentry>
@@ -356,7 +410,7 @@
 			</section>
 
 			<section>
-				<title>Size and Position</title>
+				<title>Layout Properties</title>
 
 				<para>
 					The size of a component is determined by its width and height, which
@@ -387,13 +441,13 @@ myButton.setWidth("100px");
 				</para>
 
 				<figure xml:id="figure.eclipse.editor.component-properties.size">
-					<title>Component Size and Position</title>
+					<title>Layout Properties</title>
 					<mediaobject>
 						<imageobject role="html">
 							<imagedata align="center" fileref="img/eclipse/editor-properties-size.png"/>
 						</imageobject>
 						<imageobject role="fo">
-							<imagedata scale="100" smallscale="100%" align="center" fileref="img/eclipse/editor-properties-size.png"/>
+							<imagedata scale="100" smallscale="75%" align="center" fileref="img/eclipse/editor-properties-size.png"/>
 						</imageobject>
 					</mediaobject>
 				</figure>
@@ -432,90 +486,8 @@ mainLayout.addComponent(myButton,
                     overlap. Value <literal>-1</literal> means automatic, in which case
                     the components added to the layout later will be on top.
                 </para>
-			</section>
-
-			<section>
-				<title>Other Properties</title>
-
-				<para>
-                    The bottom section of the property panel, shown in <xref
-                    linkend="figure.eclipse.editor.component-properties.other"/>, allows
-                    settings other often used component properties.
-				</para>
-
-				<figure xml:id="figure.eclipse.editor.component-properties.other">
-					<title>Other Properties</title>
-					<mediaobject>
-						<imageobject role="html">
-							<imagedata align="center" fileref="img/eclipse/editor-properties-other.png"/>
-						</imageobject>
-						<imageobject role="fo">
-							<imagedata scale="100" smallscale="100%" align="center" fileref="img/eclipse/editor-properties-other.png"/>
-						</imageobject>
-					</mediaobject>
-				</figure>
-
-				<variablelist>
-					<varlistentry>
-						<term><guilabel>Style Names</guilabel></term>
-						<listitem>
-							<para>
-								Enter the enabled CSS style names for the component as a
-								space-seraparated list. See <xref linkend="themes"/> for
-								information on component styles in themes.
-							</para>
-						</listitem>
-					</varlistentry>
-					<varlistentry>
-						<term><guilabel>Visible</guilabel></term>
-						<listitem>
-							<para>
-                                Defines whether the component is visible or hidden, as set
-                                with the <methodname>setVisible()</methodname> method.
-							</para>
-						</listitem>
-					</varlistentry>
-					<varlistentry>
-						<term><guilabel>Enabled</guilabel></term>
-						<listitem>
-							<para>
-                                Defines whether the component is enabled or disabled, as
-                                set with the <methodname>setEnabled()</methodname>
-                                method. If disabled, no user interaction is allowed for
-                                the component and it is usually shown as shadowed.
-							</para>
-						</listitem>
-					</varlistentry>
-					<varlistentry>
-						<term><guilabel>Read-only</guilabel></term>
-						<listitem>
-							<para>
-                                Defines whether editing the component is allowed, as set
-                                with the <methodname>setReadonly()</methodname> method.
-							</para>
-						</listitem>
-					</varlistentry>
-					<varlistentry>
-						<term><guilabel>Immediate</guilabel></term>
-						<listitem>
-							<para>
-                                Defines whether user interaction with the component is
-                                updated immediately (after the component loses focus) in
-                                the server as a state or value chage in the component
-                                value.
-							</para>
-						</listitem>
-					</varlistentry>
-                </variablelist>
-
-                <para>
-                    Most of the component properties mentioned above are defined in the
-                    <classname>Component</classname> interface; see <xref
-                    linkend="components.interfaces.component"/> for further details.
-                </para>
-				
-			</section>
-		</section>
+            </section>
+        </section>
 
 		<section xml:id="eclipse.editor.absolutelayout">
 			<title>Editing an <classname>AbsoluteLayout</classname></title>
