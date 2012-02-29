@@ -647,7 +647,7 @@
 
   <xsl:template match="pubdate" mode="book.titlepage.recto.mode">
     <fo:block>
-      <xsl:text>2011</xsl:text>
+      <xsl:text>2012</xsl:text>
     </fo:block>
   </xsl:template>
 
