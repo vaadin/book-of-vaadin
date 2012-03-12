@@ -706,27 +706,25 @@ main.addComponent(poller);]]></programlisting>
 
                     <variablelist>
                         <varlistentry>
-                            <term><classname>appUri</classname></term>
+                            <term><parameter>appUri</parameter></term>
                             <listitem>
                                 The application URI consists of the context and the
                                 application path. If the context is
                                 <literal>/mycontext</literal> and the application path is
                                 <literal>myapp</literal>, the
                                 <parameter>appUri</parameter> would be
-                                <literal>/mycontext/myapp</literal>. The
-                                <filename>multiapp.html</filename> example assumes the use
-                                of root context, which is used in the demo application.
+                                <literal>/mycontext/myapp</literal>.
                             </listitem>
                         </varlistentry>
                         <varlistentry>
-                            <term><classname>pathInfo</classname></term>
+                            <term><parameter>pathInfo</parameter></term>
                             <listitem>
                                 The <parameter>PATHINFO</parameter> parameter for the
                                 Servlet.
                             </listitem>
                         </varlistentry>
                         <varlistentry>
-                            <term><classname>themeUri</classname></term>
+                            <term><parameter>themeUri</parameter> (optional)</term>
                             <listitem>
                                 URI of the application theme. The URI must include
                                 application context and the path to the theme
@@ -735,14 +733,16 @@ main.addComponent(poller);]]></programlisting>
                             </listitem>
                         </varlistentry>
                         <varlistentry>
-                            <term><classname>versionInfo</classname></term>
+                            <term><parameter>versionInfo</parameter></term>
                             <listitem>
                                 This item is itself an associative map that contains two
                                 parameters: <parameter>vaadinVersion</parameter> contains
                                 the version number of the Vaadin version used by the
                                 application. The <parameter>applicationVersion</parameter>
                                 parameter contains the version of the particular
-                                application.
+                                application. The contained parameters are optional, but
+                                the <parameter>versionInfo</parameter> parameter itself is
+                                not.
                             </listitem>
                         </varlistentry>
                     </variablelist>
@@ -750,56 +750,50 @@ main.addComponent(poller);]]></programlisting>
 					<para>
 						The following example defines two applications to run in the same
 						window: the Calculator and Hello World examples. In the example,
-						the application context is <literal>/tk5</literal>.
+						the application context is <literal>/mycontext</literal>.
 					</para>
 
 					<programlisting><?pocket-size 65% ?>&lt;script type="text/javascript"&gt;
-    var vaadin = {
-        vaadinConfigurations: {
-            '<emphasis role="bold">calc</emphasis>': {
-                appUri:'<emphasis role="bold">/tk5/Calc</emphasis>',
-                pathInfo: '<emphasis role="bold">/</emphasis>',
-                themeUri: '<emphasis role="bold">/tk5/VAADIN/themes/example</emphasis>',
-                versionInfo : {
-                    vaadinVersion:"5.9.9-INTERNAL-
-                         NONVERSIONED-DEBUG-BUILD",
-                    applicationVersion:"NONVERSIONED"
-                }
-            },
-            '<emphasis role="bold">hello</emphasis>': {
-                appUri:'<emphasis role="bold">/tk5/HelloWorld</emphasis>',
-                pathInfo: '<emphasis role="bold">/</emphasis>',
-                themeUri: '<emphasis role="bold">/tk5/VAADIN/themes/example</emphasis>',
-                versionInfo : {
-                    vaadinVersion:"5.9.9-INTERNAL-
-                          NONVERSIONED-DEBUG-BUILD",
-                    applicationVersion:"NONVERSIONED"
-                }
-            }
-        }};
+  var vaadin = {
+    vaadinConfigurations: {
+      '<emphasis role="bold">calc</emphasis>': {
+        appUri:'<emphasis role="bold">/mycontext/Calc</emphasis>',
+        pathInfo: '<emphasis role="bold">/</emphasis>',
+        themeUri: '<emphasis role="bold">/mycontext/VAADIN/themes/example</emphasis>',
+        versionInfo : {
+          vaadinVersion: "6.7.6",
+          applicationVersion: "NONVERSIONED"
+        }
+      },
+      '<emphasis role="bold">hello</emphasis>': {
+        appUri:'<emphasis role="bold">/mycontext/HelloWorld</emphasis>',
+        pathInfo: '<emphasis role="bold">/</emphasis>',
+        themeUri: '<emphasis role="bold">/mycontext/VAADIN/themes/example</emphasis>',
+        versionInfo : {}
+      }
+    }};
 &lt;/script&gt;</programlisting>
 				</listitem>
 
 				<listitem>
 					<para>
-						Loading the Vaadin Client-Side Engine is done with the
-						following kind of line in the <literal>&lt;head&gt;</literal>
-						element:
+						Loading the Vaadin Client-Side Engine, that is, the widget set, is
+						done with the following kind of line in the
+						<literal>&lt;head&gt;</literal> element:
 					</para>
 
-					<programlisting><?pocket-size 65% ?>&lt;script language='javascript' src='/<emphasis>vaadin-examples</emphasis>/VAADIN/widgetsets/com.vaadin.terminal.gwt.DefaultWidgetSet/com.vaadin.terminal.gwt.DefaultWidgetSet.nocache.js'&gt;&lt;/script&gt;</programlisting>
+					<programlisting><?pocket-size 65% ?>&lt;script language='javascript' src='/<emphasis role="bold">mycontext</emphasis>/VAADIN/widgetsets/com.vaadin.terminal.gwt.DefaultWidgetSet/com.vaadin.terminal.gwt.DefaultWidgetSet.nocache.js'&gt;&lt;/script&gt;</programlisting>
 
 					<para>
 						The engine URI consists of the context of the web application,
-						<literal>vaadin-examples</literal> above, followed by the path
-						to the JavaScript (<filename>.js</filename>) file of the widget
-						set, relative to the <filename>WebContent</filename>
-						directory. The file contains the Client-Side Engine compiled for
-						the particular widget set. The line above assumes the use of the
-						default widget set of Vaadin. If you have made custom
-						widgets that are defined in a custom widget set, you need to use
-						the path to the compiled widget set file. Widget sets must be
-						compiled under the
+						<literal>mycontext</literal> above, followed by the path to the
+						JavaScript (<filename>.js</filename>) file of the widget set,
+						relative to the web application root (the
+						<filename>WebContent</filename> directory in Eclipse). The line
+						above assumes the use of the default widget set in Vaadin. If you
+						have made custom widgets that are defined in a custom widget set,
+						you need to use the path to the compiled widget set file. Widget
+						sets must be compiled under the
 						<filename>WebContent/VAADIN/widgetsets</filename> directory.
 					</para>
 
@@ -824,85 +818,76 @@ main.addComponent(poller);]]></programlisting>
 						parameter, as follows:
 					</para>
 
-					<programlisting>&lt;div id="calc"/&gt;</programlisting>
+					<programlisting>&lt;div id="<emphasis role="bold">calc</emphasis>"&gt;&lt;/div&gt;</programlisting>
+
+                    <para>
+                        The embedding element should not be self-closing.
+                    </para>
 				</listitem>
 			</orderedlist>
 
 			<para>
-				Below is a complete example of embedding an application. It works
-				out-of-the-box with the <application>Calculator</application> demo
-				application.
+				Below is a complete example of embedding an application.
 			</para>
 
-			<programlisting><?pocket-size 65% ?><![CDATA[<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" >
-  <head>
-    <title>Embedding Example</title>
+			<programlisting><?pocket-size 65% ?><![CDATA[<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+          "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type"
+        content="text/html; charset=UTF-8" />
 
-    <!-- Set parameters for the Vaadin Client-Side Engine. -->
-    <script type="text/javascript">
-	    var vaadin = {appUri:'Calc', pathInfo: '/'};
-    </script>
+  <title>Embedding a Vaadin Application in HTML Page</title>
+  
+  <!-- Define the application configuration -->
+  <script type="text/javascript">
+    var vaadin = {
+      vaadinConfigurations: {
+        helloworld: {
+          appUri:'/book-examples/helloworld',
+          pathInfo: '/',
+          themeUri:'/book-examples/VAADIN/themes/book-examples',
+          versionInfo : {}}
+      }};
+  </script>
+  
+  <!-- Load the widget set, that is, the Client-Side Engine -->
+  <script language='javascript' src='/book-examples/VAADIN/widgetsets/com.vaadin.book.widgetset.BookExamplesWidgetSet/com.vaadin.book.widgetset.BookExamplesWidgetSet.nocache.js'></script>
+
+  <!-- Load the style sheet -->
+  <link rel="stylesheet"
+        type="text/css"
+        href="/book-examples/VAADIN/themes/book-examples/styles.css"/>
+</head>
+
+<body>
+  <!-- GWT requires an invisible history frame is needed for -->
+  <!-- page/fragment history in the browser                  -->
+  <iframe tabIndex="-1" id="__gwt_historyFrame" style="position:absolute;width:0;height:0;border:0;overflow:hidden;" src="javascript:false"></iframe>
+
+  <h1>Embedding a Vaadin Application</h1>
     
-    <!-- Load the Vaadin Client-Side Engine. -->
-    <script language='javascript' src='/vaadin-examples/VAADIN/widgetsets/com.vaadin.terminal.gwt.DefaultWidgetSet/com.vaadin.terminal.gwt.DefaultWidgetSet.nocache.js'></script>
+  <p>This is a static web page that contains an embedded Vaadin
+     application. It's here:</p>
 
-    <!-- We can stylize the web application. -->
-    <style>
-        #vaadin-ajax-window {background: #c0c0ff;}
-        .v-button {background: pink;}
-    </style>
-  </head>
+  <!-- So here comes the div element in which the Vaadin -->
+  <!-- application is embedded.                          -->
+  <div id="helloworld" style="border: 2px solid green;"></div>
+  
+  <p>Please view the page source to see how embedding works.</p>
 
-  <body>
-    <!-- This <iframe> element is required by GWT. -->
-    <iframe id="__gwt_historyFrame"
-            style="width:0;height:0;border:0"></iframe>
-    
-    <h1>This is a HTML page</h1>
-    <p>Below is the Vaadin application inside a table:</p>
-    <table align="center" border="3" style="background: yellow;">
-      <tr><th>The Calculator</th></tr>
-      <tr>
-        <td>
-          <!-- Placeholder <div> for the Vaadin application -->
-          <div id="vaadin-ajax-window"/>
-        </td>
-      </tr>
-    </table>	
-  </body>
+  <noscript>You have to enable javascript in your browser to
+            use an application built with Vaadin.</noscript>
+</body>
 </html>]]></programlisting>
 
 			<para>
-				The page will look as shown in <xref linkend="figure.embedding.div"/>.
+				You can style the embedded application with themes, as described in <xref
+				linkend="themes"/>. The Client-Side Engine loads the theme required by the
+				application. In addition, you can do styling with CSS in the embedding
+				page. In the above example, we added some styling directly to the element.
 			</para>
-
-			<figure xml:id="figure.embedding.div" float="center" floatstyle="before">
-				<title>Embedded Application</title>
-				<mediaobject>
-					<imageobject role="html">
-						<imagedata align="center" fileref="img/application/embedding2.png"/>
-					</imageobject>
-					<imageobject role="fo">
-						<imagedata scale="80" smallscale="100%" align="center" fileref="img/application/embedding2.png"/>
-					</imageobject>
-				</mediaobject>
-			</figure>
-
-			<para>
-				You can style the web application with themes as described in <xref
-				linkend="themes"/>. The Client-Side Engine loads the style sheets
-				required by the application. In addition, you can do styling in the
-				embedding page, as was done in the example above.
-			</para>
-
-			<para>
-				The disadvantage of this embedding method is that there can only be one
-				web application embedded in a page. One is usually enough, but if it is
-				not, you need to use the <literal>&lt;iframe&gt;</literal> method below.
-			</para>
-
 		</section>
 
 		<section xml:id="application.embedding.iframe">
