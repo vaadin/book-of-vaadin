@@ -53,12 +53,12 @@ IMAGES =	intro/architecture intro/toolchain \
 
 # List of source XML files
 XMLFILES =  book.xml \
-	part1-addons.xml	part1-datamodel.xml	part1-layout.xml	part1-mobile-tablet.xml	part1-themes.xml \
-	part1-advanced.xml	part1-eclipse.xml	part1-mobile-components.xml	part1-mobile-testing.xml	part1-timeline.xml \
-	part1-application.xml	part1-getting-started.xml	part1-mobile-considerations.xml	part1-mobile.xml	part1-uidl.xml \
-	part1-architecture.xml	part1-gwt.xml	part1-mobile-limitations.xml	part1-rapid.xml	part1-vaadin.xml \
-	part1-calendar.xml	part1-introduction.xml	part1-mobile-phone.xml	part1-sqlcontainer.xml \
-	part1-components.xml	part1-jpacontainer.xml	part1-mobile-project.xml	part1-testbench.xml
+	chapter-addons.xml	chapter-datamodel.xml	chapter-layout.xml	chapter-themes.xml \
+	chapter-advanced.xml	chapter-eclipse.xml	chapter-timeline.xml \
+	chapter-application.xml	chapter-getting-started.xml	chapter-mobile.xml	chapter-uidl.xml \
+	chapter-architecture.xml	chapter-gwt.xml	chapter-rapid.xml	chapter-vaadin.xml \
+	chapter-calendar.xml	chapter-introduction.xml	chapter-sqlcontainer.xml \
+	chapter-components.xml	chapter-jpacontainer.xml	chapter-testbench.xml
 
 
 # List if icons in img/icons

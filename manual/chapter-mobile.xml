@@ -48,9 +48,695 @@
         </para>
     </section>
 
-    &book.part1.mobile.considerations;
-    &book.part1.mobile.project;
-    &book.part1.mobile.components;
+    <section xml:id="mobile.considerations">
+        <title>Considerations Regarding Mobile Browsing</title>
+
+        <para>
+            When developing applications that support mobile browsing, you need to consider
+            various issues that are different from non-mobile use.
+        </para>
+        
+        <section xml:id="mobile.considerations.mobile-hi">
+            <title>Mobile Human Interface</title>
+
+            <para>
+                Mobile devices use very different human interfaces than regular
+                computers. Perhaps the most evident feature is that the user can easily change
+                the orientation of the display to switch between portrait and landscape
+                views. This may change not just the dimensions of the display, but also the
+                most useful layout.
+            </para>
+
+            <para>
+                There is often no physical but a virtual keyboard. You need to ensure that,
+                when the virtual keyboard pops up, it does not hide the input field to which
+                the user is trying to enter data. This should be handled by the browser, but
+                you should in any case check that it does. This is largely a testing issue.
+            </para>
+
+            <para>
+                There is no "right-finger-button" and double-tap is not normally used in
+                mobile user interfaces unlike the double-click with mouse. Instead, a "long
+                tap" usually has the same meaning as the double click. Finger gestures also
+                play a large role, such as using a vertical swipe gesture for scrolling instead
+                of a scroll bar.
+            </para>
+
+            <para>
+                TouchKit helps with many of these special requirements for mobile
+                applications.
+            </para>
+        </section>
+
+        <section xml:id="mobile.considerations.bandwidth">
+            <title>Bandwidth</title>
+            
+            <para>
+                Mobile Internet connections are often significantly slower than with fixed
+                lines. With a common 384 kbps connection, just loading the Vaadin client-side
+                engine can take several seconds. This can be helped by compiling a widget set
+                that includes only the used components.
+            </para>
+
+            <para>
+                Even with mobile broadband, the latency can be significant factor, especially
+                with highly interactive rich applications. The latency is usually almost
+                unnoticeable in fixed lines, typically less than 100 ms, while mobile Edge
+                connections typically have latency around 500 ms, and sometimes much higher
+                during hiccups. You may need to limit the use of the immediate mode, text
+                change events, and polling.
+            </para>
+        </section>
+
+        <section xml:id="mobile.considerations.features">
+            <title>Mobile Features</title>
+
+            <para>
+                Phones and tablets have many integrated features that are often available in
+                the browser interface as well. Location-awareness is one of the most recent
+                features. And of course, you can also make phone calls.
+            </para>
+        </section>
+
+        <section xml:id="mobile.considerations.compatibility">
+            <title>Compatibility</title>
+
+            <para>
+                The mobile browsing field is currently evolving at fast pace and the special
+                conventions that are introduced by leading manufacturers may, in the next few
+                years, stabilize as new web standards. The browser support in TouchKit
+                concentrates on WebKit, which appears to be emerging as the leading mobile
+                browser core. In addition to Apple's products, also the default browser in
+                Android uses WebKit as the layout engine. Yet there are differences, as the
+                Android's JavaScript engine, which is highly relevant for Vaadin, is the
+                Google Chrome's V8 engine.
+            </para>
+
+            <para>
+                TouchKit aims to follow the quickly evolving APIs of these major platforms,
+                with the assumption that other browsers will follow their lead in
+                standardization. Other platforms will be supported if they rise in popularity.
+            </para>
+
+            <section xml:id="mobile.considerations.compatibility.backbutton">
+                <title>Back Button</title>
+
+                <para>
+                    Some mobile devices, especially Android devices, have a dedicated back
+                    button, while iOS devices particularly do not. TouchKit does not provide
+                    any particular support for the button, but as it is a regular browser back
+                    button, you can handle it with URI fragments, as described in <xref
+                        linkend="advanced.urifu"/>. For iOS, the browser back button is hidden if
+                    the user adds the application to the home screen, in which case you need
+                    to implement application-specific logic for the back-navigation.
+                </para>
+            </section>
+        </section>
+    </section>
+
+    <section xml:id="mobile.project">
+        <title>Creating a Project Targeting Multiple Devices</title>
+
+        <section xml:id="mobile.project.installing">
+            <title>Using TouchKit Add-on in a Project</title>
+
+            <para>
+                You can install TouchKit as a Vaadin add-on or use it with Maven with the
+                <literal>vaadin-touchkit</literal> dependency.
+
+                <!-- TODO: maven dep wrong (agpl/cval etc), also more probls. -->
+                <!-- TODO: Reference to the add-on installation. -->
+            </para>
+
+            <section xml:id="mobile.project.webxml">
+                <title>Deployment Descriptor</title>
+
+                <para>
+                    You need to use the special
+                    <classname>TouchKitApplicationServlet</classname> class instead of the
+                    regular <classname>ApplicationServlet</classname> in the
+                    <filename>web.xml</filename> deployment descriptor.
+                </para>
+
+                <para>
+                    As TouchKit comes with a custom widget set, you need to define a combining
+                    widget set for your project. The combining widget set descriptor is
+                    automatically generated by the Vaadin Plugin for Eclipse and in Maven when
+                    you install or define the TouchKit add-on.
+
+                    <!-- TODO: Reference to the add-on installation. -->
+                </para>
+
+                <programlisting><?pocket-size 65% ?>&lt;servlet&gt;
+  &lt;servlet-name&gt;Vaadin Application Servlet&lt;/servlet-name&gt;
+  &lt;servlet-class&gt;com.vaadin.addon.touchkit.server.TouchKitApplicationServlet&lt;/servlet-class&gt;
+  &lt;init-param&gt;
+    &lt;description&gt;Vaadin application class to start&lt;/description&gt;
+    &lt;param-name&gt;application&lt;/param-name&gt;
+    &lt;param-value&gt;<emphasis role="bold">com.vaadin.demo.mobilemail.MobileMailApplication</emphasis>&lt;/param-value&gt;
+  &lt;/init-param&gt;
+  &lt;init-param&gt;
+    &lt;param-name&gt;widgetset&lt;/param-name&gt;
+    &lt;param-value&gt;<emphasis role="bold">com.vaadin.demo.mobilemail.gwt.MobileMailWidgetSet</emphasis>&lt;/param-value&gt;
+  &lt;/init-param&gt;
+&lt;/servlet&gt;</programlisting>
+            </section>
+        </section>
+
+        <section xml:id="mobile.project.application">
+            <title>Application</title>
+
+            <para>
+                Mobile applications must extend the
+                <classname>TouchKitApplication</classname> instead of the regular
+                <classname>Application</classname> class. Because much of the browser
+                information is not yet available when the <methodname>init()</methodname>
+                method is called, you should only set basic things like the main window
+                and theme there. The main window must be set and must be a
+                <classname>TouchKitWindow</classname>, not a <classname>Window</classname>
+                as in regular Vaadin applications.
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[public class MobileMailApplication extends TouchKitApplication {
+    @Override
+    public void init() {
+        setMainWindow(new TouchKitWindow());
+
+        // Using mobile mail theme
+        setTheme("mobilemail");
+    }]]></programlisting>
+
+            <para>
+                Most initialization has to be be done in
+                <methodname>onBrowserDetailsReady()</methodname>, including the decision
+                to use a regular or a mobile browser interface. The decision is usually
+                made using the user-agent information available in the
+                <classname>WebBrowser</classname> class and the width and height of the
+                main window.
+            </para>
+
+        <programlisting><?pocket-size 65% ?><![CDATA[public void onBrowserDetailsReady() {
+    WebBrowser browser = getBrowser();
+    float viewPortWidth = getMainWindow().getWidth();
+
+    if (viewPortWidth < 600) {
+        getMainWindow().setContent(new SmartphoneMainView());
+    } else {
+        getMainWindow().setContent(new TabletMainView());
+    }
+}]]></programlisting>
+
+            <para>
+                The demo application does not actually support regular browsers, just notifies
+                about the situation. The special mobile components in TouchKit are not
+                guaranteed to work at all in regular browsers. It does give separate user
+                interfaces for phones and tablets, as described in detail later.
+            </para>
+        </section>
+    </section>
+
+    <section xml:id="mobile.components">
+        <title>Mobile User Interface Components</title>
+
+        <para>
+            TouchKit introduces a number of components special to mobile device user
+            interfaces.
+        </para>
+
+        <section xml:id="mobile.components.navigationview">
+            <title><classname>NavigationView</classname></title>
+            
+            <para>
+                The <classname>NavigationView</classname> is a layout component that consists
+                of a navigation bar and a content area. The content area is scrollable, so
+                there is no need to use an inner panel component. In addition, there can be an
+                optional toolbar component at the bottom of the
+                view. <classname>NavigationView</classname> is often used inside a
+                <classname>NavigationManager</classname> to get view change animations.
+            </para>
+
+            <figure xml:id="figure.mobile.components.navigationview">
+                <title>Layout of the <classname>NavigationView</classname></title>
+                <mediaobject>
+                    <imageobject role="html">
+                        <imagedata align="center" fileref="img/mobile/navigationview-lo.png"/>
+                    </imageobject>
+                    <imageobject role="fo">
+                        <imagedata smallscale="100%" scale="70" align="center" fileref="img/mobile/navigationview-hi.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+
+            <para>
+                <classname>NavigationView</classname> has a full size by default. The content
+                area is expanding, so that it takes all the space left over from the navigation
+                bar and toolbar.
+            </para>
+
+            <section xml:id="mobile.components.navigationview.navigationbar">
+                <title>Navigation Bar</title>
+
+                <para>
+                    The navigation bar at the top of <classname>NavigationView</classname> is
+                    a <classname>NavigationBar</classname> component. It has two component
+                    slots, with one on the left and one on the right. On the middle, there is
+                    a caption. You can use the <classname>NavigationBar</classname> elsewhere
+                    as well, such as for the toolbar.
+                </para>
+
+                <para>
+                    The left slot is automatically filled with a <guibutton>Back</guibutton>
+                    button if you set the previous component with
+                    <methodname>setPreviousComponent()</methodname>. If you use the
+                    <classname>NavigationView</classname> inside a
+                    <classname>NavigationManager</classname>, the manager automaticaly sets
+                    the previous view when you navigate to it from another managed view.
+                </para>
+
+                <para>
+                    You can get access to the navigation bar component with
+                    <methodname>getNavigationBar()</methodname> to use its manipulator methods
+                    directly, but <classname>NavigationView</classname> also offers some
+                    shorthand methods: <methodname>setLeftComponent()</methodname>,
+                    <methodname>setRightComponent()</methodname>, and a setter and a getter
+                    for the caption.
+                </para>
+            </section>
+
+            <section xml:id="mobile.components.navigationview.toolbar">
+                <title>Toolbar</title>
+
+                <para>
+                    A slot for an optional toolbar is located at the bottom of the
+                    <classname>NavigationView</classname>. The toolbar can be any component,
+                    but a <classname>Toolbar</classname> component made for this purpose is
+                    included in TouchKit. It is described in <xref
+                        linkend="mobile.components.toolbar"/>. You could also use a
+                    <classname>HorizontalLayout</classname> or
+                    <classname>CssLayout</classname>.
+                </para>
+
+                <para>
+                    You usually fill the tool bar with <classname>Button</classname>
+                    components with an icon and no textual caption. You set the toolbar with
+                    <methodname>setToolbar()</methodname>.
+                </para>
+            </section>
+
+            <section xml:id="mobile.components.navigationview.css">
+                <title>Styling with CSS</title>
+                
+                <programlisting><![CDATA[.v-touchkit-navview { }
+  .v-touchkit-navview-wrapper {}
+  .v-touchkit-navview-toolbar {}
+.v-touchkit-navview .v-touchkit-navview-notoolbar {}]]></programlisting>
+
+                <para>
+                    The root element has the <literal>v-touchkit-navview</literal> class. The
+                    content area is wrapped inside a
+                    <literal>v-touchkit-navview-wrapper</literal> element. If the view has a
+                    toolbar, the toolbar slot has the
+                    <literal>v-touchkit-navview-toolbar</literal> style, but if not, the
+                    top-level element has the <literal>v-touchkit-navview-notoolbar</literal>
+                    style.
+                </para>
+            </section>
+        </section>
+
+        <!-- TODO <section xml:id="mobile.components.navigationbar">
+    <title><classname>NavigationBar</classname></title>
+
+        <para>
+            
+        </para>
+    </section> -->
+
+        <section xml:id="mobile.components.toolbar">
+            <title><classname>Toolbar</classname></title>
+
+            <para>
+                The <classname>Toolbar</classname> is a layout component that extends
+                <classname>CssLayout</classname>, usually containing
+                <classname>Button</classname> components. The toolbar has by default 100%
+                horizontal width and a fixed height. The components are spread evenly
+                in the horizontal direction. <classname>Toolbar</classname> is typically used
+                in a <classname>NavigationView</classname>, as described in <xref
+                    linkend="mobile.components.navigationview" xrefstyle="select:label"/>.
+            </para>
+
+            <para>
+                For a description of the inherited features, please refer to <xref
+                    linkend="layout.components.orderedlayout"/>.
+            </para>
+
+            <section xml:id="mobile.components.toolbar.css">
+                <title>Styling with CSS</title>
+                
+                <programlisting><![CDATA[.v-touchkit-toolbar { }]]></programlisting>
+                
+                <para>
+                    The component has an overall <literal>v-touchkit-toolbar</literal> style in
+                    addition to the <literal>v-csslayout</literal> style of the
+                    superclass. Other style names are as for 
+                    <classname>CssLayout</classname>.
+                </para>
+            </section>
+        </section>
+
+        <section xml:id="mobile.components.navigationpanel">
+            <title><classname>NavigationManager</classname></title>
+            
+            <para>
+                The <classname>NavigationManager</classname> is a visual effect component that
+                gives sliding animation when switching between views. You can register
+                three components: the currently displayed component,
+                the previous one on the left, and the next component on the right. You can set
+                these components with <methodname>setCurrentComponent()</methodname>,
+                <methodname>setPreviousComponent()</methodname>, and
+                <methodname>setNextComponent()</methodname>, respectively. 
+            </para>
+
+            <para>
+                The <classname>NavigationManager</classname> component is illustrated in <xref
+                    linkend="figure.mobile.components.navigationpanel"/>.
+            </para>
+
+            <figure xml:id="figure.mobile.components.navigationpanel">
+                <title><classname>NavigationManager</classname> with Three <classname>NavigationView</classname>s</title>
+                <mediaobject>
+                    <imageobject role="html">
+                        <imagedata align="center" fileref="img/mobile/navigationpanel-lo.png"/>
+                    </imageobject>
+                    <imageobject role="fo">
+                        <imagedata smallscale="100%" scale="80" align="center" fileref="img/mobile/navigationpanel-hi.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+
+            <para>
+                The navigation manager is important for responsiveness, because the previous and
+                next components are cached and the slide animation started before server is
+                contacted to load the new next or previous views.
+            </para>
+
+            <para>
+                Switching between the views is done programmatically according to user
+                interaction; swipe gestures are not supported at the moment.
+            </para>
+
+            <section xml:id="mobile.components.navigationpanel.viewhandling">
+                <title>Handling View Changes</title>
+
+                <para>
+                    While you can put any components in the manager, some special features are
+                    enabled when using the <classname>NavigationView</classname>. When a view
+                    becomes visible, the <methodname>onBecomingVisible()</methodname> method
+                    in the view is called. You can override it, just remember to call the
+                    superclass method.
+                </para>
+
+                <programlisting><![CDATA[@Override
+protected void onBecomingVisible() {
+    super.onBecomingVisible();
+
+    ...
+}]]></programlisting>
+            </section>
+
+            <section xml:id="mobile.components.navigationpanel.breadcrump">
+                <title>Tracking Breadcrumbs</title>
+
+                <para>
+                    <classname>NavigationManager</classname> also handles
+                    <emphasis>breadcrumb</emphasis> tracking. The
+                    <methodname>navigateTo()</methodname> pushes the current view on the top
+                    of the breadcrumb stack and <methodname>navigateBack()</methodname> can be
+                    called to return to the previous breadcrumb level.
+                </para>
+
+                <para>
+                    Notice that calling <methodname>navigateTo()</methodname> with the
+                    "previous" component is equivalent to calling
+                    <methodname>navigateBack()</methodname>.
+                </para>
+            </section>
+        </section>
+
+        <section xml:id="mobile.components.navigationbutton">
+            <title><classname>NavigationButton</classname></title>
+
+            <para>
+                The <classname>NavigationButton</classname> is a special version of the
+                regular <classname>Button</classname> designed for navigation inside a
+                <classname>NavigationManager</classname>, as described in <xref
+                    linkend="mobile.components.navigationpanel"
+                    xrefstyle="select:label"/>. Clicking the button will automatically navigate to
+                the defined target view. The view change animation does not need to make a
+                server request first, but starts immediately after clicking the button. If you
+                leave the target view empty, an empty placeholder view is shown in the
+                animation. The view is filled after it gets the content from the server.
+            </para>
+
+            <para>
+                You can give the target view either in the constructor or with
+                <methodname>setTargetView()</methodname>.
+            </para>
+
+            <programlisting><?pocket-size 75% ?><![CDATA[
+NavigationView view = new NavigationView("A View");
+...
+NavigationButton button = new NavigationButton("Click");
+button.setTargetView(view);
+...]]></programlisting>
+
+            <para>
+                Notice that the automatic navigation will only work if the button is inside a
+                <classname>NavigationManager</classname> (in a view inside it). If you just
+                want to use the button as a visual element, you can use it like a regular
+                <classname>Button</classname> and handle the click events with a
+                <classname>ClickListener</classname>.
+            </para>
+
+            <section xml:id="mobile.components.navigationbutton.css">
+                <title>Styling with CSS</title>
+
+                <programlisting><![CDATA[.v-touchkit-navbutton { }
+  .v-touchkit-navbutton-desc { }]]></programlisting>
+
+                <para>
+                    The component has an overall <literal>v-touchkit-navbutton</literal> style. If
+                    the component description is set with
+                    <methodname>setDescription()</methodname>, it is shown in a separate
+                    <literal>&lt;span&gt;</literal> element with the
+                    <literal>v-touchkit-navbutton-desc</literal> style.
+                </para>
+            </section>
+        </section>
+
+        <section xml:id="mobile.components.popover">
+            <title><classname>Popover</classname></title>
+
+            <para>
+                <classname>Popover</classname> is much like a regular Vaadin sub-window,
+                useful for quickly displaying some options or a small form related to an
+                action. Unlike regular sub-windows, it does not support dragging or resizing
+                by the user. It can have a caption, but usually does not. As sub-windows
+                usually require a rather large screen size, the <classname>Popover</classname>
+                is mainly applicable to tablet devices, but can be used also in phones with
+                full size with <methodname>setSizeFull()</methodname>.
+            </para>
+
+            <para>
+                In the following, we extend <classname>Popover</classname> to use it. It is
+                modal by default. Notice that the screen size is not available in the
+                constructor, so we have to postpone using it to the
+                <methodname>attach()</methodname> method.
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[public class ComposeView extends Popover {
+    ...
+    public ComposeView(boolean smartphone) {
+        setClosable(false);
+
+        ...
+
+        // In phones use all space, in tablets just vertically
+        if (smartphone) {
+            setSizeFull();
+        } else {
+            setHeight("100%");
+            center();
+        }
+    }
+
+    @Override
+    public void attach() {
+        super.attach();
+
+        // If tablet is wide, leave some space horizontally
+        if (!smartphone) {
+            if (getParent().getWidth() > 800) {
+                setWidth("80%");
+            } else {
+                setWidth("100%");
+            }
+        }
+    }
+    ...
+}]]></programlisting>
+
+        <para>
+            You add popover windows to an application-level <classname>Window</classname>
+            object with <methodname>addWindow()</methodname>, just like sub-windows in a
+            regular Vaadin application.
+        </para>
+
+        <programlisting><?pocket-size 65% ?><![CDATA[if (event.getButton() == emailButton) {
+    ComposeView composeView = new ComposeView(smartphone);
+    getWindow().addWindow(composeView);
+    return;
+}]]></programlisting>
+
+            <para>
+                The resulting user interface in a tablet device is shown in <xref
+                    linkend="figure.mobile.components.popover"/>.
+            </para>
+
+            <figure xml:id="figure.mobile.components.popover">
+                <title><classname>Popover</classname> in a Tablet Device</title>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata smallscale="100%" scale="70" align="center" fileref="img/mobile/touchkitsubwindow.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+
+            <para>
+                Alternatively, you can call the <methodname>showRelativeTo()</methodname>,
+                which displays the sub-window relative to an existing component in the user
+                interface.
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[Popover popover = new Popover();
+popover.setContent(mailboxHierarchyView);
+popover.setClosable(true);
+popover.showRelativeTo(showMailboxHierarchyButton);
+popover.setHeight(getParent().getHeight() - 100, UNITS_PIXELS);]]></programlisting>
+
+            <para>
+                In this case, you should not call <methodname>addWindow()</methodname>
+                explicitly.
+            </para>
+
+            <section xml:id="mobile.components.popover.css">
+                <title>Styling with CSS</title>
+
+                <programlisting><![CDATA[.v-touchkit-popover .v-touchkit-fullscreen { }
+  .v-touchkit-popover .v-touchkit-relative { }
+  .v-touchkit-popover .v-touchkit-plain { }]]></programlisting>
+
+                <para>
+                    The component has an overall <literal>v-touchkit-popover</literal> style. If
+                    full-screen, it also has the <literal>v-touchkit-fullscreen</literal> style, if
+                    positioned relatively it has <literal>v-touchkit-relative</literal>, and if not,
+                    the <literal>v-touchkit-plain</literal> style.
+                </para>
+            </section>
+        </section>
+
+        <section xml:id="mobile.components.switch">
+            <title><classname>Switch</classname></title>
+
+            <para>
+                The <classname>Switch</classname> component is a
+                <classname>CheckBox</classname> that looks like the switch button in Apple
+                iOS.
+            </para>
+
+            <programlisting><![CDATA[Switch switch = new Switch();
+switch.setCaption("Do I look like iOS?");
+layout.addComponent(switch);]]></programlisting>
+
+        <section xml:id="mobile.components.switch.css">
+            <title>Styling with CSS</title>
+
+            <programlisting><![CDATA[.v-touchkit-switch { }
+  .v-touchkit-switch-slider { }]]></programlisting>
+
+                <para>
+                    The component has an overall <literal>v-touchkit-switch</literal> style. The slider
+                    element has <literal>v-touchkit-switch-slider</literal> style.
+                </para>
+            </section>
+        </section>
+
+        <section xml:id="mobile.components.componentgroup">
+            <title><classname>ComponentGroup</classname></title>
+
+            <para>
+                The <classname>ComponentGroup</classname> is a layout component for grouping
+                components. It uses margins, background color, and rounded corners to
+                visualize the grouping. It extends <classname>CssLayout</classname> and
+                behaves otherwise as such, except in having 100% default width. There is a
+                vertical and a horizontal version of the component.
+            </para>
+            
+            <programlisting><![CDATA[VerticalComponentGroup componentGroup = new VerticalComponentGroup();
+
+// Name field
+Component textField = new TextField("Name");
+textField.setWidth("100%");
+componentGroup.addComponent(textField);
+
+// Email field
+EmailField emailField = new EmailField("Email");
+emailField.setWidth("100%");
+componentGroup.addComponent(emailField);
+
+// Number field
+NumberField numberField = new NumberField("Age");
+numberField.setWidth("100%");
+componentGroup.addComponent(numberField);]]></programlisting>
+
+            <section xml:id="mobile.components.componentgroup.css">
+                <title>Styling with CSS</title>
+
+                <programlisting><![CDATA[.v-touchkit-componentgroup { }
+.v-touchkit-componentgroup-h { }]]></programlisting>
+
+                <para>
+                    The component has an overall <literal>v-touchkit-componentgroup</literal> style if
+                    vertical and <literal>v-touchkit-componentgroup-h</literal> if horizontal. If the
+                    component has a caption, the <literal>v-touchkit-has-caption</literal> style is
+                    added.
+                </para>
+            </section>
+        </section>
+
+        <section xml:id="mobile.components.emailfield">
+            <title><classname>EmailField</classname></title>
+
+            <para>
+                The <classname>EmailField</classname> is just like the regular
+                <classname>TextField</classname>, except that it has automatic capitalization
+                and correction turned off. Mobile devices also recognize the field as an email
+                field and can offer a virtual keyboard for the purpose, so that it includes
+                the at (<literal>@</literal>) and period (<literal>.</literal>) characters,
+                and possibly a shorthand for <literal>.com</literal>.
+            </para>
+        </section>
+
+        <section xml:id="mobile.components.numberfield">
+            <title><classname>NumberField</classname></title>
+            
+            <para>
+                The <classname>NumberField</classname> is just like the regular
+                <classname>TextField</classname>, except that it is marked as a numeric input
+                field for mobile devices, so that they will show a numeric virtual keyboard
+                rather than the default alphanumeric.
+            </para>
+        </section>
+    </section>
 
     <section xml:id="mobile.features">
         <title>Mobile Features</title>
@@ -115,10 +801,46 @@
         </section>
     </section>
 
-    <!-- &book.part1.mobile.phone; -->
-    <!-- &book.part1.mobile.tablet; -->
-    &book.part1.mobile.testing;
-    <!-- &book.part1.mobile.limitations; -->
+    <section xml:id="mobile.testing">
+        <title>Testing and Debugging on Mobile Devices</title>
+
+        <para>
+            Testing places special challenges for mobile devices. The mobile browsers may not
+            have much debugging features and you may not be able to install third-party
+            debugging add-ons, such as Firebug.
+        </para>
+
+        <section xml:id="mobile.testing.debugging">
+            <title>Debugging</title>
+
+            <para>
+                The debug mode, as described in <xref linkend="advanced.debug-production-modes"/>,
+                works on mobile browsers as well, even if it is a bit harder to use.
+            </para>
+
+            <para>
+                The lack of FireBug and similar tools can be helped with simple client-side
+                coding. For example, you can dump the HTML content of the page with the
+                <parameter>innerHTML</parameter> property in the HTML DOM.
+            </para>
+
+            <para>
+                TouchKit supports especially WebKit-based browsers, which are used in iOS and
+                Android devices. You can therefore reach a good compatibility by using a
+                desktop browser based on WebKit. Features such as geolocation are also
+                supported by desktop browsers. If you make your phone/tablet-detection and
+                orientation detection using screen size, you can easily emulate the modes by
+                resizing the browser.
+            </para>
+        </section>
+
+        <!-- section xml:id="mobile.testing.testing">
+        <title>Debugging</title>
+
+        <para>
+        </para>
+    </section -->
+    </section>
 
     <indexterm startref="term.touchkit" class="endofrange"/>
 </chapter>
