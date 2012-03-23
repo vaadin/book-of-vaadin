@@ -1,10 +1,10 @@
 LANGUAGE =	fi
-POFILES  =	book.po part1-introduction.po
+POFILES  =	book.po chapter-introduction.po
 XMLFILES =  book.xml \
-			part1-advanced.xml part1-architecture.xml part1-datamodel.xml \
-			part1-getting-started.xml part1-introduction.xml part1-themes.xml \
-			part1-vaadin.xml part1-application.xml part1-components.xml \
-			part1-eclipse.xml part1-gwt.xml part1-layout.xml part1-uidl.xml
+			chapter-advanced.xml chapter-architecture.xml chapter-datamodel.xml \
+			chapter-getting-started.xml chapter-introduction.xml chapter-themes.xml \
+			chapter-vaadin.xml chapter-application.xml chapter-components.xml \
+			chapter-eclipse.xml chapter-gwt.xml chapter-layout.xml chapter-uidl.xml
 
 all:
 	@echo "Targets: 'make merge' or 'make compile'"
