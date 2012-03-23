@@ -154,11 +154,18 @@ viewbook: book.pdf FORCE
 i18n: pot
 
 POTFILES := $(foreach file, $(XMLFILES), $(patsubst %.xml, %.pot, translations/pot/$(file)))
+POTEXPORTS := $(foreach file, $(XMLFILES), $(patsubst %.xml, %.po, translations/pot-exports/$(file)))
 
-pot: $(POTFILES)
+pot: $(POTFILES) init-pot-exports $(POTEXPORTS)
 
 translations/pot/%.pot: %.xml
 	xml2pot $< > $@
+
+init-pot-exports:
+	mkdir -p translations/pot-exports
+
+translations/pot-exports/%.po: translations/pot/%.pot
+	cp $< $@
 
 ################################################################################
 # Compile localizations
