@@ -159,7 +159,7 @@ POTEXPORTS := $(foreach file, $(XMLFILES), $(patsubst %.xml, %.po, translations/
 pot: $(POTFILES) init-pot-exports $(POTEXPORTS)
 
 translations/pot/%.pot: %.xml
-	xml2pot $< > $@
+	xml2pot $< | msgcat - --no-wrap > $@
 
 init-pot-exports:
 	mkdir -p translations/pot-exports
