@@ -9,9 +9,11 @@ PUBLISHZIP = book-of-vaadin-translations.zip
 
 LANGUAGES = fi-fi
 
-compile: import fi
+all: import compile publish
 
-publish: compile
+compile: fi
+
+publish:
 	cd $(RESULTDIR) ; zip -r book-of-vaadin-translations.zip book-fi
 	scp $(RESULTDIR)/$(PUBLISHZIP) $(PUBLISHURI)
 	ssh vaadin@vaadin.com bin/unpack-book-translations.py
