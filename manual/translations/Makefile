@@ -40,7 +40,7 @@ $(IMPORTZIP): FORCE
 	curl --user $(USERNAME):$(PASSWORD) https://api.getlocalization.com/bookofvaadin/api/translations/zip -o $(IMPORTZIP)
 
 # Copy imported PO files over the old translations
-copyover: fi_FI/*.po FORCE
+copyover: fi_FI/*.po unzip FORCE
 
 fi_FI/%.po: $(IMPORTDIR)/fi-fi/%_fi-fi.po* unzip FORCE
 	cp $< $@
