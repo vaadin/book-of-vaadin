@@ -387,7 +387,7 @@
 		</apply>
 	</target>
 
-	<!-- Compile localized documentation. -->
+	<!-- Compile localized documentation stored in repository. -->
 	<target name="localized-docs">
 		<antcall target="manual-html">
 			<param name="locale" value="fi_FI"/>
@@ -395,6 +395,85 @@
 			<param name="manual.language.extension" value="-fi"/>
 		</antcall>
 	</target>
+
+	<!-- Compile imported localized documentation. -->
+	<target name="build-imported-locale" depends="init">
+        <property name="translation.import.path" value="${result-path}/import/${manual.language.docbook}${manual.language.extension}"/>
+        <property name="translation.build.path" value="manual/translations/${locale}"/>
+
+        <echo>Translation import path: ${translation.import.path}</echo>
+        <echo>Translation build path:  ${translation.build.path}</echo>
+
+        <!-- Copy translations over the existing PO files. -->
+        <copy todir="${translation.build.path}">
+            <fileset dir="${translation.import.path}">
+                <include name="*.po"/>
+            </fileset>
+            <globmapper from="*_${manual.language.docbook}${manual.language.extension}.po" to="*.po"/>
+        </copy>
+        <copy todir="${translation.build.path}">
+            <fileset dir="${translation.import.path}">
+                <include name="*.pot"/>
+            </fileset>
+            <globmapper from="*_${manual.language.docbook}${manual.language.extension}.pot" to="*.po"/>
+        </copy>
+
+		<antcall target="manual-html">
+			<param name="locale" value="${locale}"/>
+			<param name="manual.language.docbook" value="${manual.language.docbook}"/>
+			<param name="manual.language.extension" value="${manual.language.extension}"/>
+		</antcall>
+	</target>
+
+    <!-- Download translations from the community translation service and build them. -->
+    <target name="import-build-localized-docs" depends="init">
+        <property name="manual.translations.importzip" value="${result-path}/book-of-vaadin-gl.zip"/>
+        <property name="manual.translations.importdir" value="${result-path}/import"/>
+
+        <!-- Download -->
+        <exec executable="curl">
+            <arg value="--user"/>
+            <arg value="${getlocalization.username}:${getlocalization.password}"/>
+            <arg value="${getlocalization.url}"/>
+            <arg value="-o"/>
+            <arg value="${manual.translations.importzip}"/>
+        </exec>
+
+        <!-- Unpack -->
+        <unzip src="${manual.translations.importzip}" dest="${manual.translations.importdir}"/>
+
+        <!-- For each language, run the per-language import. -->
+        <antcall target="build-imported-locale">
+            <param name="locale" value="fi_FI"/>
+			<param name="manual.language.docbook" value="fi"/>
+			<param name="manual.language.extension" value="-fi"/>
+        </antcall>
+    </target>
+
+    <target name="publish-localized-docs" depends="init">
+        <property name="manual.translations.zip" value="${result-path}/book-of-vaadin-translations.zip"/>
+        
+        <!-- Package all translations -->
+        <zip zipfile="${manual.translations.zip}"
+             basedir="${result-path}/package/WebContent/docs/"
+             includes="book-??/**/*"/>
+
+        <!-- Publish to download site -->
+        <!-- Copy the linux installation package and the JAR. -->
+        <echo>Copying package to server...</echo>
+        <exec executable="scp" searchpath="true" resultproperty="publish.scp.result">
+            <arg value="-B"/>
+            <arg value="${manual.translations.zip}"/>
+            <arg value="${manual.publish}"/>
+        </exec>
+
+        <!-- Unpackage the documentation on the target server. -->
+        <echo>Extracting package on server...</echo>
+        <exec executable="ssh" searchpath="true" resultproperty="publish.ssh.result">
+            <arg value="${manual.publish.address}"/>
+            <arg value="${manual.publish.script}"/>
+        </exec>
+    </target>
 
     <!-- =================================================================== -->
     <!-- Eclipse Manual                                                      -->
