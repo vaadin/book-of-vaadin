@@ -398,7 +398,7 @@
 
 	<!-- Compile imported localized documentation. -->
 	<target name="build-imported-locale" depends="init">
-        <property name="translation.import.path" value="${result-path}/import/${manual.language.docbook}${manual.language.extension}"/>
+        <property name="translation.import.path" value="${result-path}/import/${manual.language.docbook}${import.language.extension}"/>
         <property name="translation.build.path" value="manual/translations/${locale}"/>
 
         <echo>Translation import path: ${translation.import.path}</echo>
@@ -409,16 +409,16 @@
             <fileset dir="${translation.import.path}">
                 <include name="*.po"/>
             </fileset>
-            <globmapper from="*_${manual.language.docbook}${manual.language.extension}.po" to="*.po"/>
+            <globmapper from="*_${manual.language.docbook}${import.language.extension}.po" to="*.po"/>
         </copy>
         <copy todir="${translation.build.path}" overwrite="yes">
             <fileset dir="${translation.import.path}">
                 <include name="*.pot"/>
             </fileset>
-            <globmapper from="*_${manual.language.docbook}${manual.language.extension}.pot" to="*.po"/>
+            <globmapper from="*_${manual.language.docbook}${import.language.extension}.pot" to="*.po"/>
         </copy>
 
-		<antcall target="manual-html">
+		<antcall target="manual-html" inheritAll="false">
 			<param name="locale" value="${locale}"/>
 			<param name="manual.language.docbook" value="${manual.language.docbook}"/>
 			<param name="manual.language.extension" value="${manual.language.extension}"/>
@@ -426,7 +426,7 @@
 	</target>
 
     <!-- Download translations from the community translation service and build them. -->
-    <target name="import-build-localized-docs" depends="init">
+    <target name="import-localized-docs" depends="init">
         <property name="manual.translations.importzip" value="${result-path}/book-of-vaadin-gl.zip"/>
         <property name="manual.translations.importdir" value="${result-path}/import"/>
 
@@ -439,14 +439,51 @@
             <arg value="${manual.translations.importzip}"/>
         </exec>
 
-        <!-- Unpack -->
         <unzip src="${manual.translations.importzip}" dest="${manual.translations.importdir}"/>
+    </target>
 
-        <!-- For each language, run the per-language import. -->
-        <antcall target="build-imported-locale">
+    <target name="build-all-localized-docs">
+        <!-- Run the build for each language. -->
+        <antcall target="build-imported-locale" inheritAll="false">
             <param name="locale" value="fi_FI"/>
 			<param name="manual.language.docbook" value="fi"/>
+			<param name="import.language.extension" value="-fi"/>
 			<param name="manual.language.extension" value="-fi"/>
+        </antcall>
+
+        <antcall target="build-imported-locale" inheritAll="false">
+            <param name="locale" value="de_DE"/>
+			<param name="manual.language.docbook" value="de"/>
+			<param name="import.language.extension" value=""/>
+			<param name="manual.language.extension" value="-de"/>
+        </antcall>
+
+        <antcall target="build-imported-locale" inheritAll="false">
+            <param name="locale" value="fr_FR"/>
+			<param name="manual.language.docbook" value="fr"/>
+			<param name="import.language.extension" value=""/>
+			<param name="manual.language.extension" value="-fr"/>
+        </antcall>
+
+        <antcall target="build-imported-locale" inheritAll="false">
+            <param name="locale" value="cs_CZ"/>
+			<param name="manual.language.docbook" value="cs"/>
+			<param name="import.language.extension" value="-CZ"/>
+			<param name="manual.language.extension" value="-cs"/>
+        </antcall>
+
+        <antcall target="build-imported-locale" inheritAll="false">
+            <param name="locale" value="es_419"/>
+			<param name="manual.language.docbook" value="es"/>
+			<param name="import.language.extension" value="-419"/>
+			<param name="manual.language.extension" value="-es"/>
+        </antcall>
+
+        <antcall target="build-imported-locale" inheritAll="false">
+            <param name="locale" value="ru_RU"/>
+			<param name="manual.language.docbook" value="ru"/>
+			<param name="import.language.extension" value=""/>
+			<param name="manual.language.extension" value="-ru"/>
         </antcall>
     </target>
 
