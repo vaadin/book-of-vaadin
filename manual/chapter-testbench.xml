@@ -23,11 +23,11 @@
 
         <para>
             Vaadin TestBench makes it possible to automate the regression testing of web
-            applications that use Vaadin. You develop test cases as JUnit tests along your
-            application code. A recorder that runs in browser creates JUnit test stubs,
-            which you can then refine. You can compile the JUnit tests and run them as
-            many times as you want, on multiple browser and operating system
-            platforms. The test results are collected for later analysis.
+            applications that use Vaadin. You develop test cases as JUnit, or any other,
+            tests along your application code. A recorder that runs in browser creates
+            JUnit test stubs, which you can then refine. You can run the tests as many
+            times as you want, on multiple browser and operating system platforms. The
+            test results are collected for later analysis.
         </para>
 
 		<figure xml:id="figure.testbench.workflow">
@@ -49,7 +49,7 @@
                 <para>Record test case stubs in browser</para>
             </listitem>
             <listitem>
-                <para>Develop JUnit tests in Java with the WebDriver</para>
+                <para>Develop tests in Java with the WebDriver</para>
             </listitem>
             <listitem>
                 <para>Validate UI state by assertions and screen capture comparison</para>
@@ -102,17 +102,18 @@
 
         <itemizedlist>
             <listitem>
-                <para>Vaadin TestBench Recorder</para>
+                <para>Vaadin TestBench Java Library</para>
             </listitem>
             <listitem>
-                <para>Vaadin TestBench Library</para>
+                <para>Vaadin TestBench Recorder</para>
             </listitem>
         </itemizedlist>
 
         <para>
-            The library includes WebDriver, which allows running tests as JUnit tests in a
-            browser. It also includes the Grid Hub server, which you can use to run tests
-            in a grid configuration.
+            The library includes WebDriver, which provides API to control a browser like a
+            user would. This API can be used to build, for example, JUnit tests.  It also
+            includes the grid hub and node servers, which you can use to run tests in a
+            grid configuration.
         </para>
 
         <para>
@@ -133,17 +134,11 @@
 		</figure>
 
         <para>
-            Recording test cases requires Vaadin TestBench Recorder, which is a Firefox
-            extension that you install in your browser. It provides a control panel to
+            The Vaadin TestBench Recorder is helpful for creating test case stubs. It is a
+            Firefox extension that you install in your browser. It has a control panel to
             record test cases and play them back. You can play the test cases right in the
             recorder. You can then export the tests as JUnit tests, which you can edit
             further and then execute with the WebDriver.
-        </para>
-
-        <para>
-            The test suite and results from test runs are stored on the test server. A
-            test suite includes JUnit tests and possible reference images for similarity
-            tests.
         </para>
 
         <para>
@@ -154,6 +149,11 @@
             <listitem>
                 <para>
                     Executing tests with the WebDriver
+                </para>
+            </listitem>
+            <listitem>
+                <para>
+                    Additional support for testing Vaadin-based applications
                 </para>
             </listitem>
             <listitem>
@@ -232,7 +232,7 @@
                     <para>Browsers installed on test nodes</para>
                 </listitem>
                 <listitem>
-                    <para>Apache Ant or some other way to run Ant scripts (recommended)</para>
+                    <para>Build system such as Ant or Maven to automate execution of tests during build process (recommended)</para>
                 </listitem>
             </itemizedlist>
         </simplesect>
@@ -241,9 +241,9 @@
             <title>Continuous Integration Compatibility</title>
 
             <para>
-                Vaadin TestBench works with continuous integration systems that support
-                JUnit testing. It is tested to work on the TeamCity build management and
-                continuous integration server.
+                Vaadin TestBench tests are like any other Java tests, so they work with
+                continuous integration systems. It is tested to work on the TeamCity build
+                management and continuous integration server.
             </para>
         </simplesect>
 
@@ -558,119 +558,128 @@
             </para>
         </section>
 
-        <section xml:id="testbench.rc-installation.os-settings">
-            <title>Operating system settings</title>
+        <section xml:id="testbench.installation.testnode">
+            <title>Test Node Configuration</title>
 
             <para>
-                Make any operating system settings that might interfere with the browser and how
-                it is opened or closed. Typical problems include crash handler dialogs.
+                If you are running the tests in a grid environment, you need to make some
+                configuration to the test nodes to get more stable results.
             </para>
 
-            <para>
-                On Windows, disable error reporting in case a browser crashes as follows:
-            </para>
+            <section xml:id="testbench.installation.testnode.os-settings">
+                <title>Operating system settings</title>
 
-            <orderedlist>
-                <listitem>
-                    <para>
-                        Open <menuchoice><guimenu>control panel</guimenu><guimenuitem>System</guimenuitem></menuchoice>
-                    </para>
-                </listitem>
-                <listitem>
-                    <para>
-                        Select <guilabel>Advanced</guilabel> tab
-                    </para>
-                </listitem>
-                <listitem>
-                    <para>
-                        Select <guilabel>Error reporting</guilabel>
-                    </para>
-                </listitem>
-                <listitem>
-                    <para>
-                        Check that <guilabel>Disable error reporting</guilabel> is selected
-                    </para>
-                </listitem>
-                <listitem>
-                    <para>
-                        Check that <guilabel>But notify me when critical errors occur</guilabel> is not selected
-                    </para>
-                </listitem>
-            </orderedlist>
-        </section>
+                <para>
+                    Make any operating system settings that might interfere with the browser and how
+                    it is opened or closed. Typical problems include crash handler dialogs.
+                </para>
 
-        <section xml:id="testbench.rc-installation.screenshot-settings">
-            <title>Settings for Screenshots</title>
+                <para>
+                    On Windows, disable error reporting in case a browser crashes as follows:
+                </para>
 
-            <para>
-                The screenshot comparison feature requires that the user interface of
-                the browser stays constant. The exact features that interfere with
-                testing depend on the browser and the operating system.
-            </para>
+                <orderedlist>
+                    <listitem>
+                        <para>
+                            Open <menuchoice><guimenu>control panel</guimenu><guimenuitem>System</guimenuitem></menuchoice>
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                            Select <guilabel>Advanced</guilabel> tab
+                        </para>
+                    </listitem>
+                    <listitem>
+                    <para>
+                            Select <guilabel>Error reporting</guilabel>
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                            Check that <guilabel>Disable error reporting</guilabel> is selected
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                            Check that <guilabel>But notify me when critical errors occur</guilabel> is not selected
+                        </para>
+                    </listitem>
+                </orderedlist>
+            </section>
 
-            <para>
-                In general:
-            </para>
+            <section xml:id="testbench.installation.testnode.screenshot-settings">
+                <title>Settings for Screenshots</title>
 
-            <itemizedlist>
-                <listitem>
-                    <para>
-                        Disable the auto-hide function for the toolbar
-                    </para>
-                </listitem>
-                <listitem>
-                    <para>
-                        Check that the toolbar is either locked or unlocked on all test hosts
-                    </para>
-                </listitem>
-                <listitem>
-                    <para>
-                        Disable blinking cursor
-                    </para>
-                </listitem>
-                <listitem>
-                    <para>
-                        Use the same screen resolution on all test machines and check
+                <para>
+                    The screenshot comparison feature requires that the user interface of
+                    the browser stays constant. The exact features that interfere with
+                    testing depend on the browser and the operating system.
+                </para>
+
+                <para>
+                    In general:
+                </para>
+
+                <itemizedlist>
+                    <listitem>
+                        <para>
+                            Disable the auto-hide function for the toolbar
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                            Check that the toolbar is either locked or unlocked on all test hosts
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                            Disable blinking cursor
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                            Use the same screen resolution on all test machines and check
                         that the maximized window is always the same size
-                    </para>
-                </listitem>
-                <listitem>
-                    <para>
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
                         Configure browsers in the same manner on all machines (same toolbars visible, same
-                        themes, etc)
+                            themes, etc)
                     </para>
-                </listitem>
-                <listitem>
-                    <para>
-                        Use identical operating system themeing on every host
-                    </para>
-                </listitem>
-                <listitem>
-                    <para>
-                        Turn off any software that may suddenly pop up a new window
-                    </para>
-                </listitem>
-                <listitem>
-                    <para>
-                        Turn off screen saver
-                    </para>
-                </listitem>
-            </itemizedlist>
-
-            <para>
-                If using Windows and Internet Explorer, you should give also the
-                following setting:
-            </para>
-
-            <itemizedlist>
-                <listitem>
-                    <para>
-                        Turn on <guilabel>Allow active content to run in files on My
-                            Computer</guilabel> under <guilabel>Security
-                            settings</guilabel>
-                    </para>
-                </listitem>
-            </itemizedlist>
+                    </listitem>
+                    <listitem>
+                        <para>
+                            Use identical operating system themeing on every host
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                            Turn off any software that may suddenly pop up a new window
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                            Turn off screen saver
+                        </para>
+                    </listitem>
+                </itemizedlist>
+                
+                <para>
+                    If using Windows and Internet Explorer, you should give also the
+                    following setting:
+                </para>
+                
+                <itemizedlist>
+                    <listitem>
+                        <para>
+                            Turn on <guilabel>Allow active content to run in files on My
+                                Computer</guilabel> under <guilabel>Security
+                                settings</guilabel>
+                        </para>
+                    </listitem>
+                </itemizedlist>
+            </section>
         </section>
     </section>
 
@@ -681,9 +690,9 @@
             Vaadin TestBench can usually test Vaadin application as they are, especially
             if just taking screenshots. However, assertion on HTML elements require a DOM
             path to the element and this path is vulnerable to even small changes in the
-            DOM structure. They might change because of your UI logic, or if a new Vaadin
-            version has some small changes. To make such problems less common, you can use
-            <emphasis>debug IDs</emphasis> to refer to components.
+            DOM structure. They might change because of your layout or UI logic, or if a
+            new Vaadin version has some small changes. To make such problems less common,
+            you can use <emphasis>debug IDs</emphasis> to refer to components.
         </para>
 
         <programlisting><?pocket-size 65% ?><![CDATA[public class ApplicationToBeTested extends Application {
@@ -728,13 +737,14 @@
         </figure>
 
         <para>
-            The button caption would be accessible in a JUnit test with the following
-            XPath expression: <literal>//div[@id='main.button']/span/span</literal>. For
-            the label, the path would be from the page root. A recorded test case stub for
-            the above application is given in <xref
-            linkend="testbench.development.stub"/>, which is further refined in this
-            chapter.
+            The button caption would then be accessible in a JUnit test with the following
+            XPath expression: <literal>//div[@id='main.button']</literal>. For the label,
+            the path would be from the page root. A recorded test case stub for the above
+            application is given in <xref linkend="testbench.development.stub"/>, which is
+            further refined in this chapter.
         </para>
+
+        <!-- TODO: A description of different selectors would be needed (XPath, CSS, ...) -->
     </section>
 
     <section xml:id="testbench.recorder">
@@ -1025,7 +1035,7 @@
     </section>
 
     <section xml:id="testbench.development">
-        <title>Developing Tests</title>
+        <title>Developing JUnit Tests</title>
 
         <para>
             Tests are developed using the Selenium WebDriver, which is augmented with
@@ -1043,6 +1053,13 @@
             paths. You can also use the Recorder just to find the paths, and copy and
             paste them directly to your source code without going through the export
             hassle.
+        </para>
+
+        <para>
+            While this section describes the development of JUnit tests, Vaadin TestBench
+            and the WebDriver are in no way specific to JUnit and you can use any test
+            execution framework, or just regular Java applications, to develop TestBench
+            tests.
         </para>
 
         <section xml:id="testbench.development.stub">
@@ -1495,13 +1512,14 @@ public void testTooltip() throws Exception {
 
         </section>
 
+        <!-- TODO
         <section xml:id="testbench.development.contextmenu">
             <title>Testing Context Menus</title>
 
             <para>
                 TBD
             </para>
-        </section>
+        </section> -->
     </section>
 
     <section xml:id="testbench.screenshots">
