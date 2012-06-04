@@ -46,6 +46,7 @@ IMAGES =	intro/architecture intro/toolchain \
 			mobile/navigationview mobile/navigationpanel \
 			testbench/tt-workflow testbench/tt-architecture-simple testbench/tt-recorder-workflow \
 			testbench/tt-junit-workflow \
+			testbench/recorder-export-testcase \
 			jpacontainer/detailed-architecture jpacontainer/three-layer-architecture jpacontainer/jpa-mapping-graphic \
 			jpacontainer/domain-model \
 			portal/liferay-ipc-architecture portal/liferay-ipc-demo-annotated \
@@ -58,7 +59,8 @@ XMLFILES =  book.xml \
 	chapter-application.xml	chapter-getting-started.xml	chapter-mobile.xml	chapter-uidl.xml \
 	chapter-architecture.xml	chapter-gwt.xml	chapter-rapid.xml	chapter-vaadin.xml \
 	chapter-calendar.xml	chapter-introduction.xml	chapter-sqlcontainer.xml \
-	chapter-components.xml	chapter-jpacontainer.xml	chapter-testbench.xml
+	chapter-components.xml	chapter-jpacontainer.xml \
+	chapter-testbench.xml chapter-portal.xml
 
 
 # List if icons in img/icons
