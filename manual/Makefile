@@ -44,6 +44,7 @@ IMAGES =	intro/architecture intro/toolchain \
 			datamodel/datamodel-interfaces datamodel/beanitem-doublebinding \
 			rapid/domain-model \
 			mobile/navigationview mobile/navigationpanel \
+			testbench/webdriver-use \
 			testbench/tt-workflow testbench/tt-architecture-simple testbench/tt-recorder-workflow \
 			testbench/tt-junit-workflow \
 			testbench/recorder-export-testcase \

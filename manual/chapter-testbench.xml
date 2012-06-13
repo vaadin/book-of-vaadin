@@ -4,8 +4,7 @@
 	<title>Vaadin TestBench</title>
 
     <para>
-        This chapter describes the installation and use of the commercial Vaadin TestBench
-        product.
+        This chapter describes the installation and use of the Vaadin TestBench.
     </para>
 
     <section xml:id="testbench.overview">
@@ -22,12 +21,41 @@
         </para>
 
         <para>
-            Vaadin TestBench makes it possible to automate the regression testing of web
-            applications that use Vaadin. You develop test cases as JUnit, or any other,
-            tests along your application code. A recorder that runs in browser creates
-            JUnit test stubs, which you can then refine. You can run the tests as many
-            times as you want, on multiple browser and operating system platforms. The
-            test results are collected for later analysis.
+            In a typical situation, you are developing a web application with Vaadin and
+            want to ensure that only intended changes occur in its behaviour after
+            modifying the code, without testing the application manually every time. There
+            are two basic ways of detecting such regressions. Screenshots are the
+            strictest way, but often just checking the displayed values in the HTML is
+            better if you want to allow some flexibility for themeing, for example. You
+            may also want to generate many different kinds of inputs to the application
+            and check that they produce the desired outputs.
+        </para>
+
+		<figure xml:id="figure.testbench.webdriver">
+			<title>Controlling the Browser with WebDriver</title>
+			<mediaobject>
+				<imageobject role="html">
+					<imagedata align="center" fileref="img/testbench/webdriver-use-lo.png"/>
+				</imageobject>
+				<imageobject role="fo">
+					<imagedata scale="70" smallscale="100%" align="center" fileref="img/testbench/webdriver-use-hi.png"/>
+				</imageobject>
+			</mediaobject>
+		</figure>
+
+        <para>
+            Vaadin TestBench utilizes the Selenium WebDriver to control the browser from
+            Java code, as illustrated in <xref linkend="figure.testbench.webdriver"/>. It
+            can open a new browser window to start the application, interact with the
+            components for example by clicking them, and then get the HTML element values.
+        </para>
+
+        <para>
+            You can develop such WebDriver unit tests along your application code, for
+            example with JUnit, which is a widely used Java unit testing framework. You
+            can also use a recorder that runs in the browser to create JUnit test case
+            stubs, which you can then refine further with Java. You can run the tests as
+            many times as you want in your workstation or in a distributed grid setup.
         </para>
 
 		<figure xml:id="figure.testbench.workflow">
@@ -46,7 +74,7 @@
 
         <itemizedlist>
             <listitem>
-                <para>Record test case stubs in browser</para>
+                <para>Record JUnit test case stubs in browser</para>
             </listitem>
             <listitem>
                 <para>Develop tests in Java with the WebDriver</para>
@@ -63,6 +91,9 @@
             <listitem>
                 <para>Integration with unit testing</para>
             </listitem>
+            <listitem>
+                <para>Test with browsers on mobile devices</para>
+            </listitem>
         </itemizedlist>
 
         <para>
@@ -72,156 +103,112 @@
             tests, you can use Vaadin TestBench on just a single computer.
         </para>
 
-        <para>
-            Vaadin TestBench is based on the Selenium testing framework. Selenium is
-            augmented with Vaadin-specific extensions, such as the screen capture feature.
-        </para>
-
         <simplesect>
-            <title>Licensing and Trial Period</title>
+            <title>Based on Selenium</title>
 
             <para>
-                Vaadin TestBench is a commercial product sold under the Commercial Vaadin
-                Add-On License (CVAL). You can purchase and download TestBench from the
-                Vaadin Directory.
+                Vaadin TestBench is based on the Selenium web browser automation
+                library. With the Selenium WebDriver API, you can control browsers
+                straight from Java code. The TestBench Recorder is based on the Selenium
+                IDE. 
             </para>
 
             <para>
-                You may try out the product for a free 30-day trial period, after which
-                you are required to acquire the needed licenses.
+                Selenium is augmented with Vaadin-specific extensions, such as:
+            </para>
+
+            <itemizedlist>
+                <listitem>Handling Ajax-based communications of Vaadin properly</listitem>
+                <listitem>Exporting test case stubs from the Recorder</listitem>
+                <listitem>Opening tooltips for testing</listitem>
+                <listitem>Opening context menus for testing</listitem>
+                <listitem>Screen capture taking and comparison</listitem>
+                <listitem>Finding HTML elements using a Vaadin selector</listitem>
+            </itemizedlist>
+
+            <para>
+                The workflow of Vaadin TestBench differs somewhat from the typical use of
+                Selenium, which focuses on the use of the Selenium IDE for recording and
+                playing back test cases and suites, while Vaadin TestBench is usually used
+                with the WebDriver. Consequently, the HTML-based test case/suite format of
+                Selenium is not normally used with Vaadin TestBench.
             </para>
         </simplesect>
-    </section>
 
-    <section xml:id="testbench.components">
-        <title>TestBench Components</title>
-
-        <para>
-            The main components of Vaadin TestBench are:
-        </para>
-
-        <itemizedlist>
-            <listitem>
-                <para>Vaadin TestBench Java Library</para>
-            </listitem>
-            <listitem>
-                <para>Vaadin TestBench Recorder</para>
-            </listitem>
-        </itemizedlist>
-
-        <para>
-            The library includes WebDriver, which provides API to control a browser like a
-            user would. This API can be used to build, for example, JUnit tests.  It also
-            includes the grid hub and node servers, which you can use to run tests in a
-            grid configuration.
-        </para>
-
-        <para>
-            The components and a basic setup are illustrated in <xref
-            linkend="figure.testbench.architecture"/>.
-        </para>
-
-		<figure xml:id="figure.testbench.architecture">
-			<title>Vaadin TestBench Architecture</title>
-			<mediaobject>
-				<imageobject role="html">
-					<imagedata align="center" fileref="img/testbench/tt-architecture-simple-lo.png"/>
-				</imageobject>
-				<imageobject role="fo">
-					<imagedata scale="80" smallscale="100%" align="center" fileref="img/testbench/tt-architecture-simple-hi.png"/>
-				</imageobject>
-			</mediaobject>
-		</figure>
-
-        <para>
-            The Vaadin TestBench Recorder is helpful for creating test case stubs. It is a
-            Firefox extension that you install in your browser. It has a control panel to
-            record test cases and play them back. You can play the test cases right in the
-            recorder. You can then export the tests as JUnit tests, which you can edit
-            further and then execute with the WebDriver.
-        </para>
-
-        <para>
-            Vaadin TestBench Library provides the central control logic for:
-        </para>
-
-        <itemizedlist>
-            <listitem>
-                <para>
-                    Executing tests with the WebDriver
-                </para>
-            </listitem>
-            <listitem>
-                <para>
-                    Additional support for testing Vaadin-based applications
-                </para>
-            </listitem>
-            <listitem>
-                <para>
-                    Comparing screen captures with reference images
-                </para>
-            </listitem>
-            <listitem>
-                <para>
-                    Controlling the execution of tests on the Vaadin TestBench Grid Hub
-                </para>
-            </listitem>
-        </itemizedlist>
-
-        <para>
-            A basic Vaadin TestBench environment consists of:
-        </para>
-
-        <itemizedlist>
-            <listitem>
-                <para>
-                    A workstation with Firefox and the TestBench Recorder for recording tests
-                </para>
-            </listitem>
-            <listitem>
-                <para>
-                    A build/test server used to build, launch, and test the web application
-                </para>
-            </listitem>
-            <listitem>
-                <para>
-                    A server running the Grid Hub
-                </para>
-            </listitem>
-            <listitem>
-                <para>
-                    One or more servers running the tests
-                </para>
-            </listitem>
-        </itemizedlist>
-
-        <para>
-            The workstation and servers can be separate computers or one computer can work in multiple roles.
-        </para>
-    </section>
-
-    <section xml:id="testbench.requirements">
-        <title>Requirements</title>
-
-        <simplesect>
-            <title>Requirements for Vaadin TestBench Recorder</title>
+        <simplesect xml:id="testbench.overview.components">
+            <title>TestBench Components</title>
 
             <para>
-                For recording and playback with Vaadin TestBench Recorder:
+                The main components of Vaadin TestBench are:
             </para>
 
             <itemizedlist>
                 <listitem>
-                    <para>Mozilla Firefox 3.x or newer</para>
+                    <para>Vaadin TestBench Java Library</para>
+                </listitem>
+                <listitem>
+                    <para>Vaadin TestBench Recorder</para>
+                </listitem>
+            </itemizedlist>
+
+            <para>
+                The library includes WebDriver, which provides API to control a browser like a
+                user would. This API can be used to build tests, for example, with JUnit.  It
+                also includes the grid hub and node servers, which you can use to run tests in
+                a grid configuration.
+            </para>
+
+            <para>
+                The Vaadin TestBench Recorder is helpful for creating test case stubs. It is a
+                Firefox extension that you install in your browser. It has a control panel to
+                record test cases and play them back. You can play the test cases right in the
+                recorder. You can then export the tests as JUnit tests, which you can edit
+                further and then execute with the WebDriver.
+            </para>
+
+            <para>
+                Vaadin TestBench Library provides the central control logic for:
+            </para>
+
+            <itemizedlist>
+                <listitem>
+                    <para>
+                        Executing tests with the WebDriver
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        Additional support for testing Vaadin-based applications
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        Comparing screen captures with reference images
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        Distributed testing with grid node and hub services
+                    </para>
                 </listitem>
             </itemizedlist>
         </simplesect>
 
-        <simplesect>
-            <title>Requirements for Automated Testing</title>
+        <simplesect xml:id="testbench.overview.requirements">
+            <title>Requirements</title>
 
             <para>
-                For running tests:
+                Requirements for recording test cases with Vaadin TestBench Recorder:
+            </para>
+
+            <itemizedlist>
+                <listitem>
+                    <para>Mozilla Firefox</para>
+                </listitem>
+            </itemizedlist>
+
+            <para>
+                Requirements for running tests:
             </para>
 
             <itemizedlist>
@@ -229,7 +216,15 @@
                     <para>Java JDK 1.5 or newer</para>
                 </listitem>
                 <listitem>
-                    <para>Browsers installed on test nodes</para>
+                    <para>Browsers installed on test nodes as supported by Selenium WebDriver</para>
+                    <itemizedlist>
+                        <listitem>Google Chrome</listitem>
+                        <listitem>Internet Explorer</listitem>
+                        <listitem>Mozilla Firefox</listitem>
+                        <listitem>Opera</listitem>
+                        <listitem>HtmlUnit (headless browser)</listitem>
+                        <listitem>Mobile browsers: Android, iPhone</listitem>
+                    </itemizedlist>
                 </listitem>
                 <listitem>
                     <para>Build system such as Ant or Maven to automate execution of tests during build process (recommended)</para>
@@ -239,47 +234,34 @@
 
         <simplesect>
             <title>Continuous Integration Compatibility</title>
+                
+            <para>
+                Continuous integration means automatic compilation and testing of
+                applications frequently, typically at least daily, but ideally every time
+                when code changes are committed to the source repository. This practice
+                allows catching integration problems early and finding the changes that
+                first caused them to occur.
+            </para>
 
             <para>
-                Vaadin TestBench tests are like any other Java tests, so they work with
-                continuous integration systems. It is tested to work on the TeamCity build
-                management and continuous integration server.
+                You can make unit tests with Vaadin TestBench just like you would do any
+                other Java unit tests, so they work seamlessly with continuous integration
+                systems. Vaadin TestBench is tested to work with the TeamCity build
+                management and continuous integration server, which has special support
+                for the JUnit unit testing framework, as well as several others.
             </para>
         </simplesect>
 
         <simplesect>
-            <title>Known Compatibility Problems</title>
+            <title>Licensing and Trial Period</title>
 
-            <variablelist>
-                <varlistentry>
-                    <term><para>Firebug should be disabled</para></term>
-                    <listitem>
-                        <para>
-                            In some cases, Firebug injects a <literal>&lt;div
-                            id="_firebugConsole"&gt;</literal> element under the
-                            <literal>&lt;body&gt;</literal> element (the element is
-                            invisible in the Firebug's HTML structure browser). This can
-                            disturb recording of test cases, especially when closing
-                            notifications. Firebug 1.6 should fix this issue, but we still
-                            encourage TestBench users to disable Firebug when recording or
-                            playing test cases.
-                        </para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term><para>Screenshots when running Internet Explorer 9 in Compatibility Mode</para></term>
-                    <listitem>
-                        <para>
-                            Internet Explorer prior to version 9 adds a two-pixel border
-                            around the content area. Version 9 no longer does this and as
-                            a result screenshots taken using Internet Explorer 9 running
-                            in compatibility mode (IE7/IE8) will include the two pixel
-                            border, contrary to what the older versions of Internet
-                            Explorer do.
-                        </para>
-                    </listitem>
-                </varlistentry>
-            </variablelist>
+            <para>
+                You can download TestBench from Vaadin Directory. You may try out the
+                product for a free 30-day trial period, after which you are required to
+                acquire the needed licenses. You can purchase licenses from the Directory.
+                Vaadin TestBench license is also included in the Vaadin Pro Account
+                subscription.
+            </para>
         </simplesect>
     </section>
 
@@ -303,12 +285,9 @@
         </itemizedlist>
 
         <para>
-            At first, you only need to install the Recorder. It allows you to record and
-            play back tests in the browser.
-        </para>
-
-        <para>
-            Two basic installation types are covered in these instructions:
+            Which modules you need to install depends on whether you are developing tests
+            or running existing tests. Two basic installation types are covered in these
+            instructions:
         </para>
 
         <itemizedlist>
@@ -324,45 +303,82 @@
             <title>Test Development Installation</title>
 
             <para>
-                In a typical small test development setup, you install all the tools on a
-                workstation; TestBench Recorder in your browser to record stubs, develop
-                JUnit tests under an IDE such as Eclipse, and develop the launch scripts
-                that are used for the distributed tests.  <!-- TODO See <xref
-                linkend="testbench.installation.workstation-playback"/> for a quick test
-                development setup. -->
+                In a typical test development setup, you install Vaadin TestBench on a
+                workstation. You can use the TestBench Recorder to record test cases and
+                export them as JUnit test case stubs. This is especially recommended if
+                you are new to Vaadin TestBench and do not want to code from scratch. You
+                can install the Recorder in Firefox as described in <xref
+                linkend="testbench.installation.recorder"/>.
+            </para>
+
+            <para>
+                You may find it convenient to develop and execute tests under an IDE such
+                as Eclipse. The special support for running JUnit test cases in Eclipse is
+                described in <xref linkend="testbench.development.eclipse"/>.
+            </para>
+
+            <para>
+                In such a test development setup, you do not need a grid hub or
+                nodes. However, if you develop tests for a grid, you can run the tests,
+                the grid hub, and one node all in your development workstation. A
+                distributed setup is described in the following section.
             </para>
         </section>
 
         <section xml:id="testbench.installation.distributed">
-            <title>A Distributed Test Environment</title>
+            <title>A Distributed Testing Environment</title>
 
             <para>
-                A Vaadin TestBench grid consists of two categories of hosts:
+                Vaadin TestBench supports distributed execution of tests in a grid. A test
+                grid consists of the following categories of hosts:
             </para>
 
             <itemizedlist>
                 <listitem>
-                    <para>Vaadin TestBench Grid Hub</para>
+                    <para>One or more test servers executing the tests</para>
                 </listitem>
                 <listitem>
-                    <para>Grid nodes running Vaadin TestBench</para>
+                    <para>A grid hub</para>
+                </listitem>
+                <listitem>
+                    <para>Grid nodes</para>
                 </listitem>
             </itemizedlist>
 
             <para>
-                The hub is a service that handles communication between the JUnit test
-                runner and the nodes. The nodes are services that perform the actual
+                The components of a grid setup are illustrated in <xref
+                    linkend="figure.testbench.architecture"/>.
+            </para>
+
+            <figure xml:id="figure.testbench.architecture">
+                <title>Vaadin TestBench Grid Setup</title>
+                <mediaobject>
+                    <imageobject role="html">
+                        <imagedata align="center" fileref="img/testbench/tt-architecture-simple-lo.png"/>
+                    </imageobject>
+                    <imageobject role="fo">
+                        <imagedata scale="100" smallscale="100%" align="center" fileref="img/testbench/tt-architecture-simple-hi.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+
+            <para>
+                The grid hub is a service that handles communication between the JUnit
+                test runner and the nodes. The nodes are services that perform the actual
                 execution of test commands in the browser.
             </para>
 
             <para>
-                The hub requires very little resources, so you would typically run it either in
-                the test server or on one of the nodes.
+                The hub requires very little resources, so you would typically run it
+                either in the test server or on one of the nodes. You can run the tests,
+                the hub, and one node all in one host, but in a fully distributed setup,
+                you install the Vaadin TestBench components on separate hosts.
             </para>
 
             <para>
-                In a fully distributed setup, you install the Vaadin TestBench components on
-                separate hosts. <!-- TODO -->
+                Controlling browsers over a distributed setup requires using a remote
+                WebDriver.  Grid development and use of the hub and nodes is described in
+                <xref linkend="testbench.grid"/>.
             </para>
         </section>
 
@@ -443,8 +459,10 @@
                     <listitem>
                         <para>
                             The example folder provides TestBench examples for both Ant
-                            and Maven, including the build script and the JUnit test
-                            source files.
+                            and Maven, including the build script and the JUnit test Java
+                            source files. For more details in these examples, see <xref
+                            linkend="testbench.development.ant"/> and <xref
+                            linkend="testbench.development.maven"/>.
                         </para>
                     </listitem>
                 </varlistentry>
@@ -454,8 +472,8 @@
                         <para>
                             The Maven folder contains version of the Vaadin TestBench
                             libraries that you can install in your local Maven
-                            repository. Please follow the instructions in the
-                            <filename>INSTALL</filename> text file.
+                            repository. Please follow the instructions in <xref
+                            linkend="testbench.development.maven"/>.
                         </para>
                     </listitem>
                 </varlistentry>
@@ -497,8 +515,12 @@
             <title>Installing the Recorder</title>
 
             <para>
-                You need the Vaadin TestBench Recorder in a test development environment
-                to record test cases and to export them as JUnit tests.
+                You can use the Vaadin TestBench Recorder in a test development
+                environment to record test cases and to export them as JUnit test case
+                stubs which you can then develop further. This gives you a quick start
+                when you are learning to use TestBench. Later you can use the Recorder to
+                identify the HTML DOM paths of the user interface elements which you want
+                to test.
             </para>
 
             <para>
@@ -623,30 +645,8 @@
                 <itemizedlist>
                     <listitem>
                         <para>
-                            Disable the auto-hide function for the toolbar
-                        </para>
-                    </listitem>
-                    <listitem>
-                        <para>
-                            Check that the toolbar is either locked or unlocked on all test hosts
-                        </para>
-                    </listitem>
-                    <listitem>
-                        <para>
                             Disable blinking cursor
                         </para>
-                    </listitem>
-                    <listitem>
-                        <para>
-                            Use the same screen resolution on all test machines and check
-                        that the maximized window is always the same size
-                        </para>
-                    </listitem>
-                    <listitem>
-                        <para>
-                        Configure browsers in the same manner on all machines (same toolbars visible, same
-                            themes, etc)
-                    </para>
                     </listitem>
                     <listitem>
                         <para>
@@ -688,7 +688,7 @@
 
         <para>
             Vaadin TestBench can usually test Vaadin application as they are, especially
-            if just taking screenshots. However, assertion on HTML elements require a DOM
+            if just taking screenshots. However, assertions on HTML elements require a DOM
             path to the element and this path is vulnerable to even small changes in the
             DOM structure. They might change because of your layout or UI logic, or if a
             new Vaadin version has some small changes. To make such problems less common,
@@ -737,11 +737,14 @@
         </figure>
 
         <para>
-            The button caption would then be accessible in a JUnit test with the following
-            XPath expression: <literal>//div[@id='main.button']</literal>. For the label,
-            the path would be from the page root. A recorded test case stub for the above
-            application is given in <xref linkend="testbench.development.stub"/>, which is
-            further refined in this chapter.
+            The button would be rendered as a HTML element: <literal>&lt;div
+            id="main.button" ...&gt;...&lt;/div&gt;</literal>. The DOM element would then
+            be accessible from the HTML page with:
+            <literal>driver.findElement(By.id="main.button")</literal>. For the label,
+            which doesn't have a debug ID, the path would be from the page root. A
+            recorded test case stub for the above application is given in <xref
+            linkend="testbench.development.stub"/>, which is further refined in this
+            chapter.
         </para>
 
         <!-- TODO: A description of different selectors would be needed (XPath, CSS, ...) -->
@@ -902,13 +905,13 @@
                 state and press <inlinegraphic
                 fileref="img/testbench/inline/inline-play-button.png"/> <guibutton>Play
                 current test</guibutton> to run the test again. You can use the
-                <literal>&amp;restartApplication</literal> parameter for an application in
+                <literal>?restartApplication</literal> parameter for an application in
                 the URL to restart it.
             </para>
 
             <para>
-                You can also play back saved tests by opening a target test in the
-                Recorder with
+                You can also play back tests saved in the HTML format by first opening a
+                test in the Recorder with
                 <menuchoice><guimenu>File</guimenu><guimenuitem>Open</guimenuitem></menuchoice>.
             </para>
 
@@ -1043,16 +1046,15 @@
         </para>
 
         <para>
-            Perhaps the easiest way to start developing tests is to use the Recorder
-            to create a JUnit test stub, which is described in the next section.  The
-            main purpose of the recorder is to help identify the HTML DOM paths of the
-            user interface elements that you want to interact with and use for
-            assertions. Once you get the hang of coding tests, you should be able to
-            do it without using the Recorder. Working with debug IDs and using a web
-            debugger, such as Firebug, is usually the easiest way to find out the DOM
-            paths. You can also use the Recorder just to find the paths, and copy and
-            paste them directly to your source code without going through the export
-            hassle.
+            Perhaps the easiest way to start developing tests is to use the Recorder to
+            create a JUnit test stub, which is described in the next section.  The main
+            purpose of the recorder is to help identify the HTML DOM paths of the user
+            interface elements that you want to interact with and use for assertions. Once
+            you get the hang of coding tests, you should be able to do it without using
+            the Recorder. Working with debug IDs and using a browser debugger, such as
+            Firebug, is usually the easiest way to find out the DOM paths. You can also
+            use the Recorder just to find the paths, and copy and paste them directly to
+            your source code without going through the export hassle.
         </para>
 
         <para>
@@ -1126,11 +1128,11 @@ public class Testcase1 extends TestBenchTestCase {
                     hierarchy for the complete list.
                 </para>
 
-                <programlisting><?pocket-size 65% ?><![CDATA[	@Before
-	public void setUp() throws Exception {
-		driver = TestBench.createDriver(new FirefoxDriver());
-		baseUrl = "http://localhost:8080/myapp";
-	}
+                <programlisting><?pocket-size 65% ?><![CDATA[    @Before
+    public void setUp() throws Exception {
+        driver = TestBench.createDriver(new FirefoxDriver());
+        baseUrl = "http://localhost:8080/myapp";
+    }
 ]]]></programlisting>
 
                 <para>
@@ -1225,7 +1227,8 @@ public class Testcase1 extends TestBenchTestCase {
             <title>Running JUnit Tests in Eclipse</title>
 
             <para>
-                The Eclipse IDE integrates JUnit with nice control features
+                The Eclipse IDE integrates JUnit with nice control features. To run
+                TestBench JUnit test cases in Eclipse, you need to do the following:
             </para>
 
             <orderedlist>
@@ -1281,6 +1284,168 @@ public class Testcase1 extends TestBenchTestCase {
                 If you are using some other IDE, it might support JUnit tests as well. If
                 not, you can run the tests using Ant or Maven.
             </para>
+        </section>
+
+        <section xml:id="testbench.development.ant">
+            <title>Executing Tests with Ant</title>
+
+            <para>
+                Apache Ant has built-in support for executing JUnit tests. To enable the
+                support, you need to have the JUnit library <filename>junit.jar</filename>
+                and its Ant integration library <filename>ant-junit.jar</filename> in the
+                Ant classpath, as described in Ant documentation.
+            </para>
+
+            <para>
+                Once enabled, you can use the <literal>&lt;junit&gt;</literal> task in an
+                Ant script. The following example assumes that the source files are
+                located under a <filename>src</filename> directory under the current
+                directory and compiles them to the <filename>classes</filename>
+                directory. The the class path is defined with the
+                <literal>classpath</literal> reference ID and should include the TestBench
+                JAR and all relevant dependencies.
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[<project default="run-tests">
+    <path id="classpath">
+        <fileset dir="../.."
+                 includes="vaadin-testbench-standalone-*.jar" />
+    </path>
+
+    <!-- This target compiles the JUnit tests. -->
+    <target name="compile-tests">
+        <mkdir dir="classes" />
+        <javac srcdir="src" destdir="classes"
+               debug="on" encoding="utf-8">
+            <classpath>
+                <path refid="classpath" />
+            </classpath>
+        </javac>
+    </target>
+
+    <!-- This target calls JUnit -->
+    <target name="run-tests" depends="compile-tests">
+        <junit fork="yes">
+            <classpath>
+                <path refid="classpath" />
+                <pathelement path="classes" />
+            </classpath>
+
+            <formatter type="brief" usefile="false" />
+                                
+            <batchtest>
+                <fileset dir="src">
+                    <include name="**/**.java" />
+                </fileset>
+            </batchtest>
+        </junit>
+    </target>
+</project>]]></programlisting>
+
+            <para>
+                A complete Ant script example is given in the
+                <filename>example/ant/test.xml</filename> file in the installation
+                package. It sets up the classpath for Vaadin TestBench, compiles the
+                tests, and executes the JUnit tests. It also cleans up error screenshots
+                from previous runs.
+            </para>
+        </section>
+
+        <section xml:id="testbench.development.maven">
+            <title>Executing Tests with Maven</title>
+
+            <para>
+                Executing JUnit tests with Vaadin TestBench under Maven requires
+                installing the TestBench library in the local Maven repository and
+                defining it as a dependency in any POM that needs to execute TestBench
+                tests.
+            </para>
+
+            <para>
+                A complete example of a Maven test setup is given in the
+                <filename>example/maven</filename> folder in the installation
+                package. Please see the <filename>README</filename> file in the folder for
+                further instructions.
+            </para>
+
+            <section xml:id="testbench.development.maven.install">
+                <title>Installing TestBench in Local Repository</title>
+
+                <para>
+                    You can install TestBench in the local Maven repository with the following
+                    command in the <filename>maven</filename> folder:
+                </para>
+
+                <screen><prompt>$</prompt> <command>cd</command> <parameter>maven</parameter>
+<prompt>$</prompt> <command>mvn</command> install:install-file \
+      -Dfile=<parameter>vaadin-testbench-&version.testbench;-SNAPSHOT.jar</parameter> \
+      -Djavadoc=<parameter>vaadin-testbench-&version.testbench;-SNAPSHOT-javadoc.jar</parameter> \
+      -DpomFile=<parameter>pom.xml</parameter></screen>
+
+                <para>
+                    The <filename>maven</filename> folder also includes an
+                    <filename>INSTALL</filename> file, which contains instructions for
+                    installing TestBench in Maven.
+                </para>
+
+            </section>
+
+            <section xml:id="testbench.development.maven.dependency">
+                <title>Defining TestBench as a Dependency</title>
+
+                <para>
+                    Once TestBench is installed in the local repository as instructed in
+                    the previous section, you can define it as an dependency in the Maven
+                    POM of your project as follows:
+                </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[    <dependency>
+      <groupId>com.vaadin</groupId>
+      <artifactId>vaadin-testbench</artifactId>
+      <version>&version.testbench;-SNAPSHOT</version>
+    </dependency>]]></programlisting>
+
+                <para>
+                    For instructions on how to create a new Vaadin project with Maven,
+                    please see <xref linkend="getting-started.maven"/>.
+                </para>
+            </section>
+
+            <section xml:id="testbench.development.maven.running">
+                <title>Running the Tests</title>
+
+                <para>
+                    To compile and run the tests, simply execute the
+                    <literal>test</literal> lifecycle phase with Maven as follows:
+                </para>
+
+                <screen><prompt>$</prompt> <command>mvn</command> test
+...
+-------------------------------------------------------
+ T E S T S
+-------------------------------------------------------
+Running TestBenchExample
+Tests run: 6, Failures: 2, Errors: 0, Skipped: 1, Time elapsed: 36.736 sec &lt;&lt;&lt; FAILURE!
+
+Results :
+
+Failed tests: 
+  testDemo(TestBenchExample): expected:&lt;[5/17/]12&gt; but was:&lt;[17.6.20]12&gt;
+  testScreenshot(TestBenchExample): Screenshots differ
+
+Tests run: 6, Failures: 2, Errors: 0, Skipped: 1
+...</screen>
+
+                <para>
+                    Error screenshots from screenshot comparison are written to the
+                    <filename>target/testbench/errors</filename> folder. To enable
+                    comparing them to "expected" screenshots, you need to copy the
+                    screenshots to the
+                    <filename>src/test/resources/screenshots/reference/</filename>
+                    folder. See <xref linkend="testbench.screenshots"/> for more
+                    information regarding screenshots.
+                </para>
+            </section>
         </section>
 
         <section xml:id="testbench.development.setup">
@@ -1445,16 +1610,19 @@ public void testCase1() throws Exception {
             <programlisting><![CDATA[import static org.junit.Assert.assertEquals;]]></programlisting>
 
             <para>
-                Please see the Selenium API documentation for a complete reference of the
-                element search methods in the <classname>WebDriver</classname> and
+                Please see the <link
+                xlink:href="http://seleniumhq.org/docs/03_webdriver.html#selenium-webdriver-api-commands-and-operations">Selenium
+                API documentation</link> for a complete reference of the element search
+                methods in the <classname>WebDriver</classname> and
                 <classname>By</classname> classes and for the interaction commands in the
                 <classname>WebElement</classname> class.
             </para>
 
             <para>
                 TestBench has a collection of its own commands, defined in the
-                <classname>TestBenchCommands</classname> object, which you can get by
-                calling <literal>testBench(driver)</literal> in a test case.
+                <classname>TestBenchCommands</classname> interface. You can get a command
+                object that you can use by calling <literal>testBench(driver)</literal> in
+                a test case.
             </para>
         </section>
 
@@ -1530,12 +1698,6 @@ public void testTooltip() throws Exception {
             comparison with a reference screenshot taken earlier.
         </para>
         
-        <para>
-            Screenshots cover the page area in the browser. The browser is automatically
-            maximized to fullscreen. The screenshot size therefore depends on the screen
-            size, which is relevant for screenshot comparison.
-        </para>
-
         <section xml:id="testbench.screenshots.parameters">
             <title>Screenshot Parameters</title>
 
@@ -1566,7 +1728,7 @@ public void testTooltip() throws Exception {
                     </listitem>
                 </varlistentry>
                 <varlistentry>
-                    <term><parameter>screenshotComparisonTolerance</parameter> (default: <literal>0.25</literal>)</term>
+                    <term><parameter>screenshotComparisonTolerance</parameter> (default: <literal>0.01</literal>)</term>
                     <listitem>
                         Screen comparison is usually not done with exact pixel values,
                         because rendering in browser often has some tiny
@@ -1606,6 +1768,20 @@ public void testTooltip() throws Exception {
                 For example:
             </para>
 
+            <programlisting><?pocket-size 65% ?><![CDATA[@Before
+public void setUp() throws Exception {
+    Parameters.setScreenshotErrorDirectory(
+        "screenshots/errors");
+    Parameters.setScreenshotReferenceDirectory(
+        "screenshots/reference");
+    Parameters.setMaxScreenshotRetries(2);
+    Parameters.setScreenshotComparisonTolerance(1.0);
+    Parameters.setScreenshotRetryDelay(10);
+    Parameters.setScreenshotComparisonCursorDetection(true);
+    Parameters.setCaptureScreenshotOnFailure(true);
+}
+]]></programlisting>
+
         </section>
 
         <section xml:id="testbench.screenshots.failure">
@@ -1636,19 +1812,47 @@ public void setUp() throws Exception {
 
             <para>
                 Vaadin TestBench allows taking screenshots of the web browser window with
-                the <methodname>compareScreen()</methodname> command in the
-                <classname>TestBenchCommands</classname> object. Most commonly, you use
-                the variant of the method that accepts a screenshot identifier string. The
-                actual filename includes also browser information.
+                the <methodname>compareScreen()</methodname> command in a
+                <classname>TestBenchCommands</classname> object. The method has a number
+                of variants.
+            </para>
+
+            <para>
+                The <methodname>compareScreen(<classname>File</classname>)</methodname>
+                takes a <classname>File</classname> object pointing to the reference
+                image. In this case, a possible error image is written to the error
+                directory with the same file name. You can get a file object to a
+                reference image with the static
+                <methodname>ImageFileUtil.getReferenceScreenshotFile()</methodname> helper
+                method.
+            </para>
+
+            <programlisting><?pocket-size 75% ?><![CDATA[assertTrue("Screenshots differ",
+           testBench(driver).compareScreen(
+               ImageFileUtil.getReferenceScreenshotFile(
+                   "myshot.png")));]]></programlisting>
+
+            <para>
+                The <methodname>compareScreen(<classname>String</classname>)</methodname>
+                takes a base name of the screenshot. It is appended with browser
+                identifier and the file extension.
             </para>
 
             <programlisting><?pocket-size 75% ?><![CDATA[assertTrue(testBench(driver).compareScreen("tooltip"));]]></programlisting>
 
             <para>
-                Screenshots taken this way are compared to a reference image stored in the
-                reference image folder. If differences are found (or the reference image
-                is missing), the comparison method returns <literal>false</literal> and
-                stores the screenshot in the error folder.
+                The <methodname>compareScreen(<classname>BufferedImage</classname>,
+                <classname>String</classname>)</methodname> allows keeping the reference
+                image in memory. An error image is written to a file with a name
+                determined from the base name given as the second parameter.
+            </para>
+
+            <para>
+                Screenshots taken with the <methodname>compareScreen()</methodname> method
+                are compared to a reference image stored in the reference image folder. If
+                differences are found (or the reference image is missing), the comparison
+                method returns <literal>false</literal> and stores the screenshot in the
+                error folder.
             </para>
 
             <section xml:id="testbench.screenshot.comparison.error-images">
@@ -1682,8 +1886,14 @@ public void setUp() throws Exception {
                 </figure>
 
                 <para>
-                    When taking screenshots, the browser is maximized to full screen. Only the page
-                    view area in the browser is captured.
+                    Screenshots cover the visible page area in the browser. The size of
+                    the browser is therefore relevant for screenshot comparison. The
+                    browser is normally sized with a predefined default size. You can set
+                    the size of the browser window with, for example,
+                    <literal>driver.manage().window().setSize(new Dimension(1024,
+                    768));</literal> in the <literal>@Before</literal> method. The size
+                    includes any browser chrome, so the actual screenshot size will be
+                    smaller.
                 </para>
             </section>
 
@@ -1693,7 +1903,7 @@ public void setUp() throws Exception {
                 <para>
                     Reference images are expected to be found in the reference image
                     folder, as defined with the
-                    <parameter>screenshotErrorDirectory</parameter> parameter described in
+                    <parameter>screenshotReferenceDirectory</parameter> parameter described in
                     <xref linkend="testbench.screenshots.parameters"/>.  To create a
                     reference image, just copy a screenshot from the
                     <filename>errors/</filename> directory to the
@@ -1799,16 +2009,42 @@ tooltip_firefox_12.0_2.png</screen>
                 automatically collect and store the screenshots as build artifacts.
             </para>
         </section>
+
+
+        <section xml:id="testbench.screenshot.compatibility">
+            <title>Known Compatibility Problems</title>
+
+            <variablelist>
+                <varlistentry>
+                    <term><para>Screenshots when running Internet Explorer 9 in Compatibility Mode</para></term>
+                    <listitem>
+                        <para>
+                            Internet Explorer prior to version 9 adds a two-pixel border
+                            around the content area. Version 9 no longer does this and as
+                            a result screenshots taken using Internet Explorer 9 running
+                            in compatibility mode (IE7/IE8) will include the two pixel
+                            border, contrary to what the older versions of Internet
+                            Explorer do.
+                        </para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>            
     </section>
 
     <section xml:id="testbench.grid">
-        <title>Running Tests in a Grid</title>
+        <title>Running Tests in an Distributed Environment</title>
 
         <para>
             A distributed test environment consists of a grid hub and a number of test
             nodes. The hub listens to calls from test runners and delegates them to the
             grid nodes. Different nodes can run on different operating system platforms
             and have different browsers installed.
+        </para>
+
+        <para>
+            A basic distributed installation was covered in <xref
+            linkend="testbench.installation.distributed"/>.
         </para>
 
         <section xml:id="testbench.grid.remote">
@@ -1856,23 +2092,23 @@ public void testRemoteWebDriver() throws MalformedURLException {
 ]]></programlisting>
 
             <para>
-                Running the example requires that the hub server and the nodes are
-                running. These are purely Selenium functionalities, so please refer to the
-                Selenium documentation for a distributed testing setup.
+                Running the example requires that the hub service and the nodes are
+                running. Starting them is described in the subsequent sections. Please
+                refer to Selenium documentation for more detailed information.
             </para>
         </section>
 
-        <section>
+        <section xml:id="testbench.grid.hub">
             <title>Starting the Hub</title>
             
             <para>
-                The TestBench grid hub listens to calls from test runners and
-                delegates them to the grid nodes. The grid hub is included in the
-                Vaadin TestBench JAR and you can start it with the following command:
+                The TestBench grid hub listens to calls from test runners and delegates
+                them to the grid nodes. The grid hub service is included in the Vaadin
+                TestBench JAR and you can start it with the following command:
             </para>
 
             <screen><prompt>$</prompt> <command>java</command> -jar \
-       vaadin-testbench-standalone-3.0.0.jar \
+       vaadin-testbench-standalone-&version.testbench;.jar \
        -role hub</screen>
 
             <para>
@@ -1884,25 +2120,30 @@ public void testRemoteWebDriver() throws MalformedURLException {
             </para>
         </section>
 
-        <section>
+        <section xml:id="testbench.grid.node">
             <title>Starting a Grid Node</title>
 
             <para>
                 A TestBench grid node listens to calls from the hub and is capable of
-                opening a browser. The grid hub is included in the Vaadin TestBench JAR
-                and you can start it with the following command:
+                opening a browser. The grid node service is included in the Vaadin
+                TestBench JAR and you can start it with the following command:
             </para>
 
             <screen><prompt>$</prompt> <command>java</command> -jar \
-       vaadin-testbench-standalone-3.0.0.jar \
+       vaadin-testbench-standalone-&version.testbench;.jar \
        -role node \
        -hub <parameter>http://localhost:4444/grid/register</parameter></screen>
 
             <para>
                 The node registers itself in the grid hub and you need to give the address
-                of the hub with the <parameter>-hub</parameter> parameter. You can run one
-                grid node in the same host as the hub, as is done in the example above
-                with the localhost address.
+                of the hub with the <parameter>-hub</parameter> parameter.
+            </para>
+
+            <para>
+                You can run one grid node in the same host as the hub, as is done in the
+                example above with the localhost address. In such case notice that, at
+                least in OS X, you may need to duplicate the JAR to a separate copy to use
+                it to run a grid node service.
             </para>
         </section>
 
