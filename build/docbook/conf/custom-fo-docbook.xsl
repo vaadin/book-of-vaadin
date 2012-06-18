@@ -21,6 +21,9 @@
   <!-- Enable syntax color highlighting. -->
   <xsl:param name="highlight.source" select="1"/>
 
+  <!-- Always have the term above the definition -->
+  <xsl:param name="variablelist.as.blocks" select="1"/>
+
   <xsl:attribute-set name="monospace.verbatim.properties">
     <xsl:attribute name="font-size">
       <xsl:value-of select="$body.font.master * 0.80"/>

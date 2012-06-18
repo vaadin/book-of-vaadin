@@ -118,21 +118,12 @@
             </para>
 
             <itemizedlist>
-                <listitem>Handling Ajax-based communications of Vaadin properly</listitem>
+                <listitem>Proper handling of Ajax-based communications of Vaadin</listitem>
                 <listitem>Exporting test case stubs from the Recorder</listitem>
-                <listitem>Opening tooltips for testing</listitem>
-                <listitem>Opening context menus for testing</listitem>
-                <listitem>Screen capture taking and comparison</listitem>
+                <listitem>Performance testing of Vaadin applications</listitem>
+                <listitem>Screen capture comparison</listitem>
                 <listitem>Finding HTML elements using a Vaadin selector</listitem>
             </itemizedlist>
-
-            <para>
-                The workflow of Vaadin TestBench differs somewhat from the typical use of
-                Selenium, which focuses on the use of the Selenium IDE for recording and
-                playing back test cases and suites, while Vaadin TestBench is usually used
-                with the WebDriver. Consequently, the HTML-based test case/suite format of
-                Selenium is not normally used with Vaadin TestBench.
-            </para>
         </simplesect>
 
         <simplesect xml:id="testbench.overview.components">
@@ -213,7 +204,7 @@
 
             <itemizedlist>
                 <listitem>
-                    <para>Java JDK 1.5 or newer</para>
+                    <para>Java JDK 1.6 or newer</para>
                 </listitem>
                 <listitem>
                     <para>Browsers installed on test nodes as supported by Selenium WebDriver</para>
@@ -222,7 +213,6 @@
                         <listitem>Internet Explorer</listitem>
                         <listitem>Mozilla Firefox</listitem>
                         <listitem>Opera</listitem>
-                        <listitem>HtmlUnit (headless browser)</listitem>
                         <listitem>Mobile browsers: Android, iPhone</listitem>
                     </itemizedlist>
                 </listitem>
@@ -246,9 +236,9 @@
             <para>
                 You can make unit tests with Vaadin TestBench just like you would do any
                 other Java unit tests, so they work seamlessly with continuous integration
-                systems. Vaadin TestBench is tested to work with the TeamCity build
-                management and continuous integration server, which has special support
-                for the JUnit unit testing framework, as well as several others.
+                systems. Vaadin TestBench is tested to work with at least TeamCity and
+                Hudson/Jenkins build management and continuous integration servers, which
+                all have special support for the JUnit unit testing framework.
             </para>
         </simplesect>
 
@@ -256,10 +246,10 @@
             <title>Licensing and Trial Period</title>
 
             <para>
-                You can download TestBench from Vaadin Directory. You may try out the
-                product for a free 30-day trial period, after which you are required to
-                acquire the needed licenses. You can purchase licenses from the Directory.
-                Vaadin TestBench license is also included in the Vaadin Pro Account
+                You can download Vaadin TestBench from Vaadin Directory and try it out for
+                a free 30-day trial period, after which you are required to acquire the
+                needed licenses. You can purchase licenses from the Directory.  A license
+                for Vaadin TestBench is also included in the Vaadin Pro Account
                 subscription.
             </para>
         </simplesect>
@@ -422,16 +412,20 @@
                 <title>Linux, MacOS X, and other UNIX</title>
 
                 <para>
-                    In Linux, Mac OS X, and other UNIX-like systems, use Info-ZIP or other ZIP
-                    software with the command:
+                    In Linux, Mac OS X, and other UNIX-like systems, you can use Info-ZIP
+                    or other ZIP software with the command:
                 </para>
 
                 <screen><prompt>$</prompt> <command>unzip</command> <parameter>vaadin-testbench-&version.testbench;.zip</parameter></screen>
 
                 <para>
                     The contents of the installation package will be extracted under the
-                    <filename>vaadin-testbench</filename> installation directory in the
-                    chosen directory.
+                    current directory.
+                </para>
+
+                <para>
+                    In Mac OS X, you can also double-click the package to extract it under
+                    the current folder in a folder with the same name as the package.
                 </para>
             </simplesect>
         </section>
@@ -460,7 +454,24 @@
                         <para>
                             The example folder provides TestBench examples for both Ant
                             and Maven, including the build script and the JUnit test Java
-                            source files. For more details in these examples, see <xref
+                            source files. The Java source files have test cases that
+                            demonstrate:
+                        </para>
+                        
+                        <itemizedlist>
+                            <listitem>Creation of a WebDriver</listitem>
+                            <listitem>Navigating to a web page</listitem>
+                            <listitem>Interaction with the user interface</listitem>
+                            <listitem>Testing tooltips</listitem>
+                            <listitem>Testing context menus</listitem>
+                            <listitem>Use of Vaadin selectors</listitem>
+                            <listitem>Use of CSS selectors</listitem>
+                            <listitem>Use of remote web driver</listitem>
+                            <listitem>Taking and comparing screenshots</listitem>
+                        </itemizedlist>
+
+                        <para>
+                            For more details in these examples, see <xref
                             linkend="testbench.development.ant"/> and <xref
                             linkend="testbench.development.maven"/>.
                         </para>
@@ -517,7 +528,7 @@
             <para>
                 You can use the Vaadin TestBench Recorder in a test development
                 environment to record test cases and to export them as JUnit test case
-                stubs which you can then develop further. This gives you a quick start
+                stubs, which you can then develop further. This gives you a quick start
                 when you are learning to use TestBench. Later you can use the Recorder to
                 identify the HTML DOM paths of the user interface elements which you want
                 to test.
@@ -537,15 +548,16 @@
                 <listitem>
                     <para>
                         Either drag and drop the
-                        <filename>vaadin-testbench-recorder-&version.testbench;.xpi</filename> to an
-                        open Firefox window or open it from the <guimenu>File</guimenu>
-                        menu.
+                        <filename>vaadin-testbench-recorder-&version.testbench;.xpi</filename>
+                        to an open Firefox window or open it from the menu with
+                        <menuchoice><guimenu>File</guimenu><guimenuitem>Open
+                        File</guimenuitem></menuchoice>.
                     </para>
                 </listitem>
                 <listitem>
                     <para>
                         Firefox will ask if you want to install the TestBench Recorder extension. Click
-                        <guibutton>Install Now</guibutton>.
+                        <guibutton>Install</guibutton>.
                     </para>
 
                     <figure xml:id="figure.testbench.installation.recorder">
@@ -1620,9 +1632,43 @@ public void testCase1() throws Exception {
 
             <para>
                 TestBench has a collection of its own commands, defined in the
-                <classname>TestBenchCommands</classname> interface. You can get a command
+                <interfacename>TestBenchCommands</interfacename> interface. You can get a command
                 object that you can use by calling <literal>testBench(driver)</literal> in
                 a test case.
+            </para>
+        </section>
+
+        <section xml:id="testbench.development.waitforvaadin">
+            <title>Waiting for Vaadin</title>
+
+            <para>
+                Selenium is intended for regular web applications that load a page that is
+                immediately rendered by the browser. Vaadin, on the other hand, is an Ajax
+                framework where page is loaded just once and rendering is done in
+                JavaScript. This takes more time so that the rendering might not be
+                finished when the WebDriver continues executing the test. Vaadin TestBench
+                allows waiting until the rendering is finished.
+            </para>
+
+            <para>
+                The waiting is automatically enabled. You can disable waiting by calling
+                <methodname>disableWaitForVaadin()</methodname> in the
+                <interfacename>TestBenchCommands</interfacename> interface. You can call
+                it in a test case as follows:
+            </para>
+
+            <programlisting><![CDATA[testBench(driver).disableWaitForVaadin();]]></programlisting>
+
+            <para>
+                When disabled, you can wait for the rendering to finish by calling
+                <methodname>waitForVaadin()</methodname> explicitly.
+            </para>
+
+            <programlisting><![CDATA[testBench(driver).waitForVaadin();]]></programlisting>
+
+            <para>
+                You can re-enable the waiting with
+                <methodname>enableWaitForVaadin()</methodname> in the same interface.
             </para>
         </section>
 
@@ -1972,13 +2018,13 @@ tooltip_firefox_12.0_2.png</screen>
                 </para>
 
                 <figure xml:id="figure.testbench.screenshot.comparison.visualization.highlighting">
-                    <title>A highlighed error image and the reference image</title>
+                    <title>The reference image and a highlighed error image</title>
                     <mediaobject>
                         <imageobject role="html">
                             <imagedata align="center" fileref="img/testbench/screenshots/tt-screenshot-comparison-1.png"/>
                         </imageobject>
                         <imageobject role="fo">
-                            <imagedata scale="120" smallscale="80%" align="center" fileref="img/testbench/screenshots/tt-screenshot-comparison-1.png"/>
+                            <imagedata scale="100" smallscale="80%" align="center" fileref="img/testbench/screenshots/tt-screenshot-comparison-1.png"/>
                         </imageobject>
                     </mediaobject>
                     <mediaobject>
@@ -1986,12 +2032,22 @@ tooltip_firefox_12.0_2.png</screen>
                             <imagedata align="center" fileref="img/testbench/screenshots/tt-screenshot-comparison-2.png"/>
                         </imageobject>
                         <imageobject role="fo">
-                            <imagedata scale="120" smallscale="80%" align="center" fileref="img/testbench/screenshots/tt-screenshot-comparison-2.png"/>
+                            <imagedata scale="100" smallscale="80%" align="center" fileref="img/testbench/screenshots/tt-screenshot-comparison-2.png"/>
                         </imageobject>
                     </mediaobject>
                 </figure>
             </section>
         </section>
+
+        <!--
+        <section xml:id="testbench.screenshots.masked">
+            <title>Masking Screenshots</title>
+
+            <para>
+                TODO
+            </para>
+        </section>
+        -->
 
         <section xml:id="testbench.screenshot.comparison.practices">
             <title>Practices for Handling Screenshots</title>
