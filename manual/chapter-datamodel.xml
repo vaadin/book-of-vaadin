@@ -287,6 +287,202 @@ tf.setPropertyDataSource(property);]]></programlisting>
 
         </section>
 
+        <section xml:id="datamodel.properties.converter">
+            <title>Converting Between Property Type and Representation</title>
+
+            <para>
+                Fields allow editing a certain type, such as a
+                <classname>String</classname> or <classname>Date</classname>. The bound
+                property, on the other hand, could have some entirely different
+                type. Conversion between a representation edited by the field and the
+                model defined in the property is handler with a converter that implements
+                the <interfacename>Converter</interfacename> interface.
+            </para>
+
+            <para>
+                Most common type conversions, such as between string and integer, are
+                handled by the default converters. They are created in a converter factory
+                global in the application.
+            </para>
+
+            <section xml:id="datamodel.properties.converter.basic">
+                <title>Basic Use of Converters</title>
+
+                <para>
+                    The
+                    <methodname>setConverter(<interfacename>Converter</interfacename>)</methodname>
+                    method sets the converter for a field. The method is defined in
+                    <classname>AbstractField</classname>.
+                </para>
+
+                <programlisting><![CDATA[// Have an integer property
+final ObjectProperty<Integer> property =
+        new ObjectProperty<Integer>(42); 
+        
+// Create a TextField, which edits Strings
+final TextField tf = new TextField("Name");
+
+// Use a converter between String and Integer
+tf.setConverter(new StringToIntegerConverter());
+
+// And bind the field
+tf.setPropertyDataSource(property);]]></programlisting>
+
+                <para>
+                    The built-in converters are the following:
+                </para>
+
+                <table xml:id="datamodel.properties.converter.basic.built-in">
+                    <title>Built-in Converters</title>
+                    <thead>
+                        <row valign="top">
+                            <entry>Converter</entry>
+                            <entry>Representation</entry>
+                            <entry>Model</entry>
+                        </row>
+                    </thead>
+                    <tgroup cols="3" align="left">
+                        <tbody>
+                            <row valign="top">
+                                <entry><classname>StringToIntegerConverter</classname></entry>
+                                <entry><classname>String</classname></entry>
+                                <entry><classname>Integer</classname></entry>
+                            </row>
+                            <row valign="top">
+                                <entry><classname>StringToDoubleConverter</classname></entry>
+                                <entry><classname>String</classname></entry>
+                                <entry><classname>Double</classname></entry>
+                            </row>
+                            <row valign="top">
+                                <entry><classname>StringToNumberConverter</classname></entry>
+                                <entry><classname>String</classname></entry>
+                                <entry><classname>Number</classname></entry>
+                            </row>
+                            <row valign="top">
+                                <entry><classname>StringToBooleanConverter</classname></entry>
+                                <entry><classname>String</classname></entry>
+                                <entry><classname>Boolean</classname></entry>
+                            </row>
+                            <row valign="top">
+                                <entry><classname>StringToDateConverter</classname></entry>
+                                <entry><classname>String</classname></entry>
+                                <entry><classname>Date</classname></entry>
+                            </row>
+                            <row valign="top">
+                                <entry><classname>DateToLongConverter</classname></entry>
+                                <entry><classname>Date</classname></entry>
+                                <entry><classname>Long</classname></entry>
+                            </row>
+                        </tbody>
+                    </tgroup>
+                </table>
+
+                <para>
+                    In addition, there is a <classname>ReverseConverter</classname> that
+                    takes a converter as a parameter and reverses the conversion
+                    direction.
+                </para>
+
+                <para>
+                    If a converter already exists for a type, the
+                    <methodname>setConverter(<interfacename>Class</interfacename>)</methodname>
+                    retrieves the converter for the given type from the converter factory,
+                    and then sets it for the field. This method is used implicitly when
+                    binding field to a property data source.
+                </para>
+            </section>
+
+            <section xml:id="datamodel.properties.converter.custom">
+                <title>Implementing a Converter</title>
+
+                <para>
+                    A conversion always occurs between a <emphasis>representation
+                    type</emphasis>, edited by the field component, and a <emphasis>model
+                    type</emphasis>, that is, the type of the property data
+                    source. Converters implement the
+                    <interfacename>Converter</interfacename> interface defined in the
+                    <package>com.vaadin.data.util.converter</package> package.
+                </para>
+
+                <para>
+                    For example, let us assume that we have a simple
+                    <classname>Complex</classname> type for storing complex values.
+                </para>
+
+                <programlisting><?pocket-size 65% ?><![CDATA[public class ComplexConverter
+       implements Converter<String, Complex> {
+    @Override
+    public Complex convertToModel(String value, Locale locale)
+            throws ConversionException {
+        String parts[] =
+            value.replaceAll("[\\(\\)]", "").split(",");
+        if (parts.length != 2)
+            throw new ConversionException(
+                    "Unable to parse String to Complex");
+        return new Complex(Double.parseDouble(parts[0]),
+                           Double.parseDouble(parts[1]));
+    }
+
+    @Override
+    public String convertToPresentation(Complex value,
+                                        Locale locale)
+            throws ConversionException {
+        return "("+value.getReal()+","+value.getImag()+")";
+    }
+
+    @Override
+    public Class<Complex> getModelType() {
+        return Complex.class;
+    }
+
+    @Override
+    public Class<String> getPresentationType() {
+        return String.class;
+    }
+}]]></programlisting>
+
+                <para>
+                    The conversion methods get the locale for the conversion as a
+                    parameter.
+                </para>
+            </section>
+
+            <section xml:id="datamodel.properties.converter.converterfactory">
+                <title>Converter Factory</title>
+
+                <para>
+                    If a field does not directly allow editing a property type, a default
+                    converter is attempted to create using an application-global converter
+                    factory. If you define your own converters that you wish to include in
+                    the converter factory, you need to implement one yourself. While you
+                    could implement the <interfacename>ConverterFactory</interfacename>
+                    interface, it is usually easier to just extend
+                    <classname>DefaultConverterFactory</classname>.
+                </para>
+
+                <programlisting><?pocket-size 65% ?><![CDATA[class MyConverterFactory extends DefaultConverterFactory {
+    @Override
+    public <PRESENTATION, MODEL> Converter<PRESENTATION, MODEL>
+            createConverter(Class<PRESENTATION> presentationType,
+                            Class<MODEL> modelType) {
+        // Handle one particular type conversion
+        if (String.class == presentationType &&
+            Complex.class == modelType)
+            return (Converter<PRESENTATION, MODEL>)
+                   new ComplexConverter();
+
+        // Default to the supertype
+        return super.createConverter(presentationType,
+                                     modelType);
+    }
+}
+
+// Use the factory globally in the application
+Application.getCurrentApplication().setConverterFactory(
+        new MyConverterFactory());]]></programlisting>
+            </section>
+        </section>
+
         <section xml:id="datamodel.properties.implementing">
             <title>Implementing the <classname>Property</classname> Interface</title>
 
@@ -381,7 +577,6 @@ final TextField tf = new TextField("Name", property);]]></programlisting>
                 implementation.
             </para>
         </section>
-
 	</section>
 
 	<section xml:id="datamodel.items">
@@ -599,7 +794,56 @@ form.getField("discovererborn").setCaption("Born");]]></programlisting>
                 </para>
             </section>
         </section>
-	</section>
+
+    </section>
+
+    <section xml:id="datamodel.itembinding">
+        <title>Binding Fields to Items</title>
+
+        <para>
+            Most applications in existence have forms of some sort. Forms contain fields,
+            which you want to bind to a data source, an item in the Vaadin data
+            model. <classname>FieldGroup</classname> provides an easy way to bind fields
+            to the properties of an item. You can use it by first creating a layout with
+            some fields, and then call it to bind the fields to the data source. You can
+            also let the <classname>FieldGroup</classname> create the fields using a field
+            factory. It can also handle commits. Notice that
+            <classname>FieldGroup</classname> is not a user interface component, so you
+            can not add it to a layout.
+        </para>
+
+        <section xml:id="datamodel.itembinding.fieldfactory">
+            <title>Basic Binding</title>
+
+            <para>
+            </para>
+        </section>
+
+        <section xml:id="datamodel.itembinding.fieldfactory">
+            <title>Binding a Form Class</title>
+
+            <para>
+                One of the most common patterns for creating forms is a class that
+                contains the fields of the form as member variables. The class can be a
+                <classname>CustomComponent</classname> or extend a layout.
+            </para>
+        </section>
+
+        <section xml:id="datamodel.itembinding.fieldfactory">
+            <title>Using a <interfacename>FieldFactory</interfacename> to Build and Bind Fields</title>
+
+            <para>
+                Using the <methodname>buildAndBind()</methodname> methods,
+                <classname>FieldGroup</classname> can create fields for you using a
+                <interfacename>FieldGroupFieldFactory</interfacename>, but you still have
+                to add them to the correct position in your layout.
+            </para>
+        </section>
+
+        <section xml:id="datamodel.itembinding.commit">
+            <title>Handling Commits</title>
+        </section>
+    </section>
 
 	<section xml:id="datamodel.container">
 		<title>Collecting Items in Containers</title>

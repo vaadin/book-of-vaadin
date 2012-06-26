@@ -86,21 +86,22 @@
 		</para>
 
 		<para>
-			Hidden well under the hood, Vaadin uses <firstterm>GWT</firstterm>, the
-			<firstterm>Google Web Toolkit</firstterm>, for rendering the user interface in
-			the browser.
+            When doing purely server-side development, Vaadin uses a client-side engine
+            for rendering the user interface in the browser. All the client-server
+            communications are hidden well under the hood.
 
-            <indexterm><primary>Google Web Toolkit</primary></indexterm>
             <indexterm><primary>JavaScript</primary></indexterm>
 
-            GWT programs are written in Java, but compiled into JavaScript, thus freeing
-            the developer from learning JavaScript and other browser technologies. GWT is
-            ideal for implementing advanced user interface components (or widgets in GWT
-            terminology) and interaction logic in the browser, while Vaadin handles the
-            actual application logic in the server. Vaadin is designed to be extensible,
-            and you can indeed use any 3rd-party GWT components easily, in addition to the
-            component repertoire offered in Vaadin. The use of GWT also means that all the
-            code you need to write is pure Java.
+            Client-side code is written in Java, but compiled into JavaScript, thus
+            freeing the developer from learning JavaScript and other browser
+            technologies. Client-side coding is ideal for implementing advanced user
+            interface components (or "widgets") and interaction logic in the browser,
+            while the actual application logic is handled in the server. Vaadin is
+            designed to be extensible, and you can indeed use any 3rd-party widgets
+            easily, in addition to the component repertoire offered in Vaadin. The Vaadin
+            client-side framework is based on Google Web Toolkit (GWT).
+
+            <indexterm><primary>Google Web Toolkit</primary></indexterm>
 		</para>
 
 		<informalfigure floatstyle="right">
@@ -144,43 +145,41 @@
 			<title>HelloWorld.java</title>
 			<programlisting><?pocket-size 75% ?><![CDATA[import com.vaadin.ui.*;
 
-public class HelloWorld extends com.vaadin.Application {
-
-    public void init() { 
-        Window main = new Window("Hello window"); 
-        setMainWindow(main);
-        main.addComponent(new Label("Hello World!")); 
+public class HelloWorld extends Root {
+    @Override
+    protected void init(WrappedRequest request) {
+        // Set the window or tab title
+        getPage().setTitle("Hello window");
+        
+        // Display the greeting
+        addComponent(new Label("Hello World!"));
     }
 }]]></programlisting>
 		</example>
 		
 		<para>
-			The first thing to note is that every Vaadin application extends the
-			<classname>com.vaadin.Application</classname> class. Instances of the
-			<classname>Application</classname> are essentially user sessions, and one is
-			created for each user who uses the application. In the context of our
-			HelloWorld application, it is sufficient to know that the application object
-			is created when the user first accesses it and at that time
-			<methodname>init()</methodname> method is invoked.
+			Every Vaadin application has a <emphasis>&root;</emphasis> that extends the
+			<classname>com.vaadin.ui.&rootclass;</classname> class. A &root; is a part of
+			the web page in which the Vaadin application runs. An application can, in
+			fact, have multiple pages (windows) and &root;s in the same page, especially
+			in portals. A Vaadin application instance is essentially a user session, and a
+			session is created for each user who uses the application. In the context of
+			our HelloWorld application, it is sufficient to know that the underlying
+			session is created when the user first accesses the application by opening the
+			page, and <methodname>init()</methodname> method is invoked at that time.
 		</para>
 
 		<para>
-			Initialization of the application first creates a new
-			<emphasis>window</emphasis> object and sets "Hello window" as its caption. The
-			"window" refers to the browser window or tab, although window objects are also
-			used when embedding Vaadin applications to HTML pages. The window is set as
-			the main window of the application; an application can actually have many
-			windows (or tabs or embeddings). This means that when a user opens the
-			application in a browser, the contents of the "main window" are shown to the
-			user in the web page. The caption is shown as the title of the (browser)
-			window.
+			In the above example, the initialization of the &root; first accesses the web
+			page object in which the application runs and sets the page title, which is
+			used in the caption of the browser window or tab.
 		</para>
 
 		<para>
 			The example creates a new <classname>Label</classname> user interface
-			component, which can show simple text, and sets the text to "Hello
-			World!". Finally, the label is added to the main window. So, when the
-			application is opened in a browser, the page shows the text "Hello World!".
+			component, which displays simple text, and sets the text to "Hello
+			World!". Finally, the label is added to the &root;. So, when the application
+			page is opened in a browser, it shows the text "Hello World!".
 		</para>
 		
 		<para>
@@ -411,6 +410,37 @@ public class HelloWorld extends com.vaadin.Application {
                 Release Notes of each version.
             </para>
 		</simplesect>
+
+		<simplesect xml:id="intro.background.vaadin7">
+			<title>Towards Vaadin 7</title>
+
+            <para>
+                Vaadin 7 is still under development when this edition of the book is
+                published, and will continue to evolve throughout 2012. It is a major
+                revision that changes the Vaadin API much more than Vaadin 6 did. It will
+                certainly be more web-oriented than Vaadin 6 was.
+            </para>
+
+            <para>
+                We are doing everything we can to help Vaadin rise high in the web
+                universe. Some of this work is easy and almost routine - fixing bugs and
+                implementing features. But going higher also requires standing firmer. That is
+                one of the aims of Vaadin 7 - redesign the product so that the new
+                architecture enables Vaadin to reach over many long-standing challenges.
+
+                Many of the changes require breaking API compatibility with Vaadin 6,
+                especially in the cliend-side, but they are made with a strong desire to
+                avoid carrying unnecessary legacy burden far into the future. Vaadin 7
+                includes a compatibility layer for making adoption of Vaadin 7 in existing
+                applications easier.
+            </para>
+
+            <para>
+                Vaadin 7 is targeted at the end of 2012. Alpha and beta releases allow
+                developers to get some taste of what is coming. The most significant API
+                changes are already there - go ahead and try them.
+            </para>
+        </simplesect>
     </section>
 
     <!--

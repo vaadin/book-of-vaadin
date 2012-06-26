@@ -298,14 +298,13 @@
 				components. <classname>AbstractComponent</classname> manages much of the
 				serialization of component states between the client and the
 				server. Creation of new components and serialization is described in <xref
-				linkend="gwt"/>, and the server-side serialization API in <xref
-				linkend="uidl"/>.
+				linkend="gwt"/>.
 			</para>
 
             <indexterm startref="term.components.interfaces.abstractcomponent" class="endofrange"/>
         </section>
 
-        <section xml:id="components.fields">
+        <section xml:id="components.interfaces.fields">
             <title>Field Components (<classname>Field</classname> and <classname>AbstractField</classname>)</title>
 
             <indexterm xml:id="term.components.fields" class="startofrange">
@@ -319,7 +318,7 @@
 				relationships and the important interfaces and base classes.
 			</para>
 
-			<figure xml:id="figure.components.fields">
+			<figure xml:id="figure.components.interfaces.fields">
 				<title>Field Components</title>
 				<mediaobject>
 					<imageobject role="html">
@@ -338,18 +337,11 @@
 			</para>
 
 			<para>
-				Fields are strongly coupled with the Vaadin data model. The field value is
-				handled as a <classname>Property</classname> of the field
-				component. Selection fields allow management of the selectable items
-				through the <classname>Container</classname> interface.
-			</para>
-
-			<para>
 				The description of the field interfaces and base classes is broken down in
 				the following sections.
 			</para>
 
-			<section>
+			<section xml:id="components.interfaces.fields.field">
 				<title><classname>Field</classname> Interface</title>
 
 				<para>
@@ -426,16 +418,36 @@
 								required, but none is entered. The error message is set as
 								the component error for the field and is usually displayed
 								in a tooltip when the mouse pointer hovers over the error
-								indicator. The <classname>Form</classname> component can
-								display the error message in a special error indicator
-								area.
+								indicator.
 							</para>
 						</listitem>
 					</varlistentry>
 				</variablelist>
 			</section>
 
-			<section>
+			<section xml:id="components.interfaces.fields.databinding">
+				<title>Data Binding and Conversions</title>
+
+                <para>
+                    Fields are strongly coupled with the Vaadin data model. The field value is
+                    handled as a <classname>Property</classname> of the field component, as
+                    documented in <xref linkend="datamodel.properties"/>. Selection fields
+                    allow management of the selectable items through the
+                    <classname>Container</classname> interface.
+                </para>
+
+                <para>
+                    Fields edit some particular type. For example,
+                    <classname>TextField</classname> allows editing
+                    <classname>String</classname> values. When bound to a data source, the
+                    property type of the data model can be something different, say an
+                    <classname>Integer</classname>. <emphasis>Converters</emphasis> are used
+                    for converting the values between the representation and the model. They
+                    are described in <xref linkend="datamodel.properties.converter"/>.
+                </para>
+            </section>
+
+            <section xml:id="components.interfaces.fields.valuechanges">
 				<title>Handling Field Value Changes</title>
 				
 				<para>
@@ -457,7 +469,7 @@
 				</para>
 			</section>
 
-			<section>
+            <section xml:id="components.interfaces.fields.valuechanges">
 				<title><classname>AbstractField</classname> Base Class</title>
 
 				<para>
@@ -642,18 +654,15 @@ button.setDescription("This is the tooltip");]]></programlisting>
 
 			<para>
 				A description is rendered as a tooltip in most
-				components. <classname>Form</classname> shows it as text in the top area
-				of the component, as described in <xref
-				linkend="components.form.layout"/>.
+				components.
 			</para>
 
 			<para>
 				When a component error has been set with
 				<methodname>setComponentError()</methodname>, the error is usually also
-				displayed in the tooltip, below the description
-				(<classname>Form</classname> displays it in the bottom area of the
-				form). Components that are in error state will also display the error
-				indicator. See <xref linkend="application.errors.error-indicator"/>.
+				displayed in the tooltip, below the description. Components that are in
+				error state will also display the error indicator. See <xref
+				linkend="application.errors.error-indicator"/>.
 			</para>
 
 			<para>
@@ -1102,8 +1111,7 @@ layout.addComponent(readonly);]]></programlisting>
                 Setting a layout or some other component container as read-only does not
                 usually make the contained components read-only recursively. This is
                 different from, for example, the disabled state, which is usually applied
-                recursively. The <classname>Form</classname> component is an exception, as
-                it applies the read-only state to the form fields.
+                recursively.
             </para>
 
             <para>
@@ -1198,11 +1206,11 @@ layout.addComponent(label);]]></programlisting>
                 name. For example, if you add a style name <literal>mystyle</literal> to a
                 <classname>Button</classname>, the component would get both
                 <literal>mystyle</literal> and <literal>v-button-mystyle</literal>
-                styles. Neither form may conflict with built-in style names of Vaadin or
-                GWT. For example, <literal>focus</literal> style would conflict with a
-                built-in style of the same name, and an <literal>option</literal> style
-                for a <classname>Select</classname> component would conflict with the
-                built-in <literal>v-select-option</literal> style.
+                styles. Neither form may conflict with built-in style names of Vaadin. For
+                example, <literal>focus</literal> style would conflict with a built-in
+                style of the same name, and an <literal>option</literal> style for a
+                <classname>Select</classname> component would conflict with the built-in
+                <literal>v-select-option</literal> style.
             </para>
 
             <para>
@@ -1497,7 +1505,7 @@ mycomponent.setHeight("400px");]]></programlisting>
 
 			<para>
 				Focusing is supported by all <classname>Field</classname> components and
-				also by <classname>Form</classname> and <classname>Upload</classname>.
+				also by <classname>Upload</classname>.
 			</para>
 
 			<para>
@@ -1616,28 +1624,42 @@ panel.addComponent(
 
             <para>
                 The contents of a label are formatted depending on the content mode. By
-                default, the text is assumed to be plain text and any contained XML-specific
-                characters will be quoted appropriately to allow rendering the contents of a
-                label in XHTML in a web browser. The content mode can be set in the constructor
-                or with <methodname>setContentMode()</methodname>, and can have the following
-                values:
+                default, the text is assumed to be plain text and any contained
+                XML-specific characters will be quoted appropriately to allow rendering
+                the contents of a label in XHTML in a web browser. The content mode can be
+                set in the constructor or with <methodname>setContentMode()</methodname>,
+                and can have the values defined in the
+                <classname>Label.ContentMode</classname> enumeration type:
             </para>
 
             <variablelist>
                 <varlistentry>
-                    <term><constant>CONTENT_DEFAULT</constant></term>
+                    <term><constant>DEFAULT</constant></term>
                     <listitem>
                         <para>
-                            The default content mode is <varname>CONTENT_TEXT</varname> (see
+                            The default content mode is <varname>TEXT</varname> (see
                             below).
                         </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
-				<term><constant>CONTENT_PREFORMATTED</constant></term>
+                    <term><constant>TEXT</constant></term>
                     <listitem>
                         <para>
-                            Content mode, where the label contains preformatted text. It will
+                            Content mode where the label contains only plain text. All
+                            characters are allowed, including the special
+                            <literal>&lt;</literal>, <literal>&gt;</literal>, and
+                            <literal>&amp;</literal> characters in XML or HTML, which are
+                            quoted properly in XHTML while rendering the component. This
+                            is the default mode.
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+				<term><constant>PREFORMATTED</constant></term>
+                    <listitem>
+                        <para>
+                            Content mode where the label contains preformatted text. It will
                             be, by default, rendered with a fixed-width typewriter
                             font. Preformatted text can contain line breaks, written in Java
                             with the <literal>\n</literal> escape sequence for a newline
@@ -1647,7 +1669,7 @@ panel.addComponent(
                     </listitem>
                 </varlistentry>
                 <varlistentry>
-                    <term><constant>CONTENT_RAW</constant></term>
+                    <term><constant>RAW</constant></term>
                     <listitem>
                         <para>
                             Content mode where the label contains raw text. Output is not
@@ -1667,20 +1689,7 @@ panel.addComponent(
                     </listitem>
                 </varlistentry>
                 <varlistentry>
-                    <term><constant>CONTENT_TEXT</constant></term>
-                    <listitem>
-                        <para>
-                            Content mode, where the label contains only plain text. All
-                            characters are allowed, including the special
-                            <literal>&lt;</literal>, <literal>&gt;</literal>, and
-                            <literal>&amp;</literal> characters in XML or HTML, which are
-                            quoted properly in XHTML while rendering the component. This is
-                            the default mode.
-                        </para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term><constant>CONTENT_XHTML</constant></term>
+                    <term><constant>XHTML</constant></term>
                     <listitem>
                         <para>
                             Content mode where the label contains XHTML. The content will
@@ -1695,7 +1704,7 @@ panel.addComponent(
                     </listitem>
                 </varlistentry>
                 <varlistentry>
-                    <term><constant>CONTENT_XML</constant></term>
+                    <term><constant>XML</constant></term>
                     <listitem>
                         <para>
                             Content mode, where the label contains well-formed and
@@ -1710,7 +1719,7 @@ panel.addComponent(
                     </listitem>
                 </varlistentry>
                 <varlistentry>
-                    <term><constant>CONTENT_UIDL</constant></term>
+                    <term><constant>UIDL</constant></term>
                     <listitem>
                         <para>
                             Formatted content mode, where the contents are XML that is
@@ -1749,38 +1758,38 @@ panel.addComponent(
 
 			<programlisting><?pocket-size 65% ?><![CDATA[GridLayout labelgrid = new GridLayout (2,1);
 
-labelgrid.addComponent (new Label ("CONTENT_DEFAULT"));
+labelgrid.addComponent (new Label ("DEFAULT"));
 labelgrid.addComponent (
     new Label ("This is a label in default mode: <plain text>",
-               Label.CONTENT_DEFAULT));
+               Label.ContentMode.DEFAULT));
 
-labelgrid.addComponent (new Label ("CONTENT_PREFORMATTED"));
+labelgrid.addComponent (new Label ("PREFORMATTED"));
 labelgrid.addComponent (
     new Label ("This is a preformatted label.\n"+
                "The newline character \\n breaks the line.",
-               Label.CONTENT_PREFORMATTED));
+               Label.ContentMode.PREFORMATTED));
 
-labelgrid.addComponent (new Label ("CONTENT_RAW"));
+labelgrid.addComponent (new Label ("RAW"));
 labelgrid.addComponent (
     new Label ("This is a label in raw mode.<br>It can contain, "+
                "for example, unbalanced markup.",
-               Label.CONTENT_RAW));
+               Label.ContentMode.RAW));
 
-labelgrid.addComponent (new Label ("CONTENT_TEXT"));
+labelgrid.addComponent (new Label ("TEXT"));
 labelgrid.addComponent (
     new Label ("This is a label in (plain) text mode",
-               Label.CONTENT_TEXT));
+               Label.ContentMode.TEXT));
 
-labelgrid.addComponent (new Label ("CONTENT_XHTML"));
+labelgrid.addComponent (new Label ("XHTML"));
 labelgrid.addComponent (
     new Label ("<i>This</i> is an <b>XHTML</b> formatted label",
-               Label.CONTENT_XHTML));
+               Label.ContentMode.XHTML));
 
-labelgrid.addComponent (new Label ("CONTENT_XML"));
+labelgrid.addComponent (new Label ("XML"));
 labelgrid.addComponent (
     new Label ("This is an <myelement>XML</myelement> "+
                "formatted label",
-               Label.CONTENT_XML));
+               Label.ContentMode.XML));
 
 main.addComponent(labelgrid);]]></programlisting>
 
@@ -1816,7 +1825,7 @@ main.addComponent(labelgrid);]]></programlisting>
 main.addComponent(new Label("Here we have an image <img src=\"" +
                             this.getRelativeLocation(labelimage) +
                             "\"/> within text.",
-                            Label.CONTENT_XHTML));]]></programlisting>
+                            Label.ContentMode.XHTML));]]></programlisting>
 
             <para>
                 When you use a class loader resource, the image has to be included in
@@ -1863,10 +1872,10 @@ main.addComponent(new Label("Here we have an image <img src=\"" +
                 <literal>&amp;nbsp;</literal> or <literal>&amp;#160;</literal>:
             </para>
 
-            <programlisting><?pocket-size 65% ?><![CDATA[layout.addComponent(new Label("&nbsp;", Label.CONTENT_XHTML));]]></programlisting>
+            <programlisting><?pocket-size 65% ?><![CDATA[layout.addComponent(new Label("&nbsp;", Label.ContentMode.XHTML));]]></programlisting>
 
             <para>
-                Using the <parameter>Label.CONTENT_PREFORMATTED</parameter> mode has the
+                Using the <parameter>Label.ContentMode.PREFORMATTED</parameter> mode has the
                 same effect; preformatted spaces do not collapse in a vertical layout. In
                 a <classname>HorizontalLayout</classname>, the width of a space character
                 may be unpredictable if the label font is proportional, so you can use the
@@ -2185,10 +2194,10 @@ tf.setImmediate(true);]]></programlisting>
 
             <book-example id="component.textfield.valuetype" style="float: right"/>
             <para>
-                You can bind a <classname>TextField</classname> to any property type that
-                allows conversion of the value to and from <classname>String</classname> with
-                the <methodname>getValue()</methodname> and
-                <methodname>setValue()</methodname> methods.
+                <classname>TextField</classname> edits <classname>String</classname>
+                values, but you can bind it to any property type that has a proper
+                converter, as described in <xref
+                linkend="datamodel.properties.converter"/>.
             </para>
 
             <book-example id="component.textfield.databinding" style="float: right"/>
@@ -2203,6 +2212,7 @@ final ObjectProperty<Double> property =
     new ObjectProperty<Double>(trouble);
         
 // Create a text field bound to it
+// (StringToDoubleConverter is used automatically)
 TextField tf = new TextField("The Answer", property);
 tf.setImmediate(true);
 
@@ -2212,19 +2222,19 @@ Label feedback = new Label(property);
 feedback.setCaption("The Value");]]></programlisting>
 
             <para>
-                When you put values in a <classname>Form</classname> or
-                <classname>Table</classname>, the
+                When you put a <classname>Table</classname> in editable mode or create
+                fields with a <classname>FieldGroup</classname>, the
                 <classname>DefaultFieldFactory</classname> creates a
                 <classname>TextField</classname> for almost every property type by
-                default. However, you often need to make a custom factory that sets the
-                text field description, immediateness, validation, formatting, and so on.
+                default. You often need to make a custom factory to customize the creation
+                and to set the field tooltip, validation, formatting, and so on.
             </para>
 
             <para>
                 See <xref linkend="datamodel"/> for more details on data binding, field
                 factories for <classname>Table</classname> in <xref
-                linkend="components.table.editing"/>, and for <classname>Form</classname>
-                in <xref linkend="components.form.binding.fieldfactory"/>.
+                linkend="components.table.editing"/>, and <xref
+                linkend="datamodel.itembinding"/> regarding forms.
             </para>
 
             <book-example id="component.textfield.beanbinding">
@@ -3214,15 +3224,15 @@ date.setValue(new java.util.Date());]]></programlisting>
             <title>Time Resolution</title>
 
             <para>
-                You probably will not need milliseconds in most applications, and might
-                not even need the time, but just the date, or month or year. The
+                The <classname>DateField</classname> displays dates by default. It can
+                also display the time in hours and minutes, or just the month or year. The
                 visibility of the input components is controlled by <emphasis>time
                 resolution</emphasis>, which can be set with
                 <methodname>setResolution()</methodname> method. The method takes as its
                 parameters the lowest visible component, typically
                 <parameter>RESOLUTION_DAY</parameter> for just dates and
                 <parameter>RESOLUTION_MIN</parameter> for dates with time in hours and
-                minutes. Please see the API Reference for a complete list of resolution
+                minutes. Please see the API Reference for the complete list of resolution
                 parameters.
             </para>
         </section>
@@ -3330,9 +3340,9 @@ date.setValue(new java.util.Date());]]></programlisting>
 		</para>
 
 		<para>
-			Clicking on a check box will change its state. The state is the
-			<classname>Boolean</classname> property of the <classname>Button</classname>,
-			and can be set with <methodname>setValue()</methodname> and obtained with
+			Clicking on a check box will change its state. The state is a
+			<classname>Boolean</classname> property that you can set with the
+			<methodname>setValue()</methodname> method and obtain with the
 			<methodname>getValue()</methodname> method of the
 			<classname>Property</classname> interface.  Changing the value of a check box
 			will cause a <classname>ValueChangeEvent</classname>, which can be handled by
@@ -3381,10 +3391,19 @@ checkbox2.addListener(new ValueChangeListener() {
 		<simplesect>
 			<title>CSS Style Rules</title>
 			
-			<programlisting><![CDATA[.v-checkbox { }]]></programlisting>
-			
+			<programlisting><![CDATA[.v-checkbox { }
+  .v-checkbox > input { }
+  .v-checkbox > label { }]]></programlisting>
+
+            <para>
+                The top-level element of a <classname>CheckBox</classname> has the
+                <literal>v-checkbox</literal> style. It contains two sub-elements: the
+                actual check box <literal>input</literal> element and the
+                <literal>label</literal> element. If you want to have the label on the
+                left, you can change the positions with "<literal>direction:
+                rtl</literal>" for the top element.
+            </para>
 		</simplesect>
-		
 	</section>
 
 	<section xml:id="components.selecting">
@@ -5053,12 +5072,13 @@ layout.addComponent(switchEditable);]]></programlisting>
                             <row valign="top">
                                 <entry><classname>Item</classname></entry>
                                 
-                                <entry>A <classname>Form</classname>. The fields of the
-                                    form are automatically created from the item's properties
-                                    using a <classname>FormFieldFactory</classname>. The
-                                    normal use for this property type is inside a
-                                    <classname>Form</classname> and is less useful inside a
-                                    <classname>Table</classname>.</entry>
+                                <entry>A <classname>Form</classname> (deprecated in Vaadin
+                                7). The fields of the form are automatically created from
+                                the item's properties using a
+                                <classname>FormFieldFactory</classname>. The normal use
+                                for this property type is inside a
+                                <classname>Form</classname> and is less useful inside a
+                                <classname>Table</classname>.</entry>
                             </row>
                             <row valign="top">
                                 <entry><emphasis>other</emphasis></entry>
@@ -6324,691 +6344,69 @@ Upload upload = new Upload("Upload the file here", this);]]></programlisting>
 			uploaded image in an <classname>Embedded</classname> component.
 		</para>
 
-		<programlisting><?pocket-size 65% ?><![CDATA[import java.io.File;
-import java.io.FileOutputStream;
-import java.io.OutputStream;
-import com.vaadin.terminal.FileResource;
-import com.vaadin.ui.*;
+        <book-example id="component.upload.basic" style="float: right"/>
+		<programlisting><?pocket-size 65% ?><![CDATA[// Create the upload with a caption and set receiver later
+Upload upload = new Upload("Upload Image Here", null);
+upload.setButtonCaption("Start Upload");
+        
+// Put the upload component in a panel
+Panel panel = new Panel("Cool Image Storage");
+panel.addComponent(upload);
+        
+// Show uploaded file in this placeholder
+final Embedded image = new Embedded("Uploaded Image");
+image.setVisible(false);
+panel.addComponent(image);
 
-public class MyUploader extends CustomComponent
-                        implements Upload.SucceededListener,
-                                   Upload.FailedListener,
-                                   Upload.Receiver {
-
-    Panel root;         // Root element for contained components.
-    Panel imagePanel;   // Panel that contains the uploaded image.
-    File  file;         // File to write to.
-
-    MyUploader() {
-        root = new Panel("My Upload Component");
-        setCompositionRoot(root);
-
-        // Create the Upload component.
-        final Upload upload =
-                new Upload("Upload the file here", this);
-
-        // Use a custom button caption instead of plain "Upload".
-        upload.setButtonCaption("Upload Now");
-
-        // Listen for events regarding the success of upload.
-        upload.addListener((Upload.SucceededListener) this);
-        upload.addListener((Upload.FailedListener) this);
-
-        root.addComponent(upload);
-        root.addComponent(new Label("Click 'Browse' to "+
-                "select a file and then click 'Upload'."));
-
-        // Create a panel for displaying the uploaded image.
-        imagePanel = new Panel("Uploaded image");
-        imagePanel.addComponent(
-                         new Label("No image uploaded yet"));
-        root.addComponent(imagePanel);
-    }
-
-    // Callback method to begin receiving the upload.
+// Implement both receiver that saves upload in a file and
+// listener for successful upload
+class ImageUploader implements Receiver, SucceededListener {
+    public File file;
+    
     public OutputStream receiveUpload(String filename,
-                                      String MIMEType) {
-        FileOutputStream fos = null; // Output stream to write to
-        file = new File("/tmp/uploads/" + filename);
+                                      String mimeType) {
+        // Create upload stream
+        FileOutputStream fos = null; // Stream to write to
         try {
             // Open the file for writing.
+            file = new File("/tmp/uploads/" + filename);
             fos = new FileOutputStream(file);
         } catch (final java.io.FileNotFoundException e) {
-            // Error while opening the file. Not reported here.
-            e.printStackTrace();
+            Notification.show(
+                    "Could not open file<br/>", e.getMessage(),
+                    Notification.TYPE_ERROR_MESSAGE);
             return null;
         }
-
         return fos; // Return the output stream to write to
     }
 
-    // This is called if the upload is finished.
-    public void uploadSucceeded(Upload.SucceededEvent event) {
-        // Log the upload on screen.
-        root.addComponent(new Label("File " + event.getFilename()
-                + " of type '" + event.getMIMEType()
-                + "' uploaded."));
-        
-        // Display the uploaded file in the image panel.
-        final FileResource imageResource =
-                new FileResource(file, getApplication());
-        imagePanel.removeAllComponents();
-        imagePanel.addComponent(new Embedded("", imageResource));
+    public void uploadSucceeded(SucceededEvent event) {
+        // Show the uploaded file in the image viewer
+        image.setVisible(true);
+        image.setSource(new FileResource(file,
+                                         getApplication()));
     }
-
-    // This is called if the upload fails.
-    public void uploadFailed(Upload.FailedEvent event) {
-        // Log the failure on screen.
-        root.addComponent(new Label("Uploading "
-                + event.getFilename() + " of type '"
-                + event.getMIMEType() + "' failed."));
-    }
-}]]></programlisting>
+};
+final ImageUploader uploader = new ImageUploader(); 
+upload.setReceiver(uploader);
+upload.addListener(uploader);]]></programlisting>
 
 		<para>
 			The example does not check the type of the uploaded files in any way, which
 			will cause an error if the content is anything else but an image. The program
 			also assumes that the MIME type of the file is resolved correctly based on the
 			file name extension. After uploading an image, the component will look as show
-			in <xref linkend="figure.ui.upload.example"/> below. The browser shows the
-			<guibutton>Browse</guibutton> button localized.
+			in <xref linkend="figure.ui.upload.example"/> below.
 		</para>
 
-        <!-- TODO: Update with other than IT Mill image. -->
 		<figure xml:id="figure.ui.upload.example">
 			<title>Image Upload Example</title>
 			<mediaobject>
 				<imageobject>
-					<imagedata smallscale="140" align="center" fileref="img/components/upload-example.png"/>
+					<imagedata smallscale="100%" align="center" fileref="img/components/upload-example.png"/>
 				</imageobject>
 			</mediaobject>
 		</figure>
-
-	</section>
-
-	<section xml:id="components.form">
-		<title><classname>Form</classname></title>
-
-		<para>
-			Most web applications need forms. The <classname>Form</classname> component in
-			Vaadin offers an easy way to create forms where the fields can be
-			automatically generated from a data source that is bound to the form. The
-			<classname>BeanItem</classname> adapter allows the data sources to be just
-			JavaBeans or Plain Old Java Objects (POJOs) with just the setter and getter
-			methods. <classname>Form</classname> manages buffering so that the form
-			contents can be committed to the data source only when filling the form is
-			complete, and before that, the user can discard any changes.
-		</para>
-
-		<para>
-			The <classname>Form</classname> component is also a layout, with a bounding
-			box, a caption, a description field, and a special error indicator. As such,
-			it can also be used within logical forms to group input fields.
-		</para>
-
-		<section xml:id="components.form.layout">
-			<title>Form as a User Interface Component</title>
-
-			<para>To begin with the <classname>Form</classname>, it is a UI component with
-			a layout suitable for its purpose. A <classname>Form</classname> has a
-			caption, a description, a layout that contains the fields, an error indicator,
-			and a footer, as illustrated in <xref linkend="figure.ui.form.layout"/>
-			below. Unlike with other components, the caption is shown within the
-			border. (See the details below on how to enable the border with CSS, as it may
-			not be enabled in the default style.)</para>
-
-			<figure xml:id="figure.ui.form.layout">
-				<title>Layout of the Form Component</title>
-				<mediaobject>
-					<imageobject>
-						<imagedata smallscale="130" align="center" fileref="img/components/form-example3.png"/>
-					</imageobject>
-				</mediaobject>
-			</figure>
-
-			<para>
-				Unlike most components, <classname>Form</classname> does not accept the
-				caption in the constructor, as forms are often captionless, but you can
-				give the caption with the <methodname>setCaption()</methodname>. While the
-				description text, which you can set with
-				<classname>setDescription()</classname>, is shown as a tooltip in most
-				other components, a <classname>Form</classname> displays it in top of the
-				form box as shown in the figure above.
-			</para>
-
-			<programlisting><?pocket-size 65% ?><classname>Form</classname> form = new <classname>Form</classname>();
-form.setCaption("Form Caption");
-form.setDescription("This is a description of the Form that is " +
-        "displayed in the upper part of the form. You normally " +
-        "enter some descriptive text about the form and its " +
-        "use here.");
-</programlisting>
-
-			<para>
-				<classname>Form</classname> has <classname>FormLayout</classname>
-				as its default layout, but you can set any other layout with
-				<methodname>setLayout()</methodname>. See
-				<xref linkend="layout.components.formlayout"/> for more information.
-				Note that the <classname>Form</classname> itself handles layout for
-				the description, the footer and other common elements of the form.
-				The user-set layout only manages the contained fields and their
-				captions.
-			</para>
-
-			<para>
-				The <classname>Form</classname> is most of all a container for fields so
-				it offers many kinds of automation for creating and managing fields. You
-				can, of course, create fields directly in the layout, but it is usually
-				more desirable to bind the fields to the connected data source.
-			</para>
-
-			<programlisting><?pocket-size 65% ?><emphasis>// Add a field directly to the layout. This field will
-// not be bound to the data source Item of the form.</emphasis>
-form.getLayout().addComponent(new TextField("A Field"));
-
-<emphasis>// Add a field and bind it to an named item property.</emphasis>
-form.addField("another", new TextField("Another Field"));</programlisting>
-
-			<para>
-				Binding forms and their fields to data objects is described further in
-				<xref linkend="components.form.binding"/> below.
-			</para>
-
-			<para>
-				The <classname>Form</classname> has a special error indicator inside the
-				form. The indicator can show the following types of error messages:
-			</para>
-
-			<itemizedlist>
-				<listitem>Errors set with the <methodname>setComponentError()</methodname>
-				method of the form. For example:
-				<programlisting><?pocket-size 65% ?>form.setComponentError(new UserError("This is the error indicator of the Form."));</programlisting>
-				</listitem>
-
-				<listitem>Errors caused by a validator attached to the
-				<classname>Form</classname> with
-				<methodname>addValidator()</methodname>.</listitem>
-
-				<listitem>Errors caused by validators attached to the fields inside forms,
-				if <methodname>setValidationVisible(true)</methodname> is set for the
-				form. This type of validation is explained futher in <xref
-				linkend="components.form.validation"/> below.</listitem>
-
-				<listitem>Errors from automatic validation of fields set as
-				<emphasis>required</emphasis> with
-				<methodname>setRequired(true)</methodname> if an error message has also been
-				set with <methodname>setRequiredError()</methodname>.</listitem>
-			</itemizedlist>
-
-			<para>
-				Only a single error is displayed in the error indicator at a time.
-			</para>
-
-			<para>
-				Finally, <classname>Form</classname> has a footer area. The footer is a
-				<classname>HorizontalLayout</classname> by default, but you can
-				change it with <methodname>setFooter()</methodname>.
-			</para>
-
-			<programlisting><?pocket-size 65% ?><emphasis>// Set the footer layout.</emphasis>
-form.<methodname>setFooter</methodname>(new <classname>VerticalLayout</classname>());
-
-form.<methodname>getFooter</methodname>().<methodname>addComponent</methodname>(
-        new <classname>Label</classname>("This is the footer area of the Form. "+
-                  "You can use any layout here. "+
-                  "This is nice for buttons."));
-
-// Have a button bar in the footer.
-<classname>HorizontalLayout</classname> okbar = new <classname>HorizontalLayout</classname>();
-okbar.<methodname>setHeight</methodname>("25px");
-form.<methodname>getFooter</methodname>().<methodname>addComponent</methodname>(okbar);
-
-<emphasis>// Add an Ok (commit), Reset (discard), and Cancel buttons
-// for the form.</emphasis>
-<classname>Button</classname> okbutton = new <classname>Button</classname>("OK", form, "commit");
-okbar.<methodname>addComponent</methodname>(okbutton);
-okbar.<methodname>setComponentAlignment</methodname>(okbutton, Alignment.TOP_RIGHT);
-okbar.<methodname>addComponent</methodname>(new <classname>Button</classname>("Reset", form, "discard"));
-okbar.<methodname>addComponent</methodname>(new <classname>Button</classname>("Cancel"));</programlisting>
-
-
-			<simplesect xml:id="components.form.layout.css">
-				<title>CSS Style Rules</title>
-
-				<programlisting>.v-form {}
-.v-form legend
-.v-form fieldset {}
-.v-form-error {}
-.v-form-errormessage {}
-.v-form-description {}</programlisting>
-
-				<para>
-					The top-level style name of a <classname>Form</classname> component is
-					<literal>v-form</literal>. It is important to notice that the form is
-					implemented as a HTML <literal>&lt;fieldset&gt;</literal>, which
-					allows placing the caption (or "legend") inside the border. It would
-					not be so meaningful to set a border for the top-level form
-					element. The following example sets a border around the form, as is
-					done in <xref linkend="figure.ui.form.layout"/> above.
-				</para>
-
-				<programlisting>.v-form fieldset {
-    border: thin solid;
-}</programlisting>
-
-				<para>
-					The top-level element of the form has the style name
-					<literal>v-form-error</literal> if a component error has been set for
-					the form.
-				</para>
-
-			</simplesect>
-
-		</section>
-
-		<section xml:id="components.form.binding">
-			<title>Binding Form to Data</title>
-
-			<para>
-				The main purpose of the <classname>Form</classname> component is that you
-				can bind it to a data source and let the <classname>Form</classname>
-				generate and manage fields automatically. The data source can be any class
-				that implements the <classname>Item</classname> interface, which is part
-				of the Vaadin Data Model, as described in <xref
-				linkend="datamodel"/>. You can either implement the
-				<classname>Item</classname> interface yourself, which can be overly
-				complicated, or use the ready <classname>BeanItem</classname> adapter to
-				bind the form to any JavaBean object. You can also use
-				<classname>PropertysetItem</classname> to bind the form to an ad hoc set
-				of <classname>Property</classname> objects, resembling a 
-				<classname>Map</classname>.
-			</para>
-
-			<para>
-				Let us consider the following simple JavaBean with proper setter and
-				getter methods for the member variables.
-			</para>
-
-			<programlisting><![CDATA[/** A simple JavaBean. */
-public class PersonBean {
-    String name;
-    String city;
-    
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setCity(String city) {
-        this.city = city;
-    }
-
-    public String getCity() {
-        return city;
-    }
-}]]></programlisting>
-
-			<para>
-				We can now bind this bean to a <classname>Form</classname> using the
-				<classname>BeanItem</classname> adapter as follows.
-			</para>
-
-			<programlisting><?pocket-size 75% ?><emphasis>// Create a form and use FormLayout as its layout.</emphasis>
-final <classname>Form</classname> form = new <classname>Form</classname>();
-
-<emphasis>// Set form caption and description texts</emphasis>
-form.setCaption("Contact Information");
-form.setDescription("Please specify name of the person and the city where the person lives in.");
-
-<emphasis>// Create the custom bean.</emphasis>
-<classname>PersonBean</classname> bean = new <classname>PersonBean</classname>();
-
-<emphasis>// Create a bean item that is bound to the bean.</emphasis>
-<classname>BeanItem</classname> item = new <classname>BeanItem</classname>(bean);
-
-<emphasis>// Bind the bean item as the data source for the form.</emphasis>
-form.setItemDataSource(item);</programlisting>
-
-			<para>
-				The <classname>Form</classname> uses <classname>FormLayout</classname>
-				layout by default and automatically generates the fields for each of the
-				bean properties, as shown in <xref linkend="figure.ui.form.binding.bean"/>
-				below.
-			</para>
-
-			<figure xml:id="figure.ui.form.binding.bean">
-				<title>Form Automatically Generated from a Bean</title>
-				<mediaobject>
-					<imageobject>
-						<imagedata smallscale="130" align="center" fileref="img/components/form-example1.png"/>
-					</imageobject>
-				</mediaobject>
-			</figure>
-
-			<para>
-				The automatically determined order of the fields can be undesirable. To
-				set the order properly, you can use the
-				<methodname>setVisibleItemProperties()</methodname> method of the
-				<classname>Form</classname>, which takes an ordered collection as its
-				parameter. Fields that are not listed in the collection are not included
-				in the form.
-			</para>
-
-			<programlisting><emphasis>// Set the order of the items in the form.</emphasis>
-<classname>Vector</classname> order = new <classname>Vector</classname>();
-order.add("city");
-order.add("name");
-form.setVisibleItemProperties(order);</programlisting>
-
-			<para>
-				The form uses the property identifiers as the captions of the fields by
-				default. If you want to have more proper captions for the fields, which is
-				often the case, you need to use a <classname>FieldFactory</classname> to
-				create the fields, as is shown in the section below.
-			</para>
-
-			<section xml:id="components.form.binding.fieldfactory">
-				<title>Generating Proper Fields with a <classname>FormFieldFactory</classname></title>
-
-				<para>
-					The form generates the fields automatically using very coarse logic. A
-					<classname>String</classname>, <classname>int</classname>, or
-					<classname>double</classname> will result in a
-					<classname>TextField</classname> alike, regardless of the meaning of
-					the field. You might want to have a city name to be input with a combo
-					box, for example. You can create such custom fields by implementing
-					the <methodname>createField()</methodname> method in the
-					<classname>FormFieldFactory</classname> interface.
-				</para>
-
-				<para>
-                    The default implementation, <classname>DefaultFieldFactory</classname>
-                    is shared with the <classname>Table</classname> component: it also
-                    implements the <classname>TableFieldFactory</classname>
-                    interface. This allows the <classname>DefaultFieldFactory</classname>
-                    to create the fields for both purposes with the same logic. It is
-                    usually simplest to just extend the default implementation instead of
-                    implementing the interfaces from scratch. You should consult the
-                    source code of <classname>DefaultFieldFactory</classname> to see how
-                    it works; you may want to reimplement
-                    <methodname>createFieldByPropertyType()</methodname>, which actually
-                    creates the fields by type, instead of the
-                    <methodname>createField()</methodname>.
-                </para>
-
-                <!-- TODO: describe the createField() method somehow. -->
-
-				<para>
-					Below is an example of implementing the
-					<classname>FormFieldFactory</classname> interface for a specific form,
-					using the names of the fields of the form to create the editable field
-					components.
-				</para>
-
-                <!-- TODO: Have an example that extends DefaultFieldFactory? -->
-
-                <programlisting><?pocket-size 65% ?>class MyFieldFactory implements FormFieldFactory {
-    public Field createField(Item item, Object propertyId,
-                             Component uiContext) {
-        // Identify the fields by their Property ID.
-        String pid = (String) propertyId;
-        if ("name".equals(pid)) {
-            return new TextField("Name");
-        } else if ("city".equals(pid)) {
-            Select select = new Select("City");
-            select.addItem("Berlin");
-            select.addItem("Helsinki");
-            select.addItem("London");
-            select.addItem("New York");
-            select.addItem("Turku");
-            select.setNewItemsAllowed(true);
-            return select;
-        }
-        
-        return null; // Invalid field (property) name.
-    }
-}</programlisting>
-
-				<para>
-					You set a <classname>Form</classname> to use a custom field factory
-					with <methodname>setFieldFactory()</methodname>:
-				</para>
-
-				<programlisting>form.setFieldFactory(new MyFieldFactory());</programlisting>
-				<para>
-					The earlier example will now look as shown in <xref linkend="figure.ui.form.binding.fieldfactory"/>.
-				</para>
-
-				<figure xml:id="figure.ui.form.binding.fieldfactory">
-					<title>Form Fields Generated with a <classname>FormFieldFactory</classname></title>
-					<mediaobject>
-						<imageobject>
-							<imagedata smallscale="120" align="center" fileref="img/components/form-example2.png"/>
-						</imageobject>
-					</mediaobject>
-				</figure>
-			</section>
-		</section>
-		<section xml:id="components.form.validation">
-			<title>Validating Form Input</title>
-
-			<para>
-				Validation of the form input is one of the most important tasks in
-				handling forms. The fields in Vaadin can be bound to
-				validators. The validation provides feedback about bad input and the forms
-				can also manage validation results and accept the input only if all
-				validations are successful. Fields can also be set as
-				<emphasis>required</emphasis>, which is a special built-in validator. The
-				validators work on the server-side.
-			</para>
-
-			<section>
-				<title>Using Validators in Forms</title>
-
-				<para>
-					Validators check the validity of input and, if the input is invalid,
-					can provide an error message through an exception. Validators are classes
-					that implement the <classname>Validator</classname> interface. The
-					interface has two methods that you must implement:
-					<methodname>isValid()</methodname> that returns the success or failure
-					as a truth value, and <methodname>validate()</methodname>, which
-					reports a failure with an exception. The exception can be associated
-					with an error message describing the details of the error.
-				</para>
-
-				<para>
-					Simple validators that only need to produce a single error message
-					in case the validation fails can inherit from
-					<classname>AbstractValidator</classname> or
-					<classname>AbstractStringValidator</classname>.
-					The Vaadin also provides a number of standard validators,
-					including <classname>IntegerValidator</classname> and
-					<classname>DoubleValidator</classname> for validating numerical
-					input, <classname>StringLengthValidator</classname>,
-					<classname>EmailValidator</classname> and the more general
-					<classname>RegexpValidator</classname> for checking that a string
-					matches a Java regular expression:  
-				</para>
-				
-				<programlisting><?pocket-size 65% ?>// Postal code that must be 5 digits (10000-99999).
-TextField field = new TextField("Postal Code");
-field.setColumns(5);
-
-// Create the validator
-Validator postalCodeValidator = new RegexpValidator(
-    "[1-9][0-9]{4}", "Postal code must be a number 10000-99999.");
-field.addValidator(postalCodeValidator);</programlisting>
-
-				<para>
-					If you are using a custom <classname>FieldFactory</classname> to
-					generate the fields, you may want to set the validators for fields
-					there. It is useful to have the form in <emphasis>immediate</emphasis>
-					mode:
-				</para>
-
-				<programlisting><?pocket-size 65% ?>// Set the form to act immediately on user input. This is
-// necessary for the validation of the fields to occur immediately
-// when the input focus changes and not just on commit.
-form.setImmediate(true);</programlisting>
-
-				<para>
-					Validation is done always when you call the
-					<methodname>commit()</methodname> method of the
-					<classname>Form</classname>.
-				</para>
-
-				<programlisting><?pocket-size 65% ?>// The Commit button calls form.commit().
-Button commit = new Button("Commit", form, "commit");</programlisting>
-
-				<para>
-					If any of the validators in the form fail, the commit will fail and a
-					validation exception message is displayed in the error indicator of
-					the form. If the commit is successful, the input data is written to
-					the data source. Notice that <methodname>commit()</methodname> also
-					implicitly sets <methodname>setValidationVisible(true)</methodname> (if
-					<methodname>setValidationVisibleOnCommit()</methodname> is
-					<parameter>true</parameter>, as is the default). This makes the error
-					indicators visible even if they were previously not visible.
-				</para>
-
-				<figure>
-					<title>Form Validation in Action</title>
-					<mediaobject>
-						<imageobject>
-							<imagedata smallscale="140" align="center" fileref="img/components/form-validation-1.png"/>
-						</imageobject>
-					</mediaobject>
-				</figure>
-
-				<para>
-					For cases in which more complex error handling is required, the
-					validator can also implement the <classname>Validator</classname>
-					interface directly:
-				</para>
-				
-				<programlisting><?pocket-size 65% ?><![CDATA[// Create the validator
-Validator postalCodeValidator = new Validator() {
-
-    // The isValid() method returns simply a boolean value, so
-    // it can not return an error message.
-    public boolean isValid(Object value) {
-        if (value == null || !(value instanceof String)) {
-            return false;
-        }
-
-        return ((String) value).matches("[1-9][0-9]{4}");
-    }
-
-    // Upon failure, the validate() method throws an exception
-    // with an error message.
-    public void validate(Object value)
-                throws InvalidValueException {
-        if (!isValid(value)) {
-            if (value != null &&
-                value.toString().startsWith("0")) {
-                throw new InvalidValueException(
-                    "Postal code must not start with a zero.");
-            } else {
-                throw new InvalidValueException(
-                    "Postal code must be a number 10000-99999.");
-            }
-        }
-    }
-};]]></programlisting>
-
-			</section>
-
-			<section>
-				<title>Required Fields in Forms</title>
-
-				<para>
-					Setting a field as <parameter>required</parameter> outside a form is
-					usually just a visual clue to the user. Leaving a required field empty
-					does not display any error indicator in the empty field as a failed
-					validation does. However, if you set a form field as required with
-					<methodname>setRequired(true)</methodname> and give an error message
-					with <methodname>setRequiredError()</methodname> and the user leaves
-					the required field empty, the form will display the error message in
-					its error indicator.
-				</para>
-
-				<programlisting><?pocket-size 65% ?>form.getField("name").setRequired(true);
-form.getField("name").setRequiredError("Name is missing");
-form.getField("address").setRequired(true); // No error message</programlisting>
-
-				<para>
-					To have the validation done immediately when the fields lose focus,
-					you should set the form as <emphasis>immediate</emphasis>, as was done
-					in the section above.
-				</para>
-				
-				<figure>
-					<title>Empty Required Field After Clicking Commit</title>
-					<mediaobject>
-						<imageobject>
-							<imagedata smallscale="130" align="center" fileref="img/components/form-required-example1.png"/>
-						</imageobject>
-					</mediaobject>
-				</figure>
-
-				<note>
-                    <para>
-                        It is important that you provide the user with feedback
-                        from failed validation of required fields either by setting an
-                        error message or by providing the feedback by other
-                        means.
-                    </para>
-
-                    <para>
-                        Otherwise, when a user clicks the <guibutton>Ok</guibutton> button
-                        (commits the form), the button does not appear to work and the
-                        form does not indicate any reason. As an alternative to setting
-                        the error message, you can handle the validation error and provide
-                        the feedback about the problem with a different mechanism.
-                    </para>
-				</note>
-			</section>
-
-		</section>
-		<section xml:id="components.form.buffering">
-			<title>Buffering Form Data</title>
-
-			<para>
-                Buffering means keeping the edited data in a buffer and writing it to the data
-                source only when the <methodname>commit()</methodname> method is called for the
-                component. If the user has made changes to a buffer, calling
-                <methodname>discard()</methodname> restores the buffer from the data
-                source. Buffering is actually a feature of all <classname>Field</classname>
-                components and <classname>Form</classname> is a
-                <classname>Field</classname>. <classname>Form</classname> manages the buffering of
-                its contained fields so that if <methodname>commit()</methodname> or
-                <methodname>discard()</methodname> is called for the <classname>Form</classname>, it
-                calls the respective method for all of its managed fields.
-			</para>
-
-            <programlisting><?pocket-size 75% ?>final Form form = new Form();
-...add components...
-
-// Enable buffering.
-form.setWriteThrough(false);
-
-// The Ok button calls form.commit().
-Button commit = new Button("Ok", form, "commit");
-
-// The Restore button calls form.discard().
-Button restore = new Button("Restore", form, "discard");</programlisting>
-
-            <para>
-                The Form example in the Feature Browser of Vaadin demonstrates buffering in
-                forms. The <emphasis>Widget caching demo</emphasis> in Additional demos demonstrates
-                buffering in other <classname>Field</classname> components, its source code is
-                available in <filename>BufferedComponents.java</filename>.
-            </para>
-
-		</section>
 	</section>
 
 	<section xml:id="components.progressindicator">
@@ -7615,10 +7013,10 @@ protected byte[] getLoginHTML() {
 
             <indexterm><primary>Google Web Toolkit</primary></indexterm>
 
-            Even further, you can create entirely new low-level components,
-            by integrating custom Google Web Toolkit components or by extending the
-            client-side functionality of built-in components. Development of custom GWT
-            components is covered in <xref linkend="gwt"/>.
+            Even further, you can create entirely new low-level components, by integrating
+            pure client-side components or by extending the client-side functionality of
+            built-in components. Development of new components is covered in <xref
+            linkend="gwt"/>.
 		</para>
 	</section>
 

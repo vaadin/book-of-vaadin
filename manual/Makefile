@@ -58,7 +58,8 @@ XMLFILES =  book.xml \
 	chapter-application.xml	chapter-getting-started.xml	chapter-mobile.xml	chapter-uidl.xml \
 	chapter-architecture.xml	chapter-gwt.xml	chapter-rapid.xml	chapter-vaadin.xml \
 	chapter-calendar.xml	chapter-introduction.xml	chapter-sqlcontainer.xml \
-	chapter-components.xml	chapter-jpacontainer.xml	chapter-testbench.xml
+	chapter-components.xml	chapter-jpacontainer.xml \
+	chapter-testbench.xml chapter-portal.xml
 
 
 # List if icons in img/icons

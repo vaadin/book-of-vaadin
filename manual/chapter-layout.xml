@@ -114,13 +114,9 @@
 			the interaction components as the leaves of the component tree.
 		</para>
 
-        <programlisting><?pocket-size 70% ?><![CDATA[// Create the main window.
-Window main = new Window("My Application");
-setMainWindow(main);
-
-// Set the root layout (VerticalLayout is actually the default).
+        <programlisting><?pocket-size 70% ?><![CDATA[// Set the root layout (VerticalLayout is actually the default).
 VerticalLayout root = new VerticalLayout();
-main.setContent(root);
+setContent(root);
 
 // Add the topmost component.
 root.addComponent(new Label("The Ultimate Cat Finder"));
@@ -1259,6 +1255,359 @@ scrollButtons.addComponent(scrollDown);]]></programlisting>
             </simplesect>
         </section>
     </section>
+
+	<section xml:id="layout.sub-window">
+		<title>Sub-Windows</title>
+		
+		<para>
+            <emphasis>Sub-windows</emphasis> are floating panels within a native browser
+            window. Unlike native windows, they are managed by the client-side runtime of
+            Vaadin using HTML features. Vaadin allows opening and closing sub-windows,
+            refreshing one window from another, resizing windows, and scrolling the window
+            content. Sub-windows are typically used for <firstterm>Dialog
+            Windows</firstterm> and <firstterm>Multiple Document Interface</firstterm>
+            applications. Sub-windows are by default not modal; you can set them modal as
+            described in <xref linkend="layout.sub-window.modal"/>.
+		</para>
+
+		<para>
+			As with all user interface components, the appearance of a window and its
+			contents is defined with themes.
+		</para>
+
+		<para>
+			User control of a sub-window is limited to moving, resizing, and closing
+			the window. Maximizing or minimizing are not yet supported.
+		</para>
+
+		<section xml:id="layout.sub-window.openclose">
+			<title>Opening and Closing a Sub-Window</title>
+			
+			<para>
+				You can open a new window by creating a new
+				<classname>Window</classname> object and adding it to the
+				main window with <methodname>addWindow()</methodname> method of
+				the <classname>Application</classname> class.
+			</para>
+
+			<programlisting><![CDATA[mywindow = new Window("My Window");
+mainwindow.addWindow(mywindow);]]></programlisting>
+
+			<para>
+				You close the window in a similar fashion, by calling the
+				<methodname>removeWindow()</methodname> of the
+				<classname>Application</classname> class:
+			</para>
+
+			<programlisting><![CDATA[myapplication.removeWindow (mywindow);]]></programlisting>
+
+			<para>
+				The user can, by default, close a sub-window by clicking the close
+				button in the upper-right corner of the window. You can disable the button
+				by setting the window as <emphasis>read-only</emphasis> with
+				<methodname>setReadOnly(true)</methodname>. Notice that you could disable
+				the button also by making it invisible in CSS with a "<parameter>display:
+				none</parameter>" formatting. The problem with such a cosmetic disabling
+				is that a malicious user might re-enable the button and close the window,
+				which might cause problems and possibly be a security hole. Setting
+				the window as read-only not only disables the close button on the client
+				side, but also prevents processing the close event on the server side.
+			</para>
+	
+			<para>
+				The following example demonstrates the use of a sub-window in an
+				application. The example manages the window using a custom component that
+				contains a button for opening and closing the window.
+			</para>
+
+			<programlisting><?pocket-size 65% ?><![CDATA[/** Component contains a button that allows opening a window. */
+public class WindowOpener extends CustomComponent
+                          implements Window.CloseListener {
+    Window mainwindow;  // Reference to main window
+    Window mywindow;    // The window to be opened
+    Button openbutton;  // Button for opening the window
+    Button closebutton; // A button in the window
+    Label  explanation; // A descriptive text
+
+    public WindowOpener(String label, Window main) {
+        mainwindow = main;
+
+        // The component contains a button that opens the window.
+        final VerticalLayout layout = new VerticalLayout();
+        
+        openbutton = new Button("Open Window", this,
+                                "openButtonClick");
+        explanation = new Label("Explanation");
+        layout.addComponent(openbutton);
+        layout.addComponent(explanation);
+        
+        setCompositionRoot(layout);
+    }
+
+    /** Handle the clicks for the two buttons. */
+    public void openButtonClick(Button.ClickEvent event) {
+        /* Create a new window. */
+        mywindow = new Window("My Dialog");
+        mywindow.setPositionX(200);
+        mywindow.setPositionY(100);
+
+        /* Add the window inside the main window. */
+        mainwindow.addWindow(mywindow);
+
+        /* Listen for close events for the window. */
+        mywindow.addListener(this);
+
+        /* Add components in the window. */
+        mywindow.addComponent(
+                new Label("A text label in the window."));
+        closebutton = new Button("Close", this, "closeButtonClick");
+        mywindow.addComponent(closebutton);
+
+        /* Allow opening only one window at a time. */
+        openbutton.setEnabled(false);
+
+        explanation.setValue("Window opened");
+    }
+
+    /** Handle Close button click and close the window. */
+    public void closeButtonClick(Button.ClickEvent event) {
+        /* Windows are managed by the application object. */
+        mainwindow.removeWindow(mywindow);
+
+        /* Return to initial state. */
+        openbutton.setEnabled(true);
+
+        explanation.setValue("Closed with button");
+    }
+
+    /** In case the window is closed otherwise. */
+    public void windowClose(CloseEvent e) {
+        /* Return to initial state. */
+        openbutton.setEnabled(true);
+
+        explanation.setValue("Closed with window controls");
+    }
+}]]></programlisting>
+
+			<para>
+				The example implements a custom component that inherits the
+				<classname>CustomComponent</classname> class. It consists of a
+				<classname>Button</classname> that it uses to open a window and a
+				<classname>Label</classname> to describe the state of the window. When the
+				window is open, the button is disabled. When the window is closed, the
+				button is enabled again. <!-- TODO: Notice that pushing the
+				<guibutton>Close</guibutton> button removes the window, but the close
+				event will not be called so after removal we have to disable the ... -->
+			</para>
+
+			<para>
+				You can use the above custom component in the application class with:
+			</para>
+
+			<programlisting><?pocket-size 75% ?> public void init() { 
+    Window main = new Window("The Main Window"); 
+    setMainWindow(main);
+
+    main.addComponent(new WindowOpener("Window Opener", main));
+}</programlisting>
+
+			<para>
+				When added to an application, the screen will look as illustrated
+				in the following screenshot:
+			</para>
+
+			<figure xml:id="figure.window.open.example">
+				<title>Opening a Sub-Window</title>
+				<mediaobject>
+					<imageobject role="html">
+						<imagedata align="center" fileref="img/layout/window_openexample.png"/>
+					</imageobject>
+					<imageobject role="fo">
+						<imagedata smallscale="100%" align="center" fileref="img/layout/window_openexample.png"/>
+					</imageobject>
+				</mediaobject>
+			</figure>
+
+		</section>
+
+		<section xml:id="layout.sub-window.position">
+			<title>Window Positioning</title>
+
+			<para>
+				When created, a window will have a default size and
+				position. You can specify the size of a window with
+				<methodname>setHeight()</methodname> and
+				<methodname>setWidth()</methodname> methods. You can set the
+				position of the window with <methodname>setPositionX()</methodname>
+				and <methodname>setPositionY()</methodname> methods.
+			</para>
+
+			<programlisting><![CDATA[/* Create a new window. */
+mywindow = new Window("My Dialog");
+
+/* Set window size. */
+mywindow.setHeight("200px");
+mywindow.setWidth("400px");
+
+/* Set window position. */
+mywindow.setPositionX(200);
+mywindow.setPositionY(50);]]></programlisting>
+
+			<para>
+				Notice that the size of the main window is unknown and the
+				<methodname>getHeight</methodname> and
+				<methodname>getWidth</methodname> methods will return
+				<returnvalue>-1</returnvalue>.
+			</para>
+
+		</section>
+
+		<section xml:id="layout.sub-window.scrolling">
+			<title>Scrolling Sub-Window Content</title>
+
+            <indexterm xml:id="term.layout.sub-window.scrolling.scrollbars" class="startofrange">
+                <primary>scroll bars</primary>
+            </indexterm>
+
+            <para>
+                If a sub-window has a fixed or percentual size and its content becomes too
+                big to fit in the content area, a scroll bar will appear for the
+                particular direction. On the other hand, if the sub-window has undefined
+                size in the direction, it will fit the size of the content and never get a
+                scroll bar. Scroll bars in sub-windows are handled with regular HTML
+                features, namely <literal>overflow: auto</literal> property in CSS.
+                <indexterm><primary>overflow</primary></indexterm>
+            </para>
+
+
+            <para>
+                <indexterm><primary><interfacename>Scrollable</interfacename></primary></indexterm>
+
+                As <classname>Window</classname> extends <classname>Panel</classname>,
+                windows are also <interfacename>Scrollable</interfacename>. Note that the
+                interface defines <emphasis>programmatic scrolling</emphasis>, not
+                scrolling by the user. Please see <xref linkend="layout.components.panel"/>.
+            </para>
+
+            <indexterm startref="term.layout.sub-window.scrolling.scrollbars" class="endofrange"/>
+        </section>
+
+		<!-- section xml:id="section.window.native"> <title>Native Child Windows</title>
+
+			<note>
+				<title>Not Yet Supported</title>
+
+				Support for native child windows is not yet available in Vaadin
+				Release 5. The Release 5 allows you, however, to access the application
+				from multiple root windows. 
+			</note>
+
+			<para>
+				Native windows are managed by the operating system or its
+				windowing system and window manager. This is the common type of
+				windows on a desktop. As Vaadin applications run on a
+				web browser, the native windows are browser windows, often called
+				<emphasis>popup windows</emphasis>, which can be separate windows
+				or managed as tabs by the browser.
+			</para>
+
+			<para>
+				You can define a window to be a native (popup) window by setting
+				its style with <methodname>setStyle("native")</methodname>. The
+				following screenshot is taken from the above example in <xref
+				linkend="section.window.openclose"/> with the style set to
+				native.
+			</para>
+
+			<figure xml:id="figure.window.native">
+				<title>Screenshot of a native child window</title>
+				<mediaobject>
+					<imageobject role="html">
+						<imagedata align="center" fileref="img/layout/window_native.png"/>
+					</imageobject>
+					<imageobject role="fo">
+						<imagedata scale="60" align="center" fileref="img/layout/window_native.png"/>
+					</imageobject>
+				</mediaobject>
+			</figure>
+
+			<para>
+				While Vaadin 4.x supports native windows, they are
+				generally not recommended because of various problems they
+				create. For one, the browser will not tell when a window is
+				closed, so there will be no
+				<methodname>windowClose()</methodname> event. You will never know
+				if a certain window really is open or not. It also means that the
+				window object can be left hanging. You should never trust that a
+				window still exists or prevent the user from opening a new window
+				to replace a closed window. Many browsers also prevent opening
+				popup windows by default, and may do so invisibly, so the user
+				might be left wondering why pushing a button did not do anything.
+			</para>
+
+			<para>
+				For example, consider the above example in <xref
+				linkend="section.window.openclose"/>. Notice that since the main
+				window depends on the state of the child window: the opening
+				button is grayed when the child window is open. If the child
+				window was a native window and the user clicked on the close
+				button available on all native windows, the browser would not
+				tell the application about the event. The opening button in the
+				main window would be left grayed for all eternity.
+			</para>
+
+	        </section -->
+
+		<section xml:id="layout.sub-window.modal">
+			<title>Modal Windows</title>
+
+			<para>
+				A modal window is a child window that has to be closed by the
+				user before the use of the parent window can continue. Dialog windows
+				are typically modal. The advantage of modal windows is the
+				simplification of user interaction, which may contribute to the
+				clarity of the user interface. Modal windows are also easy to use
+				from a development perspective, because as user interaction is
+				isolated to them, changes in application state are more limited
+				while the modal window is open. The disadvantage of modal windows
+				is that they can restrict workflow too much.
+			</para>
+
+			<figure xml:id="figure.window.modal">
+				<title>Screenshot of the Modal Window Demo Application</title>
+				<mediaobject>
+					<imageobject role="html">
+						<imagedata align="center" fileref="img/layout/window_modal.png"/>
+					</imageobject>
+					<imageobject role="fo">
+						<imagedata scale="90" smallscale="100%" align="center" fileref="img/layout/window_modal.png"/>
+					</imageobject>
+				</mediaobject>
+			</figure>
+			
+			<para>
+				Depending on theme settings, the parent window may be grayed
+				while the modal window is open.
+			</para>
+
+			<para>
+				The demo application of Vaadin includes an example of
+				using modal windows. <xref linkend="figure.window.modal"/> above
+				is from the demo application. The example includes the source
+				code.
+			</para>
+
+			<warning>
+				<title>Security Warning</title>
+				<para>
+					Modality of child windows is purely a client-side feature and can be
+					circumvented with client-side attack code. You should not trust in the
+					modality of child windows in security-critical situations such as
+					login windows.
+				</para>
+			</warning>
+		</section>
+	</section> <!-- Child windows -->
 
 	<section xml:id="layout.components.splitpanel">
         <title><classname>HorizontalSplitPanel</classname> and <classname>VerticalSplitPanel</classname></title>

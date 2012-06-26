@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<appendix xml:id="vaadin6-migration">
+	<title>Migrating from Vaadin 6</title>
+
+    <section xml:id="vaadin6-migration.overview">
+        <title>Overview</title>
+
+        <para>
+            The Vaadin 7 API is more clearly for the web. Earlier many web concepts were
+            more abstracted from the developer, while now they are more easily
+            accessible. For example, the <methodname>init()</methodname> method receives
+            as a parameter HTTP request data, which was earlier more difficult to
+            obtain. Also the new central concept of <classname>Root</classname> is for web
+            use where Vaadin applications are often embedded in web pages.
+        </para>
+    </section>
+
+    <section xml:id="vaadin6-migration.root">
+        <title>The Role of <classname>Root</classname></title>
+
+        <para>
+            The "main window" concept in Vaadin 6 is replaced with
+            <emphasis>root</emphasis>. A root is in most cases what "main window" used to
+            be in Vaadin 6, and in most code you can simply change
+            <classname>Window</classname> to <classname>Root</classname>.
+        </para>
+
+        <para>
+            Even more visibly, a Vaadin application does not any longer extend
+            <classname>Application</classname>, but <classname>Root</classname>.
+        </para>
+
+        <para>
+            Consider a Vaadin 6 application:
+        </para>
+
+        <programlisting><?pocket-size 75% ?><![CDATA[public class MyApplication extends Application {
+    @Override
+    public void init() {
+        mainWindow = new Window("Myportlet Application");
+        setMainWindow(mainWindow);
+
+        mainWindow.addComponent(new Label("Hello, world!"));
+        ...
+    }
+}]]></programlisting>
+
+        <para>
+            In Vaadin 7, the equivalent is:
+        </para>
+
+        <programlisting><?pocket-size 75% ?><![CDATA[
+public class MyRoot extends Root {
+    @Override
+    protected void init(WrappedRequest request) {
+        addComponent(new Label("Hello, world!"));
+        ...
+    }
+}]]></programlisting>
+
+        <para>
+            The new <classname>WrappedRequest</classname> contains request data received
+            in the initial request, which was previously only available by implementing
+            <interface>HttpServletRequestListener</interface> in the application class.
+        </para>
+    </section>
+</appendix>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: xml
+sgml-omittag:nil
+sgml-shorttag:nil
+sgml-namecase-general:nil
+sgml-general-insert-case:lower
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:4
+sgml-indent-data:t
+sgml-parent-document:nil
+sgml-exposed-tags:nil
+sgml-local-catalogs:("/etc/sgml/catalog" "/usr/share/xemacs21/xemacs-packages/etc/psgml-dtds/CATALOG")
+sgml-local-ecat-files:("ECAT" "~/sgml/ECAT" "/usr/share/sgml/ECAT" "/usr/local/share/sgml/ECAT" "/usr/local/lib/sgml/ECAT")
+End:
+-->

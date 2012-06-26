@@ -11,36 +11,9 @@
 
 	<para>
 		This chapter describes how you can create custom client-side components as Google
-		Web Toolkit (GWT) widgets and how you integrate them with Vaadin. The client-side
-		implementations of all standard user interface components in Vaadin use the same
-		client-side interfaces and patterns.
-	</para>
-
-	<para>
-		Google Web Toolkit is intended for developing browser-based user interfaces using
-		the Java language, which is compiled into JavaScript that is executed in the
-		browser. Knowledge of such client-side technologies is usually not needed with
-		Vaadin, as its built-in repertoire of user interface components should be
-		sufficient for most applications. The easiest way to create custom components in
-		Vaadin is to make composite components with the
-		<classname>CustomComponent</classname> class, as described in <xref
-		linkend="components.customcomponent"/>. In some cases, however, you may need to
-		make modifications to existing components, integrate existing GWT widgets with
-		your application, or create entirely new ones.
-	</para>
-
-	<para>
-		Creation of new widgets involves a number of rather intricate tasks. The Vaadin
-		Plugin for Eclipse makes many of the tasks much easier, so if you are using
-		Eclipse and the plugin, you should find <xref linkend="gwt.eclipse"/> helpful.
-	</para>
-
-	<para>
-		If you need more background on the architecture, <xref
-		linkend="architecture.client-side"/> gives an introduction to the
-		architecture of the Vaadin Client-Side Engine. If you are new to Google
-		Web Toolkit, <xref linkend="architecture.technology.gwt"/> gives an introduction to
-		GWT and its role in the architecture of Vaadin.
+		Web Toolkit (GWT) widgets or JavaScript components and how you integrate them with
+		Vaadin. The client-side implementations of all standard user interface components
+		in Vaadin use the same client-side interfaces and patterns.
 	</para>
 
 	<note>
@@ -57,165 +30,191 @@
 		</para>
 	</note>
 
-	<section xml:id="gwt.overview">
-		<title>Overview</title>
+    <section xml:id="gwt.overview">
+        <title>Overview</title>
 
         <para>
-            <indexterm><primary>Client-Side Engine</primary></indexterm>
-            <indexterm><primary>JavaScript</primary></indexterm>
-
-            The Client-Side Engine of Vaadin runs in the web browser as a JavaScript
-            program and renders the user interface components according to state data
-            received from the server. For each server-side component, there is a
-            client-side widget, which renders the content of the particular component
-            type.
-
-            <indexterm>
-                <primary>Google Web Toolkit</primary>
-                <secondary>GWT Compiler</secondary>
-            </indexterm>
-            <indexterm><primary>Java</primary></indexterm>
-
-            The client-side engine and all the built-in client-side widgets of
-            Vaadin have been programmed in Java with GWT, and compiled into JavaScript
-            with the GWT Compiler. Developing custom Vaadin components and integrating
-            existing GWT widgets is easy, requiring only Java programming.
+            Vaadin components consist of two parts: a server-side and a client-side
+            component. The latter are also called <emphasis>widgets</emphasis> in Google
+            Web Toolkit (GWT) parlance. A Vaadin application uses the API of the
+            server-side component, which is "painted" as a client-side widget in the
+            browser. As on the server-side, the client-side widgets form a hierarchy of
+            layout widgets and regular widgets as the leaves.
         </para>
 
         <para>
-            <indexterm><primary>Paintable</primary></indexterm>
+            The communication between a client-side widget and a server-side component is
+            managed with a <emphasis>connector</emphasis> that handles syncronizing the
+            widget state and events to and from the server-side.
 
-            You can start with any existing GWT widget or design a new one. To integrate
-            it with Vaadin, you have to implement the <classname>Paintable</classname>
-            interface of the client-side engine that provides the AJAX communications with
-            the server-side application. You can find the interface in the
-            <package>com.vaadin.terminal.gwt.client</package> package. You can also choose
-            to extend an existing Vaadin client-side widget in the
-            <package>com.vaadin.terminal.gwt.client.ui</package> package. You can find the
-            source code for the built-in widgets in the Vaadin JAR.
+            <indexterm><primary>connector</primary></indexterm>
         </para>
 
         <para>
-            <indexterm><primary>DefaultWidgetSet</primary></indexterm>
-            <indexterm><primary>widget set</primary></indexterm>
-            <indexterm>
-                <primary>Google Web Toolkit</primary>
-                <secondary>GWT Module Descriptor</secondary>
-            </indexterm>
+            When painting the user interface, a client-side widget is created for each
+            server-side component. This mapping is defined in the connector class with a
+            <literal>@Connect</literal> annotation.
 
-            To use custom widgets, you need to define a <emphasis>widget set</emphasis>
-            that inherits the <classname>DefaultWidgetSet</classname>, which contains the
-            standard widgets, or some other widget set. You can also define stylesheets
-            for custom widgets. A widget set is defined in a GWT Module Descriptor.
+            <indexterm><primary>@Connect</primary></indexterm>
         </para>
 
-		<para>
-			For the server-side API, you need a server-side component that can serialize
-			and deserialize its attributes to and from the client-side counterpart.
+        <para>
+            The state of a server-side component is synchronized automatically to the
+            client-side widget and back using a <emphasis>shared state</emphasis>
+            object. A shared state object implements the
+            <interfacename>ComponentState</interfacename> interface and it is used both in
+            the server-side and the client-side component. On the client-side, a connector
+            always has access to its state instance, as well to the state of its parent
+            component state and the states of its children.
 
-            <indexterm>
-                <primary>AbstractComponent</primary>
-                <secondary><methodname>paintContent()</methodname></secondary>
-                <secondary><methodname>paint()</methodname></secondary>
-            </indexterm>
-            <indexterm>
-                <primary>AbstractField</primary>
-                <secondary><methodname>paintContent()</methodname></secondary>
-                <secondary><methodname>paint()</methodname></secondary>
-            </indexterm>
+            <indexterm><primary>state object</primary></indexterm>
+            <indexterm><primary><classname>ComponentState</classname></primary></indexterm>
+        </para>
 
-            A server-side component usually inherits the
-            <classname>AbstractComponent</classname> or
-            <classname>AbstractField</classname> class and implements either the
-            <methodname>paintContent()</methodname> or the more generic
-            <methodname>paint()</methodname> method to serialize its data to the
-            client.
+        <para>
+            The state sharing assumes that state is defined with standard Java types, such
+            as integers, doubles, ...
+        </para>
 
-            <indexterm><primary>UIDL</primary></indexterm>
+        <para>
+            In addition to state, both server- and client-side can make remote procedure
+            calls (RPC) on the other side. RPC is used foremost for event
+            notifications. For example, when a client-side connector of a button receives
+            a click, it sends the event to the server-side using RPC.
+        </para>
 
-            These methods "paint" the component in the browser by generating a UIDL
-            element that is sent to the client. The UIDL element contains all the relevant
-            information about the component, and you can easily add your own attributes to
-            it. Upon reception of UIDL messages, the client-side engine creates or updates
-            user interface widgets as needed.
-		</para>
+        <simplesect xml:id="gwt.overview.javascript">
+            <title>Integrating JavaScript Components</title>
 
-		<para>
-			To summarize, you need to do the following:
-		</para>
+            <para>
+                In addition to the GWT widget integration, Vaadin offers a simplified way
+                to integrate pure JavaScript components. The JavaScript connector code is
+                published from the server-side. As the JavaScript integration does not
+                involve GWT programming, no widget set compilation is needed.
 
-		<itemizedlist>
-            <indexterm><primary>Paintable</primary></indexterm>
-			<listitem>Implement the <classname>Paintable</classname> interface of Vaadin in a GWT widget</listitem>
+                <indexterm><primary>JavaScript</primary></indexterm>
+            </para>
+        </simplesect>
+    </section>
 
-            <indexterm><primary>widget set</primary></indexterm>
-			<listitem>Define a widget set that extends an existing widget set with the new widget</listitem>
+    <section xml:id="gwt.layout">
+        <title>Handling Layouts</title>
 
-            <indexterm><primary>CSS</primary></indexterm>
-			<listitem>Create a default CSS style sheet for the widget set (optional)</listitem>
+        <section xml:id="gwt.sizes">
+            <title>Handling Sizes</title>
+        </section>
 
-            <indexterm>
-                <primary>Google Web Toolkit</primary>
-                <secondary>GWT Module Descriptor</secondary>
-            </indexterm>
-            <indexterm><primary>GWT Module Descriptor</primary></indexterm>
+        <section xml:id="gwt.layout.managed">
+            <title>Managed Layouts</title>
 
-			<listitem>Create a GWT Module Descriptor (<filename>.gwt.xml</filename>) that
-			defines the widget set and the optional style sheet</listitem>
+            <para>
+                A <classname>ManagedLayout</classname> is the most versatile, and at the
+                same time the heaviest, way to lay out widgets.
+            </para>
+        </section>
+    </section>
 
-            <indexterm><primary>server-side component</primary></indexterm>
-			<listitem>Create a server-side counterpart for the client-side widget</listitem>
+    <section xml:id="gwt.addons">
+        <title>Creating Add-ons</title>
 
-		</itemizedlist>
+        <indexterm xml:id="term.gwt.addons" class="startofrange" significance="preferred">
+            <primary>add-ons</primary>
+            <secondary>creating</secondary>
+        </indexterm>
 
-		<para>
-            <indexterm><primary>Color Picker</primary></indexterm>
+        <para>
+        </para>
 
-			<xref linkend="figure.gwt.widget-files"/> illustrates the folder hierarchy of
-			the Color Picker example used in this chapter.
-		</para>
+        <indexterm startref="term.gwt.addons" class="endofrange"/>
+    </section>
 
-		<figure xml:id="figure.gwt.widget-files">
-			<title>Color Picker Package</title>
-			<mediaobject>
-				<imageobject role="html">
-					<imagedata align="center" fileref="img/gwt/gwt-widget-files-lo.png"/>
-				</imageobject>
-				<imageobject role="fo">
-					<imagedata scale="60" smallscale="100%" align="center" fileref="img/gwt/gwt-widget-files-hi.png"/>
-				</imageobject>
-			</mediaobject>
-		</figure>
+    <section xml:id="gwt.vaadin-6-migration">
+        <title>Migrating from Vaadin 6</title>
 
-		<para>
-			The <filename>ColorPickerApplication.java</filename> application provides an
-			example of using the custom <classname>ColorPicker</classname> component. The
-			source code for the server-side implementation of the component is located in
-			the same folder.
-		</para>
+        <indexterm xml:id="term.gwt.vaadin-6-migration" class="startofrange" significance="preferred">
+            <primary>Vaadin 6 Migration</primary>
+            <secondary>add-ons</secondary>
+        </indexterm>
 
-		<para>
-            <indexterm><primary>Google Web Toolkit</primary><secondary>GWT Compiler</secondary></indexterm>
+        <para>
+            The client-side architecture was redesigned almost entirely in Vaadin 7. In
+            Vaadin 6, state synchronization was done explicitly by serializing and
+            deserializing the state on the server- and client-side. In Vaadin 7, the
+            serialization is handled automatically by the framework using state objects.
+        </para>
+        
+        <para>
+            In Vaadin 6, a server-side component serialized its state to the client-side
+            using the <interfacename>Paintable</interfacename> interface and deserialized
+            the state through the <interfacename>VariableOwner</interfacename>
+            interface. In Vaadin 7, these are done through the
+            <interfacename>ClientConnector</interfacename> interface.
+        </para>
 
-			The GWT Compiler takes the root folder of the client-side source code as its
-			argument and compiles all the Java source files into JavaScript. A client-side
-			widget set must therefore be contained within a single package, which in the
-			Color Picker example is the
-			<filename>com.vaadin.demo.colorpicker.gwt.client</filename> package. The
-			inherited widget set and an optional style sheet are specified in a
-			<filename>.gwt.xml</filename> descriptor for the GWT Compiler. In the example,
-			the client-side widget is split in two classes:
-			<classname>GwtColorPicker</classname>, a pure GWT widget, and
-			<classname>VColorPicker</classname> that provides the integration with
-			Vaadin. The default style sheet for the widget set is defined in the
-			descriptor and located in the
-			<filename>gwt/public/colorpicker/styles.css</filename> subfolder.
-		</para>
+        <para>
+            On the client-side, a widget deserialized its state through the
+            <interfacename>Paintable</interfacename> interface and sent state changes
+            through the <interfacename>ApplicationConnection</interfacename> object. In
+            Vaadin 7, these are replaced with the
+            <interfacename>ServerConnector</interfacename>.
+        </para>
 
-	</section>
+        <para>
+            In addition to state synchronization, Vaadin 7 has an RPC mechanism that can
+            be used for communicating events. They are especially useful for events that
+            are not associated with a state change, such as a button click.
+        </para>
 
-	<section xml:id="gwt.eclipse">
-		<title>Doing It the Simple Way in Eclipse</title>
+        <para>
+            The framework ensures that the connector hierarchy and states are up-to-date
+            when listeners are called.
+        </para>
+
+        <section xml:id="gwt.vaadin-6-migration.quick">
+            <title>Quick (and Dirty) Migration</title>
+
+            <para>
+                Vaadin 7 has a compatibility layer that allows quick conversion of a widget.
+            </para>
+
+            <orderedlist>
+                <listitem>
+                    <para>
+                        Create a connector class, such as
+                        <classname>MyConnector</classname>, that extends
+                        <classname>Vaadin6Connector</classname>. Implement the
+                        <methodname>createWidget()</methodname> method as
+                        <literal>GWT.create(MyWidget.class)</literal>.
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        Move the <literal>@ClientWidget(MyWidget.class)</literal> from the
+                        server-side component, say <classname>MyComponent</classname>, to
+                        the <classname>MyConnector</classname> class and make it
+                        <literal>@Connect(MyComponent.class)</literal>.
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        Have the server-side component implement the
+                        <interface>Vaadin6Component</interface> interface to enable
+                        compatibility handling.
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        Remove any calls to <literal>super.paintContent()</literal>
+                    </para>
+                </listitem>
+            </orderedlist>
+        </section>
+
+        <indexterm startref="term.gwt.vaadin-6-migration" class="endofrange"/>
+    </section>
+
+    <section xml:id="gwt.eclipse">
+        <title>Starting It Simple With Eclipse</title>
 
         <indexterm xml:id="term.gwt.eclipse" class="startofrange">
             <primary>Eclipse</primary>
@@ -231,98 +230,84 @@
 		<section xml:id="gwt.eclipse.widget">
 			<title>Creating a Widget</title>
 
-			<para>
-				You can create a new widget as follows:
-			</para>
 
-			<orderedlist>
-				<listitem>
-					<para>
-						Select
-						<menuchoice><guimenu>File</guimenu><guisubmenu>New</guisubmenu><guimenuitem>Other...</guimenuitem></menuchoice>
-						in the main menu <emphasis>or</emphasis> right-click the
-						<guilabel>Project Explorer</guilabel> and select
-						<menuchoice><guimenu>New</guimenu><guimenuitem>Other...</guimenuitem></menuchoice>
-						<emphasis>or</emphasis> press
-						<keycombo><keycap>Ctrl</keycap><keycap>N</keycap></keycombo> to
-						open the <guilabel>New</guilabel> dialog.
-					</para>
-				</listitem>
+            <orderedlisting>
+                <listitem>
+                    <para>
+                        Right-click the project in the Project Explorer and select
+                        <menuchoice><guimenu>New</guimenu><guimenuitem>Other...</guimenuitem></menuchoice>.
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        In the wizard selection, select
+                        <menuchoice><guimenu>Vaadin</guimenu><guimenuitem>Vaadin
+                        Widget</guimenuitem></menuchoice> and click
+                        <guibutton>Next</guibutton>.
+                    </para>
 
-				<listitem>
-					<para>
-						In the first, <guilabel>Select a wizard</guilabel> step, select
-						<menuchoice><guimenu>Vaadin</guimenu><guimenuitem>Vaadin
-						Widget</guimenuitem></menuchoice> and click
-						<guibutton>Next</guibutton>.
-					</para>
+                    <screenshot>
+                        <mediaobject>
+                            <imageobject role="html">
+                                <imagedata align="center" fileref="img/eclipse/widget-new-select.png"/>
+                            </imageobject>
+                            <imageobject role="fo">
+                                <imagedata scale="100" smallscale="100%" align="center" fileref="img/eclipse/widget-new-select.png"/>
+                            </imageobject>
+                        </mediaobject>
+                    </screenshot>
+                </listitem>
+                <listitem>
+                    <para>
+                        In the <guilabel>New Component Wizard</guilabel>, make the following
+                        settins.
+                    </para>
 
-					<screenshot>
-						<mediaobject>
-							<imageobject role="html">
-								<imagedata align="center" fileref="img/eclipse/widget-new-select.png"/>
-							</imageobject>
-							<imageobject role="fo">
-								<imagedata scale="100" smallscale="100%" align="center" fileref="img/eclipse/widget-new-select.png"/>
-							</imageobject>
-						</mediaobject>
-					</screenshot>
-				</listitem>
-
-				<?dbfo-need height="5cm" ?>
-				<listitem>
-					<para>
-						In the <guilabel>New Component wizard</guilabel> step, fill out
-						the target folder, package, and class information.
-					</para>
-
-					<screenshot>
-						<mediaobject>
-							<imageobject role="html">
-								<imagedata align="center" fileref="img/eclipse/widget-new-settings.png"/>
-							</imageobject>
-							<imageobject role="fo">
-								<imagedata scale="100" smallscale="100%" align="center" fileref="img/eclipse/widget-new-settings.png"/>
-							</imageobject>
-						</mediaobject>
-					</screenshot>
-
-					<variablelist>
-						<varlistentry>
-							<term><guilabel>Source folder</guilabel></term>
-							<listitem>
-								<para>
-									The root folder of the entire source tree. The default
-									value is the default source tree of your project, and
-									you should normally leave it unchanged unless you have
-									a different project structure.
-								</para>
-							</listitem>
-						</varlistentry>
-						<varlistentry>
-							<term><guilabel>Package</guilabel></term>
-							<listitem>
-								<para>
-									The parent package under which the new server-side
-									component should be created. If it does not already
-									exist, the <filename>.gwt.xml</filename> descriptor
-									that defines the widget set will be created under the
-									<package>widgetset</package> subpackage under this
-									package, and the actual new widget under the
-									<package>widgetset.client.ui</package> subpackage.
-								</para>
-							</listitem>
-						</varlistentry>
+                    <screenshot>
+                        <mediaobject>
+                            <imageobject>
+                                <imagedata scale="100" smallscale="100%" align="center" fileref="img/eclipse/widget-new-settings.png"/>
+                            </imageobject>
+                        </mediaobject>
+                    </screenshot>
+                    
+                    <variablelist>
+                        <varlistentry>
+                            <term><guilabel>Source folder</guilabel></term>
+                            <listitem>
+                                <para>
+                                    The root folder of the entire source tree. The default
+                                    value is the default source tree of your project, and
+                                    you should normally leave it unchanged unless you have
+                                    a different project structure.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term><guilabel>Package</guilabel></term>
+                            <listitem>
+                                <para>
+                                    The parent package under which the new server-side
+                                    component should be created. If the project does not
+                                    already have a widget set, one is created under this
+                                    package in <package>widgetset</package>
+                                    subpackage. The subpackage will contain the
+                                    <filename>.gwt.xml</filename> descriptor that defines
+                                    the widget set and the new widget stub under the
+                                    <package>widgetset.client</package> subpackage.
+                                </para>
+                            </listitem>
+                        </varlistentry>
 						<varlistentry>
 							<term><guilabel>Name</guilabel></term>
 							<listitem>
 								<para>
 									The class name of the new <emphasis>server-side
 									component</emphasis>. The name of the client-side
-									widget stub (if you have its creation enabled) will be
-									the same but with "<classname>V</classname>-" prefix,
-									for example, <classname>VMycomponent</classname>. You
-									can rename the classes afterwards.
+									widget stub will be the same but with
+									"-<classname>Widget</classname>" suffix, for example,
+									<classname>MycomponentWidget</classname>. You can
+									rename the classes afterwards.
 								</para>
 							</listitem>
 						</varlistentry>
@@ -342,12 +327,15 @@
 							</listitem>
 						</varlistentry>
 						<varlistentry>
-							<term><guilabel>Build client-side stub</guilabel></term>
+							<term><guilabel>Template</guilabel></term>
 							<listitem>
 								<para>
-									When this option is selected (strongly recommended),
-									the wizard will build a stub for the client-side
-									widget.
+									Select which template to use. The default is
+									<guilabel>Full fledged</guilabel>, which creates the
+									server-side component, the client-side widget, the
+									connector, a shared state object, and an RPC
+									object. The <guilabel>Connector only</guilabel> leaves
+									the shared state and RPC objects out.
 								</para>
 							</listitem>
 						</varlistentry>
@@ -356,8 +344,8 @@
 					<para>
 						Finally, click <guibutton>Finish</guibutton> to create the new component.
 					</para>
-				</listitem>
-			</orderedlist>
+                </listitem>
+            </orderedlisting>
 
 			<para>
 				The wizard will:
@@ -369,19 +357,20 @@
                 </listitem>
 
 				<listitem>
-                    <para>Create a GWT module descriptor file (<filename>.gwt.xml</filename>) in
-                    the <filename>widgetset</filename> package under the base package</para>
+                    <para>
+                        If the project does not already have a widget set, the wizard
+                        creates a GWT module descriptor file
+                        (<filename>.gwt.xml</filename>) in the base package and modifies
+                        the <filename>web.xml</filename> deployment descriptor to specify
+                        the widget set class name parameter for the application
+                    </para>
                 </listitem>
 
 				<listitem>
-                    <para>Create a client-side widget stub in the
-                    <filename>widgetset.client.ui</filename> package under the base
+                    <para>Create a client-side widget stub (along with the connector and
+                    shared state and RPC stubs) in the
+                    <filename>client.componentname</filename> package under the base
                     package</para>
-                </listitem>
-
-                <listitem>
-                    <para>Modify the <filename>web.xml</filename> deployment descriptor to
-                    specify the widget set class name parameter for the application.</para>
                 </listitem>
 			</itemizedlist>
 
@@ -390,7 +379,7 @@
 				the serialization of component state between them, is explained in the
 				subsequent sections of this chapter.
 			</para>
-			
+
 			<para>
 				To compile the widget set, click the <guibutton>Compile widget
 				set</guibutton> button in the Eclipse toolbar. See <xref
@@ -419,24 +408,26 @@
 				compiler requires that the client-side code <emphasis>must</emphasis>
 				always be stored under a package named "<filename>client</filename>".
 			</para>
-		</section>
+        </section>
 
 		<section xml:id="gwt.eclipse.compiling">
-			<title>Recompiling the Widget Set</title>
+			<title>Compiling the Widget Set</title>
 
 			<para>
-				After you edit a widget, you need to recompile the widget set. Vaadin
-				automatically suggests to compile the widget set every time you save
-				a client-side source file. If this gets annoying, you can disable the automatic
-				recompilation from the Vaadin category in project settings, by selecting
-				the <guilabel>Suspend automatic widgetset builds</guilabel> option.
+				After you edit a widget, you need to compile the widget set. The Vaadin
+				Plugin for Eclipse automatically suggests to compile the widget set in
+				various situations, such as when you save a client-side source file. If
+				this gets annoying, you can disable the automatic recompilation in the
+				Vaadin category in project settings, by selecting the <guilabel>Suspend
+				automatic widgetset builds</guilabel> option.
             </para>
 
             <para>
-                You can recompile the widget set manually by clicking the
-                <guibutton>Compile widgetset</guibutton> button in the Eclipse toolbar,
-                shown in <xref linkend="figure.gwt.eclipse.compiling.toolbar"/> while the
-                project is open and selected.
+                You can compile the widget set manually by clicking the <guibutton>Compile
+                widgetset</guibutton> button in the Eclipse toolbar, shown in <xref
+                linkend="figure.gwt.eclipse.compiling.toolbar"/>, while the project is
+                open and selected. If the project has multiple widget set definition
+                files, you need to select the one to compile in the Project Explorer.
 			</para>
 
             <!-- TODO: Better icon as requested in #3692. -->
@@ -454,12 +445,13 @@
 
             <para>
                 The compilation progress is shown in the <guilabel>Console</guilabel>
-                panel in Eclipse, as illustrated in <xref
-                linkend="figure.gwt.eclipse.compiling"/>.
+                panel in Eclipse, illustrated in <xref
+                linkend="figure.gwt.eclipse.compiling"/>. You should note especially the
+                list of widget sets found in the class path.
             </para>
 
 			<figure xml:id="figure.gwt.eclipse.compiling" float="center" floatstyle="before">
-				<title>Recompiling a Widget Set</title>
+				<title>Compiling a Widget Set</title>
 				<mediaobject>
 					<imageobject role="html">
 						<imagedata align="center" fileref="img/eclipse/widgetset-compiling.png"/>
@@ -469,7 +461,7 @@
 					</imageobject>
 				</mediaobject>
 			</figure>
-
+            
 			<para>
 				The compilation output is written under the
 				<filename>WebContent/VAADIN/widgetsets</filename> folder, in a widget set
@@ -485,2442 +477,41 @@
             </para>
 
 			<para>
-				For detailed information on compiling widget sets, see <xref
+				For more information on compiling widget sets, see <xref
 				linkend="gwt.development.compiler"/>. Should you compile a widget set
 				outside Eclipse, you need to refresh the project by selecting it in
 				<guilabel>Project Explorer</guilabel> and pressing <keycap>F5</keycap>.
 			</para>
-		</section>
-
-        <section xml:id="gwt.plugin.settings">
-            <title>Plugin Related Project Settings</title>
-
-            <para>
-                When you have the Eclipse Plugin installed, the project settings will have
-                a <guilabel>Vaadin</guilabel> section, where you can select the Vaadin
-                version and make settings to widget set building. The settings window is
-                shown in <xref linkend="figure.gwt.plugin.settings"/>.
-            </para>
-
-            <figure xml:id="figure.gwt.plugin.settings">
-                <title>Plugin Related Project Settings</title>
-                <mediaobject>
-                    <imageobject role="html">
-                        <imagedata align="center" fileref="img/eclipse/project-settings-widgetset.png"/>
-                    </imageobject>
-                    <imageobject role="fo">
-                        <imagedata scale="60" smallscale="100%" align="center" fileref="img/eclipse/project-settings-widgetset.png"/>
-                    </imageobject>
-                </mediaobject>
-            </figure>
-
-            <variablelist>
-                <varlistentry>
-                    <term><guilabel>Suspend automatic widgetset builds</guilabel></term>
-                    <listitem>
-                        <para>
-                            Normally, when this option is unselected, Eclipse will suggest
-                            to rebuild the widget set automatically every time you save a
-                            widget source file. If this gets annoying, you can suspend the
-                            automatic building by enabling this option. You then have to
-                            click the widget set build button in the Eclipse toolbar.
-                        </para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term><guilabel>JavaScript style</guilabel></term>
-                    <listitem>
-                        <para>
-                            Normally, GWT outputs obfuscated JavaScript to make the code
-                            less readable. The main purpose is to protect the intellectual
-                            property, but the obfuscated code is also more compact,
-                            reducing the time required to load and parse the files. The
-                            <guilabel>Obfuscated</guilabel> mode is the default. The other
-                            output types are <guilabel>Pretty</guilabel>, which makes the
-                            JavaScript more readable to a human, and
-                            <guilabel>Detailed</guilabel>, which is more detailed than the
-                            pretty option with, for example, more descriptive variable
-                            names.
-                        </para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term><guilabel>Compiler threads</guilabel></term>
-                    <listitem>
-                        <para>
-                            You can set the GWT Compiler to use a specific number of
-                            threads to use the available processor cores.
-                        </para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term><guilabel>Create development mode launch</guilabel></term>
-                    <listitem>
-                        <para>
-                            Clicking this button generates a launch configuration for
-                            starting the application in GWT Development Mode. You can use
-                            the launch configuration to debug client-side code. See <xref
-                            linkend="gwt.development.development-mode"/> for detailed information on
-                            the GWT Develpment Mode launch configuration.
-                        </para>
-                    </listitem>
-                </varlistentry>
-            </variablelist>
-
-            <para>
-                The plugin will automatically download the GWT version compatible with the
-                selected Vaadin package.
-            </para>
         </section>
 
         <indexterm startref="term.gwt.eclipse" class="endofrange"/>
-	</section>
+    </section>
 
-	<section xml:id="gwt.widgets">
-		<title>Google Web Toolkit Widgets</title>
+    <section xml:id="gwt.javascript">
+        <title>Integrating JavaScript Components</title>
 
-		<para>
-			Let us take a look into how you create custom GWT widgets. The authoritative
-			sources for developing with GWT are the <emphasis><indexterm><primary>Google
-			Web Toolkit</primary></indexterm>Google Web Toolkit Developer Guide</emphasis>
-			and <emphasis>Google Web Toolkit Class Reference</emphasis>, both available
-			from the GWT website.
-		</para>
-
-		<para>
-			Google Web Toolkit offers a variety of ways for creating custom widgets. The
-			easiest way is to create <emphasis>composite</emphasis> widgets by grouping
-			existing basic widgets and adding some interaction logic to them. You can also
-			develop widgets using the lower-level Java interfaces used by the standard GWT
-			widgets or the really low-level JavaScript interfaces.
-		</para>
-
-		<para>
-			A custom GWT widget needs to find its place in the GWT class hierarchy. <xref
-			linkend="figure.gwt.widgets"/> illustrates the abstract base classes for
-			GWT widgets.
-		</para>
-
-		<figure xml:id="figure.gwt.widgets">
-			<title>GWT Widget Base Class Hierarchy</title>
-			<mediaobject>
-				<imageobject role="html">
-					<imagedata align="center" fileref="img/gwt/gwt-widgets-lo.png"/>
-				</imageobject>
-				<imageobject role="fo">
-					<imagedata scale="60" smallscale="100%" align="center" fileref="img/gwt/gwt-widgets-hi.png"/>
-				</imageobject>
-			</mediaobject>
-		</figure>
-
-		<para>
-			Each of the base classes offers various services for different types of
-			widgets. Many custom widgets, such as the Color Picker example below, extend
-			the <classname>Composite</classname> class to compose the widget from existing
-			GWT widgets. The other base classes offer various features useful for
-			different kinds of widgets. You can also choose to extend an existing GWT
-			widget, as we have done for most of the standard user interface components of
-			Vaadin, or to extend a Vaadin widget.
-		</para>
-
-		<section xml:id="gwt.widgets.extending">
-			<title>Extending a Vaadin Widget</title>
-
-			<para>
-				Extending an existing Vaadin widget is an easy way to add features, such
-				as advanced client-side validation, to existing standard components. Just
-				extend both the server-side component and the client-side widget, and add
-				the needed properties and other functionality.
-			</para>
-
-			<para>
-                A few guidelines apply for extending existing components:
-            </para>
-
-            <itemizedlist>
-                <listitem>Do not redefine the <varname>client</varname> or
-                <varname>id</varname> member variables in the subclass. They should always
-                be defined as <parameter>protected</parameter> and set by the base class
-                where they are defined in
-                <methodname>updateFromUIDL()</methodname>.</listitem>
-
-                <listitem>Call <methodname>super()</methodname> as the first thing in the
-                constructor.</listitem>
-
-                <listitem>In <methodname>updateFromUIDL()</methodname>:
-
-                    <itemizedlist>
-                        <listitem>Do not call
-                        <methodname>client.updateComponent()</methodname> as it is already
-                        called in the superclass. If the superclass calls it in an
-                        undesired way, you have to reimplement the entire functionality
-                        and not call <methodname>super.updateFromUIDL()</methodname> at
-                        all.</listitem>
-
-                        <listitem>Call <methodname>super.updateFromUIDL(uidl,
-                        client)</methodname>, unless you specifically want to change the
-                        behaviour of the superclass implementation of the method. In such
-                        case, you have to set the <varname>client</varname> and
-                        <varname>id</varname> yourself.</listitem>
-                    </itemizedlist>
-
-                </listitem>
-
-                <listitem>Be careful about overloading superclass handlers, etc.</listitem>
-            </itemizedlist>
-
-            <!-- TODO: An example. -->
-
-		</section>
-
-		<section xml:id="gwt.widgets.example.colorpicker">
-			<title>Example: A Color Picker GWT Widget</title>
-
-			<para>
-				In the following example, we present a custom widget composited from the
-				<classname>HorizontalPanel</classname>, <classname>Grid</classname>,
-				<classname>Button</classname>, and <classname>Label</classname> GWT
-				widgets. This widget does not include any Vaadin integration with the
-				server-side code, which will be added in a separate integration widget
-				later in this chapter.
-			</para>
-
-            <programlisting><?pocket-size 65% ?><![CDATA[package com.vaadin.demo.colorpicker.gwt.client.ui;
-
-import com.google.gwt.event.dom.client.*;
-import com.google.gwt.user.client.*;
-import com.google.gwt.user.client.ui.*;
-
-/**
- * A regular GWT component without integration with Vaadin.
- */
-public class GwtColorPicker extends Composite
-                            implements ClickHandler {
-
-    // The currently selected color name to give client-side 
-    // feedback to the user.
-    protected Label currentcolor = new Label();
-
-    public GwtColorPicker() {
-        // Create a 4x4 grid of buttons with names for 16 colors
-        final Grid grid = new Grid(4, 4);
-        final String[] colors = new String[] { "aqua", "black",
-                "blue", "fuchsia", "gray", "green", "lime",
-                "maroon", "navy", "olive", "purple", "red",
-                "silver", "teal", "white", "yellow" };
-        int colornum = 0;
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 4; j++, colornum++) {
-                // Create a button for each color
-                Button button = new Button(colors[colornum]);
-                button.addClickHandler(this);
-
-                // Put the button in the Grid layout
-                grid.setWidget(i, j, button);
-
-                // Set the button background colors.
-                DOM.setStyleAttribute(button.getElement(),
-                                      "background",
-                                      colors[colornum]);
-
-                // For dark colors, the button label must be
-                // in white.
-                if ("black navy maroon blue purple"
-                        .indexOf(colors[colornum]) != -1) {
-                    DOM.setStyleAttribute(button.getElement(),
-                                          "color", "white");
-                }
-            }
-        }
-
-        // Create a panel with the color grid and currently
-        // selected color indicator.
-        final HorizontalPanel panel = new HorizontalPanel();
-        panel.add(grid);
-        panel.add(currentcolor);
-
-        // Set the class of the color selection feedback box 
-        // to allow CSS styling. We need to obtain the DOM
-        // element for the current color label. This assumes 
-        // that the <td> element of the HorizontalPanel is
-        // the parent of the label element. Notice that the 
-        // element has no parent before the widget has been
-        // added to the horizontal panel.
-        final Element panelcell =
-            DOM.getParent(currentcolor.getElement());
-        DOM.setElementProperty(panelcell, "className",
-                               "colorpicker-currentcolorbox");
-
-        // Set initial color. This will be overridden with the
-        // value read from server.
-        setColor("white");
-
-        // Composite GWT widgets must call initWidget().
-        initWidget(panel);
-    }
-
-    /** Handles click on a color button. */
-    @Override
-    public void onClick(ClickEvent event) {
-        // Use the button label as the color name to set
-        setColor(((Button) event.getSource()).getText());
-    }
-
-    /** Sets the currently selected color. */
-    public void setColor(String newcolor) {
-        // Give client-side feedback by changing the color
-        // name in the label.
-        currentcolor.setText(newcolor);
-
-        // Obtain the DOM elements. This assumes that the <td>
-        // element of the HorizontalPanel is the parent of the
-        // caption element.
-        final Element caption = currentcolor.getElement();
-        final Element cell = DOM.getParent(caption);
-
-        // Give feedback by changing the background color
-        DOM.setStyleAttribute(cell, "background", newcolor);
-        DOM.setStyleAttribute(caption, "background", newcolor);
-        if ("black navy maroon blue purple"
-                .indexOf(newcolor) != -1)
-            DOM.setStyleAttribute(caption, "color", "white");
-        else
-            DOM.setStyleAttribute(caption, "color", "black");
-    }
-}]]></programlisting>
-
-			<para>
-				This example demonstrates one reason for making a custom widget: it
-				provides client-side feedback to the user in a way that would not be
-				possible or at least practical from server-side code. Server-side code can
-				only select a static CSS style or a theme, while on the client-side we can
-				manipulate styles of HTML elements flexibly. Notice that manipulation of
-				the DOM tree depends somewhat on the browser. In this example, the
-				manipulation should be rather compatible, but in some cases there could be
-				problems. Thd standard GWT and Vaadin widgets handle many of such
-				compatibility issues, but when doing low-level operations such as DOM
-				manipulation, you may need to consider browser compatibility.
-			</para>
-
-			<para>
-				The structure of the DOM tree depends on how GWT renders its widgets in a
-				specific browser. It is also not guaranteed that the rendering does not
-				change in future releases of GWT. You should therefore make as few
-				assumptions regarding the DOM structure as possible. Unfortunately, GWT
-				does not provide a way to set the style of, for example, cells of layout
-				elements. The above example therefore assumes that the
-				<classname>Grid</classname> is a table and the
-				<literal>&lt;button&gt;</literal> elements are inside
-				<literal>&lt;td&gt;</literal> elements of the table. See <xref
-				linkend="gwt.widgets.styling" /> below for more details on compatibility.
-			</para>
-
-			<para>
-				The widget will look as shown in <xref
-				linkend="figure.gwt.integration.example.colorpicker.nostyle"/>.
-			</para>
-
-			<figure xml:id="figure.gwt.integration.example.colorpicker.nostyle">
-				<title>Color Picker Widget Without Styling</title>
-				<mediaobject>
-					<imageobject role="html">
-						<imagedata align="center" fileref="img/custom/gwt-colorpicker-2b.png"/>
-					</imageobject>
-					<imageobject role="fo">
-						<imagedata align="center" smallscale="130" fileref="img/custom/gwt-colorpicker-2b.png"/>
-					</imageobject>
-				</mediaobject>
-			</figure>
-
-			<para>
-				As you may notice, the widget will look rather uninviting without CSS styling. We will
-				next look how to define a default style for a GWT widget.
-			</para>
-		</section>
-
-		<section xml:id="gwt.widgets.styling">
-			<title>Styling GWT Widgets</title>
-			
-			<para>
-				GWT renders its widgets in the DOM tree of the web browser as HTML
-				elements. Therefore, you can define their style with Cascading Style
-				Sheets (CSS), just as in HTML. The GWT Compiler supports packaging style
-				sheets from the source package tree. The style sheet is defined in the
-				<filename>.gwt.xml</filename> GWT module descriptor file (see <xref
-				linkend="gwt.widgetset"/> for details).
-			</para>
-
-			<programlisting><![CDATA[<!-- Default theme for the widget set. -->
-<stylesheet src="colorpicker/styles.css"/>]]></programlisting>
-
-			<para>
-				The style sheet path is relative to the <filename>public</filename> folder
-				under the folder containing the <filename>.gwt.xml</filename> file. In
-				Eclipse, you can add the folders as regular folders instead of Java
-				packages.
-			</para>
-
-			<para>
-				Let us define the <filename>colorpicker/styles.css</filename> as follows.
-			</para>
-
-			<programlisting><?pocket-size 75% ?><![CDATA[/* Set style for the color picker table.
- * This assumes that the Grid layout is rendered
- * as a HTML <table>. */
-table.example-colorpicker {
-    border-collapse: collapse;
-    border: 0px;
-}
-
-/* Set color picker button style.
- * This does not make assumptions about the HTML
- * element tree as it only uses the class attributes
- * of the elements. */
-.example-colorpicker .gwt-Button {
-    height: 60px;
-    width: 60px;
-    border: none;
-    padding: 0px;
-}
-
-/* Set style for the right-hand box that shows the
- * currently selected color.  While this may work for
- * other implementations of the HorizontalPanel as well,
- * it somewhat assumes that the layout is rendered
- * as a table where cells are <td> elements. */
-.colorpicker-currentcolorbox {
-    width: 240px;
-    text-align: center;
-    /* Must be !important to override GWT styling: */
-    vertical-align: middle !important;
-}]]></programlisting>
-
-			<para>
-				The stylesheet above makes some assumptions regarding the HTML element
-				structure. First, it assumes that the <classname>Grid</classname> layout
-				is a table. Second, the custom class name,
-				<literal>colorpicker-currentcolorbox</literal>, of the right-hand
-				<classname>HorizontalPanel</classname> cell was inserted in the DOM
-				representation of the widget in the GwtColorPicker implementation. Styling
-				a button makes less assumptions. Using only class names instead of
-				specific element names may make a stylesheet more compatible if the HTML
-				representation is different in different browsers or changes in the future.
-			</para>
-			
-			<figure xml:id="figure.gwt.styling.colorpicker">
-				<title>Color Picker Widget With Styling</title>
-				<mediaobject>
-					<imageobject role="html">
-						<imagedata align="center" fileref="img/custom/gwt-colorpicker-2.png"/>
-					</imageobject>
-					<imageobject role="fo">
-						<imagedata smallscale="120" align="center" fileref="img/custom/gwt-colorpicker-2.png"/>
-					</imageobject>
-				</mediaobject>
-			</figure>
-
-		</section>
-	</section>
-
-	<section xml:id="gwt.integration">
-		<title>Integrating a GWT Widget</title>
-		
-		<para>
-			Integration of GWT widgets with Vaadin can be done in two basic ways:
-			by modifying the original widget or by extending it and adding the integration
-			code in the subclass. The latter way is actually the way the standard
-			client-side components in Vaadin are done: they simply inherit the
-			corresponding standard GWT widgets. For example,
-			<classname>VButton</classname> inherits GWT <classname>Button</classname>.
-		</para>
-
-		<para>
-			The client-side integration code has the following tasks:
-		</para>
-
-		<itemizedlist>
-			<listitem>Receive component state from server</listitem>
-			
-			<listitem>Send state changes caused by user interaction to server</listitem>
-
-			<listitem>Manage CSS style class</listitem>
-		</itemizedlist>
-		
-		<para>
-			The integration is broken down in the following sections into server-client
-			deserialization done in <methodname>updateFromUIDL()</methodname> and
-			client-server serialization done with
-			<methodname>updateVariable()</methodname>. The complete example of the
-			integration of the Color Picker widget is given at the end of this section.
-		</para>
-
-		<para>
-			If you are using the Eclipse IDE, the Vaadin Plugin for Eclipse allows easy
-			creation of a stub for a new widget, alongside its server-side component. It
-			also manages the widget set for you automatically. See <xref
-			linkend="gwt.eclipse.widget"/> for detailed instructions.
-		</para>
-
-		<note>
-			<title>Naming Conventions</title>
-
-			<para>
-				While the use of Vaadin does not require the use of any particular naming
-				conventions for GWT widgets, some notes regarding naming may be
-				necessary. Even though Java package names make it possible to use
-				identical class names in the same context, it may be useful to try to make
-				them more distinctive to avoid any inconvenience. GWT uses plain names for
-				its standard widgets, such as <classname>Button</classname>. The standard
-				components of Vaadin use identical or similar names, but that does not
-				cause any inconvenience, because the GWT widgets and server-side
-				components of Vaadin are never used in the same context. For the
-				client-side components of Vaadin, we use the "<literal>V</literal>"
-				prefix, for example <classname>VButton</classname>. In the Color Picker
-				example, we use <classname>GwtColorPicker</classname> for the GWT widget,
-				<classname>VColorPicker</classname> for the integration implementation,
-				and <classname>ColorPicker</classname> for the server-side component. You
-				may wish to follow similar conventions.
-			</para>
-
-			<para>
-				Notice that the naming convention changed when IT Mill Toolkit was renamed
-				as Vaadin. The prefix for client-side widgets in IT Mill Toolkit was
-				<literal>I</literal>, which was changed to <literal>V</literal> in
-				Vaadin. Similarly, CSS style name prefixes were changed from
-				<literal>i-</literal> to <literal>v-</literal>.
-			</para>
-		</note>
-
-		<section xml:id="gwt.integration.deserialization">
-			<title>Deserialization of Component State from Server</title>
-	
-			<para>
-				To receive data from the server, a widget must implement the
-				<classname>Paintable</classname> interface and its
-				<methodname>updateFromUIDL()</methodname> method. The idea is that the
-				method "paints" the user interface description by manipulating the HTML
-				tree on the browser. Typically, when using composite GWT components, most
-				of the DOM tree manipulation is done by standard GWT widgets.
-			</para>
-
-			<para>
-				An implementation of the <methodname>updateFromUIDL()</methodname> method
-				must include some routine tasks:
-			</para>
-
-			<itemizedlist>
-				<listitem>
-					Call <methodname>updateComponent()</methodname> and return if it
-					succeeds
-				</listitem>
-				
-				<listitem>Manage the component identifier</listitem>
-				
-				<listitem>
-					Manage a reference to the <classname>ApplicationConnection</classname>
-					object. The widget needs to know it to be able to initiate a server
-					request when a browser event occurs.
-				</listitem>
-
-			</itemizedlist>
-			
-			<para>
-				The latter two of these tasks are not needed if the widget does not handle
-				any user input that needs to be sent to server.
-			</para>
-
-			<para>
-				The following excerpt provides a skeleton for the
-				<methodname>updateFromUIDL()</methodname> method and shows how the
-				component identifier and connection object reference are managed by a
-				widget.
-			</para>
-
-	<programlisting><![CDATA[    String uidlId;
-    ApplicationConnection client;
-
-    ...
-
-    public void updateFromUIDL(UIDL uidl,
-            ApplicationConnection client) {
-        if (client.updateComponent(this, uidl, true))
-            return;
- 
-        this.client = client;
-        uidlId = uidl.getId();
-
-        ...
-    }]]></programlisting>
-
-			<para>
-				The <methodname>updateComponent()</methodname> call has several functions
-				important for different kinds of components. It updates various default
-				attributes, such as <parameter>disabled</parameter>,
-				<parameter>readonly</parameter>, <parameter>invisible</parameter>, and
-				(CSS) <parameter>style</parameter> attributes.  If the
-				<parameter>manageCaption</parameter> argument is <literal>true</literal>,
-				the call will also update the caption of the component. By default, the
-				caption is managed by the parent layout of the component. Components,
-				such as a <classname>Button</classname>, that manage the caption
-				themselves, do not need management of the caption.
-			</para>
-
-			<para>
-				The <methodname>updateComponent()</methodname> is also part of the
-				transmutation mechanism that allows a single server-side component to have
-				alternative client-side implementations, based on its parameters. For
-				example, the <classname>Button</classname> server-side component can
-				manifest either as a clickable <classname>VButton</classname> or as a
-				switchable <classname>VCheckBox</classname> widget on the client-side. If
-				the parameters are changed, the client-side widget can be replaced with
-				another dynamically. Determination of the correct implementation is done
-				in a <classname>WidgetSet</classname>. If
-				<methodname>updateComponent()</methodname> returns
-				<returnvalue>true</returnvalue>, the client-side engine can attempt to
-				replace the implementation. For more details on the transmutation
-				mechanism, see <xref linkend="gwt.widgetset"/>.
-			</para>
-
-			<para>
-				The component identifier is used when the component needs to serialize its
-				updated state to server. The reference to the application connection
-				manager is needed to make the server request. If a component does not have
-				any state changes that need to be sent to the server, management of the
-				variables is not needed. See <xref
-				linkend="gwt.integration.serialization"/> below for further details.
-			</para>
-
-			<para>
-				The design of the client-side framework of Vaadin, because the
-				<classname>Paintable</classname> is an interface and can not store any
-				references.  Having an API layer between GWT and custom widgets would be a
-				much more complicated solution.
-			</para>
-			
-		</section>
-
-		<section xml:id="gwt.integration.serialization">
-			<title>Serialization of Component State to Server</title>
-			
-			<para>
-				User input is handled in GWT widgets with events.
-			</para>
-
-			<para>
-				User input is passed to the server using the
-				<methodname>updateVariable()</methodname> method. If the
-				<parameter>immediate</parameter> parameter is
-				<parameter>false</parameter>, the value is simply added to a queue to be
-				sent to the server at next AJAX request. If the argument is
-				<parameter>true</parameter>, the AJAX request is made immediately, and
-				will include all queued updates to variables. The
-				<parameter>immediate</parameter> argument is described in more detail
-				below.
-			</para>
-
-			<programlisting><![CDATA[if (uidl_id == null || client == null)
-    return;
-
-client.updateVariable(uidl_id, "myvariable",
-                      newvalue, immediate);]]></programlisting>
-
-			<para>
-				The <parameter>client</parameter> of the above example is a reference to
-				the <classname>ApplicationConnection</classname> object that manages
-				server requests. The <parameter>uidl_id</parameter> argument is the UIDL
-				identifier obtained during a <methodname>updateFromUIDL()</methodname>
-				call with <methodname>uidl.getId()</methodname> method.
-			</para>
-
-			<para>
-				The <methodname>updateVariable()</methodname> method has several varieties
-				to send variables of different types.
-			</para>
-
-			<table>
-				<title>UIDL Variable Types</title>
-				<tgroup cols="3" align="left">
-					<thead>
-						<row valign="top">
-							<entry>Type</entry>
-							<entry>Description</entry>
-							<entry>UIDL Type</entry>
-						</row>
-					</thead>
-					<tbody>
-						<row valign="top">
-							<entry><constant>String</constant></entry>
-							<entry>
-								String object.
-							</entry>
-							<entry>s</entry>
-						</row>
-						<row valign="top">
-							<entry><constant>int</constant></entry>
-							<entry>
-								Native integer value.
-							</entry>
-							<entry>i</entry>
-						</row>
-						<row valign="top">
-							<entry><constant>long</constant></entry>
-							<entry>
-								Native long integer value.
-							</entry>
-							<entry>l</entry>
-						</row>
-						<row valign="top">
-							<entry><constant>float</constant></entry>
-							<entry>
-								Native single-precision floating-point value.
-							</entry>
-							<entry>f</entry>
-						</row>
-						<row valign="top">
-							<entry><constant>double</constant></entry>
-							<entry>
-								Native double-precision floating-point value.
-							</entry>
-							<entry>d</entry>
-						</row>
-						<row valign="top">
-							<entry><constant>boolean</constant></entry>
-							<entry>
-								Native boolean value.
-							</entry>
-							<entry>b</entry>
-						</row>
-						<row valign="top">
-							<entry><constant>Object[]</constant></entry>
-							<entry>
-								Array of object data. The
-								<methodname>toString()</methodname> method is used to
-								serialize each of the objects. The content strings are
-								escaped with <methodname>escapeString()</methodname>, to
-								allow characters such as quotes.
-							</entry>
-							<entry>a</entry>
-						</row>
-					</tbody>
-				</tgroup>
-			</table>
-
-			<para>
-				This serialization mechanism is intended to be as simple as possible
-				in most cases, when the user input is typically just one state
-				variable, while also allowing the serialization of more complex data,
-				if necessary.
-			</para>
-			
-			<section>
-				<title>Immediateness</title>
-				
-				<para>
-					Server-side components that inherit
-					<classname>AbstractComponent</classname> have an
-					<parameter>immediate</parameter> attribute, set with
-					<methodname>setImmediate()</methodname>. This attribute dictates
-					whether a component makes a server request immediately when its state
-					changes, or only afterwards. For example, there is no need to send the
-					contents of a "Username" <classname>TextField</classname> before the
-					"Login" button has been clicked. On the other hand, the server can set
-					the <classname>TextField</classname> as immediate to receive changes
-					for example when the component loses focus.
-				</para>
-
-				<para>
-					Most widgets should support immediateness by receiving the
-					<parameter>immediate</parameter> attribute from the UIDL message that
-					renders the widget. The following example is extracted from the
-					<classname>VTextField</classname> implementation.
-				</para>
-
-				<programlisting><?pocket-size 75% ?><![CDATA[// Store the immediate attribute in a member variable
-private boolean immediate = false;
-...
-
-public void updateFromUIDL(UIDL uidl,
-                           ApplicationConnection client) {
-    if(client.updateComponent(this, uidl, true))
-        return;
-
-    // Receive and store the immediate attribute
-    immediate  = uidl.getBooleanAttribute("immediate");
-    ...
-}
-
-public void onChange(Widget sender) {
-    if(client != null && id != null) {
-        // Use the stored immediate attribute to say
-        // whether or not make the server request
-        //  immediately.
-        client.updateVariable(id, "text", getText(),
-                              immediate);
-    }
-}]]></programlisting>
-
-				<para>
-					In some widgets, the <parameter>immediate</parameter> attribute would
-					have little meaning, and in fact an accidental
-					<parameter>false</parameter> value would cause undesired
-					behaviour. For example, a button is always expected to send a request
-					to the server when it is clicked. Such widgets can simply use
-					<parameter>true</parameter> for the <parameter>immediate</parameter>
-					argument in <methodname>updateVariable()</methodname>. For example,
-					<classname>VButton</classname> does as follows:
-					</para>
-
-				<programlisting><![CDATA[public void onClick(Widget sender) {
-    if (id == null || client == null)
-        return;
-    client.updateVariable(id, "state", true,
-                          /* always immediate */ true);
-}]]></programlisting>
-
-			</section>
-		</section>
-
-		<section xml:id="gwt.integration.example.colorpicker">
-			<title>Example: Integrating the Color Picker Widget</title>
-
-			<para>
-				Below is a complete example of an integration component for the Color
-				Picker example. It demonstrates all the basic tasks needed for the
-				integration of a GWT widget with its server-side counterpart component.
-			</para>
-
-		<programlisting><?pocket-size 65% ?><![CDATA[import com.vaadin.terminal.gwt.client.ApplicationConnection;
-import com.vaadin.terminal.gwt.client.Paintable;
-import com.vaadin.terminal.gwt.client.UIDL;
-
-public class VColorPicker extends GwtColorPicker
-                          implements Paintable {
-
-    /** Set the CSS class name to allow styling. */
-    public static final String CLASSNAME = "example-colorpicker";
-
-    /** Component identifier in UIDL communications. */
-    String uidlId;
-
-    /** Reference to the server connection object. */
-    ApplicationConnection client;
-
-    /**
-     * The constructor should first call super() to initialize
-     * the component and then handle any initialization relevant
-     * to Vaadin.
-     */
-    public VColorPicker() {
-        // The superclass has a lot of relevant initialization
-        super();
-
-        // This method call of the Paintable interface sets
-        // the component style name in DOM tree
-        setStyleName(CLASSNAME);
-    }
-
-    /**
-     * This method must be implemented to update the client-side
-     * component from UIDL data received from server.
-     * 
-     * This method is called when the page is loaded for the
-     * first time, and every time UI changes in the component
-     * are received from the server.
-     */
-    public void updateFromUIDL(UIDL uidl,
-                               ApplicationConnection client) {
-        // This call should be made first. Ensure correct
-        // implementation, and let the containing layout
-        // manage the caption, etc.
-        if (client.updateComponent(this, uidl, true))
-            return;
-
-        // Save reference to server connection object to be
-        // able to send user interaction later
-        this.client = client;
-
-        // Save the UIDL identifier for the component
-        uidlId = uidl.getId();
-
-        // Get value received from server and actualize it
-        // in the GWT component
-        setColor(uidl.getStringVariable("colorname"));
-    }
-
-    /**
-     * Override the method to communicate the new value
-     * to server.
-     **/
-    public void setColor(String newcolor) {
-        // Ignore if no change
-        if (newcolor.equals(currentcolor.getText()))
-            return;
-
-        // Let the original implementation to do
-        // whatever it needs to do
-        super.setColor(newcolor);
-
-        // Updating the state to the server can not be done
-        // before the server connection is known, i.e., before
-        // updateFromUIDL() has been called.
-        if (uidlId == null || client == null)
-            return;
-
-        // Communicate the user interaction parameters to server.
-        // This call will initiate an AJAX request to the server.
-        client.updateVariable(uidlId, "colorname",
-                              newcolor, true);
-    }
-}]]></programlisting>
-
-		</section>
-	</section>
-	
-	<section xml:id="gwt.widgetset">
-		<title>Defining a Widget Set</title>
-		
-		<para>
-			The client-side components, or in GWT terminology, widgets, must be made
-			usable in the client-side GWT application by defining a widget set. A widget
-			set is actually a GWT application and needs to be defined in the <emphasis>GWT
-			module descriptor</emphasis> as the entry point of the client-side engine. A
-			GWT module descriptor is an XML file with extension
-			<filename>.gwt.xml</filename>.
-		</para>
+        <indexterm xml:id="term.gwt.javascript" class="startofrange">
+            <primary>JavaScript integration</primary>
+        </indexterm>
 
         <para>
-            If you are using the Eclipse IDE, the New Vaadin Widget wizard will
-            automatically create the GWT module descriptor. See <xref
-            linkend="gwt.eclipse.widget"/> for detailed instructions.
+            Vaadin allows simplified integration of pure JavaScript components. The
+            JavaScript connector code is published from the server-side. As the JavaScript
+            integration does not involve GWT programming, no widget set compilation is
+            needed.
         </para>
 
-        <para>
-            The following example of <filename>ColorPickerWidgetSet.gwt.xml</filename>
-            shows the GWT module descriptor of the Color Picker application. We also
-            define the default stylesheet for the color picker widget, as described above
-            in <xref linkend="gwt.widgets.styling"/>.
-        </para>
-
-		<programlisting><?pocket-size 65% ?><![CDATA[<module>
-	<!-- Inherit the default widget set -->
-	<inherits name="com.vaadin.terminal.gwt.DefaultWidgetSet" />
-	
-	<!-- The default theme of this widget set -->	
-	<stylesheet src="colorpicker/styles.css"/>
-</module>]]></programlisting>
-
-        <para>
-            Compiling widget sets takes considerable time. You can reduce the compilation
-            time significantly by compiling the widget sets only for your browser, which
-            is useful during development. You can do this by setting the
-            <parameter>user.agent</parameter> property in the
-            <filename>.gwt.xml</filename> GWT module descriptor.
-        </para>
-
-        <programlisting><?pocket-size 75% ?><![CDATA[<set-property name="user.agent" value="gecko1_8"/>]]></programlisting>
-
-        <para>
-            The <parameter>value</parameter> attribute should match your browser. The
-            browsers supported by GWT depend on the GWT version, below is a list of
-            browser identifiers supported by GWT 2.0.
-        </para>
-
-        <table>
-            <title>GWT User Agents</title>
-            <tgroup cols="2" align="left">
-                <thead>
-                    <row valign="top">
-                        <entry>Identifier</entry>
-                        <entry>Name</entry>
-                    </row>
-                </thead>
-                <tbody>
-                    <row valign="top">
-                        <entry>gecko1_8</entry>
-                        <entry>Mozilla Firefox 1.5 and later</entry>
-                    </row>
-                    <row valign="top">
-                        <entry>gecko</entry>
-                        <entry>Mozilla Firefox 1.0 (<emphasis>obsolete</emphasis>)</entry>
-                    </row>
-                    <row valign="top">
-                        <entry>ie6</entry>
-                        <entry>Internet Explorer 6</entry>
-                    </row>
-                    <row valign="top">
-                        <entry>ie8</entry>
-                        <entry>Internet Explorer 8</entry>
-                    </row>
-                    <row valign="top">
-                        <entry>safari</entry>
-                        <entry>Apple Safari and other Webkit-based browsers including Google Chrome</entry>
-                    </row>
-                    <row valign="top">
-                        <entry>opera</entry>
-                        <entry>Opera</entry>
-                    </row>
-                </tbody>
-            </tgroup>
-        </table>
-
-        <para>
-            For more information about the GWT Module XML Format, please see Google Web
-            Toolkit Developer Guide.
-        </para>
-	</section>
-		
-	<section xml:id="gwt.server-side">
-		<title>Server-Side Components</title>
-
-		<para>
-			Server-side components provide the API for user applications to build their
-			user interface. Many applications do not ever need to bother with the
-			client-side implementation of the standard components, but those that use
-			their own GWT widgets need to have corresponding server-side components.
-		</para>
-
-		<para>
-			If you are using the Vaadin Plugin for Eclipse, the wizard for creating new
-			widgets will also create a stub of the server-side component for you. See
-			<xref linkend="gwt.eclipse.widget"/> for detailed instructions.
-		</para>
-
-		<para>
-			A server-side component has two basic tasks: it has to be able to serialize
-			its state variables to the corresponding client-side component, and
-			deserialize any user input received from the client. Many of these tasks are
-			taken care of by the component framework.
-		</para>
-
-		<section>
-			<title>Binding to the Client-Side Widget</title>
+        <section xml:id="gwt.javascript.connector">
+            <title>Defining a JavaScript Connector</title>
 
             <para>
-                A server-side component needs to be bound to a specific client-side
-                widget. This is done with a special annotation. For example, for the
-                <classname>ColorPicker</classname> server-side component, we define:
-            </para>
-			
-			<programlisting><![CDATA[import com.vaadin.demo.colorpicker.widgetset.client.ui.VColorPicker;
-
-@ClientWidget(VColorPicker.class)
-public class ColorPicker extends AbstractField {
-    ...]]></programlisting>
-
-			<para>
-				The annotation is read during the compilation of the widget with the GWT
-				Compiler. The compiler invokes a <classname>WidgetMapGenerator</classname>
-				that reads the annotations from the compiled server-side component
-				classes. It is therefore necessary that the server-side components are
-				compiled before the client-side compilation, as noted in <xref
-				linkend="gwt.development.compiler"/>.
-			</para>
-				
-            <para>
-                The serialization is broken down into server-client serialization and
-                client-server deserialization in the following sections.  We will also
-                present the complete example of the server-side implementation of the
-                Color Picker component below.
-            </para>
-
-		</section>
-
-		<section xml:id="gwt.server-side.serialization">
-			<title>Server-Client Serialization</title>
-
-			<!-- UNFINISHED -->
-			
-			<para>
-				The server-side implementation of a component must be able to serialize
-				its data into a UIDL message that is sent to the client. You need to
-				override the <methodname>paintContent()</methodname> method, defined in
-				<classname>AbstractComponent</classname>. You should call the superclass
-				to allow it to paint its data as well.
-			</para>
-
-			<para>
-				The data is serialized with the variants of the
-				<methodname>addAttribute()</methodname> and
-				<methodname>addVariable()</methodname> methods for different basic data
-				types.
-			</para>
-
-			<para>
-				The UIDL API offered in <classname>PaintTarget</classname> is covered in
-				<xref linkend="uidl.painting"/>.
-			</para>
-
-			<para>
-				<!-- done in <methodname>changeVariables()</methodname> method done with
-				<methodname>paintContent()</methodname> method -->
-			</para>
-
-		</section>
-
-		<section xml:id="gwt.server-side.deserialization">
-			<title>Client-Server Deserialization</title>
-			
-			<para>
-				The server-side component must be able to receive state changes from the
-				client-side widget. This is done by overriding the
-				<methodname>changeVariables()</methodname> method, defined in
-				<classname>AbstractComponent</classname>. A component should always call
-				the superclass implementation in the beginning to allow it handle its
-				variables.
-			</para>
-
-			<para>
-				The variables are given as objects in the <parameter>variables</parameter>
-				map, with the same key with which they were serialized on the
-				client-side. The object type is likewise the same as given for the
-				particular variable in <methodname>updateVariable()</methodname> in the
-				client-side.
-			</para>
-
-			<programlisting><?pocket-size 65% ?><![CDATA[@Override
-public void changeVariables(Object source, Map variables) {
-    // Let superclass read any common variables.
-    super.changeVariables(source, variables);
-
-    // Sets the currently selected color
-    if (variables.containsKey("colorname") && !isReadOnly()) {
-        final String newValue = (String)variables.get("colorname");
-
-        // Changing the property of the component will
-        // trigger a ValueChangeEvent
-        setValue(newValue, true);
-    }
-}]]></programlisting>
-
-			<para>
-				The above example handles variable changes for a field component
-				inheriting <classname>AbstractField</classname>. Fields have their value
-				as the value property of the object. Setting the value with
-				<methodname>setValue()</methodname>, as above, will trigger a
-				<classname>ValueChangeEvent</classname>, which the user of the component
-				can catch with a <classname>ValueChangeListener</classname>.
-			</para>
-
-			<para>
-				Contained components, such as components inside a layout, are deserialized
-				by referencing them by their <emphasis>paintable identifier</emphasis> or
-				<emphasis>PID</emphasis>.
-			</para>
-		</section>
-
-        <!-- Edit bookmark. -->
-
-		<section xml:id="gwt.server-side.example.colorpicker">
-			<title>Example: Color Picker Server-Side Component</title>
-
-			<para>
-				The following example provides the complete server-side
-				<classname>ColorPicker</classname> component for the Color Picker
-				example. It has only one state variable: the currently selected color,
-				which is stored as the property of the component. Implementation of the
-				<classname>Property</classname> interface is provided in the
-				<classname>AbstractField</classname> superclass of the component. The UIDL
-				tag name for the component is <literal>colorpicker</literal> and the state
-				is communicated through the <parameter>colorname</parameter> variable.
-			</para>
-
-			<programlisting><?pocket-size 65% ?><![CDATA[package com.vaadin.demo.colorpicker;
-
-import com.vaadin.demo.colorpicker.widgetset.client.ui.VColorPicker;
-...
-
-/**
- * Color picker for selecting a color from a palette.
- * 
- * @author magi
- */
-@ClientWidget(VColorPicker.class)
-public class ColorPicker extends AbstractField {
-    public ColorPicker() {
-        super();
-        setValue(new String("white"));
-    }
-
-    /** The property value of the field is a String. */
-    @Override
-    public Class<?> getType() {
-        return String.class;
-    }
-
-    /** Set the currently selected color. */
-    public void setColor(String newcolor) {
-        // Sets the color name as the property of the component.
-        // Setting the property will automatically cause
-        // repainting of the component with paintContent().
-        setValue(newcolor);
-    }
-
-    /** Retrieve the currently selected color. */
-    public String getColor() {
-        return (String) getValue();
-    }
-
-    /** Paint (serialize) the component for the client. */
-    @Override
-    public void paintContent(PaintTarget target)
-    throws PaintException {
-        // Superclass writes any common attributes in the
-        // paint target.
-        super.paintContent(target);
-
-        // Add the currently selected color as a variable in
-        // the paint target.  
-        target.addVariable(this, "colorname", getColor());
-    }
-
-    /** Deserialize changes received from the client. */
-    @Override
-    public void changeVariables(Object source, Map variables) {
-        // Sets the currently selected color
-        if (variables.containsKey("colorname") &&
-                !isReadOnly()) {
-            // Changing the property of the component will
-            // trigger a ValueChangeEvent
-            setValue((String) variables.get("colorname"), true);
-        }
-    }
-}]]></programlisting>
-
-		</section>
-	</section>
-	
-	<section xml:id="gwt.usage">
-		<title>Using a Custom Component</title>
-
-		<para>
-			A custom component is used like any other Vaadin component. You will,
-			however, need to compile the client-side widget set with the GWT Compiler.
-			See <xref linkend="gwt.development.compiler"/> for instructions on how to
-			compile widget sets.
-		</para>
-	
-		<section xml:id="gwt.usage.example.colorpicker">
-			<title>Example: Color Picker Application</title>
-
-			<para>
-				The following server-side example application shows how to use the Color
-				Picker custom widget. The example includes also server-side feedback of
-				the user input and changing the color selection to show that the
-				communication of the component state works in both directions.
-			</para>
-
-			<programlisting><?pocket-size 65% ?><![CDATA[package com.vaadin.demo.colorpicker;
-
-import com.vaadin.data.Property.ValueChangeEvent;
-import com.vaadin.data.Property.ValueChangeListener;
-import com.vaadin.ui.*;
-import com.vaadin.ui.Button.ClickEvent;
-
-/**
- * Demonstration application that shows how to use a simple
- * custom client-side GWT component, the ColorPicker.
- */
-public class ColorPickerApplication
-       extends com.vaadin.Application {
-    Window main = new Window("Color Picker Demo");
-    
-    /* The custom component. */
-    ColorPicker colorselector = new ColorPicker();
-    
-    /* Another component. */
-    Label colorname;
-    
-    public void init() {
-        setMainWindow(main);
-        setTheme("demo");
-        
-        // Listen for value change events in the custom
-        // component, triggered when user clicks a button
-        // to select another color.
-        colorselector.addListener(new ValueChangeListener() {
-            public void valueChange(ValueChangeEvent event) {
-                // Provide some server-side feedback
-                colorname.setValue("Selected color: " + 
-                                   colorselector.getColor());
-            }
-        });
-        main.addComponent(colorselector);
-        
-        // Add another component to give feedback from
-        // server-side code
-        colorname = new Label("Selected color: " +
-                              colorselector.getColor());
-        main.addComponent(colorname);
-        
-        // Server-side manipulation of the component state
-        Button button = new Button("Set to white");
-        button.addListener(new Button.ClickListener() {
-            public void buttonClick(ClickEvent event) {
-                colorselector.setColor("white");
-            }
-        });
-        main.addComponent(button);
-    }
-}]]></programlisting>
-
-		</section>
-
-		<section xml:id="gwt.usage.deployment">
-			<title>Web Application Deployment</title>
-
-			<para>
-				Deployment of web applications that include custom components is almost
-				identical to the normal case where you use only the default widget set of
-				Vaadin. The default case is documented in <xref
-				linkend="section.web.web-xml"/>. You only need to specify the widget set
-				for the application in the <filename>WebContent/WEB-INF/web.xml</filename>
-				deployment descriptor.
-			</para>
-
-			<para>
-				If you use the Vaadin Plugin for Eclipse to create a new widget in your
-				project, the plugin will modify the deployment descriptor to use the
-				custom widget set.
-			</para>
-
-			<para>
-				The following deployment descriptor specifies the Color Picker Application
-				detailed in the previous section.
-			</para>
-			
-			<programlisting><?pocket-size 65% ?>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
-&lt;web-app
-  id="WebApp_ID"
-  version="2.4"
-  xmlns="http://java.sun.com/xml/ns/j2ee"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee
-           http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd"&gt;
-
-    &lt;display-name&gt;myproject&lt;/display-name&gt;
-
-    &lt;servlet&gt;
-        &lt;servlet-name&gt;<parameter>ColorPickerServlet</parameter>&lt;/servlet-name&gt;
-        &lt;servlet-class&gt;
-            com.vaadin.terminal.gwt.server.ApplicationServlet
-        &lt;/servlet-class&gt;
-        &lt;init-param&gt;
-            &lt;param-name&gt;application&lt;/param-name&gt;
-            &lt;param-value&gt;
-                <parameter>com.vaadin.demo.colorpicker.ColorPickerApplication</parameter>
-            &lt;/param-value&gt;
-        &lt;/init-param&gt;
-        &lt;init-param&gt;
-            &lt;param-name&gt;widgetset&lt;/param-name&gt;
-            &lt;param-value&gt;
-                <parameter>com.vaadin.demo.colorpicker.widgetset.ColorPickerWidgetSet</parameter>
-            &lt;/param-value&gt;
-        &lt;/init-param&gt;
-    &lt;/servlet&gt;
-
-    &lt;servlet-mapping&gt;
-        &lt;servlet-name&gt;<parameter>ColorPickerServlet</parameter>&lt;/servlet-name&gt;
-        &lt;url-pattern&gt;<parameter>/*</parameter>&lt;/url-pattern&gt;
-    &lt;/servlet-mapping&gt;
-&lt;/web-app&gt;</programlisting>
-		</section>
-
-		<para>
-			The project specific parameters are emphasized. Notice that the widget set
-			name is not a file name, but the base name for the
-			<filename>ColorPickerWidgetSet.gwt.xml</filename> module descriptor.
-        </para>
-
-        <para>
-            The Eclipse Plugin will automatically generate the
-            <parameter>init-param</parameter> parameter in the
-            <filename>web.xml</filename> file of your project when you create a new
-            widget.
-		</para>
-
-		<para>
-			As the project context root in the above example is
-			<filename>myproject</filename> and the
-			<parameter>&lt;url-pattern&gt;</parameter> is <filename>/*</filename>, the URL
-			for the application will be <uri>/myproject/</uri>. If you are using an URL
-			pattern such as <filename>/myapp/*</filename>, you need to make an additional
-			mapping to map requests to <filename>/VAADIN/*</filename> context to the same
-			servlet. Otherwise the default widget set and built-in themes in Vaadin will
-			be missing.
-		</para>
-
-        <programlisting><?pocket-size 65% ?><![CDATA[  <servlet-mapping>
-    <servlet-name>Book of Vaadin Examples</servlet-name>
-    <url-pattern>/VAADIN/*</url-pattern>
-  </servlet-mapping>]]></programlisting>
-		
-	</section>
-
-	<section xml:id="gwt.development">
-		<title>GWT Widget Development</title>
-		
-		<para>
-			Development of new GWT widgets includes widget set definition (GWT Module
-			Descriptor), compiling the widgets and the Vaadin Client-Side Engine to
-			JavaScript with the GWT Compiler, and debugging the application in the GWT
-			Development Mode.
-		</para>
-
-		<para>
-			You can use any IDE for developing GWT components for Vaadin. The examples
-			given in this book are for the Eclipse IDE. It allows easy launching of the
-			GWT Development Mode, debugging, and running an external compiler for GWT
-			widget sets.
-		</para>
-
-		<section xml:id="gwt.development.eclipse">
-			<title>Creating a Widget Project</title>
-
-			<para>
-				Creation of a Vaadin project that uses the default widget set was covered
-				in <xref linkend="getting-started.first-project"/>. Developing custom
-				widgets creates a number of additional requirements for a project.
-            </para>
-
-            <para>
-                Let us review the steps required for creating an application that contains
-                custom widgets. Details for each step are given in the subsequent
-                sections.
-			</para>
-
-			<orderedlist>
-				<listitem>
-					Create a new Vaadin project (for Eclipse, see <xref
-					linkend="getting-started.first-project.creation"
-					xrefstyle="select:label"/>)
-				</listitem>
-				<listitem>
-					Copy or import the GWT JARs to the project and add them to the class
-					path (<xref linkend="gwt.development.import-gwt"
-					xrefstyle="select:label"/>)
-				</listitem>
-				<listitem>
-					Write the source code for the client-side widgets, their server-side
-					counterparts, and the application (<xref
-					linkend="gwt.development.module-creation" xrefstyle="select: label"/>)
-				</listitem>
-				<listitem>
-					<para>Write the <filename>web.xml</filename> Deployment Descriptor for
-					the web application</para>
-					<itemizedlist>
-						<listitem>
-							Define the widget set used in the application (<xref linkend="gwt.usage.deployment"
-							xrefstyle="select:label"/>)
-						</listitem>
-					</itemizedlist>
-				</listitem>
-				<listitem>
-					Compile the widget set to JavaScript runtime with GWT Compiler (<xref
-					linkend="gwt.development.compiler" xrefstyle="select:label"/>)
-				</listitem>
-				<listitem>
-					Deploy the project to an application server (for Eclipse and Tomcat see <xref
-					linkend="getting-started.first-project.server"
-					xrefstyle="select:label"/>)
-				</listitem>
-				<listitem>
-					<para>Either:</para>
-
-					<orderedlist>
-						<listitem>
-							Open a web browser to use the web application.
-						</listitem>
-						<listitem>
-							Open a web browser in GWT Development Mode to debug the
-							client-side widget code. (<xref
-							linkend="gwt.development.development-mode"
-							xrefstyle="select:label"/>)
-						</listitem>
-					</orderedlist>
-				</listitem>
-			</orderedlist>
-
-			<para>
-				The contents of a ready widget development project are described in <xref
-				linkend="gwt.development.compiler.result"/>.
-			</para>
-
-            <para>
-                The Vaadin Plugin for Eclipse makes the creation of application custom
-                widgets as well as the application projects easy by taking care of all the
-                above steps (except deployment), so if you use it, please see <xref
-                linkend="gwt.eclipse"/> for detailed instructions.
-			</para>
-		</section>
-
-		<section xml:id="gwt.development.import-gwt">
-			<title>Importing GWT Installation Package</title>
-
-            <indexterm>
-                <primary>Google Web Toolkit</primary>
-                <secondary>importing</secondary>
-            </indexterm>
-			
-			<para>
-				You will need to include the Google Web Toolkit in your project to develop
-				custom widgets. You can download it from the GWT website - just make sure
-				the version is compatible with the version of Vaadin that you use. The
-				package includes precompiled libraries and applications for the specific
-				platform of the installation. To use the libraries, you need to configure
-				them in the classpath of your project as described below.
-			</para>
-
-			<para>
-				You can copy or import either the entire GWT directory or just the GWT
-				JARs to your project.
-			</para>
-
-			<para>
-				If you use Eclipse and copy the GWT directory or the libraries to the
-				project with system tools, remember to select your project folder and
-				press <keycap>F5</keycap> to refresh the project. You can also import the
-				directory as follows (importing the JARs is similar):
-			</para>
-
-			<orderedlist>
-				<listitem>
-					Right-click on the project folder in <guilabel>Project
-					Explorer</guilabel> and select
-					<menuchoice><guimenu>Import</guimenu><guimenuitem>Import...</guimenuitem></menuchoice>.
-				</listitem>
-				<listitem>
-					From the Import dialog, select
-					<menuchoice><guimenu>General</guimenu><guimenuitem>File
-					System</guimenuitem></menuchoice> and click
-					<guibutton>Next</guibutton>.
-				</listitem>
-				<listitem>
-					Click <guibutton>Browse</guibutton> button of the "<guilabel>From
-					directory</guilabel>" field and browse to the parent directory of the
-					GWT installation directory. Click <guibutton>Ok</guibutton> in the
-					file selection dialog.
-				</listitem>
-				<listitem>
-					Select the <filename>gwt</filename> entry in the list box for importing.
-				</listitem>
-				<listitem>
-					In the "<guilabel>Into folder</guilabel>" field, enter
-					<filename>myproject/gwt</filename>. (If you do not set this, all the
-					contents of the <filename>gwt</filename> directory will be imported
-					directly below the root directory of the project which is undesirable.)
-				</listitem>
-				<listitem>
-					Click <guibutton>Finish</guibutton>.
-				</listitem>
-			</orderedlist>
-
-			<para>
-				You must include the GWT libraries in the classpath of the project. If
-				using Eclipse, right-click on the project folder in the <guilabel>Project
-				Explorer</guilabel> in Eclipse and select
-				<menuchoice><guimenu>Properties</guimenu></menuchoice>. Select
-				<menuchoice><guimenu>Java Build
-				Path</guimenu><guimenuitem>Libraries</guimenuitem></menuchoice>.
-			</para>
-		</section>
-
-		<section xml:id="gwt.development.module-creation">
-			<title>Writing the Code</title>
-
-            <section>
-                <title>Guidelines for the Project Structure</title>
-
-                <para>
-                    The project structure is otherwise free, but if you use the build
-                    script described in <xref linkend="gwt.development.compiler"/> or
-                    configure the GWT Development Mode, as described in <xref
-                    linkend="gwt.development.development-mode"/>, the examples assume that
-                    source files are located under the
-                    <filename>WebContent/WEB-INF/src</filename> folder.
-                </para>
-
-                <para>
-                    We recommend that the name for the package containing the widget set
-                    is <filename>widgetset</filename>, but this is not required. GWT does,
-                    however, require that the client-side code is written under a
-                    <filename>client</filename> package and any stylesheets are located
-                    under a <filename>public</filename> directory (not necessarily a
-                    package) under the package containing the
-                    <filename>.gwt.xml</filename> descriptor.
-                </para>
-
-                <para>
-                    See <xref linkend="gwt.development.compiler.result"/> for an example
-                    project structure.
-                </para>
-            </section>
-
-			<section xml:id="gwt.development.module-creation.import">
-				<title>Importing the ColorPicker Demo</title>
-				
-				<para>
-					If you want to use the Color Picker application as an application
-					skeleton, you need to import it under the source folder.
-				</para>
-
-				<orderedlist>
-					<listitem>
-						Right-click on the source folder and select
-						<menuchoice><guimenuitem>Import</guimenuitem></menuchoice>.
-					</listitem>
-					<listitem>
-						In the <guilabel>Import</guilabel> dialog, select
-						<menuchoice><guimenu>General</guimenu><guimenuitem>File
-						System</guimenuitem></menuchoice> and click
-						<guibutton>Next</guibutton>.
-					</listitem>
-					<listitem>
-						Browse to
-						<filename>WebContent/WEB-INF/src/com/vaadin/demo/colorpicker/</filename>
-						and click <guibutton>Ok</guibutton> button in the <guilabel>Import
-						from directory</guilabel> dialog.
-					</listitem>
-					<listitem>
-						In the <guilabel>Into folder</guilabel> field, enter
-						<filename>myproject/WebContent/WEB-INF/src/com/vaadin/demo/colorpicker</filename>.
-					</listitem>
-					<listitem>
-						Check the <filename>colorpicker</filename> entry in the list box.
-					</listitem>
-					<listitem>
-						Click <guibutton>Finish</guibutton>.
-					</listitem>
-				</orderedlist>
-
-				<para>
-					This will import the directory as
-					<package>com.vaadin.demo.colorpicker</package> package. If you
-					want to use it as a skeleton for your own project, you should refactor
-					it to some other name. Notice that you will need to refactor the
-					package and application name manually in the
-					<filename>web.xml</filename> and <filename>.gwt.xml</filename>
-					descriptor files.
-				</para>
-			</section>
-		</section>
-
-		<section xml:id="gwt.development.compiler">
-			<title>Compiling GWT Widget Sets</title>
-
-			<para>
-				You need to compile the Vaadin Client-Side Engine and your custom widget
-				set to JavaScript with the GWT Compiler. The easiest way is to use the
-				Vaadin Plugin for Eclipse, it has a toolbar button that allows you to
-				compile the widget set. See <xref linkend="gwt.eclipse.compiling"/> for
-				instructions.
-			</para>
-
-            <para>
-                If you need to use Ant for compiling a widget set, you can find a script
-                template at the URL <link
-                xlink:href="https://vaadin.com/download/misc/build-widgetset.xml">https://vaadin.com/download/misc/build-widgetset.xml</link>. You
-                can copy the build script to your project and, once configured, enter:
-			</para>
-
-			<screen><prompt>$</prompt> <command>ant -f build-widgetset.xml</command></screen>
-
-            <!-- TODO: A separate script template for own projects. -->
-
-			<para>
-                To configure the build script, you need to set the paths in the
-                "<literal>configure</literal>" target and the widget set class name in the
-                "<literal>compile-widgetset</literal>" target to suit your project.
-			</para>
-
-			<para>
-				You can launch the build script from Eclipse, by right-clicking the script
-				in Package Explorer and selecting <menuchoice><guimenu>Run
-				As</guimenu><guimenuitem>Ant Build</guimenuitem></menuchoice>. Progress of
-				the compilation is shown in the <guilabel>Console</guilabel> window.
-			</para>
-
-			<para>
-				After compilation, <emphasis>refresh the project by selecting it and
-				pressing <keycap>F5</keycap></emphasis>. This makes Eclipse scan new
-				content in the file system and become aware of the output of the
-				compilation in the <filename>WebContent/VAADIN/widgetsets/</filename>
-				directory. If the project is not refreshed, the JavaScript runtime is not
-				included in the web application and running the application will result in
-				an error message such as the following:
-			</para>
-
-			<screen>Requested resource [VAADIN/widgetsets/com.vaadin.demo.colorpicker.gwt.ColorPickerWidgetSet/com.vaadin.demo.colorpicker.gwt.ColorPickerWidgetSet.nocache.js] not found from filesystem or through class loader. Add widgetset and/or theme JAR to your classpath or add files to WebContent/VAADIN folder.</screen>
-
-			<para>
-				Compilation with GWT is required also initially when using the GWT
-				Development Mode, which is described in <xref
-				linkend="gwt.development.development-mode"/>. The compilation with the GWT
-				Compiler must be done at least once, as it provides files that are used
-				also by the GWT Development Mode, even though the browser runs the GWT
-				application in Java Virtual Machine instead of JavaScript.
-			</para>
-
-			<warning>
-				<para>
-					Because GWT supports a slightly reduced version of Java, GWT
-					compilation can produce errors that do not occur with the Java
-					compiler integrated in the Eclipse IDE.
-				</para>
-			</warning>
-
-            <para>
-                Also notice that client-side compilation loads the server-side classes (to
-                find the <literal>@ClientWidget</literal> annotations) and, as a side
-                effect, executes any static code blocks in the classes, even in any
-                non-component classes such as the application class. This could cause
-                unexpected behaviour during the compilation.
-            </para>
-
-			<section xml:id="gwt.development.compiler.compiling">
-				<title>Compiling a Custom Widget Set</title>
-
-				<para>
-					If you wish to use the build script to compile your own widget sets,
-					open it in an editor. The build script contains some instructions in
-					the beginning of the file.
-				</para>
-
-                <para>
-                    First, you need to make some basic configuration in the
-                    <parameter>configure</parameter> target:
-                </para>
-
-				<programlisting><?pocket-size 65% ?>&lt;target name="configure"&gt;
-    &lt;!-- Path from this file to the project root --&gt;
-    &lt;property name="base"
-              value="../../../" /&gt;
-
-    &lt;!-- Location of GWT distribution --&gt;
-    &lt;property name="gwt-location"
-              value="${base}gwt" /&gt;
-
-    &lt;!-- Location of Vaadin JAR --&gt;
-    &lt;property name="vaadin-jar-location"
-            value="${base}WebContent/WEB-INF/lib/vaadin-6.3.3.jar"/&gt;
-
-    &lt;!-- Location of project source code --&gt;
-    &lt;property name="src-location"
-              value="${base}WebContent/WEB-INF/src" /&gt;
-
-    &lt;!-- Target where to compile server-side classes --&gt;
-    &lt;property name="server-side-destination"
-              value="${base}WebContent/WEB-INF/classes"/&gt;
-
-    &lt;!-- Target where to compile the widget set --&gt;
-    &lt;property name="client-side-destination"
-              value="${base}WebContent/VAADIN/widgetsets" /&gt;
-&lt;/target&gt;</programlisting>
-
-				<para>
-					You also need to define the widget set in the
-					<parameter>configure-widgetset</parameter> target:
-				</para>
-
-				<programlisting><?pocket-size 65% ?>&lt;!-- NOTE: Modify this example to compile your own widgetset --&gt;
-&lt;target name="configure-widgetset"&gt;
-
-  &lt;!-- Name of the widget set --&gt;
-  &lt;property name="widgetset"
-    value="<emphasis role="bold">com.vaadin.demo.colorpicker.gwt.ColorPickerWidgetSet</emphasis>"/&gt;</programlisting>
-
-                <para>
-                    The widget set class name must match the package and the file name of
-                    the <filename>.gwt.xml</filename> descriptor, without the extension.
-                </para>
-
-                <para>
-                    You can use the <parameter>compile-widgetset</parameter> target as it
-                    is, or as a template for your own configuration:
-                </para>
-
-				<programlisting><?pocket-size 65% ?>&lt;!-- Build the widget set. --&gt;
-&lt;target name="compile-widgetset"
-        depends="compile-server-side, generate-widgetset"&gt;
-    &lt;echo&gt;Compiling ${widgetset}...&lt;/echo&gt;
-
-    &lt;java classname="com.google.gwt.dev.Compiler"
-          failonerror="yes" fork="yes" maxmemory="256m"&gt;
-        &lt;arg value="-war" /&gt;
-        &lt;arg value="${client-side-destination}" /&gt;
-        &lt;arg value="${widgetset}" /&gt;
-        &lt;jvmarg value="-Xss1024k"/&gt;
-        &lt;jvmarg value="-Djava.awt.headless=true"/&gt;
-        &lt;classpath&gt;
-            &lt;path refid="compile.classpath"/&gt;
-        &lt;/classpath&gt;
-    &lt;/java&gt;
-&lt;/target&gt;</programlisting>
-
-                <para>
-                    Notice that the server-side must be compiled before the client-side
-                    and the compiled server-side classes must be included in the class
-                    path for the GWT Compiler. The reason is that the annotations that
-                    define the component-to-widget mappings are read from the class files
-                    during the GWT compilation.
-                </para>
-
-				<note>
-					<title>Google Web Toolkit Version</title>
-					
-					<para>
-						You must use a version of GWT that is compatible with the version
-						of Vaadin you are using. If you use the Vaadin Plugin for Eclipse,
-						it automatically downloads a GWT version that matches the
-						currently used Vaadin version.
-					</para>
-				</note>
-
-				<warning>
-					<title>Java Stack Overflow Problems</title>
-
-					<para>
-						The <parameter>-Xss</parameter> parameter for the Java process may
-						be necessary if you experience stack overflow errors with the
-						default stack size. They occur especially with GWT 1.6, which uses
-						large amount of stack space.
-					</para>
-					
-					<para>
-						Notice further that the Windows version of Sun JRE 1.5 has a bug
-						that makes the stack size setting ineffective. The Windows version
-						also has a smaller default stack size than the other platforms. If
-						you experience the problem, we advice that you either use JRE 1.6
-						on the Windows platform or use a wrapper that circumvents the
-						problem. To use the wrapper, use class
-						<classname>com.vaadin.launcher.WidgetsetCompiler</classname>
-						in the build script instead of the regular compiler.
-					</para>
-				</warning>
-
-				<para>
-					The <parameter>-Djava.awt.headless=true</parameter> parameter is
-					necessary in Linux/UNIX platforms to avoid some X11 warnings.
-				</para>
-
-				<para>
-					You can now compile the widget set with the following command:
-				</para>
-
-				<screen><prompt>$</prompt> <command>ant -f build-widgetset.xml</command></screen>
-			</section>
-
-            <section xml:id="gwt.development.compiler.widgetset.generating">
-                <title>Generating Widget Set Definition</title>
-                
-                <para>
-                    If you use libraries containing other widget sets, you may want to
-                    automatically generate the <filename>.gwt.xml</filename> GWT Module
-                    Descriptor that defines the widget set that combines the Vaadin
-                    default widget set, widget sets included in any libraries, and any
-                    widget sets defined in your project.
-                </para>
-
-                <para>
-                    If you use the <filename>build-widgetset.xml</filename> Ant build
-                    script as a template, you need to define the settings required for
-                    generating a widget set in the <literal>configure-widgetset</literal>
-                    target.
-                </para>
-
-				<programlisting><?pocket-size 65% ?>&lt;target name="configure-widgetset"&gt;
-  &lt;property name="widgetset"
-         value="<emphasis role="bold">com.vaadin.demo.generated.GeneratedWidgetSet</emphasis>"/&gt;
-  <emphasis role="bold">&lt;property name="generate.widgetset" value="1"/&gt;</emphasis>
-  &lt;property name="widgetset-path" value="com/vaadin/demo/widgetset"/&gt;
-&lt;/target&gt;</programlisting>
-
-                <para>
-                    Define the name of the widget set definition file, without the
-                    <filename>.gwt.xml</filename> suffix, in the
-                    <literal>widgetset</literal> property. The
-                    <literal>generate-widgetset</literal> target is executed only if the
-                    <literal>generate.widgetset</literal> property is defined. You also
-                    need to give a file path to the widget set directory, relative to the
-                    <literal>$src-location directory.</literal>.
-                </para>
-
-                <para>
-                    The <literal>generate-widgetset</literal> target is defined as
-                    follows:
-                </para>
-
-				<programlisting><?pocket-size 65% ?><![CDATA[<target name="generate-widgetset"
-        depends="compile-server-side, configure-widgetset"
-        if="generate.widgetset">
-    
-    <!-- Create the directory if it does not already exist. -->
-    <mkdir dir="${src-location}/${widgetset-path}"/>
-    
-    <java classname="com.vaadin.terminal.gwt.widgetsetutils.WidgetSetBuilder"
-          failonerror="yes" fork="yes" maxmemory="256m">
-        <arg value="${widgetset}"/>
-        <jvmarg value="-Xss1024k"/>
-        <jvmarg value="-Djava.awt.headless=true"/>
-        <classpath>
-            <path refid="compile.classpath"/>
-        </classpath>
-    </java>
-</target>]]></programlisting>
-
-                <para>
-                    The widget set builder assumes that the root of the source directory
-                    is the <emphasis>first</emphasis> item in the class path, here defined
-                    with the <literal>src-location</literal> property. The location must
-                    point to the root of the entire source tree, not the path of the
-                    widget set under it. Also the location of compiled server-side classes
-                    must be included, here defined with the
-                    <literal>server-side-destination</literal> property. In the example
-                    script, the class path is defined in the <literal>init</literal>
-                    target as follows:
-                </para>
-
-				<programlisting><?pocket-size 65% ?><![CDATA[<path id="compile.classpath">
-    <pathelement path="${src-location}" />
-	<pathelement path="${server-side-destination}" />
-	<pathelement path="${toolkit-jar-location}" />
-	<pathelement path="${gwt-location}/gwt-user.jar" />
-	<pathelement path="${gwt-location}/gwt-dev-${gwt-platform}.jar" />
-    <pathelement path="${gwt-location}/validation-api-1.0.0.GA.jar" />
-    <pathelement path="${gwt-location}/validation-api-1.0.0.GA-sources.jar" />
-    <fileset dir="${base}WebContent/WEB-INF/lib/">
-    	<include name="*.jar"/>
-     </fileset>
-</path>]]></programlisting>
-            </section>
-
-		</section>
-
-		<section xml:id="gwt.development.compiler.result">
-			<title>Ready to Run</title>
-
-			<para>
-				<xref linkend="figure.gwt.compiler.result.annotated"/> shows the contents of
-				a ready project.
-			</para>
-			
-			<figure xml:id="figure.gwt.compiler.result.annotated">
-				<title>Annotated Project Contents</title>
-				<mediaobject>
-					<imageobject role="html">
-						<imagedata align="center" fileref="img/gwt/gwt-hostedmode-project-annotated-lo.png"/>
-					</imageobject>
-					<imageobject role="fo">
-						<imagedata scale="60" smallscale="100%" align="center" fileref="img/gwt/gwt-hostedmode-project-annotated-hi.png"/>
-					</imageobject>
-				</mediaobject>
-			</figure>
-
-			<para>
-				Notice that the Package Explorer does not correspond with the file system
-				contents. Eclipse displays the items marked with asterisk (*) in a logical
-				location, instead of the physical location in the file system.
-			</para>
-
-			<para>
-				You can either run the application in web mode, as introduced in <xref
-				linkend="getting-started.first-project.run" xrefstyle="select: label"/>,
-				or debug it in the GWT Development Mode, as detailed in the next
-				section.
-			</para>
-		</section>
-
-		<section xml:id="gwt.development.development-mode">
-			<title>GWT Development Mode</title>
-
-			<para>
-                The GWT Development Mode allows debugging client-side GWT applications in
-                a Java IDE such as Eclipse, as if the applications ran as Java in the
-                browser, even though they actually are JavaScript. This is made possible
-                by the Google Web Toolkit Developer Plugin, which is available for major
-                browsers, such as Mozilla Firefox, Google Chrome, Safari, and Internet
-                Explorer.
-			</para>
-
-			<figure xml:id="figure.gwt.hostedmodebrowser">
-				<title>GWT Development Mode</title>
-				<mediaobject>
-					<imageobject role="html">
-						<imagedata align="center" fileref="img/custom/gwt-colorpicker-3.png"/>
-					</imageobject>
-					<imageobject role="fo">
-						<imagedata scale="70" smallscale="100%" align="center" fileref="img/custom/gwt-colorpicker-3.png"/>
-					</imageobject>
-				</mediaobject>
-			</figure>
-
-			<para>
-				<xref linkend="figure.gwt.hostedmodebrowser"/> shows the GWT Development
-				Mode in action. On the left, you have the GWT Development Mode window. It
-				displays compilation information and possible errors that occur during
-				compilation. You can open the application in a new browser window by
-				clicking <guibutton>Launch Default Browser</guibutton>.
-			</para>
-
-			<para>
-				The browser window has a <guibutton>Compile/Browse</guibutton> button,
-				which runs the GWT Compiler to produce the runtime code and opens a
-				regular web browser to run the application. Notice that even though it is
-				possible to recompile the program with the button, GWT Compiler must be
-				run at least once before launching the GWT Development Mode, as described
-				in <xref linkend="gwt.development.compiler"/>, as the compiler creates
-				some required files.
-			</para>
-
-			<para>
-				Because GWT supports a slightly reduced version of Java, GWT compilation
-				can produce errors that do not occur with the Java compiler integrated in
-				the Eclipse IDE. Such errors will show up in the GWT Development Mode
-				window.
-			</para>
-
-			<section xml:id="gwt.development.development-mode.eclipse">
-				<title>Creating a GWT Development Mode Launch Configuration</title>
-
-				<para>
-					If you use the Vaadin Plugin for Eclipse, you can create a launch
-					configuration for the GWT Development Mode in the project properties.
-					The Vaadin project properties are described in <xref
-					linkend="gwt.plugin.settings"/>. Open the project properties and the
-					Vaadin section, click <guibutton>Create development mode
-					launch</guibutton> and <guibutton>OK</guibutton>. You should see the
-					launch configuration appear in the project.
-				</para>
-
-				<para>
-                    You can run a launch configuration in a few different ways. For
-                    example, select it, open menu
-                    <menuchoice><guimenu>Run</guimenu><guimenuitem>Debug
-                    As...</guimenuitem></menuchoice>, and select the launch
-                    configuration. The GWT Development Mode window should open.
-                </para>
-            </section>
-
-			<section xml:id="gwt.development.development-mode.manual">
-				<title>Creating a Launch Configuration Manually</title>
-
-				<para>
-					This section describes how to create a launch configuration for the
-					GWT Development Mode manually in the Eclipse IDE, without using the
-					Vaadin Plugin for Eclipse.
-				</para>
-
-				<orderedlist>
-					<listitem>
-						Select from menu
-						<menuchoice><guimenu>Run</guimenu><guimenuitem>Debug...</guimenuitem></menuchoice>
-						and the <guilabel>Debug</guilabel> configuration window will
-						open. Notice that it is not purposeful to run the GWT Development
-						Mode in the "<guilabel>Run</guilabel>" mode, because its entire
-						purpose is to allow debugging.
-					</listitem>
-
-					<listitem>
-						<para>
-							Select the <menuchoice><guimenu>Java
-							Application</guimenu></menuchoice> folder and click on the
-							<guibutton>New</guibutton> button to create a new launch
-							configuration.
-						</para>
-
-						<figure>
-							<title>Creating New Launch Configuration</title>
-							<mediaobject>
-								<imageobject role="html">
-									<imagedata align="center" fileref="img/gwt/gwt-hostedmode-launch-1.png"/>
-								</imageobject>
-								<imageobject role="fo">
-									<imagedata scale="75" smallscale="100%" align="center" fileref="img/gwt/gwt-hostedmode-launch-1.png"/>
-								</imageobject>
-							</mediaobject>
-						</figure>
-					</listitem>
-
-					<listitem>
-						Click on the created launch configuration to open it on the
-						right-side panel. In the <guilabel>Main</guilabel> tab, give the
-						launch configuration a name. Define the <guilabel>Main
-						class</guilabel> as
-						<classname>com.google.gwt.dev.DevMode</classname>.
-
-						<figure>
-							<title>Naming Launch Configuration</title>
-							<mediaobject>
-								<imageobject role="html">
-									<imagedata align="center" fileref="img/gwt/gwt-hostedmode-launch-2.png"/>
-								</imageobject>
-								<imageobject role="fo">
-									<imagedata scale="65" smallscale="100%" align="center" fileref="img/gwt/gwt-hostedmode-launch-2.png"/>
-								</imageobject>
-							</mediaobject>
-						</figure>
-					</listitem>
-
-					<listitem>
-						<para>
-							Switch to the <guilabel>Arguments</guilabel> tab and enter
-							arguments for the application. 
-						</para>
-
-						<orderedlist>
-							<listitem>
-								<para>In the <guilabel>Program arguments</guilabel> field,
-								enter:</para>
-
-								<screen>-noserver -war WebContent/VAADIN/widgetsets
-<parameter>com.example.myproject.widgetset.MyProjectWidgetSet</parameter>
--startupUrl http://localhost:<parameter>8080</parameter>/<parameter>myproject</parameter></screen>
-
-								<para>
-									The browser application, <classname>DevMode</classname>,
-									takes as its arguments the following parameters:
-								</para>
-								
-								<variablelist>
-									<varlistentry>
-										<term>-noserver</term>
-										<listitem>
-											<para>Prevents an embedded web server from starting, thereby
-												allowing to use an already running server.</para>
-										</listitem>
-									</varlistentry>
-									<varlistentry>
-										<term>-whitelist</term>
-										<listitem>
-											<para>Adds a regular expression to the list of allowed
-												URL patterns for the web browser. Modify the port
-												number from the 8080 given above as necessary.</para>
-										</listitem>
-									</varlistentry>
-									<varlistentry>
-										<term>-war</term>
-										<listitem>
-											<para>Output directory for compiling widgets
-											with GWT Compiler. The directory must be
-											<parameter>WebContent/VAADIN/widgetsets</parameter>.
-											You can compile the widgets either from the
-											GWT Development Mode window or externally as
-											explained later in this chapter.</para>
-										</listitem>
-									</varlistentry>
-									<varlistentry>
-										<term>-startupUrl &lt;URL&gt;</term>
-										<listitem>
-											<para>The URL to connect to. This must be the
-											same as the whitelist entry given above. The
-											port number must correspond to the port of the
-											running web server. The Jetty web server
-											included in Vaadin will run in port
-											8888 by default. In contrast, Apache Tomcat
-											installed under Eclipse will run in port 8080
-											by default.</para>
-										</listitem>
-									</varlistentry>
-								</variablelist>
-							</listitem>
-							<listitem>
-								<para>
-									In the <guilabel>VM arguments</guilabel> field enter,
-									for example, <parameter>-Xms256M -Xmx512M</parameter>
-									to give the GWT Development Mode more memory than the
-									default amount.
-								</para>
-							</listitem>
-						</orderedlist>
-
-						<figure>
-							<title>DevMode Arguments</title>
-							<mediaobject>
-								<imageobject role="html">
-									<imagedata align="center" fileref="img/gwt/gwt-hostedmode-launch-3.png"/>
-								</imageobject>
-								<imageobject role="fo">
-									<imagedata scale="65" align="center" fileref="img/gwt/gwt-hostedmode-launch-3.png"/>
-								</imageobject>
-							</mediaobject>
-						</figure>
-					</listitem>
-
-					<listitem>
-						In the <guilabel>Classpath</guilabel> tab, you will by default
-						have <parameter>vaadin-examples</parameter>, which
-						contains the default classpath entries for the project. If the
-						classpath entries for the project are sufficient, this should be enough.
-					</listitem>
-
-					<listitem>
-						Click <guibutton>Apply</guibutton> to save the launch configuration.
-					</listitem>
-
-					<listitem>
-						Click <guibutton>Debug</guibutton> to launch the GWT Development
-						Mode using the launch configuration.
-					</listitem>
-				</orderedlist>
-				
-				<para>
-					 See the following section for details on debugging with the GWT
-					 Development Mode.
-				</para>
-			</section>
-
-			<section xml:id="gwt.development.development-mode.debugging">
-				<title>Debugging with GWT Development Mode</title>
-
-				<para>
-					The purpose of the GWT Development Mode is to allow debugging
-					client-side GWT applications, or in our case, GWT widgets.  Below is a
-					checklist for important requirements for launching the GWT Development
-					Mode:
-				</para>
-				
-				<itemizedlist mark="square">
-					<listitem>
-						GWT is installed in the project.
-					</listitem>
-					<listitem>
-						GWT libraries are included in the project classpath.
-					</listitem>
-					<listitem>
-						Widget sets have been compiled with GWT Compiler.
-					</listitem>
-					<listitem>
-						<filename>web.xml</filename> descriptor is configured.
-					</listitem>
-					<listitem>
-						Web server is running and listening to the correct port.
-					</listitem>
-					<listitem>
-						GWT Development Mode launch configuration is configured.
-					</listitem>
-				</itemizedlist>
-
-				<para>
-					Once everything is ready to start debugging, just open a source file,
-					for example, the
-					<classname>com.vaadin.demo.colorpicker.gwt.client.ui.GwtColorPicker</classname>
-					class. Find the <methodname>onClick()</methodname> method. At the line
-					containing the <methodname>setColor()</methodname> call, right-click
-					on the leftmost bar in the editor and select
-					<menuchoice><guimenuitem>Toggle Breakpoint</guimenuitem></menuchoice>
-					from the popup menu. A small magnifying glass will appear in the bar
-					to indicate the breakpoint.
-				</para>
-
-				<figure>
-					<title>Setting a Breakpoint</title>
-					<mediaobject>
-						<imageobject role="html">
-							<imagedata align="center" fileref="img/gwt/gwt-hostedmode-debug-2.png"/>
-						</imageobject>
-						<imageobject role="fo">
-							<imagedata scale="85" align="center" fileref="img/gwt/gwt-hostedmode-debug-2.png"/>
-						</imageobject>
-					</mediaobject>
-				</figure>
-
-				<para>
-					Select from menu
-					<menuchoice><guimenu>Run</guimenu><guimenuitem>Debug...</guimenuitem></menuchoice>
-					and the <guilabel>Debug</guilabel> configuration window will
-					open. Notice that it is not purposeful to run the GWT Development Mode
-					in the "<guilabel>Run</guilabel>" mode, because its entire purpose is
-					to allow debugging.
-				</para>
-
-				<figure>
-					<title>Debugging with GWT Development Mode</title>
-					<mediaobject>
-						<imageobject role="html">
-							<imagedata align="center" fileref="img/gwt/gwt-hostedmode-debug-1.png"/>
-						</imageobject>
-						<imageobject role="fo">
-							<imagedata scale="40" align="center" fileref="img/gwt/gwt-hostedmode-debug-1.png"/>
-						</imageobject>
-					</mediaobject>
-				</figure>
-
-				<para>
-					<emphasis role="strong">Starting applications under the GWT
-					Development Mode can take considerable time!</emphasis> Compiling
-					widgets can take 10-60 seconds, depending on the hardware. During this
-					time, the web browser is unresponsive, does not update its window, and
-					appears "stuck".
-				</para>
-
-				<para>
-					Please refer to Eclipse IDE documentation for further instructions on
-					using the debugger.
-				</para>
-
-			</section>
-		</section>
-
-        <section xml:id="gwt.development.packaging">
-            <title>Packaging a Widget Set</title>
-
-            <para>
-                Packaging and reusing custom components is almost as easy as with any Java
-                code, but with a small difference. You can package the <emphasis>source
-                code</emphasis> of a widget set as a JAR. A user can drop the JAR in the
-                project and add it to the class path. If using widgets from multiple
-                widget sets, the user has to inherit the widget set in a combining widget
-                set (which can be generated automatically). The user then has to compile
-                the widget set(s) as described in <xref
-                linkend="gwt.development.compiler"/>.
-            </para>
-
-            <para>
-                While you could, in theory, package precompiled widget sets in the JAR as
-                well, it would create a serious danger for incompatibility between the
-                client-side and server-side versions of Vaadin. The user would anyhow have
-                to recompile the widget set if he uses multiple widget sets packaged in
-                different JARs, or has developed project-specific widgets.
-            </para>
-
-            <para>
-                The widget set build script template, which you can find at the URL <link
-                xlink:href="https://vaadin.com/download/misc/build-widgetset.xml">https://vaadin.com/download/misc/build-widgetset.xml</link>,
-                includes an example <literal>package-jar</literal> target for building a
-                JAR. You can use the example as it is or modify it as you need.
-            </para>
-
-            <para>
-                You need to make the JAR packaging specific configuration in the
-                <literal>configure-jar</literal> target. Change to property values to
-                reflect your widget set.
-            </para>
-
-            <programlisting>&lt;target name="configure-jar"&gt;
-    &lt;!-- The compiled JAR name --&gt;
-    &lt;property name="jar-destination"
-              value="${base}<emphasis role="bold">colorpicker.jar</emphasis>"/&gt;
-
-    &lt;!-- Title of the widget set (for JAR) --&gt;
-    &lt;property name="widgetset-title"
-              value="<emphasis role="bold">ColorPicker</emphasis>"/&gt;
-
-    &lt;!-- Version of the widget set (for JAR) --&gt;
-    &lt;property name="widgetset-version" value="<emphasis role="bold">1.0</emphasis>"/&gt;
-
-    &lt;!-- Vendor of the widget set (for JAR) --&gt;
-    &lt;property name="widgetset-vendor"
-              value="<emphasis role="bold">IT Mill Oy</emphasis>"/&gt;
-&lt;/target&gt;</programlisting>
-
-            <para>
-                You may want to check also the <literal>package-jar</literal> target if
-                you want to use other license information or otherwise customize the
-                package content.
-            </para>
-
-            <para>
-                Assuming that you have otherwise configured the build script for your
-                project as described in <xref linkend="gwt.development.compiler"/>, you
-                can build the JAR package with the following command:
-            </para>
-
-            <screen><prompt>$</prompt> <command>ant -f build-widgetset.xml package-jar</command></screen>
-
-            <para>
-                Notice that the <literal>package-jar</literal> target <emphasis>does
-                not</emphasis> depend on the <literal>compile-widgetset</literal> target,
-                as the compiled widget set is not included in the package. If you really
-                wish to do so, add the dependency and include the compiled files as a
-                fileset for the package.
+                A JavaScript connector is a function that handles communication between
+                the server-side code and the integrated JavaScript code. The connector
+                functions are added in the <literal>window</literal> object.
             </para>
         </section>
 
-        <section xml:id="gwt.development.troubleshooting">
-            <title>Troubleshooting</title>
-
-            <para>
-                Below are some typical cases that may cause you trouble.
-            </para>
-
-            <variablelist>
-                <varlistentry>
-                    <term><emphasis>Deferred binding fails</emphasis></term>
-                    <listitem>
-                        <para>
-                            The widget set compilation in GWT Development Mode console
-                            produces the following error, which is shown in the Eclipse
-                            console:
-                        </para>
-
-                        <programlisting><![CDATA[Deferred binding failed for 'com.vaadin.csvalidation.widgetset.client.ui.VJavaScriptEditor' (did you forget to inherit a required module?)]]></programlisting>
-
-                        <para>
-                            This problem occurs if the creation of an instance of a widget
-                            fails, usually due to an exception in the constructor. The GWT
-                            Development Mode console displays a more detailed exception log.
-                        </para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term><emphasis>Widgets are missing from the widget set</emphasis></term>
-                    <listitem>
-                        <para>
-                            The widget set compilation displays the list of widgets included
-                            in the widget set. If the list includes only the inherited widgets
-                            (built-in Vaadin widgets), but your custom widgets are missing,
-                            there is a problem.
-                        </para>
-                        
-                        <para>
-                            The typical reason is that the server-side classes are not yet
-                            compiled or are missing from the classpath. Check that the
-                            server-side compilation output folder (such as
-                            <filename>build/classes</filename>) is included in the classpath
-                            of GWT Compiler and that you compile the server-side components
-                            before the client-side, so that they are available in the
-                            classpath. The reason for this is that GWT Compiler (or more
-                            precisely a Vaadin widget set generator) reads the annotations
-                            that define the mappping from server-side components to
-                            client-side widgets from compiled class files.
-                        </para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term><emphasis>The correct widget set is not loaded</emphasis></term>
-                    <listitem>
-                        <para>
-                            The widget set must be specified in
-                            <filename>WebContent/WEB-INF/web.xml</filename> descriptor, as an
-                            initialization parameter for the servlet.
-                        </para>
-                        
-                        <programlisting><?pocket-size 65% ?><![CDATA[<init-param>
-    <description>Application widgetset</description>
-    <param-name>widgetset</param-name>
-    <param-value>com.example.mylibrary.widgetset.MyWidgetset</param-value>
-</init-param>]]></programlisting>
-
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term><emphasis>A generated widget set inherits itself</emphasis></term>
-                    <listitem>
-                        <para>
-                            The widget set builder can create a <filename>.gwt.xml</filename>
-                            descriptor that inherits the same widget set. This usually occurs
-                            when the class path for the source files is set to something
-                            different than the root of the entire source tree, so that the
-                            package name of the widget set to be defined with the descriptor
-                            would be invalid.
-                        </para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term></term>
-                    <listitem></listitem>
-                </varlistentry>
-            </variablelist>
-        </section>
+        <indexterm startref="term.gwt.javascript" class="endofrange"/>
     </section>
 
     <indexterm startref="term.gwt" class="endofrange"/>

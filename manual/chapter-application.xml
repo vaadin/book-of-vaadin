@@ -22,12 +22,12 @@
 
 		<para>
 			An application made with Vaadin runs as a Java Servlet in a Servlet
-			container. The entry-point is the application class, which needs to create and
-			manage all necessary user interface components, including windows. User
-			interaction is handled with event listeners, simplified by binding user
+			container. The entry-point is the <emphasis>&root;</emphasis> class, which
+			needs to create and manage the user interface components. User input is
+			handled with event listeners, which can be simplified by binding user
 			interface components directly to data. Visual appearance is defined in themes
-			as CSS files. Icons, other images, and downloadable files are handled as
-			<emphasis>resources</emphasis>, which can be external or served by the
+			as CSS or SASS files. Icons, other images, and downloadable files are handled
+			as <emphasis>resources</emphasis>, which can be external or served by the
 			application server or the application itself.
 		</para>
 		
@@ -44,41 +44,46 @@
 		</figure>
 
 		<para>
-			<xref linkend="figure.application.architecture"/> above gives the basic
-			architecture of an application made with the Vaadin framework, with
-			all the major elements, which are introduced below and discussed in detail in
-			this chapter.
+			<xref linkend="figure.application.architecture"/> above illustrates the basic
+			architecture of an application made with the Vaadin framework, with all the
+			major elements, which are introduced below and discussed in detail in this
+			chapter.
 		</para>
 
 		<para>
-			First of all, an application that uses Vaadin must define an
-			application class that inherits the abstract
-			<classname>com.vaadin.Application</classname> class.  The application
-			class must implement the <methodname>init()</methodname> method.
+			First of all, a Vaadin application must have one or more &root; classes that
+			extend the abstract <classname>com.vaadin.ui.&rootclass;</classname> class and
+			implement the <methodname>init()</methodname> method.  A custom theme can be
+			defined as an annotation for the &root;.
 		</para>
 		
-		<programlisting><![CDATA[public class MyApp extends com.vaadin.Application {
-
-    public void init() { 
+		<programlisting><![CDATA[@Theme("hellotheme")
+public class HelloWorld extends Root {
+    protected void init(WrappedRequest request) {
         ... initialization code goes here ...
     }
 }]]></programlisting>
 
+        <para>
+            A &root; is a viewport to a Vaadin application running in a web page.  A web
+            page, represented by the <classname>Page</classname> class, can have multiple
+            such &root;s embedded within it. Such situation is typical especially with
+            portlets in a portal. An application can run in multiple browser windows, each
+            having a <classname>Page</classname> and one or more &root;s.
+        </para>
+
 		<para>
-			Besides acting as the entry-point in the servlet, the
-			<classname>Application</classname> class provides facilities for window
-			access, execution control, and theme selection. The application API may seem
-			similar to Java Servlet API, but that is only superficial. Vaadin
-			framework associates requests with sessions so that an application class
-			instance is really a session object.  Because of this, you can develop web
-			applications much like you would develop desktop applications.
+            The &root; API may seem similar to Java Servlet API, but that is only
+            superficial. Vaadin framework associates requests with sessions so that an
+            application instance is really a session object. Because of this, you can
+            develop web applications much like you would develop desktop applications.
 		</para>
 		
         <note>
             <title>Restarting Application Session</title>
 
             <para>
-                When you open the URL for the application, it creates a new user
+                When you first open an URL for the application, it creates a new user
                 session. The session is preserved even if you reload the page. However, if
                 you use Eclipse, it likes to do hot deployment to Tomcat and you may
                 experience a problem that the application does not return to its initial
@@ -95,29 +100,40 @@
         </note>
 
 		<para>
-			The most important thing in the initialization is the creation of the main
-			window (see below), which any application has. This, and the deployment of the
-			application as a Java Servlet in the Servlet container, as described in <xref
+			The most important task in the initialization is the creation of the initial
+			user interface. This, and the deployment of the application as a Java Servlet
+			in the Servlet container, as described in <xref
 			linkend="application.environment"/>, are the minimal requirements for an
 			application.
 		</para>
 
 		<para>
-			Below is a short overview of the basic elements of an application:
+			Below is a short overview of the other basic elements of an application
+			besides &root;:
 		</para>
 
 		<variablelist>
 			<varlistentry>
-				<term>Windows</term>
+				<term>Page</term>
 				<listitem>
 					<para>
-						An application always has a <emphasis>main window</emphasis>, as
-						described in <xref linkend="application.main-window"/>. An
-						application can actually have a number of such application-level
-						windows, all bound to the same application session, as described
-						in <xref linkend="application.windows"/>. Application-level
-						windows can contain non-native sub-windows, which are essentially
-						floating layout components handled inside the browser.
+                        A browser window displays a web page, which is made of HTML and
+                        can have multiple &root;s inside it. Such a web page is
+                        represented by the <classname>Page</classname> class. An
+                        application can have multiple windows displaying different pages,
+                        all belonging to the same user session.
+					</para>
+				</listitem>
+			</varlistentry>
+
+			<varlistentry>
+				<term>Application</term>
+				<listitem>
+					<para>
+						A Vaadin application, as defined by the
+						<classname>Application</classname> class, is essentially a user
+						session. It can run on multiple pages (or windows) and have
+						multiple &root;s.
 					</para>
 				</listitem>
 			</varlistentry>
@@ -126,13 +142,15 @@
 				<term>User Interface Components</term>
 				<listitem>
 					<para>
-						The user interface consists of UI components that are created and
-						laid out by the application. User interaction with the components
-						causes events (see below) related to the component, which the
-						application must handle. Most components are bound to some data
-						using the Data Model (see below). You can make your own UI
-						components through either inheritance or composition. For a
-						thorough reference of UI components, see <xref
+						The user interface consists of components that are created by the
+						application. They are laid out hierarchically using special
+						<emphasis>layout components</emphasis>. User interaction with the
+						components causes <emphasis>events</emphasis> related to the
+						component, which the application can handle. <emphasis>Field
+						components</emphasis> are intended for inputting values and can be
+						directly bound to data using the Vaadin Data Model. You can make
+						your own user interface components through either inheritance or
+						composition. For a thorough reference of UI components, see <xref
 						linkend="components"/>, for layout components, see <xref
 						linkend="layout"/>, and for composing components, see <xref
 						linkend="components.customcomponent"/>.
@@ -173,8 +191,8 @@
 					<para>
 						The presentation and logic of the user interface are
 						separated. While the UI logic is handled as Java code, the
-						presentation is defined in <emphasis>themes</emphasis> as
-						CSS. Vaadin provides a default theme. User-defined themes can, in
+						presentation is defined in <emphasis>themes</emphasis> as CSS or
+						SASS. Vaadin provides a default theme. User-defined themes can, in
 						addition to style sheets, include HTML templates that define
 						custom layouts and other theme resources, such as images. Themes
 						are discussed in detail in <xref linkend="themes"/>, custom
@@ -188,425 +206,25 @@
 				<term>Data Binding</term>
 				<listitem>
 					<para>
-						Field components are essentially views to data, represented in a
-						<emphasis>data model</emphasis>. Using the data model, the
-						components can update the application data directly, without the
-						need for any control code. A field component model is always bound
-						to a <emphasis>property</emphasis>, an <emphasis>item</emphasis>, or
-						a <emphasis>container</emphasis>, depending on the field type.
-						While all the components have a default data model, they can be
-						bound to a user-defined data source. For example, you can bind a
-						table component to an SQL query response. For a complete overview
-						of data binding in Vaadin, please refer to <xref
-						linkend="datamodel"/>.
+						Field components are essentially views to data, represented in the
+						<emphasis>Vaadin Data Model</emphasis>. Using the data model, the
+						components can get their values from and update user input to the
+						data model directly, without the need for any control code. A
+						field component is always bound to a <emphasis>property</emphasis>
+						and a group a fields to an <emphasis>item</emphasis> that holds
+						the properties. Items can be collected in a
+						<emphasis>container</emphasis>, which can act as a data source for
+						some components such as tables or lists. While all the components
+						have a default data model, they can be bound to a user-defined
+						data source. For example, you can bind a
+						<classname>Table</classname> component to an SQL query
+						response. For a complete overview of data binding in Vaadin,
+						please refer to <xref linkend="datamodel"/>.
 					</para>
 				</listitem>
 			</varlistentry>
         </variablelist>
 	</section>
-		
-	<section xml:id="application.main-window">
-		<title>Managing the Main Window</title>
-
-		<para>
-			As explained in <xref linkend="advanced.application.pages"/>, an AJAX web
-			application usually runs in a single "web page" in a browser window. The page
-			is generally not reloaded after it is opened initially, but it communicates
-			user interaction with the server through AJAX communications. A window in an
-			AJAX application is therefore more like a window in a desktop application and
-			less like a web page.
-		</para>
-
-		<para>
-			A <classname>Window</classname> is the top-level container of a user interface
-			displayed in a browser window. As an AJAX application typically runs on a
-			single "page" (URL), there is usually just one window -- the main window. The
-			main window can be accessed using the URL of the application. You set the main
-			window with the <methodname>setMainWindow()</methodname> method of the
-			<classname>Application</classname> class.
-		</para>
-
-		<programlisting><?pocket-size 75% ?>import com.vaadin.ui.*;
-
-public class HelloWorld extends com.vaadin.Application {
-    public void init() { 
-        Window main = new Window("The Main Window"); 
-        setMainWindow(main);
-
-        <emphasis>... fill the main window with components ...</emphasis>
-    }
-}</programlisting>
-
-        <para>
-            You can add components to the main window, or to any other window, with the
-            <classname>addComponent()</classname> method, which actually adds the given
-            component to the root layout component bound to the window. If you wish to use
-            other than the default root layout, you can set it with
-            <methodname>setContent()</methodname>, as explained in <xref
-            linkend="layout.root-layout"/>.
-        </para>
-		
-		<para>
-			Vaadin has two basic kinds of windows: <emphasis>application-level
-			windows</emphasis>, such as the main window, and
-			<emphasis>sub-windows</emphasis> inside the application-level windows. The
-			sub-windows are explained in the next section, while application-level windows
-			are covered in <xref linkend="application.windows"/>.
-		</para>
-	</section>
-
-	<section xml:id="application.child-windows">
-		<title>Sub-Windows</title>
-		
-		<para>
-			An application-level window can have a number of floating child or
-			sub-windows. They are managed by the client-side JavaScript runtime of Vaadin
-			using HTML features. Vaadin allows opening and closing sub-windows,
-			refreshing one window from another, resizing windows, and scrolling the window
-			content. Sub-windows are typically used for <firstterm>Dialog
-			Windows</firstterm> and <firstterm>Multiple Document Interface</firstterm>
-			applications. Sub-windows are by default not modal; you can set them modal
-			as described in <xref linkend="application.child-windows.modal"/>.
-		</para>
-
-		<para>
-			As with all user interface components, the appearance of a window and its
-			contents is defined with themes.
-		</para>
-
-		<para>
-			User control of a sub-window is limited to moving, resizing, and closing
-			the window. Maximizing or minimizing are not yet supported.
-		</para>
-
-		<section xml:id="application.child-window.openclose">
-			<title>Opening and Closing a Sub-Window</title>
-			
-			<para>
-				You can open a new window by creating a new
-				<classname>Window</classname> object and adding it to the
-				main window with <methodname>addWindow()</methodname> method of
-				the <classname>Application</classname> class.
-			</para>
-
-			<programlisting><![CDATA[mywindow = new Window("My Window");
-mainwindow.addWindow(mywindow);]]></programlisting>
-
-			<para>
-				You close the window in a similar fashion, by calling the
-				<methodname>removeWindow()</methodname> of the
-				<classname>Application</classname> class:
-			</para>
-
-			<programlisting><![CDATA[myapplication.removeWindow (mywindow);]]></programlisting>
-
-			<para>
-				The user can, by default, close a sub-window by clicking the close
-				button in the upper-right corner of the window. You can disable the button
-				by setting the window as <emphasis>read-only</emphasis> with
-				<methodname>setReadOnly(true)</methodname>. Notice that you could disable
-				the button also by making it invisible in CSS with a "<parameter>display:
-				none</parameter>" formatting. The problem with such a cosmetic disabling
-				is that a malicious user might re-enable the button and close the window,
-				which might cause problems and possibly be a security hole. Setting
-				the window as read-only not only disables the close button on the client
-				side, but also prevents processing the close event on the server side.
-			</para>
-	
-			<para>
-				The following example demonstrates the use of a sub-window in an
-				application. The example manages the window using a custom component that
-				contains a button for opening and closing the window.
-			</para>
-
-			<programlisting><?pocket-size 65% ?><![CDATA[/** Component contains a button that allows opening a window. */
-public class WindowOpener extends CustomComponent
-                          implements Window.CloseListener {
-    Window mainwindow;  // Reference to main window
-    Window mywindow;    // The window to be opened
-    Button openbutton;  // Button for opening the window
-    Button closebutton; // A button in the window
-    Label  explanation; // A descriptive text
-
-    public WindowOpener(String label, Window main) {
-        mainwindow = main;
-
-        // The component contains a button that opens the window.
-        final VerticalLayout layout = new VerticalLayout();
-        
-        openbutton = new Button("Open Window", this,
-                                "openButtonClick");
-        explanation = new Label("Explanation");
-        layout.addComponent(openbutton);
-        layout.addComponent(explanation);
-        
-        setCompositionRoot(layout);
-    }
-
-    /** Handle the clicks for the two buttons. */
-    public void openButtonClick(Button.ClickEvent event) {
-        /* Create a new window. */
-        mywindow = new Window("My Dialog");
-        mywindow.setPositionX(200);
-        mywindow.setPositionY(100);
-
-        /* Add the window inside the main window. */
-        mainwindow.addWindow(mywindow);
-
-        /* Listen for close events for the window. */
-        mywindow.addListener(this);
-
-        /* Add components in the window. */
-        mywindow.addComponent(
-                new Label("A text label in the window."));
-        closebutton = new Button("Close", this, "closeButtonClick");
-        mywindow.addComponent(closebutton);
-
-        /* Allow opening only one window at a time. */
-        openbutton.setEnabled(false);
-
-        explanation.setValue("Window opened");
-    }
-
-    /** Handle Close button click and close the window. */
-    public void closeButtonClick(Button.ClickEvent event) {
-        /* Windows are managed by the application object. */
-        mainwindow.removeWindow(mywindow);
-
-        /* Return to initial state. */
-        openbutton.setEnabled(true);
-
-        explanation.setValue("Closed with button");
-    }
-
-    /** In case the window is closed otherwise. */
-    public void windowClose(CloseEvent e) {
-        /* Return to initial state. */
-        openbutton.setEnabled(true);
-
-        explanation.setValue("Closed with window controls");
-    }
-}]]></programlisting>
-
-			<para>
-				The example implements a custom component that inherits the
-				<classname>CustomComponent</classname> class. It consists of a
-				<classname>Button</classname> that it uses to open a window and a
-				<classname>Label</classname> to describe the state of the window. When the
-				window is open, the button is disabled. When the window is closed, the
-				button is enabled again. <!-- TODO: Notice that pushing the
-				<guibutton>Close</guibutton> button removes the window, but the close
-				event will not be called so after removal we have to disable the ... -->
-			</para>
-
-			<para>
-				You can use the above custom component in the application class with:
-			</para>
-
-			<programlisting><?pocket-size 75% ?> public void init() { 
-    Window main = new Window("The Main Window"); 
-    setMainWindow(main);
-
-    main.addComponent(new WindowOpener("Window Opener", main));
-}</programlisting>
-
-			<para>
-				When added to an application, the screen will look as illustrated
-				in the following screenshot:
-			</para>
-
-			<figure xml:id="figure.window.open.example">
-				<title>Opening a Sub-Window</title>
-				<mediaobject>
-					<imageobject role="html">
-						<imagedata align="center" fileref="img/layout/window_openexample.png"/>
-					</imageobject>
-					<imageobject role="fo">
-						<imagedata smallscale="100%" align="center" fileref="img/layout/window_openexample.png"/>
-					</imageobject>
-				</mediaobject>
-			</figure>
-
-		</section>
-
-		<section xml:id="application.child-window.position">
-			<title>Window Positioning</title>
-
-			<para>
-				When created, a window will have a default size and
-				position. You can specify the size of a window with
-				<methodname>setHeight()</methodname> and
-				<methodname>setWidth()</methodname> methods. You can set the
-				position of the window with <methodname>setPositionX()</methodname>
-				and <methodname>setPositionY()</methodname> methods.
-			</para>
-
-			<programlisting><![CDATA[/* Create a new window. */
-mywindow = new Window("My Dialog");
-
-/* Set window size. */
-mywindow.setHeight("200px");
-mywindow.setWidth("400px");
-
-/* Set window position. */
-mywindow.setPositionX(200);
-mywindow.setPositionY(50);]]></programlisting>
-
-			<para>
-				Notice that the size of the main window is unknown and the
-				<methodname>getHeight</methodname> and
-				<methodname>getWidth</methodname> methods will return
-				<returnvalue>-1</returnvalue>.
-			</para>
-
-		</section>
-
-		<section xml:id="application.child-window.scrolling">
-			<title>Scrolling Sub-Window Content</title>
-
-            <indexterm xml:id="term.application.child-window.scrolling.scrollbars" class="startofrange">
-                <primary>scroll bars</primary>
-            </indexterm>
-
-            <para>
-                If a sub-window has a fixed or percentual size and its content becomes too
-                big to fit in the content area, a scroll bar will appear for the
-                particular direction. On the other hand, if the sub-window has undefined
-                size in the direction, it will fit the size of the content and never get a
-                scroll bar. Scroll bars in sub-windows are handled with regular HTML
-                features, namely <literal>overflow: auto</literal> property in CSS.
-                <indexterm><primary>overflow</primary></indexterm>
-            </para>
-
-
-            <para>
-                <indexterm><primary><interfacename>Scrollable</interfacename></primary></indexterm>
-
-                As <classname>Window</classname> extends <classname>Panel</classname>,
-                windows are also <interfacename>Scrollable</interfacename>. Note that the
-                interface defines <emphasis>programmatic scrolling</emphasis>, not
-                scrolling by the user. Please see <xref linkend="layout.components.panel"/>.
-            </para>
-
-            <indexterm startref="term.application.child-window.scrolling.scrollbars" class="endofrange"/>
-        </section>
-
-		<!-- section xml:id="section.window.native"> <title>Native Child Windows</title>
-
-			<note>
-				<title>Not Yet Supported</title>
-
-				Support for native child windows is not yet available in Vaadin
-				Release 5. The Release 5 allows you, however, to access the application
-				from multiple root windows. 
-			</note>
-
-			<para>
-				Native windows are managed by the operating system or its
-				windowing system and window manager. This is the common type of
-				windows on a desktop. As Vaadin applications run on a
-				web browser, the native windows are browser windows, often called
-				<emphasis>popup windows</emphasis>, which can be separate windows
-				or managed as tabs by the browser.
-			</para>
-
-			<para>
-				You can define a window to be a native (popup) window by setting
-				its style with <methodname>setStyle("native")</methodname>. The
-				following screenshot is taken from the above example in <xref
-				linkend="section.window.openclose"/> with the style set to
-				native.
-			</para>
-
-			<figure xml:id="figure.window.native">
-				<title>Screenshot of a native child window</title>
-				<mediaobject>
-					<imageobject role="html">
-						<imagedata align="center" fileref="img/layout/window_native.png"/>
-					</imageobject>
-					<imageobject role="fo">
-						<imagedata scale="60" align="center" fileref="img/layout/window_native.png"/>
-					</imageobject>
-				</mediaobject>
-			</figure>
-
-			<para>
-				While Vaadin 4.x supports native windows, they are
-				generally not recommended because of various problems they
-				create. For one, the browser will not tell when a window is
-				closed, so there will be no
-				<methodname>windowClose()</methodname> event. You will never know
-				if a certain window really is open or not. It also means that the
-				window object can be left hanging. You should never trust that a
-				window still exists or prevent the user from opening a new window
-				to replace a closed window. Many browsers also prevent opening
-				popup windows by default, and may do so invisibly, so the user
-				might be left wondering why pushing a button did not do anything.
-			</para>
-
-			<para>
-				For example, consider the above example in <xref
-				linkend="section.window.openclose"/>. Notice that since the main
-				window depends on the state of the child window: the opening
-				button is grayed when the child window is open. If the child
-				window was a native window and the user clicked on the close
-				button available on all native windows, the browser would not
-				tell the application about the event. The opening button in the
-				main window would be left grayed for all eternity.
-			</para>
-
-	        </section -->
-
-		<section xml:id="application.child-windows.modal">
-			<title>Modal Windows</title>
-
-			<para>
-				A modal window is a child window that has to be closed by the
-				user before the use of the parent window can continue. Dialog windows
-				are typically modal. The advantage of modal windows is the
-				simplification of user interaction, which may contribute to the
-				clarity of the user interface. Modal windows are also easy to use
-				from a development perspective, because as user interaction is
-				isolated to them, changes in application state are more limited
-				while the modal window is open. The disadvantage of modal windows
-				is that they can restrict workflow too much.
-			</para>
-
-			<figure xml:id="figure.window.modal">
-				<title>Screenshot of the Modal Window Demo Application</title>
-				<mediaobject>
-					<imageobject role="html">
-						<imagedata align="center" fileref="img/layout/window_modal.png"/>
-					</imageobject>
-					<imageobject role="fo">
-						<imagedata scale="90" smallscale="100%" align="center" fileref="img/layout/window_modal.png"/>
-					</imageobject>
-				</mediaobject>
-			</figure>
-			
-			<para>
-				Depending on theme settings, the parent window may be grayed
-				while the modal window is open.
-			</para>
-
-			<para>
-				The demo application of Vaadin includes an example of
-				using modal windows. <xref linkend="figure.window.modal"/> above
-				is from the demo application. The example includes the source
-				code.
-			</para>
-
-			<warning>
-				<title>Security Warning</title>
-				<para>
-					Modality of child windows is purely a client-side feature and can be
-					circumvented with client-side attack code. You should not trust in the
-					modality of child windows in security-critical situations such as
-					login windows.
-				</para>
-			</warning>
-		</section>
-	</section> <!-- Child windows -->
 		
     <section xml:id="application.events">
         <title>Handling Events with Listeners</title>
@@ -1672,6 +1290,21 @@ public void terminalError(Terminal.ErrorEvent event) {
 		</section>
 	</section>
 
+	<section xml:id="application.navigation">
+		<title>Navigating in an Application</title>
+
+        <!-- TODO Vaadin -->
+
+        <section xml:id="application.navigation">
+            <title>URI Fragments and History</title>
+
+            <para>
+                Bookmarking a basic Vaadin application only bookmarks the URL for the
+                application, not a specific application state.
+            </para>
+        </section>
+    </section>
+
 	<section xml:id="application.environment">
 		<title>Setting Up the Application Environment</title>
 		
@@ -1703,6 +1336,8 @@ public void terminalError(Terminal.ErrorEvent event) {
             exists also other kinds of web applications. To avoid confusion with the
             general meaning of "web application", we often refer to Java web application
             as "WAR" in this book.
+
+            <!-- TODO Vaadin 7: What is the relationship between servlet and application? -->
 		</para>
 		
 		<section>
@@ -1771,7 +1406,7 @@ public void terminalError(Terminal.ErrorEvent event) {
 				<varlistentry>
 					<term>
 						<filename>
-							WEB-INF/lib/vaadin-6.x.x.jar
+							WEB-INF/lib/vaadin-7.x.x.jar
 						</filename>
 					</term>
 					<listitem>
@@ -1827,16 +1462,20 @@ public void terminalError(Terminal.ErrorEvent event) {
 
 			<para>
 				The deployment descriptor is an XML file with the name
-				<filename>web.xml</filename> in the <filename>WEB-INF</filename> directory of
-				a web application. It is a standard component in Java EE describing
-				how a web application should be deployed. The structure of the deployment
+				<filename>web.xml</filename> in the <filename>WEB-INF</filename> directory
+				of a web application. It is a standard component in Java EE describing how
+				a web application should be deployed. The structure of the deployment
 				descriptor is illustrated by the following example. You simply deploy
 				applications as servlets implemented by the special
 				<methodname>com.vaadin.terminal.gwt.server.ApplicationServlet</methodname>
-				wrapper class. The class of the actual application is specified by giving
-				the <parameter>application</parameter> parameter with the name of the
-				specific application class to the servlet. The servlet is then connected
-				to a URL in a standard way for Java Servlets.
+				wrapper class.
+            </para>
+
+            <para>
+                If your application has a single &root;, you simply specify the &root;
+                class by giving the <parameter>&root;</parameter> parameter with the name
+                of the specific root class for the servlet. The servlet is then connected
+                to a URL in a standard way for Java Servlets.
 			</para>
 
 			<example xml:id="ex.web.xml">
@@ -1855,8 +1494,8 @@ public void terminalError(Terminal.ErrorEvent event) {
         com.vaadin.terminal.gwt.server.ApplicationServlet
     &lt;/servlet-class&gt;
     &lt;init-param&gt;
-      &lt;param-name&gt;application&lt;/param-name&gt;
-      &lt;param-value&gt;<emphasis role="strong">MyApplicationClass</emphasis>&lt;/param-value&gt;
+      &lt;param-name&gt;&root;&lt;/param-name&gt;
+      &lt;param-value&gt;<emphasis role="strong">My&rootclass;</emphasis>&lt;/param-value&gt;
     &lt;/init-param&gt;
   &lt;/servlet&gt;
 
@@ -1867,39 +1506,68 @@ public void terminalError(Terminal.ErrorEvent event) {
 &lt;/web-app&gt;</programlisting>
 			</example>
 
-			<para>
-				The descriptor defines a servlet with name
-				<filename>myservlet</filename>. The servlet class,
-				<classname>com.vaadin.terminal.gwt.server.ApplicationServlet</classname>,
-				is provided by Vaadin framework and it should be the same for all
-				Vaadin projects. The servlet takes the class name
-				<classname>Calc</classname> of the user application class as a parameter,
-				including the full package path to the class. If the class is in the
-				default package the package path is obviously not used.
-			</para>
+            <para>
+                The descriptor defines a servlet with name <filename>myservlet</filename>.
+                The servlet class,
+                <classname>com.vaadin.terminal.gwt.server.ApplicationServlet</classname>,
+                is provided by Vaadin framework and is normally the same for all Vaadin
+                projects. For some purposes, you may need to use a custom servlet class.
+            </para>
 
-			<para>
-				The <literal>url-pattern</literal> is defined above as
-				<literal>/*</literal>. This matches to any URL under the project
-				context. We defined above the project context as
-				<literal>myproject</literal> so the application URL will be
-				<uri>http://localhost:8080/myproject/</uri>. If the project were to have
-				multiple applications or servlets, they would have to be given different names to distinguish them.
-				For example, <literal>url-pattern</literal>
-				<literal>/myapp/*</literal> would match a URL such as
-				<uri>http://localhost:8080/myproject/myapp/</uri>. Notice that the slash
-				and the asterisk <emphasis>must</emphasis> be included at the end of the
-				pattern.
-			</para>
+			<section>
+				<title>&rootclass; or Application Class</title>
 
-			<para>
-				Notice also that if the URL pattern is other than root
-				<literal>/*</literal> (such as <literal>/myapp/*</literal>), you will also
-				need to make a servlet mapping to <literal>/VAADIN/*</literal> (unless you
-				are serving it statically as noted below). For example:
-			</para>
+                <para>
+                    The servlet can take either an application class or the &root; class
+                    of an application as a parameter. A &root; class is normally given in
+                    applications with a single &root; inside a page, while using an
+                    application class as the entry-point allows multiple &root;s.
+                </para>
+                    
+                <para>
+                    If the <literal>&root;</literal> parameter is given, its value must be
+                    the class name of the &root; class, such as
+                    <classname>com.example.My&rootclass;</classname>, including the full
+                    package path to the class. If the class is in the default package, the
+                    package path is obviously not used.
+                </para>
 
-			<programlisting>    ...
+                <para>
+                    If your application has multiple &root;s in one page, or for other
+                    purposes, you can extend the <classname>Application</classname> class
+                    instead of <classname>&rootclass;</classname> and define your
+                    application class with the <literal>application</literal> parameter
+                    for the servlet. For roots created during the execution of an
+                    application, such as for displaying popup windows, you can add new
+                    roots dynamically to the application instance.
+                </para>
+            </section>
+
+			<section>
+				<title>Servlet Mapping with URL Patterns</title>
+
+                <para>
+                    The <literal>url-pattern</literal> is defined above as
+                    <literal>/*</literal>. This matches to any URL under the project
+                    context. We defined above the project context as
+                    <literal>myproject</literal> so the URL for the page of the &root; will be
+                    <uri>http://localhost:8080/myproject/</uri>. If the project were to have
+                    multiple &root;s or servlets, they would have to be given different names
+                    to distinguish them.  For example, <literal>url-pattern</literal>
+                    <literal>/my&root;/*</literal> would match a URL such as
+                    <uri>http://localhost:8080/myproject/my&root;/</uri>. Notice that the slash
+                    and the asterisk <emphasis>must</emphasis> be included at the end of the
+                    pattern.
+                </para>
+
+                <para>
+                    Notice also that if the URL pattern is other than
+                    <literal>/*</literal> (such as <literal>/my&root;/*</literal>), you will also
+                    need to make a servlet mapping to <literal>/VAADIN/*</literal> (unless you
+                    are serving it statically as noted below). For example:
+                </para>
+
+                <programlisting>    ...
     &lt;servlet-mapping&gt;
         &lt;servlet-name&gt;<emphasis role="strong">myservlet</emphasis>&lt;/servlet-name&gt;
         &lt;url-pattern&gt;/myurl/*&lt;/url-pattern&gt;
@@ -1910,26 +1578,27 @@ public void terminalError(Terminal.ErrorEvent event) {
         &lt;url-pattern&gt;/VAADIN/*&lt;/url-pattern&gt;
     &lt;/servlet-mapping&gt;</programlisting>
 
-            <para>
-                If you have multiple servlets, you should specify only one
-                <literal>/VAADIN/*</literal> mapping . It doesn't matter which servlet you
-                map the pattern to, as long as it is a Vaadin servlet.
-            </para>
+                <para>
+                    If you have multiple servlets, you should specify only one
+                    <literal>/VAADIN/*</literal> mapping. It does not matter which servlet you
+                    map the pattern to, as long as it is a Vaadin servlet.
+                </para>
 
-			<para>
-				You do not have to provide the above <literal>/VAADIN/*</literal> mapping
-				if you serve both the widget sets and (custom and default) themes
-				statically in the <filename>WebContent/VAADIN/</filename> directory. The
-				mapping simply allows serving them dynamically from the Vaadin
-				JAR. Serving them statically is recommended for production environments as
-				it is faster. If you serve the content from within the same web
-				application, you may not have the root pattern <literal>/*</literal> for
-				the Vaadin servlet, as then all the requests would be mapped to the
-				servlet.
-			</para>
+                <para>
+                    You do not have to provide the above <literal>/VAADIN/*</literal> mapping
+                    if you serve both the widget sets and (custom and default) themes
+                    statically in the <filename>WebContent/VAADIN/</filename> directory. The
+                    mapping simply allows serving them dynamically from the Vaadin
+                    JAR. Serving them statically is recommended for production environments as
+                    it is faster. If you serve the content from within the same web
+                    application, you may not have the root pattern <literal>/*</literal> for
+                    the Vaadin servlet, as then all the requests would be mapped to the
+                    servlet.
+                </para>
+            </section>
 
 			<section>
-				<title>Deployment Descriptor Parameters</title>
+				<title>Other Deployment Parameters</title>
 
 				<para>
 					Deployment descriptor can have many parameters and options that
@@ -1967,12 +1636,15 @@ public void terminalError(Terminal.ErrorEvent event) {
     <session-timeout>30</session-timeout>
 </session-config>]]></programlisting>
 
+                <!-- TODO Vaadin 7: How is close() detected?
 				<para>
 					After the timeout expires, the <methodname>close()</methodname>
 					method of the <classname>Application</classname> class will be
 					called. You should implement it if you wish to handle timeout
 					situations.
 				</para>
+                -->
+
 			</section>
 		</section>
 	</section>

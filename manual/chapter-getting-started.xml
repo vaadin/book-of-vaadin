@@ -26,7 +26,7 @@
 
         <itemizedlist>
             <listitem><link xlink:href="http://www.microsoft.com/windowsxp/">Windows XP</link>, Linux, or Mac OS X</listitem>
-            <listitem><link xlink:href="http://java.sun.com/javase/downloads/index.jsp">Sun Java 2 Standard Edition 6.0</link> (Java 1.5 or newer is required)</listitem>
+            <listitem><link xlink:href="http://java.sun.com/javase/downloads/index.jsp">Sun Java 2 Standard Edition 6.0</link> (JDK 1.6 or newer is required)</listitem>
             <listitem><link xlink:href="http://www.eclipse.org/downloads/">Eclipse IDE for Java EE Developers</link></listitem>
             <listitem><link xlink:href="http://tomcat.apache.org/">Apache Tomcat 7.0 (Core) or newer</link></listitem>
             <listitem><link xlink:href="http://www.getfirefox.com/">Mozilla Firefox</link> browser</listitem>
@@ -71,7 +71,7 @@
 
 			<para>
 				Java SDK is required by Vaadin and also by the Eclipse IDE.
-				Vaadin is compatible with Java 1.5	and later editions. 
+				Vaadin is compatible with Java 1.6 and later editions. 
 			</para>
 
 			<section>
@@ -300,9 +300,11 @@
 				by clicking the yellow warning bar at the top of the browser-window.
 			</para>
 			
-			<para>When Firebug is installed, it can be enabled at any time from the bottom
-			right corner of the Firefox window. <xref
-			linkend="figure.firebug.calc"/> shows an example of what Firebug looks like.</para>
+			<para>
+                When Firebug is installed, it can be enabled at any time from the corner
+                of the Firefox window. <xref linkend="figure.firebug.calc"/> shows an
+                example of what Firebug looks like.
+            </para>
 
 			 <figure xml:id="figure.firebug.calc">
 				<title>Firebug Debugger for Firefox</title>
@@ -1012,20 +1014,17 @@
 				The application class created by the plugin contains the following code:
 			</para>
 
-			<programlisting><?pocket-size 75% ?><![CDATA[package com.example.myproject;
+            <programlisting><?pocket-size 75% ?><![CDATA[package com.example.myproject;
 
-import com.vaadin.Application;
 import com.vaadin.ui.*;
-public class MyprojectApplication extends Application
-{
-   @Override 
-   public void init() {
-      Window mainWindow = 
-         new Window("Myproject Application");
-      Label label = new Label("Hello Vaadin user");
-      mainWindow.addComponent(label);
-      setMainWindow(mainWindow);
-   }
+import com.vaadin.terminal.WrappedRequest;
+
+public class MyprojectRoot extends Root {
+    @Override
+    public void init(WrappedRequest request) {
+        Label label = new Label("Hello Vaadin user");
+        addComponent(label);
+    }
 }]]></programlisting>
 
 			<para>
@@ -1034,23 +1033,17 @@ public class MyprojectApplication extends Application
 				look something like:
 			</para>
 
-<programlisting><![CDATA[public void init() {
-   final Window mainWindow = 
-      new Window("Myproject Application");
+<programlisting><![CDATA[@Override
+public void init(WrappedRequest request) {
+    Label label = new Label("Hello Vaadin user");
+    addComponent(label);
 
-   Label label = new Label("Hello Vaadin user");
-   mainWindow.addComponent(label);
-
-   mainWindow.addComponent(
-      new Button("What is the time?",
-         new Button.ClickListener() {
-         public void buttonClick(ClickEvent event) {
-            mainWindow.showNotification(
-               "The time is " + new Date());
-         }
-      }));
-
-   setMainWindow(mainWindow);
+    addComponent(new Button("What is the time?",
+                            new Button.ClickListener() {
+        public void buttonClick(ClickEvent event) {
+            Notification.show("The time is " + new Date());
+        }
+    }));
 }]]></programlisting>
 
 			<para>
@@ -1081,10 +1074,10 @@ public class MyprojectApplication extends Application
   	  com.vaadin.terminal.gwt.server.ApplicationServlet
   	</servlet-class>
   	<init-param>
-      <description>Vaadin application class to start</description>
-      <param-name>application</param-name>
+      <description>Vaadin root class to use</description>
+      <param-name>root</param-name>
       <param-value>
-        com.example.myproject.MyprojectApplication
+        com.example.myproject.MyprojectRoot
       </param-value>
   	</init-param>
   </servlet>
@@ -1284,8 +1277,8 @@ public class MyprojectApplication extends Application
 
                 <para>
                     Adding the <uri>?restartApplication</uri> parameter in the URL tells
-                    the Vaadin servlet to create a new <classname>Application</classname>
-                    instance when reloading the page.
+                    the Vaadin servlet to create a new application instance (user session)
+                    when reloading the page.
                 </para>
             </note>
 		</section>
