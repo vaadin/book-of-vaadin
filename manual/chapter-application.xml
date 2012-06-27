@@ -114,15 +114,38 @@ public class HelloWorld extends Root {
 
 		<variablelist>
 			<varlistentry>
+				<term>&rootclass;</term>
+				<listitem>
+					<para>
+                        You normally develop Vaadin applications by extending
+                        <classname>&rootclass;</classname>, which is essentially a view to
+                        a Vaadin application. It cat fill the entire page, but can also be
+                        just a part of a web page. Normally, when the user opens a new
+                        page with the URL of the Vaadin application, a new
+                        <classname>Page</classname> is created with a
+                        <classname>Root</classname> inside it.
+                    </para>
+				</listitem>
+			</varlistentry>
+
+			<varlistentry>
 				<term>Page</term>
 				<listitem>
 					<para>
                         A browser window displays a web page, which is made of HTML and
-                        can have multiple &root;s inside it. Such a web page is
+                        can have one or more &root;s inside it. Such a web page is
                         represented by the <classname>Page</classname> class. An
                         application can have multiple windows displaying different pages,
-                        all belonging to the same user session.
+                        running the same or different &root; classes, all belonging to the
+                        same user session.
 					</para>
+
+					<para>
+                        A new <classname>Page</classname>, as well as a root for it, is
+                        automatically created when the user opens a new browser window or
+                        tab with the application URL. You can also open new windows/tabs
+                        dynamically.
+                    </para>
 				</listitem>
 			</varlistentry>
 
@@ -132,9 +155,16 @@ public class HelloWorld extends Root {
 					<para>
 						A Vaadin application, as defined by the
 						<classname>Application</classname> class, is essentially a user
-						session. It can run on multiple pages (or windows) and have
-						multiple &root;s.
+						session. It can have multiple pages (windows), each having one or
+						more &root;s.
 					</para>
+
+                    <para>
+                        You can develop a Vaadin application by extending
+                        <classname>Application</classname> instead of
+                        <classname>&rootclass;</classname>, and create the page and &root;
+                        objects yourself.
+                    </para>
 				</listitem>
 			</varlistentry>
 
@@ -144,13 +174,14 @@ public class HelloWorld extends Root {
 					<para>
 						The user interface consists of components that are created by the
 						application. They are laid out hierarchically using special
-						<emphasis>layout components</emphasis>. User interaction with the
-						components causes <emphasis>events</emphasis> related to the
-						component, which the application can handle. <emphasis>Field
-						components</emphasis> are intended for inputting values and can be
-						directly bound to data using the Vaadin Data Model. You can make
-						your own user interface components through either inheritance or
-						composition. For a thorough reference of UI components, see <xref
+						<emphasis>layout components</emphasis>, with a &root; at the top
+						of the hierarchy. User interaction with the components causes
+						<emphasis>events</emphasis> related to the component, which the
+						application can handle. <emphasis>Field components</emphasis> are
+						intended for inputting values and can be directly bound to data
+						using the Vaadin Data Model. You can make your own user interface
+						components through either inheritance or composition. For a
+						thorough reference of UI components, see <xref
 						linkend="components"/>, for layout components, see <xref
 						linkend="layout"/>, and for composing components, see <xref
 						linkend="components.customcomponent"/>.
@@ -1337,14 +1368,12 @@ public void terminalError(Terminal.ErrorEvent event) {
     super.terminalError(event);
 
     // Some custom behaviour.
-    if (getMainWindow() != null) {
-        getMainWindow().showNotification(
-                "An unchecked exception occured!",
-                event.getThrowable().toString(),
-                Notification.TYPE_ERROR_MESSAGE);
-    }
+    new Notification(
+        "An unchecked exception occured!",
+        event.getThrowable().toString(),
+        Notification.TYPE_ERROR_MESSAGE)
+            .show(Page.getCurrent());
 }]]></programlisting>
-			
 
 			<para>
 				Handling other exceptions works in the usual way for Java
@@ -1354,21 +1383,6 @@ public void terminalError(Terminal.ErrorEvent event) {
 
 		</section>
 	</section>
-
-	<section xml:id="application.navigation">
-		<title>Navigating in an Application</title>
-
-        <!-- TODO Vaadin -->
-
-        <section xml:id="application.navigation">
-            <title>URI Fragments and History</title>
-
-            <para>
-                Bookmarking a basic Vaadin application only bookmarks the URL for the
-                application, not a specific application state.
-            </para>
-        </section>
-    </section>
 
 	<section xml:id="application.environment">
 		<title>Setting Up the Application Environment</title>

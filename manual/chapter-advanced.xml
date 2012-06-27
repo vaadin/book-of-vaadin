@@ -2182,6 +2182,261 @@ urifu.addListener(new FragmentChangedListener() {
         </figure>
     </section>
 
+	<section xml:id="application.navigator">
+		<title>Navigating in an Application</title>
+
+        <para>
+            Vaadin applications do not have actual page navigation as they usually run on
+            a single page. Quite commonly, however, applications have different views
+            between which the user should be able to navigate. Such views could have a
+            distinct URI fragment to be able to bookmark them or to go back.  The
+            <classname>Navigator</classname> in Vaadin can be used for most cases of
+            navigation.
+        </para>
+
+        <section xml:id="application.navigator.navigating">
+            <title>Setting Up for Navigation</title>
+
+            <para>
+                The <classname>Navigator</classname> class manages a collection of
+                <emphasis>views</emphasis> that implement the
+                <interfacename>View</interfacename> interface. The views can be either
+                registered beforehand or acquired from a <emphasis>view
+                provider</emphasis>.  When registering, the views must have a name
+                identifier and be added to a navigator with
+                <methodname>addView()</methodname>. You can register new views at any
+                point. Once registered, you can navigate to them with
+                <methodname>navigateTo()</methodname>.
+            </para>
+
+            <para>
+                The views managed by the <classname>Navigator</classname> are displayed in a
+                <interfacename>ViewDisplay</interfacename>. The framework includes a
+                <classname>SimpleViewDisplay</classname> component, which can be used in most
+                cases to display views.
+            </para>
+
+            <para>
+                Let us consider the following application with two views: start and
+                main. Here, we define their names with enums to be typesafe.
+            </para>
+
+            <book-example id="advanced.navigator.basic" style="float: right"/>
+            <programlisting><?pocket-size 65% ?><![CDATA[public class NavigatorRoot extends Root {
+    Navigator  navigator;
+    
+    enum Views {START, MAIN};
+
+    @Override
+    protected void init(WrappedRequest request) {
+        getPage().setTitle("Navigation Example");
+        
+        // Fill the page with a view display
+        SimpleViewDisplay viewDisplay = new SimpleViewDisplay();
+        viewDisplay.setSizeFull();
+        setContent(viewDisplay);
+
+        // Create the navigator to control the page
+        navigator = new Navigator(Page.getCurrent(),
+                                  viewDisplay);
+        
+        // Create and register the views
+        navigator.addView(Views.START.name(), new StartView());
+        navigator.addView(Views.MAIN.name(), new MainView());
+
+        // Navigate to the start view
+        navigator.navigateTo(Views.START.name());
+    }
+}]]></programlisting>
+
+            <section xml:id="application.navigator.navigating.viewprovider">
+                <title>View Providers</title>
+
+                <para>
+                    You can create new views dynamically using a <emphasis>view
+                    provider</emphasis> that implement the
+                    <interfacename>ViewProvider</interfacename> interface. A provider is
+                    registered in <classname>Navigator</classname> with
+                    <methodname>registerProvider()</methodname>.
+                </para>
+
+                <para>
+                    The <methodname>ClassBasedViewProvider</methodname> is a view provider
+                    that can dynamically create new instances of a specified view class
+                    based on the view name.
+                </para>
+
+                <para>
+                    The <methodname>StaticViewProvider</methodname> returns an existing
+                    view instance based on the view name. The
+                    <methodname>addView()</methodname> in <classname>Navigator</classname>
+                    is actually just a shorthand for creating a static view provider for
+                    each registered view.
+                </para>
+           </section>
+        </section>
+
+        <section xml:id="application.navigator.view">
+            <title>Implementing a View</title>
+
+            <para>
+                Views can be any objects that implement the
+                <interfacename>View</interfacename> interface. When the
+                <methodname>navigateTo()</methodname> is called for the navigator, or the
+                application is opened with the URI fragment associated with the view, it
+                switches to the view and calls its <methodname>navigateTo()</methodname>
+                method.
+            </para>
+
+            <para>
+                To continue with the example, consider the following simple view just lets the
+                user to navigate to the other view. It doesn't do anything special when the
+                user navigates to it.
+            </para>
+
+            <book-example id="advanced.navigator.basic" style="float: right"/>
+            <programlisting><?pocket-size 65% ?><![CDATA[/** A start view for navigating to the main view */
+public class StartView extends VerticalLayout implements View {
+    public StartView() {
+        setSizeFull();
+
+        Button button = new Button("Go to Main View",
+                new Button.ClickListener() {
+            @Override
+            public void buttonClick(ClickEvent event) {
+                navigator.navigateTo(Views.MAIN.name());
+            }
+        });
+        addComponent(button);
+        setComponentAlignment(button, Alignment.MIDDLE_CENTER);
+    }        
+        
+    @Override
+    public void navigateTo(String fragmentParameters) {
+        // Nothing to do here really
+    }
+}]]></programlisting>
+        </section>
+
+        <section xml:id="application.navigator.view">
+            <title>Handling URI Fragment Path</title>
+
+            <para>
+                URI fragments can be used with <classname>Navigator</classname> in two
+                ways: for navigating to a specific view and for navigating to a state
+                within the view. The URI fragment accepted by
+                <methodname>navigateTo()</methodname> can have the view name at the root,
+                followed by fragment parameters after a slash
+                ("<literal>/</literal>"). These parameters are passed to the
+                <methodname>navigateTo()</methodname> method in the
+                <interfacename>View</interfacename>.
+            </para>
+
+            <para>
+                In the following example, we implement within-view navigation.
+            </para>
+
+            <book-example id="advanced.navigator.basic" style="float: right"/>
+            <programlisting><?pocket-size 65% ?><![CDATA[/** Main view with a menu */
+public class MainView extends VerticalLayout implements View {
+
+    // Menu navigation button listener
+    class ButtonListener implements Button.ClickListener {
+        String menuitem;
+        public ButtonListener(String menuitem) {
+            this.menuitem = menuitem;
+        }
+
+        @Override
+        public void buttonClick(ClickEvent event) {
+            // Navigate to a specific state
+            navigator.navigateTo(Views.MAIN.name() +
+                                 "/" + menuitem);
+        }
+    }
+
+    public MainView() {
+        setSizeFull();
+        
+        // Layout with menu on left and view area on right
+        HorizontalLayout hLayout = new HorizontalLayout();
+        hLayout.setSizeFull();
+
+        // Have a menu on the left side of the screen
+        Panel menu = new Panel("Menu");
+        menu.addComponent(new Button("Cat",
+                  new ButtonListener("cat")));
+        menu.addComponent(new Button("Dog",      
+                  new ButtonListener("dog")));
+        menu.addComponent(new Button("Reindeer",
+                  new ButtonListener("reindeer")));
+        menu.addComponent(new Button("Penguin",
+                  new ButtonListener("penguin")));
+        menu.addComponent(new Button("Sheep",
+                  new ButtonListener("sheep")));
+        menu.setHeight("100%");
+        menu.setWidth(null);
+        menu.getContent().setWidth(null);
+        hLayout.addComponent(menu);
+
+        // Have a panel that contains a content area on the right
+        panel = new Panel("Content Panel");
+        panel.setSizeFull();
+        hLayout.addComponent(panel);
+        hLayout.setExpandRatio(panel, 1.0f);
+
+        addComponent(hLayout);
+        setExpandRatio(hLayout, 1.0f);
+        
+        // Allow going back to the start
+        Button logout = new Button("Logout",
+                   new Button.ClickListener() {
+            @Override
+            public void buttonClick(ClickEvent event) {
+                navigator.navigateTo(Views.START.name());
+            }
+        });
+        addComponent(logout);
+    }        
+    
+    @Override
+    public void navigateTo(String fragmentParameters) {
+        panel.removeAllComponents();
+
+        if (fragmentParameters == null) {
+            panel.addComponent(
+                new Label("Nothing to see here, " +
+                          "just pass along."));
+            return;
+        }
+
+        // Display some content
+        panel.addComponent(
+            new Label("You are currently watching a " +
+                      fragmentParameters));
+        panel.addComponent(new Embedded(null,
+            new ThemeResource("img/" + fragmentParameters +
+                              "-128px.png")));
+    }
+}]]></programlisting>
+
+            <para>
+                The main view is shown in <xref
+                    linkend="figure.advanced.navigator.mainview"/>. At this point, the URL would
+                be <literal>http://localhost:8080/myapp#MAIN/reindeer</literal>.
+            </para>
+
+            <figure xml:id="figure.advanced.navigator.mainview">
+                <title>Navigator Main View</title>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata smallscale="100%" align="center" fileref="img/advanced/navigator-mainview.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+        </section>
+    </section>
+
     <section xml:id="advanced.httpservletrequestlistener">
         <title>Capturing HTTP Requests</title>
 
