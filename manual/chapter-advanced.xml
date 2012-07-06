@@ -2182,7 +2182,7 @@ urifu.addListener(new FragmentChangedListener() {
         </figure>
     </section>
 
-	<section xml:id="application.navigator">
+	<section xml:id="advanced.navigator">
 		<title>Navigating in an Application</title>
 
         <para>
@@ -2284,6 +2284,19 @@ urifu.addListener(new FragmentChangedListener() {
                     each registered view.
                 </para>
            </section>
+
+            <section xml:id="application.navigator.navigating.viewchangelistener">
+                <title>View Change Listeners</title>
+
+                <para>
+                    You can handle view changes also by implementing a
+                    <interfacename>ViewChangeListener</interfacename> and adding it to a
+                    <classname>Navigator</classname>. When a view change occurs, a
+                    listener receives a <classname>ViewChangeEvent</classname> object,
+                    which has references to the old and the activated view, the name of
+                    the activated view, as well as the fragment parameters.
+                </para>
+            </section>
         </section>
 
         <section xml:id="application.navigator.view">
@@ -3883,17 +3896,29 @@ class MyComponent extends CustomComponent {
             <indexterm xml:id="term.advanced.global.threadlocal" class="startofrange"><primary>ThreadLocal pattern</primary></indexterm>
 
             <para>
+                Vaadin uses the ThreadLocal pattern for allowing global access to the
+                <classname>Application</classname>, <classname>&rootclass;</classname>,
+                and <classname>Page</classname> objects of the currently processed server
+                request with a static <methodname>getCurrent()</methodname> method in all
+                the respective classes. This section explains why the pattern is used in
+                Vaadin and how it works. The explanation is given as an implementation, if
+                you find a need to reimplement the pattern for some reason.
+            </para>
+
+            <!-- TODO Vaadin 7: Clean up what is no longer necessary -->
+
+            <para>
                 The ThreadLocal pattern gives a solution to the global access problem by
-                solving two sub-problems.
+                solving two sub-problems of static variables.
             </para>
 
             <para>
-                As the first problem, the servlet container processes requests for many
-                users (sessions) sequentially, so if a static variable is set in a request
-                belonging one user, it could be read or re-set by the next incoming
-                request belonging to another user. This can be solved by setting the
-                global reference at the beginning of each HTTP request to point to data of
-                the current user, as illustrated in Figure <xref
+                As the first problem, assume that the servlet container processes requests
+                for many users (sessions) sequentially. If a static variable is set in a
+                request belonging one user, it could be read or re-set by the next
+                incoming request belonging to another user. This can be solved by setting
+                the global reference at the beginning of each HTTP request to point to
+                data of the current user, as illustrated in Figure <xref
                 linkend="figure.advanced.global.threadlocal.sequentiality"
                 xrefstyle="select:labelnumber"/>.
             </para>
@@ -3913,7 +3938,7 @@ class MyComponent extends CustomComponent {
             </figure>
 
             <para>
-                You can implement such switching either with the
+                It is possible to implement such switching either with the
                 <classname>TransactionListener</classname> or
                 <classname>HttpServletRequestListener</classname> interface by setting the
                 reference in <methodname>transactionStart()</methodname> or

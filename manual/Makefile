@@ -34,6 +34,7 @@ IMAGES =	intro/architecture intro/toolchain \
 			components/slider-example1 \
 			components/textfield-diagram \
 			application/application-architecture application/resource_classdiagram \
+			application/view-navigation \
 			advanced/liferay-display \
 			advanced/threadlocal-sequentiality advanced/threadlocal-concurrency \
 			themes/theme-contents themes/eclipse-theme-created-annotated \

@@ -117,13 +117,26 @@ public class HelloWorld extends Root {
 				<term>&rootclass;</term>
 				<listitem>
 					<para>
-                        You normally develop Vaadin applications by extending
-                        <classname>&rootclass;</classname>, which is essentially a view to
-                        a Vaadin application. It cat fill the entire page, but can also be
-                        just a part of a web page. Normally, when the user opens a new
-                        page with the URL of the Vaadin application, a new
-                        <classname>Page</classname> is created with a
-                        <classname>Root</classname> inside it.
+                        A <emphasis>&root;</emphasis> represents a HTML fragment in which
+                        a Vaadin application runs in a web page. It typically fills the
+                        entire page, but can also be just a part of a page. You normally
+                        develop a Vaadin application by extending
+                        <classname>&rootclass;</classname> and adding user interface
+                        components to it. A &root; is essentially a viewport or window
+                        connected to an application, and you can have many such views
+                        especially in a multi-window application. Normally, when the user
+                        opens a new page with the URL of the Vaadin application, a new
+                        <classname>Root</classname> (and the associated
+                        <classname>Page</classname> object) is automatically created for
+                        it.
+                    </para>
+
+                    <para>
+                        The current &root; object can be globally accessed with
+                        <methodname>Root.getCurrent()</methodname>. The static method
+                        returns the thread-local &root; instance for the currently
+                        processed request (see <xref
+                        linkend="advanced.global.threadlocal"/>).
                     </para>
 				</listitem>
 			</varlistentry>
@@ -132,19 +145,17 @@ public class HelloWorld extends Root {
 				<term>Page</term>
 				<listitem>
 					<para>
-                        A browser window displays a web page, which is made of HTML and
-                        can have one or more &root;s inside it. Such a web page is
-                        represented by the <classname>Page</classname> class. An
-                        application can have multiple windows displaying different pages,
-                        running the same or different &root; classes, all belonging to the
-                        same user session.
+                        A <classname>&rootclass;</classname> is associated with a
+                        <classname>Page</classname> object that represents the web page as
+                        well as the browser window in which the &root; runs.
 					</para>
 
-					<para>
-                        A new <classname>Page</classname>, as well as a root for it, is
-                        automatically created when the user opens a new browser window or
-                        tab with the application URL. You can also open new windows/tabs
-                        dynamically.
+                    <para>
+                        The <classname>Page</classname> object for the currently processed
+                        request can be globally accessed from a Vaadin application with
+                        <methodname>Page.getCurrent()</methodname>. This is equivalent to
+                        calling
+                        <methodname>&rootclass;.getCurrent().getPage()</methodname>.
                     </para>
 				</listitem>
 			</varlistentry>
@@ -155,15 +166,16 @@ public class HelloWorld extends Root {
 					<para>
 						A Vaadin application, as defined by the
 						<classname>Application</classname> class, is essentially a user
-						session. It can have multiple pages (windows), each having one or
-						more &root;s.
+						session. It can have multiple windows, each represented by a
+						<classname>&rootclass;</classname>, which in turn is associated
+						with a <classname>Page</classname>.
 					</para>
 
                     <para>
-                        You can develop a Vaadin application by extending
+                        You can actually also develop a Vaadin application by extending
                         <classname>Application</classname> instead of
-                        <classname>&rootclass;</classname>, and create the page and &root;
-                        objects yourself.
+                        <classname>&rootclass;</classname>, and create the &root;s
+                        yourself.
                     </para>
 				</listitem>
 			</varlistentry>
@@ -193,7 +205,8 @@ public class HelloWorld extends Root {
 				<term>Events and Listeners</term>
 				<listitem>
 					<para>
-                        Events, and listeners that handle events, are the basis of
+                        Vaadin follows an event-driven programming paradigm, in which
+                        events, and listeners that handle the events, are the basis of
                         handling user interaction in an application. <xref
                         linkend="architecture.events"/> gave an introduction to events and
                         listeners from an architectural point-of-view, while <xref
@@ -256,6 +269,7 @@ public class HelloWorld extends Root {
 			</varlistentry>
         </variablelist>
 	</section>
+
 		
     <section xml:id="application.events">
         <title>Handling Events with Listeners</title>
@@ -419,17 +433,16 @@ public class HelloWorld extends Root {
 		</para>
 
 		<para>
-			Events are usually emitted by the framework, but applications may
-			need to emit them too in some situations, such as when updating some
-			part of the UI is required. Events can be emitted using the
+			Events are usually emitted by the framework, but applications may need to emit
+			them too in some situations, such as when updating some part of the UI is
+			required. Events can be emitted programmatically using the
 			<methodname>fireEvent(Component.Event)</methodname> method of
-			<classname>AbstractComponent</classname>. The event is then relayed
-			to all the listeners of the particular event class for the
-			object. Some components have a default event type, for example, a
-			<classname>Button</classname> has a nested
+			<classname>AbstractComponent</classname>. The event is then relayed to all the
+			listeners of the particular event class for the object. Some components have a
+			default event type, for example, a <classname>Button</classname> has a nested
 			<classname>Button.ClickEvent</classname> class and a corresponding
-			<classname>Button.ClickListener</classname> interface. These events
-			can be triggered with <methodname>fireComponentEvent()</methodname>.
+			<classname>Button.ClickListener</classname> interface. These events can be
+			triggered with <methodname>fireComponentEvent()</methodname>.
 		</para>
     </section>
 
@@ -521,9 +534,6 @@ public class HelloWorld extends Root {
 				an appropriate <classname>Embedded</classname> or
 				<classname>Link</classname> or some other user interface
 				component, which manages the rendering of the URI.
-			</para>
-
-			<para>
 			</para>
 		</section>
 
@@ -713,6 +723,8 @@ main.addComponent(new Embedded("Image title", imageresource));]]></programlistin
 		</para>
 	</section -->
 
+    <!-- TODO Vaadin 7: Verify and re-enable if possible -->
+    <!--
 	<section xml:id="application.close">
 		<title>Shutting Down an Application</title>
 
@@ -758,9 +770,11 @@ main.addComponent(closeButton);]]></programlisting>
 
 			<programlisting><![CDATA[setLogoutURL("/logout.html");]]></programlisting>
 
-			<!-- TODO: Update if #2752 is fixed. -->
 		</section>
+        -->
+        <!-- TODO: Update if #2752 is fixed. -->
 
+        <!--
 		<section>
 			<title>Handling the Closing of a Window</title>
 
@@ -803,7 +817,7 @@ main.addListener(new Window.CloseListener(){
 				in many cases, but sometimes it is not and can create a security problem.
 			</para>
 		</section>
-	</section>
+	</section> -->
 	
 	<section xml:id="application.errors">
 		<title>Handling Errors</title>
@@ -869,294 +883,8 @@ button.addListener(new Button.ClickListener() {
 				</mediaobject>
 			</figure>
 
-			<para>
-				The <classname>Form</classname> component handles and displays also the
-				errors of its contained fields so that it displays both the error
-				indicator and the message in a special error indicator area. See <xref
-				linkend="components.form"/> and <xref
-				linkend="components.form.validation"/> for details on the
-				<classname>Form</classname> component and validation of form input.
-			</para>
+            <!-- TODO Vaadin 7: Is there anything to say about errors in forms? -->
 		</section>
-
-		<section xml:id="application.errors.notifications">
-			<title>Notifications</title>
-
-			<para>
-				Notifications are error or information boxes that appear briefly,
-				typically at the center of the screen. A notification box has a caption
-				and an optional description and icon. The box stays on the screen either
-				for a preset time or until the user clicks it. The notification type
-				defines the default appearance and behaviour of a notification.
-			</para>
-
-			<para>
-                There are two ways to create a notification. The easiest is to use a
-                static shorthand <methodname>Notification.show()</methodname> method,
-                which takes the caption of the notification as a parameter and displays it
-                in the current page.
-            </para>
-
-			<programlisting><![CDATA[Notification.show("This is a warning");]]></programlisting>
-
-			<figure xml:id="figure.notification.example1">
-				<title>Notification</title>
-				<mediaobject>
-					<imageobject role="html">
-						<imagedata align="center" fileref="img/application/notification-example2.png"/>
-					</imageobject>
-					<imageobject role="fo">
-						<imagedata scale="70" smallscale="100%" align="center" fileref="img/application/notification-example2.png"/>
-					</imageobject>
-				</mediaobject>
-			</figure>
-
-            <para>
-                For more control, you can create a <classname>Notification</classname>
-                object. Different constructors exist for taking just the caption, or also
-                the description, notification type, and whether HTML is allowed or
-                not. Notifications are shown in a <classname>Page</classname>, typically
-                the current page.
-			</para>
-
-			<programlisting><![CDATA[new Notification("This is a warning",
-    "<br/>This is the <i>last</i> warning",
-    Notification.TYPE_WARNING_MESSAGE, true)
-    .show(Page.getCurrent());]]></programlisting>
-
-			<para>
-				The caption and description are by default written on the same line. If
-				you want to have a line break between them, use the XHTML line break
-				markup "<literal>&lt;br/&gt;</literal>" if HTML is enabled, or
-				"<literal>\n</literal>" if not. When HTML is enabled (it is by default),
-				you can use any XHTML markup in the caption and description of a
-				notification. If it is possible to get the notification content from user
-				input, you should either disallow HTML with
-				<methodname>setHtmlContentAllowed(false)</methodname> or sanitize the
-				content carefully, as noted in <xref
-				linkend="advanced.security.sanitizing"/>.
-			</para>
-
-			<figure xml:id="figure.notification.example2">
-				<title>Notification with HTML Formatting</title>
-				<mediaobject>
-					<imageobject role="html">
-						<imagedata align="center" fileref="img/application/notification-example3.png"/>
-					</imageobject>
-					<imageobject role="fo">
-						<imagedata scale="70" smallscale="130" align="center" fileref="img/application/notification-example3.png"/>
-					</imageobject>
-				</mediaobject>
-			</figure>
-
-            <section xml:id="application.errors.notifications.type">
-                <title>Notification Type</title>
-
-                <para>
-                    The notification type defines the overall default style and behaviour of a
-                    notification. If no notification type is given, the "humanized" type is
-                    used as the default. The notification types, listed below, are defined in
-                    the <classname>Notification</classname> class.
-                </para>
-                
-                <variablelist>
-                    <varlistentry>
-                        <term>
-                            <parameter>TYPE_HUMANIZED_MESSAGE</parameter>
-                            <inlinemediaobject>
-                                <imageobject role="html">
-                                    <imagedata align="center" fileref="img/application/notification-humanized.png"/>
-                                </imageobject>
-                                <imageobject role="fo">
-                                    <imagedata scale="70" align="center" fileref="img/application/notification-humanized.png"/>
-                                </imageobject>
-                            </inlinemediaobject>
-                        </term>
-                        <listitem>
-                            <para>
-                                A user-friendly message that does not annoy too much: it does
-                                not require confirmation by clicking and disappears
-                                quickly. It is centered and has a neutral gray color.
-                            </para>
-                        </listitem>
-                    </varlistentry>
-                    <varlistentry>
-                        <term>
-                            <parameter>TYPE_WARNING_MESSAGE</parameter>
-                            <inlinemediaobject>
-                                <imageobject role="html">
-                                    <imagedata align="center" fileref="img/application/notification-warning.png"/>
-                                </imageobject>
-                                <imageobject role="fo">
-                                    <imagedata scale="70" align="center" fileref="img/application/notification-warning.png"/>
-                                </imageobject>
-                            </inlinemediaobject>
-                        </term>
-                        <listitem>
-                            <para>
-                                Warnings are messages of medium importance. They are displayed
-                                with colors that are neither neutral nor too distractive. A
-                                warning is displayed for 1.5 seconds, but the user can click
-                                the message box to dismiss it. The user can continue to
-                                interact with the application while the warning is displayed.
-                            </para>
-                        </listitem>
-                    </varlistentry>
-                    <varlistentry>
-                        <term>
-                            <parameter>TYPE_ERROR_MESSAGE</parameter>
-                            <inlinemediaobject>
-                                <imageobject role="html">
-                                    <imagedata align="center" fileref="img/application/notification-error.png"/>
-                                </imageobject>
-                                <imageobject role="fo">
-                                    <imagedata scale="70" align="center" fileref="img/application/notification-error.png"/>
-                                </imageobject>
-                            </inlinemediaobject>
-                        </term>
-                        <listitem>
-                            <para>
-                                Error messages are notifications that require the highest user
-                                attention, with alert colors and by requiring the user to
-                                click the message to dismiss it. The error message box does
-                                not itself include an instruction to click the message,
-                                although the close box in the upper right corner indicates it
-                                visually. Unlike with other notifications, the user can not
-                                interact with the application while the error message is
-                                displayed.
-                            </para>
-                        </listitem>
-                    </varlistentry>
-                    <varlistentry>
-                        <term>
-                            <parameter>TYPE_TRAY_NOTIFICATION</parameter>
-                            <inlinemediaobject>
-                                <imageobject role="html">
-                                    <imagedata align="center" fileref="img/application/notification-tray.png"/>
-                                </imageobject>
-                                <imageobject role="fo">
-                                    <imagedata scale="70" align="center" fileref="img/application/notification-tray.png"/>
-                                </imageobject>
-                            </inlinemediaobject>
-                        </term>
-                        <listitem>
-                            <para>
-                                Tray notifications are displayed in the "system tray" area,
-                                that is, in the lower-right corner of the browser view. As
-                                they do not usually obsure any user interface, they are
-                                displayed longer than humanized or warning messages, 3 seconds
-                                by default. The user can continue to interact with the
-                                application normally while the tray notification is displayed.
-                            </para>
-                        </listitem>
-                    </varlistentry>
-                </variablelist>
-            </section>
-
-            <section xml:id="application.errors.notifications.customization">
-                <title>Customizing Notifications</title>
-
-                <para>
-                    All of the features of specific notification types can be controlled
-                    with the <classname>Notification</classname> properties. Once
-                    configured, you need to show it in the current page.
-                </para>
-
-                <programlisting><?pocket-size 65% ?><![CDATA[// Notification with default settings for a warning
-Notification notif = new Notification(
-    "Warning",
-    "<br/>Area of reindeer husbandry",
-    Notification.TYPE_WARNING_MESSAGE);
-
-// Customize it
-notif.setDelayMsec(20000);
-notif.setPosition(Notification.POSITION_BOTTOM_RIGHT);
-notif.setStyleName("mystyle");
-notif.setIcon(new ThemeResource("img/reindeer.png"));
-                
-// Show it in the page
-notif.show(Page.getCurrent());]]></programlisting>
-
-                <para>
-                    The <methodname>setPosition()</methodname> method allows setting the
-                    positioning of the notification. The method takes as its parameter any of
-                    the constants:
-                </para>
-
-                <informaltable frame="none">
-                    <tgroup cols="1" align="left">
-                        <tbody>
-                            <row valign="top" rowsep="0"><entry colsep="0"><parameter>Notification.POSITION_CENTERED</parameter></entry></row>
-                            <row valign="top" rowsep="0"><entry colsep="0"><parameter>Notification.POSITION_CENTERED_TOP</parameter></entry></row>
-                            <row valign="top" rowsep="0"><entry colsep="0"><parameter>Notification.POSITION_CENTERED_BOTTOM</parameter></entry></row>
-                            <row valign="top" rowsep="0"><entry colsep="0"><parameter>Notification.POSITION_TOP_LEFT</parameter></entry></row>
-                            <row valign="top" rowsep="0"><entry colsep="0"><parameter>Notification.POSITION_TOP_RIGHT</parameter></entry></row>
-                            <row valign="top" rowsep="0"><entry colsep="0"><parameter>Notification.POSITION_BOTTOM_LEFT</parameter></entry></row>
-                            <row valign="top" rowsep="0"><entry colsep="0"><parameter>Notification.POSITION_BOTTOM_RIGHT</parameter></entry></row>
-                        </tbody>
-                    </tgroup>
-                </informaltable>
-
-                <para>
-                    The <methodname>setDelayMSec()</methodname> allows you to set the time in
-                    milliseconds for how long the notification is displayed. Parameter value
-                    <literal>-1</literal> means that the message is displayed until the user
-                    clicks the message box. It also prevents interaction with other parts of
-                    the application window, as is default behaviour for error messages. It
-                    does not, however, add a close box that the error notification has.
-                </para>
-            </section>
-
-            <section xml:id="application.errors.notifications.css">
-                <title>Styling with CSS</title>
-
-                <programlisting><?pocket-size 65% ?><![CDATA[.v-Notification {}
-  .popupContent {}
-    .gwt-HTML {}
-      h1 {}
-      p  {}]]></programlisting>
-
-                <para>
-                    The notification box is a floating <literal>div</literal> element
-                    under the <literal>body</literal> element of the page. It has an
-                    overall <literal>v-Notification</literal> style. The content is
-                    wrapped inside an element with <literal>popupContent</literal>
-                    style. The caption is enclosed within an <literal>h1</literal> element
-                    and the description in a <literal>p</literal> element.
-                </para>
-
-                <para>
-                    To customize it, add a style for the
-                    <classname>Notification</classname> object with
-                    <methodname>setStyleName("mystyle")</methodname>, and make the
-                    settings in the theme, for example as follows:
-                </para>
-
-                <programlisting><![CDATA[.v-Notification.mystyle {
-    background: #FFFF00;
-    border: 10px solid #C00000;
-    color: black;
-}]]></programlisting>
-
-                <para>
-                    The result is shown, with the icon set earlier in the customization
-                    example, in <xref
-                    linkend="figure.application.errors.notifications.css"/>.
-                </para>
-
-                <figure xml:id="figure.application.errors.notifications.css">
-                    <title>Styled Notification</title>
-                    <mediaobject>
-                        <imageobject role="html">
-                            <imagedata align="center" fileref="img/application/notification-customization.png"/>
-                        </imageobject>
-                        <imageobject role="fo">
-                            <imagedata scale="70" smallscale="130" align="center" fileref="img/application/notification-customization.png"/>
-                        </imageobject>
-                    </mediaobject>
-                </figure>
-            </section>
-        </section>
 
 		<section xml:id="application.errors.systemmessages">
 			<title>Customizing System Messages</title>
@@ -1384,6 +1112,283 @@ public void terminalError(Terminal.ErrorEvent event) {
 		</section>
 	</section>
 
+    <section xml:id="application.notifications">
+        <title>Notifications</title>
+
+        <para>
+            Notifications are error or information boxes that appear briefly, typically at
+            the center of the screen. A notification box has a caption and an optional
+            description and icon. The box stays on the screen either for a preset time or
+            until the user clicks it. The notification type defines the default appearance
+            and behaviour of a notification.
+        </para>
+
+        <para>
+            There are two ways to create a notification. The easiest is to use a static
+            shorthand <methodname>Notification.show()</methodname> method, which takes the
+            caption of the notification as a parameter and displays it in the current
+            page.
+        </para>
+
+        <programlisting><![CDATA[Notification.show("This is a warning");]]></programlisting>
+
+        <figure xml:id="figure.notification.example1">
+            <title>Notification</title>
+            <mediaobject>
+                <imageobject role="html">
+                    <imagedata align="center" fileref="img/application/notification-example2.png"/>
+                </imageobject>
+                <imageobject role="fo">
+                    <imagedata scale="70" smallscale="100%" align="center" fileref="img/application/notification-example2.png"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
+
+        <para>
+            For more control, you can create a <classname>Notification</classname>
+            object. Different constructors exist for taking just the caption, or also
+            the description, notification type, and whether HTML is allowed or
+            not. Notifications are shown in a <classname>Page</classname>, typically
+            the current page.
+        </para>
+
+        <programlisting><![CDATA[new Notification("This is a warning",
+    "<br/>This is the <i>last</i> warning",
+    Notification.TYPE_WARNING_MESSAGE, true)
+    .show(Page.getCurrent());]]></programlisting>
+
+        <para>
+            The caption and description are by default written on the same line. If you
+            want to have a line break between them, use the XHTML line break markup
+            "<literal>&lt;br/&gt;</literal>" if HTML is enabled, or
+            "<literal>\n</literal>" if not. When HTML is enabled (it is by default), you
+            can use any XHTML markup in the caption and description of a notification. If
+            it is possible to get the notification content from user input, you should
+            either disallow HTML with
+            <methodname>setHtmlContentAllowed(false)</methodname> or sanitize the content
+            carefully, as noted in <xref linkend="advanced.security.sanitizing"/>.
+        </para>
+
+        <figure xml:id="figure.notification.example2">
+            <title>Notification with HTML Formatting</title>
+            <mediaobject>
+                <imageobject role="html">
+                    <imagedata align="center" fileref="img/application/notification-example3.png"/>
+                </imageobject>
+                <imageobject role="fo">
+                    <imagedata scale="70" smallscale="130" align="center" fileref="img/application/notification-example3.png"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
+
+        <section xml:id="application.notifications.type">
+            <title>Notification Type</title>
+
+            <para>
+                The notification type defines the overall default style and behaviour of a
+                notification. If no notification type is given, the "humanized" type is
+                used as the default. The notification types, listed below, are defined in
+                the <classname>Notification</classname> class.
+            </para>
+                
+            <variablelist>
+                <varlistentry>
+                    <term>
+                        <parameter>TYPE_HUMANIZED_MESSAGE</parameter>
+                        <inlinemediaobject>
+                            <imageobject role="html">
+                                <imagedata align="center" fileref="img/application/notification-humanized.png"/>
+                                </imageobject>
+                            <imageobject role="fo">
+                                <imagedata scale="70" align="center" fileref="img/application/notification-humanized.png"/>
+                            </imageobject>
+                        </inlinemediaobject>
+                    </term>
+                    <listitem>
+                        <para>
+                            A user-friendly message that does not annoy too much: it does
+                            not require confirmation by clicking and disappears
+                            quickly. It is centered and has a neutral gray color.
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>
+                        <parameter>TYPE_WARNING_MESSAGE</parameter>
+                        <inlinemediaobject>
+                            <imageobject role="html">
+                                <imagedata align="center" fileref="img/application/notification-warning.png"/>
+                            </imageobject>
+                            <imageobject role="fo">
+                                <imagedata scale="70" align="center" fileref="img/application/notification-warning.png"/>
+                            </imageobject>
+                        </inlinemediaobject>
+                    </term>
+                    <listitem>
+                        <para>
+                            Warnings are messages of medium importance. They are displayed
+                            with colors that are neither neutral nor too distractive. A
+                            warning is displayed for 1.5 seconds, but the user can click
+                            the message box to dismiss it. The user can continue to
+                            interact with the application while the warning is displayed.
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>
+                        <parameter>TYPE_ERROR_MESSAGE</parameter>
+                        <inlinemediaobject>
+                            <imageobject role="html">
+                                <imagedata align="center" fileref="img/application/notification-error.png"/>
+                            </imageobject>
+                            <imageobject role="fo">
+                                <imagedata scale="70" align="center" fileref="img/application/notification-error.png"/>
+                            </imageobject>
+                        </inlinemediaobject>
+                    </term>
+                    <listitem>
+                        <para>
+                            Error messages are notifications that require the highest user
+                            attention, with alert colors and by requiring the user to
+                            click the message to dismiss it. The error message box does
+                            not itself include an instruction to click the message,
+                            although the close box in the upper right corner indicates it
+                            visually. Unlike with other notifications, the user can not
+                            interact with the application while the error message is
+                            displayed.
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>
+                        <parameter>TYPE_TRAY_NOTIFICATION</parameter>
+                        <inlinemediaobject>
+                            <imageobject role="html">
+                                <imagedata align="center" fileref="img/application/notification-tray.png"/>
+                            </imageobject>
+                            <imageobject role="fo">
+                                <imagedata scale="70" align="center" fileref="img/application/notification-tray.png"/>
+                            </imageobject>
+                        </inlinemediaobject>
+                    </term>
+                    <listitem>
+                        <para>
+                            Tray notifications are displayed in the "system tray" area,
+                            that is, in the lower-right corner of the browser view. As
+                            they do not usually obsure any user interface, they are
+                            displayed longer than humanized or warning messages, 3 seconds
+                            by default. The user can continue to interact with the
+                            application normally while the tray notification is displayed.
+                        </para>
+                        </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        
+        <section xml:id="application.notifications.customization">
+            <title>Customizing Notifications</title>
+            
+            <para>
+                All of the features of specific notification types can be controlled with
+                the <classname>Notification</classname> properties. Once configured, you
+                need to show it in the current page.
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[// Notification with default settings for a warning
+Notification notif = new Notification(
+    "Warning",
+    "<br/>Area of reindeer husbandry",
+    Notification.TYPE_WARNING_MESSAGE);
+
+// Customize it
+notif.setDelayMsec(20000);
+notif.setPosition(Notification.POSITION_BOTTOM_RIGHT);
+notif.setStyleName("mystyle");
+notif.setIcon(new ThemeResource("img/reindeer.png"));
+                
+// Show it in the page
+notif.show(Page.getCurrent());]]></programlisting>
+
+            <para>
+                The <methodname>setPosition()</methodname> method allows setting the
+                positioning of the notification. The method takes as its parameter any of
+                the constants:
+            </para>
+
+            <informaltable frame="none">
+                <tgroup cols="1" align="left">
+                    <tbody>
+                        <row valign="top" rowsep="0"><entry colsep="0"><parameter>Notification.POSITION_CENTERED</parameter></entry></row>
+                        <row valign="top" rowsep="0"><entry colsep="0"><parameter>Notification.POSITION_CENTERED_TOP</parameter></entry></row>
+                        <row valign="top" rowsep="0"><entry colsep="0"><parameter>Notification.POSITION_CENTERED_BOTTOM</parameter></entry></row>
+                        <row valign="top" rowsep="0"><entry colsep="0"><parameter>Notification.POSITION_TOP_LEFT</parameter></entry></row>
+                        <row valign="top" rowsep="0"><entry colsep="0"><parameter>Notification.POSITION_TOP_RIGHT</parameter></entry></row>
+                        <row valign="top" rowsep="0"><entry colsep="0"><parameter>Notification.POSITION_BOTTOM_LEFT</parameter></entry></row>
+                        <row valign="top" rowsep="0"><entry colsep="0"><parameter>Notification.POSITION_BOTTOM_RIGHT</parameter></entry></row>
+                    </tbody>
+                </tgroup>
+            </informaltable>
+
+            <para>
+                The <methodname>setDelayMSec()</methodname> allows you to set the time in
+                milliseconds for how long the notification is displayed. Parameter value
+                <literal>-1</literal> means that the message is displayed until the user
+                clicks the message box. It also prevents interaction with other parts of
+                the application window, as is default behaviour for error messages. It
+                does not, however, add a close box that the error notification has.
+            </para>
+        </section>
+
+        <section xml:id="application.notifications.css">
+            <title>Styling with CSS</title>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[.v-Notification {}
+  .popupContent {}
+    .gwt-HTML {}
+      h1 {}
+      p  {}]]></programlisting>
+
+            <para>
+                The notification box is a floating <literal>div</literal> element under
+                the <literal>body</literal> element of the page. It has an overall
+                <literal>v-Notification</literal> style. The content is wrapped inside an
+                element with <literal>popupContent</literal> style. The caption is
+                enclosed within an <literal>h1</literal> element and the description in a
+                <literal>p</literal> element.
+            </para>
+
+            <para>
+                To customize it, add a style for the <classname>Notification</classname>
+                object with <methodname>setStyleName("mystyle")</methodname>, and make the
+                settings in the theme, for example as follows:
+            </para>
+
+            <programlisting><![CDATA[.v-Notification.mystyle {
+    background: #FFFF00;
+    border: 10px solid #C00000;
+    color: black;
+}]]></programlisting>
+
+            <para>
+                The result is shown, with the icon set earlier in the customization
+                example, in <xref
+                    linkend="figure.application.errors.notifications.css"/>.
+            </para>
+
+            <figure xml:id="figure.application.errors.notifications.css">
+                <title>Styled Notification</title>
+                <mediaobject>
+                    <imageobject role="html">
+                        <imagedata align="center" fileref="img/application/notification-customization.png"/>
+                    </imageobject>
+                    <imageobject role="fo">
+                        <imagedata scale="70" smallscale="130" align="center" fileref="img/application/notification-customization.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+        </section>
+    </section>
+
 	<section xml:id="application.environment">
 		<title>Setting Up the Application Environment</title>
 		
@@ -1419,7 +1424,7 @@ public void terminalError(Terminal.ErrorEvent event) {
             <!-- TODO Vaadin 7: What is the relationship between servlet and application? -->
 		</para>
 		
-		<section>
+		<section xml:id="application.environment.war-eclipse">
 			<title>Creating Deployable WAR in Eclipse</title>
 
 			<para>
@@ -1455,7 +1460,7 @@ public void terminalError(Terminal.ErrorEvent event) {
             </orderedlist>
 		</section>
 		
-		<section>
+		<section xml:id="application.environment.war">
 			<title>Web Application Contents</title>
 
 			<para>
@@ -1536,7 +1541,7 @@ public void terminalError(Terminal.ErrorEvent event) {
 			</variablelist>
 		</section>
 
-		<section xml:id="section.web.web-xml">
+		<section xml:id="application.environment.web-xml">
 			<title>Deployment Descriptor <filename>web.xml</filename></title>
 
 			<para>
@@ -1727,6 +1732,456 @@ public void terminalError(Terminal.ErrorEvent event) {
 			</section>
 		</section>
 	</section>
+
+    <section xml:id="application.architecture">
+        <title>Basic Application Architecture</title>
+
+        <para>
+            Once your application grows beyond a dozen or so lines, which is actually
+            quite soon, you need to start considering the application architecture. You
+            are free to use any object-oriented techniques available in Java to organize
+            your code in methods, classes, packages, and libraries. The overall
+            architecture defines how these modules communicate together and what sort of
+            dependencies they have between them. It also defines the scope of the
+            application. The scope of this book, however, only gives a possibility to
+            mention some of the most common architectural patterns in Vaadin applications.
+        </para>
+
+        <section xml:id="application.architecture.inheritance">
+            <title>Using Inheritance</title>
+
+            <para>
+                Inheritance is one of the basic tenets of object oriented
+                programming. Vaadin framework is built on top of abstraction layers, with
+                interfaces and abstract classes. Any classes can be extended by
+                inheritance.
+            </para>
+
+            <para>
+                One of the most common patterns with Vaadin is extending a class for a
+                single case to use it.
+            </para>
+        </section>
+
+        <section xml:id="application.architecture.composition">
+            <title>Compositing Components</title>
+
+            <para>
+                User interfaces typically contain many user interface components in a
+                layout hierarchy. Vaadin provides many layout components for laying
+                contained components vertically, horizontally, in a grid, and in many
+                other ways. You can extend layout components to create composite
+                components.
+            </para>
+
+            <programlisting><![CDATA[class MyView extends VerticalLayout {
+    TextField entry   = new TextField("Enter this");
+    Label     display = new Label("See this");
+    Button    click   = new Button("Click This");
+
+    public MyView() {
+        addComponent(entry);
+        addComponent(display);
+        addComponent(click);
+        
+        // Configure it a bit
+        setSizeFull();
+        addStyleName("myview");
+    }
+}
+
+// Use it
+Layout myview = new MyView();]]></programlisting>
+
+            <para>
+                While extending layouts is an easy way to make component composition, it
+                is a good practice to encapsulate implementation details, such as the
+                exact layout component used. Otherwise, the users of such a composite
+                could begin to rely on such implementation details, which would make
+                changes harder. For this purpose, Vaadin has a special
+                <classname>CustomComponent</classname> wrapper, which hides the content
+                representation.
+            </para>
+
+            <programlisting><![CDATA[
+class MyView extends CustomComponent {
+    TextField entry   = new TextField("Enter this");
+    Label     display = new Label("See this");
+    Button    click   = new Button("Click This");
+
+    public MyView() {
+        Layout layout = new VerticalLayout();
+        
+        layout.addComponent(entry);
+        layout.addComponent(display);
+        layout.addComponent(click);
+        
+        setCompositionRoot(layout);
+        
+        setSizeFull();
+    }
+}
+
+// Use it
+MyView myview = new MyView();]]></programlisting>
+
+            <para>
+                For more detailed information on component composition with
+                <classname>CustomComponent</classname>, see <xref
+                linkend="components.customcomponent"/>. The Vaadin Plugin for Eclipse also
+                includes a visual editor for composite components, as described in <xref
+                linkend="eclipse"/>.
+            </para>
+        </section>
+
+        <section xml:id="application.architecture.layering">
+            <title>Layered Architectures</title>
+
+            <para>
+                Layered architectures, where each layer has a clearly distinct
+                responsibility, are probably the most common architectures. Typically,
+                applications follow at least a three-layer architecture:
+            </para>
+
+            <itemizedlist>
+                <listitem>User interface layer</listitem>
+                <listitem>Domain layer</listitem>
+                <listitem>Data store layer</listitem>
+            </itemizedlist>
+
+            <para>
+                Such an architecture starts from a <emphasis>domain model</emphasis>,
+                which defines the data model and the "business logic" of the application,
+                typically as POJOs. A user interface is built on top of the domain model,
+                in our context with the Vaadin Framework. The Vaadin user interface could
+                be bound directly to the data model through the Vaadin Data Model,
+                described in <xref linkend="datamodel"/>. Beneath the domain model lies a
+                data store, such as a relational database. The dependencies between the
+                layers are restricted so that a higher layer may depend on a lower one,
+                but never the other way around.
+            </para>
+
+            <para>
+                An <emphasis>application layer</emphasis> (or <emphasis>service
+                layer</emphasis>) is often distinguished from the domain layer, offering
+                the domain logic as a service. In Java EE development, Enterprise
+                JavaBeans (EJBs) are typically used for building this layer.
+            </para>
+
+            <para>
+                An <emphasis>infratructure layer</emphasis> is often distinguished from
+                the data store layer, with a purpose to abstract the data store. For
+                example, it could involve a persistence solution such as JPA and an EJB
+                container. This layer becomes relevant with Vaadin when binding Vaadin
+                components to data with the JPAContainer, as described in <xref
+                linkend="jpacontainer"/>.
+            </para>
+        </section>
+
+        <!-- TODO: Scrap or rap... (...)
+        <section xml:id="application.architecture.mvc">
+            <title>Model-View-Controller</title>
+
+            <para>
+                Notice that Vaadin components are views by themselves, but at a different
+                level. You can bind a controller to them as an event listener. The
+                components can also be bound directly to the data model. Especially, the
+                <interfacename>Field</interfacename> components implement the
+                <interfacename>Property.Viewer</interfacename> and
+                <interfacename>Property.Editor</interfacename> interfaces for this
+                purpose. See <xref linkend="datamodel"/> for more information about the
+                Vaadin data model and binding.
+            </para>
+        </section>
+        -->
+
+        <section xml:id="application.architecture.mvp">
+            <title>Model-View-Presenter</title>
+
+            <para>
+                The Model-View-Presenter (MVP) pattern is one of the most common patterns
+                with Vaadin. It is similar to the older Model-View-Controller (MVC)
+                pattern, which is not so applicable to Vaadin development. Instead of an
+                implementation-aware controller, there is an implementation-agnostic
+                presenter that operates the view through an interface. The view does not
+                interact directly with the model. This isolates the view implementation
+                better than in MVC and allows easier unit testing of the presenter and
+                model.
+            </para>
+
+            <para>
+                Let us first look how the model and view are bound together by the
+                presenter in the following example:
+            </para>
+
+<programlisting><?pocket-size 65% ?><![CDATA[
+// Create the model and the Vaadin view implementation
+CalculatorModel      model     = new CalculatorModel();
+VaadinCalculatorView view      = new VaadinCalculatorView();
+    
+// The presenter binds the model and view together
+new CalculatorPresenter(model, view);
+    
+// The view implementation is a Vaadin component
+layout.addComponent(view);]]></programlisting>
+
+            <para>
+                You could add the view anywhere in the Vaadin application, as it is a
+                composite component.
+            </para>
+
+            <section xml:id="application.architecture.mvp.model">
+                <title>The Model</title>
+
+                <para>
+                    Our business model is quite simple, with one value and a number of
+                    operations for manipulating it.
+                </para>
+    
+                <programlisting><?pocket-size 65% ?><![CDATA[/** The model **/
+class CalculatorModel {
+    private double value = 0.0;
+    
+    public void clear() {
+        value = 0.0;
+    }
+
+    public void add(double arg) {
+        value += arg;
+    }
+
+    public void multiply(double arg) {
+        value *= arg;
+    }
+
+    public void divide(double arg) {
+        if (arg != 0.0)
+            value /= arg;
+    }
+    
+    public double getValue() {
+        return value;
+    }
+    
+    public void setValue(double value) {
+        this.value = value;
+    }
+}]]></programlisting>
+            </section>
+
+            <section xml:id="application.architecture.mvp.view">
+                <title>The View</title>
+
+                <para>
+                    The purpose of the view in MVP is to display data and receive user
+                    interaction. It relays the user interaction to the presenter in an
+                    fashion that is independent of the view implementation, that is, no
+                    Vaadin events.  It is defined as a UI framework interface that can
+                    have multiple implementations.
+                </para>
+
+                <programlisting><?pocket-size 65% ?><![CDATA[interface CalculatorView {
+    public void setDisplay(double value);
+
+    interface ButtonClickListener {
+        void buttonClick(char operation);
+    }
+    public void addListener(ButtonClickListener listener);
+}]]></programlisting>
+
+                <para>
+                    The are design alternatives for the view. It could receive the
+                    listener in its constructor, or it could just know the presenter.
+                </para>
+
+                <para>
+                    As we are using Vaadin, we make a Vaadin implementation of the
+                    interface as follows:
+                </para>
+    
+                <programlisting><?pocket-size 65% ?><![CDATA[class VaadinCalculatorView extends CustomComponent
+        implements CalculatorView, ClickListener {
+    private Label display = new Label("0.0");
+
+    public VaadinCalculatorView() {
+        GridLayout layout  = new GridLayout(4, 5);
+
+        // Create a result label that spans over all
+        // the 4 columns in the first row
+        layout.addComponent(display, 0, 0, 3, 0);
+    
+        // The operations for the calculator in the order
+        // they appear on the screen (left to right, top
+        // to bottom)
+        String[] operations = new String[] {
+            "7", "8", "9", "/", "4", "5", "6",
+            "*", "1", "2", "3", "-", "0", "=", "C", "+" };
+
+        // Add buttons and have them send click events
+        // to this class
+        for (String caption: operations)
+            layout.addComponent(new Button(caption, this));
+
+        setCompositionRoot(layout);
+    }
+    
+    public void setDisplay(double value) {
+        display.setValue(Double.toString(value));
+    }
+
+    /* Only the presenter registers one listener... */
+    List<ButtonClickListener> listeners =
+            new ArrayList<ButtonClickListener>();
+
+    public void addListener(ButtonClickListener listener) {
+        listeners.add(listener);
+    }
+
+    /** Relay button clicks to the presenter with an
+     *  implementation-independent event */
+    @Override
+    public void buttonClick(ClickEvent event) {
+        for (ButtonClickListener listener: listeners)
+            listener.buttonClick(event.getButton()
+                                 .getCaption().charAt(0));
+    }
+}]]></programlisting>
+            </section>
+
+            <section xml:id="application.architecture.mvp.presenter">
+                <title>The Presenter</title>
+
+                <para>
+                    The presenter in MVP is a middle-man that handles all user interaction
+                    logic, but in an implementation-independent way, so that it doesn't
+                    actually know anything about Vaadin. It shows data in the view and
+                    receives user interaction back from it.
+                </para>
+
+                <programlisting><?pocket-size 65% ?><![CDATA[/** The presenter */
+class CalculatorPresenter
+        implements CalculatorView.ButtonClickListener {
+    CalculatorModel model;
+    CalculatorView  view;
+
+    private double current = 0.0;
+    private char   lastOperationRequested = 'C';
+    
+    public CalculatorPresenter(CalculatorModel model,
+                               CalculatorView  view) {
+        this.model = model;
+        this.view  = view;
+        
+        view.setDisplay(current);            
+        view.addListener(this);
+    }
+
+    @Override
+    public void buttonClick(char operation) {
+        // Handle digit input
+        if ('0' <= operation && operation <= '9') {
+            current = current * 10
+                    + Double.parseDouble("" + operation);
+            view.setDisplay(current);
+            return;
+        }
+
+        // Execute the previously input operation
+        switch (lastOperationRequested) {
+        case '+':
+            model.add(current);
+            break;
+        case '-':
+            model.add(-current);
+            break;
+        case '/':
+            model.divide(current);
+            break;
+        case '*':
+            model.multiply(current);
+            break;
+        case 'C':
+            model.setValue(current);
+            break;
+        } // '=' is implicit
+
+        lastOperationRequested = operation;
+
+        current = 0.0;
+        if (operation == 'C')
+            model.clear();
+        view.setDisplay(model.getValue());
+    }
+}]]></programlisting>
+
+                <para>
+                    In the above example, we held some state information in the
+                    presenter. Alternatively, we could have had an intermediate controller
+                    between the presenter and the model to handle the low-level button
+                    logic.
+                </para>
+            </section>
+        </section>
+
+        <section xml:id="application.architecture.navigation">
+            <title>View Navigation</title>
+
+            <para>
+                While the most simple applications have just a single
+                <emphasis>view</emphasis> (or <emphasis>screen</emphasis>), perhaps most
+                have many. Even in a single view, you often want to have sub-views, for
+                example to display different content. <xref
+                linkend="figure.application.architecture.navigation"/> illustrates a
+                typical navigation between different top-level views of an application,
+                and a main view with sub-views.
+            </para>
+
+            <figure xml:id="figure.application.architecture.navigation">
+                <title>Navigation Between Views</title>
+                <mediaobject>
+                    <imageobject role="html">
+                        <imagedata align="center" fileref="img/application/view-navigation-lo.png"/>
+                    </imageobject>
+                    <imageobject role="fo">
+                        <imagedata scale="70" smallscale="100%" align="center" fileref="img/application/view-navigation-hi.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+
+            <para>
+                The <classname>Navigator</classname> described in <xref
+                linkend="advanced.navigator"/> is a view manager that provides a flexible
+                way to navigate between views and sub-views, while managing the URI
+                fragment in the page URL to allow bookmarking, linking, and going back in
+                browser history.
+            </para>
+
+            <para>
+                Often Vaadin application views are part of something bigger. In such
+                cases, you may need to integrate the Vaadin applications with the other
+                website. You can use the embedding techniques described in <xref
+                linkend="application.embedding"/>.
+            </para>
+        </section>
+
+        <section xml:id="application.architecture.accessing">
+            <title>Accessing &rootclass;, Page, and Application</title>
+            
+            <para>
+                You can access the current &root;, page, and application objects from
+                anywhere in the application using the static
+                <methodname>getCurrent()</methodname> method in the respective
+                <classname>&rootclass;</classname>, <classname>Page</classname>, and
+                <classname>Application</classname> classes.
+            </para>
+
+            <para>
+                These methods use the built-in ThreadLocal support for application and &root;
+                objects. The pattern is described in detail in <xref
+                    linkend="advanced.global.threadlocal"/>.
+            </para>
+        </section>
+    </section>
 
 </chapter>
 	
