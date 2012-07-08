@@ -1747,21 +1747,10 @@ notif.show(Page.getCurrent());]]></programlisting>
             mention some of the most common architectural patterns in Vaadin applications.
         </para>
 
-        <section xml:id="application.architecture.inheritance">
-            <title>Using Inheritance</title>
-
-            <para>
-                Inheritance is one of the basic tenets of object oriented
-                programming. Vaadin framework is built on top of abstraction layers, with
-                interfaces and abstract classes. Any classes can be extended by
-                inheritance.
-            </para>
-
-            <para>
-                One of the most common patterns with Vaadin is extending a class for a
-                single case to use it.
-            </para>
-        </section>
+        <para>
+            Vaadin framework is built on top of abstraction layers, with interfaces and
+            abstract classes. Any classes can be extended by inheritance.
+        </para>
 
         <section xml:id="application.architecture.composition">
             <title>Compositing Components</title>
@@ -1864,12 +1853,13 @@ MyView myview = new MyView();]]></programlisting>
             <para>
                 An <emphasis>application layer</emphasis> (or <emphasis>service
                 layer</emphasis>) is often distinguished from the domain layer, offering
-                the domain logic as a service. In Java EE development, Enterprise
+                the domain logic as a service, which can be used by the user interface
+                layer, as well as for other uses. In Java EE development, Enterprise
                 JavaBeans (EJBs) are typically used for building this layer.
             </para>
 
             <para>
-                An <emphasis>infratructure layer</emphasis> is often distinguished from
+                An <emphasis>infrastructure layer</emphasis> is often distinguished from
                 the data store layer, with a purpose to abstract the data store. For
                 example, it could involve a persistence solution such as JPA and an EJB
                 container. This layer becomes relevant with Vaadin when binding Vaadin
@@ -1901,7 +1891,7 @@ MyView myview = new MyView();]]></programlisting>
             <para>
                 The Model-View-Presenter (MVP) pattern is one of the most common patterns
                 with Vaadin. It is similar to the older Model-View-Controller (MVC)
-                pattern, which is not so applicable to Vaadin development. Instead of an
+                pattern, which is not as meaningful in Vaadin development. Instead of an
                 implementation-aware controller, there is an implementation-agnostic
                 presenter that operates the view through an interface. The view does not
                 interact directly with the model. This isolates the view implementation
@@ -1909,12 +1899,37 @@ MyView myview = new MyView();]]></programlisting>
                 model.
             </para>
 
+            <figure xml:id="figure.application.architecture.mvp">
+                <title>Model-View-Presenter Pattern</title>
+                <mediaobject>
+                    <imageobject role="html">
+                        <imagedata align="center" fileref="img/application/mvp-pattern-lo.png"/>
+                    </imageobject>
+                    <imageobject role="fo">
+                        <imagedata scale="70" smallscale="100%" align="center" fileref="img/application/mvp-pattern-hi.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+
+            <para>
+                <xref linkend="figure.application.architecture.mvp"/> illustrates the MVP
+                pattern with a simple calculator. The domain model is realized in the
+                <classname>Calculator</classname> class, which includes a data model and
+                some model logic operations. The <classname>CalculatorViewImpl</classname>
+                is a Vaadin implementation of the view, defined in the
+                <interfacename>CalculatorView</interfacename> interface. The
+                <classname>CalculatorPresenter</classname> handles the user interface
+                logic. User interaction events received in the view are translated into
+                implementation-independent events for the presenter to handle (the view
+                implementation could also just call the presenter).
+            </para>
+
             <para>
                 Let us first look how the model and view are bound together by the
                 presenter in the following example:
             </para>
 
-<programlisting><?pocket-size 65% ?><![CDATA[
+            <programlisting><?pocket-size 65% ?><![CDATA[
 // Create the model and the Vaadin view implementation
 CalculatorModel      model     = new CalculatorModel();
 VaadinCalculatorView view      = new VaadinCalculatorView();
@@ -1926,7 +1941,7 @@ new CalculatorPresenter(model, view);
 layout.addComponent(view);]]></programlisting>
 
             <para>
-                You could add the view anywhere in the Vaadin application, as it is a
+                You could add the view anywhere in a Vaadin application, as it is a
                 composite component.
             </para>
 
@@ -1983,15 +1998,17 @@ class CalculatorModel {
                 <programlisting><?pocket-size 65% ?><![CDATA[interface CalculatorView {
     public void setDisplay(double value);
 
-    interface ButtonClickListener {
+    interface CalculatorViewListener {
         void buttonClick(char operation);
     }
-    public void addListener(ButtonClickListener listener);
+    public void addListener(CalculatorViewListener listener);
 }]]></programlisting>
 
                 <para>
                     The are design alternatives for the view. It could receive the
-                    listener in its constructor, or it could just know the presenter.
+                    listener in its constructor, or it could just know the
+                    presenter. Here, we forward button clicks as an
+                    implementation-independent event.
                 </para>
 
                 <para>
@@ -2030,10 +2047,10 @@ class CalculatorModel {
     }
 
     /* Only the presenter registers one listener... */
-    List<ButtonClickListener> listeners =
-            new ArrayList<ButtonClickListener>();
+    List<CalculatorViewListener> listeners =
+            new ArrayList<CalculatorViewListener>();
 
-    public void addListener(ButtonClickListener listener) {
+    public void addListener(CalculatorViewListener listener) {
         listeners.add(listener);
     }
 
@@ -2041,7 +2058,7 @@ class CalculatorModel {
      *  implementation-independent event */
     @Override
     public void buttonClick(ClickEvent event) {
-        for (ButtonClickListener listener: listeners)
+        for (CalculatorViewListener listener: listeners)
             listener.buttonClick(event.getButton()
                                  .getCaption().charAt(0));
     }
@@ -2058,9 +2075,8 @@ class CalculatorModel {
                     receives user interaction back from it.
                 </para>
 
-                <programlisting><?pocket-size 65% ?><![CDATA[/** The presenter */
-class CalculatorPresenter
-        implements CalculatorView.ButtonClickListener {
+                <programlisting><?pocket-size 65% ?><![CDATA[class CalculatorPresenter
+        implements CalculatorView.CalculatorViewListener {
     CalculatorModel model;
     CalculatorView  view;
 
@@ -2174,6 +2190,16 @@ class CalculatorPresenter
                 <classname>&rootclass;</classname>, <classname>Page</classname>, and
                 <classname>Application</classname> classes.
             </para>
+
+                <programlisting><?pocket-size 75% ?><![CDATA[// Opens a sub-window
+Root.getCurrent().addWindow(new Window("My Window"));
+
+// Set the page title (window or tab caption)
+Page.getCurrent().setTitle("My Page");
+
+// Set the logout URL
+Application.getCurrent().setLogoutURL(
+        "http://en.wikipedia.org/wiki/Reindeer");]]></programlisting>
 
             <para>
                 These methods use the built-in ThreadLocal support for application and &root;
