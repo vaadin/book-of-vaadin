@@ -37,7 +37,7 @@ unzip: $(IMPORTZIP) FORCE
 $(IMPORTZIP): FORCE
 	mkdir -p $(IMPORTDIR)
 	rm -rf ./$(IMPORTDIR)/*-*
-	curl --user $(USERNAME):$(PASSWORD) https://api.getlocalization.com/bookofvaadin/api/translations/zip -o $(IMPORTZIP)
+	curl --user $(USERNAME):$(PASSWORD) https://www.getlocalization.com/bookofvaadin/api/translations/zip -o $(IMPORTZIP)
 
 # Copy imported PO files over the old translations
 copyover: fi_FI/*.po unzip FORCE
