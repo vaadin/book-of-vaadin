@@ -12,6 +12,13 @@
         components directly to data sources, such as database queries.
     </para>
 
+    <para>
+        <emphasis>This edition is a draft. Many new features that will be included in the
+        final version of Vaadin 7 are not yet covered in the draft and some of the content
+        may be outdated. For the most current version, please see the on-line edition
+        available at <uri>http://vaadin.com/book</uri>.</emphasis>
+    </para>
+
 	<section xml:id="datamodel.overview">
 		<title>Overview</title>
 
@@ -809,11 +816,11 @@ form.getField("discovererborn").setCaption("Born");]]></programlisting>
         </para>
 
         <section xml:id="datamodel.itembinding.fieldfactory">
-            <title>Basic Binding</title>
+            <title>Simple Binding</title>
 
             <!-- TODO Vaadin 7 -->
             <para>
-                Let us start with a data model that has an item with couple of
+                Let us start with a data model that has an item with a couple of
                 properties. The item could be any item type, as described earlier.
             </para>
 
@@ -846,6 +853,19 @@ FieldGroup binder = new FieldGroup(item);
 binder.bind(nameField, "name");
 binder.bind(ageField, "age");]]></programlisting>
 
+            <para>
+                The above way of binding is not different from simply calling
+                <methodname>setPropertyDataSource()</methodname> for the fields. It does,
+                however, register the fields in the field group, which for example enables
+                buffering or validation of the fields using the field group, as described
+                in <xref linkend="datamodel.itembinding.buffering"/>.
+            </para>
+
+            <para>
+                Next, we consider more practical uses for a
+                <classname>FieldGroup</classname>.
+            </para>
+
             <!-- TODO Vaadin 7: What's the point??? -->
         </section>
 
@@ -870,13 +890,103 @@ form.addComponent(binder.buildAndBind("Age", "age"));]]></programlisting>
         </section>
 
         <section xml:id="datamodel.itembinding.formclass">
-            <title>Binding a Form Class</title>
+            <title>Binding Member Fields</title>
 
             <para>
-                One of the most common patterns for creating forms is a class that
-                contains the fields of the form as member variables. The class can be a
-                <classname>CustomComponent</classname> or extend a layout.
+                The <methodname>bindMemberFields()</methodname> method in
+                <classname>FieldGroup</classname> uses reflection to bind the properties of an
+                item to field components that are member variables of a class. Hence, if
+                you implement a form as a class with the fields stored as member
+                variables, you can use this method to bind them super-easy.
             </para>
+
+            <para>
+                The item properties are mapped to the members by the property ID and the
+                name of the member variable. If you want to map a property with a
+                different ID to a member, you can use the <literal>@PropertyId</literal>
+                annotation for the member, with the property ID as the parameter.
+            </para>
+
+            <para>
+                For example:
+            </para>
+
+            <book-example id="datamodel.itembinding.formclass.extended"></book-example>
+            <programlisting><?pocket-size 65% ?><![CDATA[// Have an item
+PropertysetItem item = new PropertysetItem();
+item.addItemProperty("name", new ObjectProperty<String>("Zaphod"));
+item.addItemProperty("age", new ObjectProperty<Integer>(42));
+
+// Define a form as a class that extends some layout
+class MyForm extends FormLayout {
+    // Member that will bind to the "name" property
+    TextField name = new TextField("Name");
+    
+    // Member that will bind to the "age" property 
+    @PropertyId("age")
+    TextField ageField = new TextField("Age");
+    
+    public MyForm() {
+        // Customize the layout a bit
+        setSpacing(true);
+        
+        // Add the fields
+        addComponent(name);
+        addComponent(ageField);
+    }
+}
+        
+// Create one
+MyForm form = new MyForm();
+        
+// Now create a binder that can also creates the fields
+// using the default field factory
+FieldGroup binder = new FieldGroup(item);
+binder.bindMemberFields(form);
+
+// And the form can be used in an higher-level layout
+layout.addComponent(form);]]></programlisting>
+
+            <section xml:id="datamodel.itembinding.formclass.customcomponent">
+                <title>Encapsulating in <classname>CustomComponent</classname></title>
+
+                <para>
+                    Using a <classname>CustomComponent</classname> can be better for hiding
+                    the implementation details than extending a layout. Also, the use of the
+                    <classname>FieldGroup</classname> can be encapsulated in the form class.
+                </para>
+
+                <para>
+                    Consider the following as an alternative for the form implementation
+                    presented earlier:
+                </para>
+
+                <book-example id="datamodel.itembinding.formclass.customcomponent"></book-example>
+                <programlisting><?pocket-size 75% ?><![CDATA[// A form component that allows editing an item
+class MyForm extends CustomComponent {
+    // Member that will bind to the "name" property
+    TextField name = new TextField("Name");
+    
+    // Member that will bind to the "age" property 
+    @PropertyId("age")
+    TextField ageField = new TextField("Age");
+    
+    public MyForm(Item item) {
+        FormLayout layout = new FormLayout();
+        layout.addComponent(name);
+        layout.addComponent(ageField);
+        
+        // Now use a binder to bind the members
+        FieldGroup binder = new FieldGroup(item);
+        binder.bindMemberFields(this);
+
+        setCompositionRoot(layout);
+    }
+}
+        
+// And the form can be used as a component
+layout.addComponent(new MyForm(item));]]></programlisting>
+            </section>
         </section>
 
         <section xml:id="datamodel.itembinding.buffering">
@@ -886,9 +996,52 @@ form.addComponent(binder.buildAndBind("Age", "age"));]]></programlisting>
                 A <classname>FieldGroup</classname> handles buffering the form content so
                 that it is written to the data model only when the
                 <methodname>commit()</methodname> is called for the
+                <classname>FieldGroup</classname>. Edits can be discarded, so that the
+                underlying property value is reloaded, by calling
+                <methodname>discard()</methodname>. Buffering is enabled by default, but
+                can be set with the <methodname>setBuffered()</methodname> method in
                 <classname>FieldGroup</classname>.
             </para>
-            <!-- TODO Vaadin 7 -->
+
+            <book-example id="datamodel.itembinding.formclass.customcomponent"></book-example>
+            <programlisting><?pocket-size 65% ?><![CDATA[// Have an item of some sort
+final PropertysetItem item = new PropertysetItem();
+item.addItemProperty("name", new ObjectProperty<String>("Q"));
+item.addItemProperty("age",  new ObjectProperty<Integer>(42));
+
+// Have some layout and create the fields
+Panel form = new Panel("Buffered Form");
+form.setContent(new FormLayout());
+
+// Build and bind the fields using the default field factory
+final FieldGroup binder = new FieldGroup(item);
+form.addComponent(binder.buildAndBind("Name", "name"));
+form.addComponent(binder.buildAndBind("Age",  "age"));
+
+// Enable buffering (actually enabled by default)
+binder.setBuffered(true);
+        
+// A button to commit the buffer
+form.addComponent(new Button("OK", new ClickListener() {
+    @Override
+    public void buttonClick(ClickEvent event) {
+        try {
+            binder.commit();
+            Notification.show("Thanks!");
+        } catch (CommitException e) {
+            Notification.show("You fail!");
+        }
+    }
+}));
+
+// A button to discard the buffer
+form.addComponent(new Button("Discard", new ClickListener() {
+    @Override
+    public void buttonClick(ClickEvent event) {
+        binder.discard();
+        Notification.show("Discarded!");
+    }
+}));]]></programlisting>
         </section>
 
         <section xml:id="datamodel.itembinding.beans">
@@ -896,12 +1049,22 @@ form.addComponent(binder.buildAndBind("Age", "age"));]]></programlisting>
 
             <para>
                 The <classname>BeanFieldGroup</classname> makes it easier to bind fields
-                to a bean. It also handles binding to nested beans properties.
+                to a bean. It also handles binding to nested beans properties. The build a
+                field bound to a nested bean property, identify the property with dot
+                notation. For example, if a <classname>Person</classname> bean has a
+                <literal>address</literal> property with an <classname>Address</classname>
+                type, which in turn has a <literal>street</literal> property, you could
+                build a field bound to the property with
+                <methodname>buildAndBind("Street", "address.street")</methodname>.
             </para>
 
             <para>
-                The input can be validated using the Java Bean Validation API, as
-                described in <xref linkend="datamodel.itembinding.beanvalidation"/>.
+                The input to fields bound to a bean can be validated using the Java Bean
+                Validation API, as described in <xref
+                linkend="datamodel.itembinding.beanvalidation"/>. The
+                <classname>BeanFieldGroup</classname> automatically adds a
+                <classname>BeanValidator</classname> to every field if a bean validation
+                implementation is included in the classpath.
             </para>
         </section>
 

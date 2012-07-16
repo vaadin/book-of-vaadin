@@ -16,6 +16,13 @@
 		components in Vaadin use the same client-side interfaces and patterns.
 	</para>
 
+    <para>
+        <emphasis>This edition is a draft. Many new features that will be included in
+        Vaadin 7 are not yet covered in the draft and some of the content may in fact be
+        outdated. For the most current version, please see the on-line edition available
+        at <uri>http://vaadin.com/book</uri>.</emphasis>
+    </para>
+
 	<note>
 		<title>On Terminology</title>
 		<para>
@@ -629,25 +636,17 @@ warname -bindAddress 127.0.0.1]]></programlisting>
         <section xml:id="gwt.connector.basic">
             <title>A Basic Connector</title>
 
+            <para>
+                The basic tasks of a connector is to hook up to the widget and handle
+                events from user interaction and changes received from the server. A
+                connector also has a number of routine infrastructure methods which need
+                to be implemented.
+            </para>
+            
             <programlisting><?pocket-size 65% ?><![CDATA[@Connect(MyComponent.class)
-public class MyComponentConnector extends AbstractComponentConnector {
+public class MyComponentConnector
+        extends AbstractComponentConnector {
     public MyComponentConnector() {    
-        registerRpc(MyComponentClientRpc.class, new MyComponentClientRpc() {
-            public void alert(String message) {
-            	// TODO Do something useful
-                Window.alert(message);
-            }
-        });
-
-		// TODO ServerRpc usage example, do something useful instead
-        getWidget().addClickHandler(new ClickHandler() {
-            public void onClick(ClickEvent event) {
-                final MouseEventDetails mouseDetails = MouseEventDetailsBuilder
-                        .buildMouseEventDetails(event.getNativeEvent(),
-                                getWidget().getElement());
-                rpc.clicked(mouseDetails);
-            }
-        });
     }
 
     @Override
@@ -666,15 +665,38 @@ public class MyComponentConnector extends AbstractComponentConnector {
     }
 
     @Override
-    public void onStateChanged(StateChangeEvent stateChangeEvent) {
+    public void onStateChanged(StateChangeEvent stateChangeEvent)
+    {
         super.onStateChanged(stateChangeEvent);
-		
-		// TODO do something useful
+        
+        // Do something useful
         final String text = getState().getText();
         getWidget().setText(text);
     }
-
 }]]></programlisting>
+        </section>
+
+        <section xml:id="gwt.connector.communication">
+            <title>Communication with the Server-Side</title>
+            
+            <para>
+                The main task of a connector is to handle communicating user interaction
+                to the server-side and receive state changes to be displayed to the user.
+            </para>
+
+            <para>
+                State changes are communicated to and from the server-side through a
+                <emphasis>shared state</emphasis> interface, as described in <xref
+                linkend="gwt.shared-state"/>. The serialization of the state data is
+                handled completely transparently.
+            </para>
+
+            <para>
+                In addition, a connector can make remote procedure calls (RPC) to the
+                server-side and also the server-side component can make RPC calls to the
+                connector. For a thorough description of the RPC mechanism, refer to <xref
+                linkend="gwt.rpc"/>.
+            </para>
         </section>
     </section>
 

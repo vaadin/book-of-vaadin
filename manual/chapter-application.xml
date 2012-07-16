@@ -11,24 +11,34 @@
         point-of-view.
 	</para>
 
-	<para>
-		If you are a newcomer to AJAX development, you may benefit from <xref
-		linkend="architecture.technology.ajax"/>, which explains the role of pages in
-		Vaadin.
-	</para>
+    <para>
+        Vaadin provides two application development models, a server-side and
+        client-side. In this chapter, we concentrate on the server-side model, which is
+        usually the easiest way to create web applications. The pure client-side
+        development model is described in <xref
+        linkend="gwt.widget.clientside-application"/>.
+    </para>
+
+    <para>
+        <emphasis>This edition is a draft. Many new features that will be included in
+        Vaadin 7 are not yet covered in this chapter and some of the content may in fact
+        be outdated. For the most current version, please see the on-line edition
+        available at <uri>http://vaadin.com/book</uri>.</emphasis>
+    </para>
 
 	<section xml:id="application.overview">
 		<title>Overview</title>
 
 		<para>
-			An application made with Vaadin runs as a Java Servlet in a Servlet
-			container. The entry-point is the <emphasis>&root;</emphasis> class, which
-			needs to create and manage the user interface components. User input is
-			handled with event listeners, which can be simplified by binding user
-			interface components directly to data. Visual appearance is defined in themes
-			as CSS <!-- TODO Vaadin 7: SASS --> files. Icons, other images, and
-			downloadable files are handled as <emphasis>resources</emphasis>, which can be
-			external or served by the application server or the application itself.
+            A server-side application made with Vaadin runs as a Java
+            Servlet in a Servlet container. The entry-point is the
+            <emphasis>&root;</emphasis> class, which needs to create and manage the user
+            interface components. User input is handled with event listeners, which can be
+            simplified by binding user interface components directly to data. Visual
+            appearance is defined in themes as CSS <!-- TODO Vaadin 7: SASS -->
+            files. Icons, other images, and downloadable files are handled as
+            <emphasis>resources</emphasis>, which can be external or served by the
+            application server or the application itself.
 		</para>
 		
 		<figure xml:id="figure.application.architecture">
@@ -1765,16 +1775,20 @@ notif.show(Page.getCurrent());]]></programlisting>
             Once your application grows beyond a dozen or so lines, which is actually
             quite soon, you need to start considering the application architecture. You
             are free to use any object-oriented techniques available in Java to organize
-            your code in methods, classes, packages, and libraries. The overall
-            architecture defines how these modules communicate together and what sort of
-            dependencies they have between them. It also defines the scope of the
-            application. The scope of this book, however, only gives a possibility to
-            mention some of the most common architectural patterns in Vaadin applications.
+            your code in methods, classes, packages, and libraries. An architecture
+            defines how these modules communicate together and what sort of dependencies
+            they have between them. It also defines the scope of the application. The
+            scope of this book, however, only gives a possibility to mention some of the
+            most common architectural patterns in Vaadin applications.
         </para>
 
         <para>
-            Vaadin framework is built on top of abstraction layers, with interfaces and
-            abstract classes. Any classes can be extended by inheritance.
+            The following sections describe some basic application patterns. You may also
+            want to consider the advanced architectures presented in <xref
+            linkend="advanced.patterns"/>. The <xref linkend="advanced.global"/> discusses
+            the problem of passing essentially global references around, a common problem
+            which is also visited in later in this section, in <xref
+            linkend="application.architecture.accessing"/>.
         </para>
 
         <section xml:id="application.architecture.composition">
@@ -1808,6 +1822,11 @@ notif.show(Page.getCurrent());]]></programlisting>
 Layout myview = new MyView();]]></programlisting>
 
             <para>
+                This composition pattern is especially supported for creating forms, as
+                described in <xref linkend="datamodel.itembinding.formclass"/>.
+            </para>
+
+            <para>
                 While extending layouts is an easy way to make component composition, it
                 is a good practice to encapsulate implementation details, such as the
                 exact layout component used. Otherwise, the users of such a composite
@@ -1817,8 +1836,7 @@ Layout myview = new MyView();]]></programlisting>
                 representation.
             </para>
 
-            <programlisting><![CDATA[
-class MyView extends CustomComponent {
+            <programlisting><![CDATA[class MyView extends CustomComponent {
     TextField entry   = new TextField("Enter this");
     Label     display = new Label("See this");
     Button    click   = new Button("Click This");
@@ -1840,328 +1858,12 @@ class MyView extends CustomComponent {
 MyView myview = new MyView();]]></programlisting>
 
             <para>
-                For more detailed information on component composition with
+                For a more detailed description of the
                 <classname>CustomComponent</classname>, see <xref
                 linkend="components.customcomponent"/>. The Vaadin Plugin for Eclipse also
                 includes a visual editor for composite components, as described in <xref
                 linkend="eclipse"/>.
             </para>
-        </section>
-
-        <section xml:id="application.architecture.layering">
-            <title>Layered Architectures</title>
-
-            <para>
-                Layered architectures, where each layer has a clearly distinct
-                responsibility, are probably the most common architectures. Typically,
-                applications follow at least a three-layer architecture:
-            </para>
-
-            <itemizedlist>
-                <listitem>User interface layer</listitem>
-                <listitem>Domain layer</listitem>
-                <listitem>Data store layer</listitem>
-            </itemizedlist>
-
-            <para>
-                Such an architecture starts from a <emphasis>domain model</emphasis>,
-                which defines the data model and the "business logic" of the application,
-                typically as POJOs. A user interface is built on top of the domain model,
-                in our context with the Vaadin Framework. The Vaadin user interface could
-                be bound directly to the data model through the Vaadin Data Model,
-                described in <xref linkend="datamodel"/>. Beneath the domain model lies a
-                data store, such as a relational database. The dependencies between the
-                layers are restricted so that a higher layer may depend on a lower one,
-                but never the other way around.
-            </para>
-
-            <para>
-                An <emphasis>application layer</emphasis> (or <emphasis>service
-                layer</emphasis>) is often distinguished from the domain layer, offering
-                the domain logic as a service, which can be used by the user interface
-                layer, as well as for other uses. In Java EE development, Enterprise
-                JavaBeans (EJBs) are typically used for building this layer.
-            </para>
-
-            <para>
-                An <emphasis>infrastructure layer</emphasis> is often distinguished from
-                the data store layer, with a purpose to abstract the data store. For
-                example, it could involve a persistence solution such as JPA and an EJB
-                container. This layer becomes relevant with Vaadin when binding Vaadin
-                components to data with the JPAContainer, as described in <xref
-                linkend="jpacontainer"/>.
-            </para>
-        </section>
-
-        <!-- TODO: Scrap or rap... (...)
-        <section xml:id="application.architecture.mvc">
-            <title>Model-View-Controller</title>
-
-            <para>
-                Notice that Vaadin components are views by themselves, but at a different
-                level. You can bind a controller to them as an event listener. The
-                components can also be bound directly to the data model. Especially, the
-                <interfacename>Field</interfacename> components implement the
-                <interfacename>Property.Viewer</interfacename> and
-                <interfacename>Property.Editor</interfacename> interfaces for this
-                purpose. See <xref linkend="datamodel"/> for more information about the
-                Vaadin data model and binding.
-            </para>
-        </section>
-        -->
-
-        <section xml:id="application.architecture.mvp">
-            <title>Model-View-Presenter</title>
-
-            <para>
-                The Model-View-Presenter (MVP) pattern is one of the most common patterns
-                with Vaadin. It is similar to the older Model-View-Controller (MVC)
-                pattern, which is not as meaningful in Vaadin development. Instead of an
-                implementation-aware controller, there is an implementation-agnostic
-                presenter that operates the view through an interface. The view does not
-                interact directly with the model. This isolates the view implementation
-                better than in MVC and allows easier unit testing of the presenter and
-                model.
-            </para>
-
-            <figure xml:id="figure.application.architecture.mvp">
-                <title>Model-View-Presenter Pattern</title>
-                <mediaobject>
-                    <imageobject role="html">
-                        <imagedata align="center" fileref="img/application/mvp-pattern-lo.png"/>
-                    </imageobject>
-                    <imageobject role="fo">
-                        <imagedata scale="70" smallscale="100%" align="center" fileref="img/application/mvp-pattern-hi.png"/>
-                    </imageobject>
-                </mediaobject>
-            </figure>
-
-            <para>
-                <xref linkend="figure.application.architecture.mvp"/> illustrates the MVP
-                pattern with a simple calculator. The domain model is realized in the
-                <classname>Calculator</classname> class, which includes a data model and
-                some model logic operations. The <classname>CalculatorViewImpl</classname>
-                is a Vaadin implementation of the view, defined in the
-                <interfacename>CalculatorView</interfacename> interface. The
-                <classname>CalculatorPresenter</classname> handles the user interface
-                logic. User interaction events received in the view are translated into
-                implementation-independent events for the presenter to handle (the view
-                implementation could also just call the presenter).
-            </para>
-
-            <para>
-                Let us first look how the model and view are bound together by the
-                presenter in the following example:
-            </para>
-
-            <programlisting><?pocket-size 65% ?><![CDATA[
-// Create the model and the Vaadin view implementation
-CalculatorModel    model = new CalculatorModel();
-CalculatorViewImpl view  = new CalculatorViewImpl();
-    
-// The presenter binds the model and view together
-new CalculatorPresenter(model, view);
-    
-// The view implementation is a Vaadin component
-layout.addComponent(view);]]></programlisting>
-
-            <para>
-                You could add the view anywhere in a Vaadin application, as it is a
-                composite component.
-            </para>
-
-            <section xml:id="application.architecture.mvp.model">
-                <title>The Model</title>
-
-                <para>
-                    Our business model is quite simple, with one value and a number of
-                    operations for manipulating it.
-                </para>
-    
-                <programlisting><?pocket-size 65% ?><![CDATA[/** The model **/
-class CalculatorModel {
-    private double value = 0.0;
-    
-    public void clear() {
-        value = 0.0;
-    }
-
-    public void add(double arg) {
-        value += arg;
-    }
-
-    public void multiply(double arg) {
-        value *= arg;
-    }
-
-    public void divide(double arg) {
-        if (arg != 0.0)
-            value /= arg;
-    }
-    
-    public double getValue() {
-        return value;
-    }
-    
-    public void setValue(double value) {
-        this.value = value;
-    }
-}]]></programlisting>
-            </section>
-
-            <section xml:id="application.architecture.mvp.view">
-                <title>The View</title>
-
-                <para>
-                    The purpose of the view in MVP is to display data and receive user
-                    interaction. It relays the user interaction to the presenter in an
-                    fashion that is independent of the view implementation, that is, no
-                    Vaadin events.  It is defined as a UI framework interface that can
-                    have multiple implementations.
-                </para>
-
-                <programlisting><?pocket-size 65% ?><![CDATA[interface CalculatorView {
-    public void setDisplay(double value);
-
-    interface CalculatorViewListener {
-        void buttonClick(char operation);
-    }
-    public void addListener(CalculatorViewListener listener);
-}]]></programlisting>
-
-                <para>
-                    The are design alternatives for the view. It could receive the
-                    listener in its constructor, or it could just know the
-                    presenter. Here, we forward button clicks as an
-                    implementation-independent event.
-                </para>
-
-                <para>
-                    As we are using Vaadin, we make a Vaadin implementation of the
-                    interface as follows:
-                </para>
-    
-                <programlisting><?pocket-size 65% ?><![CDATA[class CalculatorViewImpl extends CustomComponent
-        implements CalculatorView, ClickListener {
-    private Label display = new Label("0.0");
-
-    public CalculatorViewImpl() {
-        GridLayout layout  = new GridLayout(4, 5);
-
-        // Create a result label that spans over all
-        // the 4 columns in the first row
-        layout.addComponent(display, 0, 0, 3, 0);
-    
-        // The operations for the calculator in the order
-        // they appear on the screen (left to right, top
-        // to bottom)
-        String[] operations = new String[] {
-            "7", "8", "9", "/", "4", "5", "6",
-            "*", "1", "2", "3", "-", "0", "=", "C", "+" };
-
-        // Add buttons and have them send click events
-        // to this class
-        for (String caption: operations)
-            layout.addComponent(new Button(caption, this));
-
-        setCompositionRoot(layout);
-    }
-    
-    public void setDisplay(double value) {
-        display.setValue(Double.toString(value));
-    }
-
-    /* Only the presenter registers one listener... */
-    List<CalculatorViewListener> listeners =
-            new ArrayList<CalculatorViewListener>();
-
-    public void addListener(CalculatorViewListener listener) {
-        listeners.add(listener);
-    }
-
-    /** Relay button clicks to the presenter with an
-     *  implementation-independent event */
-    @Override
-    public void buttonClick(ClickEvent event) {
-        for (CalculatorViewListener listener: listeners)
-            listener.buttonClick(event.getButton()
-                                 .getCaption().charAt(0));
-    }
-}]]></programlisting>
-            </section>
-
-            <section xml:id="application.architecture.mvp.presenter">
-                <title>The Presenter</title>
-
-                <para>
-                    The presenter in MVP is a middle-man that handles all user interaction
-                    logic, but in an implementation-independent way, so that it doesn't
-                    actually know anything about Vaadin. It shows data in the view and
-                    receives user interaction back from it.
-                </para>
-
-                <programlisting><?pocket-size 65% ?><![CDATA[class CalculatorPresenter
-        implements CalculatorView.CalculatorViewListener {
-    CalculatorModel model;
-    CalculatorView  view;
-
-    private double current = 0.0;
-    private char   lastOperationRequested = 'C';
-    
-    public CalculatorPresenter(CalculatorModel model,
-                               CalculatorView  view) {
-        this.model = model;
-        this.view  = view;
-        
-        view.setDisplay(current);            
-        view.addListener(this);
-    }
-
-    @Override
-    public void buttonClick(char operation) {
-        // Handle digit input
-        if ('0' <= operation && operation <= '9') {
-            current = current * 10
-                    + Double.parseDouble("" + operation);
-            view.setDisplay(current);
-            return;
-        }
-
-        // Execute the previously input operation
-        switch (lastOperationRequested) {
-        case '+':
-            model.add(current);
-            break;
-        case '-':
-            model.add(-current);
-            break;
-        case '/':
-            model.divide(current);
-            break;
-        case '*':
-            model.multiply(current);
-            break;
-        case 'C':
-            model.setValue(current);
-            break;
-        } // '=' is implicit
-
-        lastOperationRequested = operation;
-
-        current = 0.0;
-        if (operation == 'C')
-            model.clear();
-        view.setDisplay(model.getValue());
-    }
-}]]></programlisting>
-
-                <para>
-                    In the above example, we held some state information in the
-                    presenter. Alternatively, we could have had an intermediate controller
-                    between the presenter and the model to handle the low-level button
-                    logic.
-                </para>
-            </section>
         </section>
 
         <section xml:id="application.architecture.navigation">
@@ -2233,7 +1935,6 @@ Application.getCurrent().setLogoutURL(
             </para>
         </section>
     </section>
-
 </chapter>
 	
 <!-- Keep this comment at the end of the file
