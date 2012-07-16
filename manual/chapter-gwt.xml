@@ -113,7 +113,7 @@
 		<section xml:id="gwt.eclipse.widget">
 			<title>Creating a Widget</title>
 
-            <orderedlisting>
+            <orderedlist>
                 <listitem>
                     <para>
                         Right-click the project in the Project Explorer and select
@@ -227,7 +227,7 @@
 						Finally, click <guibutton>Finish</guibutton> to create the new component.
 					</para>
                 </listitem>
-            </orderedlisting>
+            </orderedlist>
 
 			<para>
 				The wizard will:
@@ -271,7 +271,7 @@
 				<filename>WebContent/VAADIN/widgetsets</filename> folder. When you need to
 				recompile the widget set in Eclipse, see <xref
 				linkend="gwt.eclipse.compiling"/>. For detailed information on compiling
-				widget sets, see <xref linkend="gwt.development.compiler"/>.
+				widget sets, see <xref linkend="gwt.compiling"/>.
 			</para>
 
 			<para>
@@ -360,7 +360,7 @@
 
 			<para>
 				For more information on compiling widget sets, see <xref
-				linkend="gwt.development.compiler"/>. Should you compile a widget set
+				linkend="gwt.compiling"/>. Should you compile a widget set
 				outside Eclipse, you need to refresh the project by selecting it in
 				<guilabel>Project Explorer</guilabel> and pressing <keycap>F5</keycap>.
 			</para>
@@ -1414,9 +1414,8 @@ public class CapsLockWarningConnector
         <title>Compiling a Client-Side Module</title>
 
         <para>
-            Client-side widgets used by a Vaadin application must be compiled to a widget
-            set. The widget set also forms the Vaadin Client-Side Engine, which as a whole
-            handles rendering the user interface in the browser.
+            A client-side module, either a widget set or a pure client-side module, must
+            be compiled to JavaScript using the GWT Compiler.
         </para>
 
         <para>
@@ -1426,17 +1425,70 @@ public class CapsLockWarningConnector
             described in <xref linkend="addons.compiling"/>.
         </para>
 
-        <section xml:id="gwt.compiling.eclipse">
-            <title>Compiling a Widget Set in Eclipse</title>
+        <section xml:id="gwt.compiling.overview">
+            <title>GWT Compiler Overview</title>
 
             <para>
-                When the Vaadin Plugin is installed in Eclipse, you can simply click the
+                The GWT Compiler compiles Java to JavaScript. It is included in the Vaadin
+                JAR as <classname>com.google.gwt.dev.Compiler</classname>, together with
+                the core GWT and Vaadin widgets.
+            </para>
+
+            <para>
+                The compiler compiles a <emphasis>client module</emphasis>, which can be
+                either a pure client-side module or a Vaadin widget set, that is, the
+                Vaadin Client-Side Engine that includes the widgets used in the
+                application. The client module is defined with a module descriptor, which
+                was described in <xref linkend="gwt.widgetset"/>.
+            </para>
+
+            <para>
+                The compiler writes the compilation result to a target folder that will
+                include the compiled JavaScript with any static resources included in the
+                module.
+            </para>
+        </section>
+
+        <section xml:id="gwt.compiling.eclipse">
+            <title>Compiling in Eclipse</title>
+
+            <para>
+                For compiling a widget set or other client-side module in Eclipse, see
+                <xref linkend="gwt.eclipse.compiling"/>. To put it short, when the Vaadin
+                Plugin is installed in Eclipse, you can simply click the
                 <guibutton>Compile Vaadin widgets</guibutton> button in the toolbar. It
                 will compile the widget set it finds from the project. If the project has
                 multiple widget sets, such as one for custom widgets and another one for
                 the project, you need to select the module descriptor of the widget set to
                 compile before clicking the button.
             </para>
+        </section>
+
+        <section xml:id="gwt.compiling.ant">
+            <title>Compiling with Ant</title>
+
+            <para>
+                You can find a script template for compiling widget sets with Ant at the
+                URL <link
+                xlink:href="https://vaadin.com/download/misc/build-widgetset-vaadin7.xml">https://vaadin.com/download/misc/build-widgetset-vaadin7.xml</link>.
+                You can copy the build script to your project and, once configured, use it
+                by entering:
+            </para>
+
+            <screen><prompt>$</prompt> <command>ant -f build-widgetset-vaadin7.xml</command></screen>
+
+            <!-- TODO Vaadin 7 -->
+        </section>
+
+        <section xml:id="gwt.compiling.maven">
+            <title>Compiling with Maven</title>
+
+            <para>
+                You can compile the widget set with the <literal>gwt:compile</literal>
+                goal as follows:
+            </para>
+
+            <screen><prompt>$</prompt> <command>mvn</command> <parameter>gwt:compile</parameter></screen>
         </section>
     </section>
 
@@ -1626,7 +1678,7 @@ public class CapsLockWarningConnector
 
             <para>
                 Alternatively, you can use the bookmarklets provided by the code
-                server. Go to <url>http://localhost:9876/</url> and drag the bookmarklets
+                server. Go to <uri>http://localhost:9876/</uri> and drag the bookmarklets
                 "<guilabel>Dev Mode On</guilabel>" and "<guilabel>Dev Mode Off</guilabel>"
                 to the bookmarks bar
             </para>
@@ -1701,11 +1753,11 @@ public class CapsLockWarningConnector
 
             <para>
                 Assuming that you have otherwise configured the build script for your
-                project as described in <xref linkend="gwt.development.compiler"/>, you
+                project as described in <xref linkend="gwt.compiling.ant"/>, you
                 can build the JAR package with the following command:
             </para>
 
-            <screen><prompt>$</prompt> <command>ant -f build-widgetset.xml package-jar</command></screen>
+            <screen><prompt>$</prompt> <command>ant -f build-widgetset-vaadin7.xml package-jar</command></screen>
 
             <para>
                 Notice that the <literal>package-jar</literal> target <emphasis>does

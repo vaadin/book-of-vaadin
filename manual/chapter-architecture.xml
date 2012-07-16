@@ -94,7 +94,6 @@
 					<para>
                         <indexterm><primary>Client-Side Engine</primary></indexterm>
                         <indexterm><primary>Google Web Toolkit</primary></indexterm>
-                        <indexterm><primary>UIDL</primary></indexterm>
                         <indexterm><primary>HTTP</primary></indexterm>
 
 						The Client-Side Engine of Vaadin manages the rendering in
@@ -220,8 +219,68 @@
                 CSS, DOM, JavaScript, XMLHttpRequest, and XML.
 			</para>
 
+            <para>
+                The  web was originally not built for applications, but for hypertext
+                pages that you can view with a browser. The purpose of web pages is
+                to provide <emphasis>content</emphasis> for the user. Application
+                software has a somewhat different purpose; usually to allow you to
+                work on some data or content, much of which is not ever intended to
+                be accessible through a web browser as web pages. As the web is
+                inherently page-based, conventional web applications had to work with
+                page requests and output HTML as response. JavaScript and AJAX have
+                made it possible to let go of the pages.
+            </para>
+
+            <para>
+                Pages are largely an unknown concept to conventional desktop
+                applications. At most, desktop applications can open multiple
+                windows, but usually they work with a single main window, with an
+                occasional dialog window here and there. Same goes usually for web
+                applications developed with Vaadin: an application typically
+                runs on a single page, changing the layout as needed and popping up
+                dialog boxes.
+            </para>
+
+            <para>
+                Not having to load pages and use hyperlinks to communicate all user
+                interaction is a relief for application development. However, they
+                are an important feature that ordinary desktop applications
+                lack. They allow referencing different functionalities of an
+                application or resources managed by the application. They are also
+                important for integration with external applications.
+            </para>
+
+            <para>
+                Certain resources can be identified through a <firstterm>URL</firstterm> or
+                <firstterm>Uniform Resource Locator</firstterm>.  A URL can easily be passed
+                around or stored as a bookmark. We will see in <xref
+                    linkend="advanced.requesthandler"/> how you can retrieve the URL path or query
+                parameters of a request.
+            </para>
+
+            <para>
+                Using URIs or request parameters to access functionalities or content is
+                not as straight-forward as in conventional page-based web
+                applications. Vaadin, just as any other AJAX framework, uses browser
+                cookies not just for tracking users but also for tracking the application
+                state. Cookies are unique in a browser, so any two windows share the same
+                cookies and therefore also the state. The advantage is that you can close
+                your browser and open it again and the application will be in the state
+                where you left off (except for components such as text fields which did
+                not have the immediate attribute enabled). The disadvantage is that there
+                is no good way to distinguish between the windows, so there can usually be
+                only a single application window. Even if there were several, you would
+                have trouble with synchronization of application data between
+                windows. Many conventional page-based web applications simply ignore
+                out-of-sync situations, but such situations are risky for application
+                platforms that are intended to be stable. Therefore it is safer to work
+                with a single browser window. A URI can be used to fetch
+                resources that have no particular state or to provide an entry point to
+                the application.
+            </para>
+
 			<para>
-				AJAX, with all the fuss and pomp it receives, is essentially made possible
+				With all the fuss and pomp it receives, AJAX is essentially made possible
 				by a simple API, namely the <methodname>XMLHttpRequest</methodname> class
 				in JavaScript. The API is available in all major browsers and, as of 2006,
 				the API is under way to become a W3C standard.
@@ -233,13 +292,6 @@
 				<emphasis>marshalling</emphasis>) of data objects. The Vaadin terminal
 				adapter handles serialization of shared state between server and client,
 				as well as RPC calls to the other side.
-			</para>
-
-			<para>
-				If you're a newcomer to Ajax, <xref linkend="advanced.application.pages"/>
-				discusses the history and motivations for AJAX-based web applications, as
-				well as some special characteristics that differ from both traditional web
-				applications and desktop applications.
 			</para>
 		</section>
 
@@ -280,38 +332,6 @@
 				the integration of client-side widgets with the server-side.
 			</para>
 		</section>
-
-		<section xml:id="architecture.technology.json">
-			<title>JSON</title>
-
-			<para>
-				JSON is a lightweight data-interchange format that is easy and fast to
-				generate and parse. JSON messages are said to be possibly a hundred times
-				faster to parse than XML with current browser technology. The format is a
-				subset of the JavaScript language, which makes it possible to evaluate
-				JSON messages directly as JavaScript expressions. This makes JSON very
-				easy to use in JavaScript applications and therefore also for AJAX
-				applications.
-			</para>
-
-			<para>
-				The Client-Side Engine of Vaadin uses JSON through Google Web
-				Toolkit, which supports JSON communications in the
-				<classname>com.google.gwt.json.client</classname> package.  Together with
-				advanced update optimization and caching, Vaadin is able to
-				update changes in the user interface to the browser in an extremely
-				efficient way.
-			</para>
-
-			<para>
-				The use of JSON is completely invisible to a developer using
-				Vaadin. Implementation of client-server serialization in custom widgets
-				uses abstract interfaces that may be implemented as any low-level
-				interchange format, such as XML or JSON. Details on JSON communications
-				are given in <xref linkend="uidl.json"/>.
-			</para>
-		</section>
-
 	</section>
 
 	<section xml:id="architecture.server-side">
@@ -345,13 +365,14 @@
             
 			This section gives an overview of the client-side architecture of
 			Vaadin. Knowledge of the client-side technologies is generally not needed
-			unless you develop or use custom GWT components.
+			unless you develop or use custom client-side widgets.
 
             <indexterm><primary>Google Web Toolkit</primary></indexterm>
             <indexterm><primary>Java</primary></indexterm>
 
-            The client-side engine is based on Google Web Toolkit (GWT), which allows the
-            development of the engine and client-side components solely with Java.
+            The client-side engine is based on Google Web Toolkit (GWT) and its GWT
+            Compiler, which allows the development of the engine and client-side
+            components solely with Java.
 		</para>
 
 		<para>
@@ -376,14 +397,12 @@
 			of the client-side engine using a button component as an example. The user
 			interface is managed by the <classname>ApplicationConnection</classname>
 			class, which handles AJAX requests to the server and renders the user
-			interface according to responses. Communications are done over HTTP(S) using
-			the JSON data interchange format and the User Interface Definition Language
-			(UIDL). In the server-side application, the button is used with the
-			<classname>Button</classname> class of Vaadin. On the client-side, the user
-			interface consists of various GWT components that inherit
-			<classname>Widget</classname> class. In the figure above, the GWT class
-			<classname>Button</classname> is used to render the button in the browser (the
-			inheritance of <classname>Button</classname> is simplified in the
+			interface according to responses. In the server-side application, the button
+			is used with the <classname>Button</classname> class of Vaadin. On the
+			client-side, the user interface consists of various GWT components that
+			inherit <classname>Widget</classname> class. In the figure above, the GWT
+			class <classname>Button</classname> is used to render the button in the
+			browser (the inheritance of <classname>Button</classname> is simplified in the
 			figure). Vaadin provides an <classname>VButton</classname> class, which
 			implements the <classname>Paintable</classname> interface needed for rendering
 			the component with GWT.
@@ -396,15 +415,6 @@
 			server. All server communications are done through the
 			<classname>ApplicationConnection</classname> class.
 		</para>
-
-		<para>
-			The communication with the server is done as UIDL (User Interface Definition
-			Language) messages using the JSON message interchange format over a HTTP(S)
-			connection. UIDL is described in <xref linkend="uidl"/> and JSON in
-			<xref linkend="architecture.technology.json"/> and <xref
-			linkend="uidl.json"/>.
-		</para>
-
 	</section>
 
 	<section xml:id="architecture.events">

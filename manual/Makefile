@@ -58,7 +58,7 @@ IMAGES =	intro/architecture intro/toolchain \
 XMLFILES =  book.xml \
 	chapter-addons.xml	chapter-datamodel.xml	chapter-layout.xml	chapter-themes.xml \
 	chapter-advanced.xml	chapter-eclipse.xml	chapter-timeline.xml \
-	chapter-application.xml	chapter-getting-started.xml	chapter-mobile.xml	chapter-uidl.xml \
+	chapter-application.xml	chapter-getting-started.xml	chapter-mobile.xml \
 	chapter-architecture.xml	chapter-gwt.xml	chapter-rapid.xml	chapter-vaadin.xml \
 	chapter-calendar.xml	chapter-introduction.xml	chapter-sqlcontainer.xml \
 	chapter-components.xml	chapter-jpacontainer.xml \
