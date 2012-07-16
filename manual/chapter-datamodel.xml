@@ -813,17 +813,40 @@ form.getField("discovererborn").setCaption("Born");]]></programlisting>
 
             <!-- TODO Vaadin 7 -->
             <para>
+                Let us start with a data model that has an item with couple of
+                properties. The item could be any item type, as described earlier.
             </para>
-        </section>
 
-        <section xml:id="datamodel.itembinding.fieldfactory">
-            <title>Binding a Form Class</title>
+            <programlisting><?pocket-size 65% ?><![CDATA[// Have an item
+PropertysetItem item = new PropertysetItem();
+item.addItemProperty("name", new ObjectProperty<String>("Zaphod"));
+item.addItemProperty("age", new ObjectProperty<Integer>(42));]]></programlisting>
 
             <para>
-                One of the most common patterns for creating forms is a class that
-                contains the fields of the form as member variables. The class can be a
-                <classname>CustomComponent</classname> or extend a layout.
+                Next, you would design a form for editing the data. The
+                <classname>FormLayout</classname> (<xref linkend="layout.formlayout"/> is
+                ideal for forms, but you could use any other layout as well.
             </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[// Have some layout and create the fields
+FormLayout form = new FormLayout();
+
+TextField nameField = new TextField("Name");
+form.addComponent(nameField);
+
+TextField ageField = new TextField("Age");
+form.addComponent(ageField);]]></programlisting>
+
+            <para>
+                Then, we can bind the fields to the data as follows:
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[// Now create the binder and bind the fields
+FieldGroup binder = new FieldGroup(item);
+binder.bind(nameField, "name");
+binder.bind(ageField, "age");]]></programlisting>
+
+            <!-- TODO Vaadin 7: What's the point??? -->
         </section>
 
         <section xml:id="datamodel.itembinding.fieldfactory">
@@ -835,11 +858,36 @@ form.getField("discovererborn").setCaption("Born");]]></programlisting>
                 <interfacename>FieldGroupFieldFactory</interfacename>, but you still have
                 to add them to the correct position in your layout.
             </para>
+
+            <programlisting><?pocket-size 75% ?><![CDATA[// Have some layout
+FormLayout form = new FormLayout();
+        
+// Now create a binder that can also create the fields
+// using the default field factory
+FieldGroup binder = new FieldGroup(item);
+form.addComponent(binder.buildAndBind("Name", "name"));
+form.addComponent(binder.buildAndBind("Age", "age"));]]></programlisting>
         </section>
 
-        <section xml:id="datamodel.itembinding.commit">
-            <title>Handling Commits</title>
+        <section xml:id="datamodel.itembinding.formclass">
+            <title>Binding a Form Class</title>
 
+            <para>
+                One of the most common patterns for creating forms is a class that
+                contains the fields of the form as member variables. The class can be a
+                <classname>CustomComponent</classname> or extend a layout.
+            </para>
+        </section>
+
+        <section xml:id="datamodel.itembinding.buffering">
+            <title>Buffering Forms</title>
+
+            <para>
+                A <classname>FieldGroup</classname> handles buffering the form content so
+                that it is written to the data model only when the
+                <methodname>commit()</methodname> is called for the
+                <classname>FieldGroup</classname>.
+            </para>
             <!-- TODO Vaadin 7 -->
         </section>
     </section>
