@@ -890,6 +890,148 @@ form.addComponent(binder.buildAndBind("Age", "age"));]]></programlisting>
             </para>
             <!-- TODO Vaadin 7 -->
         </section>
+
+        <section xml:id="datamodel.itembinding.beans">
+            <title>Binding Fields to a Bean</title>
+
+            <para>
+                The <classname>BeanFieldGroup</classname> makes it easier to bind fields
+                to a bean. It also handles binding to nested beans properties.
+            </para>
+
+            <para>
+                The input can be validated using the Java Bean Validation API, as
+                described in <xref linkend="datamodel.itembinding.beanvalidation"/>.
+            </para>
+        </section>
+
+        <section xml:id="datamodel.itembinding.beanvalidation">
+            <title>Bean Validation</title>
+
+            <para>
+                Vaadin allows using the Java Bean Validation API 1.0 (JSR-303) for
+                validating input from fields bound to bean properties before the values
+                are committed to the bean. The validation is done based on annotations on
+                the bean properties.
+            </para>
+            
+            <para>
+                Using bean validation requires an implementation of the Bean Validation
+                API, such as Hibernate Validator
+                (<filename>hibernate-validator-4.2.0.Final.jar</filename> or later) or
+                Apache Bean Validation. The implementation JAR must be included in the
+                project classpath when using the bean validation, or otherwise an internal
+                error is thrown.
+            </para>
+            
+            <para>
+                Bean validation is especially useful when persisting entity beans with the
+                Vaadin JPAContainer, described in <xref linkend="jpacontainer"/>.
+            </para>
+
+            <section xml:id="datamodel.itembinding.beanvalidation.annotations">
+                <title>Annotations</title>
+
+                <para>
+                    The validation constraints are defined as annotations. For example,
+                    consider the following bean:
+                </para>
+
+                <programlisting><?pocket-size 65% ?><![CDATA[// Here is a bean
+public class Person implements Serializable {
+    @NotNull
+    @javax.validation.constraints.Size(min=2, max=10)
+    String name;
+    
+    @Min(1)
+    @Max(130)
+    int age;
+    
+    // ... setters and getters ...
+}]]></programlisting>
+
+                <para>
+                    For a complete list of allowed constraints for different data types,
+                    please see the <link
+                    xlink:href="http://docs.oracle.com/javaee/6/tutorial/doc/gircz.html">Bean
+                    Validation API documentation</link>.
+                </para>
+            </section>
+
+            <section xml:id="datamodel.itembinding.beanvalidation.validating">
+                <title>Validating the Beans</title>
+
+                <para>
+                    Validating a bean is done with a <classname>BeanValidator</classname>,
+                    which you initialize with the name of the bean property it should
+                    validate and add it the the editor field.
+                </para>
+
+                <para>
+                    In the following example, we validate a single unbuffered field:
+                </para>
+
+                <programlisting><?pocket-size 65% ?><![CDATA[Person bean = new Person("Mung bean", 100);
+BeanItem<Person> item = new BeanItem<Person> (bean);
+    
+// Create an editor bound to a bean field
+TextField firstName = new TextField("First Name",
+        item.getItemProperty("name"));
+    
+// Add the bean validator
+firstName.addValidator(new BeanValidator(Person.class, "name"));
+    
+firstName.setImmediate(true);
+layout.addComponent(firstName);]]></programlisting>
+
+                <para>
+                    In this case, the validation is done immediately after focus leaves
+                    the field. You could do the same for the other field as well.
+                </para>
+
+                <para>
+                    Bean validators are automatically created when using a
+                    <classname>BeanFieldGroup</classname>.
+                </para>
+
+                <programlisting><?pocket-size 65% ?><![CDATA[// Have a bean
+Person bean = new Person("Mung bean", 100);
+        
+// Form for editing the bean
+final BeanFieldGroup<Person> binder =
+        new BeanFieldGroup<Person>(Person.class);
+binder.setItemDataSource(bean);
+layout.addComponent(binder.buildAndBind("Name", "name"));
+layout.addComponent(binder.buildAndBind("Age", "age"));
+
+// Buffer the form content
+binder.setBuffered(true);
+layout.addComponent(new Button("OK", new ClickListener() {
+    @Override
+    public void buttonClick(ClickEvent event) {
+        try {
+            binder.commit();
+        } catch (CommitException e) {
+        }
+    }
+}));]]></programlisting>
+            </section>
+
+            <section xml:id="datamodel.itembinding.beanvalidation.locale">
+                <title>Locale Setting for Bean Validation</title>
+
+                <para>
+                    The validation error messages are defined in the bean validation
+                    implementation, in a
+                    <filename>ValidationMessages.properties</filename> file. The message
+                    is shown in the language specified with the locale setting for the
+                    form. The default language is English, but for example Hibernate
+                    Validator contains translations of the messages for a number of
+                    languages. If other languages are needed, you need to provide a
+                    translation of the properties file.
+                </para>
+            </section>
+        </section>
     </section>
 
 	<section xml:id="datamodel.container">
