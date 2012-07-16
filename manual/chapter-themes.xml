@@ -52,9 +52,9 @@
 
 		<para>
 			The name of a theme folder defines the name of the theme. The name is used in
-			the <methodname>setTheme()</methodname> call. A theme must contain the
-			<filename>styles.css</filename> stylesheet, but other contents have free
-			naming. We suggest a convention for naming the folders as
+			the <literal>@Theme</literal> annotation that sets the theme. A theme must
+			contain the <filename>styles.css</filename> stylesheet, but other contents
+			have free naming. We suggest a convention for naming the folders as
 			<filename>img</filename> for images, <filename>layouts</filename> for custom
 			layouts, and <filename>css</filename> for additional stylesheets.
 		</para>
@@ -68,22 +68,21 @@
 		</para>
 
 		<para>
-			You use a theme with a simple <methodname>setTheme()</methodname> method call
-			for the <classname>Application</classname> object as follows:
+			You use a theme with by specifying it with the <literal>@Theme</literal>
+			annotation for the &root; class of the application as follows:
 		</para>
 
-		<programlisting><![CDATA[public class MyApplication
-       extends com.vaadin.Application {
-    public void init() {
-        setTheme("demo");
+		<programlisting><![CDATA[@Theme("mytheme")
+public class MyRoot extends Root {
+    @Override
+    protected void init(WrappedRequest request) {
         ...
     }
 }]]></programlisting>
 
 		<para>
-			An application can use different themes for different users and switch between
-			themes during execution. For smaller changes, a theme can contain alternate
-			styles for user interface components, which can be changed as needed.
+			A theme can contain alternate styles for user interface components, which can
+			be changed as needed.
 		</para>
 
 		<para>
@@ -99,8 +98,6 @@
 			as images, for example in <classname>Embedded</classname> objects and other
 			objects that allow inclusion of images using resources.
 		</para>
-
-		<programlisting><![CDATA[]]></programlisting>
 	</section>
 
 	<section xml:id="themes.css">
@@ -844,9 +841,9 @@ td.another {background: yellow;}]]></programlisting>
 
 			<para>
 				Vaadin currently includes two built-in themes: <literal>reindeer</literal>
-				and <literal>runo</literal>. The latter is the default theme for IT Mill
-				Toolkit 5 (where its name is "default"); the default theme in Vaadin 6.0
-				is <literal>reindeer</literal>.
+				and <literal>runo</literal>. The default theme in Vaadin 6 and 7 is
+				<literal>reindeer</literal>. The <literal>runo</literal> was the default
+				theme for IT Mill Toolkit 5 (where its name was "default").
 			</para>
 					
 			<para>
@@ -865,18 +862,22 @@ td.another {background: yellow;}]]></programlisting>
                 mostly special style names for specific components.
             </para>
 
-            <programlisting><?pocket-size 65% ?><![CDATA[setTheme("runo");
+            <programlisting><?pocket-size 65% ?><![CDATA[@Theme("runo")
+public class MyRoot extends Root {
+    @Override
+    protected void init(WrappedRequest request) {
+        ...      
+        Panel panel = new Panel("Regular Panel in the Runo Theme");
+        panel.addComponent(new Button("Regular Runo Button"));
         
-Panel panel = new Panel("Regular Panel in the Runo Theme");
-panel.addComponent(new Button("Regular Runo Button"));
-        
-// A button with the "small" style
-Button smallButton = new Button("Small Runo Button");
-smallButton.addStyleName(Runo.BUTTON_SMALL);
+        // A button with the "small" style
+        Button smallButton = new Button("Small Runo Button");
+        smallButton.addStyleName(Runo.BUTTON_SMALL);
 
-Panel lightPanel = new Panel("Light Panel");
-lightPanel.addStyleName(Runo.PANEL_LIGHT);
-lightPanel.addComponent(new Label("With addStyleName(\"light\")"));]]></programlisting>
+        Panel lightPanel = new Panel("Light Panel");
+        lightPanel.addStyleName(Runo.PANEL_LIGHT);
+        lightPanel.addComponent(new Label("With addStyleName(\"light\")"));
+        ...]]></programlisting>
 
             <para>
                 The example with the Runo theme is shown in <xref linkend="figure.themes.creating.default.runo"/>.
@@ -914,20 +915,10 @@ lightPanel.addComponent(new Label("With addStyleName(\"light\")"));]]></programl
 			<title>Using Themes</title>
 
 			<para>
-				Using a theme is simple, you only need to set the theme with
-				<methodname>setTheme()</methodname> in the application object. The Eclipse
-				wizard for creating custom Vaadin themes automatically adds such call in
-				the <methodname>init()</methodname> method of the application class, as
-				explained in <xref linkend="themes.eclipse"/>.
+				Using a theme is simple, you just set it for a
+				<classname>&rootclass;</classname> class with the
+				<literal>@Theme</literal> annotation.
 			</para>
-
-			<para>
-				Defining the appearance of a user interface component is fairly
-				simple. First, you create a component and add a custom style name for it
-				with <methodname>addStyleName()</methodname>. Then you write the CSS
-				element that defines the formatting for the component.
-			</para>
-
 		</section>
 
 		<section xml:id="themes.creating.inheritance">
@@ -935,7 +926,7 @@ lightPanel.addComponent(new Label("With addStyleName(\"light\")"));]]></programl
 
 			<para>
 				When you define your own theme, you will need to inherit a built-in theme
-				(unless you just copy the built-in theme).
+				(unless you just copy the built-in theme, which is not recommended).
 			</para>
 
 			<para>
@@ -951,60 +942,12 @@ lightPanel.addComponent(new Label("With addStyleName(\"light\")"));]]></programl
 }]]></programlisting>
 
 			<para>
-				You can even create a deep hierarchy of themes by inheritance. Such a
-				solution is often useful if you have some overall theme for your
-				application and a slightly modified theme for different user classes. You
-				can even make it possible for each user to have his or her own theme.
+				You can even create a deep hierarchy of themes by inheritance.
 			</para>
-
-			<para>
-				For example, let us assume that we have the base theme of an application
-				with the name <classname>myapp</classname> and a specific
-				<classname>myapp-student</classname> theme for users with the student
-				role. The stylesheet of the base theme would be located in
-				<filename>themes/myapp/styles.css</filename>. We can then "inherit" it in
-				<filename>themes/myapp-student/styles.css</filename> with a simple
-				<literal>@import</literal> statement:
-			</para>
-
-			<programlisting><![CDATA[@import "../myapp/styles.css";
-
-.v-app {
-    background: green;
-}]]></programlisting>
-
-			<para>
-				This would make the page look just as with the base theme, except for the
-				green background. You could use the theme inheritance as follows:
-			</para>
-
-		<programlisting><?pocket-size 70% ?><![CDATA[public class MyApplication extends com.vaadin.Application {
-    
-    public void init() {
-        setTheme("myapp");
-        ...
-    }
-
-    public void login(User user) {
-        if (user.role == User.ROLE_STUDENT)
-            setTheme("myapp-student");
-        ...
-    }
-
-    public void logout() {
-        setTheme("myapp");
-        ...
-    }
-}]]></programlisting>
-
-			<para>
-				In the above example, the <classname>User</classname> class is an
-				imaginary class assumed to hold user information.
-			</para>
-
 		</section>
 	</section>
 
+    <!-- TODO Vaadin 7: SASS?
 	<section xml:id="themes.sass">
 		<title>Themeing with SASS</title>
 
@@ -1025,12 +968,10 @@ lightPanel.addComponent(new Label("With addStyleName(\"light\")"));]]></programl
                 following, we give just basic introduction to using it with Vaadin.
             </para>
 
-            <!-- TODO
             <para>
                 You can create a new SASS-based theme with the Eclipse plugin, as
                 described in <xref linkend="themes.eclipse"/>.
             </para>
-            -->
         </section>
 
         <section xml:id="themes.sass.servlet">
@@ -1054,6 +995,7 @@ lightPanel.addComponent(new Label("With addStyleName(\"light\")"));]]></programl
             </para>
         </section>
     </section>
+    -->
 
 	<section xml:id="themes.eclipse">
 		<title>Creating a Theme in Eclipse</title>
@@ -1191,17 +1133,15 @@ lightPanel.addComponent(new Label("With addStyleName(\"light\")"));]]></programl
 		<para>
 			If you selected an application class or classes in the <guilabel>Modify
 			application classes to use theme</guilabel> in the theme wizard, the wizard
-			will add the following line at the end of the <methodname>init()</methodname>
-			method of the application class(es):
-		</para>
-
-		<programlisting><?pocket-size 75% ?><![CDATA[setTheme("myprojecttheme");]]></programlisting>
+			will add the <literal>@Theme</literal> annotation to the application &root;
+			class.
+        </para>
 
 		<para>
-			Notice that renaming a theme by changing the name of the folder will not
-			change the <methodname>setTheme()</methodname> calls in the application
-			classes or vise versa. You need to change such references to theme names in
-			the calls manually.
+			If you later rename the theme in Eclipse, notice that changing the name of the
+			folder will not automatically change the <literal>@Theme</literal>
+			annotation. You need to change such references to theme names in the calls
+			manually.
 		</para>
 	</section>
 

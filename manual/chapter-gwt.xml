@@ -10,10 +10,10 @@
     <indexterm><primary>widgets</primary></indexterm>
 
 	<para>
-		This chapter describes how you can create custom client-side components as Google
-		Web Toolkit (GWT) widgets or JavaScript components and how you integrate them with
-		Vaadin. The client-side implementations of all standard user interface components
-		in Vaadin use the same client-side interfaces and patterns.
+		This chapter describes how you can create new client-side components (widgets) or
+		JavaScript components and how you can integrate them with server-side
+		components. The client-side implementations of all standard user interface
+		components in Vaadin use the same client-side interfaces and patterns.
 	</para>
 
 	<note>
@@ -23,10 +23,8 @@
 
             Google Web Toolkit uses the term <emphasis>widget</emphasis> for user
             interface components. In this book, we use the term widget to refer to
-            client-side components made with <indexterm><primary>Google Web
-            Toolkit</primary></indexterm>Google Web Toolkit, while using the term
-            <emphasis>component</emphasis> in a general sense and also in the special
-            sense for server-side components.
+            client-side components, while using the term <emphasis>component</emphasis> in
+            a general sense and also in the special sense for server-side components.
 		</para>
 	</note>
 
@@ -97,122 +95,6 @@
         </simplesect>
     </section>
 
-    <section xml:id="gwt.layout">
-        <title>Handling Layouts</title>
-
-        <section xml:id="gwt.sizes">
-            <title>Handling Sizes</title>
-        </section>
-
-        <section xml:id="gwt.layout.managed">
-            <title>Managed Layouts</title>
-
-            <para>
-                A <classname>ManagedLayout</classname> is the most versatile, and at the
-                same time the heaviest, way to lay out widgets.
-            </para>
-        </section>
-    </section>
-
-    <section xml:id="gwt.addons">
-        <title>Creating Add-ons</title>
-
-        <indexterm xml:id="term.gwt.addons" class="startofrange" significance="preferred">
-            <primary>add-ons</primary>
-            <secondary>creating</secondary>
-        </indexterm>
-
-        <para>
-        </para>
-
-        <indexterm startref="term.gwt.addons" class="endofrange"/>
-    </section>
-
-    <section xml:id="gwt.vaadin-6-migration">
-        <title>Migrating from Vaadin 6</title>
-
-        <indexterm xml:id="term.gwt.vaadin-6-migration" class="startofrange" significance="preferred">
-            <primary>Vaadin 6 Migration</primary>
-            <secondary>add-ons</secondary>
-        </indexterm>
-
-        <para>
-            The client-side architecture was redesigned almost entirely in Vaadin 7. In
-            Vaadin 6, state synchronization was done explicitly by serializing and
-            deserializing the state on the server- and client-side. In Vaadin 7, the
-            serialization is handled automatically by the framework using state objects.
-        </para>
-        
-        <para>
-            In Vaadin 6, a server-side component serialized its state to the client-side
-            using the <interfacename>Paintable</interfacename> interface and deserialized
-            the state through the <interfacename>VariableOwner</interfacename>
-            interface. In Vaadin 7, these are done through the
-            <interfacename>ClientConnector</interfacename> interface.
-        </para>
-
-        <para>
-            On the client-side, a widget deserialized its state through the
-            <interfacename>Paintable</interfacename> interface and sent state changes
-            through the <interfacename>ApplicationConnection</interfacename> object. In
-            Vaadin 7, these are replaced with the
-            <interfacename>ServerConnector</interfacename>.
-        </para>
-
-        <para>
-            In addition to state synchronization, Vaadin 7 has an RPC mechanism that can
-            be used for communicating events. They are especially useful for events that
-            are not associated with a state change, such as a button click.
-        </para>
-
-        <para>
-            The framework ensures that the connector hierarchy and states are up-to-date
-            when listeners are called.
-        </para>
-
-        <section xml:id="gwt.vaadin-6-migration.quick">
-            <title>Quick (and Dirty) Migration</title>
-
-            <para>
-                Vaadin 7 has a compatibility layer that allows quick conversion of a widget.
-            </para>
-
-            <orderedlist>
-                <listitem>
-                    <para>
-                        Create a connector class, such as
-                        <classname>MyConnector</classname>, that extends
-                        <classname>Vaadin6Connector</classname>. Implement the
-                        <methodname>createWidget()</methodname> method as
-                        <literal>GWT.create(MyWidget.class)</literal>.
-                    </para>
-                </listitem>
-                <listitem>
-                    <para>
-                        Move the <literal>@ClientWidget(MyWidget.class)</literal> from the
-                        server-side component, say <classname>MyComponent</classname>, to
-                        the <classname>MyConnector</classname> class and make it
-                        <literal>@Connect(MyComponent.class)</literal>.
-                    </para>
-                </listitem>
-                <listitem>
-                    <para>
-                        Have the server-side component implement the
-                        <interface>Vaadin6Component</interface> interface to enable
-                        compatibility handling.
-                    </para>
-                </listitem>
-                <listitem>
-                    <para>
-                        Remove any calls to <literal>super.paintContent()</literal>
-                    </para>
-                </listitem>
-            </orderedlist>
-        </section>
-
-        <indexterm startref="term.gwt.vaadin-6-migration" class="endofrange"/>
-    </section>
-
     <section xml:id="gwt.eclipse">
         <title>Starting It Simple With Eclipse</title>
 
@@ -222,14 +104,14 @@
         </indexterm>
 
 		<para>
-			While you can develop new widgets with any IDE or even without, you may find
-			Eclipse and the Vaadin Plugin for it useful, as it automates all the basic
-			routines of widget development, most importantly the creation of new widgets.
+            Let us first take the easy way and create a simple component with Eclipse.
+            While you can develop new widgets with any IDE or even without, you may find
+            Eclipse and the Vaadin Plugin for it useful, as it automates all the basic
+            routines of widget development, most importantly the creation of new widgets.
 		</para>
 
 		<section xml:id="gwt.eclipse.widget">
 			<title>Creating a Widget</title>
-
 
             <orderedlisting>
                 <listitem>
@@ -485,6 +367,1440 @@
         </section>
 
         <indexterm startref="term.gwt.eclipse" class="endofrange"/>
+    </section>
+
+    <section xml:id="gwt.widget">
+        <title>Creating a Widget</title>
+
+        <para>
+            Creating a new Vaadin component begins from a client-side widget, which is
+            later integrated with a server-side counterpart to enable server-side
+            development. In addition, you can also choose to make pure client-side
+            widgets, a possibility which we also describe later in this section.
+        </para>
+
+        <section xml:id="gwt.widget.simple">
+            <title>A Basic Widget</title>
+
+            <para>
+                All widgets extend the GWT <classname>Widget</classname> class or some of
+                its subclasses. You can extend any GWT or Vaadin widgets. The basic GWT
+                widget component hierarchy is illustrated in <xref
+                linkend="figure.gwt.widgets"/> .
+            </para>
+
+            <figure xml:id="figure.gwt.widgets">
+                <title>GWT Widget Base Class Hierarchy</title>
+                <mediaobject>
+                    <imageobject role="html">
+                        <imagedata align="center" fileref="img/gwt/gwt-widgets-lo.png"/>
+                    </imageobject>
+                    <imageobject role="fo">
+                        <imagedata scale="60" smallscale="100%" align="center" fileref="img/gwt/gwt-widgets-hi.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+
+            <para>
+                For example, we could extend the GWT <classname>Label</classname> to
+                display some custom text.
+            </para>
+
+            <programlisting><?pocket-size 75% ?><![CDATA[package com.example.myapp.client;
+
+import com.google.gwt.user.client.ui.Label;
+
+public class MyWidget extends Label {
+    public static final String CLASSNAME = "mywidget";
+
+    public MyWidget() {
+        setStyleName(CLASSNAME);
+        setText("This is MyWidget");
+    }
+}]]></programlisting>
+
+            <para>
+                The above example is largely what the Eclipse plugin generates as a widget
+                stub. It is a good practice to set a style class for the widget, to allow
+                styling it with CSS.
+            </para>
+
+            <para>
+                The client-side source code <emphasis>must</emphasis> be contained in a
+                <filename>client</filename> package under the package of the descriptor
+                file, which is covered later.
+            </para>
+        </section>
+
+        <section xml:id="gwt.widget.clientside-application">
+            <title>Creating a Pure Client-Side Application</title>
+
+            <para>
+                Widgets can be used on their own in a pure client-side application,
+                without a server-side Vaadin application. Such applications are useful
+                when retrieving or storing data in a server is not necessary.
+            </para>
+
+            <para>
+                Even with regular server-side Vaadin applications, it may be useful to
+                provide an off-line mode if the connection is closed. An off-line mode can
+                persist data in a local store in the browser, thereby avoiding the need
+                for server-side storage, and transmit the data to the server when the
+                connection is again available. Such pattern is commonly used with Vaadin
+                TouchKit, as described in <xref linkend="mobile"/>.
+            </para>
+           
+            <section xml:id="gwt.widget.clientside-application.entrypoint">
+                <title>Entry-Point</title>
+
+                <para>
+                    A client-side application requires an
+                    <emphasis>entry-point</emphasis> where the execution starts, much like an
+                    <methodname>init()</methodname> method in regular Vaadin applications.
+                </para>
+
+                <programlisting><![CDATA[package com.example.myapp.client;
+
+import com.google.gwt.core.client.EntryPoint;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.ui.RootPanel;
+import com.vaadin.terminal.gwt.client.ui.button.VButton;
+
+public class MyEntryPoint implements EntryPoint {
+    @Override
+    public void onModuleLoad() {
+        // Use the custom widget
+        final MyWidget mywidget = new MyWidget();
+        RootPanel.get().add(mywidget);
+
+        // Add a Vaadin button
+        VButton button = new VButton();
+        button.setText("Click me!");
+        button.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                mywidget.setText("Clicked!");
+            }
+        });
+        
+        RootPanel.get().add(button);
+    }
+}]]></programlisting>
+            </section>
+
+            <section xml:id="gwt.widget.clientside-application.descriptor">
+                <title>Module Descriptor</title>
+
+                <para>
+                    The entry-point is defined, along with any other
+                    configuration, in a <emphasis>GWT module descriptor</emphasis>. The
+                    descriptor is an XML file with suffix <filename>.gwt.xml</filename>.
+                </para>
+
+                <programlisting><?pocket-size 65% ?><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE module PUBLIC
+    "-//Google Inc.//DTD Google Web Toolkit 1.7.0//EN"
+    "http://google-web-toolkit.googlecode.com/svn/tags/1.7.0/distro-source/core/src/gwt-module.dtd">
+<module>
+    <!-- Inherit the core Vaadin and GWT widgets -->
+    <inherits name="com.vaadin.Vaadin" />
+
+    <!-- The entry-point for the client-side application -->
+    <entry-point class="com.example.myapp.client.MyEntryPoint"/>
+</module>]]></programlisting>
+
+                <para>
+                    Any static resources, such as images or CSS stylesheets, must be
+                    contained in a <filename>public</filename> folder (not a Java package)
+                    under the folder of the descriptor file.
+                </para>
+            </section>
+
+            <section xml:id="gwt.widget.clientside-application.compiling">
+                <title>Compiling</title>
+
+                <para>
+                    The application needs to be compiled with the GWT Compiler into
+                    JavaScript. We cover the details of the GWT compilation later, but
+                    compiling pure client-side applications is a bit different as there is
+                    no widget set.
+                </para>
+
+                <para>
+                    Probably the easiest way to compile a client-side application is to
+                    use the GWT Development Mode, which also allows debugging. You need to
+                    execute the <classname>com.google.gwt.dev.DevMode</classname> class in
+                    the Vaadin JAR with the following parameters:
+                </para>
+
+                <programlisting><![CDATA[-noserver -war warname com.example.myapp.MyModule
+-startupUrl http://localhost:8080/myproject
+warname -bindAddress 127.0.0.1]]></programlisting>
+            </section>
+
+            <section xml:id="gwt.widget.clientside-application.executing">
+                <title>Executing</title>
+
+                <para>
+                    You can use the JavaScript code of a pure client-side application in a
+                    HTML page for example as follows:
+                </para>
+
+                <programlisting><?pocket-size 65% ?><![CDATA[<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type"
+          content="text/html; charset=UTF-8" />
+
+    <title>Embedding a Vaadin Application in HTML Page</title>
+
+    <!-- Load the Vaadin style sheet -->
+    <link rel="stylesheet"
+          type="text/css"
+          href="/myproject/VAADIN/themes/reindeer/styles.css"/>
+  </head>
+
+  <body>
+    <h1>A Pure Client-Side Application</h1>
+    
+    <script type="text/javascript" language="javascript"
+            src="com.example.myapp.MyModule/com.example.myapp.MyModule.nocache.js"></script>
+  </body>
+</html>]]></programlisting>
+
+                <para>
+                    The JavaScript module is loaded in a <literal>&lt;script&gt;</literal>
+                    element. The <literal>src</literal> parameter should be a relative
+                    link from the page to the compiled JavaScript module.
+                </para>
+
+                <para>
+                    If the application uses Vaadin widgets, and not just GWT core widgets,
+                    you need to include the Vaadin theme as was done in the example. The
+                    exact path to the style file depends on your project structure - the
+                    example is given for a regular Vaadin application where themes are
+                    contained in the <filename>VAADIN</filename> folder in the WAR.
+                </para>
+            </section>
+        </section>
+    </section>
+
+    <section xml:id="gwt.server-side">
+        <title>Creating a Server-Side Component</title>
+
+        <para>
+            Normal server-side Vaadin applications interface with a server-side component
+            that is rendered on the client-side using the widget counterpart. A
+            server-side component must manage state synchronization between the widget on
+            the client-side, in addition to any server-side logic.
+        </para>
+
+        <section xml:id="gwt.server-side.basic">
+            <title>Basic Server-Side Component</title>
+
+            <para>
+                The component state is usually managed by a <emphasis>shared
+                state</emphasis>, described later in <xref linkend="gwt.shared-state"/>.
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[public class MyComponent extends AbstractComponent {
+    public MyComponent() {
+        getState().setText("This is MyComponent");
+    }
+
+    @Override
+    public MyComponentState getState() {
+        return (MyComponentState) super.getState();
+    }
+}]]></programlisting>
+
+        </section>
+    </section>
+
+    <section xml:id="gwt.connector">
+        <title>Integrating the Two Sides with a Connector</title>
+
+        <para>
+            A client-side widget is integrated with a server-side component with a
+            <emphasis>connector</emphasis>. A connector is a client-side class that
+            communicates changes to the widget state and events to the server-side.
+        </para>
+
+        <section xml:id="gwt.connector.basic">
+            <title>A Basic Connector</title>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[@Connect(MyComponent.class)
+public class MyComponentConnector extends AbstractComponentConnector {
+    public MyComponentConnector() {    
+        registerRpc(MyComponentClientRpc.class, new MyComponentClientRpc() {
+            public void alert(String message) {
+            	// TODO Do something useful
+                Window.alert(message);
+            }
+        });
+
+		// TODO ServerRpc usage example, do something useful instead
+        getWidget().addClickHandler(new ClickHandler() {
+            public void onClick(ClickEvent event) {
+                final MouseEventDetails mouseDetails = MouseEventDetailsBuilder
+                        .buildMouseEventDetails(event.getNativeEvent(),
+                                getWidget().getElement());
+                rpc.clicked(mouseDetails);
+            }
+        });
+    }
+
+    @Override
+    protected Widget createWidget() {
+        return GWT.create(MyComponentWidget.class);
+    }
+
+    @Override
+    public MyComponentWidget getWidget() {
+        return (MyComponentWidget) super.getWidget();
+    }
+
+    @Override
+    public MyComponentState getState() {
+        return (MyComponentState) super.getState();
+    }
+
+    @Override
+    public void onStateChanged(StateChangeEvent stateChangeEvent) {
+        super.onStateChanged(stateChangeEvent);
+		
+		// TODO do something useful
+        final String text = getState().getText();
+        getWidget().setText(text);
+    }
+
+}]]></programlisting>
+        </section>
+    </section>
+
+    <section xml:id="gwt.shared-state">
+        <title>Sharing State</title>
+
+        <para>
+            The basic synchronization between the client-side widget and its server-side
+            counterpart is handled using a <emphasis>shared state</emphasis>. The shared
+            state is serialized transparently and communicated to the other side.
+        </para>
+
+        <para>
+            A shared state object simply needs to extend the
+            <classname>ComponentState</classname>. It should contain setters and getters
+            for the properties that are to be synchronized.
+        </para>
+
+        <programlisting><?pocket-size 65% ?><![CDATA[public class MyComponentState extends ComponentState {
+    private String text;
+
+    public String getText() {
+        return text;
+    }
+
+    public void setText(String text) {
+        this.text = text;
+    }
+}]]></programlisting>
+
+        <section xml:id="gwt.shared-state.component">
+            <title>Handling Shared State on Server-Side</title>
+
+            <para>
+                A server-side component can access the shared state with the
+                <methodname>getState()</methodname> method, which returns the
+                <classname>ComponentState</classname> object of the shared state type of
+                the component.
+            </para>
+
+            <para>
+                To prevent casting the shared state object every time, it is recommended
+                that you override the base implementation with one that returns the proper
+                shared state type, as follows:
+            </para>
+
+            <programlisting><![CDATA[@Override
+public MyComponentState getState() {
+    return (MyComponentState) super.getState();
+}]]></programlisting>
+
+            <para>
+                You can then use the <methodname>getState()</methodname> to access the
+                shared state object with the proper type.
+            </para>
+
+            <programlisting><![CDATA[public MyComponent() {
+    getState().setText("This is the initial state");
+    ....
+}]]></programlisting>
+
+            <para>
+                After you make changes to the shared state object in the server-side
+                component, you need to call <methodname>requestRepaint()</methodname> to
+                inform the framework that the state has changed and the client-side widget
+                needs to be repainted by synchronizing the state.
+            </para>
+
+            <para>
+                For example, the server-side component could offer a setter for a
+                component property, which delegates the property to the shared state
+                object and requests the repaint:
+            </para>
+
+            <programlisting><![CDATA[void setText(String text) {
+    // update shared state
+    getState().setText(text);
+    requestRepaint();
+}]]></programlisting>
+        </section>
+
+        <section xml:id="gwt.shared-state.connector">
+            <title>Handing Shared State in a Connector</title>
+
+            <para>
+                A connector can access the shared state with the
+                <methodname>getState()</methodname> method. To prevent casting the shared
+                state object every time, it is recommended that you override the base
+                implementation with one that returns the proper shared state type, as
+                follows:
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[@Override
+public MyComponentState getState() {
+    return (MyComponentState) super.getState();
+}]]></programlisting>
+
+            <para>
+                State changes made on the server-side are communicated transparently to
+                the client-side. When a state change occurs, the
+                <methodname>onStateChanged()</methodname> method in the connector is
+                called. You should should always call the superclass method before
+                anything else to handle changes to common component properties.
+            </para>
+                
+            <programlisting><?pocket-size 65% ?><![CDATA[@Override
+public void onStateChanged(StateChangeEvent stateChangeEvent) {
+    super.onStateChanged(stateChangeEvent);
+		
+    // TODO do something useful
+    final String text = getState().getText();
+    getWidget().setText(text);
+}]]></programlisting>
+        </section>
+
+        <section xml:id="gwt.shared-state.component">
+            <title>Referring to Components in Shared State</title>
+
+            <para>
+                While you can pass any regular Java objects through a shared state,
+                referring to another component requires special handling because on the
+                server-side you can only refer to a server-side component, while on the
+                client-side you only have widgets. References to components can be made by
+                referring to their connectors, which are shared.
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[public class MyComponentState extends ComponentState {
+    private Connector otherComponent;
+
+    public Connector getOtherComponent() {
+        return otherComponent;
+    }
+
+    public void setOtherComponent(Connector otherComponent) {
+        this.otherComponent = otherComponent;
+    }
+}]]></programlisting>
+
+            <para>
+                You could then access the component on the server-side as follows:
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[public class MyComponent {
+    public void MyComponent(Component otherComponent) {
+        getState().setOtherComponent(otherComponent);
+    }
+
+    public Component getOtherComponent() {
+        return (Component)getState().getOtherComponent();
+    }
+
+    // And the cast method
+    @Override
+    public MyComponentState getState() {
+        return (MyComponentState) super.getState();
+    }
+}]]></programlisting>
+
+            <para>
+                On the client-side, you should cast it in a similar fashion to a
+                <classname>ComponentConnector</classname>, or possibly to the specific
+                connector type if it is known.
+            </para>
+        </section>
+
+        <section xml:id="gwt.shared-state.resource">
+            <title>Sharing Resources</title>
+
+            <para>
+                Resources, which commonly are references to icons or other images, are
+                another case of objects that require special handling in sharing. A
+                <interfacename>Resource</interfacename> object exists only on the
+                server-side and on the client-side you have an URL to the resource. The
+                shared state object needs to pass the reference as a
+                <classname>URLReference</classname> object.
+            </para>
+
+            <programlisting><![CDATA[public class MyState extends ComponentState {
+    private URLReference myIcon;
+
+    public URLReference getMyIcon() {
+        return icon;
+    }
+
+    public void setMyIcon(URLReference myIcon) {
+        this.myIcon = myIcon;
+    }
+}]]></programlisting>
+
+            <para>
+                On the server-side, you can set the reference as a
+                <classname>ResourceReference</classname> object, which creates the URL for
+                the resource object given to the constructor as follows:
+            </para>
+
+            <programlisting><![CDATA[getState().setMyIcon(new ResourceReference(myResource));]]></programlisting>
+
+            <para>
+                It is normally meaningful only to set the resource on the server-side and
+                then access it on the client-side. If you for some reason need to access
+                it on the server-side, you need to cast the
+                <classname>URLReference</classname> to the
+                <classname>ResourceReference</classname> that exists on the server-side,
+                and get the <interfacename>Resource</interfacename> object with
+                <methodname>getResource()</methodname>.
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[ResourceReference ref =
+    ((ResourceReference) getState().getMyIcon());
+if (ref != null) {
+    Resource resource = ref.getResource();
+    ...
+}]]></programlisting>
+
+            <para>
+                The URL for the resource can be accessed on the client-side with the
+                <methodname>getURL()</methodname> method.
+            </para>
+
+            <programlisting><?pocket-size 75% ?><![CDATA[String url = getState().getMyIcon().getURL();]]></programlisting>
+        </section>
+    </section>
+
+    <section xml:id="gwt.rpc">
+        <title>RPC Calls Between Client- and Server-Side</title>
+
+        <para>
+            Vaadin supports making Remote Procedure Calls (RPC) between a server-side
+            component and its client-side widget counterpart. RPC calls are normally used
+            for communicating stateless events, such as button clicks or other user
+            interaction, in contrast to changing the shared state. Either party can make
+            an RPC call to the other side. When a client-side widget makes a call, a
+            server request is made. Calls made from the server-side to the client-side are
+            communicated in the response of the server request during which the call was
+            made.
+        </para>
+
+        <para>
+            If you use Eclipse and enable the "Full-Fledged" widget in the New Vaadin
+            Widget wizard, it automatically creates a component with an RPC stub.
+        </para>
+
+        <section xml:id="gwt.rpc.server-side">
+            <title>RPC Calls to the Server-Side</title>
+
+            <para>
+                RPC calls from the client-side to the server-side are made through an RPC
+                interface that extends the <interfacename>ServerRpc</interfacename>
+                interface. A server RPC interface simply defines any methods that can be
+                called through the interface.
+            </para>
+
+            <para>
+                For example:
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[public interface MyComponentServerRpc extends ServerRpc {
+    public void clicked(MouseEventDetails mouseDetails);
+}]]></programlisting>
+
+            <para>
+                The above example defines a single <methodname>clicks()</methodname> RPC
+                call, which takes a <classname>MouseEventDetails</classname> object as the
+                parameter. You can pass any serializable Java objects in RPC calls and
+                Vaadin handles the serialization.
+            </para>
+
+            <section xml:id="gwt.rpc.server-side.calling">
+                <title>Making a Call</title>
+
+                <para>
+                    Before making a call, you need to instantiate the server RPC object
+                    with <methodname>RpcProxy.create()</methodname>. After that, you can
+                    make calls through the server RPC interface that you defined, for
+                    example as follows:
+                </para>
+
+                <programlisting><?pocket-size 65% ?><![CDATA[@Connect(MyComponent.class)
+public class MyComponentConnector
+       extends AbstractComponentConnector {
+
+    MyComponentServerRpc rpc = RpcProxy
+            .create(MyComponentServerRpc.class, this);
+
+    public MyComponentConnector() {
+        getWidget().addClickHandler(new ClickHandler() {
+            public void onClick(ClickEvent event) {
+                final MouseEventDetails mouseDetails =
+                     MouseEventDetailsBuilder
+                         .buildMouseEventDetails(
+                                 event.getNativeEvent(),
+                                 getWidget().getElement());
+
+                // Make the call
+                rpc.clicked(mouseDetails);
+            }
+        });
+    }
+}]]></programlisting>
+            </section>
+            
+            <section xml:id="gwt.rpc.server-side.handling">
+                <title>Handling a Call</title>
+
+                <para>
+                    RPC calls are handled in a server-side implementation of the server
+                    RPC interface. The call and its parameters are serialized and passed
+                    to the server in an RPC request transparently.
+                </para>
+
+                <programlisting><?pocket-size 65% ?><![CDATA[public class MyComponent extends AbstractComponent {
+    private MyComponentServerRpc rpc =
+    new MyComponentServerRpc() {
+        private int clickCount = 0;
+        
+        public void clicked(MouseEventDetails mouseDetails) {
+            Notification.show("Click from the client!");
+        }
+    };
+
+    public MyComponent() {
+        ...
+        registerRpc(rpc);
+    }
+}]]></programlisting>
+            </section>
+        </section>
+    </section>
+
+    <section xml:id="gwt.extension">
+        <title>Component and &rootclass; Extensions</title>
+
+        <para>
+            Adding features to existing components by extending them by inheritance
+            creates a problem when you want to combine such features. For example, one
+            add-on could add spell-check to a <classname>TextField</classname>, while
+            another could add client-side validation. Combining such add-on features would
+            be difficult if not impossible. You might also want to add a feature to
+            several or even to all components, but extending all of them by inheritance is
+            not really an option. Vaadin includes a component plug-in mechanism for these
+            purposes. Such plug-ins are simply called <emphasis>extensions</emphasis>.
+        </para>
+
+        <para>
+            Also a &root; can be extended in a similar fashion. In fact, some Vaadin
+            features such as notifications are &root; extensions.
+        </para>
+
+        <para>
+            Implementing an extension requires defining a server-side extension class and
+            a client-side connector. An extension can have a shared state with the
+            connector and use RPC, just like a component could.
+        </para>
+
+        <section xml:id="gwt.extension.server-side">
+            <title>Server-Side Extension API</title>
+
+            <para>
+                The server-side API for an extension consists of class that extends (in
+                the Java sense) the <classname>AbstractExtension</classname> class. It
+                needs to have an <emphasis>extend()</emphasis> method that takes the
+                extended component or &root; as a parameter and passes it to the
+                <emphasis>super.extend()</emphasis>.
+            </para>
+
+            <para>
+                For example, let us have a trivial example with an extension that takes no
+                special parameters:
+            </para>
+
+            <programlisting><?pocket-size 75% ?><![CDATA[public class CapsLockWarning extends AbstractExtension {
+    public void extend(PasswordField field) {
+        super.extend(field);
+    }
+}]]></programlisting>
+
+            <para>
+                The extension can then be added to a component as follows:
+            </para>
+
+            <programlisting><?pocket-size 75% ?><![CDATA[PasswordField password = new PasswordField("Give it");
+new CapsLockWarning().extend(password);
+layout.addComponent(password);]]></programlisting>
+
+            <para>
+                Adding a feature in such a "reverse" way is a bit unusual in the Vaadin
+                API, but allows type safety for extensions, as the method can limit the
+                target type to which the extension can be applied, and whether it is a
+                component or &root;.
+            </para>
+        </section>
+
+        <section xml:id="gwt.extension.connector">
+            <title>Extension Connectors</title>
+
+            <para>
+                An extension does not have a corresponding widget on the client-side, but
+                only an extension connector that extends the
+                <classname>AbstractExtensionConnector</classname> class. The server-side
+                extension class is specified with a <literal>@Connect</literal>
+                annotation, just like in component connectors.
+            </para>
+
+            <para>
+                An extension connector needs to implement the
+                <methodname>extend()</methodname> method, which allows hooking to the
+                extended component. The normal extension mechanism is to modify the
+                extended component as needed and add event handlers to it to handle user
+                interaction. A connector can share a state with the server-side extension
+                as well as make RPC calls just like with normal components.
+            </para>
+
+            <para>
+                In the following example, we implement a "Caps Lock warning" extension. It
+                listens for changes in the Caps Lock state and displays a floating warning
+                element over the extended component if the Caps Lock is on.
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[@Connect(CapsLockWarning.class)
+public class CapsLockWarningConnector
+        extends AbstractExtensionConnector {
+
+    @Override
+    protected void extend(ServerConnector target) {
+        // Get the extended widget
+        final Widget passwordWidget =
+                ((ComponentConnector) target).getWidget();
+
+        // Preparations for the added feature
+        final VOverlay warning = new VOverlay();
+        warning.add(new HTML("Caps Lock is enabled!"));
+
+        // Add an event handler
+        pw.addDomHandler(new KeyPressHandler() {
+            public void onKeyPress(KeyPressEvent event) {
+                if (isEnabled() && isCapsLockOn(event)) {
+                    warning.showRelativeTo(passwordWidget);
+                } else {
+                    warning.hide();
+                }
+            }
+        }, KeyPressEvent.getType());
+    }
+
+    private boolean isCapsLockOn(KeyPressEvent e) {
+        return e.isShiftKeyDown() ^
+               Character.isUpperCase(e.getCharCode());
+    }
+}]]></programlisting>
+
+            <para>
+                The <methodname>extend()</methodname> method gets the connector of the
+                extended component as the parameter, in the above example a
+                <classname>PasswordFieldConnector</classname>. It can access the widget
+                with the <methodname>getWidget()</methodname>.
+            </para>
+
+            <para>
+                An extension connector needs to be included in a widget set. The class
+                must therefore be defined under the <filename>client</filename> package of
+                a widget set, just like with component connectors.
+            </para>
+        </section>
+    </section>
+
+    <section xml:id="gwt.styling">
+        <title>Styling a Widget</title>
+
+        <para>
+            To make your widget look stylish, you need to style it. There are two basic
+            ways to define CSS styles for a component: in the widget sources and in a
+            theme. A default style should be defined in the widget sources, and different
+            themes can then modify the style.
+        </para>
+
+        <section xml:id="gwt.styling.class">
+            <title>Determining the CSS Class</title>
+
+            <para>
+                The CSS class of a widget element is normally defined in the widget class
+                and set with <methodname>setStyleName()</methodname>. A widget should set
+                the styles for its sub-elements as it desires.
+            </para>
+
+            <para>
+                For example, you could style a composite widget with an overall style and
+                with separate styles for the sub-widgets as follows:
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[public class MyPickerWidget extends ComplexPanel {
+    public static final String CLASSNAME = "mypicker";
+
+    private final TextBox textBox = new TextBox();
+    private final PushButton button = new PushButton("...");
+
+    public MyPickerWidget() {
+        setElement(Document.get().createDivElement());
+        setStylePrimaryName(CLASSNAME);
+
+        textBox.setStylePrimaryName(CLASSNAME + "-field");
+        button.setStylePrimaryName(CLASSNAME + "-button");
+
+        add(textBox, getElement());
+        add(button, getElement());
+
+        button.addClickHandler(new ClickHandler() {
+            public void onClick(ClickEvent event) {
+              Window.alert("Calendar picker not yet supported!");
+            }
+        });
+    }
+}]]></programlisting>
+
+            <para>
+                In addition, all Vaadin components get the <literal>v-connector</literal>
+                class. If it extends an existing Vaadin or GWT widget, it will inherit
+                CSS classes from that as well.
+            </para>
+        </section>
+
+        <section xml:id="gwt.styling.default">
+            <title>Default Stylesheet</title>
+
+            <para>
+                A client-side module, which is normally a widget set, can include
+                stylesheets. They must be placed under the <filename>public</filename>
+                folder under the folder of the widget set, a described in <xref
+                linkend="gwt.widgetset.stylesheet"/>.
+            </para>
+
+            <para>
+                For example, you could style the widget described above as follows:
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[.mypicker {
+	white-space: nowrap;
+}
+
+.mypicker-button {
+	display: inline-block;
+	border: 1px solid black;
+	padding: 3px;
+	width: 15px;
+	text-align: center;
+}]]></programlisting>
+
+            <para>
+                Notice that some size settings may require more complex handling and
+                calculating the sizes dynamically.
+            </para>
+        </section>
+        
+        <!--
+        <section xml:id="gwt.styling.sizing">
+            <title>Considerations Regarding Sizing</title>
+
+            <para>
+                Determining the size of a widget requires some consideration. When Vaadin
+                widgets are rendered as HTML, they all get the
+                <literal>v-connector</literal> CSS class, which sets the CSS 3 property
+                <literal>box-sizing: border-box</literal>. This causes the browser to
+                consider borders and paddings when it calculates the size of the
+                component. For example, if a component has <literal>5px</literal> padding
+                and <literal>100%</literal> width, and is placed inside a slot... WHAT??
+            </para>
+        </section>
+        -->
+
+        <!-- TODO
+        <section xml:id="gwt.styling.size-calculation">
+            <title>Calculating the Widget Size</title>
+
+            <para>
+                While using CSS is the preferred way to size and position your widgets, it
+                is not always possible.
+            </para>
+        </section>
+        -->
+    </section>
+
+    <section xml:id="gwt.componentcontainer">
+        <title>Component Containers</title>
+
+        <para>
+            Component containers, such as layout components, are a special group of
+            components that require some consideration. In addition to handling state,
+            they need to manage the serialization of their contained components to the
+            other side.
+        </para>
+
+        <para>
+            The easiest way to implement a component container is extend the
+            <classname>AbstractComponentContainer</classname>, which handles the
+            serialization of the container server-side components to the client-side.
+        </para>
+
+        <!-- TODO Vaadin 7: https://vaadin.com/wiki/-/wiki/Main/Creating%20a%20simple%20component%20container -->
+
+        <!-- TODO Vaadin 7
+        <section xml:id="gwt.layout">
+            <title>Handling Layouts</title>
+
+            <section xml:id="gwt.sizes">
+                <title>Handling Sizes</title>
+            </section>
+
+            <section xml:id="gwt.layout.managed">
+                <title>Managed Layouts</title>
+                
+                <para>
+                    A <classname>ManagedLayout</classname> is the most versatile, and at the
+                    same time the heaviest, way to lay out widgets.
+                </para>
+            </section>
+        </section>
+        -->
+    </section>
+    
+    <section xml:id="gwt.widgetset">
+        <title>Defining a Client-Side Module Descriptor</title>
+
+        <para>
+            Widget sets and other client-side modules are defined in a GWT
+            <emphasis>module descriptor</emphasis>, which is an XML file with
+            <filename>.gwt.xml</filename> suffix. The only necessary task is to inherit a
+            base widget set. If you are developing a regular widget set, you should
+            normally inherit the <classname>DefaultWidgetSet</classname>.
+        </para>
+
+        <programlisting><?pocket-size 65% ?><![CDATA[
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE module PUBLIC
+  "-//Google Inc.//DTD Google Web Toolkit 1.7.0//EN"
+  "http://google-web-toolkit.googlecode.com/svn/tags/1.7.0/distro-source/core/src/gwt-module.dtd">
+
+<module>
+    <!-- Inherit the default widget set -->
+    <inherits name="com.vaadin.terminal.gwt.DefaultWidgetSet" />
+</module>]]></programlisting>
+
+        <para>
+            If you are developing a pure client-side application, you should instead
+            inherit <classname>com.vaadin.Vaadin</classname>, as described in <xref
+                linkend="gwt.widget.clientside-application"/>. In that case, the module
+            descriptor also needs an entry-point.
+        </para>
+        
+        <para>
+            If you are using the Eclipse IDE, the New Vaadin Widget wizard will
+            automatically create the GWT module descriptor. See <xref
+                linkend="gwt.eclipse.widget"/> for detailed instructions.
+        </para>
+        
+        <section xml:id="gwt.widgetset.stylesheet">
+            <title>Specifying a Stylesheet</title>
+
+            <para>
+                Widgets can have CSS stylesheets. These stylesheets are compiled into
+                the widget set. In the module descriptor, define a
+                <literal>stylesheet</literal> element as follows:
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[    <!-- The default theme of this widget set -->	
+    <stylesheet src="mycomponent/styles.css"/>]]></programlisting>
+
+            <para>
+                The specified path is relative to the <emphasis>public</emphasis>
+                folder under the folder of the module descriptor.
+            </para>
+        </section>
+
+        <section xml:id="gwt.widgetset.compilation-limiting">
+            <title>Limiting Compilation Targets</title>
+                
+            <para>
+                Compiling widget sets takes considerable time. You can reduce the
+                compilation time significantly by compiling the widget sets only for
+                your browser, which is useful during development. You can do this by
+                setting the <parameter>user.agent</parameter> property in the module
+                descriptor.
+            </para>
+                
+            <programlisting><?pocket-size 75% ?><![CDATA[<set-property name="user.agent" value="gecko1_8"/>]]></programlisting>
+            
+            <para>
+                The <parameter>value</parameter> attribute should match your browser. The
+                browsers supported by GWT depend on the GWT version, below is a list of
+                browser identifiers supported by GWT 2.0.
+            </para>
+            
+            <table>
+                <title>GWT User Agents</title>
+                <tgroup cols="2" align="left">
+                    <thead>
+                        <row valign="top">
+                            <entry>Identifier</entry>
+                            <entry>Name</entry>
+                        </row>
+                    </thead>
+                    <tbody>
+                        <row valign="top">
+                            <entry>gecko1_8</entry>
+                            <entry>Mozilla Firefox 1.5 and later</entry>
+                        </row>
+                        <row valign="top">
+                            <entry>gecko</entry>
+                            <entry>Mozilla Firefox 1.0 (<emphasis>obsolete</emphasis>)</entry>
+                        </row>
+                        <row valign="top">
+                            <entry>ie6</entry>
+                            <entry>Internet Explorer 6</entry>
+                        </row>
+                        <row valign="top">
+                            <entry>ie8</entry>
+                            <entry>Internet Explorer 8</entry>
+                            </row>
+                        <row valign="top">
+                            <entry>safari</entry>
+                            <entry>Apple Safari and other Webkit-based browsers including Google Chrome</entry>
+                            </row>
+                        <row valign="top">
+                            <entry>opera</entry>
+                                <entry>Opera</entry>
+                        </row>
+                    </tbody>
+                </tgroup>
+            </table>
+        </section>
+        
+        <para>
+            For more information about the GWT Module XML Format, please see Google Web
+            Toolkit Developer Guide.
+        </para>
+    </section>
+
+    <section xml:id="gwt.compiling">
+        <title>Compiling a Client-Side Module</title>
+
+        <para>
+            Client-side widgets used by a Vaadin application must be compiled to a widget
+            set. The widget set also forms the Vaadin Client-Side Engine, which as a whole
+            handles rendering the user interface in the browser.
+        </para>
+
+        <para>
+            As most Vaadin add-ons include widgets, widget set compilation is usually
+            needed when using add-ons. In that case, the widget sets from different
+            add-ons are compiled into a <emphasis>project widget set</emphasis>, as
+            described in <xref linkend="addons.compiling"/>.
+        </para>
+
+        <section xml:id="gwt.compiling.eclipse">
+            <title>Compiling a Widget Set in Eclipse</title>
+
+            <para>
+                When the Vaadin Plugin is installed in Eclipse, you can simply click the
+                <guibutton>Compile Vaadin widgets</guibutton> button in the toolbar. It
+                will compile the widget set it finds from the project. If the project has
+                multiple widget sets, such as one for custom widgets and another one for
+                the project, you need to select the module descriptor of the widget set to
+                compile before clicking the button.
+            </para>
+        </section>
+    </section>
+
+    <section xml:id="gwt.debugging">
+        <title>Debugging Client-Side Code</title>
+        
+        <para>
+            Vaadin includes two application execution modes for debugging client-side
+            code. The Development Mode compiles the client-side module and runs it in the
+            browser, using a browser plugin to communicate with the debugger. The
+            "SuperDevMode" allows debugging the code right in the browser, without even
+            need to install a plugin.
+        </para>
+
+        <section xml:id="gwt.debugging.devmode">
+            <title>Launching Development Mode</title>
+
+            <para>
+                The Development Mode compiles the client-side module (or widget set),
+                launches the application in the browser, and allows debugging the
+                client-side code in Eclipse. You can launch the Development Mode by
+                running the <classname>com.google.gwt.dev.DevMode</classname> class. It
+                requires some parameters, as described later.
+            </para>
+
+            <para>
+                The Vaadin Plugin for Eclipse can create a launch configuration for the
+                Development Mode. In the Vaadin section of project properties, click the
+                <guibutton>Create development mode launch</guibutton> button. This creates
+                a new launch configuration in the project. You can edit the launch
+                configuration in <menuchoice><guimenu>Run</guimenu><guimenuitem>Run
+                Configurations</guimenuitem></menuchoice>. 
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[-noserver -war WebContent/VAADIN/widgetsets com.example.myproject.widgetset.MyWidgetSet -startupUrl http://localhost:8080/myproject -bindAddress 127.0.0.1]]></programlisting>
+
+            <para>
+                The parameters are as follows:
+            </para>
+
+            <variablelist>
+                <varlistentry>
+                    <term><parameter>-noserver</parameter></term>
+                    <listitem>
+                        Normally, the Development Mode launches its own server for hosting
+                        the content. As we are developing the application under an IDE
+                        that deploys it to a server, we can disable the Development Mode
+                        server with this option.
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>-war</parameter></term>
+                    <listitem>
+                        Specifies path to the location where the JavaScript is to be
+                        compiled. When developing pure client-side widgets, this could be
+                        the <filename>WebContent</filename> folder, or some other
+                        folder. When compiling widget sets, it must be
+                        <filename>WebContent/VAADIN/widgetsets</filename>.
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>-startupUrl</parameter></term>
+                    <listitem>
+                        Specifies the address of the loader page for the application. For
+                        server-side Vaadin applications, this should be the path to the
+                        Vaadin application servlet, as defined in the deployment. For pure
+                        client-side widgets, it should be the page where the application is
+                        included.
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>-bindAddress</parameter></term>
+                    <listitem>
+                        This is the IP address of the host in which the Development Mode
+                        runs. Normally it is the local host, that is,
+                        <literal>127.0.0.1</literal>.
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+
+        <section xml:id="gwt.debugging.superdevmode">
+            <title>Launching SuperDevMode</title>
+
+            <para>
+                The SuperDevMode is much like the regular Development Mode, except that it
+                does not require a browser plugin. Compilation from Java to JavaScript is
+                done incrementally, reducing the compilation time significantly. It also
+                allows debugging JavaScript and even Java right in the browser (currently
+                only supported in Chrome).
+            </para>
+
+            <para>
+                You can enable SuperDevMode as follows:
+            </para>
+
+            <orderedlist>
+                <listitem>
+                    <para>
+                        You need to set a redirect property in the
+                        <filename>.gwt.xml</filename> module descriptor as follows:
+                    </para>
+
+                    <programlisting><?pocket-size 65% ?><![CDATA[<set-configuration-property name="devModeRedirectEnabled" value="true" />]]></programlisting>
+
+                    <para>
+                        In addition, you need the <literal>xsiframe</literal> linker. It
+                        is included in the
+                        <classname>com.vaadin.terminal.gwt.DefaultWidgetSet</classname> as
+                        well as in the <classname>com.vaadin.Vaadin</classname>
+                        module. Otherwise, you need to include it with:
+                    </para>
+
+                    <programlisting><?pocket-size 65% ?><![CDATA[<add-linker name="xsiframe" />]]></programlisting>
+                </listitem>
+
+                <listitem>
+                    Compile the module (that is, the widget set), for example by clicking
+                    the button in Eclipse.
+                </listitem>
+
+                <listitem>
+                    <para>
+                        If you are using Eclipse, create a launch configuration for the
+                        SuperDevMode by clicking the <guibutton>Create SuperDevMode
+                        launch</guibutton> in the <guilabel>Vaadin</guilabel> section of
+                        the project properties.
+                    </para>
+
+                    <orderedlist>
+                        <listitem>
+                            The main class to execute should be
+                            <classname>com.google.gwt.dev.codeserver.CodeServer</classname>.
+                        </listitem>
+                        <listitem>
+                            The application takes the fully-qualified class name of the
+                            module (or widget set) as parameter, for example,
+                            <classname>com.example.myproject.widgetset.MyprojectWidgetset</classname>.
+                        </listitem>
+                        <listitem>
+                            Add project sources to the class path of the launch if they
+                            are not in the project class path.
+                        </listitem>
+                    </orderedlist>
+                </listitem>
+            </orderedlist>
+
+            <para>
+                The above configuration only needs to be once to enable the
+                SuperDevMode. After that, you can launch the mode as follows:
+            </para>
+
+            <orderedlist>
+                <listitem>
+                    Run the SuperDevMode Code Server with the launch configuration that
+                    you created above. This perfoms the initial compilation of your module
+                    or widget set.
+                </listitem>
+                <listitem>
+                    Launch the servlet container for your application, for example, Tomcat.
+                </listitem>
+                <listitem>
+                    Open your browser with the application URL and add
+                    <literal>?superdevmode</literal> parameter to the URL (see the notice
+                    below if you are not extending
+                    <classname>DefaultWidgetSet</classname>). This recompiles the code,
+                    after which the page is reloaded with the SuperDevMode. You can also
+                    use the <literal>?debug</literal> parameter and then click the
+                    <guibutton>SDev</guibutton> button in the debug console.
+                </listitem>
+            </orderedlist>
+
+            <para>
+                If you make changes to the client-side code and refresh the page in the
+                browser, the client-side is recompiled and you see the results
+                immediately.
+            </para>
+
+            <para>
+                The Step 3 above assumes that you extend
+                <classname>DefaultWidgetSet</classname> in your module. If that is not the
+                case, you need to add the following at the start of the
+                <methodname>onModuleLoad()</methodname> method of the module:
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[if (SuperDevMode.enableBasedOnParameter()) { return; }]]></programlisting>
+
+            <para>
+                Alternatively, you can use the bookmarklets provided by the code
+                server. Go to <url>http://localhost:9876/</url> and drag the bookmarklets
+                "<guilabel>Dev Mode On</guilabel>" and "<guilabel>Dev Mode Off</guilabel>"
+                to the bookmarks bar
+            </para>
+
+            <section xml:id="gwt.debugging.superdevmode.java">
+                <title>Debugging Java Code in Chrome</title>
+
+                <para>
+                    Chrome supports source maps, which allow debugging Java source code
+                    from which the JavaScript was compiled.
+                </para>
+
+                <para>
+                    Open the Chrome Inspector by right-clicking and selecting
+                    <guilabel>Inspect Element</guilabel>. Click the settings icon in the
+                    lower corner of the window and check the
+                    <menuchoice><guimenu>Scripts</guimenu><guimenuitem>Enable source
+                    maps</guimenuitem></menuchoice> option. Refresh the page with the
+                    Inspector open, and you will see Java code instead of JavaScript in
+                    the scripts tab.
+                </para>
+            </section>
+        </section>
+    </section>
+
+    <section xml:id="gwt.addons">
+        <title>Creating Add-ons</title>
+
+        <indexterm xml:id="term.gwt.addons" class="startofrange" significance="preferred">
+            <primary>add-ons</primary>
+            <secondary>creating</secondary>
+        </indexterm>
+
+        <section xml:id="gwt.addons.jar">
+            <title>Packaging an Add-On JAR</title>
+
+            <para>
+                The widget set build script template, which you can find at the URL <link
+                xlink:href="https://vaadin.com/download/misc/build-widgetset-vaadin7.xml">https://vaadin.com/download/misc/build-widgetset-vaadin7.xml</link>,
+                includes an example <literal>package-jar</literal> target for building a
+                JAR. You can use the example as it is or modify it as you need.
+            </para>
+
+            <para>
+                You need to make the JAR packaging specific configuration in the
+                <literal>configure-jar</literal> target. Change to property values to
+                reflect your widget set.
+            </para>
+
+            <programlisting>&lt;target name="configure-jar"&gt;
+    &lt;!-- The compiled JAR name --&gt;
+    &lt;property name="jar-destination"
+              value="${base}<emphasis role="bold">colorpicker.jar</emphasis>"/&gt;
+
+    &lt;!-- Title of the widget set (for JAR) --&gt;
+    &lt;property name="widgetset-title"
+              value="<emphasis role="bold">ColorPicker</emphasis>"/&gt;
+
+    &lt;!-- Version of the widget set (for JAR) --&gt;
+    &lt;property name="widgetset-version" value="<emphasis role="bold">1.0</emphasis>"/&gt;
+
+    &lt;!-- Vendor of the widget set (for JAR) --&gt;
+    &lt;property name="widgetset-vendor"
+              value="<emphasis role="bold">IT Mill Oy</emphasis>"/&gt;
+&lt;/target&gt;</programlisting>
+
+            <para>
+                You may want to check also the <literal>package-jar</literal> target if
+                you want to use other license information or otherwise customize the
+                package content.
+            </para>
+
+            <para>
+                Assuming that you have otherwise configured the build script for your
+                project as described in <xref linkend="gwt.development.compiler"/>, you
+                can build the JAR package with the following command:
+            </para>
+
+            <screen><prompt>$</prompt> <command>ant -f build-widgetset.xml package-jar</command></screen>
+
+            <para>
+                Notice that the <literal>package-jar</literal> target <emphasis>does
+                not</emphasis> depend on the <literal>compile-widgetset</literal> target,
+                as the compiled widget set is not included in the package. If you really
+                wish to do so, add the dependency and include the compiled files as a
+                fileset for the package.
+            </para>
+        </section>
+        <indexterm startref="term.gwt.addons" class="endofrange"/>
+    </section>
+
+    <section xml:id="gwt.vaadin-6-migration">
+        <title>Migrating from Vaadin 6</title>
+
+        <indexterm xml:id="term.gwt.vaadin-6-migration" class="startofrange" significance="preferred">
+            <primary>Vaadin 6 Migration</primary>
+            <secondary>add-ons</secondary>
+        </indexterm>
+
+        <para>
+            The client-side architecture was redesigned almost entirely in Vaadin 7. In
+            Vaadin 6, state synchronization was done explicitly by serializing and
+            deserializing the state on the server- and client-side. In Vaadin 7, the
+            serialization is handled automatically by the framework using state objects.
+        </para>
+        
+        <para>
+            In Vaadin 6, a server-side component serialized its state to the client-side
+            using the <interfacename>Paintable</interfacename> interface and deserialized
+            the state through the <interfacename>VariableOwner</interfacename>
+            interface. In Vaadin 7, these are done through the
+            <interfacename>ClientConnector</interfacename> interface.
+        </para>
+
+        <para>
+            On the client-side, a widget deserialized its state through the
+            <interfacename>Paintable</interfacename> interface and sent state changes
+            through the <interfacename>ApplicationConnection</interfacename> object. In
+            Vaadin 7, these are replaced with the
+            <interfacename>ServerConnector</interfacename>.
+        </para>
+
+        <para>
+            In addition to state synchronization, Vaadin 7 has an RPC mechanism that can
+            be used for communicating events. They are especially useful for events that
+            are not associated with a state change, such as a button click.
+        </para>
+
+        <para>
+            The framework ensures that the connector hierarchy and states are up-to-date
+            when listeners are called.
+        </para>
+
+        <section xml:id="gwt.vaadin-6-migration.quick">
+            <title>Quick (and Dirty) Migration</title>
+
+            <para>
+                Vaadin 7 has a compatibility layer that allows quick conversion of a widget.
+            </para>
+
+            <orderedlist>
+                <listitem>
+                    <para>
+                        Create a connector class, such as
+                        <classname>MyConnector</classname>, that extends
+                        <classname>Vaadin6Connector</classname>. Implement the
+                        <methodname>createWidget()</methodname> method as
+                        <literal>GWT.create(MyWidget.class)</literal>.
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        Move the <literal>@ClientWidget(MyWidget.class)</literal> from the
+                        server-side component, say <classname>MyComponent</classname>, to
+                        the <classname>MyConnector</classname> class and make it
+                        <literal>@Connect(MyComponent.class)</literal>.
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        Have the server-side component implement the
+                        <interface>Vaadin6Component</interface> interface to enable
+                        compatibility handling.
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        Remove any calls to <literal>super.paintContent()</literal>
+                    </para>
+                </listitem>
+            </orderedlist>
+        </section>
+
+        <indexterm startref="term.gwt.vaadin-6-migration" class="endofrange"/>
     </section>
 
     <section xml:id="gwt.javascript">
