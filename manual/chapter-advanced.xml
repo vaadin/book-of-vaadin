@@ -3414,29 +3414,100 @@ pos.setTopValue(pos.getTopValue() + yChange);]]></programlisting>
 
             <para>
                 You can make JavaScript calls from the server-side with the
-                <methodname>executeJavascript()</methodname> method in the
-                <classname>Root</classname> object.
+                <methodname>execute()</methodname> method in the
+                <classname>JavaScript</classname> class. You can get a
+                <classname>JavaScript</classname> instance from the current
+                <classname>Page</classname> object with
+                <methodname>getJavaScript()</methodname>.
 
                 <!-- TODO Check that the API is so. -->
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[// Execute JavaScript in the currently processed page
+Page.getCurrent().getJavaScript().execute("alert('Hello')");]]></programlisting>
+
+            <para>
+                The <classname>JavaScript</classname> class itself has a static shorthand
+                method <methodname>getCurrent()</methodname> to get the instance for the
+                currently processed page.
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[// Shorthand
+JavaScript.getCurrent().execute("alert('Hello')");]]></programlisting>
+
+            <para>
+                The JavaScript is executed after the server request that is currently
+                processed returns. If multiple JavaScript calls are made during the
+                processing of the request, they are all executed sequentially after the
+                request is done. Hence, the JavaScript execution does not pause the
+                execution of the server-side application and you can not return values
+                from the JavaScript.
             </para>
         </section>
 
         <section xml:id="advanced.javascript.callback">
-            <title>Handling JavaScript Calls</title>
+            <title>Handling JavaScript Callbacks</title>
 
             <para>
-                You can register JavaScript call-back methods from the server-side. You
-                need to implement and register a <classname>JavaScriptCallback</classname>
-                and its <methodname>call()</methodname> method. <!-- TODO: How to register
-                -->
+                You can make calls with JavaScript from the client-side to the
+                server-side. This requires that you register JavaScript call-back methods
+                from the server-side. You need to implement and register a
+                <classname>JavaScriptCallback</classname> with
+                <methodname>addCallback()</methodname> in the current
+                <classname>JavaScript</classname> object. A callback requires a method
+                name, with an optional package path, given for the
+                <methodname>addCallback()</methodname>. You only need to implement the
+                <methodname>call()</methodname> method to handle calls from the
+                client-side JavaScript.
+            </para>
 
+            <programlisting><?pocket-size 65% ?><![CDATA[JavaScript.getCurrent().addCallback("com.example.foo.myfunc",
+                                    new JavaScriptCallback() {
+    @Override
+    public void call(JSONArray arguments) throws JSONException {
+        Notification.show("Received call");
+    }
+});
+        
+Link link = new Link("Send Message", new ExternalResource(
+        "javascript:com.example.foo.myfunc()"));]]></programlisting>
+
+            <para>
                 Parameters passed to the JavaScript method on the client-side are provided
-                in the first <classname>JSONObject</classname> object in the array passed
-                to the <methodname>call()</methodname> method.
+                in a <classname>JSONArray</classname> passed to the
+                <methodname>call()</methodname> method. The parameter values can be
+                acquired with the <methodname>get()</methodname> method by the index of
+                the parameter, or any of the type-casting getters. The getter must match
+                the type of the passed parameter, or a
+                <classname>JSONException</classname> is thrown.
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[JavaScript.getCurrent().addCallback("com.example.foo.myfunc",
+                                    new JavaScriptCallback() {
+    @Override
+    public void call(JSONArray arguments) throws JSONException {
+        try {
+            String message = arguments.getString(0);
+            int    value   = arguments.getInt(1);
+            Notification.show("Message: " + message +
+                              ", value: " + value);
+        } catch (JSONException e) {
+            Notification.show("Error: " + e.getMessage());
+        }
+    }
+});
+        
+Link link = new Link("Send Message", new ExternalResource(
+        "javascript:com.example.foo.myfunc(prompt('Message'), 42)"));]]></programlisting>
+
+            <para>
+                The callback mechanism is the same as the RPC mechanism used with
+                JavaScript component integration, as described in <xref
+                linkend="gwt.javascript.rpc"/>.
             </para>
         </section>
     </section>
-        
+
     <section xml:id="advanced.patterns">
         <title>Advanced Application Architectures</title>
 
