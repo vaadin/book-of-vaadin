@@ -271,7 +271,7 @@
                 of a navigation bar and a content area. The content area is scrollable, so
                 there is no need to use an inner panel component. In addition, there can be an
                 optional toolbar component at the bottom of the
-                view. <classname>NavigationView</classname> is often used inside a
+                view. A <classname>NavigationView</classname> is often used inside a
                 <classname>NavigationManager</classname> to get view change animations.
             </para>
 
@@ -299,18 +299,19 @@
                 <para>
                     The navigation bar at the top of <classname>NavigationView</classname> is
                     a <classname>NavigationBar</classname> component. It has two component
-                    slots, with one on the left and one on the right. On the middle, there is
-                    a caption. You can use the <classname>NavigationBar</classname> elsewhere
-                    as well, such as for the toolbar.
+                    slots, with one on the left and one on the right. The caption is displayed
+                    in the middle. The <classname>NavigationBar</classname> can be used elsewhere
+                    as well, such as for a view containing a form with save and cancel buttons
+                    in the upper right and left corners.
                 </para>
 
                 <para>
-                    The left slot is automatically filled with a <guibutton>Back</guibutton>
-                    button if you set the previous component with
-                    <methodname>setPreviousComponent()</methodname>. If you use the
-                    <classname>NavigationView</classname> inside a
-                    <classname>NavigationManager</classname>, the manager automaticaly sets
-                    the previous view when you navigate to it from another managed view.
+                    When the <classname>NavigationBar</classname> is used for navigation and you
+                    set the previous component with
+                    <methodname>setPreviousComponent()</methodname>, the left slot is
+                    automatically filled with a <guibutton>Back</guibutton> button. This is
+                    done automatically if you use the <classname>NavigationView</classname>
+                    inside a <classname>NavigationManager</classname>.
                 </para>
 
                 <para>
@@ -542,56 +543,25 @@ button.setTargetView(view);
                 action. Unlike regular sub-windows, it does not support dragging or resizing
                 by the user. It can have a caption, but usually does not. As sub-windows
                 usually require a rather large screen size, the <classname>Popover</classname>
-                is mainly applicable to tablet devices, but can be used also in phones with
-                full size with <methodname>setSizeFull()</methodname>.
+                is mainly applicable to tablet devices. When used on smaller devices, such as
+                phones, the <classname>Popover</classname> automatically fills the entire
+                screen.
             </para>
 
             <para>
-                In the following, we extend <classname>Popover</classname> to use it. It is
-                modal by default. Notice that the screen size is not available in the
+                In the following example, we extend <classname>Popover</classname> to use it. It
+                is modal by default. Notice that the screen size is not available in the
                 constructor, so we have to postpone using it to the
                 <methodname>attach()</methodname> method.
             </para>
 
-            <programlisting><?pocket-size 65% ?><![CDATA[public class ComposeView extends Popover {
-    ...
-    public ComposeView(boolean smartphone) {
-        setClosable(false);
+            <para>
+                Popover windows are added to an application-level <classname>Window</classname>
+                object with <methodname>addWindow()</methodname>, just like sub-windows in a
+                regular Vaadin application.
+            </para>
 
-        ...
-
-        // In phones use all space, in tablets just vertically
-        if (smartphone) {
-            setSizeFull();
-        } else {
-            setHeight("100%");
-            center();
-        }
-    }
-
-    @Override
-    public void attach() {
-        super.attach();
-
-        // If tablet is wide, leave some space horizontally
-        if (!smartphone) {
-            if (getParent().getWidth() > 800) {
-                setWidth("80%");
-            } else {
-                setWidth("100%");
-            }
-        }
-    }
-    ...
-}]]></programlisting>
-
-        <para>
-            You add popover windows to an application-level <classname>Window</classname>
-            object with <methodname>addWindow()</methodname>, just like sub-windows in a
-            regular Vaadin application.
-        </para>
-
-        <programlisting><?pocket-size 65% ?><![CDATA[if (event.getButton() == emailButton) {
+            <programlisting><?pocket-size 65% ?><![CDATA[if (event.getButton() == emailButton) {
     ComposeView composeView = new ComposeView(smartphone);
     getWindow().addWindow(composeView);
     return;
