@@ -754,16 +754,17 @@ componentGroup.addComponent(numberField);]]></programlisting>
             </para>
 
             <para>
-                Geolocation is requested by calling
-                <methodname>detectCurrentPosition()</methodname> in the
-                <classname>TouchKitWindow</classname> main window of the application. You
-                need to give a <classname>PositionCallback</classname> handler that
-                receives the location in <methodname>onSuccess()</methodname> if acquired
-                from the device successfully. The position is given in
-                a <classname>Position</classname> object.
+                Geolocation is requested by calling the static
+                <classname>Geolocator</classname><methodname>.detect()</methodname> method. You
+                need to provide a <classname>PositionCallback</classname> handler that
+                is called when the device has an answer for your request. If the geolocation 
+                request succeeded, <methodname>onSuccess()</methodname> is called. Otherwise, e.g
+                . if the user didn't allow sharing of his location, <methodname>
+                onFailure</methodname> is called. The geolocation data is provided in a
+                <classname>Position</classname> object.
             </para>
 
-            <programlisting><?pocket-size 65% ?><![CDATA[mainWindow.detectCurrentPosition(new PositionCallback() {
+            <programlisting><?pocket-size 65% ?><![CDATA[Geolocator.detect(new PositionCallback() {
     public void onSuccess(Position position) {
         double latitude  = position.getLatitude();
         double longitude = position.getLongitude();
@@ -781,7 +782,17 @@ componentGroup.addComponent(numberField);]]></programlisting>
                 The position is given as degrees with fractions. The longitude is positive
                 to East and negative to West of the Prime Meridian passing through
                 Greenwich, following the convention for coordinate systems. The accuracy
-                is given in meters.
+                is given in meters. In addition to the above data, the following are also
+                provided:
+            </para>
+            <orderedlist>
+                <listitem>Altitude</listitem>
+                <listitem>Altitude accuracy</listitem>
+                <listitem>Heading</listitem>
+                <listitem>Speed</listitem>
+            </orderedlist>
+            <para>
+                If any of the position data is unavailable, its value will be zero.
             </para>
 
             <para>
@@ -796,10 +807,13 @@ componentGroup.addComponent(numberField);]]></programlisting>
                 Notice that geolocation can take significant time, depending on the
                 location method used by the device. With Wi-Fi and cellular positioning,
                 the time is usually less than 30 seconds. With GPS, it can reach minutes
-                or longer, especially if the reception is bad.
+                or longer, especially if the reception is bad. However, once a location fix
+                has been made, updates to the location will be faster. If you are making
+                navigation software, you need to update the position data fairly frequently by
+                calling <classname>Geolocator</classname><methodname>.detect()</methodname>
+                multiple times.
             </para>
-        </section>
-    </section>
+        </section>    </section>
 
     <section xml:id="mobile.testing">
         <title>Testing and Debugging on Mobile Devices</title>
