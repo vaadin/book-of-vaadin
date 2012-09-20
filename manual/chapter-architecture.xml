@@ -4,8 +4,9 @@
 	<title>Architecture</title>
 
 	<para>
-		This chapter provides an introduction to the architecture of Vaadin at
-		somewhat technical level.
+        In <xref linkend="intro"/>, we gave a short introduction to the general
+        architecture of Vaadin. This chapter looks deeper into the architecture at a more
+        technical level.
 	</para>
 
     <para>
@@ -18,28 +19,19 @@
 	<section xml:id="architecture.overview">
 		<title>Overview</title>
 
-		<para>
-			In <xref linkend="intro"/>, we gave a short introduction to the general
-			architecture of Vaadin. Let us now look deeper into it.
-        </para>
-
         <para>
-            First of all, Vaadin provides two distinct development models: the for
-            client-side, the browser, and for the server-side. The client-side development
-            model allows developing widgets and applications in Java, which are executed
-            in the browser as JavaScript. The server-driven development model, however, is
-            the much more powerful one, allowing application development solely on the
-            server-side, by utilizing an AJAX-based Vaadin Client-Side Engine that renders
-            the user interface in the browser.
+            Vaadin provides two development models for web applications: for the
+            client-side (the browser) and for the server-side. The server-driven
+            development model is the more powerful one, allowing application development
+            solely on the server-side, by utilizing an AJAX-based Vaadin Client-Side
+            Engine that renders the user interface in the browser. The client-side model
+            allows developing widgets and applications in Java, which are compiled to
+            JavaScript and executed in the browser. The two models can share their UI
+            widgets, themes, and background services, and can be mixed together easily.
         </para>
-
-        <para>
-            <xref linkend="figure.architecture.detailed"/> gives a basic illustration of
-            the architecture.
-		</para>
 
 		<figure xml:id="figure.architecture.detailed" float="center" floatstyle="before">
-			<title>Vaadin Server-Side Development Architecture</title>
+			<title>Vaadin Development Architecture</title>
 			<mediaobject>
 				<imageobject role="html">
 					<imagedata align="center" fileref="img/arch/architecture-detailed-lo.png"/>
@@ -50,24 +42,30 @@
 			</mediaobject>
 		</figure>
 
+        <para>
+            <xref linkend="figure.architecture.detailed"/> gives a basic illustration of
+            both the server-side and client-side development architectures.
+		</para>
+
 		<para>
 			Vaadin Framework consists of a <emphasis>server-side API</emphasis>, a
 			<emphasis>client-side API</emphasis>, a horde of <emphasis>user interface
 			components</emphasis> on the both sides, <emphasis>themes</emphasis> for
 			controlling the appearance, and a <emphasis>data model</emphasis> that allows
 			binding the server-side components directly to data. For client-side
-			development, it includes the GWT Compiler, which allows compiling Java to
-			JavaScript, as well as the full GWT framework.
+			development, it includes the Vaadin Compiler, which allows compiling Java to
+			JavaScript.
 		</para>
 
 		<para>
 			A server-side Vaadin application runs as a servlet in a Java web server,
-			serving HTTP requests. The Vaadin terminal adapter receives client requests
-			through the web server's Java Servlet API, and inteprets them to user events
-			for a particular session. Sessions are tracked using cookies. Events are
-			associated with UI components and delivered to the application, which handles
-			them with listeners. If the application logic makes changes to the server-side
-			UI components, the terminal adapter renders them in the web browser by
+			serving HTTP requests. The <classname>VaadinServlet</classname> is normally
+			used as the servlet class. The servlet receives client requests and inteprets
+			them as events for a particular user session, represented by a
+			<classname>VaadinSession</classname> instance. Events are associated with user
+			interface components and delivered to the application, which handles them with
+			listeners. If the application logic makes changes to the server-side user
+			interface components, the terminal adapter renders them in the web browser by
 			generating a response. The client-side engine running in the browser receives
 			the responses and uses them to make any necessary changes to the page in the
 			browser.
@@ -77,11 +75,18 @@
 			The entry-point of a user application consists of a
 			<emphasis>&root;</emphasis> class that inherits
 			<classname>com.vaadin.ui.&rootclass;</classname>. Its task is to create the
-			initial user-interface and set up event listeners to handle user input. The
-			&root; element can then be embedded to any HTML page. For detailed information
-			about implementing a <classname>&rootclass;</classname>, see <xref
-			linkend="application"/>.
+			initial user interface and set up event listeners to handle user input. The
+			&root; can then run in the browser, and can be embedded to any HTML page. For
+			detailed information about implementing a <classname>&rootclass;</classname>,
+			see <xref linkend="application"/>.
 		</para>
+
+		<para>
+            Pure client-side applications can use the same widgets, themes and background
+            services as server-side Vaadin applications. They are useful when there is
+            need for highly responsive UI logic, and for various other purposes, such as
+            offering an off-line mode.
+        </para>
 
 		<para>
 			The major parts of the server-driven development architecture and their
@@ -91,20 +96,19 @@
 		<!-- Spacing must be compact for small format book. -->
 		<variablelist>
 			<varlistentry>
-				<term>User Interface Components</term>
+				<term>User Interface Components/Widgets</term>
 				<listitem>
 					<para>
-						The user interface consists of UI components that are created and
-						laid out by the application. Each server-side component has a
-						client-side counterpart, with which the user interacts. The
-						server-side components can serialize themselves over the client
-						connection using a terminal adapter. The client-side components,
-						in turn, can serialize user interaction back to the application,
-						which is received in the server-side components as events. The
-						components relay these events to the application logic. Most
-						components are bound to a data source (see below). For a complete
-						description of UI component architecture, see <xref
-						linkend="components"/>.
+						The user interface of a Vaadin application consists of components
+						that are created and laid out by the application. Each server-side
+						component has a client-side counterpart, a "widget", by which it
+						is rendered in the browser and with which the user interacts. The
+						client-side widgets can also be used by client-side
+						applications. The server-side components relay these events to the
+						application logic. Field components that have a value, which the
+						user can view or edit, can be bound to a data source (see
+						below). For a more detailed description of the UI component
+						architecture, see <xref linkend="components"/>.
 					</para>
 				</listitem>
 			</varlistentry>
@@ -118,30 +122,46 @@
                         <indexterm><primary>HTTP</primary></indexterm>
 
 						The Client-Side Engine of Vaadin manages the rendering in the web
-						browser. It communicates user interaction and UI changes with the
-						server-side terminal adapter. The communications are made using
-						asynchronous HTTP or HTTPS requests. See <xref
-						linkend="architecture.client-side"/>.
+						browser. It communicates user interaction and changes in the user
+						interface with the server-side terminal adapter. The
+						communications are made using asynchronous HTTP or HTTPS
+						requests. See <xref linkend="architecture.client-side"/>.
 					</para>
 				</listitem>
 			</varlistentry>
 			
 			<varlistentry>
-				<term>Terminal Adapter</term>
+				<term>Vaadin Servlet</term>
 				<listitem>
 					<para>
-                        <indexterm><primary>Terminal Adapter</primary></indexterm>
-                        <indexterm><primary>AJAX</primary></indexterm>
+                        <indexterm><primary>VaadinServlet</primary></indexterm>
 
-						The UI components do not render themselves directly as a web page,
-						but use a <emphasis>Terminal Adapter</emphasis>, which handles the
-						client-server communications at the server end. Vaadin currently
-						has a GWT terminal adapter.
-
-                        <indexterm><primary>Google Web Toolkit</primary></indexterm>
+                        The Vaadin servlet, or more exactly the
+                        <classname>VaadinServlet</classname> class, receives requests from
+                        different clients, determines which user session they belong to by
+                        tracking the sessions with cookies, and delegates the requests to
+                        the corresponding sessions.
 					</para>
 				</listitem>
 			</varlistentry>
+
+			<varlistentry>
+				<term>Vaadin Session</term>
+				<listitem>
+					<para>
+                        <indexterm><primary>VaadinSession</primary></indexterm>
+
+                        A Vaadin session, realized by the
+                        <classname>VaadinSession</classname> class, represents a user
+                        session that begins when the user first opens the application page
+                        in the browser. Sessions are tracked using cookies and expire
+                        automatically after a time since the last user interaction, or if
+                        the user logs out. Vaadin sessions are associated with one or more
+                        <emphasis>UI</emphasis>s, as described in <xref
+                        linkend="application"/>
+                    </para>
+                </listitem>
+            </varlistentry>
 
 			<varlistentry>
 				<term>Themes</term>
@@ -149,15 +169,16 @@
 					<para>
                         <indexterm><primary>theme</primary></indexterm>
                         <indexterm><primary>CSS</primary></indexterm>
+                        <indexterm><primary>SASS</primary></indexterm>
                         <indexterm><primary>HTML templates</primary></indexterm>
 
-						The user interface separates between presentation and logic. While
-						the UI logic is handled as Java code, the presentation is defined
-						in <emphasis>themes</emphasis> as CSS. Vaadin provides a
-						default themes. User themes can, in addition to style sheets,
-						include HTML templates that define custom layouts and other
-						resources, such as images. Themes are discussed in detail in <xref
-						linkend="themes"/>.
+						Vaadin makes a separation between the presentation and logic of
+						the user interface. While the UI logic is handled as Java code,
+						the presentation is defined in <emphasis>themes</emphasis> as CSS
+						or SASS. Vaadin provides a number of default themes. User themes
+						can, in addition to style sheets, include HTML templates that
+						define custom layouts and other resources, such as images. Themes
+						are discussed in detail in <xref linkend="themes"/>.
 					</para>
 				</listitem>
 			</varlistentry>
@@ -168,9 +189,10 @@
 					<para>
                         <indexterm><primary>events</primary></indexterm>
 
-						User interaction with UI components creates events, which are first
-						processed on the client-side with JavaScript and then passed all the way
-						through the HTTP server, terminal adapter, and user component layers to the
+						User interaction with UI components creates events, which are
+						first processed on the client-side by the Client-Side Engine and
+						then passed all the way through the HTTP server, Vaadin servlet,
+						session, and UI components to the event listeners defined in the
 						application. See <xref linkend="architecture.events"/>.
 					</para>
 				</listitem>
@@ -183,11 +205,13 @@
                         <indexterm><primary>Data Model</primary></indexterm>
 
 						In addition to the user interface model, Vaadin provides a
-						<emphasis>data model</emphasis> for interfacing data presented in UI
-						components. Using the data model, the user interface components can
-						update the application data directly, without the need for any control
-						code. All the UI components use this data model internally, but they can
-						be bound to a separate data source as well.
+						<emphasis>data model</emphasis> for interfacing data presented in
+						field components, such as text fields, check boxes and selection
+						components. Using the data model, the user interface components
+						can update the application data directly, often without the need
+						for any control code. All the field components in Vaadin use this
+						data model internally, but any of them can be bound to a separate
+						data source as well.
 
                         <indexterm><primary>SQL</primary></indexterm>
 
@@ -210,9 +234,9 @@
             <indexterm><primary>Google Web Toolkit</primary></indexterm>
 
 			This section provides an introduction to the various technologies and designs
-			on which Vaadin is based: AJAX-based web applications in general and Google
-			Web Toolkit. This knowledge is not necessary for using Vaadin, but provides
-			some background if you need to make low-level extensions to Vaadin.
+			on which Vaadin is based. This knowledge is not necessary for using Vaadin,
+			but provides some background if you need to make low-level extensions to
+			Vaadin.
 		</para>
 
 		<section xml:id="architecture.technology.ajax">
@@ -222,13 +246,13 @@
                 <indexterm><primary>XML</primary></indexterm>
                 <indexterm><primary>JavaScript</primary></indexterm>
 
-				AJAX (Asynchronous JavaScript and XML) is a technique for developing web
-				applications with responsive user interaction, similar to traditional
-				desktop applications. While conventional JavaScript-enabled HTML pages can
-				receive new content only with page updates, AJAX-enabled pages send user
-				interaction to the server using an asynchronous request and receive
-				updated content in the response. This way, only small parts of the page
-				data can be loaded.
+				AJAX, short for Asynchronous JavaScript and XML, is a technique for
+				developing web applications with responsive user interaction, similar to
+				traditional desktop applications. While conventional JavaScript-enabled
+				HTML pages can receive new content only by loading an entire new page,
+				AJAX-enabled pages send user interaction to the server using an
+				asynchronous request and receive updated content in the response. This
+				way, only small parts of the page data can be loaded.
 
                 <indexterm><primary>XHTML</primary></indexterm>
                 <indexterm><primary>CSS</primary></indexterm>
@@ -236,82 +260,24 @@
                 <indexterm><primary>XMLHttpRequest</primary></indexterm>
 
                 This goal is archieved by the use of a certain set of technologies: XHTML,
-                CSS, DOM, JavaScript, XMLHttpRequest, and XML.
+                CSS, DOM, JavaScript, and the XMLHttpRequest API in JavaScript. XML is
+                just one way to serialize data between the client and the server, and in
+                Vaadin it is serialized with the more efficient JSON.
 			</para>
 
-            <para>
-                The  web was originally not built for applications, but for hypertext
-                pages that you can view with a browser. The purpose of web pages is
-                to provide <emphasis>content</emphasis> for the user. Application
-                software has a somewhat different purpose; usually to allow you to
-                work on some data or content, much of which is not ever intended to
-                be accessible through a web browser as web pages. As the web is
-                inherently page-based, conventional web applications had to work with
-                page requests and output HTML as response. JavaScript and AJAX have
-                made it possible to let go of the pages.
-            </para>
-
-            <para>
-                Pages are largely an unknown concept to conventional desktop
-                applications. At most, desktop applications can open multiple
-                windows, but usually they work with a single main window, with an
-                occasional dialog window here and there. Same goes usually for web
-                applications developed with Vaadin: an application typically
-                runs on a single page, changing the layout as needed and popping up
-                dialog boxes.
-            </para>
-
-            <para>
-                Not having to load pages and use hyperlinks to communicate all user
-                interaction is a relief for application development. However, they
-                are an important feature that ordinary desktop applications
-                lack. They allow referencing different functionalities of an
-                application or resources managed by the application. They are also
-                important for integration with external applications.
-            </para>
-
-            <para>
-                Certain resources can be identified through a <firstterm>URL</firstterm> or
-                <firstterm>Uniform Resource Locator</firstterm>.  A URL can easily be passed
-                around or stored as a bookmark. We will see in <xref
-                    linkend="advanced.requesthandler"/> how you can retrieve the URL path or query
-                parameters of a request.
-            </para>
-
-            <para>
-                Using URIs or request parameters to access functionalities or content is
-                not as straight-forward as in conventional page-based web
-                applications. Vaadin, just as any other AJAX framework, uses browser
-                cookies not just for tracking users but also for tracking the application
-                state. Cookies are unique in a browser, so any two windows share the same
-                cookies and therefore also the state. The advantage is that you can close
-                your browser and open it again and the application will be in the state
-                where you left off (except for components such as text fields which did
-                not have the immediate attribute enabled). The disadvantage is that there
-                is no good way to distinguish between the windows, so there can usually be
-                only a single application window. Even if there were several, you would
-                have trouble with synchronization of application data between
-                windows. Many conventional page-based web applications simply ignore
-                out-of-sync situations, but such situations are risky for application
-                platforms that are intended to be stable. Therefore it is safer to work
-                with a single browser window. A URI can be used to fetch
-                resources that have no particular state or to provide an entry point to
-                the application.
-            </para>
-
 			<para>
-				With all the fuss and pomp it receives, AJAX is essentially made possible
-				by a simple API, namely the <methodname>XMLHttpRequest</methodname> class
-				in JavaScript. The API is available in all major browsers and, as of 2006,
-				the API is under way to become a W3C standard.
+				AJAX is essentially made possible by a simple API, namely the
+				<methodname>XMLHttpRequest</methodname> class in JavaScript. The API is
+				available in all major browsers and, as of 2006, the API is under way to
+				become a W3C standard.
 			</para>
 
 			<para>
 				Communications between the browser and the server usually require some
 				sort of <emphasis>serialization</emphasis> (or
-				<emphasis>marshalling</emphasis>) of data objects. The Vaadin terminal
-				adapter handles serialization of shared state between server and client,
-				as well as RPC calls to the other side.
+				<emphasis>marshalling</emphasis>) of data objects. The Vaadin servlet
+				handles serialization of shared state between server and client, as well
+				as RPC calls to the other side.
 			</para>
 		</section>
 
@@ -321,11 +287,12 @@
 			<para>
                 <indexterm significance="preferred"><primary>Google Web Toolkit</primary></indexterm>
 
-                Vaadin includes the Google Web Toolkit (GWT), which is a user interface
-                framework for developing client-side web applications easily, without
-                having to use JavaScript or other browser technologies directly. Pure
-                client-side Vaadin applications are developed with Java and compiled into
-                JavaScript with the GWT Compiler.
+                The Vaadin client-side framework is based on the Google Web Toolkit (GWT),
+                which purpose is to enable the development of client-side web applications
+                easily with Java, without having to use JavaScript or other browser
+                technologies directly. Pure client-side Vaadin applications are developed
+                with Java and compiled into JavaScript with the Vaadin Compiler, which is
+                an extension of the GWT Compiler.
 			</para>
 
 			<para>
@@ -358,22 +325,20 @@
 		<title>Applications as Java Servlet Sessions</title>
 
 		<para>
-			Vaadin framework does basically everything it does on top of the Java
-			Servlet API, which lies hidden deep under the hood, with the terminal adapter
-			being the lowest level layer for handling requests from the web
-			container.
+			Vaadin framework does basically everything it does on top of the Java Servlet
+			API, which lies hidden deep under the hood, with the Vaadin Servlet being the
+			lowest level layer for handling requests from the web container.
         </para>
 
         <para>
             When the web container gets the first request for a URL registered for an
-            application, it creates an instance of the
-            <classname>ApplicationServlet</classname> class in Vaadin framework
-            that inherits the <classname>HttpServlet</classname> class defined in Java
-            Servlet API. It follows sessions by using <classname>HttpSession</classname>
-            interface and associates an <classname>Application</classname> instance with
-            each session. During the lifetime of a session, the framework relays user
-            actions to the proper application instance, and further to a user interface
-            component.
+            application UI, it creates an instance of the
+            <classname>VaadinServlet</classname> class in Vaadin framework that inherits
+            the <classname>HttpServlet</classname> class defined in Java Servlet API. It
+            follows sessions by using <classname>HttpSession</classname> interface and
+            associates an <classname>VaadinSession</classname> instance with each
+            session. During the lifetime of a session, the framework relays user actions
+            to the proper application instance, and further to a user interface component.
 		</para>
     </section>
 		
@@ -383,21 +348,22 @@
 		<para>
             <indexterm significance="preferred"><primary>Client-Side Engine</primary></indexterm>
             
-			This section gives an overview of the client-side architecture of
-			Vaadin. Knowledge of the client-side technologies is generally not needed
-			unless you develop or use custom client-side widgets.
+			This section gives an overview of the client-side architecture of Vaadin, from
+			the perspective of integration with the server-side. Knowledge of the
+			client-side technologies is generally not needed unless you develop
+			client-side widgets or applications.
 
-            <indexterm><primary>Google Web Toolkit</primary></indexterm>
             <indexterm><primary>Java</primary></indexterm>
 
-            The client-side engine is based on Google Web Toolkit (GWT) and its GWT
-            Compiler, which allows the development of the engine and client-side
-            components solely with Java.
+            The client-side engine is based on the Vaadin cline-side framework, which in
+            turn is based on the Google Web Toolkit (GWT) and its GWT Compiler. The
+            compiler allows the development of the engine and client-side components
+            solely with Java.
 		</para>
 
 		<para>
-			<xref linkend="gwt"/> provides information about the integration of
-			GWT-based user interface components with Vaadin.
+			<xref linkend="clientside"/> provides a more thorough information about the
+			client-side development with Vaadin.
 		</para>
 
 		<figure xml:id="figure.architecture.client-side">
@@ -466,9 +432,10 @@
 		<para>
             To receive events of a particular type, an application must register a
             listener object with the event source. The listeners are registered in the
-            components with the <methodname>addListener()</methodname> method. The method
-            has a generic version defined at the level of
-            <classname>AbstractComponent</classname>, the base class of all components.
+            components with an <methodname>add*Listener()</methodname> method (with a
+            method name specific to the listener). The method has a generic version
+            defined at the level of <classname>AbstractComponent</classname>, the base
+            class of all components.
 		</para>
 
 		<para>
@@ -485,7 +452,7 @@
 
 		<programlisting><![CDATA[final Button button = new Button("Push it!");
 
-button.addListener(new Button.ClickListener() {
+button.addClickListener(new Button.ClickListener() {
     public void buttonClick(ClickEvent event) {
         button.setCaption("You pushed it!");
     }
