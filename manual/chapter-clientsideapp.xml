@@ -4,38 +4,94 @@
 	<title>Client-Side Applications</title>
 
     <para>
-        This chapter describes how to develop client-side applications.
+        This chapter describes how to develop client-side Vaadin applications.
     </para>
 
     <section xml:id="clientsideapp.overview">
         <title>Overview</title>
 
         <para>
-            Vaadin supports client-side application modules, which run in the browser.
-            Client-side modules can use the same widgets, themes and back-end services as
-            server-side Vaadin applications. They are useful when you have a need for
-            highly responsive UI logic, such as for games or for serving a large number of
-            clients with possibly stateless server-side code, and for various other
+            Vaadin allows developing client-side modules that run in the browser.
+            Client-side modules can use the same widgets, themes, and back-end services as
+            server-side Vaadin applications. Client-side applications are "fat clients",
+            in comparison with the "thin client" approach of the server-side Vaadin
+            applications. Fat clients are useful when you have a need for highly
+            responsive UI logic, such as for games or for serving a large number of
+            clients with possibly stateless server-side code, as well as for various other
             purposes.
         </para>
 
+		<figure xml:id="figure.clientsideapp.overview.architecture" float="center" floatstyle="before">
+			<title>Client-Side Application Architecture</title>
+			<mediaobject>
+				<imageobject role="html">
+					<imagedata align="center" fileref="img/clientsideapp/clientsideapp-architecture-lo.png"/>
+				</imageobject>
+				<imageobject role="fo">
+					<imagedata scale="60" smallscale="100%" align="center" fileref="img/clientsideapp/clientsideapp-architecture-hi.png"/>
+				</imageobject>
+			</mediaobject>
+		</figure>
+
         <para>
-            Even with regular server-side Vaadin applications, it may be useful to
-            provide an off-line mode if the connection is closed. An off-line mode can
-            persist data in a local store in the browser, thereby avoiding the need
-            for server-side storage, and transmit the data to the server when the
-            connection is again available. Such pattern is commonly used with Vaadin
-            TouchKit, as described in <xref linkend="mobile"/>.
+            A client-side application is defined as a <emphasis>module</emphasis>, which
+            has an <emphasis>entry-point</emphasis> class. Its
+            <methodname>onModuleLoad()</methodname> method is executed when the JavaScript
+            of the compiled module is loaded in the browser.
         </para>
-           
+
+        <para>
+            Consider the following client-side application:
+        </para>
+
+        <programlisting><?pocket-size 75% ?><![CDATA[public class HelloWorld implements EntryPoint {
+    @Override
+    public void onModuleLoad() {
+        RootPanel.get().add(new Label("Hello, world!"));
+    }
+}]]></programlisting>
+
+        <para>
+           The user interface of a client-side application is built under a HTML
+           <emphasis>root element</emphasis>, which can be accessed by
+           <methodname>RootPanel.get()</methodname>. The purpose and use of the
+           entry-point is documented in more detail in <xref
+           linkend="clientsideapp.entrypoint"/>. The user interface is built from
+           <emphasis>widgets</emphasis>. The built-in widgets and their relationships are
+           catalogued in <xref linkend="widgets"/>. You can also use Vaadin add-on widgets
+           or make your own.
+        </para>
+
+        <para>
+            A client-side module is defined in a <emphasis>module descriptor</emphasis>,
+            as described in <xref linkend="clientsideapp.descriptor"/>. A module is
+            compiled from Java to JavaScript using the Vaadin Compiler, of which use was
+            described in <xref linkend="clientside.compiling"/>. The <xref
+            linkend="clientsideapp.compiling"/> in this chapter gives further information
+            about compiling client-side applications. The resulting JavaScript can be
+            loaded to any web page, as described in <xref
+            linkend="clientsideapp.loading"/>.
+        </para>
+
         <para>
             The client-side user interface can be built declaratively using the included
-            <emphasis>UI Binder</emphasis>.
+            <emphasis>UI Binder</emphasis>, as described in <xref
+            linkend="clientsideapp.uibinder"/>.
         </para>
 
         <para>
             The servlet for processing RPC calls from the client-side can be generated
-            automatically by the included compiler.
+            automatically using the included compiler.
+        </para>
+
+        <para>
+            Even with regular server-side Vaadin applications, it may be useful to provide
+            an off-line mode if the connection is closed. An off-line mode can persist
+            data in a local store in the browser, thereby avoiding the need for
+            server-side storage, and transmit the data to the server when the connection
+            is again available. Such a pattern is commonly used with Vaadin TouchKit. Use
+            of a client-side application to provide an off-line mode is described in <xref
+            linkend="clientsideapp.offline"/>.
         </para>
     </section>
 
@@ -52,7 +108,7 @@
             Consider the following application:
         </para>
 
-        <programlisting><![CDATA[package com.example.myapp.client;
+        <programlisting><?pocket-size 65% ?><![CDATA[package com.example.myapp.client;
 
 import com.google.clientside.core.client.EntryPoint;
 import com.google.clientside.event.dom.client.ClickEvent;
@@ -86,9 +142,9 @@ public class MyEntryPoint implements EntryPoint {
         <title>Module Descriptor</title>
 
         <para>
-            The entry-point is defined, along with any other configuration, in a
-            <emphasis>client-side module descriptor</emphasis>. The descriptor is an
-            XML file with suffix <filename>.gwt.xml</filename>.
+            The entry-point of a client-side application is defined, along with any other
+            configuration, in a <emphasis>client-side module descriptor</emphasis>. The
+            descriptor is an XML file with suffix <filename>.gwt.xml</filename>.
         </para>
 
         <programlisting><?pocket-size 65% ?><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
@@ -108,13 +164,14 @@ public class MyEntryPoint implements EntryPoint {
         </para>
     </section>
 
-    <section xml:id="clientside.application.compiling">
-        <title>Compiling the Application</title>
+    <section xml:id="clientsideapp.compiling">
+        <title>Compiling a Client-Side Application</title>
 
         <para>
             The application needs to be compiled with the Vaadin Compiler into
-            JavaScript. We cover the details of the compilation later in <xref
-                linkend="clientside.compiling"/>.
+            JavaScript. We covered the basics of the client-side compilation in <xref
+            linkend="clientside.compiling"/>. In the following, we see how to compile
+            client-side applications.
         </para>
 
         <para>
@@ -129,12 +186,12 @@ public class MyEntryPoint implements EntryPoint {
 warname -bindAddress 127.0.0.1]]></programlisting>
     </section>
 
-    <section xml:id="clientside.application.executing">
-        <title>Executing a Client-Side Application</title>
+    <section xml:id="clientsideapp.loading">
+        <title>Loading a Client-Side Application</title>
 
         <para>
-            You can use the JavaScript code of a client-side application in a HTML page by
-            including it with a <literal>&lt;script&gt;</literal> tag, for example as
+            You can load the JavaScript code of a client-side application in a HTML page
+            by including it with a <literal>&lt;script&gt;</literal> tag, for example as
             follows:
         </para>
 
@@ -155,7 +212,8 @@ warname -bindAddress 127.0.0.1]]></programlisting>
     <h1>A Pure Client-Side Application</h1>
     
     <script type="text/javascript" language="javascript"
-            src="com.example.myapp.MyModule/com.example.myapp.MyModule.nocache.js"></script>
+            src="com.example.myapp.MyModule/com.example.myapp.MyM
+                 odule.nocache.js"></script>
   </body>
 </html>]]></programlisting>
 
@@ -171,6 +229,30 @@ warname -bindAddress 127.0.0.1]]></programlisting>
             example. The exact path to the style file depends on your project
             structure - the example is given for a regular Vaadin application where
             themes are contained in the <filename>VAADIN</filename> folder in the WAR.
+        </para>
+    </section>
+
+    <section xml:id="clientsideapp.uibinder">
+        <title>Declarative UIs with UI Binder</title>
+
+        <para>
+            To be done.
+        </para>
+    </section>
+
+    <section xml:id="clientsideapp.service">
+        <title>The Server-Side for Client-Side Apps</title>
+
+        <para>
+            To be done.
+        </para>
+    </section>
+
+    <section xml:id="clientsideapp.offline">
+        <title>Offline Mode for Server-Side Apps</title>
+
+        <para>
+            To be done.
         </para>
     </section>
 </chapter>

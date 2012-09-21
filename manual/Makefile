@@ -38,6 +38,7 @@ IMAGES =	intro/architecture intro/toolchain \
 			advanced/liferay-display \
 			advanced/threadlocal-sequentiality advanced/threadlocal-concurrency \
 			themes/theme-contents themes/eclipse-theme-created-annotated \
+			clientsideapp/clientsideapp-architecture \
 			gwt/gwt-widgets gwt/gwt-widget-files gwt/gwt-hostedmode-project-annotated\
 			gwt/gwt-custom-architecture \
 			vaadin-logo book-example \
