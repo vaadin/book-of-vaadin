@@ -266,7 +266,7 @@
 				<filename>WebContent/VAADIN/widgetsets</filename> folder. When you need to
 				recompile the widget set in Eclipse, see <xref
 				linkend="gwt.eclipse.compiling"/>. For detailed information on compiling
-				widget sets, see <xref linkend="gwt.compiling"/>.
+				widget sets, see <xref linkend="clientside.compiling"/>.
 			</para>
 
 			<para>
@@ -349,13 +349,14 @@
                 You can speed up the compilation significantly by compiling the widget set
                 only for your browser during development. The generated
                 <filename>.gwt.xml</filename> descriptor stub includes a disabled element
-                that specifies the target browser. See <xref linkend="gwt.widgetset"/> for
-                more details on setting the <literal>user-agent</literal> property.
+                that specifies the target browser. See <xref
+                linkend="gwt.module.compilation-limiting"/> for more details on setting
+                the <literal>user-agent</literal> property.
             </para>
 
 			<para>
 				For more information on compiling widget sets, see <xref
-				linkend="gwt.compiling"/>. Should you compile a widget set
+				linkend="clientside.compiling"/>. Should you compile a widget set
 				outside Eclipse, you need to refresh the project by selecting it in
 				<guilabel>Project Explorer</guilabel> and pressing <keycap>F5</keycap>.
 			</para>
@@ -997,7 +998,7 @@ public class CapsLockWarningConnector
                 A client-side module, which is normally a widget set, can include
                 stylesheets. They must be placed under the <filename>public</filename>
                 folder under the folder of the widget set, a described in <xref
-                linkend="gwt.widgetset.stylesheet"/>.
+                linkend="clientside.module.stylesheet"/>.
             </para>
 
             <para>
@@ -1087,124 +1088,6 @@ public class CapsLockWarningConnector
         </section>
         -->
     </section>
-    
-    <section xml:id="gwt.widgetset">
-        <title>Defining a Client-Side Module Descriptor</title>
-
-        <para>
-            Widget sets and other client-side modules are defined in a GWT
-            <emphasis>module descriptor</emphasis>, which is an XML file with
-            <filename>.gwt.xml</filename> suffix. The only necessary task is to inherit a
-            base widget set. If you are developing a regular widget set, you should
-            normally inherit the <classname>DefaultWidgetSet</classname>.
-        </para>
-
-        <programlisting><?pocket-size 65% ?><![CDATA[
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE module PUBLIC
-  "-//Google Inc.//DTD Google Web Toolkit 1.7.0//EN"
-  "http://google-web-toolkit.googlecode.com/svn/tags/1.7.0/distro-source/core/src/gwt-module.dtd">
-
-<module>
-    <!-- Inherit the default widget set -->
-    <inherits name="com.vaadin.terminal.gwt.DefaultWidgetSet" />
-</module>]]></programlisting>
-
-        <para>
-            If you are developing a pure client-side application, you should instead
-            inherit <classname>com.vaadin.Vaadin</classname>, as described in <xref
-                linkend="gwt.widget.clientside-application"/>. In that case, the module
-            descriptor also needs an entry-point.
-        </para>
-        
-        <para>
-            If you are using the Eclipse IDE, the New Vaadin Widget wizard will
-            automatically create the GWT module descriptor. See <xref
-                linkend="gwt.eclipse.widget"/> for detailed instructions.
-        </para>
-        
-        <section xml:id="gwt.widgetset.stylesheet">
-            <title>Specifying a Stylesheet</title>
-
-            <para>
-                Widgets can have CSS stylesheets. These stylesheets are compiled into
-                the widget set. In the module descriptor, define a
-                <literal>stylesheet</literal> element as follows:
-            </para>
-
-            <programlisting><?pocket-size 65% ?><![CDATA[    <!-- The default theme of this widget set -->	
-    <stylesheet src="mycomponent/styles.css"/>]]></programlisting>
-
-            <para>
-                The specified path is relative to the <emphasis>public</emphasis>
-                folder under the folder of the module descriptor.
-            </para>
-        </section>
-
-        <section xml:id="gwt.widgetset.compilation-limiting">
-            <title>Limiting Compilation Targets</title>
-                
-            <para>
-                Compiling widget sets takes considerable time. You can reduce the
-                compilation time significantly by compiling the widget sets only for
-                your browser, which is useful during development. You can do this by
-                setting the <parameter>user.agent</parameter> property in the module
-                descriptor.
-            </para>
-                
-            <programlisting><?pocket-size 75% ?><![CDATA[<set-property name="user.agent" value="gecko1_8"/>]]></programlisting>
-            
-            <para>
-                The <parameter>value</parameter> attribute should match your browser. The
-                browsers supported by GWT depend on the GWT version, below is a list of
-                browser identifiers supported by GWT 2.0.
-            </para>
-            
-            <table>
-                <title>GWT User Agents</title>
-                <tgroup cols="2" align="left">
-                    <thead>
-                        <row valign="top">
-                            <entry>Identifier</entry>
-                            <entry>Name</entry>
-                        </row>
-                    </thead>
-                    <tbody>
-                        <row valign="top">
-                            <entry>gecko1_8</entry>
-                            <entry>Mozilla Firefox 1.5 and later</entry>
-                        </row>
-                        <row valign="top">
-                            <entry>gecko</entry>
-                            <entry>Mozilla Firefox 1.0 (<emphasis>obsolete</emphasis>)</entry>
-                        </row>
-                        <row valign="top">
-                            <entry>ie6</entry>
-                            <entry>Internet Explorer 6</entry>
-                        </row>
-                        <row valign="top">
-                            <entry>ie8</entry>
-                            <entry>Internet Explorer 8</entry>
-                            </row>
-                        <row valign="top">
-                            <entry>safari</entry>
-                            <entry>Apple Safari and other Webkit-based browsers including Google Chrome</entry>
-                            </row>
-                        <row valign="top">
-                            <entry>opera</entry>
-                                <entry>Opera</entry>
-                        </row>
-                    </tbody>
-                </tgroup>
-            </table>
-        </section>
-        
-        <para>
-            For more information about the GWT Module XML Format, please see Google Web
-            Toolkit Developer Guide.
-        </para>
-    </section>
-
 
     <section xml:id="gwt.addons">
         <title>Creating Add-ons</title>
@@ -1255,7 +1138,7 @@ public class CapsLockWarningConnector
 
             <para>
                 Assuming that you have otherwise configured the build script for your
-                project as described in <xref linkend="gwt.compiling.ant"/>, you
+                project as described in <xref linkend="clientside.compiling.ant"/>, you
                 can build the JAR package with the following command:
             </para>
 

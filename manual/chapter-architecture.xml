@@ -63,14 +63,12 @@
 			A server-side Vaadin application runs as a servlet in a Java web server,
 			serving HTTP requests. The <classname>VaadinServlet</classname> is normally
 			used as the servlet class. The servlet receives client requests and inteprets
-			them as events for a particular user session, represented by a
-			<classname>VaadinSession</classname> instance. Events are associated with user
-			interface components and delivered to the application, which handles them with
-			listeners. If the application logic makes changes to the server-side user
-			interface components, the terminal adapter renders them in the web browser by
-			generating a response. The client-side engine running in the browser receives
-			the responses and uses them to make any necessary changes to the page in the
-			browser.
+			them as events for a particular user session. Events are associated with user
+			interface components and delivered to the event listeners defined in the
+			application. If the UI logic makes changes to the server-side user interface
+			components, the servlet renders them in the web browser by generating a
+			response. The client-side engine running in the browser receives the responses
+			and uses them to make any necessary changes to the page in the browser.
 		</para>
 
 		<para>
@@ -163,24 +161,6 @@
 			</varlistentry>
 
 			<varlistentry>
-				<term>Vaadin Session</term>
-				<listitem>
-					<para>
-                        <indexterm><primary>VaadinSession</primary></indexterm>
-
-                        A Vaadin session, realized by the
-                        <classname>VaadinSession</classname> class, represents a user
-                        session that begins when the user first opens the application page
-                        in the browser. Sessions are tracked using cookies and expire
-                        automatically after a time since the last user interaction, or if
-                        the user logs out. Vaadin sessions are associated with one or more
-                        <emphasis>UI</emphasis>s, as described in <xref
-                        linkend="application"/>
-                    </para>
-                </listitem>
-            </varlistentry>
-
-			<varlistentry>
 				<term>Themes</term>
 				<listitem>
 					<para>
@@ -189,13 +169,14 @@
                         <indexterm><primary>SASS</primary></indexterm>
                         <indexterm><primary>HTML templates</primary></indexterm>
 
-						Vaadin makes a separation between the presentation and logic of
-						the user interface. While the UI logic is handled as Java code,
-						the presentation is defined in <emphasis>themes</emphasis> as CSS
-						or SASS. Vaadin provides a number of default themes. User themes
-						can, in addition to style sheets, include HTML templates that
-						define custom layouts and other resources, such as images. Themes
-						are discussed in detail in <xref linkend="themes"/>.
+						Vaadin makes a separation between the appearance and component
+						structure of the user interface. While the UI logic is handled as
+						Java code, the presentation is defined in
+						<emphasis>themes</emphasis> as CSS or SCSS. Vaadin provides a
+						number of default themes. User themes can, in addition to style
+						sheets, include HTML templates that define custom layouts and
+						other resources, such as images. Themes are discussed in detail in
+						<xref linkend="themes"/>.
 					</para>
 				</listitem>
 			</varlistentry>
@@ -207,10 +188,10 @@
                         <indexterm><primary>events</primary></indexterm>
 
 						User interaction with UI components creates events, which are
-						first processed on the client-side by the Client-Side Engine and
-						then passed all the way through the HTTP server, Vaadin servlet,
-						session, and UI components to the event listeners defined in the
-						application. See <xref linkend="architecture.events"/>.
+						first processed on the client-side by the widgets, then passed all
+						the way through the HTTP server, Vaadin servlet, and UI components
+						to the event listeners defined in the application. See <xref
+						linkend="architecture.events"/>.
 					</para>
 				</listitem>
 			</varlistentry>
@@ -247,19 +228,13 @@
                         In addition to server-side web applications, Vaadin supports
                         client-side application modules, which run in the browser.
 
-                        Client-side modules can use the same widgets, themes and back-end
+                        Client-side modules can use the same widgets, themes, and back-end
                         services as server-side Vaadin applications. They are useful when
                         you have a need for highly responsive UI logic, such as for games
                         or for serving a large number of clients with possibly stateless
                         server-side code, and for various other purposes, such as offering
-                        an off-line mode for server-side applications.
-                    </para>
-
-                    <para>
-                        The client-side user interface can also be built declaratively
-                        using the included <emphasis>UI Binder</emphasis>. The servlet for
-                        processing RPC calls from the client-side can be generated
-                        automatically by the included compiler.
+                        an off-line mode for server-side applications. Please see <xref
+                        linkend="clientsideapp"/> for further details.
                     </para>
                 </listitem>
             </varlistentry>
@@ -270,11 +245,12 @@
 					<para>
                         Vaadin is meant for building user interfaces, and it is
                         recommended that other application layers should be kept separate
-                        from the UI. The business logic could run in the same server as
-                        the UI code, separated at least by a Java API, possibly as EJBs,
-                        or distributed to a remote back-end service. The data storage is
-                        usually distributed to a database management system, and is
-                        typically accessed through a persistence solution, such as JPA.
+                        from the UI. The business logic can run in the same servlet as the
+                        UI code, usually separated at least by a Java API, possibly as
+                        EJBs, or distributed to a remote back-end service. The data
+                        storage is usually distributed to a database management system,
+                        and is typically accessed through a persistence solution, such as
+                        JPA.
                     </para>
                 </listitem>
             </varlistentry>
@@ -400,6 +376,11 @@
 		
 	<section xml:id="architecture.client-side">
 		<title>Client-Side Engine</title>
+
+        <para>
+            <emphasis>This section is significantly outdated in relation to Vaadin 7 and
+            will be revised in the final edition of the book.</emphasis>
+        </para>
 
 		<para>
             <indexterm significance="preferred"><primary>Client-Side Engine</primary></indexterm>
