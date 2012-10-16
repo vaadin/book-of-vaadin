@@ -119,7 +119,7 @@
   <!-- ==================================================================== -->
 
   <!-- URL to the Book Examples application -->
-  <xsl:param name="book.examples.url" select="'http://demo.vaadin.com/book-examples/book/'"/>
+  <xsl:param name="book.examples.url" select="'http://demo.vaadin.com/book-examples-vaadin7/book/'"/>
 
   <xsl:template match="book-example">
     <xsl:element name="div">

@@ -12,12 +12,6 @@
 	</para>
 
     <para>
-        Vaadin provides two application development models, a server-side and
-        client-side. In this chapter, we concentrate on the server-side model, which is
-        usually the easiest way to create web applications.
-    </para>
-
-    <para>
         <emphasis>This edition is a draft. Many new features that will be included in
         Vaadin 7 are not yet covered in this chapter and some of the content may in fact
         be outdated. For the most current version, please see the on-line edition
@@ -28,15 +22,16 @@
 		<title>Overview</title>
 
 		<para>
-            A server-side application made with Vaadin runs as a Java
-            Servlet in a Servlet container. The entry-point is the
+            A server-side Vaadin application runs as a Java Servlet in a servlet
+            container. The Java Servlet API is, however, hidden behind the framework. The
+            user interface of the application is implemented as a
             <emphasis>&root;</emphasis> class, which needs to create and manage the user
-            interface components. User input is handled with event listeners, which can be
-            simplified by binding user interface components directly to data. Visual
-            appearance is defined in themes as CSS <!-- TODO Vaadin 7: SASS -->
-            files. Icons, other images, and downloadable files are handled as
-            <emphasis>resources</emphasis>, which can be external or served by the
-            application server or the application itself.
+            interface components that make up the user interface. User input is handled
+            with event listeners, although it is also possible to bind the user interface
+            components directly to data. The visual style of the application is defined in
+            themes as CSS and SCSS files. Icons, other images, and downloadable files are
+            handled as <emphasis>resources</emphasis>, which can be external or served by
+            the application server or the application itself.
 		</para>
 		
 		<figure xml:id="figure.application.architecture">
@@ -52,8 +47,8 @@
 		</figure>
 
 		<para>
-			<xref linkend="figure.application.architecture"/> above illustrates the basic
-			architecture of an application made with the Vaadin framework, with all the
+			<xref linkend="figure.application.architecture"/> illustrates the basic
+			architecture of an application made with the Vaadin Framework, with all the
 			major elements, which are introduced below and discussed in detail in this
 			chapter.
 		</para>
@@ -74,10 +69,10 @@ public class HelloWorld extends Root {
 
         <para>
             A &root; is a viewport to a Vaadin application running in a web page.  A web
-            page, represented by the <classname>Page</classname> class, can have multiple
-            such &root;s embedded within it. Such situation is typical especially with
-            portlets in a portal. An application can run in multiple browser windows, each
-            having a <classname>Page</classname> and one or more &root;s.
+            page can actually have multiple such &root;s within it. Such situation is
+            typical especially with portlets in a portal. An application can run in
+            multiple browser windows, each having a distinct <classname>UI</classname>
+            instance. The UIs can be the same UI class or different.
         </para>
 
 		<para>
@@ -285,188 +280,157 @@ public class HelloWorld extends Root {
 
         <para>
             Let us put into practice what we learned of event handling in <xref
-            linkend="architecture.events"/>. You can handle events in three basic ways, as
-            shown below.
+            linkend="architecture.events"/>. You can implement a listener interfaces in
+            regular class, but it brings the problem with differentiating between
+            different event sources. Using anonymous class for listeners is recommended in
+            most cases.
         </para>
 
-		<para>
-			The following example follows a typical pattern where you have a
-			<classname>Button</classname> component and a listener that handles user
-			interaction (clicks) communicated to the application as events. Here we define
-			a class that listens click events.
-		</para>
+        <section xml:id="application.events.classlistener">
+            <title>Implementing a Listener in a Regular Class</title>
 
-		<programlisting><?pocket-size 65% ?><![CDATA[public class TheButton implements Button.ClickListener {
-    Button thebutton;
+            <para>
+                The following example follows a typical pattern where you have a
+                <classname>Button</classname> component and a listener that handles user
+                interaction (clicks) communicated to the application as events. Here we define
+                a class that listens click events.
+            </para>
 
-    /** Creates button into given container. */
-    public TheButton(AbstractComponentContainer container) {
-        thebutton = new Button ("Do not push this button");
-        thebutton.addListener(this);
-        container.addComponent(thebutton);
+            <book-example id="application.eventlistener.classlistener" style="float: right"></book-example>
+            <programlisting><![CDATA[public class MyComposite extends CustomComponent
+             implements Button.ClickListener {
+    Button button; // Defined here for access
+
+    public MyComposite() {
+        Layout layout = new HorizontalLayout();
+        
+        // Just a single component in this composition
+        button = new Button("Do not push this");
+        button.addClickListener(this);
+        layout.addComponent(button);
+        
+        setCompositionRoot(layout);
     }
     
-    /** Handle button click events from the button. */
-    public void buttonClick (Button.ClickEvent event) {
-        thebutton.setCaption ("Do not push this button again");
+    // The listener method implementation
+    public void buttonClick(ClickEvent event) {
+        button.setCaption("Do not push this again");
     }
 }]]></programlisting>
+        </section>
 
-		<para>
-			As an application often receives events for several components of the
-			same class, such as multiple buttons, it has to be able to
-			distinguish between the individual components. There are several
-			techniques to do this, but probably the easiest is to use the
-			property of the received event, which is set to the object sending
-			the event. This requires keeping at hand a reference to every object that
-			emits events.
-		</para>
+        <section xml:id="application.events.differentiation">
+            <title>Differentiating Between Event Sources</title>
 
-		<programlisting><?pocket-size 65% ?><![CDATA[public class TheButtons implements Button.ClickListener {
-    Button thebutton;
-    Button secondbutton;
+            <para>
+                If an application receives events of the same type from multiple sources,
+                such as multiple buttons, it has to be able to distinguish between the
+                sources. If using a regular class listener, distinguishing between the
+                components can be done by comparing the source of the event with each of
+                the components. The method for identifying the source depends on the event
+                type.
+            </para>
 
-    /** Creates two buttons in given container. */
-    public TheButtons(AbstractComponentContainer container) {
-        thebutton = new Button ("Do not push this button");
-        thebutton.addListener(this);
-        container.addComponent(thebutton);
-        
-        secondbutton = new Button ("I am a button too");
-        secondbutton.addListener(this);
-        container.addComponent (secondbutton);
+            <book-example id="application.eventlistener.differentiation" style="float: right"></book-example>
+            <programlisting><![CDATA[public class TheButtons extends CustomComponent
+       implements Button.ClickListener {
+    Button onebutton;
+    Button toobutton;
+
+    public TheButtons() {
+        onebutton = new Button("Button One", this);
+        toobutton = new Button("A Button Too", this);
+
+        // Put them in some layout
+        Layout root = new HorizontalLayout(); 
+        root.addComponent(onebutton);
+        root.addComponent(toobutton);
+        setCompositionRoot(root);
     }
     
-    /** Handle button click events from the two buttons. */
-    public void buttonClick (Button.ClickEvent event) {
-        if (event.getButton() == thebutton)
-            thebutton.setCaption("Do not push this button again");
-        else if (event.getButton() == secondbutton)
-            secondbutton.setCaption("I am not a number");
+    @Override
+    public void buttonClick(ClickEvent event) {
+        // Differentiate targets by event source
+        if (event.getButton() == onebutton)
+            onebutton.setCaption ("Pushed one");
+        else if (event.getButton() == toobutton)
+            toobutton.setCaption ("Pushed too");
     }
 }]]></programlisting>
 
-		<para>
-			Another solution to handling multiple events of the same class involves
-			attaching an event source to a listener method instead of the class. An event
-			can be attached to a method using another version of the
-			<methodname>addListener()</methodname> method, which takes the event handler
-			method as a parameter. The method can be passed either by the name of the
-			method or as a <classname>Method</classname> object. In the example below, we
-			use the name of the method, as a string (which is not checked at compile
-			time).
-		</para>
+            <para>
+                Other techniques exist for separating between event sources, such as using
+                object properties, names, or captions to separate between them. Using
+                captions or any other visible text is generally discouraged, as it may
+                create problems for internationalization. Using other symbolic strings can
+                also be dangerous, because the syntax of such strings is checked only
+                runtime.
+            </para>
+        </section>
 
-		<programlisting><?pocket-size 65% ?><![CDATA[public class TheButtons2 {
-    Button thebutton;
-    Button secondbutton;
+        <section xml:id="application.events.anonymous">
+            <title>The Easy Way: Using Anonymous Classes</title>
 
-    /** Creates two buttons in given container. */
-    public TheButtons2(AbstractComponentContainer container) {
-        thebutton = new Button ("Do not push this button");
-        thebutton.addListener(Button.ClickEvent.class, this,
-                              "theButtonClick");
-        container.addComponent(thebutton);
+            <para>
+                By far the easiest and the most common way to handle events is to use
+                anonymous local classes. It encapsulates the handling of events to where
+                the component is defined and does not require cumbering the managing class
+                with interface implementations. The following example defines an anonymous
+                class that inherits the <classname>Button.ClickListener</classname>
+                interface.
+            </para>
+
+            <book-example id="application.eventlistener.anonymous"></book-example>
+            <programlisting><![CDATA[// Have a component that fires click events
+final Button button = new Button("Click Me!");
         
-        secondbutton = new Button ("I am a button too");
-        secondbutton.addListener(Button.ClickEvent.class, this,
-                                 "secondButtonClick");
-        container.addComponent (secondbutton);
+// Handle the events with an anonymous class
+button.addClickListener(new Button.ClickListener() {
+    public void buttonClick(ClickEvent event) {
+        button.setCaption("You made me click!");
     }
-    
-    public void theButtonClick (Button.ClickEvent event) {
-        thebutton.setCaption ("Do not push this button again");
+});]]></programlisting>
+
+            <para>
+                Local objects referenced from within an anonymous class, such as the
+                <classname>Button</classname> object in the above example, must be
+                declared <literal>final</literal>.
+            </para>
+
+            <para>
+                Most components allow passing a listener to the constructor, thereby
+                losing a line or two. However, notice that if accessing the component
+                being constructed from an anonymous class, you must use a reference that
+                is declared before the constructor is executed, for example as a member
+                variable in the outer class. If it is declared in the same expression
+                where the constructor is called, it doesn't yet exist. In such cases, you
+                need to get use a reference to the component acquired from the event
+                object.
+            </para>
+
+            <book-example id="application.eventlistener.constructor"></book-example>
+            <programlisting><![CDATA[final Button button = new Button("Click It!",
+  new Button.ClickListener() {
+    @Override
+    public void buttonClick(ClickEvent event) {
+        event.getButton().setCaption("Done!");
     }
+  });]]></programlisting>
 
-    public void secondButtonClick (Button.ClickEvent event) {
-        secondbutton.setCaption ("I am not a number!");
-    }
-}]]></programlisting>
-
-		<para>
-			Adding a listener method with <methodname>addListener()</methodname> is
-			really just a wrapper that creates a
-			<classname>com.vaadin.event.ListenerMethod</classname>
-			listener object, which is an adapter from a listener class to a
-			method. It implements the
-			<classname>java.util.EventListener</classname> interface and can
-			therefore work for any event source using the interface. Notice that
-			not all listener classes necessarily inherit the
-			<classname>EventListener</classname> interface.
-		</para>
-
-		<para>
-			The third way, which uses anonymous local class definitions, is often the
-			easiest as it does not require cumbering the managing class with new
-			interfaces or methods. The following example defines an anonymous class that
-			inherits the <classname>Button.ClickListener</classname> interface and
-			implements the <methodname>buttonClick()</methodname> method.
-		</para>
-
-		<programlisting><?pocket-size 65% ?><![CDATA[public class TheButtons3 {
-    Button thebutton;
-    Button secondbutton;
-
-    /** Creates two buttons in given container. */
-    public TheButtons3(AbstractComponentContainer container) {
-        thebutton = new Button ("Do not push this button");
-
-        /* Define a listener in an anonymous class. */
-        thebutton.addListener(new Button.ClickListener() {
-            /* Handle the click. */
-            public void buttonClick(ClickEvent event) {
-                thebutton.setCaption (
-                        "Do not push this button again");
-            }
-        });
-        container.addComponent(thebutton);
-        
-        secondbutton = new Button ("I am a button too");
-        secondbutton.addListener(new Button.ClickListener() {
-            public void buttonClick(ClickEvent event) {
-                secondbutton.setCaption ("I am not a number!");            
-            }
-        });
-        container.addComponent (secondbutton);
-    }
-}]]></programlisting>
-
-		<para>
-			Other techniques for separating between different sources also exist. They include
-			using object properties, names, or captions to separate between
-			them. Using captions or any other visible text is generally
-			discouraged, as it may create problems for
-			internationalization. Using other symbolic strings can also be
-			dangerous, because the syntax of such strings is checked only
-			runtime.
-		</para>
-
-		<para>
-			Events are usually emitted by the framework, but applications may need to emit
-			them too in some situations, such as when updating some part of the UI is
-			required. Events can be emitted programmatically using the
-			<methodname>fireEvent(Component.Event)</methodname> method of
-			<classname>AbstractComponent</classname>. The event is then relayed to all the
-			listeners of the particular event class for the object. Some components have a
-			default event type, for example, a <classname>Button</classname> has a nested
-			<classname>Button.ClickEvent</classname> class and a corresponding
-			<classname>Button.ClickListener</classname> interface. These events can be
-			triggered with <methodname>fireComponentEvent()</methodname>.
-		</para>
+        </section>
     </section>
 
 	<section xml:id="application.resources">
 		<title>Referencing Resources</title>
 
 		<para>
-			Web applications work over the web and have various resources, such
-			as images or downloadable files, that the web browser has to get from
-			the server. These resources are typically used in
-			<classname>Embedded</classname> (images) or
+			Web applications can display various <emphasis>resources</emphasis>, such as
+			images or downloadable files, that the browser has to load from the server
+			separate from the page in which the application is running. These resources
+			are typically used in <classname>Embedded</classname> (images) or
 			<classname>Link</classname> (downloadable files) user interface
-			components. Various components, such as
-			<classname>TabSheet</classname>, can also include icons, which are
-			also handled as resources.
+			components. Various components, such as <classname>TabSheet</classname>, can
+			also include icons, which are also handled as resources.
 		</para>
 
 		<para>
