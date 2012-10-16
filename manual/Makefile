@@ -27,7 +27,7 @@ DBPARS =	section.autolabel=1 \
 # List of images to be converted from SVG to PNG
 IMAGES =	intro/architecture intro/toolchain \
 			intro/intro-themes-faded \
-			arch/architecture-detailed arch/clientside-arch arch/events-classdiagram \
+			arch/architecture-detailed arch/clientside-arch arch/events-classdiagram arch/java-servlet \
 			components/component-diagram components/component-abstractions \
 			components/tooltip-plain-withpointer components/tooltip-richtext-withpointer \
 			components/field-diagram components/field-interface \

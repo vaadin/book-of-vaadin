@@ -146,12 +146,13 @@
                         <indexterm><primary>VaadinServlet</primary></indexterm>
 
                         Server-side Vaadin applications work on top of the Java Servlet
-                        API. The Vaadin servlet, or more exactly the
+                        API (see <xref linkend="architecture.technology.servlet"/>. The
+                        Vaadin servlet, or more exactly the
                         <classname>VaadinServlet</classname> class, receives requests from
                         different clients, determines which user session they belong to by
                         tracking the sessions with cookies, and delegates the requests to
-                        their corresponding sessions. You can customize the Vaadin
-                        servlet by extending it.
+                        their corresponding sessions. You can customize the Vaadin servlet
+                        by extending it.
 					</para>
 				</listitem>
 			</varlistentry>
@@ -345,15 +346,74 @@
 			</para>
 		</section>
 
-        <!--
 		<section xml:id="architecture.technology.servlet">
 			<title>Java Servlets</title>
 
             <para>
-                
+                A Java Servlet is a class that is executed in a Java web server (a
+                <emphasis>Servlet container</emphasis>) to extend the capabilities of the
+                server. In practice, it is normally part of a <emphasis>web
+                application</emphasis>, which can contain HTML pages to provide static
+                content, and JavaServer Pages (JSP) and Java Servlets to provide dynamic
+                content. This is illustrated in <xref
+                linkend="figure.architecture.technology.servlet"/>.
+            </para>
+
+            <figure xml:id="figure.architecture.technology.servlet"> <!--  float="center" floatstyle="before" -->
+			<title>Java Web Applications and Servlets</title>
+                <mediaobject>
+                    <imageobject role="html">
+                        <imagedata align="center" fileref="img/arch/java-servlet-lo.png"/>
+                    </imageobject>
+                    <imageobject role="fo">
+                        <imagedata scale="75"  smallscale="80%" align="center" fileref="img/arch/java-servlet-hi.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+
+            <para>
+                Web applications are usually packaged and deployed to a server as
+                <emphasis>WAR</emphasis> (<emphasis>Web application ARchive</emphasis>)
+                files, which are Java JAR packages, which in turn are ZIP compressed
+                packages. The web application is defined in a
+                <filename>WEB-INF/web.xml</filename> deployment descriptor, which defines
+                the servlet classes and also the mappings from request URL paths to the
+                servlets. This is described in more detail in <xref
+                linkend="application.environment.web-xml"/>. The class path for the
+                servlets and their dependencies includes the
+                <filename>WEB-INF/classes</filename> and <filename>WEB-INF/lib</filename>
+                folders. The <filename>WEB-INF</filename> is a special hidden folder that
+                can not be accessed by its URL path.
+            </para>
+
+            <para>
+                The servlets are Java classes that handle HTTP requests passed to them by
+                the server through the <emphasis>Java Servlet API</emphasis>. They
+                generate HTML content as a response. JSP pages, on the other hand, are
+                HTML pages, which allow including Java source code embedded in the
+                pages. They are actually translated to Java source files by the container
+                and then compiled to servlets.
+            </para>
+
+            <para>
+                The UIs of server-side Vaadin applications run as servlets. They are
+                wrapped inside a <classname>VaadinServlet</classname> servlet class, which
+                handles session tracking and other tasks. The server-side UIs are
+                implemented as classes extending the <classname>UI</classname> class, as
+                described in <xref linkend="application"/>. The class is given as a
+                parameter to the Vaadin Servlet in the <filename>web.xml</filename>
+                deployment descriptor.
+            </para>
+
+            <para>
+                The Vaadin Client-Side Engine as well as client-side Vaadin applications
+                are loaded to the browser as static JavaScript files. The client-side
+                engine, or widget set in technical terms, needs to be located under the
+                <filename>VAADIN/widgetsets</filename> path in the web application. The
+                precompiled default widget set is served from the
+                <filename>vaadin-client-compiled</filename> JAR by the Vaadin Servlet.
             </para>
         </section>
-        -->
 	</section>
 
 	<section xml:id="architecture.client-side">
