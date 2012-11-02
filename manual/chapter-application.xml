@@ -125,13 +125,13 @@ public class HelloWorld extends Root {
                         entire page, but can also be just a part of a page. You normally
                         develop a Vaadin application by extending
                         <classname>&rootclass;</classname> and adding user interface
-                        components to it. A &root; is essentially a viewport or window
-                        connected to an application, and you can have many such views
-                        especially in a multi-window application. Normally, when the user
-                        opens a new page with the URL of the Vaadin application, a new
-                        <classname>Root</classname> (and the associated
+                        components to it. A &root; is essentially a viewport connected to
+                        a user session of an application, and you can have many such
+                        views, especially in a multi-window application. Normally, when
+                        the user opens a new page with the URL of the Vaadin application,
+                        a new <classname>Root</classname> (and the associated
                         <classname>Page</classname> object) is automatically created for
-                        it.
+                        it. All of them share the same user session.
                     </para>
 
                     <para>
@@ -164,22 +164,15 @@ public class HelloWorld extends Root {
 			</varlistentry>
 
 			<varlistentry>
-				<term>Application</term>
+				<term>Vaadin Session</term>
 				<listitem>
 					<para>
-						A Vaadin application, as defined by the
-						<classname>Application</classname> class, is essentially a user
-						session. It can have multiple windows, each represented by a
-						<classname>&rootclass;</classname>, which in turn is associated
-						with a <classname>Page</classname>.
+						A <classname>VaadinServletSession</classname> object represents a user
+						session with one or more UIs open in the application. A session
+						starts when a user first opens a UI of a Vaadin application, and
+						closes when the session expires in the server or when it is closed
+						explicitly.
 					</para>
-
-                    <para>
-                        You can actually also develop a Vaadin application by extending
-                        <classname>Application</classname> instead of
-                        <classname>&rootclass;</classname>, and create the &root;s
-                        yourself.
-                    </para>
 				</listitem>
 			</varlistentry>
 
@@ -224,10 +217,11 @@ public class HelloWorld extends Root {
 				<listitem>
 					<para>
 						A user interface can display images or have links to web pages or
-						downloadable documents. These are <emphasis>resources</emphasis>,
-						which can be external or provided by the web server or the
-						application itself. <xref linkend="application.resources"/> gives
-						a practical overview of the different types of resources.
+						downloadable documents. These are handled as
+						<emphasis>resources</emphasis>, which can be external or provided
+						by the web server or the application itself. <xref
+						linkend="application.resources"/> gives a practical overview of
+						the different types of resources.
 					</para>
 				</listitem>
 			</varlistentry>
@@ -238,11 +232,11 @@ public class HelloWorld extends Root {
 					<para>
 						The presentation and logic of the user interface are
 						separated. While the UI logic is handled as Java code, the
-						presentation is defined in <emphasis>themes</emphasis> as CSS<!--
-						TODO Vaadin 7: or SASS-->. Vaadin includes some built-in
-						themes. User-defined themes can, in addition to style sheets,
-						include HTML templates that define custom layouts and other theme
-						resources, such as images. Themes are discussed in detail in <xref
+						presentation is defined in <emphasis>themes</emphasis> as CSS or
+						SCSS. Vaadin includes some built-in themes. User-defined themes
+						can, in addition to style sheets, include HTML templates that
+						define custom layouts and other theme resources, such as
+						images. Themes are discussed in detail in <xref
 						linkend="themes"/>, custom layouts in <xref
 						linkend="layout.customlayout"/>, and theme resources in <xref
 						linkend="application.resources.theme"/>.
@@ -729,30 +723,87 @@ main.addComponent(new Embedded("Image title", imageresource));]]></programlistin
 		</section>
 	</section>
 
-	<!-- section>
-		<title>Application Life-Cycle</title>
-		<para>
-		</para>
-	</section -->
+	<section xml:id="application.lifecycle">
+		<title>Application Lifecycle</title>
 
-    <!-- TODO Vaadin 7: Verify and re-enable if possible -->
-    <!--
-	<section xml:id="application.close">
-		<title>Shutting Down an Application</title>
+		<section xml:id="application.lifecycle.deployment">
+            <title>Deployment</title>
+
+            <para>
+                Before a Vaadin application can be used, it has to be deployed to a Java
+                web server, as described in <xref
+                linkend="application.environment"/>. Deploying reads the
+                <filename>web.xml</filename> deployment descriptor in the application to
+                register servlets for specific URL paths and loads the classes.
+                Deployment does not yet run any code in the application, although static
+                blocks in classes are executed when they are loaded.
+            </para>
+
+            <para>
+                Applications can be undeployed when the server shuts down, before they are
+                redeployed, and when they are explicitly undeployed. All application
+                classes are unloaded and all heap space alloced by the application
+                freed. Undeploying a server-side Vaadin application thereby ends its
+                execution. If any user sessions are open at this point, the client-side
+                state of the UIs is left hanging and an error is displayed at next server
+                request.
+            </para>
+
+            <para>
+                Some servers, such as Tomcat, support <emphasis>hot deployment</emphasis>,
+                where the classes are reloaded while preserving the memory state of the
+                application. This is done by serializing the application state and then
+                deserializing it after the classes are reloaded. This is, in fact, done
+                with the basic Eclipse setup with Tomcat and you actually need to give the
+                <literal>?restartApplication</literal> parameter to the UI to force it to
+                restart when you reload the page. Tools such as JRebel go even further by
+                reloading the code in place without need for serialization.
+            </para>
+
+            <para>
+                The server can also serialize the application state when shutting down and
+                restarting, thereby preserving sessions over restarts. Serialization
+                requires that the applications are <emphasis>serializable</emphasis>, that
+                is, all classes implement the <interfacename>Serializable</interfacename>
+                interface. This feature is also used for clustering and cloud computing,
+                such as with Google App Engine, as described in <xref
+                linkend="advanced.gae"/>.
+            </para>
+        </section>
+
+		<section xml:id="application.lifecycle.session">
+            <title>User Session</title>
+
+            <para>
+                All server requests belonging to a particular UI class are processed by
+                the <classname>VaadinServlet</classname> class. It distinguishes between
+                the clients making the requests by tracking browser cookies. When a new
+                client connects, it creates a new user session, represented by an instance
+                of <classname>VaadinSession</classname>.
+            </para>
+        </section>
 
 		<para>
 			A user can log out or close the web page or browser, so a session and the
 			associated application instance can end. Ending an application can be
 			initiated by the application logic. Otherwise, it will be ended automatically
-			when the Servlet session times out.
+			when the servlet session times out.
 		</para>
 
-		<section>
-			<title>Closing an Application</title>
+		<section xml:id="application.lifecycle.ui">
+            <title>Loading an UI</title>
+        </section>
+
+		<section xml:id="application.lifecycle.expiration">
+            <title>Session Expiration</title>
+        </section>
+
+		<section xml:id="application.lifecycle.closing">
+			<title>Closing a Session</title>
 
 			<para>
-				If the user quits the application through the user interface, an event handler
-				should call the <methodname>close()</methodname> method in the
+				If the user quits the application through the user interface, an event
+				handler should call the <methodname>close()</methodname> method in the
 				<classname>Application</classname> class to shutdown the session.
 			</para>
 
@@ -783,7 +834,7 @@ main.addComponent(closeButton);]]></programlisting>
 			<programlisting><![CDATA[setLogoutURL("/logout.html");]]></programlisting>
 
 		</section>
-        -->
+
         <!-- TODO: Update if #2752 is fixed. -->
 
         <!--
@@ -1402,15 +1453,15 @@ notif.show(Page.getCurrent());]]></programlisting>
     </section>
 
 	<section xml:id="application.environment">
-		<title>Setting Up the Application Environment</title>
+		<title>Deploying an Application</title>
 		
 		<para>
 			Vaadin applications are deployed as <emphasis>Java web
-			applications</emphasis>. A Java "web application" can contain a number of
-			servlets, each of which can be a Vaadin application or some other servlet, and
-			static resources such as HTML files. Such a web application is normally
-			packaged as WAR (Web application ARchive) file, which can be deployed to a
-			Java application server (or a servlet container to be exact).
+			applications</emphasis>, which can contain a number of servlets, each of which
+			can be a Vaadin application or some other servlet, and static resources such
+			as HTML files. Such a web application is normally packaged as WAR (Web
+			application ARchive) file, which can be deployed to a Java application server
+			(or a servlet container to be exact).
         </para>
 
         <para>
@@ -1424,14 +1475,14 @@ notif.show(Page.getCurrent());]]></programlisting>
         </para>
 
         <para>
-            Remember that, in the Java Servlet parlance, "web application" means a
-            collection of Java servlets or portlets, JSP and static HTML pages, and
-            various other resources that form an application. Such a Java web application
-            is typically packaged as a WAR package for deployment. Vaadin applications, on
-            the other hand, run as servlets within such a Java web application. There
-            exists also other kinds of web applications. To avoid confusion with the
-            general meaning of "web application", we often refer to Java web application
-            as "WAR" in this book.
+            In the Java Servlet parlance, a "web application" means a collection of Java
+            servlets or portlets, JSP and static HTML pages, and various other resources
+            that form an application. Such a Java web application is typically packaged as
+            a WAR package for deployment. Server-side Vaadin UIs run as servlets within
+            such a Java web application. There exists also other kinds of web
+            applications. To avoid confusion with the general meaning of "web
+            application", we often refer to Java web application with the misnomer "WAR"
+            in this book.
 
             <!-- TODO Vaadin 7: What is the relationship between servlet and application? -->
 		</para>
