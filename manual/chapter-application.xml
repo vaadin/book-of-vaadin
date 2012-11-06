@@ -740,12 +740,12 @@ main.addComponent(new Embedded("Image title", imageresource));]]></programlistin
             </para>
 
             <para>
-                Applications can be undeployed when the server shuts down, before they are
-                redeployed, and when they are explicitly undeployed. All application
-                classes are unloaded and all heap space alloced by the application
-                freed. Undeploying a server-side Vaadin application thereby ends its
-                execution. If any user sessions are open at this point, the client-side
-                state of the UIs is left hanging and an error is displayed at next server
+                Applications can be undeployed when the server shuts down, during
+                redeployment, and when they are explicitly undeployed. Undeploying a
+                server-side Vaadin application thereby ends its execution, all application
+                classes are unloaded, and the heap space alloced by the application is
+                freed. If any user sessions are open at this point, the client-side state
+                of the UIs is left hanging and an error is displayed on next server
                 request.
             </para>
 
@@ -757,17 +757,17 @@ main.addComponent(new Embedded("Image title", imageresource));]]></programlistin
                 with the basic Eclipse setup with Tomcat and you actually need to give the
                 <literal>?restartApplication</literal> parameter to the UI to force it to
                 restart when you reload the page. Tools such as JRebel go even further by
-                reloading the code in place without need for serialization.
+                reloading the code in place without need for serialization. The server can
+                also serialize the application state when shutting down and restarting,
+                thereby preserving sessions over restarts.
             </para>
 
             <para>
-                The server can also serialize the application state when shutting down and
-                restarting, thereby preserving sessions over restarts. Serialization
-                requires that the applications are <emphasis>serializable</emphasis>, that
-                is, all classes implement the <interfacename>Serializable</interfacename>
-                interface. This feature is also used for clustering and cloud computing,
-                such as with Google App Engine, as described in <xref
-                linkend="advanced.gae"/>.
+                Serialization requires that the applications are
+                <emphasis>serializable</emphasis>, that is, all classes implement the
+                <interfacename>Serializable</interfacename> interface. All Vaadin classes
+                do. This feature is also used for clustering and cloud computing, such as
+                with Google App Engine, as described in <xref linkend="advanced.gae"/>.
             </para>
         </section>
 
@@ -834,7 +834,7 @@ main.addComponent(closeButton);]]></programlisting>
 			<programlisting><![CDATA[setLogoutURL("/logout.html");]]></programlisting>
 
 		</section>
-
+    </section>
         <!-- TODO: Update if #2752 is fixed. -->
 
         <!--
@@ -1063,7 +1063,7 @@ public static SystemMessages getSystemMessages() {
             </para>
         </section>
 		
-		<section xml:id="application.errors.unchecked-exceptions">
+        <section xml:id="application.errors.unchecked-exceptions">
 			<title>Handling Uncaught Exceptions </title>
 
 			<para>
