@@ -370,17 +370,23 @@
 			</fileset>
 		</copy>
 
-		<property name="manual.translations.dir" value="manual/translations/${locale}"/>
-
 		<!-- Generate translated XML files from PO and English XML files. -->
+        <!-- Execute the po2xml for each PO file for the locale -->
 		<apply executable="po2xml" dest="." verbose="yes" force="yes">
-			<targetfile/>
-			<srcfile/>
-			<fileset dir="${manual.translations.dir}">
+            <!-- An execution gets the following parameters: -->
+			<targetfile/> <!-- English XML file -->
+			<srcfile/>    <!-- Translated PO file -->
+
+            <!-- The translated PO files to be fed as srcfiles -->
+			<fileset dir="${translation.staging.dir}">
 				<include name="book.po"/>
 				<include name="chapter*.po"/>
 			</fileset>
+
+            <!-- Map the targetfile name from the srcfile name -->
 			<globmapper from="*.po" to="manual/*.xml"/>
+
+            <!-- Redirects stdout from po2xml to a file in the translated source dir -->
 			<redirector>
 				<outputmapper id="out" type="glob" from="*.po" to="${manual.source.dir}/*.xml"/>
 			</redirector>
@@ -398,21 +404,31 @@
 
 	<!-- Compile imported localized documentation. -->
 	<target name="build-imported-locale" depends="init">
-        <property name="translation.import.path" value="${result-path}/import/${manual.language.docbook}${import.language.extension}"/>
-        <property name="translation.build.path" value="manual/translations/${locale}"/>
+        <property name="translation.import.dir" value="${result-path}/import/${manual.language.docbook}${import.language.extension}"/>
+        <property name="translation.staging.dir" value="${result-path}/translation-staging/${locale}"/>
 
-        <echo>Translation import path: ${translation.import.path}</echo>
-        <echo>Translation build path:  ${translation.build.path}</echo>
+        <echo>Translation import dir:  ${translation.import.dir}</echo>
+        <echo>Translation staging dir: ${translation.staging.dir}</echo>
 
-        <!-- Copy translations over the existing PO files. -->
-        <copy todir="${translation.build.path}" overwrite="yes">
-            <fileset dir="${translation.import.path}">
+        <!-- Copy PO files from repository to the staging directory -->
+        <mkdir dir="${translation.staging.dir}"/>
+        <copy todir="${translation.staging.dir}" overwrite="yes" failonerror="no">
+            <fileset dir="manual/translations/${locale}">
+                <include name="*.po"/>
+            </fileset>
+        </copy>
+
+        <!-- Copy imported translations over the existing PO files  -->
+        <!--  * Remove locale from the filenames                    -->
+        <!--  * Unify different filename extensions to .po          -->
+        <copy todir="${translation.staging.dir}" overwrite="yes" failonerror="no">
+            <fileset dir="${translation.import.dir}">
                 <include name="*.po"/>
             </fileset>
             <globmapper from="*_${manual.language.docbook}${import.language.extension}.po" to="*.po"/>
         </copy>
-        <copy todir="${translation.build.path}" overwrite="yes">
-            <fileset dir="${translation.import.path}">
+        <copy todir="${translation.staging.dir}" overwrite="yes" failonerror="no">
+            <fileset dir="${translation.import.dir}">
                 <include name="*.pot"/>
             </fileset>
             <globmapper from="*_${manual.language.docbook}${import.language.extension}.pot" to="*.po"/>
@@ -422,6 +438,7 @@
 			<param name="locale" value="${locale}"/>
 			<param name="manual.language.docbook" value="${manual.language.docbook}"/>
 			<param name="manual.language.extension" value="${manual.language.extension}"/>
+			<param name="translation.staging.dir" value="${translation.staging.dir}"/>
 		</antcall>
 	</target>
 

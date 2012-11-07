@@ -211,15 +211,32 @@
                     <itemizedlist>
                         <listitem>Google Chrome</listitem>
                         <listitem>Internet Explorer</listitem>
-                        <listitem>Mozilla Firefox</listitem>
+                        <listitem>Mozilla Firefox (10.x ESR recommended)</listitem>
                         <listitem>Opera</listitem>
                         <listitem>Mobile browsers: Android, iPhone</listitem>
                     </itemizedlist>
                 </listitem>
+
                 <listitem>
-                    <para>Build system such as Ant or Maven to automate execution of tests during build process (recommended)</para>
+                    <para>
+                        A build system, such as Ant or Maven, to automate execution of
+                        tests during build process (recommended)
+                    </para>
                 </listitem>
             </itemizedlist>
+
+            <para>
+                Note that running tests on Firefox 10.x ESR is recommended because of the
+                frequent release cycle of Firefox, which often cause tests to
+                fail. Download the ESR release of Firefox from <link
+                    xlink:href="http://www.mozilla.org/en-US/firefox/organizations/all.html">http://www.mozilla.org/en-US/firefox/organizations/all.html</link>.
+                Install it alongside your normal Firefox install (do not overwrite).
+            </para>
+
+            <para>
+                For Mac OS X, note the issue mentioned in <xref
+                linkend="testbench.known-issues.firefox-mac"/>.
+            </para>
         </simplesect>
 
         <simplesect>
@@ -673,12 +690,62 @@
             </para>
         </section>
 
+        <section xml:id="testbench.installation.browserdrivers">
+            <title>Installing Browser Drivers</title>
+                
+            <para>
+                Whether developing tests with the WebDriver in the workstation or running
+                tests in a grid, using some browsers requires that a browser driver is
+                installed.
+            </para>
+
+            <orderedlist>
+                <listitem>
+                    <para>Download the latest browser driver</para>
+
+                    <itemizedlist>
+                        <listitem>
+                            <para>
+                                Internet Explorer (Windows only) - install <filename>IEDriverServer.exe</filename> from:
+                            </para>
+                            <para>
+                                <link
+                                    xlink:href="http://code.google.com/p/selenium/downloads/list">http://code.google.com/p/selenium/downloads/list</link>
+                            </para>
+                        </listitem>
+                        <listitem>
+                            <para>
+                                Chrome - install ChromeDriver (a part of the Chromium
+                                project) for your platform from:
+                            </para>
+                            <para>
+                                <link
+                                    xlink:href="http://code.google.com/p/chromedriver/downloads/list">http://code.google.com/p/chromedriver/downloads/list</link>
+                            </para>
+                        </listitem>
+                    </itemizedlist>
+                </listitem>
+
+                <listitem>
+                    Add the driver executable to PATH <emphasis>or</emphasis> define it as
+                    a system property in the application using WebDriver locally, or in
+                    distributed use give it as a command-line parameter to the grid node
+                    service, as described in <xref linkend="testbench.grid.node"/>.
+                </listitem>
+            </orderedlist>
+        </section>
+
         <section xml:id="testbench.installation.testnode">
             <title>Test Node Configuration</title>
 
             <para>
                 If you are running the tests in a grid environment, you need to make some
                 configuration to the test nodes to get more stable results.
+            </para>
+
+            <para>
+                Further configuration is provided in command-line parameters when starting
+                the node services, as described in <xref linkend="testbench.grid.node"/>.
             </para>
 
             <section xml:id="testbench.installation.testnode.os-settings">
@@ -696,12 +763,12 @@
                 <orderedlist>
                     <listitem>
                         <para>
-                            Open <menuchoice><guimenu>control panel</guimenu><guimenuitem>System</guimenuitem></menuchoice>
+                            Open <menuchoice><guimenu>Control Panel</guimenu><guimenuitem>System</guimenuitem></menuchoice>
                         </para>
                     </listitem>
                     <listitem>
                         <para>
-                            Select <guilabel>Advanced</guilabel> tab
+                            Select the <guilabel>Advanced</guilabel> tab
                         </para>
                     </listitem>
                     <listitem>
@@ -767,8 +834,8 @@
                     <listitem>
                         <para>
                             Turn on <guilabel>Allow active content to run in files on My
-                                Computer</guilabel> under <guilabel>Security
-                                settings</guilabel>
+                            Computer</guilabel> under <guilabel>Security
+                            settings</guilabel>
                         </para>
                     </listitem>
                 </itemizedlist>
@@ -1236,9 +1303,10 @@ import com.vaadin.testbench.TestBench;
 import com.vaadin.testbench.TestBenchTestCase;
 
 public class Testcase1 extends TestBenchTestCase {
-	private WebDriver driver;
-	private String baseUrl;
-	private StringBuffer verificationErrors = new StringBuffer();]]></programlisting>
+    private WebDriver driver;
+    private String baseUrl;
+    private StringBuffer verificationErrors = new StringBuffer();
+    ...]]></programlisting>
 
             <para>
                 The <parameter>verificationErrors</parameter> is used to collect some
@@ -1295,11 +1363,11 @@ public class Testcase1 extends TestBenchTestCase {
                 <programlisting><?pocket-size 65% ?><![CDATA[@Test
 public void testCase1() throws Exception {
     driver.get(concatUrl(baseUrl, "/myapp"));
-	assertEquals("Push Me!", driver.findElement(By.vaadin(
+    assertEquals("Push Me!", driver.findElement(By.vaadin(
         "bookexamplestobetested::PID_Smain.button")).getText());
-	driver.findElement(By.vaadin(
+    driver.findElement(By.vaadin(
         "bookexamplestobetested::PID_Smain.button")).click();
-	assertEquals("Thanks!", driver.findElement(By.vaadin(
+    assertEquals("Thanks!", driver.findElement(By.vaadin(
         "bookexamplestobetested::/VVerticalLayout[0]/"+
         "ChildComponentContainer[1]/VLabel[0]")).getText());
 }]]></programlisting>
@@ -1647,9 +1715,9 @@ String tooltipText = driver.findElement(
 
                 <screen><prompt>$</prompt> <command>cd</command> <parameter>maven</parameter>
 <prompt>$</prompt> <command>mvn</command> install:install-file \
-      -Dfile=<parameter>vaadin-testbench-&version.testbench;-SNAPSHOT.jar</parameter> \
-      -Djavadoc=<parameter>vaadin-testbench-&version.testbench;-SNAPSHOT-javadoc.jar</parameter> \
-      -DpomFile=<parameter>pom.xml</parameter></screen>
+   -Dfile=<parameter>vaadin-testbench-&version.testbench;-SNAPSHOT.jar</parameter> \
+   -Djavadoc=<parameter>vaadin-testbench-&version.testbench;-SNAPSHOT-javadoc.jar</parameter> \
+   -DpomFile=<parameter>pom.xml</parameter></screen>
 
                 <para>
                     The <filename>maven</filename> folder also includes an
@@ -1690,16 +1758,17 @@ String tooltipText = driver.findElement(
 
                 <screen><prompt>$</prompt> <command>mvn</command> test
 ...
--------------------------------------------------------
+-----------------------------------------------------
  T E S T S
--------------------------------------------------------
+-----------------------------------------------------
 Running TestBenchExample
 Tests run: 6, Failures: 2, Errors: 0, Skipped: 1, Time elapsed: 36.736 sec &lt;&lt;&lt; FAILURE!
 
 Results :
 
 Failed tests: 
-  testDemo(TestBenchExample): expected:&lt;[5/17/]12&gt; but was:&lt;[17.6.20]12&gt;
+  testDemo(TestBenchExample):
+      expected:&lt;[5/17/]12&gt; but was:&lt;[17.6.20]12&gt;
   testScreenshot(TestBenchExample): Screenshots differ
 
 Tests run: 6, Failures: 2, Errors: 0, Skipped: 1
@@ -1750,7 +1819,7 @@ Tests run: 6, Failures: 2, Errors: 0, Skipped: 1
             </section>
         </section>
 
-        <section xml:id="testbench.development.setup.webdriver">
+        <section xml:id="testbench.development.webdriver">
             <title>Creating and Closing a Web Driver</title>
             
             <para>
@@ -1793,7 +1862,7 @@ Tests run: 6, Failures: 2, Errors: 0, Skipped: 1
                 be static.
             </para>
 
-            <programlisting><?pocket-size 75% ?><![CDATA[public class AdvancedTest extends TestBenchTestCase {
+            <programlisting><?pocket-size 65% ?><![CDATA[public class AdvancedTest extends TestBenchTestCase {
     static private WebDriver driver;
 
     @BeforeClass
@@ -1806,6 +1875,41 @@ Tests run: 6, Failures: 2, Errors: 0, Skipped: 1
         driver.quit();
     }
 }]]></programlisting>
+
+            <section xml:id="testbench.development.webdriver.browsers">
+                <title>Browser Drivers</title>
+
+                <para>
+                    Please see the API documentation of the
+                    <interfacename>WebDriver</interfacename> interface for a complete list
+                    of supported drivers, that is, classes implementing the interface.
+                </para>
+
+                <para>
+                    Both the Internet Explorer and Chrome require a special driver, as was
+                    noted in <xref linkend="testbench.installation.browserdrivers"/>. The
+                    driver executable must be included in the operating system
+                    <literal>PATH</literal> or be given with a driver-specific system
+                    property in Java with: <methodname>System.setProperty(prop,
+                    key))</methodname>.
+                </para>
+
+                <itemizedlist>
+                    <listitem>Chrome: <parameter>webdriver.chrome.driver</parameter></listitem>
+                    <listitem>IE: <parameter>webdriver.ie.driver</parameter></listitem>
+                </itemizedlist>
+
+                <para>
+                    If you use the Firefox 10.x ESR version, which is recommended because
+                    of test stability, you need to the binary when creating the driver as
+                    follows:
+                </para>
+
+                <programlisting><?pocket-size 65% ?><![CDATA[FirefoxBinary binary =
+    new FirefoxBinary(new File("/path/to/firefox_ESR_10"));
+driver = TestBench.createDriver(
+    new FirefoxDriver(binary, new FirefoxProfile()));]]></programlisting>
+            </section>
         </section>
 
         <section xml:id="testbench.development.basic">
@@ -2632,6 +2736,12 @@ public void testRemoteWebDriver() throws MalformedURLException {
 ]]></programlisting>
 
             <para>
+                Please see the API documentation of the
+                <classname>DesiredCapabilities</classname> class for a complete list of
+                supported capabilities.
+            </para>
+
+            <para>
                 Running the example requires that the hub service and the nodes are
                 running. Starting them is described in the subsequent sections. Please
                 refer to <link
@@ -2649,8 +2759,7 @@ public void testRemoteWebDriver() throws MalformedURLException {
                 TestBench JAR and you can start it with the following command:
             </para>
 
-            <screen><prompt>$</prompt> <command>java</command> -jar \
-       vaadin-testbench-standalone-&version.testbench;.jar \
+            <screen><prompt>$</prompt> <command>java</command> -jar vaadin-testbench-standalone-&version.testbench;.jar \
        -role hub</screen>
 
             <para>
@@ -2660,6 +2769,194 @@ public void testRemoteWebDriver() throws MalformedURLException {
                 nodes, as instructed in the next section, the "console" page displays a
                 list of the grid nodes with their browser capabilities.
             </para>
+        </section>
+
+        <section xml:id="testbench.grid.node-configuration">
+            <title>Node Service Configuration</title>
+
+            <para>
+                Test nodes can be configured with command-line options, as described
+                later, or in a configuration file in JSON format. If no configuration file
+                is provided, a default configuration is used.
+            </para>
+
+            <para>
+                A node configuration file is specified with the
+                <parameter>-nodeConfig</parameter> parameter to the node service, for
+                example as follows:
+            </para>
+
+            <screen><prompt>$</prompt> <command>java</command> -jar vaadin-testbench-standalone-&version.testbench;.jar
+       -role node -nodeConfig <parameter>nodeConfig.json</parameter></screen>
+
+            <para>
+                See <xref linkend="testbench.grid.node"/> for further details on starting
+                the node service.
+            </para>
+
+            <section xml:id="testbench.grid.node-configuration.format">
+                <title>Configuration File Format</title>
+
+                <para>
+                    The test node configuration file follows the JSON format, which
+                    defines nested associative maps. An associative map is defined as a
+                    block enclosed in curly braces (<literal>{}</literal>). A mapping is a
+                    key-value pair separated with a colon (<literal>:</literal>). A key is
+                    a string literal quoted with double quotes
+                    (<literal>"key"</literal>). The value can be a string literal, list,
+                    or a nested associative map. A list a comma-separated sequence
+                    enclosed within square brackets (<literal>[]</literal>).
+                </para>
+
+                <para>
+                    The top-level associative map should have two associations:
+                    <literal>capabilities</literal> (to a list of associative maps) and
+                    <literal>configuration</literal> (to a nested associative map).
+                </para>
+
+                <programlisting><?pocket-size 75% ?>{
+  "capabilities":
+    [
+      {
+        "browserName": "<parameter>firefox</parameter>",
+        ...
+      },
+      ...
+    ],
+  "configuration":
+  {
+    "port": 5555,
+    ...
+  }
+}</programlisting>
+
+                <para>
+                    A complete example is given later.
+                </para>
+            </section>
+
+            <section xml:id="testbench.grid.node-configuration.capabilities">
+                <title>Browser Capabilities</title>
+
+                <para>
+                    The browser capabilities are defined as a list of associative maps as
+                    the value of the <literal>capabilities</literal> key. The capabilities
+                    can also be given from command-line using the
+                    <parameter>-browser</parameter> parameter, as described in <xref
+                    linkend="testbench.grid.node"/>.
+                </para>
+
+                <para>
+                    The keys in the map are the following:
+                </para>
+
+                <variablelist>
+                    <varlistentry>
+                        <term><parameter>platform</parameter></term>
+                        <listitem>
+                            The operating system platform of the test node. Can be
+                            <literal>WINDOWS</literal>, <literal>LINUX</literal>, or
+                            <literal>MAC</literal>.
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><parameter>browserName</parameter></term>
+                        <listitem>
+                            A browser identifier, any of: <literal>android</literal>,
+                            <literal>chrome</literal>, <literal>firefox</literal>,
+                            <literal>htmlunit</literal>, <literal>internet explorer</literal>,
+                            <literal>iphone</literal>, <literal>opera</literal>.
+                    </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><parameter>maxInstances</parameter></term>
+                        <listitem>
+                            The maximum number of browser instances of this type open at
+                            the same time for parallel testing.
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><parameter>version</parameter></term>
+                        <listitem>
+                            The major version number of the browser.
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><parameter>seleniumProtocol</parameter></term>
+                        <listitem>
+                            This should be <literal>WebDriver</literal> for WebDriver use, or
+                            <literal>Selenium</literal> for tests in the HTML format.
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><parameter>firefox_binary</parameter></term>
+                        <listitem>
+                            Full path and file name of the Firefox executable. This is
+                            typically needed if you have Firefox ESR installed in a
+                            location that is not in the system path.
+                        </listitem>
+                    </varlistentry>
+                </variablelist>
+            </section>
+
+            <section xml:id="testbench.grid.node-configuration.capabilities">
+                <title>Server Configuration</title>
+
+                <para>
+                    The node service configuration is defined as a nested associative map
+                    as the value of the <literal>configuration</literal> key. The
+                    configuration parameters can also be given as command-line parameters
+                    to the node service, as described in <xref linkend="testbench.grid.node"/>.
+                </para>
+
+                <para>
+                    See the following example for a typical server configuration.
+                </para>
+            </section>
+
+            <section xml:id="testbench.grid.node-configuration.example">
+                <title>Example Configuration</title>
+
+                <programlisting><?pocket-size 75% ?>{
+  "capabilities":
+    [
+      {
+        "browserName": "<parameter>firefox</parameter>",
+        "maxInstances": <parameter>5</parameter>,
+        "seleniumProtocol": "<parameter>WebDriver</parameter>",
+        "version": "<parameter>10</parameter>",
+        "firefox_binary": "<parameter>/path/to/firefox10</parameter>"
+      },
+      {
+        "browserName": "<parameter>firefox</parameter>",
+        "maxInstances": <parameter>5</parameter>,
+        "version": "<parameter>16</parameter>",
+        "firefox_binary": "<parameter>/path/to/firefox16</parameter>"
+      },
+      {
+        "browserName": "<parameter>chrome</parameter>",
+        "maxInstances": <parameter>5</parameter>,
+        "seleniumProtocol": "<parameter>WebDriver</parameter>"
+      },
+      {
+        "platform": "<parameter>WINDOWS</parameter>",
+        "browserName": "<parameter>internet explorer</parameter>",
+        "maxInstances": <parameter>1</parameter>,
+        "seleniumProtocol": "<parameter>WebDriver</parameter>"
+      }
+    ],
+  "configuration":
+  {
+    "proxy": "org.openqa.grid.selenium.proxy.DefaultRemoteProxy",
+    "maxSession": 5,
+    "port": 5555,
+    "host": ip,
+    "register": true,
+    "registerCycle": 5000,
+    "hubPort": 4444
+  }
+}</programlisting>
+            </section>
         </section>
 
         <section xml:id="testbench.grid.node">
@@ -2677,8 +2974,10 @@ public void testRemoteWebDriver() throws MalformedURLException {
        -hub <parameter>http://localhost:4444/grid/register</parameter></screen>
 
             <para>
-                The node registers itself in the grid hub and you need to give the address
-                of the hub with the <parameter>-hub</parameter> parameter.
+                The node registers itself in the grid hub. You need to give the address of
+                the hub either with the <parameter>-hub</parameter> parameter or in the
+                node configuration file as described in <xref
+                linkend="testbench.grid.node-configuration"/>.
             </para>
 
             <para>
@@ -2687,6 +2986,58 @@ public void testRemoteWebDriver() throws MalformedURLException {
                 least in OS X, you may need to duplicate the JAR to a separate copy to use
                 it to run a grid node service.
             </para>
+
+            <section xml:id="testbench.grid.node.browser-capabilities">
+                <title>Browser Capabilities</title>
+
+                <para>
+                    The browsers installed in the node can be defined either with a
+                    command-line parameter or with a configuration file in JSON format, as
+                    described in <xref linkend="testbench.grid.node-configuration"/>.
+                </para>
+
+                <para>
+                    On command-line, you can issue a <parameter>-browser</parameter> option to
+                    define the browser capabilities. It must be followed by a comma-separated
+                    list of property-value definitions, such as the following:
+                </para>
+
+                <screen>-browser "browserName=firefox,version=10,firefox_binary=/path/to/firefox10" \
+-browser "browserName=firefox,version=16,firefox_binary=/path/to/firefox16" \
+-browser "browserName=chrome,maxInstances=5" \
+-browser "browserName=internet explorer,maxInstances=1,platform=WINDOWS"</screen>
+
+                <para>
+                    The configuration properties are described in <xref
+                    linkend="testbench.grid.node-configuration"/>.
+                </para>
+            </section>
+
+            <section xml:id="testbench.grid.node.browserdriver">
+                <title>Browser Driver Parameters</title>
+
+                <para>
+                    If you use Chrome or Internet Explorer, their remote driver
+                    executables must be in the system path (in the <literal>PATH</literal>
+                    environment variable) or be given with a command-line parameter to the
+                    node service:
+                </para>
+
+                <variablelist>
+                    <varlistentry>
+                        <term>Internet Explorer</term>
+                        <listitem>
+                            <parameter>-Dwebdriver.ie.driver=C:\path\to\IEDriverServer.exe</parameter>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>Google Chrome</term>
+                        <listitem>
+                            <parameter>-Dwebdriver.chrome.driver=/path/to/ChromeDriver</parameter>
+                        </listitem>
+                    </varlistentry>
+                </variablelist>
+            </section>
         </section>
 
         <section xml:id="testbench.grid.mobile">
@@ -2719,7 +3070,8 @@ public void testRemoteWebDriver() throws MalformedURLException {
              </para>
         </section>
     </section>
-    <section xml:id="testbench.known.issues">
+
+    <section xml:id="testbench.known-issues">
         <title>Known Issues</title>
 
         <para>
@@ -2727,7 +3079,7 @@ public void testRemoteWebDriver() throws MalformedURLException {
             to be difficult to use or need modification to work.
         </para>
 
-        <section xml:id="testbench.known.issues.asserttextpresent">
+        <section xml:id="testbench.known-issues.asserttextpresent">
             <title>Using <methodname>assertTextPresent</methodname> and <methodname>assertTextNotPresent</methodname></title>
 
             <para>
@@ -2744,7 +3096,7 @@ public void testRemoteWebDriver() throws MalformedURLException {
             </para>
         </section>
 
-        <section xml:id="testbench.known.issues.upload">
+        <section xml:id="testbench.known-issues.upload">
             <title>Exporting Recordings of the <classname>Upload</classname> Component</title>
 
             <para>
@@ -2754,6 +3106,35 @@ public void testRemoteWebDriver() throws MalformedURLException {
                 that cannot be cleared. Also make sure that the replay window is wide enough for the upload
                 button to be visible (see <methodname>driver.resizeViewPortTo()</methodname>), otherwise you
                 will get an exception when running the test.
+            </para>
+        </section>
+
+        <section xml:id="testbench.known-issues.firefox-mac">
+            <title>Running Firefox Tests on Mac OS X</title>
+
+            <para>
+                Firefox needs to have focus in the main window for any focus events to be
+                triggered. This sometimes causes problems if something interferes with the
+                focus. For example, a <classname>TextField</classname> that has an input
+                prompt relies on the JavaScript <methodname>onFocus()</methodname> event
+                to clear the prompt when the field is focused.
+            </para>
+
+            <para>
+                The problem occurs when OS X considers the Java process of an application
+                using TestBench (or the node service) to have a native user interface
+                capability, as with AWT or Swing, even when they are not used. This causes
+                the focus to switch from Firefox to the process using TestBench, causing
+                tests requiring focus to fail. To remedy this problem, you need to start
+                the JVM in which the tests are running with the
+                <parameter>-Djava.awt.headless=true</parameter> parameter to disable the
+                user interface capability of the Java process.
+            </para>
+
+            <para>
+                Note that the same problem is present also when debugging tests with
+                Firefox. We therefore recommend using Chrome for debugging tests, unless
+                Firefox is necessary.
             </para>
         </section>
     </section>

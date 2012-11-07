@@ -278,7 +278,7 @@
                 of a navigation bar and a content area. The content area is scrollable, so
                 there is no need to use an inner panel component. In addition, there can be an
                 optional toolbar component at the bottom of the
-                view. <classname>NavigationView</classname> is often used inside a
+                view. A <classname>NavigationView</classname> is often used inside a
                 <classname>NavigationManager</classname> to get view change animations.
             </para>
 
@@ -306,18 +306,19 @@
                 <para>
                     The navigation bar at the top of <classname>NavigationView</classname> is
                     a <classname>NavigationBar</classname> component. It has two component
-                    slots, with one on the left and one on the right. On the middle, there is
-                    a caption. You can use the <classname>NavigationBar</classname> elsewhere
-                    as well, such as for the toolbar.
+                    slots, with one on the left and one on the right. The caption is displayed
+                    in the middle. The <classname>NavigationBar</classname> can be used elsewhere
+                    as well, such as for a view containing a form with save and cancel buttons
+                    in the upper right and left corners.
                 </para>
 
                 <para>
-                    The left slot is automatically filled with a <guibutton>Back</guibutton>
-                    button if you set the previous component with
-                    <methodname>setPreviousComponent()</methodname>. If you use the
-                    <classname>NavigationView</classname> inside a
-                    <classname>NavigationManager</classname>, the manager automaticaly sets
-                    the previous view when you navigate to it from another managed view.
+                    When the <classname>NavigationBar</classname> is used for navigation and you
+                    set the previous component with
+                    <methodname>setPreviousComponent()</methodname>, the left slot is
+                    automatically filled with a <guibutton>Back</guibutton> button. This is
+                    done automatically if you use the <classname>NavigationView</classname>
+                    inside a <classname>NavigationManager</classname>.
                 </para>
 
                 <para>
@@ -549,56 +550,25 @@ button.setTargetView(view);
                 action. Unlike regular sub-windows, it does not support dragging or resizing
                 by the user. It can have a caption, but usually does not. As sub-windows
                 usually require a rather large screen size, the <classname>Popover</classname>
-                is mainly applicable to tablet devices, but can be used also in phones with
-                full size with <methodname>setSizeFull()</methodname>.
+                is mainly applicable to tablet devices. When used on smaller devices, such as
+                phones, the <classname>Popover</classname> automatically fills the entire
+                screen.
             </para>
 
             <para>
-                In the following, we extend <classname>Popover</classname> to use it. It is
-                modal by default. Notice that the screen size is not available in the
+                In the following example, we extend <classname>Popover</classname> to use it. It
+                is modal by default. Notice that the screen size is not available in the
                 constructor, so we have to postpone using it to the
                 <methodname>attach()</methodname> method.
             </para>
 
-            <programlisting><?pocket-size 65% ?><![CDATA[public class ComposeView extends Popover {
-    ...
-    public ComposeView(boolean smartphone) {
-        setClosable(false);
+            <para>
+                Popover windows are added to an application-level <classname>Window</classname>
+                object with <methodname>addWindow()</methodname>, just like sub-windows in a
+                regular Vaadin application.
+            </para>
 
-        ...
-
-        // In phones use all space, in tablets just vertically
-        if (smartphone) {
-            setSizeFull();
-        } else {
-            setHeight("100%");
-            center();
-        }
-    }
-
-    @Override
-    public void attach() {
-        super.attach();
-
-        // If tablet is wide, leave some space horizontally
-        if (!smartphone) {
-            if (getParent().getWidth() > 800) {
-                setWidth("80%");
-            } else {
-                setWidth("100%");
-            }
-        }
-    }
-    ...
-}]]></programlisting>
-
-        <para>
-            You add popover windows to an application-level <classname>Window</classname>
-            object with <methodname>addWindow()</methodname>, just like sub-windows in a
-            regular Vaadin application.
-        </para>
-
-        <programlisting><?pocket-size 65% ?><![CDATA[if (event.getButton() == emailButton) {
+            <programlisting><?pocket-size 65% ?><![CDATA[if (event.getButton() == emailButton) {
     ComposeView composeView = new ComposeView(smartphone);
     getWindow().addWindow(composeView);
     return;
@@ -676,48 +646,103 @@ layout.addComponent(switch);]]></programlisting>
                 </para>
             </section>
         </section>
-
-        <section xml:id="mobile.components.componentgroup">
-            <title><classname>ComponentGroup</classname></title>
-
-            <para>
-                The <classname>ComponentGroup</classname> is a layout component for grouping
-                components. It uses margins, background color, and rounded corners to
-                visualize the grouping. It extends <classname>CssLayout</classname> and
-                behaves otherwise as such, except in having 100% default width. There is a
-                vertical and a horizontal version of the component.
-            </para>
-            
-            <programlisting><![CDATA[VerticalComponentGroup componentGroup = new VerticalComponentGroup();
-
-// Name field
-Component textField = new TextField("Name");
-textField.setWidth("100%");
-componentGroup.addComponent(textField);
-
-// Email field
-EmailField emailField = new EmailField("Email");
-emailField.setWidth("100%");
-componentGroup.addComponent(emailField);
-
-// Number field
-NumberField numberField = new NumberField("Age");
-numberField.setWidth("100%");
-componentGroup.addComponent(numberField);]]></programlisting>
-
-            <section xml:id="mobile.components.componentgroup.css">
+		
+		<section xml:id="mobile.components.verticalcomponentgroup">
+            <title><classname>VerticalComponentGroup</classname></title>
+			<para>
+				The <classname>VerticalComponentGroup</classname> is a layout component for grouping
+                components in the vertical stack. The most typical use of the 
+                <classname>VerticalComponentGroup</classname> is to make vertical navigation menus 
+                containing <classname>NavigationButton</classname>s for the mobile application.
+				The <classname>VerticalComponentGroup</classname> and 
+				<classname>HorizontalComponentGroup</classname> both extend 
+				<classname>AbstractComponentGroup</classname> which is inherited from the 
+				<classname>AbstractComponentContainer</classname>.
+				In the client side both component group widgets are extending the lightweigth 
+				<classname>FlowPanel</classname>.
+			</para>
+			
+			<section xml:id="mobile.components.verticalcomponentgroup.css">
                 <title>Styling with CSS</title>
 
-                <programlisting><![CDATA[.v-touchkit-componentgroup { }
-.v-touchkit-componentgroup-h { }]]></programlisting>
+                <programlisting><![CDATA[.v-touchkit-verticalcomponentgroup { }]]></programlisting>
 
                 <para>
-                    The component has an overall <literal>v-touchkit-componentgroup</literal> style if
-                    vertical and <literal>v-touchkit-componentgroup-h</literal> if horizontal. If the
-                    component has a caption, the <literal>v-touchkit-has-caption</literal> style is
-                    added.
+                    The component has an overall <literal>v-touchkit-verticalcomponentgroup</literal> 
+                    style. If the component has a caption, the 
+                    <literal>v-touchkit-has-caption</literal> style is added.
                 </para>
             </section>
+		</section>
+		
+		<section xml:id="mobile.components.horizontalcomponentgroup">
+            <title><classname>HorizontalComponentGroup</classname></title>
+			<para>
+				The <classname>HorizontalComponentGroup</classname> is mainly intended to group buttons
+				 inside the <classname>VerticalComponentGroup</classname> slots.
+			</para>
+			
+			<programlisting><?pocket-size 65% ?><![CDATA[HorizontalComponentGroup horizontalCGroup = new HorizontalComponentGroup();
+horizontalCGroup.addComponent(new Button("First"));
+horizontalCGroup.addComponent(new Button("Another"));
+
+NavigationButton navButton = new NavigationButton();
+button.setIcon(new ThemeResource("../runo/icons/32/ok.png"));
+        
+VerticalComponentGroup verticalCGroup = new VerticalComponentGroup();
+verticalCGroup.setMargin(true);
+
+verticalCGroup.addComponent(horizontalCGroup);
+verticalCGroup.addComponent(new Button("Button"));
+verticalCGroup.addComponent(new TextField("TF's caption"));
+verticalCGroup.addComponent(navButton);]]></programlisting>
+			
+		</section>
+
+        <section xml:id="mobile.components.tabbarview">
+            <title><classname>TabBarView</classname></title>
+            
+            <para>
+                The <classname>TabBarView</classname> is a layout component that consist of
+		a tab bar and content area. Each tab will have it's own content area which
+		will be displayed when a correspoding tab is selected. TabBarView is inherited
+		from the <classname>ComponentContainer</classname> but uses it's own specialized
+		API for monipulating tabs. <methodname>removeComponent()</methodname> and
+		<methodname>addComponent()</methodname> will throw an 
+		<classname>UnsupportedOperationException</classname> if used.
+	    </para>
+
+<programlisting><![CDATA[TabBarView bar = new TabBarView();
+
+//Create some Vaadin Component to use as content
+Label content = new Label("Really simple content");
+
+//Create a tab for it
+Tab tab = bar.addTab(label);
+
+//Set tab name and/or icon
+tab.setCaption("tab name");
+tab.setIcon(new ThemeResource(...));
+
+//Programmatically modify tab bar
+Tab selectedTab = bar.getSelectedTab();
+bar.setSelectedTab(selectedTab); //same as user clicking the tab
+bar.removeTab(selectedTab);]]></programlisting>
+
+            <section xml:id="mobile.components.tabbarview.css">
+                <title>Styling with CSS</title>
+
+                <programlisting><![CDATA[.v-touchkit-tabbar {} 
+.v-touchkit-tabbar-wrapper {} 
+.v-touchkit-tabbar-toolbar {} ]]></programlisting>
+		<para>
+			The component has overall <literal>v-touchkit-tabbar</literal> style.
+			Content area is wrapped inside a <literal>v-touchkit-tabbar-wrapper</literal>
+			element. Tab bar control area itself has the <literal>v-touchkit-tabbar-toolbar</literal>
+			style.
+		</para>
+	    </section>
+
         </section>
 
         <section xml:id="mobile.components.emailfield">
@@ -743,6 +768,19 @@ componentGroup.addComponent(numberField);]]></programlisting>
                 rather than the default alphanumeric.
             </para>
         </section>
+
+        <section xml:id="mobile.components.urlfield">
+            <title><classname>UrlField</classname></title>
+            
+            <para>
+                The <classname>UrlField</classname> is just like the regular
+                <classname>TextField</classname>, except that it is marked as a URL input
+                field for mobile devices, so that they will show a URL input virtual keyboard
+                rather than the default alphanumeric. It has convenience methods 
+                <methodname>getUrl()</methodname> and <methodname>setUrl(URL url)</methodname>
+                for converting input value from and to java.net.URL.
+            </para>
+        </section>
     </section>
 
     <section xml:id="mobile.features">
@@ -761,16 +799,17 @@ componentGroup.addComponent(numberField);]]></programlisting>
             </para>
 
             <para>
-                Geolocation is requested by calling
-                <methodname>detectCurrentPosition()</methodname> in the
-                <classname>TouchKitWindow</classname> main window of the application. You
-                need to give a <classname>PositionCallback</classname> handler that
-                receives the location in <methodname>onSuccess()</methodname> if acquired
-                from the device successfully. The position is given in
-                a <classname>Position</classname> object.
+                Geolocation is requested by calling the static
+                <classname>Geolocator</classname><methodname>.detect()</methodname> method. You
+                need to provide a <classname>PositionCallback</classname> handler that
+                is called when the device has an answer for your request. If the geolocation 
+                request succeeded, <methodname>onSuccess()</methodname> is called. Otherwise, e.g
+                . if the user didn't allow sharing of his location, <methodname>
+                onFailure</methodname> is called. The geolocation data is provided in a
+                <classname>Position</classname> object.
             </para>
 
-            <programlisting><?pocket-size 65% ?><![CDATA[mainWindow.detectCurrentPosition(new PositionCallback() {
+            <programlisting><?pocket-size 65% ?><![CDATA[Geolocator.detect(new PositionCallback() {
     public void onSuccess(Position position) {
         double latitude  = position.getLatitude();
         double longitude = position.getLongitude();
@@ -788,7 +827,17 @@ componentGroup.addComponent(numberField);]]></programlisting>
                 The position is given as degrees with fractions. The longitude is positive
                 to East and negative to West of the Prime Meridian passing through
                 Greenwich, following the convention for coordinate systems. The accuracy
-                is given in meters.
+                is given in meters. In addition to the above data, the following are also
+                provided:
+            </para>
+            <orderedlist>
+                <listitem>Altitude</listitem>
+                <listitem>Altitude accuracy</listitem>
+                <listitem>Heading</listitem>
+                <listitem>Speed</listitem>
+            </orderedlist>
+            <para>
+                If any of the position data is unavailable, its value will be zero.
             </para>
 
             <para>
@@ -803,10 +852,13 @@ componentGroup.addComponent(numberField);]]></programlisting>
                 Notice that geolocation can take significant time, depending on the
                 location method used by the device. With Wi-Fi and cellular positioning,
                 the time is usually less than 30 seconds. With GPS, it can reach minutes
-                or longer, especially if the reception is bad.
+                or longer, especially if the reception is bad. However, once a location fix
+                has been made, updates to the location will be faster. If you are making
+                navigation software, you need to update the position data fairly frequently by
+                calling <classname>Geolocator</classname><methodname>.detect()</methodname>
+                multiple times.
             </para>
-        </section>
-    </section>
+        </section>    </section>
 
     <section xml:id="mobile.testing">
         <title>Testing and Debugging on Mobile Devices</title>
