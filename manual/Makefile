@@ -41,6 +41,7 @@ IMAGES =	intro/architecture intro/toolchain \
 			clientsideapp/clientsideapp-architecture \
 			gwt/gwt-widgets gwt/gwt-widget-files gwt/gwt-hostedmode-project-annotated\
 			gwt/gwt-custom-architecture \
+			gwt/widget-integration \
 			vaadin-logo book-example \
 			eclipse/editor-design-2-crop eclipse/widgetset-compiling-toolbar \
 			datamodel/datamodel-interfaces datamodel/beanitem-doublebinding \
