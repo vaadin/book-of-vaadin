@@ -8,10 +8,13 @@
 
         <para>
             Vaadin Charts is a feature-rich interactive charting library for Vaadin. It
-            provides a <classname>Chart</classname> component, which can illustrate data
-            in many available chart types. The charts allow flexible configuration of all
-            the chart elements as well as the visual style. The library includes a number
-            of built-in visual themes, which you can extend further.
+            provides a <classname>Chart</classname> component, which can illustrate one-
+            and two dimensional numeric data in many available chart types. The charts
+            allow flexible configuration of all the chart elements as well as the visual
+            style. The library includes a number of built-in visual themes, which you can
+            extend further. The basic functionalities allow the user to interact with the
+            chart elements in various ways, and you can define custom interaction with
+            click events.
         </para>
 
 		<figure xml:id="figure.charts.overview" float="center" floatstyle="before">
@@ -24,24 +27,92 @@
 		</figure>
 
         <para>
+            The data displayed in a chart can be one- or two dimensional tabular data, or
+            scatter data with free X and Y values. Data displayed in range charts has
+            minimum and maximum values instead of singular values.
+        </para>
+
+        <para>
             This chapter covers the basic use of Vaadin Charts and the chart
             configuration. For detailed documentation of the configuration parameters and
             classes, please refer to the JavaDoc API documentation of the library.
         </para>
 
         <para>
+            In the following basic example, which we study further in <xref
+            linkend="charts.basic-use"/>, we demonstrate how to display one-dimensional
+            data in a column graph and customize the X and Y axis labels and titles.
+        </para>
+
+        <programlisting><?pocket-size 65% ?><![CDATA[
+Chart chart = new Chart(ChartType.BAR);
+chart.setWidth("400px");
+chart.setHeight("300px");
+        
+// Modify the default configuration a bit
+Configuration conf = chart.getConfiguration();
+conf.setTitle("Planets");
+conf.setSubTitle("The bigger they are the harder they pull");
+conf.getLegend().setEnabled(false); // Disable legend
+
+// The data
+ListSeries series = new ListSeries("Diameter");
+series.setData(4900,  12100,  12800,
+               6800,  143000, 125000,
+               51100, 49500);
+conf.addSeries(series);
+
+// Set the category labels on the axis correspondingly
+XAxis xaxis = new XAxis();
+xaxis.setCategories("Mercury", "Venus",   "Earth",
+                    "Mars",    "Jupiter", "Saturn",
+                    "Uranus",  "Neptune");
+xaxis.setTitle("Planet");
+conf.addxAxis(xaxis);
+
+// Set the Y axis title
+YAxis yaxis = new YAxis();
+yaxis.setTitle("Diameter");
+yaxis.getLabels().setFormatter(
+  "function() {return Math.floor(this.value/1000) + \'Mm\';}");
+yaxis.getLabels().setStep(2);
+conf.addyAxis(yaxis);
+        
+layout.addComponent(chart);]]></programlisting>
+
+        <para>
+            The resulting chart is shown in <xref
+            linkend="figure.charts.overview.basicexample"/>.
+        </para>
+
+		<figure xml:id="figure.charts.overview.basicexample">
+			<title>Basic Chart Example</title>
+			<mediaobject>
+				<imageobject>
+					<imagedata scale="70" smallscale="80%" align="center" fileref="img/charts/charts-basicexample.png"/>
+				</imageobject>
+			</mediaobject>
+		</figure>
+
+        <para>
             Vaadin Charts is based on Highcharts JS, a charting library written in
             JavaScript.
         </para>
 
-        <simplesect>
-            <title>Licensing and Trial Period</title>
+        <simplesect xml:id="charts.overview.licensing">
+            <title>Licensing</title>
 
             <para>
-                Vaadin Charts is licensed under the Commercial Vaadin Add-on Licence
-                (CVAL) version 2.0. The per-developer license is available for Vaadin Pro
-                Account subscribers as explained at <link
-                xlink:href="https://vaadin.com/pro">vaadin.com/pro</link>.
+                Vaadin Charts is a commercial product licensed under the CVAL License
+                (Commercial Vaadin Add-On License). A license needs to be purchased for
+                all use, including web deployments as well as intranet use. The Vaadin
+                Charts license includes the license for Highcharts JS.
+            </para>
+
+            <para>
+                The commercial licenses can be purchased from the <link
+                xlink:href="https://vaadin.com/directory">Vaadin Directory</link>, where
+                you can also find the license details and download the Vaadin Charts.
             </para>
         </simplesect>
     </section>
@@ -50,10 +121,547 @@
         <title>Installing Vaadin Charts</title>
 
         <para>
-            Vaadin Charts can be installed either as an installation package,
-            downloaded from the Vaadin Directory, or as a Maven dependency. You can also
-            create a new JPAContainer-enabled Vaadin project using a Maven archetype.
+            Vaadin Charts can be installed either from an installation package, which you
+            can download from the Vaadin Directory, or as a Maven dependency. For detailed
+            instructions, please see <xref linkend="addons"/>.
         </para>
+
+        <para>
+            Once you have installed the library in your project, you need to compile the
+            widget set.
+        </para>
+
+        <para>
+            <!-- TODO: Update -->
+            <emphasis>-- This will be updated once the add-on is available --</emphasis>
+        </para>
+    </section>
+
+    <section xml:id="charts.basic-use">
+        <title>Basic Use</title>
+
+        <para>
+            The <classname>Chart</classname> is a regular Vaadin component, which you can
+            add to a layout. You can give the chart type in the constructor or set it
+            later in the chart model. A chart has a height of 400 pixels and takes full
+            width by default, which settings you may often need to customize.
+        </para>
+
+        <programlisting><![CDATA[Chart chart = new Chart(ChartType.COLUMN);
+chart.setWidth("400px");  // 100% by default
+chart.setHeight("300px"); // 400px by default]]></programlisting>
+
+        <para>
+            The chart types are described in <xref
+            linkend="charts.basic-use.charttypes"/>.
+        </para>
+
+        <simplesect xml:id="charts.basic-use.configuration">
+            <title>Configuration</title>
+
+            <para>
+                After creating a chart, you need to configure it further. At the least,
+                you need to specify the data series to be displayed in the configuration.
+            </para>
+
+            <para>
+                Most methods available in the <classname>Chart</classname> object handle
+                its basic Vaadin component properties. All the chart-specific properties
+                are in a separate <classname>Configuration</classname> object, which you
+                can access with the <methodname>getConfiguration()</methodname> method.
+            </para>
+
+            <programlisting><![CDATA[Configuration conf = chart.getConfiguration();
+conf.setTitle("Reindeer Kills by Predators");
+conf.setSubTitle("Kills Grouped by Counties");]]></programlisting>
+
+            <para>
+                The configuration properties are described in more detail in <xref
+                linkend="charts.configuration"/>.
+            </para>
+        </simplesect>
+
+        <simplesect xml:id="charts.basic-use.data">
+            <title>Chart Data</title>
+
+            <para>
+                The data displayed in a chart is stored in the chart configuration as a list
+                of <classname>Series</classname> objects. A new data series is added in a
+                chart with the <methodname>addSeries()</methodname> method.
+            </para>
+
+            <programlisting><?pocket-size 75% ?><![CDATA[ListSeries series = new ListSeries("Diameter");
+series.setData(4900,  12100,  12800,
+               6800,  143000, 125000,
+               51100, 49500);
+conf.addSeries(series);]]></programlisting>
+
+            <para>
+                The data can be specified with a number of different series types
+                <classname>DataSeries</classname>, <classname>ListSeries</classname>,
+                <classname>AreaListSeries</classname>, and <classname>RangeSeries</classname>.
+                The data configuration is described in more detail in <xref
+                    linkend="charts.data"/>.
+            </para>
+        </simplesect>
+
+        <simplesect xml:id="charts.basic-use.axis">
+            <title>Axis Configuration</title>
+
+            <para>
+                One of the most common tasks for charts is customizing its axes. At the
+                least, you usually want to set the axis titles. Usually you also want to
+                specify labels for data values in the axes.
+            </para>
+
+            <para>
+                When an axis is categorical rather than numeric, you can define category
+                labels for the items. They must be in the same order and the same number
+                as you have values in your data series.
+            </para>
+
+            <programlisting><![CDATA[XAxis xaxis = new XAxis();
+xaxis.setCategories("Mercury", "Venus",   "Earth",
+                    "Mars",    "Jupiter", "Saturn",
+                    "Uranus",  "Neptune");
+xaxis.setTitle("Planet");
+conf.addxAxis(xaxis);]]></programlisting>
+
+            <para>
+                Formatting of numeric labels can be done with JavaScript expressions, for
+                example as follows:
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[// Set the Y axis title
+YAxis yaxis = new YAxis();
+yaxis.setTitle("Diameter");
+yaxis.getLabels().setFormatter(
+  "function() {return Math.floor(this.value/1000) + \'Mm\';}");
+yaxis.getLabels().setStep(2);
+conf.addyAxis(yaxis);]]></programlisting>
+        </simplesect>
+
+        <section xml:id="charts.basic-use.charttypes">
+            <title>Chart Types</title>
+
+            <para>
+                The easiest way to specify the type of a chart is to give the chart type
+                in the constructor of the <classname>Chart</classname> object. You can
+                later read or set it with the <literal>chartType</literal> property of the
+                chart model, which you can get with
+                <methodname>getConfiguration().getChart()</methodname>.
+            </para>
+
+            <para>
+                The chart types defined in the <classname>ChartType</classname> enum are:
+            </para>
+        
+            <table xml:id="table.charts.basic-use.charttypes">
+                <title>Chart Types</title>
+                <tgroup cols="2" align="left">
+                    <colspec colnum="1" colname="col1" colwidth="1*"/>
+                    <colspec colnum="2" colname="col2" colwidth="2*"/>
+                    <tbody>
+                        <row valign="top">
+                            <entry><parameter>AREA</parameter></entry>
+                            <entry>
+                                Area charts are like line charts, except that the area between
+                                the line and the Y axis is painted with a transparent color.
+                            </entry>
+                        </row>
+                        <row valign="top">
+                        <entry><parameter>LINE</parameter></entry>
+                        <entry>
+                            A line chart displays connects the sequential data points with
+                            a straight line.
+                        </entry>
+                    </row>
+                    <row valign="top">
+                        <entry><parameter>SPLINE</parameter></entry>
+                        <entry>
+                            A spline chart is like a line chart that connects sequential
+                            data points with a line, except the line is a curved spline,
+                            that is, a smooth polynomial interpolation between the points.
+                        </entry>
+                    </row>
+                    <row valign="top">
+                        <entry><parameter>AREASPLINE</parameter></entry>
+                        <entry>
+                            An area spline chart is like a spline chart that connects
+                            sequential data points with a smooth interpolation curve,
+                            except that the area between line and the axis is painted with
+                            a transparent color.
+                        </entry>
+                    </row>
+                    <row valign="top">
+                        <entry><parameter>COLUMN</parameter></entry>
+                        <entry>
+                            A column chart represents values in a discrete data series is
+                            vertical columns.
+                        </entry>
+                    </row>
+                    <row valign="top">
+                        <entry><parameter>BAR</parameter></entry>
+                        <entry>
+                            A bar chart represents values in a discrete data series in
+                            horizontal columns.
+                        </entry>
+                    </row>
+                    <row valign="top">
+                        <entry><parameter>PIE</parameter></entry>
+                        <entry>
+                            A pie chart represents values of a discrete data series with
+                            sectors of a circle. An outer rim in a chart can illustrate
+                            further subdivision in the data.
+                        </entry>
+                    </row>
+                    <row valign="top">
+                        <entry><parameter>SCATTER</parameter></entry>
+                        <entry>
+                            A scatter chart allows plotting unconnected data points with
+                            both X and Y coordinate.
+                        </entry>
+                    </row>
+                    <row valign="top">
+                        <entry><parameter>GAUGE</parameter></entry>
+                        <entry>
+                            A gauge displays a single value with a rotating needle
+                            pointing on a circular axis. Multiple axes with different
+                            scales are supported.
+                        </entry>
+                    </row>
+                    <row valign="top">
+                        <entry><parameter>AREARANGE</parameter></entry>
+                        <entry>
+                            An area range chart is like an area chart, with straight lines
+                            connecting the data points, except that the area between two
+                            data series is colored.
+                        </entry>
+                    </row>
+                    <row valign="top">
+                        <entry><parameter>COLUMNRANGE</parameter></entry>
+                        <entry>
+                            A column range has horizontal bars from one value to
+                            another. The low and high values are represented by two data
+                            series for the chart.
+                        </entry>
+                    </row>
+                    <row valign="top">
+                        <entry><parameter>AREASPLINERANGE</parameter></entry>
+                        <entry>
+                            An area spline range chart is like an area spline chart, with
+                            smooth splines interpolating the data points, except that the
+                            area between two data series is colored.
+                        </entry>
+                        </row>
+                    </tbody>
+                </tgroup>
+            </table>
+        </section>
+
+        <section xml:id="table.charts.basic-use.two-dimensional">
+            <title>Displaying Multiple Series</title>
+
+            <para>
+                The simplest data, which we saw in the examples earlier in this chapter,
+                is one-dimensional and can be represented with a single data series. Most
+                chart types support multiple data series, which are used for representing
+                two-dimensional data. For example, in line charts, you can have multiple
+                lines and in column charts the columns for different series are grouped by
+                category. Different chart types can offer alternative display modes, such
+                as stacked columns. The legend displays the symbols for each series.
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[// The data
+// Source: V. Maijala, H. Norberg, J. Kumpula, M. Nieminen
+// Calf production and mortality in the Finnish
+// reindeer herding area. 2002.
+String predators[] = {"Bear", "Wolf", "Wolverine", "Lynx"};
+int kills[][] = {        // Location:
+        {8,   0,  7, 0}, // Muddusjarvi
+        {30,  1, 30, 2}, // Ivalo
+        {37,  0, 22, 2}, // Oraniemi
+        {13, 23,  4, 1}, // Salla
+        {3,  10,  9, 0}, // Alakitka
+};    
+
+// Create a data series for each numeric column in the table
+for (int predator = 0; predator < 4; predator++) {
+    ListSeries series = new ListSeries();
+    series.setName(predators[predator]);
+    
+    // The rows of the table
+    for (int location = 0; location < kills.length; location++)
+        series.addData(kills[location][predator]);
+    conf.addSeries(series);
+}]]></programlisting>
+
+            <para>
+                The result for both regular and stacked column chart is shown in <xref
+                linkend="figure.charts.basic-use.two-dimensional"/>. Stacking is enabled
+                with <methodname>setStacking()</methodname> in
+                <classname>PlotOptionsColumn</classname>.
+            </para>
+
+            <figure xml:id="figure.charts.basic-use.two-dimensional">
+                <title>Multiple Series in a Chart</title>
+                <mediaobject>
+                    <imageobject>
+					<imagedata scale="70" smallscale="80%" align="center" fileref="img/charts/charts-twodimensional.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+        </section>
+    </section>
+
+    <section xml:id="charts.configuration">
+        <title>Chart Configuration</title>
+
+        <para>
+            All the chart content configuration of charts is defined in a <emphasis>chart
+            model</emphasis> in a <classname>Configuration</classname> object. You can
+            access the model with the <methodname>getConfiguration()</methodname> method.
+        </para>
+
+        <para>
+            The configuration properties in the <classname>Configuration</classname> class
+            are summarized in the following:
+        </para>
+
+        <itemizedlist>
+            <listitem>
+                <para><methodname>credits</methodname>: <classname>Credits</classname> (text, position, href, enabled)</para>
+            </listitem>
+            <listitem>
+                <para><methodname>labels</methodname>: <classname>HTMLLabels</classname> (html, style)</para>
+            </listitem>
+            <listitem>
+                <para><methodname>lang</methodname>: <classname>Lang</classname> (decimalPoint, thousandsSep, loading)</para>
+            </listitem>
+            <listitem>
+                <para><methodname>legend</methodname>: <classname>Legend</classname> (see <xref linkend="charts.configuration.legend"/>)</para>
+            </listitem>
+            <listitem>
+                <para><methodname>pane</methodname>: <classname>Pane</classname> </para>
+            </listitem>
+            <listitem>
+                <para><methodname>plotoptions</methodname>: <classname>PlotOptions</classname> (see <xref linkend="charts.configuration.plotoptions"/></para>
+            </listitem>
+            <listitem>
+                <para><methodname>series</methodname>: <interfacename>Series</interfacename></para>
+            </listitem>
+            <listitem>
+                <para><methodname>subTitle</methodname>: <classname>SubTitle</classname></para>
+            </listitem>
+            <listitem>
+                <para><methodname>title</methodname>: <classname>Title</classname></para>
+            </listitem>
+            <listitem>
+                <para><methodname>tooltip</methodname>: <classname>Tooltip</classname></para>
+            </listitem>
+            <listitem>
+                <para><methodname>xAxis</methodname>: <classname>XAxis</classname> (see <xref linkend="charts.configuration.axes"/></para>
+            </listitem>
+            <listitem>
+                <para><methodname>yAxis</methodname>: <classname>YAxis</classname> (see <xref linkend="charts.configuration.axes"/></para>
+            </listitem>
+        </itemizedlist>
+
+        <para>
+            For data configuration, see <xref linkend="charts.data"/>.
+        </para>
+
+        <section xml:id="charts.configuration.plotoptions">
+            <title>Chart-Type Specific Plot Options</title>
+
+            <para>
+                The plot options are chart type specific options. They all extend
+                <classname>AbstractPlotOptions</classname>. You set plot options for the
+                specific char type in the <classname>PlotOptionsHolder</classname>, which
+                you get with <methodname>getPlotOptions()</methodname> from the
+                configuration. The holder has setters for each chart type, such as
+                <methodname>setColumn()</methodname> for column charts.
+            </para>
+
+            <para>
+                For example, the following enables stacking in column charts:
+            </para>
+
+            <programlisting><?pocket-size 75% ?><![CDATA[PlotOptionsColumn plotOptions = new PlotOptionsColumn();
+plotOptions.setStacking(Stacking.NORMAL);
+conf.getPlotOptions().setColumn(plotOptions);]]></programlisting>
+
+        </section>
+
+        <section xml:id="charts.configuration.axes">
+            <title>Axes</title>
+
+            <para>
+                Many chart types have two axes, X and Y, which are represented by
+                <classname>XAxis</classname> and <classname>YAxis</classname> classes. The
+                X axis is usually horizontal, representing the iteration over the data
+                series, and Y vertical, representing the values in the data series. Some
+                chart types invert the axes and they can be explicitly inverted with
+                <methodname>getChart().setInverted()</methodname> in the chart
+                configuration. An axis has a caption and tick marks at intervals
+                indicating either numeric values or symbolic categories. Some chart types,
+                such as gauge, have only Y-axis, which is circular in the gauge, and some
+                such as a pie chart have none.
+            </para>
+
+            <para>
+                Axis objects are created and added to the configuration object with
+                <methodname>addxAxis()</methodname> and
+                <methodname>addyAxis()</methodname>.
+            </para>
+
+            <programlisting><![CDATA[XAxis xaxis = new XAxis();
+xaxis.setTitle("Axis title");
+conf.addxAxis(xaxis);]]></programlisting>
+
+            <para>
+                A chart can have more than one Y-axis, usually when different series
+                displayed in a graph have different units or scales. The association of a
+                data series with an axis is done in the data series object with
+                <methodname>setyAxis()</methodname>.
+            </para>
+
+            <para>
+                For a complete reference of the many configuration parameters for the
+                axes, please refer to the JavaDoc API documentation of Vaadin Charts.
+            </para>
+
+            <section xml:id="charts.configuration.axes.categories">
+                <title>Categories</title>
+
+                <para>
+                    The X axis displays, in most chart types, tick marks and labels at
+                    some numeric interval by default. If the items in a data series have a
+                    symbolic meaning rather than numeric, you can associate
+                    <emphasis>categories</emphasis> with the data items. The category
+                    label is displayed between two axis tick marks and aligned with the
+                    data point. In certain charts, such as column chart, where the
+                    corresponding values in different data series are grouped under the
+                    same category. You can set the category labels with
+                    <methodname>setCategories()</methodname>, which takes the categories
+                    as (an ellipsis) parameter list, or as an iterable. The list should
+                    match the items in the data series.
+                </para>
+
+                <programlisting><![CDATA[XAxis xaxis = new XAxis();
+xaxis.setCategories("Mercury", "Venus", "Earth",
+                    "Mars", "Jupiter", "Saturn",
+                    "Uranus", "Neptune");]]></programlisting>
+            </section>
+
+            <section xml:id="charts.configuration.axes.labels">
+                <title>Labels</title>
+
+                <para>
+                    The axes display, in most chart types, tick marks and labels at some
+                    numeric interval by default. The format and style of labels in an axis
+                    is defined in a <classname>Labels</classname> object, which you can
+                    get with <methodname>getLabels()</methodname> from the axis.
+                </para>
+
+                <para>
+                    For a complete reference of the many configuration parameters for the
+                    labels, please refer to the JavaDoc API documentation of Vaadin
+                    Charts.
+                </para>
+            </section>
+        </section>
+
+        <section xml:id="charts.configuration.legend">
+            <title>Legend</title>
+
+            <para>
+                The legend is a box that describes the data series shown in the chart. It
+                is enabled by default and is automatically populated with the names of the
+                data series as defined in the series objects, and the corresponding color
+                symbol of the series.
+            </para>
+        </section>
+    </section>
+
+    <section xml:id="charts.data">
+        <title>Chart Data</title>
+
+        <para>
+            Chart data is stored in data series model, which contains visual
+            representation information about the data points in addition to their values.
+            There are a number of different types of series -
+            <classname>DataSeries</classname>, <classname>ListSeries</classname>,
+            <classname>AreaListSeries</classname>, and <classname>RangeSeries</classname>.
+        </para>
+
+        <section xml:id="charts.data.listseries">
+            <title>List Series</title>
+
+            <para>
+                The <classname>ListSeries</classname> is essentially a helper type that
+                makes the handling of simple sequential data easier.
+            </para>
+
+            <programlisting><![CDATA[ListSeries series = new ListSeries();
+series.setName("Total Reindeer Population");
+series.setPointStart(1959);
+series.addData(181091);
+series.addData(201485);
+series.addData(188105);
+series.addData(177206);
+conf.addSeries(series);]]></programlisting>
+
+        </section>
+
+        <section xml:id="charts.data.arealistseries">
+            <title>Area List Series</title>
+
+            <para>
+                The <classname>ListSeries</classname> is essentially a helper type that
+                makes the handling of simple sequential data easier.
+            </para>
+        </section>
+
+        <section xml:id="charts.data.dataseries">
+            <title>Generic Data Series</title>
+
+            <para>
+                The <classname>DataSeries</classname> can represent a sequence of data
+                points at an interval as well as scatter data. Data points are represented
+                with the <classname>DataSeriesItem</classname> class, which has
+                <parameter>x</parameter> and <parameter>y</parameter> properties for
+                representing the data value. Each item can be given a category name.
+            </para>
+
+            <programlisting><![CDATA[DataSeries series = new DataSeries();
+series.setName("Total Reindeer Population");
+series.addData(new DataSeriesItem(1959, 181091));
+series.addData(new DataSeriesItem(1960, 201485));
+series.addData(new DataSeriesItem(1961, 188105));
+series.addData(new DataSeriesItem(1962, 177206));
+
+// Modify the color of one point
+series.getDataSeriesItem(1960, 201485)
+    .getMarker().setFillColor(SolidColor.RED);
+conf.addSeries(series);]]></programlisting>
+
+            <para>
+                Data points are associated with some visual representation parameters:
+                marker style, selected state, legend index, sliced (for pie charts), and
+                dial style (for gauges).
+            </para>
+        </section>
+
+        <section xml:id="charts.data.rangeseries">
+            <title>Range Series</title>
+
+            <para>
+                The <classname>RangeSeries</classname> allows specifying data with
+                minimum-maximum ranges. It is required for ranged charts.
+            </para>
+        </section>
+
     </section>
 </chapter>
 
