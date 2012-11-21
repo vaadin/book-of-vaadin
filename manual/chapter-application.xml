@@ -32,7 +32,7 @@
             A server-side Vaadin application runs as a Java Servlet in a servlet
             container. The Java Servlet API is, however, hidden behind the framework. The
             user interface of the application is implemented as a
-            <emphasis>&root;</emphasis> class, which needs to create and manage the user
+            <emphasis>&ui;</emphasis> class, which needs to create and manage the user
             interface components that make up the user interface. User input is handled
             with event listeners, although it is also possible to bind the user interface
             components directly to data. The visual style of the application is defined in
@@ -61,29 +61,29 @@
 		</para>
 
 		<para>
-			First of all, a Vaadin application must have one or more &root; classes that
-			extend the abstract <classname>com.vaadin.ui.&rootclass;</classname> class and
+			First of all, a Vaadin application must have one or more &ui; classes that
+			extend the abstract <classname>com.vaadin.ui.&uiclass;</classname> class and
 			implement the <methodname>init()</methodname> method.  A custom theme can be
-			defined as an annotation for the &root;.
+			defined as an annotation for the &ui;.
 		</para>
 		
 		<programlisting><![CDATA[@Theme("hellotheme")
-public class HelloWorld extends Root {
-    protected void init(WrappedRequest request) {
+public class HelloWorld extends UI {
+    protected void init(VaadinRequest request) {
         ... initialization code goes here ...
     }
 }]]></programlisting>
 
         <para>
-            A &root; is a viewport to a Vaadin application running in a web page.  A web
-            page can actually have multiple such &root;s within it. Such situation is
+            A &ui; is a viewport to a Vaadin application running in a web page.  A web
+            page can actually have multiple such &ui;s within it. Such situation is
             typical especially with portlets in a portal. An application can run in
             multiple browser windows, each having a distinct <classname>UI</classname>
             instance. The UIs can be the same UI class or different.
         </para>
 
 		<para>
-            The &root; API may seem similar to Java Servlet API, but that is only
+            The &ui; API may seem similar to Java Servlet API, but that is only
             superficial. Vaadin framework associates requests with sessions so that an
             application instance is really a session object. Because of this, you can
             develop web applications much like you would develop desktop applications.
@@ -102,49 +102,48 @@ public class HelloWorld extends Root {
             </para>
 
             <para>
-                Adding the <uri>?restartApplication</uri> parameter in the URL tells
-                the Vaadin servlet to create a new <classname>Application</classname>
-                instance on loading the page. If you also include a URI fragment, the
+                Adding the <uri>?restartApplication</uri> parameter in the URL tells the
+                Vaadin servlet to create a new <classname>VaadinSession</classname>
+                instance when loading the page. If you also include a URI fragment, the
                 parameter should be given before the fragment.
             </para>
         </note>
 
 		<para>
 			The most important task in the initialization is the creation of the initial
-			user interface. This, and the deployment of the application as a Java Servlet
-			in the Servlet container, as described in <xref
-			linkend="application.environment"/>, are the minimal requirements for an
-			application.
+			user interface. This, and the deployment of an UI as a Java Servlet in the
+			Servlet container, as described in <xref linkend="application.environment"/>,
+			are the minimal requirements for an application.
 		</para>
 
 		<para>
 			Below is a short overview of the other basic elements of an application
-			besides &root;:
+			besides &ui;:
 		</para>
 
 		<variablelist>
 			<varlistentry>
-				<term>&rootclass;</term>
+				<term>&uiclass;</term>
 				<listitem>
 					<para>
-                        A <emphasis>&root;</emphasis> represents a HTML fragment in which
+                        A <emphasis>&ui;</emphasis> represents an HTML fragment in which
                         a Vaadin application runs in a web page. It typically fills the
                         entire page, but can also be just a part of a page. You normally
                         develop a Vaadin application by extending
-                        <classname>&rootclass;</classname> and adding user interface
-                        components to it. A &root; is essentially a viewport connected to
-                        a user session of an application, and you can have many such
-                        views, especially in a multi-window application. Normally, when
-                        the user opens a new page with the URL of the Vaadin application,
-                        a new <classname>Root</classname> (and the associated
-                        <classname>Page</classname> object) is automatically created for
-                        it. All of them share the same user session.
+                        <classname>&uiclass;</classname> and adding content to it. A
+                        &ui; is essentially a viewport connected to a user session of an
+                        application, and you can have many such views, especially in a
+                        multi-window application. Normally, when the user opens a new page
+                        with the URL of the Vaadin UI, a new <classname>UI</classname>
+                        (and the associated <classname>Page</classname> object) is
+                        automatically created for it. All of them share the same user
+                        session.
                     </para>
 
                     <para>
-                        The current &root; object can be globally accessed with
-                        <methodname>Root.getCurrent()</methodname>. The static method
-                        returns the thread-local &root; instance for the currently
+                        The current &ui; object can be globally accessed with
+                        <methodname>UI.getCurrent()</methodname>. The static method
+                        returns the thread-local &ui; instance for the currently
                         processed request (see <xref
                         linkend="advanced.global.threadlocal"/>).
                     </para>
@@ -155,9 +154,9 @@ public class HelloWorld extends Root {
 				<term>Page</term>
 				<listitem>
 					<para>
-                        A <classname>&rootclass;</classname> is associated with a
+                        A <classname>&uiclass;</classname> is associated with a
                         <classname>Page</classname> object that represents the web page as
-                        well as the browser window in which the &root; runs.
+                        well as the browser window in which the &ui; runs.
 					</para>
 
                     <para>
@@ -165,7 +164,7 @@ public class HelloWorld extends Root {
                         request can be globally accessed from a Vaadin application with
                         <methodname>Page.getCurrent()</methodname>. This is equivalent to
                         calling
-                        <methodname>&rootclass;.getCurrent().getPage()</methodname>.
+                        <methodname>&uiclass;.getCurrent().getPage()</methodname>.
                     </para>
 				</listitem>
 			</varlistentry>
@@ -174,7 +173,7 @@ public class HelloWorld extends Root {
 				<term>Vaadin Session</term>
 				<listitem>
 					<para>
-						A <classname>VaadinServletSession</classname> object represents a user
+						A <classname>VaadinSession</classname> object represents a user
 						session with one or more UIs open in the application. A session
 						starts when a user first opens a UI of a Vaadin application, and
 						closes when the session expires in the server or when it is closed
@@ -189,17 +188,17 @@ public class HelloWorld extends Root {
 					<para>
 						The user interface consists of components that are created by the
 						application. They are laid out hierarchically using special
-						<emphasis>layout components</emphasis>, with a &root; at the top
-						of the hierarchy. User interaction with the components causes
-						<emphasis>events</emphasis> related to the component, which the
-						application can handle. <emphasis>Field components</emphasis> are
-						intended for inputting values and can be directly bound to data
-						using the Vaadin Data Model. You can make your own user interface
-						components through either inheritance or composition. For a
-						thorough reference of UI components, see <xref
-						linkend="components"/>, for layout components, see <xref
-						linkend="layout"/>, and for composing components, see <xref
-						linkend="components.customcomponent"/>.
+						<emphasis>layout components</emphasis>, with a content root layout
+						at the top of the hierarchy. User interaction with the components
+						causes <emphasis>events</emphasis> related to the component, which
+						the application can handle. <emphasis>Field components</emphasis>
+						are intended for inputting values and can be directly bound to
+						data using the Vaadin Data Model. You can make your own user
+						interface components through either inheritance or
+						composition. For a thorough reference of user interface
+						components, see <xref linkend="components"/>, for layout
+						components, see <xref linkend="layout"/>, and for compositing
+						components, see <xref linkend="components.customcomponent"/>.
 					</para>
 				</listitem>
 			</varlistentry>
@@ -275,7 +274,7 @@ public class HelloWorld extends Root {
         </variablelist>
 	</section>
 
-    <section xml:id="application.building">
+    <section xml:id="application.architecture">
         <title>Building the UI</title>
 
         <para>
@@ -283,13 +282,245 @@ public class HelloWorld extends Root {
             leaf components are contained within layout components and other component
             containers. Building the hierarchy starts from the top (or bottom - whichever
             way you like to think about it), from the <classname>UI</classname> class of
-            the application.
+            the application. You normally set a layout component as the content of the UI
+            and fill it with other components.
         </para>
+
+        <programlisting><?pocket-size 75% ?><![CDATA[public class MyHierarchicalUI extends UI {
+    @Override
+    protected void init(VaadinRequest request) {
+        // The root of the component hierarchy
+        VerticalLayout content = new VerticalLayout();
+        content.setSizeFull(); // Use entire window
+        setContent(content);   // Attach to the UI
+        
+        // Add some component
+        content.addComponent(new Label("Hello!"));
+        
+        // Layout inside layout
+        HorizontalLayout hor = new HorizontalLayout();
+        hor.setSizeFull(); // Use all available space
+
+        // Couple of horizontally laid out components
+        Tree tree = new Tree("My Tree",
+                TreeExample.createTreeContent());
+        hor.addComponent(tree);
+
+        Table table = new Table("My Table",
+                TableExample.generateContent());
+        table.setSizeFull();
+        hor.addComponent(table);
+        hor.setExpandRatio(table, 1); // Expand to fill
+
+        content.addComponent(hor);
+        content.setExpandRatio(hor, 1); // Expand to fill
+    }
+}]]></programlisting>
+
+        <para>
+            The component hierarchy could be illustrated with a tree as follows:
+        </para>
+
+        <programlisting><?pocket-size 75% ?><![CDATA[UI
+ `-- VerticalLayout
+   |-- Label
+   `-- HorizontalLayout
+     |-- Tree
+     `-- Table]]></programlisting>
+
+        <para>
+            The result is shown in <xref linkend="figure.application.architecture.example"/>.
+        </para>
+
+        <figure xml:id="figure.application.architecture.example">
+            <title>Simple Hierarchical UI</title>
+            <mediaobject>
+                <imageobject>
+                    <imagedata scale="70" smallscale="100%" align="center" fileref="img/application/ui-architecture-hierarchical.png"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
 
         <para>
             The built-in components are described in <xref linkend="components"/> and the
             layout components in <xref linkend="layout"/>.
         </para>
+
+
+        <para>
+            The example application described above just is, it does not do anything. User
+            interaction is handled with event listeners, as described a bit later in <xref
+            linkend="application.events"/>.
+        </para>
+
+        <section xml:id="application.architecture.architecture">
+            <title>Application Architecture</title>
+
+            <para>
+                Once your application grows beyond a dozen or so lines, which is usually
+                quite soon, you need to start considering the application architecture
+                more closely. You are free to use any object-oriented techniques available
+                in Java to organize your code in methods, classes, packages, and
+                libraries. An architecture defines how these modules communicate together
+                and what sort of dependencies they have between them. It also defines the
+                scope of the application. The scope of this book, however, only gives a
+                possibility to mention some of the most common architectural patterns in
+                Vaadin applications.
+            </para>
+
+            <para>
+                The subsequent sections describe some basic application patterns. You may
+                also want to consider the advanced architectures presented in <xref
+                linkend="advanced.patterns"/>. The <xref linkend="advanced.global"/>
+                discusses the problem of passing essentially global references around, a
+                common problem which is also visited in later in this section, in <xref
+                linkend="application.architecture.accessing"/>.
+            </para>
+        </section>
+
+        <section xml:id="application.architecture.composition">
+            <title>Compositing Components</title>
+
+            <para>
+                User interfaces typically contain many user interface components in a
+                layout hierarchy. Vaadin provides many layout components for laying
+                contained components vertically, horizontally, in a grid, and in many
+                other ways. You can extend layout components to create composite
+                components.
+            </para>
+
+            <programlisting><![CDATA[class MyView extends VerticalLayout {
+    TextField entry   = new TextField("Enter this");
+    Label     display = new Label("See this");
+    Button    click   = new Button("Click This");
+
+    public MyView() {
+        addComponent(entry);
+        addComponent(display);
+        addComponent(click);
+        
+        // Configure it a bit
+        setSizeFull();
+        addStyleName("myview");
+    }
+}
+
+// Use it
+Layout myview = new MyView();]]></programlisting>
+
+            <para>
+                This composition pattern is especially supported for creating forms, as
+                described in <xref linkend="datamodel.itembinding.formclass"/>.
+            </para>
+
+            <para>
+                While extending layouts is an easy way to make component composition, it
+                is a good practice to encapsulate implementation details, such as the
+                exact layout component used. Otherwise, the users of such a composite
+                could begin to rely on such implementation details, which would make
+                changes harder. For this purpose, Vaadin has a special
+                <classname>CustomComponent</classname> wrapper, which hides the content
+                representation.
+            </para>
+
+            <programlisting><![CDATA[class MyView extends CustomComponent {
+    TextField entry   = new TextField("Enter this");
+    Label     display = new Label("See this");
+    Button    click   = new Button("Click This");
+
+    public MyView() {
+        Layout layout = new VerticalLayout();
+        
+        layout.addComponent(entry);
+        layout.addComponent(display);
+        layout.addComponent(click);
+        
+        setCompositionRoot(layout);
+        
+        setSizeFull();
+    }
+}
+
+// Use it
+MyView myview = new MyView();]]></programlisting>
+
+            <para>
+                For a more detailed description of the
+                <classname>CustomComponent</classname>, see <xref
+                linkend="components.customcomponent"/>. The Vaadin Plugin for Eclipse also
+                includes a visual editor for composite components, as described in <xref
+                linkend="eclipse"/>.
+            </para>
+        </section>
+
+        <section xml:id="application.architecture.navigation">
+            <title>View Navigation</title>
+
+            <para>
+                While the most simple applications have just a single
+                <emphasis>view</emphasis> (or <emphasis>screen</emphasis>), perhaps most
+                have many. Even in a single view, you often want to have sub-views, for
+                example to display different content. <xref
+                linkend="figure.application.architecture.navigation"/> illustrates a
+                typical navigation between different top-level views of an application,
+                and a main view with sub-views.
+            </para>
+
+            <figure xml:id="figure.application.architecture.navigation">
+                <title>Navigation Between Views</title>
+                <mediaobject>
+                    <imageobject role="html">
+                        <imagedata align="center" fileref="img/application/view-navigation-lo.png"/>
+                    </imageobject>
+                    <imageobject role="fo">
+                        <imagedata scale="70" smallscale="100%" align="center" fileref="img/application/view-navigation-hi.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+
+            <para>
+                The <classname>Navigator</classname> described in <xref
+                linkend="advanced.navigator"/> is a view manager that provides a flexible
+                way to navigate between views and sub-views, while managing the URI
+                fragment in the page URL to allow bookmarking, linking, and going back in
+                browser history.
+            </para>
+
+            <para>
+                Often Vaadin application views are part of something bigger. In such
+                cases, you may need to integrate the Vaadin applications with the other
+                website. You can use the embedding techniques described in <xref
+                linkend="application.embedding"/>.
+            </para>
+        </section>
+
+        <section xml:id="application.architecture.accessing">
+            <title>Accessing &uiclass;, Page, and Session</title>
+            
+            <para>
+                You can access the current &ui;, page, and session objects from
+                anywhere in the application using the static
+                <methodname>getCurrent()</methodname> method in the respective
+                <classname>&uiclass;</classname>, <classname>Page</classname>, and
+                <classname>VaadinSession</classname> classes.
+            </para>
+
+                <programlisting><?pocket-size 75% ?><![CDATA[// Opens a sub-window
+UI.getCurrent().addWindow(new Window("My Window"));
+
+// Set the page title (window or tab caption)
+Page.getCurrent().setTitle("My Page");
+
+// Set the logout URL
+VaadinSession.getCurrent().setLogoutURL(
+        "http://en.wikipedia.org/wiki/Reindeer");]]></programlisting>
+
+            <para>
+                These methods use the built-in ThreadLocal support in the session, page,
+                and &ui; objects. The pattern is described in detail in <xref
+                linkend="advanced.global.threadlocal"/>.
+            </para>
+        </section>
     </section>
 
     <section xml:id="application.events">
@@ -730,165 +961,6 @@ main.addComponent(new Embedded("Image title", imageresource));]]></programlistin
 		</section>
 	</section>
 
-	<section xml:id="application.lifecycle">
-		<title>Application Lifecycle</title>
-
-		<section xml:id="application.lifecycle.deployment">
-            <title>Deployment</title>
-
-            <para>
-                Before a Vaadin application can be used, it has to be deployed to a Java
-                web server, as described in <xref
-                linkend="application.environment"/>. Deploying reads the
-                <filename>web.xml</filename> deployment descriptor in the application to
-                register servlets for specific URL paths and loads the classes.
-                Deployment does not yet run any code in the application, although static
-                blocks in classes are executed when they are loaded.
-            </para>
-
-            <para>
-                Applications can be undeployed when the server shuts down, during
-                redeployment, and when they are explicitly undeployed. Undeploying a
-                server-side Vaadin application thereby ends its execution, all application
-                classes are unloaded, and the heap space alloced by the application is
-                freed. If any user sessions are open at this point, the client-side state
-                of the UIs is left hanging and an error is displayed on next server
-                request.
-            </para>
-
-            <para>
-                Some servers, such as Tomcat, support <emphasis>hot deployment</emphasis>,
-                where the classes are reloaded while preserving the memory state of the
-                application. This is done by serializing the application state and then
-                deserializing it after the classes are reloaded. This is, in fact, done
-                with the basic Eclipse setup with Tomcat and you actually need to give the
-                <literal>?restartApplication</literal> parameter to the UI to force it to
-                restart when you reload the page. Tools such as JRebel go even further by
-                reloading the code in place without need for serialization. The server can
-                also serialize the application state when shutting down and restarting,
-                thereby preserving sessions over restarts.
-            </para>
-
-            <para>
-                Serialization requires that the applications are
-                <emphasis>serializable</emphasis>, that is, all classes implement the
-                <interfacename>Serializable</interfacename> interface. All Vaadin classes
-                do. This feature is also used for clustering and cloud computing, such as
-                with Google App Engine, as described in <xref linkend="advanced.gae"/>.
-            </para>
-        </section>
-
-		<section xml:id="application.lifecycle.session">
-            <title>User Session</title>
-
-            <para>
-                All server requests belonging to a particular UI class are processed by
-                the <classname>VaadinServlet</classname> class. It distinguishes between
-                the clients making the requests by tracking browser cookies. When a new
-                client connects, it creates a new user session, represented by an instance
-                of <classname>VaadinSession</classname>.
-            </para>
-        </section>
-
-		<para>
-			A user can log out or close the web page or browser, so a session and the
-			associated application instance can end. Ending an application can be
-			initiated by the application logic. Otherwise, it will be ended automatically
-			when the servlet session times out.
-		</para>
-
-		<section xml:id="application.lifecycle.ui">
-            <title>Loading an UI</title>
-        </section>
-
-		<section xml:id="application.lifecycle.expiration">
-            <title>Session Expiration</title>
-        </section>
-
-		<section xml:id="application.lifecycle.closing">
-			<title>Closing a Session</title>
-
-			<para>
-				If the user quits the application through the user interface, an event
-				handler should call the <methodname>close()</methodname> method in the
-				<classname>Application</classname> class to shutdown the session.
-			</para>
-
-			<para>
-				In the following example, we have a <guibutton>Logout</guibutton> button,
-				which ends the user session.
-			</para>
-
-			<programlisting><![CDATA[Button closeButton = new Button("Logout");
-
-closeButton.addListener(new Button.ClickListener() {
-    @Override
-    public void buttonClick(ClickEvent event) {
-        getMainWindow().getApplication().close();
-    } 
-});
-
-main.addComponent(closeButton);]]></programlisting>
-
-			<para>
-				You will soon notice that closing the application simply reloads the
-				application with a new <classname>Application</classname> instance. You
-				can set the window to redirect to a different URL (that does not reload
-				the application) with <methodname>setLogoutURL</methodname>. In your
-				application class, write:
-			</para>
-
-			<programlisting><![CDATA[setLogoutURL("/logout.html");]]></programlisting>
-
-		</section>
-    </section>
-        <!-- TODO: Update if #2752 is fixed. -->
-
-        <!--
-		<section>
-			<title>Handling the Closing of a Window</title>
-
-			<para>
-				Closing the main window (or all application-level windows) does not close
-				session and the application instance will be left hanging. You need to
-				program such behaviour by handling the close events of the windows.
-			</para>
-
-			<para>
-				If the user closes a browser window, such as the main window or any other
-				application-level window, the window will send a final AJAX request to the
-				server, which will fire a <classname>Window.CloseEvent</classname> for the
-				closed window. You can handle the event with a
-				<classname>Window.CloseListener</classname>. In case the user closes the
-				browser, the event is fired for every open window.
-			</para>
-
-			<programlisting><![CDATA[// Close the application if the main window is closed.
-main.addListener(new Window.CloseListener(){
-   @Override
-    public void windowClose(CloseEvent e) {
-       System.out.println("Closing the application");
-       getMainWindow().getApplication().close();
-    } 
-});]]></programlisting>
-
-			<para>
-				Notice that <emphasis>refreshing a window means closing and reopening
-				it</emphasis>. Therefore, if you have a close handler as above, the user
-				loses the possibility to refresh the browser window.
-			</para>
-
-			<para>
-				In the likely case that the browser crashes, no close event is communicated to
-				the server. As the server has no way of knowing about the problem, and the
-				session will be left hanging until the session timeout expires. During this
-				time, the user can restart the browser, open the application URL, and the main
-				window will be rendered where the user left off. This can be desired behaviour
-				in many cases, but sometimes it is not and can create a security problem.
-			</para>
-		</section>
-	</section> -->
-	
 	<section xml:id="application.errors">
 		<title>Handling Errors</title>
 
@@ -1458,6 +1530,288 @@ notif.show(Page.getCurrent());]]></programlisting>
         </section>
     </section>
 
+	<section xml:id="application.lifecycle">
+		<title>Application Lifecycle</title>
+
+        <para>
+            In this section, we look into more technical details of application
+            deployment, user sessions, and UI instance lifecycle. These details are not
+            generally needed for writing Vaadin applications, but may be useful for
+            understanding how they actually work and, especially, in what circumstances
+            their execution ends.
+        </para>
+
+		<section xml:id="application.lifecycle.deployment">
+            <title>Deployment</title>
+
+            <para>
+                Before a Vaadin application can be used, it has to be deployed to a Java
+                web server, as described in <xref
+                linkend="application.environment"/>. Deploying reads the
+                <filename>web.xml</filename> deployment descriptor in the application to
+                register servlets for specific URL paths and loads the classes.
+                Deployment does not yet run any code in the application, although static
+                blocks in classes are executed when they are loaded.
+            </para>
+
+            <para>
+                Applications are undeployed when the server shuts down, during
+                redeployment, and when they are explicitly undeployed. Undeploying a
+                server-side Vaadin application ends its execution, all application classes
+                are unloaded, and the heap space allocated by the application is freed for
+                garbage-collection. If any user sessions are open at this point, the
+                client-side state of the UIs is left hanging and an Out of Sync error is
+                displayed on the next server request.
+            </para>
+
+            <para>
+                Some servers, such as Tomcat, support <emphasis>hot deployment</emphasis>,
+                where the classes are reloaded while preserving the memory state of the
+                application. This is done by serializing the application state and then
+                deserializing it after the classes are reloaded. This is, in fact, done
+                with the basic Eclipse setup with Tomcat and you actually need to give the
+                <literal>?restartApplication</literal> parameter to the UI to force it to
+                restart when you reload the page. Tools such as JRebel go even further by
+                reloading the code in place without need for serialization. The server can
+                also serialize the application state when shutting down and restarting,
+                thereby preserving sessions over restarts.
+            </para>
+
+            <para>
+                Serialization requires that the applications are
+                <emphasis>serializable</emphasis>, that is, all classes implement the
+                <interfacename>Serializable</interfacename> interface. All Vaadin classes
+                do. This feature is also used for clustering and cloud computing, such as
+                with Google App Engine, as described in <xref linkend="advanced.gae"/>.
+            </para>
+        </section>
+
+		<section xml:id="application.lifecycle.session">
+            <title>User Session</title>
+
+            <para>
+                A user session begins when a user first makes a request to a Vaadin
+                servlet or portlet by opening the URL for a particular
+                <classname>UI</classname>. All server requests belonging to a particular
+                UI class are processed by the <classname>VaadinServlet</classname> or
+                <classname>VaadinPortlet</classname> class. When a new client connects, it
+                creates a new user session, represented by an instance of
+                <classname>VaadinSession</classname>.
+            </para>
+
+            <para>
+                A session ends after the last <classname>UI</classname> instance expires
+                or is closed, as described later.
+            </para>
+        </section>
+
+		<section xml:id="application.lifecycle.ui">
+            <title>Loading an UI</title>
+
+            <para>
+                <indexterm><primary><classname>UIProvider</classname></primary></indexterm>
+                <indexterm><primary><classname>DefaultUIProvider</classname></primary></indexterm>
+                <indexterm><primary><classname>BrowserWindowOpener</classname></primary></indexterm>
+
+                A <classname>UI</classname> instance is created by the Vaadin servlet when
+                a browser accesses a URL mapped to the servlet of the particular UI. The
+                servlet creates the UIs using a <classname>UIProvider</classname>
+                registered in the <classname>VaadinSession</classname> instance. A session
+                has at least a <classname>DefaultUIProvider</classname> for managing UIs
+                opened by the user. If the application lets the user open popup windows
+                with a <classname>BrowserWindowOpener</classname>, each of them has a
+                dedicated special UI provider.
+                
+            </para>
+
+            <para>
+                <indexterm><primary><classname>VaadinRequest</classname></primary></indexterm>
+                <indexterm><primary><methodname>init()</methodname></primary></indexterm>
+
+                The <methodname>init()</methodname> method for a UI is called during the
+                initial request, which the method gets as a
+                <classname>VaadinRequest</classname>.
+            </para>
+
+            <para>
+                After initialization of the <classname>UI</classname> instance, the
+                servlet generates the loader page for the application. You can customize
+                the loader page by overriding the default
+                <classname>VaadinServlet</classname> or use entirely custom loader code as
+                described in <xref linkend="application.embedding"/>. The loader page
+                loads the client-side engine, which in turn loads the page content in a
+                separate request.
+            </para>
+
+            <simplesect xml:id="application.lifecycle.ui.preserving">
+                <title>Preserving UI on Refresh</title>
+
+                <para>
+                    Reloading a page in the browser normally spawns a new
+                    <classname>UI</classname> instance and the old UI is left hanging,
+                    until cleaned up after a while. This can be undesired as it resets the
+                    UI state for the user. To preserve the UI, you can use the
+                    <classname>@PreserveOnRefresh</classname> annotation for the UI
+                    class. You can also use a <classname>UIProvider</classname> with a
+                    custom implementation of <methodname>isUiPreserved()</methodname>.
+                </para>
+
+			<programlisting><![CDATA[@PreserveOnRefresh
+public class MyUI extends UI {]]></programlisting>
+            </simplesect>
+        </section>
+
+		<section xml:id="application.lifecycle.ui-expiration">
+            <title>UI Expiration</title>
+
+            <para>
+                <classname>UI</classname> instances are cleaned up if no communication is
+                received from them after some time. If no other server requests are made,
+                the client-side sends keep-alive heartbeat requests. A UI is kept alive as
+                long as requests or heartbeats are received from it. It expires if three
+                consecutive heartbeats are missed.
+            </para>
+
+            <para>
+                The heartbeats occur at an interval of 5 minutes, which can be changed
+                with the <parameter>heartbeatInterval</parameter> parameter for the
+                servlet. You can configure the parameter in <filename>web.xml</filename>
+                as described in <xref linkend="application.environment.parameters"/>.
+            </para>
+
+            <para>
+                When the UI cleanup happens, a <classname>CleanupEvent</classname> is sent
+                to all <classname>CleanupListener</classname>s added to the UI. When the
+                <classname>UI</classname> is detached from the session,
+                <methodname>detach()</methodname> is called for it.
+            </para>
+        </section>
+
+		<section xml:id="application.lifecycle.session-expiration">
+            <title>Session Expiration</title>
+
+            <para>
+                The session is kept alive by server requests caused by user interaction
+                with the application as well as the heartbeat monitoring of the UIs.  Once
+                all UIs have expired, the session still remains. It is cleaned up from the
+                server when the session timeout configured in the web application expires.
+            </para>
+
+            <para>
+                <indexterm><primary>closeIdleSessions</primary></indexterm>
+                <indexterm><primary>Out of Sync</primary></indexterm>
+
+                The UI heartbeat keeps the session normally alive indefinitely. You may
+                want to terminate the session if the user is inactive long enough.  If the
+                <parameter>closeIdleSessions</parameter> parameter for the servlet is
+                enabled (disabled by default) in the <filename>web.xml</filename>, as
+                described in <xref linkend="application.environment.web-xml"/>, the
+                session and all of its UIs will be closed when the timeout specified by
+                the <parameter>session-timeout</parameter> parameter for the servlet
+                expires after the last non-heartbeat request. Once the session no longer
+                exists, the browser will show an Out of Sync error on the next server
+                request.
+            </para>
+
+            <para>
+                The related configuration parameters are described in <xref
+                linkend="application.environment.parameters"/>.
+            </para>
+        </section>
+
+		<section xml:id="application.lifecycle.closing">
+			<title>Closing a Session</title>
+
+			<para>
+				You can call the <methodname>close()</methodname> method in the
+				<classname>VaadinSession</classname> to shut down the session and clean up
+				all the resources allocated for it. The session is closed immediately and
+				any objects related to it are not available after calling the method. The
+				UI still visible in the browser has no session to communicate with, but
+				will still receive content from the last request. You typically want to
+				redirect the user to another URL at this point, using the
+				<methodname>setLocation()</methodname> method in
+				<classname>Page</classname>.
+			</para>
+
+			<para>
+				In the following example, we display a <guibutton>Logout</guibutton>
+				button, which ends the user session.
+			</para>
+
+		<book-example id="application.lifecycle.closing" style="float: right"></book-example>
+			<programlisting><![CDATA[Button logout = new Button("Logout");
+logout.addClickListener(new Button.ClickListener() {
+    @Override
+    public void buttonClick(ClickEvent event) {
+        // Redirect from the page
+        getUI().getPage().setLocation(
+            "/book-examples-vaadin7/");
+        
+        // Close the VaadinSession
+        getSession().close();
+    }
+});]]></programlisting>
+
+			<para>
+				You will soon notice that closing the application simply reloads the
+				application with a new <classname>Application</classname> instance. You
+				can set the window to redirect to a different URL (that does not reload
+				the application) with <methodname>setLogoutURL</methodname>. In your
+				application class, write:
+			</para>
+
+			<programlisting><![CDATA[setLogoutURL("/logout.html");]]></programlisting>
+
+		</section>
+    </section>
+        <!-- TODO: Update if #2752 is fixed. -->
+
+        <!--
+		<section>
+			<title>Handling the Closing of a Window</title>
+
+			<para>
+				Closing the main window (or all application-level windows) does not close
+				session and the application instance will be left hanging. You need to
+				program such behaviour by handling the close events of the windows.
+			</para>
+
+			<para>
+				If the user closes a browser window, such as the main window or any other
+				application-level window, the window will send a final AJAX request to the
+				server, which will fire a <classname>Window.CloseEvent</classname> for the
+				closed window. You can handle the event with a
+				<classname>Window.CloseListener</classname>. In case the user closes the
+				browser, the event is fired for every open window.
+			</para>
+
+			<programlisting><![CDATA[// Close the application if the main window is closed.
+main.addListener(new Window.CloseListener(){
+   @Override
+    public void windowClose(CloseEvent e) {
+       System.out.println("Closing the application");
+       getMainWindow().getApplication().close();
+    } 
+});]]></programlisting>
+
+			<para>
+				Notice that <emphasis>refreshing a window means closing and reopening
+				it</emphasis>. Therefore, if you have a close handler as above, the user
+				loses the possibility to refresh the browser window.
+			</para>
+
+			<para>
+				In the likely case that the browser crashes, no close event is communicated to
+				the server. As the server has no way of knowing about the problem, and the
+				session will be left hanging until the session timeout expires. During this
+				time, the user can restart the browser, open the application URL, and the main
+				window will be rendered where the user left off. This can be desired behaviour
+				in many cases, but sometimes it is not and can create a security problem.
+			</para>
+		</section>
+	</section> -->
+	
 	<section xml:id="application.environment">
 		<title>Deploying an Application</title>
 		
@@ -1487,8 +1841,8 @@ notif.show(Page.getCurrent());]]></programlisting>
             a WAR package for deployment. Server-side Vaadin UIs run as servlets within
             such a Java web application. There exists also other kinds of web
             applications. To avoid confusion with the general meaning of "web
-            application", we often refer to Java web application with the misnomer "WAR"
-            in this book.
+            application", we often refer to Java web application with the slight misnomer
+            "WAR" in this book.
 
             <!-- TODO Vaadin 7: What is the relationship between servlet and application? -->
 		</para>
@@ -1625,9 +1979,9 @@ notif.show(Page.getCurrent());]]></programlisting>
             </para>
 
             <para>
-                If your application has a single &root;, you simply specify the &root;
-                class by giving the <parameter>&root;</parameter> parameter with the name
-                of the specific root class for the servlet. The servlet is then connected
+                If your application has a single &ui;, you simply specify the &ui;
+                class by giving the <parameter>&ui;</parameter> parameter with the name
+                of the specific UI class for the servlet. The servlet is then connected
                 to a URL in a standard way for Java Servlets.
 			</para>
 
@@ -1647,8 +2001,8 @@ notif.show(Page.getCurrent());]]></programlisting>
         com.vaadin.terminal.gwt.server.ApplicationServlet
     &lt;/servlet-class&gt;
     &lt;init-param&gt;
-      &lt;param-name&gt;&root;&lt;/param-name&gt;
-      &lt;param-value&gt;<emphasis role="strong">My&rootclass;</emphasis>&lt;/param-value&gt;
+      &lt;param-name&gt;&ui;&lt;/param-name&gt;
+      &lt;param-value&gt;<emphasis role="strong">My&uiclass;</emphasis>&lt;/param-value&gt;
     &lt;/init-param&gt;
   &lt;/servlet&gt;
 
@@ -1667,55 +2021,54 @@ notif.show(Page.getCurrent());]]></programlisting>
                 projects. For some purposes, you may need to use a custom servlet class.
             </para>
 
-			<section>
-				<title>&rootclass; or Application Class</title>
+			<section xml:id="application.environment.web-xml.uiclass">
+				<title>&uiclass; or Application Class</title>
 
                 <para>
-                    The servlet can take either an application class or the &root; class
-                    of an application as a parameter. A &root; class is normally given in
-                    applications with a single &root; inside a page, while using an
-                    application class as the entry-point allows multiple &root;s.
+                    The servlet can take either an application class or the &ui; class
+                    of an application as a parameter. A &ui; class is normally given in
+                    applications with a single &ui; inside a page, while using an
+                    application class as the entry-point allows multiple &ui;s.
                 </para>
                     
                 <para>
-                    If the <literal>&root;</literal> parameter is given, its value must be
-                    the class name of the &root; class, such as
-                    <classname>com.example.My&rootclass;</classname>, including the full
+                    If the <literal>&ui;</literal> parameter is given, its value must be
+                    the class name of the &ui; class, such as
+                    <classname>com.example.My&uiclass;</classname>, including the full
                     package path to the class. If the class is in the default package, the
                     package path is obviously not used.
                 </para>
 
                 <para>
-                    If your application has multiple &root;s in one page, or for other
-                    purposes, you can extend the <classname>Application</classname> class
-                    instead of <classname>&rootclass;</classname> and define your
-                    application class with the <literal>application</literal> parameter
-                    for the servlet. For roots created during the execution of an
-                    application, such as for displaying popup windows, you can add new
-                    roots dynamically to the application instance.
+                    If your application has multiple &ui;s in one page, or for other
+                    purposes, you can extend the <classname>VaadinServlet</classname>
+                    class instead of <classname>&uiclass;</classname> and use your servlet
+                    class for the servlet. For UIs created during the execution of a
+                    servlet, such as for displaying popup windows, you can add new UIs
+                    dynamically to the application instance.
                 </para>
             </section>
 
-			<section>
+			<section xml:id="application.environment.web-xml.mapping">
 				<title>Servlet Mapping with URL Patterns</title>
 
                 <para>
                     The <literal>url-pattern</literal> is defined above as
                     <literal>/*</literal>. This matches to any URL under the project
                     context. We defined above the project context as
-                    <literal>myproject</literal> so the URL for the page of the &root; will be
+                    <literal>myproject</literal> so the URL for the page of the &ui; will be
                     <uri>http://localhost:8080/myproject/</uri>. If the project were to have
-                    multiple &root;s or servlets, they would have to be given different names
+                    multiple &ui;s or servlets, they would have to be given different names
                     to distinguish them.  For example, <literal>url-pattern</literal>
-                    <literal>/my&root;/*</literal> would match a URL such as
-                    <uri>http://localhost:8080/myproject/my&root;/</uri>. Notice that the slash
+                    <literal>/my&ui;/*</literal> would match a URL such as
+                    <uri>http://localhost:8080/myproject/my&ui;/</uri>. Notice that the slash
                     and the asterisk <emphasis>must</emphasis> be included at the end of the
                     pattern.
                 </para>
 
                 <para>
                     Notice also that if the URL pattern is other than
-                    <literal>/*</literal> (such as <literal>/my&root;/*</literal>), you will also
+                    <literal>/*</literal> (such as <literal>/my&ui;/*</literal>), you will also
                     need to make a servlet mapping to <literal>/VAADIN/*</literal> (unless you
                     are serving it statically as noted below). For example:
                 </para>
@@ -1749,226 +2102,209 @@ notif.show(Page.getCurrent());]]></programlisting>
                     servlet.
                 </para>
             </section>
+        </section>
 
-			<section>
-				<title>Other Deployment Parameters</title>
+        <section xml:id="application.environment.parameters">
+            <title>Other Deployment Parameters</title>
 
-				<para>
-					Deployment descriptor can have many parameters and options that
-					control the execution of a servlet. You can find a complete
-					documentation of the deployment descriptor in Java Servlet
-					Specification at
-					<uri>http://java.sun.com/products/servlet/</uri>.
-				</para>
+            <para>
+                A deployment descriptor can have many parameters and options that
+                control the execution of a servlet. You can find a complete
+                documentation of the deployment descriptor in Java Servlet
+                Specification at <uri>http://java.sun.com/products/servlet/</uri>.
+            </para>
 
-				<para>
-					By default, Vaadin applications run in <emphasis>debug
-					mode</emphasis>, which should be used during development. This enables
-					various debugging features. For production use, you should have put in
-					your <filename>web.xml</filename> the following parameter:
-				</para>
+            <para>
+                You can set most parameters either as a
+                <literal>&lt;context-param&gt;</literal> for the entire web application,
+                in which case they apply to all Vaadin servlets, or as an
+                <literal>&lt;init-param&gt;</literal> for an individual servlet. If both
+                are defined, servlet parameters override context parameters.
+            </para>
 
-				<programlisting><![CDATA[<context-param>
+            <section xml:id="application.environment.parameters.production-mode">
+                <title>Production Mode</title>
+
+                <para>
+                    By default, Vaadin applications run in <emphasis>debug
+                    mode</emphasis>, which should be used during development. This enables
+                    various debugging features. For production use, you should have put in
+                    your <filename>web.xml</filename> the following parameter:
+                </para>
+
+                <programlisting><![CDATA[<context-param>
   <param-name>productionMode</param-name>
   <param-value>true</param-value>
   <description>Vaadin production mode</description>
 </context-param>]]></programlisting>
 				
-				<para>
-					The parameter and the debug and production modes are described in
-					detail in <xref linkend="advanced.debug-production-modes"/>.
-				</para>
+                <para>
+                    The parameter and the debug and production modes are described in
+                    detail in <xref linkend="advanced.debug-production-modes"/>.
+                </para>
+            </section>
 
-				<para>
-					One often needed option is the session timeout. Different servlet
-					containers use varying defaults for timeouts, such as 30 minutes for
-					Apache Tomcat. You can set the timeout with:
-				</para>
+            <section xml:id="application.environment.parameters.uiprovider">
+                <title>Custom UI Provider</title>
+
+                <para>
+                    Vaadin normally uses the <classname>DefaultUIProvider</classname> for
+                    creating <classname>UI</classname> class instances. If you need to use
+                    a custom UI provider, you can define its class with the
+                    <parameter>UIProvider</parameter> parameter. The provider is
+                    registered in the <classname>VaadinSession</classname>.
+                </para>
+
+				<programlisting>  &lt;servlet&gt;
+    ...
+    &lt;init-param&gt;
+      &lt;param-name&gt;UIProvider&lt;/param-name&gt;
+      &lt;param-value&gt;<emphasis role="bold">com.example.my.MyUIProvider</emphasis>&lt;/param-value&gt;
+    &lt;/init-param&gt;</programlisting>
+
+                <para>
+                    The parameter is logically associated with a particular servlet, but
+                    can be defined in the context as well.
+                </para>
+            </section>
+
+            <section xml:id="application.environment.parameters.heartbeat">
+                <title>UI Heartbeat</title>
+
+                <para>
+                    Vaadin follows UIs using a heartbeat, as explained in <xref
+                    linkend="application.lifecycle.ui-expiration"/>. If the user closes
+                    the browser window of a Vaadin application or navigates to another
+                    page, the Client-Side Engine running in the page stops sending
+                    heartbeat to the server, and the server cleans up the
+                    <classname>UI</classname> instance.
+                </para>
+
+                <para>
+                    The interval of the heartbeat requests can be specified in seconds
+                    with the <parameter>heartbeatInterval</parameter> parameter either as
+                    a context parameter for the entire web application or an init
+                    parameter for the individual servlet. The default value is 300 seconds
+                    (5 minutes).
+                </para>
+
+                <programlisting><![CDATA[<context-param>
+  <param-name>heartbeatInterval</param-name>
+  <param-value>300</param-value>
+</context-param>]]></programlisting>
+            </section>
+
+            <section xml:id="application.environment.parameters.session-timeout">
+                <title>Session Timeout After User Inactivity</title>
+
+                <para>
+                    Normally, the session timeout defines the time after the last server
+                    request after which the server cleans up the session. Different
+                    servlet containers use varying defaults for timeouts, such as 30
+                    minutes for Apache Tomcat. You can set the timeout under
+                    <literal>&lt;web-app&gt;</literal> with:
+                </para>
+
+                <indexterm><primary>session-timeout</primary></indexterm>
 
 				<programlisting><![CDATA[<session-config>
     <session-timeout>30</session-timeout>
 </session-config>]]></programlisting>
 
-                <!-- TODO Vaadin 7: How is close() detected?
-				<para>
-					After the timeout expires, the <methodname>close()</methodname>
-					method of the <classname>Application</classname> class will be
-					called. You should implement it if you wish to handle timeout
-					situations.
-				</para>
-                -->
+                <para>
+                    <indexterm><primary>Out of Sync</primary></indexterm>
+
+                    The session timeout should be longer than the heartbeat interval or
+                    otherwise sessions are closed before the heartbeat can keep them
+                    alive. As the session expiration leaves the UIs in a state where they
+                    assume that the session still exists, this would cause an Out Of Sync
+                    error notification in the browser.
+                </para>
+
+                <indexterm><primary>closeIdleSessions</primary></indexterm>
+
+                <para>
+                    However, having a shorter heartbeat interval than the session timeout,
+                    which is the normal case, prevents the sessions from expiring. If the
+                    <parameter>closeIdleSessions</parameter> parameter for the servlet is
+                    enabled (disabled by default), Vaadin closes the UIs and the session
+                    after the time specified in the <parameter>session-timeout</parameter>
+                    parameter expires after the last non-heartbeat request.
+                </para>
+
+                <para>
+                    The <parameter>closeIdleSessions</parameter> parameter can be given to
+                    a servlet (not the web application) as follows:
+                </para>
+
+				<programlisting>  &lt;servlet&gt;
+    ...
+    &lt;init-param&gt;
+      &lt;param-name&gt;closeIdleSessions&lt;/param-name&gt;
+      &lt;param-value&gt;true&lt;/param-value&gt;
+    &lt;/init-param&gt;</programlisting>
 
 			</section>
+
+            <section xml:id="application.environment.parameters.xsrf">
+                <title>Cross-Site Request Forgery Prevention</title>
+
+                <para>
+                    Vaadin uses a protection mechanism to prevent malicious cross-site
+                    request forgery (XSRF or CSRF), also called one-click attacks or
+                    session riding, which is a security exploit for executing unauthorized
+                    commands in a web server. This protection is normally
+                    enabled. However, it prevents some forms of testing of Vaadin
+                    applications, such as with JMeter. In such cases, you can disable the
+                    protection by setting the
+                    <parameter>disable-xsrf-protection</parameter> parameter to
+                    <literal>true</literal>.
+                </para>
+
+                <programlisting><![CDATA[<context-param>
+  <param-name>disable-xsrf-protection</param-name>
+  <param-value>true</param-value>
+</context-param>]]></programlisting>
+
+            </section>
 		</section>
+
+        <section xml:id="application.environment.configuration">
+            <title>Deployment Configuration</title>
+
+            <para>
+                The Vaadin-specific parameters defined in the deployment configuration are
+                available from the <classname>DeploymentConfiguration</classname> object
+                managed by the <classname>VaadinSession</classname>.
+            </para>
+
+                <programlisting><![CDATA[DeploymentConfiguration conf =
+        getSession().getConfiguration();
+
+// Heartbeat interval in seconds
+int heartbeatInterval = conf.getHeartbeatInterval();]]></programlisting>
+
+            <para>
+                Parameters defined in the Java Servlet definition, such as the session
+                timeout, are available from the low-level
+                <classname>HttpSession</classname> or
+                <classname>PortletSession</classname> object, which are wrapped in a
+                <classname>WrappedSession</classname> in Vaadin. You can access the
+                low-level session wrapper with <methodname>getSession()</methodname> of
+                the <classname>VaadinSession</classname>.
+            </para>
+
+            <programlisting><![CDATA[WrappedSession session = getSession().getSession();
+int sessionTimeout = session.getMaxInactiveInterval();]]></programlisting>
+
+            <para>
+                You can access also other <classname>HttpSession</classname> and
+                <classname>PortletSession</classname> session properties through the
+                interface, such as set and read session attributes that are shared by all
+                servlets belonging to a particular servlet or portlet session.
+            </para>
+        </section>
 	</section>
-
-    <section xml:id="application.architecture">
-        <title>Basic Application Architecture</title>
-
-        <para>
-            Once your application grows beyond a dozen or so lines, which is actually
-            quite soon, you need to start considering the application architecture. You
-            are free to use any object-oriented techniques available in Java to organize
-            your code in methods, classes, packages, and libraries. An architecture
-            defines how these modules communicate together and what sort of dependencies
-            they have between them. It also defines the scope of the application. The
-            scope of this book, however, only gives a possibility to mention some of the
-            most common architectural patterns in Vaadin applications.
-        </para>
-
-        <para>
-            The following sections describe some basic application patterns. You may also
-            want to consider the advanced architectures presented in <xref
-            linkend="advanced.patterns"/>. The <xref linkend="advanced.global"/> discusses
-            the problem of passing essentially global references around, a common problem
-            which is also visited in later in this section, in <xref
-            linkend="application.architecture.accessing"/>.
-        </para>
-
-        <section xml:id="application.architecture.composition">
-            <title>Compositing Components</title>
-
-            <para>
-                User interfaces typically contain many user interface components in a
-                layout hierarchy. Vaadin provides many layout components for laying
-                contained components vertically, horizontally, in a grid, and in many
-                other ways. You can extend layout components to create composite
-                components.
-            </para>
-
-            <programlisting><![CDATA[class MyView extends VerticalLayout {
-    TextField entry   = new TextField("Enter this");
-    Label     display = new Label("See this");
-    Button    click   = new Button("Click This");
-
-    public MyView() {
-        addComponent(entry);
-        addComponent(display);
-        addComponent(click);
-        
-        // Configure it a bit
-        setSizeFull();
-        addStyleName("myview");
-    }
-}
-
-// Use it
-Layout myview = new MyView();]]></programlisting>
-
-            <para>
-                This composition pattern is especially supported for creating forms, as
-                described in <xref linkend="datamodel.itembinding.formclass"/>.
-            </para>
-
-            <para>
-                While extending layouts is an easy way to make component composition, it
-                is a good practice to encapsulate implementation details, such as the
-                exact layout component used. Otherwise, the users of such a composite
-                could begin to rely on such implementation details, which would make
-                changes harder. For this purpose, Vaadin has a special
-                <classname>CustomComponent</classname> wrapper, which hides the content
-                representation.
-            </para>
-
-            <programlisting><![CDATA[class MyView extends CustomComponent {
-    TextField entry   = new TextField("Enter this");
-    Label     display = new Label("See this");
-    Button    click   = new Button("Click This");
-
-    public MyView() {
-        Layout layout = new VerticalLayout();
-        
-        layout.addComponent(entry);
-        layout.addComponent(display);
-        layout.addComponent(click);
-        
-        setCompositionRoot(layout);
-        
-        setSizeFull();
-    }
-}
-
-// Use it
-MyView myview = new MyView();]]></programlisting>
-
-            <para>
-                For a more detailed description of the
-                <classname>CustomComponent</classname>, see <xref
-                linkend="components.customcomponent"/>. The Vaadin Plugin for Eclipse also
-                includes a visual editor for composite components, as described in <xref
-                linkend="eclipse"/>.
-            </para>
-        </section>
-
-        <section xml:id="application.architecture.navigation">
-            <title>View Navigation</title>
-
-            <para>
-                While the most simple applications have just a single
-                <emphasis>view</emphasis> (or <emphasis>screen</emphasis>), perhaps most
-                have many. Even in a single view, you often want to have sub-views, for
-                example to display different content. <xref
-                linkend="figure.application.architecture.navigation"/> illustrates a
-                typical navigation between different top-level views of an application,
-                and a main view with sub-views.
-            </para>
-
-            <figure xml:id="figure.application.architecture.navigation">
-                <title>Navigation Between Views</title>
-                <mediaobject>
-                    <imageobject role="html">
-                        <imagedata align="center" fileref="img/application/view-navigation-lo.png"/>
-                    </imageobject>
-                    <imageobject role="fo">
-                        <imagedata scale="70" smallscale="100%" align="center" fileref="img/application/view-navigation-hi.png"/>
-                    </imageobject>
-                </mediaobject>
-            </figure>
-
-            <para>
-                The <classname>Navigator</classname> described in <xref
-                linkend="advanced.navigator"/> is a view manager that provides a flexible
-                way to navigate between views and sub-views, while managing the URI
-                fragment in the page URL to allow bookmarking, linking, and going back in
-                browser history.
-            </para>
-
-            <para>
-                Often Vaadin application views are part of something bigger. In such
-                cases, you may need to integrate the Vaadin applications with the other
-                website. You can use the embedding techniques described in <xref
-                linkend="application.embedding"/>.
-            </para>
-        </section>
-
-        <section xml:id="application.architecture.accessing">
-            <title>Accessing &rootclass;, Page, and Application</title>
-            
-            <para>
-                You can access the current &root;, page, and application objects from
-                anywhere in the application using the static
-                <methodname>getCurrent()</methodname> method in the respective
-                <classname>&rootclass;</classname>, <classname>Page</classname>, and
-                <classname>Application</classname> classes.
-            </para>
-
-                <programlisting><?pocket-size 75% ?><![CDATA[// Opens a sub-window
-Root.getCurrent().addWindow(new Window("My Window"));
-
-// Set the page title (window or tab caption)
-Page.getCurrent().setTitle("My Page");
-
-// Set the logout URL
-Application.getCurrent().setLogoutURL(
-        "http://en.wikipedia.org/wiki/Reindeer");]]></programlisting>
-
-            <para>
-                These methods use the built-in ThreadLocal support for application and &root;
-                objects. The pattern is described in detail in <xref
-                    linkend="advanced.global.threadlocal"/>.
-            </para>
-        </section>
-    </section>
 </chapter>
 	
 <!-- Keep this comment at the end of the file

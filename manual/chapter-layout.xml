@@ -250,7 +250,7 @@ main.addComponent(menuview);]]></programlisting>
 
     </section>
 		
-    <section xml:id="layout.components.orderedlayout">
+    <section xml:id="layout.orderedlayout">
         <title><classname>VerticalLayout</classname> and <classname>HorizontalLayout</classname></title>
         
         <para>
@@ -311,7 +311,7 @@ main.addComponent(vertical);]]></programlisting>
 				linkend="layout.settings.alignment"/>.
         </para>
 
-        <section xml:id="layout.components.orderedlayout.sizing">
+        <section xml:id="layout.orderedlayout.sizing">
             <title>Sizing Contained Components</title>
 
             <para>
@@ -336,7 +336,7 @@ main.addComponent(vertical);]]></programlisting>
                 following subsections.
             </para>
 
-            <simplesect xml:id="layout.components.orderedlayout.sizing.undefined">
+            <simplesect xml:id="layout.orderedlayout.sizing.undefined">
                 <title>Layout with Undefined Size</title>
 
                 <para>
@@ -424,7 +424,7 @@ Button butt = new Button("\u2190 This Button takes 100% "+
 butt.setWidth("100%");
 vertical.addComponent(butt);]]></programlisting>
 
-                <figure xml:id="figure.layout.components.orderedlayout.sizing.undefined.defining">
+                <figure xml:id="figure.layout.orderedlayout.sizing.undefined.defining">
                     <title>Defining the Size with a Component</title>
                     <mediaobject>
                         <imageobject role="html">
@@ -634,7 +634,7 @@ parentLayout.addComponent(layout50);]]></programlisting>
         </section>
     </section>
     
-    <section xml:id="layout.components.gridlayout">
+    <section xml:id="layout.gridlayout">
         <title><classname>GridLayout</classname></title>
         
         <para>
@@ -732,7 +732,7 @@ grid.addComponent(date, 2, 2, 3, 3);]]></programlisting>
                 you specify their height or width. The layout options are similar to
                 <classname>HorizontalLayout</classname> and
                 <classname>VerticalLayout</classname>, as described in <xref
-					linkend="layout.components.orderedlayout"/>.
+					linkend="layout.orderedlayout"/>.
             </para>
             
 			<warning>
@@ -990,50 +990,46 @@ tf2.setComponentError(
         </simplesect>
     </section>
 
-    <section xml:id="layout.components.panel">
+    <section xml:id="layout.panel">
         <title><classname>Panel</classname></title>
 
         <para>
-            <classname>Panel</classname> is a simple container with a frame and an
-            optional caption. The content area is bound to a an inner layout component for
-            laying out the contained components. The default content layout is a
-            <classname>VerticalLayout</classname>, but you can change it with the
-            <methodname>setContent()</methodname> method to be any class implementing the
-            <classname>ComponentContainer</classname> interface.
+            <classname>Panel</classname> is a single-component container with a frame
+            around the content. It has an optional caption and an icon which are handled
+            by the panel itself, not its containing layout. The panel itself does not
+            manage the caption of its contained component. You need to set the content
+            with <methodname>setContent()</methodname>.
         </para>
 
         <para>
-            The caption can have an icon in addition to the text.
+            <classname>Panel</classname> has 100% width and undefined height by
+            default. This corresponds with the default sizing of
+            <classname>VerticalLayout</classname>, which is perhaps most commonly used as
+            the content of a <classname>Panel</classname>. If the width or height of a
+            panel is undefined, the content must have a corresponding undefined or fixed
+            size in the same direction to avoid a sizing paradox.
         </para>
 
-        <programlisting><![CDATA[// Create a panel with a caption.
-final Panel panel = new Panel("Contact Information");
-panel.addStyleName("panelexample");
-
-// The width of a Panel is 100% by default, make it
-// shrink to fit the contents.
-panel.setWidth(Sizeable.SIZE_UNDEFINED, 0);
-
-// Create a layout inside the panel
-final FormLayout form = new FormLayout();
-
-// Have some margin around it.
-form.setMargin(true);
-
-// Add some components
-form.addComponent(new TextField("Name"));
-form.addComponent(new TextField("Email"));
-
-// Set the layout as the root layout of the panel
-panel.setContent(form);]]></programlisting>
+        <programlisting><![CDATA[Panel panel = new Panel("Astronomy Panel");
+panel.addStyleName("mypanelexample");
+panel.setSizeUndefined(); // Shrink to fit content
+layout.addComponent(panel);
+        
+// Create the content
+FormLayout content = new FormLayout();
+content.addStyleName("mypanelcontent");
+content.addComponent(new TextField("Participant"));
+content.addComponent(new TextField("Organization"));
+content.setSizeUndefined(); // Shrink to fit
+content.setMargin(true);
+panel.setContent(content);]]></programlisting>
 
         <para>
-            The resulting layout is shown in <xref linkend="figure.layout.panel"/> with
-            the Runo theme.
+            The resulting layout is shown in <xref linkend="figure.layout.panel"/>.
         </para>
         
         <figure xml:id="figure.layout.panel">
-            <title>A <classname>Panel</classname> Layout in Runo Theme</title>
+            <title>A <classname>Panel</classname></title>
             <mediaobject>
                 <imageobject>
                     <imagedata smallscale="120" align="center" fileref="img/layout/panel.png"/>
@@ -1041,97 +1037,10 @@ panel.setContent(form);]]></programlisting>
             </mediaobject>
         </figure>	
 
-        <para>
-			See <xref linkend="layout.root-layout"/> for more information about setting
-			the content layout.
-		</para>
-
-        <para>
-            <classname>Panel</classname> has 100% width and undefined width by
-            default. This corresponds with the default sizing of
-            <classname>VerticalLayout</classname>, the default root layout of
-            <classname>Panel</classname>. If you set undefined width for a panel, also the
-            root layout must have undefined width to avoid a paradox.
-        </para>
-
-        <simplesect>
-            <title>CSS Style Rules</title>
-            
-            <programlisting><![CDATA[.v-panel {}
-.v-panel-caption {}
-.v-panel-nocaption {}
-.v-panel-content {}
-.v-panel-deco {}]]></programlisting>
-
-            <para>
-                The entire panel has <literal>v-panel</literal> style. A panel
-                consists of three parts: the caption, content, and bottom decorations
-                (shadow). These can be styled with <literal>v-panel-caption</literal>,
-                <literal>v-panel-content</literal>, and
-                <literal>v-panel-deco</literal>, respectively. If the panel has no
-                caption, the caption element will have the style
-                <literal>v-panel-nocaption</literal>.
-            </para>
-            
-            <para>
-                The built-in <emphasis>light</emphasis> style has no borders or border
-                decorations for the <classname>Panel</classname>. You enable it simply by
-                adding the <literal>light</literal> style name for the panel, as is done
-                in the example below. You can also use the
-                <parameter>PANEL_LIGHT</parameter> constant defined in
-                <classname>BaseTheme</classname> class; it is usable in all subthemes.
-            </para>
-
-            <programlisting><?pocket-size 65% ?><![CDATA[// Have a window with a SplitPanel.
-final Window window = new Window("Window with a Light Panel");
-window.setWidth("400px");
-window.setHeight("200px");
-final HorizontalSplitPanel splitter =
-        new HorizontalSplitPanel();
-window.setContent(splitter);
-
-// Create a panel with a caption.
-final Panel light = new Panel("Light Panel");
-light.setSizeFull();
-
-// The "light" style is a predefined style without borders
-light.addStyleName(Runo.PANEL_LIGHT);
-
-light.addComponent(new Label("The light Panel has no borders."));
-light.getLayout().setMargin(true);
-
-// The Panel will act as a "caption" of the left panel
-// in the SplitPanel.
-splitter.addComponent(light);
-splitter.setSplitPosition(250, Sizeable.UNITS_PIXELS);
-
-main.addWindow(window);]]></programlisting>
-
-			<para>
-				<xref linkend="figure.layout.panel.light"/> shows the rendered
-				<classname>Panel</classname> in the Runo theme.
-			</para>
-
-			<figure xml:id="figure.layout.panel.light">
-				<title>A <classname>Panel</classname> with Light Style</title>
-				<mediaobject>
-					<imageobject>
-						<imagedata smallscale="100%" align="center" fileref="img/layout/panel-light.png"/>
-					</imageobject>
-				</mediaobject>
-			</figure>	
-            
-            <para>
-                The <emphasis>light</emphasis> style is typical when using a
-                <classname>Panel</classname> as the root layout of a window or some
-                similar layout, as in the example above.
-            </para>
-        </simplesect>
-
-        <section xml:id="layout.components.panel.scrolling">
+        <section xml:id="layout.scrolling">
             <title>Scrolling the Panel Content</title>
 
-            <indexterm xml:id="term.layout.components.panel.scrolling.scrollbars" class="startofrange">
+            <indexterm xml:id="term.layout.panel.scrolling.scrollbars" class="startofrange">
                 <primary>scroll bars</primary>
             </indexterm>
 
@@ -1175,10 +1084,10 @@ layout.addComponent(panel);]]></programlisting>
 
             <para>
                 The result is shown in <xref
-                linkend="figure.layout.components.panel.scrolling"/>.
+                linkend="figure.layout.panel.scrolling"/>.
             </para>
 
-			<figure xml:id="figure.layout.components.panel.scrolling">
+			<figure xml:id="figure.layout.panel.scrolling">
 				<title>Panel with Scroll Bars</title>
 				<mediaobject>
 					<imageobject>
@@ -1198,7 +1107,7 @@ layout.addComponent(panel);]]></programlisting>
                  during the course of the person's official duties. As a work of the
                  U.S. federal government, the image is in the public domain. -->
 
-            <indexterm xml:id="term.layout.components.panel.scrolling.scrollable" class="startofrange">
+            <indexterm xml:id="term.layout.panel.scrolling.scrollable" class="startofrange">
                 <primary><interfacename>Scrollable</interfacename></primary>
             </indexterm>
 
@@ -1254,10 +1163,40 @@ scrollButtons.addComponent(scrollDown);]]></programlisting>
 
             <!-- TODO: Screenshot -->
 
-                <indexterm startref="term.layout.components.panel.scrolling.scrollable" class="endofrange"/>
-                <indexterm startref="term.layout.components.panel.scrolling.scrollbars" class="endofrange"/>
+                <indexterm startref="term.layout.panel.scrolling.scrollable" class="endofrange"/>
+                <indexterm startref="term.layout.panel.scrolling.scrollbars" class="endofrange"/>
             </simplesect>
         </section>
+
+        <simplesect>
+            <title>CSS Style Rules</title>
+            
+            <programlisting><![CDATA[.v-panel {}
+.v-panel-caption {}
+.v-panel-nocaption {}
+.v-panel-content {}
+.v-panel-deco {}]]></programlisting>
+
+            <para>
+                The entire panel has <literal>v-panel</literal> style. A panel
+                consists of three parts: the caption, content, and bottom decorations
+                (shadow). These can be styled with <literal>v-panel-caption</literal>,
+                <literal>v-panel-content</literal>, and
+                <literal>v-panel-deco</literal>, respectively. If the panel has no
+                caption, the caption element will have the style
+                <literal>v-panel-nocaption</literal>.
+            </para>
+            
+            <para>
+                The built-in <literal>light</literal> style in the Reindeer and Runo
+                themes has no borders or border decorations for the
+                <classname>Panel</classname>. You can use the
+                <parameter>Reindeer.PANEL_LIGHT</parameter> and
+                <parameter>Runo.PANEL_LIGHT</parameter> constants to add the style to a
+                panel. Other themes may also provide the light and other styles for
+                <classname>Panel</classname> as well.
+            </para>
+        </simplesect>
     </section>
 
 	<section xml:id="layout.sub-window">
@@ -1490,7 +1429,7 @@ mywindow.setPositionY(50);]]></programlisting>
                 As <classname>Window</classname> extends <classname>Panel</classname>,
                 windows are also <interfacename>Scrollable</interfacename>. Note that the
                 interface defines <emphasis>programmatic scrolling</emphasis>, not
-                scrolling by the user. Please see <xref linkend="layout.components.panel"/>.
+                scrolling by the user. Please see <xref linkend="layout.panel"/>.
             </para>
 
             <indexterm startref="term.layout.sub-window.scrolling.scrollbars" class="endofrange"/>
@@ -1613,13 +1552,13 @@ mywindow.setPositionY(50);]]></programlisting>
 		</section>
 	</section> <!-- Child windows -->
 
-	<section xml:id="layout.components.splitpanel">
+	<section xml:id="layout.splitpanel">
         <title><classname>HorizontalSplitPanel</classname> and <classname>VerticalSplitPanel</classname></title>
         
-        <indexterm xml:id="term.layout.components.splitpanel.horizontal" class="startofrange">
+        <indexterm xml:id="term.layout.splitpanel.horizontal" class="startofrange">
             <primary><classname>HorizontalSplitPanel</classname></primary>
         </indexterm>
-        <indexterm xml:id="term.layout.components.splitpanel.vertical" class="startofrange">
+        <indexterm xml:id="term.layout.splitpanel.vertical" class="startofrange">
             <primary><classname>VerticalSplitPanel</classname></primary>
         </indexterm>
 
@@ -1760,11 +1699,11 @@ hsplit.setLocked(true);]]></programlisting>
             
 		</simplesect>
 
-        <indexterm startref="term.layout.components.splitpanel.horizontal" class="endofrange"/>
-        <indexterm startref="term.layout.components.splitpanel.vertical" class="endofrange"/>
+        <indexterm startref="term.layout.splitpanel.horizontal" class="endofrange"/>
+        <indexterm startref="term.layout.splitpanel.vertical" class="endofrange"/>
     </section>
 
-    <section xml:id="layout.components.tabsheet">
+    <section xml:id="layout.tabsheet">
         <title><classname>TabSheet</classname></title>
         
         <para>
@@ -2001,7 +1940,7 @@ public class TabSheetExample extends CustomComponent implements
 		</simplesect>
     </section>
     
-	<section xml:id="layout.components.accordion">
+	<section xml:id="layout.accordion">
         <title><classname>Accordion</classname></title>
 
         <para>
@@ -2011,7 +1950,7 @@ public class TabSheetExample extends CustomComponent implements
             between the tab and the next one. You can use an
             <classname>Accordion</classname> identically to a
             <classname>TabSheet</classname>, which it actually inherits. See <xref
-            linkend="layout.components.tabsheet"/> for more information.
+            linkend="layout.tabsheet"/> for more information.
         </para>
         
         <para>
@@ -2572,8 +2511,8 @@ main.getLayout().setSizeFull();]]></programlisting>
 				<para>
 					Expansion is dealt in detail in the documentation of the layout
 					components that support it. See <xref
-					linkend="layout.components.orderedlayout"/> and <xref
-					linkend="layout.components.gridlayout"/> for details on components
+					linkend="layout.orderedlayout"/> and <xref
+					linkend="layout.gridlayout"/> for details on components
 					with relative sizes.
 				</para>
 			</section>
