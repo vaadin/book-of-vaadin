@@ -990,6 +990,97 @@ main.addComponent(textfield);
 // Let the component error be initially clear.
 textfield.setComponentError(null); // (actually the default)
 
+main.addComponent(closeButton);]]></programlisting>
+
+			<para>
+				You will soon notice that closing the application simply reloads the
+				application with a new <classname>Application</classname> instance. You
+				can set the window to redirect to a different URL (that does not reload
+				the application) with <methodname>setLogoutURL</methodname>. In your
+				application class, write:
+			</para>
+
+			<programlisting><![CDATA[setLogoutURL("/logout.html");]]></programlisting>
+
+		</section>
+    </section>
+
+        <!-- TODO: Update if #2752 is fixed. -->
+
+        <!--
+		<section>
+			<title>Handling the Closing of a Window</title>
+
+			<para>
+				Closing the main window (or all application-level windows) does not close
+				session and the application instance will be left hanging. You need to
+				program such behaviour by handling the close events of the windows.
+			</para>
+
+			<para>
+				If the user closes a browser window, such as the main window or any other
+				application-level window, the window will send a final AJAX request to the
+				server, which will fire a <classname>Window.CloseEvent</classname> for the
+				closed window. You can handle the event with a
+				<classname>Window.CloseListener</classname>. In case the user closes the
+				browser, the event is fired for every open window.
+			</para>
+
+			<programlisting><![CDATA[// Close the application if the main window is closed.
+main.addListener(new Window.CloseListener(){
+   @Override
+    public void windowClose(CloseEvent e) {
+       System.out.println("Closing the application");
+       getMainWindow().getApplication().close();
+    } 
+});]]></programlisting>
+
+			<para>
+				Notice that <emphasis>refreshing a window means closing and reopening
+				it</emphasis>. Therefore, if you have a close handler as above, the user
+				loses the possibility to refresh the browser window.
+			</para>
+
+			<para>
+				In the likely case that the browser crashes, no close event is communicated to
+				the server. As the server has no way of knowing about the problem, and the
+				session will be left hanging until the session timeout expires. During this
+				time, the user can restart the browser, open the application URL, and the main
+				window will be rendered where the user left off. This can be desired behaviour
+				in many cases, but sometimes it is not and can create a security problem.
+			</para>
+		</section>
+	</section> -->
+	
+	<section xml:id="application.errors">
+		<title>Handling Errors</title>
+
+		<section xml:id="application.errors.error-indicator">
+			<title>Error Indicator and message</title>
+
+			<para>
+				All components have a built-in error indicator that can be set explicitly
+				with <methodname>setComponentError()</methodname> or can be turned on
+				implicitly if validating the component fails. As with component caption,
+				the placement of the indicator is managed by the layout in which the
+				component is contained. Usually, the error indicator is placed right of
+				the caption text. Hovering the mouse pointer over the field displays the
+				error message.
+			</para>
+
+			<para>
+				The following example shows how you can set the component error
+				explicitly. The example essentially validates field value without using an
+				actual validator.
+			</para>
+
+			<programlisting><?pocket-size 65% ?><![CDATA[// Create a field.
+final TextField textfield = new TextField("Enter code");
+main.addComponent(textfield);
+
+// Let the component error be initially clear.
+textfield.setComponentError(null); // (actually the default)
+
 // Have a button right of the field (and align it properly).
 final Button button = new Button("Ok!");
 main.addComponent(button);
@@ -1847,7 +1938,7 @@ main.addListener(new Window.CloseListener(){
             <!-- TODO Vaadin 7: What is the relationship between servlet and application? -->
 		</para>
 		
-		<section xml:id="application.environment.war-eclipse">
+        <section xml:id="application.environment.war-eclipse">
 			<title>Creating Deployable WAR in Eclipse</title>
 
 			<para>
