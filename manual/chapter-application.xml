@@ -486,29 +486,47 @@ MyView myview = new MyView();]]></programlisting>
         </section>
 
         <section xml:id="application.architecture.accessing">
-            <title>Accessing &uiclass;, Page, and Session</title>
+            <title>Accessing &uiclass;, Page, Session, and Service</title>
+
+            <para>
+                You can get the UI and page to which a component is attached with
+                <methodname>getUI()</methodname> and <methodname>getPage()</methodname>.
+            </para>
             
             <para>
-                You can access the current &ui;, page, and session objects from
-                anywhere in the application using the static
-                <methodname>getCurrent()</methodname> method in the respective
-                <classname>&uiclass;</classname>, <classname>Page</classname>, and
-                <classname>VaadinSession</classname> classes.
+                However, the values are <literal>null</literal> until the component is
+                attached to the UI, and typically when you need it in constructors it is
+                not. It is therefore preferable to access the current &ui;, page, session,
+                and service objects from anywhere in the application using the static
+                <methodname>getCurrent()</methodname> methods in the respective
+                <classname>&uiclass;</classname>, <classname>Page</classname>,
+                <classname>VaadinSession</classname>, and
+                <classname>VaadinService</classname> classes.
             </para>
 
-                <programlisting><?pocket-size 75% ?><![CDATA[// Opens a sub-window
-UI.getCurrent().addWindow(new Window("My Window"));
+            <programlisting><?pocket-size 65% ?><![CDATA[// Set the default locale of the UI
+UI.getCurrent().setLocale(new Locale("en"));
 
 // Set the page title (window or tab caption)
 Page.getCurrent().setTitle("My Page");
+        
+// Set a session attribute
+VaadinSession.getCurrent().setAttribute("myattrib", "hello");
 
-// Set the logout URL
-VaadinSession.getCurrent().setLogoutURL(
-        "http://en.wikipedia.org/wiki/Reindeer");]]></programlisting>
+// Access the HTTP service parameters
+File baseDir = VaadinService.getCurrent().getBaseDirectory();]]></programlisting>
 
             <para>
-                These methods use the built-in ThreadLocal support in the session, page,
-                and &ui; objects. The pattern is described in detail in <xref
+                You can get the page and the session also from a <classname>UI</classname>
+                with <methodname>getPage()</methodname> and
+                <methodname>getSession()</methodname> and the service from
+                <classname>VaadinSession</classname> with
+                <methodname>getService()</methodname>.
+            </para>
+
+            <para>
+                The static methods use the built-in ThreadLocal support in the
+                classes. The pattern is described in <xref
                 linkend="advanced.global.threadlocal"/>.
             </para>
         </section>
@@ -1545,39 +1563,81 @@ notif.show(Page.getCurrent());]]></programlisting>
                 blocks in classes are executed when they are loaded.
             </para>
 
+            <section xml:id="application.lifecycle.deployment.redeployment">
+                <title>Undeploying and Redeploying</title>
+
+                <para>
+                    Applications are undeployed when the server shuts down, during
+                    redeployment, and when they are explicitly undeployed. Undeploying a
+                    server-side Vaadin application ends its execution, all application
+                    classes are unloaded, and the heap space allocated by the application
+                    is freed for garbage-collection.
+                </para>
+
+                <para>
+                    If any user sessions are open at this point, the client-side state of
+                    the UIs is left hanging and an Out of Sync error is displayed on the
+                    next server request.
+                </para>
+            </section>
+
+            <section xml:id="application.lifecycle.deployment.serialization">
+                <title>Redeployment and Serialization</title>
+
+                <para>
+                    Some servers, such as Tomcat, support <emphasis>hot
+                    deployment</emphasis>, where the classes are reloaded while preserving
+                    the memory state of the application. This is done by serializing the
+                    application state and then deserializing it after the classes are
+                    reloaded. This is, in fact, done with the basic Eclipse setup with
+                    Tomcat and you actually need to give the
+                    <literal>?restartApplication</literal> parameter to the UI to force it
+                    to restart when you reload the page. Tools such as JRebel go even
+                    further by reloading the code in place without need for
+                    serialization. The server can also serialize the application state
+                    when shutting down and restarting, thereby preserving sessions over
+                    restarts.
+                </para>
+
+                <para>
+                    Serialization requires that the applications are
+                    <emphasis>serializable</emphasis>, that is, all classes implement the
+                    <interfacename>Serializable</interfacename> interface. All Vaadin
+                    classes do, and if you extend them or implement interfaces, you
+                    usually just need to provide the serialization key, which is
+                    automatically generated by Eclipse if you use it. Serialization is
+                    also used for clustering and cloud computing, such as with Google App
+                    Engine, as described in <xref linkend="advanced.gae"/>.
+                </para>
+            </section>
+        </section>
+
+		<section xml:id="application.lifecycle.servlet-service">
+            <title>Vaadin Servlet and Service</title>
+
             <para>
-                Applications are undeployed when the server shuts down, during
-                redeployment, and when they are explicitly undeployed. Undeploying a
-                server-side Vaadin application ends its execution, all application classes
-                are unloaded, and the heap space allocated by the application is freed for
-                garbage-collection. If any user sessions are open at this point, the
-                client-side state of the UIs is left hanging and an Out of Sync error is
-                displayed on the next server request.
+                The <classname>VaadinServlet</classname> (or
+                -<classname>Portlet</classname>) class receives all server requests mapped
+                to it by its URL, as defined in the deployment configuration, and
+                associates them with sessions.
             </para>
 
             <para>
-                Some servers, such as Tomcat, support <emphasis>hot deployment</emphasis>,
-                where the classes are reloaded while preserving the memory state of the
-                application. This is done by serializing the application state and then
-                deserializing it after the classes are reloaded. This is, in fact, done
-                with the basic Eclipse setup with Tomcat and you actually need to give the
-                <literal>?restartApplication</literal> parameter to the UI to force it to
-                restart when you reload the page. Tools such as JRebel go even further by
-                reloading the code in place without need for serialization. The server can
-                also serialize the application state when shutting down and restarting,
-                thereby preserving sessions over restarts.
+                The <classname>VaadinService</classname> is a layer used by the servlet to
+                process the requests. It manages sessions and other tasks. It acts as the
+                primary low-level customization layer for processing requests.
             </para>
 
-            <para>
-                Serialization requires that the applications are
-                <emphasis>serializable</emphasis>, that is, all classes implement the
-                <interfacename>Serializable</interfacename> interface. All Vaadin classes
-                do, and if you extend them or implement interfaces, you usually just need
-                to provide the serialization key, which is automatically generated by
-                Eclipse if you use it. Serialization is also used for clustering and cloud
-                computing, such as with Google App Engine, as described in <xref
-                linkend="advanced.gae"/>.
-            </para>
+            <section xml:id="application.lifecycle.servlet-service.customization">
+                <title>Customization</title>
+
+                <para>
+                    To customize <classname>VaadinService</classname>, you first need to
+                    extend <classname>VaadinServlet/-Portlet</classname> and override the
+                    <methodname>createServletService()</methodname> to create a custom
+                    service object.
+                </para>
+            </section>
         </section>
 
 		<section xml:id="application.lifecycle.session">
@@ -1592,6 +1652,18 @@ notif.show(Page.getCurrent());]]></programlisting>
                 creates a new user session, represented by an instance of
                 <classname>VaadinSession</classname>. Sessions are tracked using cookies
                 stored in the browser.
+            </para>
+
+            <para>
+                You can obtain the <classname>VaadinSession</classname> of an
+                <classname>UI</classname> with <methodname>getSession()</methodname> or
+                globally with <methodname>VaadinSession.getCurrent()</methodname>. It
+                provides access also to the lower-level session objects,
+                <interfacename>HttpSession</interfacename> and
+                <interfacename>PortletSession</interfacename>, through a
+                <classname>SessionWrapper</classname>. You can also access to the
+                deployment configuration through <classname>VaadinSession</classname>, as
+                described in <xref linkend="application.environment.configuration"/>.
             </para>
 
             <para>
@@ -1705,9 +1777,9 @@ public class MyUI extends UI {]]></programlisting>
                 UIs are closed when the timeout specified by the
                 <parameter>session-timeout</parameter> parameter for the servlet expires
                 after the last non-heartbeat request. Once the session is gone, the
-                browser will show an error on the next server request. To avoid the ugly
-                message, you may want to set a redirect URL for the UIs as described in
-                <xref linkend="application.errors.systemmessages"/>.
+                browser will show an Out Of Sync error on the next server request. To
+                avoid the ugly message, you may want to set a redirect URL for the UIs as
+                described in <xref linkend="application.errors.systemmessages"/>.
             </para>
 
             <para>
