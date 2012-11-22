@@ -1687,7 +1687,8 @@ notif.show(Page.getCurrent());]]></programlisting>
                 UI class are processed by the <classname>VaadinServlet</classname> or
                 <classname>VaadinPortlet</classname> class. When a new client connects, it
                 creates a new user session, represented by an instance of
-                <classname>VaadinSession</classname>.
+                <classname>VaadinSession</classname>. Sessions are tracked using cookies
+                stored in the browser.
             </para>
 
             <para>
@@ -1782,7 +1783,7 @@ public class MyUI extends UI {]]></programlisting>
             <title>Session Expiration</title>
 
             <para>
-                The session is kept alive by server requests caused by user interaction
+                A session is kept alive by server requests caused by user interaction
                 with the application as well as the heartbeat monitoring of the UIs.  Once
                 all UIs have expired, the session still remains. It is cleaned up from the
                 server when the session timeout configured in the web application expires.
@@ -1790,18 +1791,20 @@ public class MyUI extends UI {]]></programlisting>
 
             <para>
                 <indexterm><primary>closeIdleSessions</primary></indexterm>
-                <indexterm><primary>Out of Sync</primary></indexterm>
 
-                The UI heartbeat keeps the session normally alive indefinitely. You may
-                want to terminate the session if the user is inactive long enough.  If the
-                <parameter>closeIdleSessions</parameter> parameter for the servlet is
-                enabled (disabled by default) in the <filename>web.xml</filename>, as
-                described in <xref linkend="application.environment.web-xml"/>, the
-                session and all of its UIs will be closed when the timeout specified by
-                the <parameter>session-timeout</parameter> parameter for the servlet
-                expires after the last non-heartbeat request. Once the session no longer
-                exists, the browser will show an Out of Sync error on the next server
-                request.
+                If there are active UIs in an application, their heartbeat keeps the
+                session alive indefinitely. You may want to have the sessions timeout if
+                the user is inactive long enough, which is the original purpose of the
+                session timeout setting. If the <parameter>closeIdleSessions</parameter>
+                parameter for the servlet is set to <literal>true</literal> in the
+                <filename>web.xml</filename>, as described in <xref
+                linkend="application.environment.web-xml"/>, the session and all of its
+                UIs are closed when the timeout specified by the
+                <parameter>session-timeout</parameter> parameter for the servlet expires
+                after the last non-heartbeat request. Once the session is gone, the
+                browser will show an error on the next server request. To avoid the ugly
+                message, you may want to set a redirect URL for the UIs as described in
+                <xref linkend="application.errors.systemmessages"/>.
             </para>
 
             <para>
@@ -1816,18 +1819,19 @@ public class MyUI extends UI {]]></programlisting>
 			<para>
 				You can call the <methodname>close()</methodname> method in the
 				<classname>VaadinSession</classname> to shut down the session and clean up
-				all the resources allocated for it. The session is closed immediately and
+				any the resources allocated for it. The session is closed immediately and
 				any objects related to it are not available after calling the method. The
 				UI still visible in the browser has no session to communicate with, but
-				will still receive content from the last request. You typically want to
-				redirect the user to another URL at this point, using the
+				will still receive the response from the final request. You typically want
+				to redirect the user to another URL at this point, using the
 				<methodname>setLocation()</methodname> method in
-				<classname>Page</classname>.
+				<classname>Page</classname>. You just have to call it before closing the
+				session.
 			</para>
 
 			<para>
-				In the following example, we display a <guibutton>Logout</guibutton>
-				button, which ends the user session.
+				In the following example, we display a logout button, which closes the
+				user session.
 			</para>
 
 		<book-example id="application.lifecycle.closing" style="float: right"></book-example>
@@ -1837,23 +1841,12 @@ logout.addClickListener(new Button.ClickListener() {
     public void buttonClick(ClickEvent event) {
         // Redirect from the page
         getUI().getPage().setLocation(
-            "/book-examples-vaadin7/");
+            "/myapp/logoutpage.html");
         
         // Close the VaadinSession
         getSession().close();
     }
 });]]></programlisting>
-
-			<para>
-				You will soon notice that closing the application simply reloads the
-				application with a new <classname>Application</classname> instance. You
-				can set the window to redirect to a different URL (that does not reload
-				the application) with <methodname>setLogoutURL</methodname>. In your
-				application class, write:
-			</para>
-
-			<programlisting><![CDATA[setLogoutURL("/logout.html");]]></programlisting>
-
 		</section>
     </section>
         <!-- TODO: Update if #2752 is fixed. -->
