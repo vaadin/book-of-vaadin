@@ -1612,19 +1612,25 @@ notif.show(Page.getCurrent());]]></programlisting>
             </section>
         </section>
 
-		<section xml:id="application.lifecycle.servlet-service">
-            <title>Vaadin Servlet and Service</title>
+        <section xml:id="application.lifecycle.servlet-service">
+            <title>Vaadin Servlet, Portlet, and Service</title>
 
             <para>
-                The <classname>VaadinServlet</classname> (or
-                -<classname>Portlet</classname>) class receives all server requests mapped
-                to it by its URL, as defined in the deployment configuration, and
-                associates them with sessions.
+                The <classname>VaadinServlet</classname>, or
+                <classname>VaadinPortlet</classname> in a portal, receives all server
+                requests mapped to it by its URL, as defined in the deployment
+                configuration, and associates them with sessions. The sessions further
+                associate the requests with particular UIs.
             </para>
 
             <para>
-                The <classname>VaadinService</classname> is a layer used by the servlet to
-                process the requests. It manages sessions and other tasks. It acts as the
+                When servicing requests, the Vaadin servlet or portlet handles all tasks
+                common to both servlets and portlets in a
+                <classname>VaadinService</classname>. It manages sessions, gives access to
+                the deployment configuration information, handles system messages, and
+                does various other tasks. Any servlet type specific tasks are handled in
+                the corresponding <classname>VaadinServletService</classname> or
+                <classname>VaadinPortletService</classname>. The service acts as the
                 primary low-level customization layer for processing requests.
             </para>
 
@@ -1633,14 +1639,15 @@ notif.show(Page.getCurrent());]]></programlisting>
 
                 <para>
                     To customize <classname>VaadinService</classname>, you first need to
-                    extend <classname>VaadinServlet/-Portlet</classname> and override the
+                    extend the <classname>VaadinServlet</classname> or
+                    -<classname>Portlet</classname> class and override the
                     <methodname>createServletService()</methodname> to create a custom
                     service object.
                 </para>
             </section>
         </section>
 
-		<section xml:id="application.lifecycle.session">
+        <section xml:id="application.lifecycle.session">
             <title>User Session</title>
 
             <para>
@@ -1672,7 +1679,7 @@ notif.show(Page.getCurrent());]]></programlisting>
             </para>
         </section>
 
-		<section xml:id="application.lifecycle.ui">
+        <section xml:id="application.lifecycle.ui">
             <title>Loading an UI</title>
 
             <para>
@@ -1702,12 +1709,13 @@ notif.show(Page.getCurrent());]]></programlisting>
 
             <para>
                 After initialization of the <classname>UI</classname> instance, the
-                servlet generates the loader page for the application. You can customize
-                the loader page by overriding the default
-                <classname>VaadinServlet</classname> or use entirely custom loader code as
-                described in <xref linkend="application.embedding"/>. The loader page
-                loads the client-side engine, which in turn loads the page content in a
-                separate request.
+                servlet generates the loader page for the application. The HTML content of
+                the page is generated as an HTML DOM object, which can be customized by
+                implementing a <interfacename>BootstrapListener</interfacename> that
+                modifies the DOM object. You can also use entirely custom loader code,
+                such as in a static HTML page, as described in <xref
+                linkend="application.embedding"/>. The loader page loads the client-side
+                engine, which in turn loads the page content in a separate request.
             </para>
 
             <simplesect xml:id="application.lifecycle.ui.preserving">
@@ -1728,7 +1736,7 @@ public class MyUI extends UI {]]></programlisting>
             </simplesect>
         </section>
 
-		<section xml:id="application.lifecycle.ui-expiration">
+        <section xml:id="application.lifecycle.ui-expiration">
             <title>UI Expiration</title>
 
             <para>
@@ -1754,7 +1762,7 @@ public class MyUI extends UI {]]></programlisting>
             </para>
         </section>
 
-		<section xml:id="application.lifecycle.session-expiration">
+        <section xml:id="application.lifecycle.session-expiration">
             <title>Session Expiration</title>
 
             <para>
@@ -1788,11 +1796,11 @@ public class MyUI extends UI {]]></programlisting>
             </para>
         </section>
 
-		<section xml:id="application.lifecycle.closing">
-			<title>Closing a Session</title>
+        <section xml:id="application.lifecycle.closing">
+            <title>Closing a Session</title>
 
-			<para>
-				You can call the <methodname>close()</methodname> method in the
+            <para>
+                You can call the <methodname>close()</methodname> method in the
 				<classname>VaadinSession</classname> to shut down the session and clean up
 				any the resources allocated for it. The session is closed immediately and
 				any objects related to it are not available after calling the method. The
