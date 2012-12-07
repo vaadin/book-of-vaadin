@@ -152,8 +152,7 @@ chart.setWidth("400px");  // 100% by default
 chart.setHeight("300px"); // 400px by default]]></programlisting>
 
         <para>
-            The chart types are described in <xref
-            linkend="charts.basic-use.charttypes"/>.
+            The chart types are described in <xref linkend="charts.charttypes"/>.
         </para>
 
         <simplesect xml:id="charts.basic-use.configuration">
@@ -241,125 +240,7 @@ yaxis.getLabels().setStep(2);
 conf.addyAxis(yaxis);]]></programlisting>
         </simplesect>
 
-        <section xml:id="charts.basic-use.charttypes">
-            <title>Chart Types</title>
-
-            <para>
-                The easiest way to specify the type of a chart is to give the chart type
-                in the constructor of the <classname>Chart</classname> object. You can
-                later read or set it with the <literal>chartType</literal> property of the
-                chart model, which you can get with
-                <methodname>getConfiguration().getChart()</methodname>.
-            </para>
-
-            <para>
-                The chart types defined in the <classname>ChartType</classname> enum are:
-            </para>
-        
-            <table xml:id="table.charts.basic-use.charttypes">
-                <title>Chart Types</title>
-                <tgroup cols="2" align="left">
-                    <colspec colnum="1" colname="col1" colwidth="1*"/>
-                    <colspec colnum="2" colname="col2" colwidth="2*"/>
-                    <tbody>
-                        <row valign="top">
-                            <entry><parameter>AREA</parameter></entry>
-                            <entry>
-                                Area charts are like line charts, except that the area between
-                                the line and the Y axis is painted with a transparent color.
-                            </entry>
-                        </row>
-                        <row valign="top">
-                        <entry><parameter>LINE</parameter></entry>
-                        <entry>
-                            A line chart displays connects the sequential data points with
-                            a straight line.
-                        </entry>
-                    </row>
-                    <row valign="top">
-                        <entry><parameter>SPLINE</parameter></entry>
-                        <entry>
-                            A spline chart is like a line chart that connects sequential
-                            data points with a line, except the line is a curved spline,
-                            that is, a smooth polynomial interpolation between the points.
-                        </entry>
-                    </row>
-                    <row valign="top">
-                        <entry><parameter>AREASPLINE</parameter></entry>
-                        <entry>
-                            An area spline chart is like a spline chart that connects
-                            sequential data points with a smooth interpolation curve,
-                            except that the area between line and the axis is painted with
-                            a transparent color.
-                        </entry>
-                    </row>
-                    <row valign="top">
-                        <entry><parameter>COLUMN</parameter></entry>
-                        <entry>
-                            A column chart represents values in a discrete data series is
-                            vertical columns.
-                        </entry>
-                    </row>
-                    <row valign="top">
-                        <entry><parameter>BAR</parameter></entry>
-                        <entry>
-                            A bar chart represents values in a discrete data series in
-                            horizontal columns.
-                        </entry>
-                    </row>
-                    <row valign="top">
-                        <entry><parameter>PIE</parameter></entry>
-                        <entry>
-                            A pie chart represents values of a discrete data series with
-                            sectors of a circle. An outer rim in a chart can illustrate
-                            further subdivision in the data.
-                        </entry>
-                    </row>
-                    <row valign="top">
-                        <entry><parameter>SCATTER</parameter></entry>
-                        <entry>
-                            A scatter chart allows plotting unconnected data points with
-                            both X and Y coordinate.
-                        </entry>
-                    </row>
-                    <row valign="top">
-                        <entry><parameter>GAUGE</parameter></entry>
-                        <entry>
-                            A gauge displays a single value with a rotating needle
-                            pointing on a circular axis. Multiple axes with different
-                            scales are supported.
-                        </entry>
-                    </row>
-                    <row valign="top">
-                        <entry><parameter>AREARANGE</parameter></entry>
-                        <entry>
-                            An area range chart is like an area chart, with straight lines
-                            connecting the data points, except that the area between two
-                            data series is colored.
-                        </entry>
-                    </row>
-                    <row valign="top">
-                        <entry><parameter>COLUMNRANGE</parameter></entry>
-                        <entry>
-                            A column range has horizontal bars from one value to
-                            another. The low and high values are represented by two data
-                            series for the chart.
-                        </entry>
-                    </row>
-                    <row valign="top">
-                        <entry><parameter>AREASPLINERANGE</parameter></entry>
-                        <entry>
-                            An area spline range chart is like an area spline chart, with
-                            smooth splines interpolating the data points, except that the
-                            area between two data series is colored.
-                        </entry>
-                        </row>
-                    </tbody>
-                </tgroup>
-            </table>
-        </section>
-
-        <section xml:id="table.charts.basic-use.two-dimensional">
+        <section xml:id="charts.basic-use.two-dimensional">
             <title>Displaying Multiple Series</title>
 
             <para>
@@ -411,6 +292,473 @@ for (int predator = 0; predator < 4; predator++) {
                     </imageobject>
                 </mediaobject>
             </figure>
+        </section>
+    </section>
+
+    <section xml:id="charts.charttypes">
+        <title>Chart Types</title>
+
+        <para>
+            Vaadin Charts comes with over a dozen different chart types.  You normally
+            specify the chart type in the constructor of the <classname>Chart</classname>
+            object. The available chart types are defined in the
+            <classname>ChartType</classname> enum. You can later read or set the chart
+            type with the <literal>chartType</literal> property of the chart model, which
+            you can get with <methodname>getConfiguration().getChart()</methodname>.
+        </para>
+
+        <para>
+            Each chart type has its specific plot options and support its specific
+            collection of chart features. They also have specific requirements for the
+            data series.
+        </para>
+
+        <para>
+            The basic chart types and their variants are covered in the following
+            subsections.
+        </para>
+
+        <section xml:id="charts.charttypes.line">
+            <title>Line and Spline Charts</title>
+
+            <para>
+                Line charts connect the series of data points with lines. In the basic
+                line charts the lines are straight, while in spline charts the lines are
+                smooth polynomial interpolations between the data points.
+            </para>
+
+            <table xml:id="table.charttypes.line.subtypes">
+                <title>Line Chart Subtypes</title>
+                <tgroup cols="2" align="left">
+                    <colspec colnum="1" colname="col1" colwidth="1*"/>
+                    <colspec colnum="2" colname="col2" colwidth="2*"/>
+                    <thead>
+                        <row valign="top">
+                            <entry>ChartType</entry>
+                            <entry>Plot Options Class</entry>
+                        </row>
+                    </thead>
+                    <tbody>
+                        <row valign="top">
+                            <entry><parameter>LINE</parameter></entry>
+                            <entry><classname>PlotOptionsLine</classname></entry>
+                        </row>
+                        <row valign="top">
+                            <entry><parameter>SPLINE</parameter></entry>
+                            <entry><classname>PlotOptionsSpline</classname></entry>
+                        </row>
+                    </tbody>
+                </tgroup>
+            </table>
+        </section>
+
+        <section xml:id="charts.charttypes.area">
+            <title>Area Charts</title>
+
+            <para>
+                Area charts are like line charts, except that the area between the line
+                and the Y axis is painted with a transparent color.  In addition to the
+                base type, chart type combinations for spline interpolation and ranges are
+                supported.
+            </para>
+
+            <table xml:id="table.charttypes.area.subtypes">
+                <title>Area Chart Subtypes</title>
+                <tgroup cols="2" align="left">
+                    <colspec colnum="1" colname="col1" colwidth="1*"/>
+                    <colspec colnum="2" colname="col2" colwidth="2*"/>
+                    <thead>
+                        <row valign="top">
+                            <entry>ChartType</entry>
+                            <entry>Plot Options Class</entry>
+                        </row>
+                    </thead>
+                    <tbody>
+                        <row valign="top">
+                            <entry><parameter>AREA</parameter></entry>
+                            <entry><classname>PlotOptionsArea</classname></entry>
+                        </row>
+                        <row valign="top">
+                            <entry><parameter>AREASPLINE</parameter></entry>
+                            <entry><classname>PlotOptionsAreaSpline</classname></entry>
+                        </row>
+                        <row valign="top">
+                            <entry><parameter>AREARANGE</parameter></entry>
+                            <entry><classname>PlotOptionsAreaRange</classname></entry>
+                        </row>
+                        <row valign="top">
+                            <entry><parameter>AREASPLINERANGE</parameter></entry>
+                            <entry><classname>PlotOptionsAreaSplineRange</classname></entry>
+                        </row>
+                    </tbody>
+                </tgroup>
+            </table>
+
+            <para>
+                Area charts support <emphasis>stacking</emphasis>, so that multiple series
+                are piled on top of each other. You enable stacking from the plot options
+                with <methodname>setStacking()</methodname>. The
+                <parameter>Stacking.NORMAL</parameter> does a normal summative stacking,
+                while the <parameter>Stacking.PERCENT</parameter> handles them as
+                proportions.
+            </para>
+
+            <para>
+                In area range charts, the area between a lower and upper value is painted
+                with a transparent color. The data series must specify the minimum and
+                maximum values for the Y coordinates, defined either with
+                <classname>RangeSeries</classname>, as described in <xref
+                linkend="charts.data.rangeseries"/>, or with
+                <classname>DataSeries</classname>, described in <xref
+                linkend="charts.data.dataseries"/>.
+            </para>
+        </section>
+
+        <section xml:id="charts.charttypes.columnbar">
+            <title>Column and Bar Charts</title>
+
+            <para>
+                Column and bar charts illustrate values as vertical or horizontal bars,
+                respectively. The two chart types are essentially equivalent, just as if
+                the orientation of the axes was inverted.
+            </para>
+
+            <para>
+                Multiple data series, that is, two-dimensional data, are shown with
+                thinner bars or columns grouped by their category, as described in <xref
+                linkend="charts.basic-use.two-dimensional"/>. Enabling stacking with
+                <methodname>setStacking()</methodname> in plot options stacks the columns
+                or bars of different series on top of each other.
+            </para>
+
+            <para>
+                You can also have <parameter>COLUMNRANGE</parameter> charts that
+                illustrate a range between a lower and an upper value, as described in
+                <xref linkend="charts.charttypes.rangecharts"/>. They require the use of
+                <classname>RangeSeries</classname> for defining the lower and upper
+                values.
+            </para>
+
+            <table xml:id="table.charttypes.columnbar.subtypes">
+                <title>Column and Bar Chart Subtypes</title>
+                <tgroup cols="2" align="left">
+                    <colspec colnum="1" colname="col1" colwidth="1*"/>
+                    <colspec colnum="2" colname="col2" colwidth="2*"/>
+                    <thead>
+                        <row valign="top">
+                            <entry>ChartType</entry>
+                            <entry>Plot Options Class</entry>
+                        </row>
+                    </thead>
+                    <tbody>
+                        <row valign="top">
+                            <entry><parameter>COLUMN</parameter></entry>
+                            <entry><classname>PlotOptionsColumn</classname></entry>
+                        </row>
+                        <row valign="top">
+                            <entry><parameter>COLUMNRANGE</parameter></entry>
+                            <entry><classname>PlotOptionsColumnRange</classname></entry>
+                        </row>
+                        <row valign="top">
+                            <entry><parameter>BAR</parameter></entry>
+                            <entry><classname>PlotOptionsBar</classname></entry>
+                        </row>
+                    </tbody>
+                </tgroup>
+            </table>
+
+            <para>
+                See the API documentation for details regarding the plot options.
+            </para>
+        </section>
+
+        <section xml:id="charts.charttypes.pie">
+            <title>Pie Charts</title>
+
+            <para>
+                A pie chart illustrates data values as sectors of size proportionate to
+                the sum of all values.
+            </para>
+
+            <para>
+                If a data point, as defined as a <classname>DataSeriesItem</classname> in
+                a <classname>DataSeries</classname>, has the <emphasis>sliced</emphasis>
+                property enabled, it is shown as slightly cut away from the pie.
+            </para>
+        </section>
+
+        <section xml:id="charts.charttypes.scatter">
+            <title>Scatter Charts</title>
+
+            <para>
+                Scatter charts, that is, charts with
+                <parameter>ChartType.SCATTER</parameter>, display a set of unconnected
+                data points. The name refers to freely given X and Y coordinates, but that
+                actually depends on the used data series, where you can either specify the
+                X coordinate explicitly or let it be generated at interval.
+            </para>
+        </section>
+
+        <section xml:id="charts.charttypes.gauge">
+            <title>Gauges</title>
+
+            <para>
+                A gauge is an one-dimensional chart with a circular Y-axis, where a
+                rotating pointer points to a value on the axis. A gauge can, in fact, have
+                multiple Y-axes to display multiple scales.
+            </para>
+
+            <para>
+                Let us consider the following gauge:
+            </para>
+
+            <programlisting><![CDATA[Chart chart = new Chart(ChartType.GAUGE);
+chart.setWidth("400px");
+chart.setHeight("400px");]]></programlisting>
+
+            <para>
+                After the settings done in the subsequent sections, it will show as in
+                <xref linkend="figure.charts.charttypes.gauge"/>.
+            </para>
+
+            <figure xml:id="figure.charts.charttypes.gauge">
+                <title>A Gauge</title>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata scale="70" smallscale="70%" align="center" fileref="img/charts/charts-gauge.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+
+            <section xml:id="charts.charttypes.gauge.conf">
+                <title>Gauge Configuration</title>
+
+                <para>
+                    The start and end angles of the gauge can be configured in the
+                    <classname>Pane</classname> object of the chart configuration. The
+                    angles can be given as -360 to 360 degrees, with 0 at the top of the
+                    circle.
+                </para>
+
+                <programlisting><![CDATA[Configuration conf = chart.getConfiguration();
+conf.setTitle("Speedometer");
+conf.getPane().setStartAngle(-135);
+conf.getPane().setEndAngle(135);]]></programlisting>
+
+            </section>
+
+            <section xml:id="charts.charttypes.gauge.axis">
+                <title>Axis Configuration</title>
+
+                <para>
+                    A gauge has only an Y-axis. You need to provide both a minimum and
+                    maximum value for it.
+                </para>
+
+                <programlisting><![CDATA[YAxis yaxis = new YAxis();
+yaxis.setTitle("km/h");
+
+// The limits are mandatory
+yaxis.setMin(0);
+yaxis.setMax(100);
+
+// Other configuration
+yaxis.getLabels().setStep(1);
+yaxis.setTickInterval(10);
+yaxis.setPlotBands(new PlotBand[]{
+        new PlotBand(0,  60,  SolidColor.GREEN),
+        new PlotBand(60, 80,  SolidColor.YELLOW),
+        new PlotBand(80, 100, SolidColor.RED)});
+
+conf.addyAxis(yaxis);]]></programlisting>
+
+                <para>
+                    You can do all kinds of other configuration to the axis - please see
+                    the API documentation for all the available parameters.
+                </para>
+            </section>
+
+            <section xml:id="charts.charttypes.gauge.data">
+                <title>Setting and Updating Gauge Data</title>
+
+                <para>
+                    A gauge only displays a single value, which you can define as a data
+                    series of length one, such as as follows:
+                </para>
+
+                <programlisting><![CDATA[ListSeries series = new ListSeries("Speed", 80);
+conf.addSeries(series);]]></programlisting>
+
+                <para>
+                    Gauges are especially meaningful for displaying changing values. You
+                    can use the <methodname>updatePoint()</methodname> method in the data
+                    series to update the single value.
+                </para>
+
+                <programlisting><?pocket-size 65% ?><![CDATA[final TextField tf = new TextField("Enter a new value");
+layout.addComponent(tf);
+
+Button update = new Button("Update", new ClickListener() {
+    @Override
+    public void buttonClick(ClickEvent event) {
+        Integer newValue = new Integer((String)tf.getValue());
+        series.updatePoint(0, newValue);
+    }
+}); 
+layout.addComponent(update);]]></programlisting>
+            </section>
+        </section>
+
+        <section xml:id="charts.charttypes.rangecharts">
+            <title>Area and Column Range Charts</title>
+
+            <para>
+                Ranged charts display an area or column between a minimum and maximum
+                value, instead of a singular data point. They require the use of
+                <classname>RangeSeries</classname>, as described in <xref
+                linkend="charts.data.rangeseries"/>. An area range is created with
+                <parameter>AREARANGE</parameter> chart type, and a column range with
+                <parameter>COLUMNRANGE</parameter> chart type.
+            </para>
+            
+            <para>
+                Consider the following example:
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[Chart chart = new Chart(ChartType.AREARANGE);
+chart.setWidth("400px");
+chart.setHeight("300px");
+
+// Modify the default configuration a bit
+Configuration conf = chart.getConfiguration();
+conf.setTitle("Extreme Temperature Range in Finland");
+...
+
+// Create the range series
+// Source: http://ilmatieteenlaitos.fi/lampotilaennatyksia
+RangeSeries series = new RangeSeries("Temperature Extremes",
+    new Double[]{-51.5,10.9},
+    new Double[]{-49.0,11.8},
+    ...
+    new Double[]{-47.0,10.8});//
+conf.addSeries(series);]]></programlisting>
+
+            <para>
+                The resulting chart, as well as the same chart with a column range, is
+                shown in <xref linkend="figure.charts.charttypes.rangecharts"/>.
+            </para>
+
+            <figure xml:id="figure.charts.charttypes.rangecharts">
+                <title>Area and Column Range Chart</title>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata scale="70" smallscale="100%" align="center" fileref="img/charts/charts-arearange.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+        </section>
+
+        <section xml:id="charts.charttypes.polar">
+            <title>Polar, Wind Rose, and Spiderweb Charts</title>
+
+            <para>
+                Most chart types having two axes can be displayed in
+                <emphasis>polar</emphasis> coordinates, where the X axis is curved on a
+                circle and Y axis from the center of the circle to its rim. Polar chart is
+                not a chart type, but can be enabled for most chart type with
+                <methodname>setPolar(true)</methodname> in the chart model parameters.
+            </para>
+
+            <para>
+                Vaadin Charts allows many sorts of typical polar chart types, such as
+                <emphasis>wind rose</emphasis>, a polar column graph, or
+                <emphasis>spiderweb</emphasis>, a polar chart with categorical data and a
+                more polygonal visual style.
+            </para>
+
+            <programlisting><![CDATA[// Create a chart of some type
+Chart char = new Chart(ChartType.LINE);
+
+// Enable the polar projection
+Configuration conf = chart.getConfiguration();
+conf.getChart().setPolar(true);]]></programlisting>
+
+            <para>
+                You need to define the sector of the polar projection with a
+                <classname>Pane</classname> object in the configuration. The sector is
+                defined as degrees from the north direction. You also need to define the
+                value range for the X axis with <methodname>setMin()</methodname> and
+                <methodname>setMax()</methodname>.
+            </para>
+
+            <programlisting><![CDATA[// Define the sector of the polar projection
+Pane pane = new Pane(0, 360); // Full circle
+conf.addPane(pane);
+
+// Define the X axis and set its value range
+XAxis axis = new XAxis();
+axis.setMin(0);
+axis.setMax(360);]]></programlisting>
+
+            <para>
+                The polar and spiderweb charts are illustrated in <xref
+                linkend="figure.charts.charttypes.polar"/>.
+            </para>
+
+            <figure xml:id="figure.charts.charttypes.polar">
+                <title>Wind Rose and Spiderweb Charts</title>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata scale="70" smallscale="100%" align="center" fileref="img/charts/charts-polarspiderweb.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+
+            <section xml:id="charts.charttypes.polar.spiderweb">
+                <title>Spiderweb Charts</title>
+
+                <para>
+                    A <emphasis>spiderweb</emphasis> chart is a commonly used visual style
+                    of a polar chart with a polygonal shape rather than a circle. The data
+                    and the X axis should be categorical to make the polygonal
+                    interpolation meaningful. The sector is assumed to be full circle, so
+                    no angles for the pane need to be specified. Note the style settings
+                    done in the axis in the example below:
+                </para>
+
+                <programlisting><?pocket-size 75% ?><![CDATA[Chart chart = new Chart(ChartType.LINE);
+...
+
+// Modify the default configuration a bit
+Configuration conf = chart.getConfiguration();
+conf.getChart().setPolar(true);
+...
+
+// Create the range series
+// Source: http://ilmatieteenlaitos.fi/lampotilaennatyksia
+ListSeries series = new ListSeries("Temperature Extremes",
+    10.9, 11.8, 17.5, 25.5, 31.0, 33.8,
+    37.2, 33.8, 28.8, 19.4, 14.1, 10.8);
+conf.addSeries(series);
+
+// Set the category labels on the X axis correspondingly
+XAxis xaxis = new XAxis();
+xaxis.setCategories("Jan", "Feb", "Mar",
+    "Apr", "May", "Jun", "Jul", "Aug", "Sep",
+    "Oct", "Nov", "Dec");
+xaxis.setTickmarkPlacement(TickmarkPlacement.ON);
+xaxis.setLineWidth(0);
+conf.addxAxis(xaxis);
+
+// Configure the Y axis
+YAxis yaxis = new YAxis();
+yaxis.setGridLineInterpolation("polygon"); // Webby look
+yaxis.setMin(0);
+yaxis.setTickInterval(10);
+yaxis.getLabels().setStep(1);
+conf.addyAxis(yaxis);]]></programlisting>
+
+            </section>
         </section>
     </section>
 
@@ -582,6 +930,10 @@ xaxis.setCategories("Mercury", "Venus", "Earth",
                 symbol of the series.
             </para>
         </section>
+
+            <section xml:id="charts.configuration.axis">
+            <title>X and Y Axis</title>
+            </section>
     </section>
 
     <section xml:id="charts.data">
@@ -614,12 +966,33 @@ conf.addSeries(series);]]></programlisting>
 
         </section>
 
-        <section xml:id="charts.data.arealistseries">
-            <title>Area List Series</title>
+        <section xml:id="charts.data.listseries">
+            <title>List Series</title>
 
             <para>
                 The <classname>ListSeries</classname> is essentially a helper type that
-                makes the handling of simple sequential data easier.
+                makes the handling of simple sequential data easier. The Y axis values are
+                given in a <classname>List&lt;Number&gt;</classname>, or with ellipsis or
+                an array. You can also add them one by one with the
+                <methodname>addData()</methodname> method.
+            </para>
+
+            <programlisting><![CDATA[ListSeries series = new ListSeries("Diameter");
+series.setData(4900,  12100,  12800,
+               6800,  143000, 125000,
+               51100, 49500);
+conf.addSeries(series);]]></programlisting>
+
+            <para>
+                The coordinates in the X axis are generated at fixed intervals starting
+                from the value specified in the <literal>pointStart</literal> property
+                (default is 0) at intervals specified in <literal>pointInterval</literal>
+                property (default is 1.0).
+            </para>
+
+            <para>
+                If the chart has multiple Y axes, you can specify the axis for the series
+                by its index number with <methodname>setyAxis()</methodname>.
             </para>
         </section>
 
@@ -651,6 +1024,17 @@ conf.addSeries(series);]]></programlisting>
                 marker style, selected state, legend index, sliced (for pie charts), and
                 dial style (for gauges).
             </para>
+
+            <!-- TODO: Is this true?
+            <section xml:id="charts.data.dataseries.range">
+                <title>Range Data</title>
+
+                <para>
+                    Range charts expect the Y values to be specified as minimum-maximum
+                    value pairs.
+                </para>
+            </section>
+            -->
         </section>
 
         <section xml:id="charts.data.rangeseries">
@@ -658,10 +1042,134 @@ conf.addSeries(series);]]></programlisting>
 
             <para>
                 The <classname>RangeSeries</classname> allows specifying data with
-                minimum-maximum ranges. It is required for ranged charts.
+                minimum-maximum value ranges in the Y axis, which you use in range charts,
+                as described in <xref linkend="charts.charttypes.rangecharts"/>. The data
+                in a range series is unmodifiable - you can only give the data points in
+                the constructor and with <methodname>setData()</methodname>.
             </para>
+
+            <para>
+                For X axis, the coordinates are generated at fixed intervals starting from
+                the value specified in the <literal>pointStart</literal> property (default
+                is 0) at intervals specified in <literal>pointInterval</literal> property
+                (default is 1.0).
+            </para>
+
+            <section xml:id="charts.data.rangeseries.data">
+                <title>Setting the Data</title>
+
+                <para>
+                    The data in a <classname>RangeSeries</classname> is given as an array
+                    of minimum-maximum value pairs for the Y value axis. The pairs are
+                    also represented as arrays. You can pass the data using the ellipsis
+                    in the constructor or the <methodname>setData()</methodname>:
+                </para>
+
+                <programlisting><![CDATA[RangeSeries series =
+    new RangeSeries("Temperature Ranges",
+    new Double[]{-51.5,10.9},
+    new Double[]{-49.0,11.8},
+    ...
+    new Double[]{-47.0,10.8});
+conf.addSeries(series);]]></programlisting>
+
+                <para>
+                    Or, as always with variable arguments, you can also pass them in an
+                    array, in the following for the <methodname>setData()</methodname>:
+                </para>
+
+                <programlisting><![CDATA[series.setData(new Double[][] {
+    new Double[]{-51.5,10.9},
+    new Double[]{-49.0,11.8},
+    ...
+    new Double[]{-47.0,10.8}});]]></programlisting>
+            </section>
         </section>
 
+        <section xml:id="charts.data.containerseries">
+            <title>Container Data Series</title>
+
+            <para>
+                The <classname>ContainerDataSeries</classname> is an adapter for binding
+                Vaadin <interfacename>Container</interfacename> data sources to
+                charts. The container needs to have properties that define the name,
+                X-value, and Y-value of a data point. The default property IDs of the
+                three properties are "<literal>name</literal>", "<literal>x</literal>",
+                and "<literal>y</literal>", respectively. You can set the property IDs
+                with <methodname>setNamePropertyId()</methodname>,
+                <methodname>setYPropertyId()</methodname>, and
+                <methodname>setXPropertyId()</methodname>, respectively. If the container
+                has no <literal>x</literal> property, the data is assumed to be
+                categorical.
+            </para>
+
+            <para>
+                In the following example, we have a
+                <classname>BeanItemContainer</classname> with
+                <classname>Planet</classname> items, which have a <literal>name</literal>
+                and <literal>diameter</literal> property. We display the container data
+                both in a Vaadin <classname>Table</classname> and a chart.
+            </para>
+
+            <programlisting><![CDATA[// The data
+BeanItemContainer<Planet> container =
+        new BeanItemContainer<Planet>(Planet.class);
+container.addBean(new Planet("Mercury", 4900));
+container.addBean(new Planet("Venus", 12100));
+container.addBean(new Planet("Earth", 12800));
+...
+
+// Display it in a table
+Table table = new Table("Planets", container);
+table.setPageLength(container.size());
+table.setVisibleColumns(new String[]{"name","diameter"});
+layout.addComponent(table);
+
+// Display it in a chart
+Chart chart = new Chart(ChartType.COLUMN);
+... Configure it ...
+
+// Wrap the container in a data series
+ContainerDataSeries series =
+        new ContainerDataSeries(container);
+
+// Set up the name and Y properties
+series.setNamePropertyId("name");
+series.setYPropertyId("diameter");
+
+conf.addSeries(series);]]></programlisting>
+
+            <para>
+                As the X axis holds categories rather than numeric values, we need to set
+                up the category labels with an array of string. There are a few ways to do
+                that, some more efficient than others, below is one way:
+            </para>
+
+            <programlisting><![CDATA[// Set the category labels on the axis correspondingly
+XAxis xaxis = new XAxis();
+String names[] = new String[container.size()];
+List<Planet> planets = container.getItemIds();
+for (int i=0; i<planets.size(); i++)
+    names[i] = planets.get(i).getName();
+xaxis.setCategories(names);
+xaxis.setTitle("Planet");
+conf.addxAxis(xaxis);]]></programlisting>
+
+            <para>
+                The result can be seen in <xref
+                linkend="figure.charts.data.containerseries"/>.
+            </para>
+
+            <figure xml:id="figure.charts.data.containerseries">
+                <title>Table and Chart Bound to a Container</title>
+                <mediaobject>
+                    <imageobject>
+					<imagedata scale="70" smallscale="100%" align="center" fileref="img/charts/charts-containerdataseries.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+
+        </section>
     </section>
 </chapter>
 
