@@ -1,6 +1,13 @@
 <?xml version='1.0'?>
+
+<!-- THIS FILE IS NOT USED FOR THE BOOK - SEE custom-html-template.xsl   -->
+<!-- This is currently used for the tutorials, which is possibly wrong.  -->
+<!-- Actually, the other file may be only used to customize page headers -->
+<!-- and footers, which is unnecessary anyhow for the website.           -->
+
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
   <xsl:import href="../xsl/xhtml/chunk.xsl"/>
+
 
   <!-- Use a custom HTML stylesheet. -->
   <xsl:param name="html.stylesheet" select="'html-style/local.css'"/>
@@ -67,6 +74,7 @@
     </html>
     <xsl:value-of select="$chunk.append"/>
   </xsl:template>
+
 
   <!-- ==================================================================== -->
   <!-- Custom title page.                                                   -->

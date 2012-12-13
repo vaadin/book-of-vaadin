@@ -77,6 +77,48 @@
   </xsl:template>
 
   <!-- ==================================================================== -->
+  <!-- Chapter numbering                                                    -->
+  <!-- ==================================================================== -->
+
+  <!-- Number chapters over the set instead of the book. -->
+  <!-- From common/labels.xsl                            -->
+  <xsl:template match="chapter" mode="label.markup">
+    <xsl:choose>
+      <xsl:when test="@label">
+        <xsl:value-of select="@label"/>
+      </xsl:when>
+      <xsl:when test="string($chapter.autolabel) != 0">
+        <xsl:if test="$component.label.includes.part.label != 0 and
+                      ancestor::part">
+          <xsl:variable name="part.label">
+            <xsl:apply-templates select="ancestor::part" 
+                                 mode="label.markup"/>
+          </xsl:variable>
+          <xsl:if test="$part.label != ''">
+            <xsl:value-of select="$part.label"/>
+            <xsl:apply-templates select="ancestor::part" 
+                                 mode="intralabel.punctuation"/>
+          </xsl:if>
+        </xsl:if>
+        <xsl:variable name="format">
+          <xsl:call-template name="autolabel.format">
+            <xsl:with-param name="format" select="$chapter.autolabel"/>
+          </xsl:call-template>
+        </xsl:variable>
+        <xsl:choose>
+          <xsl:when test="$label.from.part != 0 and ancestor::part">
+            <xsl:number from="part" count="chapter" format="{$format}" level="any"/>
+          </xsl:when>
+          <xsl:otherwise>
+            <!-- Use 'set' here instead of 'book'. -->
+            <xsl:number from="set" count="chapter" format="{$format}" level="any"/>
+          </xsl:otherwise>
+        </xsl:choose>
+      </xsl:when>
+    </xsl:choose>
+  </xsl:template>
+
+  <!-- ==================================================================== -->
   <!-- Custom title page.                                                   -->
   <!-- ==================================================================== -->
 
@@ -113,6 +155,24 @@
   <!-- Custom header data elements. Not processed - skip. -->
   <xsl:template match="headerdata|headericon">
   </xsl:template>
+
+  <!-- ==================================================================== -->
+  <!-- Table of Contents                                                    -->
+  <!-- ==================================================================== -->
+
+  <xsl:param name="generate.toc">
+    appendix  nop
+    article   toc
+    book      toc
+    chapter   toc
+    part      toc
+    preface   nop
+    qandadiv  nop
+    qandaset  nop
+    reference toc,title
+    section   nop
+    set       toc
+  </xsl:param>
 
   <!-- ==================================================================== -->
   <!-- Book Example References                                              -->

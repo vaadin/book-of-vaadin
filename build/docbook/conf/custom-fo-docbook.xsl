@@ -394,6 +394,10 @@
     </xsl:choose>
   </xsl:template>
 
+  <!-- ==================================================================== -->
+  <!-- Chapter numbering                                                    -->
+  <!-- ==================================================================== -->
+
   <!-- Number chapters over the set instead of the book. -->
   <!-- From common/labels.xsl                            -->
   <xsl:template match="chapter" mode="label.markup">
