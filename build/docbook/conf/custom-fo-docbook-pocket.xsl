@@ -136,6 +136,15 @@
 
       <!-- Vaadin customization: -->
       <xsl:choose>
+        <xsl:when test="self::book">
+          <xsl:attribute name="font-weight">bold</xsl:attribute>
+          <xsl:attribute name="margin-top">5mm</xsl:attribute>
+        </xsl:when>
+
+        <xsl:when test="self::part">
+          <xsl:attribute name="margin-top">2.5mm</xsl:attribute>
+        </xsl:when>
+
         <xsl:when test="self::chapter and name($toc-context) != 'part'">
           <xsl:attribute name="font-weight">bold</xsl:attribute>
           <xsl:attribute name="margin-top">2.5mm</xsl:attribute>
@@ -144,8 +153,13 @@
 
       <fo:inline keep-with-next.within-line="always">
         <fo:basic-link internal-destination="{$id}">
+          <!-- Have Part title in the ToC -->
+          <xsl:if test="self::part">
+            <xsl:text>Part </xsl:text>
+          </xsl:if>
+
           <!-- Have Chapter titles in part ToC-->
-          <xsl:if test="self::chapter and name($toc-context) = 'part'">
+          <xsl:if test="self::chapter and name($toc-context) != 'part'">
             <xsl:text>Chapter </xsl:text>
           </xsl:if>
 
@@ -169,18 +183,35 @@
         </fo:basic-link>
       </fo:inline>
 
-      <!-- Dots and page number -->
-      <fo:inline keep-together.within-line="always">
-        <xsl:text> </xsl:text>
-        <fo:leader leader-pattern="dots"
-          leader-pattern-width="3pt"
-          leader-alignment="reference-area"
-          keep-with-next.within-line="always"/>
-        <xsl:text> </xsl:text>
-        <fo:basic-link internal-destination="{$id}">
-          <fo:page-number-citation ref-id="{$id}"/>
-        </fo:basic-link>
-      </fo:inline>
+      <xsl:choose>
+        <!-- No dots and page number for volume. -->
+        <xsl:when test="self::book">
+          <!-- This is essentially just dummy but needed. -->
+          <fo:inline keep-together.within-line="always">
+            <xsl:text> </xsl:text>
+            <fo:leader leader-pattern="use-content"
+              leader-pattern-width="3pt"
+              leader-alignment="reference-area"
+              keep-with-next.within-line="always"/>
+            <xsl:text> </xsl:text>
+          </fo:inline>
+        </xsl:when>
+
+        <xsl:otherwise>
+          <!-- Dots and page number -->
+          <fo:inline keep-together.within-line="always">
+            <xsl:text> </xsl:text>
+            <fo:leader leader-pattern="dots"
+              leader-pattern-width="3pt"
+              leader-alignment="reference-area"
+              keep-with-next.within-line="always"/>
+            <xsl:text> </xsl:text>
+            <fo:basic-link internal-destination="{$id}">
+              <fo:page-number-citation ref-id="{$id}"/>
+            </fo:basic-link>
+          </fo:inline>
+        </xsl:otherwise>
+      </xsl:choose>
     </fo:block>
   </xsl:template>
   
@@ -196,8 +227,84 @@
     qandaset  nop
     reference toc,title
     section   nop
-    set       toc
+    set       nop
   </xsl:param>
+
+  <!-- From fo/division.xsl:                                           -->
+  <!-- Generate TOC only in the first book                             -->
+  <xsl:template name="make.book.tocs">
+    <xsl:variable name="lot-master-reference">
+      <xsl:call-template name="select.pagemaster">
+        <xsl:with-param name="pageclass" select="'lot'"/>
+      </xsl:call-template>
+    </xsl:variable>
+
+    <xsl:variable name="toc.params">
+      <xsl:call-template name="find.path.params">
+        <xsl:with-param name="table" select="normalize-space($generate.toc)"/>
+      </xsl:call-template>
+    </xsl:variable>
+
+    <!-- This additional condition makes the ToC only in the first book. -->
+    <xsl:if test="@booktoc = '1'">
+      <xsl:if test="contains($toc.params, 'toc')">
+        <xsl:call-template name="page.sequence">
+          <xsl:with-param name="master-reference"
+            select="$lot-master-reference"/>
+          <xsl:with-param name="element" select="'toc'"/>
+          <xsl:with-param name="gentext-key" select="'TableofContents'"/>
+          <xsl:with-param name="content">
+            <!-- Make a set ToC instead of a division ToC. -->
+            <xsl:call-template name="set.toc">
+              <xsl:with-param name="toc.title.p" 
+                select="contains($toc.params, 'title')"/>
+            </xsl:call-template>
+          </xsl:with-param>
+        </xsl:call-template>
+      </xsl:if>
+    </xsl:if>
+
+    <!-- Other ToCs (figures, etc) are left out here -->
+  </xsl:template>
+
+  <!-- From fo/autotoc.xsl                                          -->
+  <!-- Customized to generate the set toc from under a book element -->
+  <xsl:template name="set.toc">
+    <xsl:param name="toc-context" select="."/>
+
+    <xsl:variable name="id">
+      <xsl:call-template name="object.id"/>
+    </xsl:variable>
+
+    <xsl:variable name="cid">
+      <xsl:call-template name="object.id">
+        <xsl:with-param name="object" select="$toc-context"/>
+      </xsl:call-template>
+    </xsl:variable>
+
+    <!-- Do not select from under the current node (which can be a book), -->
+    <!-- but under the root /set                                          -->
+    <xsl:variable name="nodes" select="/set/book|/set/set|/set/setindex"/>
+
+    <xsl:if test="$nodes">
+      <fo:block id="toc...{$id}"
+        xsl:use-attribute-sets="toc.margin.properties">
+        <xsl:if test="$axf.extensions != 0">
+          <xsl:attribute name="axf:outline-level">1</xsl:attribute>
+          <xsl:attribute name="axf:outline-expand">false</xsl:attribute>
+          <xsl:attribute name="axf:outline-title">
+            <xsl:call-template name="gentext">
+              <xsl:with-param name="key" select="'TableofContents'"/>
+            </xsl:call-template>
+          </xsl:attribute>
+        </xsl:if>
+        <xsl:call-template name="table.of.contents.titlepage"/>
+        <xsl:apply-templates select="$nodes" mode="toc">
+          <xsl:with-param name="toc-context" select="$toc-context"/>
+        </xsl:apply-templates>
+      </fo:block>
+    </xsl:if>
+  </xsl:template>
 
   <!-- Only first level section titles in chapter ToC.
        Only chapter titles in part ToC.
@@ -256,13 +363,14 @@
   <!-- Page numbering                                                       -->
   <!-- ==================================================================== -->
 
-  <!-- Start ToC numbering from 'i'. From pagesetup.xsl. -->
+  <!-- From fo/pagesetup.xsl. -->
   <xsl:template name="initial.page.number">
     <xsl:param name="element" select="local-name(.)"/>
     <xsl:param name="master-reference" select="''"/>
-    
+
+    <!-- Start normal numbering from the first chapter of the first part of the first book. -->    
     <xsl:variable name="first.book.content"
-      select="ancestor::book/*[
+      select="ancestor::set/book[1]/*[
               not(self::title or
               self::subtitle or
               self::titleabbrev or
@@ -277,18 +385,9 @@
       <!-- double-sided output -->
       <xsl:when test="$double.sided != 0">
         <xsl:choose>
-          <!-- Vaadin: start ToC with page number 'i' -->
+          <!-- Vaadin: Start ToC numbering from 'i'. -->
           <xsl:when test="$element = 'toc'">1</xsl:when>
-          <xsl:when test="$element = 'book'">1</xsl:when>
           <xsl:when test="$element = 'preface'">auto-odd</xsl:when>
-          <xsl:when test="($element = 'dedication' or $element = 'article')
-                          and not(preceding::chapter
-                          or preceding::preface
-                          or preceding::appendix
-                          or preceding::article
-                          or preceding::dedication
-                          or parent::part
-                          or parent::reference)">1</xsl:when>
           <xsl:when test="generate-id($first.book.content) =
                           generate-id(.)">1</xsl:when>
           <xsl:otherwise>auto-odd</xsl:otherwise>
@@ -296,6 +395,44 @@
       </xsl:when>
 
       <!-- The pocket book never has single-sided output. -->
+    </xsl:choose>
+  </xsl:template>
+
+  <!-- Number chapters over the set instead of the book. -->
+  <!-- From common/labels.xsl                            -->
+  <xsl:template match="chapter" mode="label.markup">
+    <xsl:choose>
+      <xsl:when test="@label">
+        <xsl:value-of select="@label"/>
+      </xsl:when>
+      <xsl:when test="string($chapter.autolabel) != 0">
+        <xsl:if test="$component.label.includes.part.label != 0 and
+                      ancestor::part">
+          <xsl:variable name="part.label">
+            <xsl:apply-templates select="ancestor::part" 
+                                 mode="label.markup"/>
+          </xsl:variable>
+          <xsl:if test="$part.label != ''">
+            <xsl:value-of select="$part.label"/>
+            <xsl:apply-templates select="ancestor::part" 
+                                 mode="intralabel.punctuation"/>
+          </xsl:if>
+        </xsl:if>
+        <xsl:variable name="format">
+          <xsl:call-template name="autolabel.format">
+            <xsl:with-param name="format" select="$chapter.autolabel"/>
+          </xsl:call-template>
+        </xsl:variable>
+        <xsl:choose>
+          <xsl:when test="$label.from.part != 0 and ancestor::part">
+            <xsl:number from="part" count="chapter" format="{$format}" level="any"/>
+          </xsl:when>
+          <xsl:otherwise>
+            <!-- Use 'set' here instead of 'book'. -->
+            <xsl:number from="set" count="chapter" format="{$format}" level="any"/>
+          </xsl:otherwise>
+        </xsl:choose>
+      </xsl:when>
     </xsl:choose>
   </xsl:template>
 
