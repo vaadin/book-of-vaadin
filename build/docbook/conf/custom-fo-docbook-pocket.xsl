@@ -4,7 +4,8 @@
 <!-- ==================================================================== -->
 <xsl:stylesheet
   xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0"
-  xmlns:fo="http://www.w3.org/1999/XSL/Format">
+  xmlns:fo="http://www.w3.org/1999/XSL/Format"
+  xmlns:rx="http://www.renderx.com/XSL/Extensions">
 
   <xsl:import href="custom-fo-docbook.xsl"/>
 
@@ -357,6 +358,79 @@
         </fo:block>
       </xsl:if>
     </xsl:if>
+  </xsl:template>
+
+  <!-- ==================================================================== -->
+  <!-- PDF Bookmarks                                                        -->
+  <!-- ==================================================================== -->
+
+  <!-- Use volume label in book bookmarks instead of book title. -->
+  <xsl:template match="set|book|part|reference|preface|chapter|appendix|article
+                          |glossary|bibliography|index|setindex
+                          |refentry|refsynopsisdiv
+                          |refsect1|refsect2|refsect3|refsection
+                          |sect1|sect2|sect3|sect4|sect5|section"
+                mode="xep.outline">
+    <xsl:variable name="id">
+      <xsl:call-template name="object.id"/>
+    </xsl:variable>
+    <xsl:variable name="bookmark-label">
+      <!-- Vaadin: Use more distinctive title for volume titles -->
+      <xsl:choose>
+        <xsl:when test="self::book">
+          <!-- Vaadin: Use the abbreviated title as the volume title (TODO: better) -->
+          <xsl:apply-templates select="." mode="object.titleabbrev.markup"/>
+        </xsl:when>
+        <xsl:otherwise>
+          <xsl:apply-templates select="." mode="object.title.markup"/>
+        </xsl:otherwise>
+      </xsl:choose>
+    </xsl:variable>
+
+    <xsl:choose>
+      <!-- Vaadin: Disable the set title from the PDF ToC. -->
+      <xsl:when test="self::set">
+          <xsl:apply-templates select="*" mode="xep.outline"/>
+      </xsl:when>
+
+      <xsl:when test="self::index and $generate.index = 0"/>
+      <xsl:when test="parent::*">
+        <rx:bookmark internal-destination="{$id}">
+          <rx:bookmark-label>
+            <xsl:value-of select="normalize-space($bookmark-label)"/>
+          </rx:bookmark-label>
+          <xsl:apply-templates select="*" mode="xep.outline"/>
+        </rx:bookmark>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:if test="$bookmark-label != ''">
+          <rx:bookmark internal-destination="{$id}">
+            <rx:bookmark-label>
+              <xsl:value-of select="normalize-space($bookmark-label)"/>
+            </rx:bookmark-label>
+          </rx:bookmark>
+        </xsl:if>
+        
+        <xsl:variable name="toc.params">
+          <xsl:call-template name="find.path.params">
+            <xsl:with-param name="table" select="normalize-space($generate.toc)"/>
+          </xsl:call-template>
+        </xsl:variable>
+        <xsl:if test="contains($toc.params, 'toc')
+                      and set|book|part|reference|section|sect1|refentry
+                             |article|bibliography|glossary|chapter
+                             |appendix">
+          <rx:bookmark internal-destination="toc...{$id}">
+            <rx:bookmark-label>
+              <xsl:call-template name="gentext">
+                <xsl:with-param name="key" select="'TableofContents'"/>
+              </xsl:call-template>
+            </rx:bookmark-label>
+          </rx:bookmark>
+        </xsl:if>
+        <xsl:apply-templates select="*" mode="xep.outline"/>
+      </xsl:otherwise>
+    </xsl:choose>
   </xsl:template>
 
   <!-- ==================================================================== -->
@@ -779,6 +853,31 @@
   <!-- ==================================================================== -->
   <!-- Title page                                                           -->
   <!-- ==================================================================== -->
+
+  <!-- Disable set title page -->
+  <xsl:template match="set">
+    <xsl:variable name="id">
+      <xsl:call-template name="object.id"/>
+    </xsl:variable>
+
+    <xsl:variable name="content" select="book|set|setindex"/>
+
+    <xsl:variable name="titlepage-master-reference">
+      <xsl:call-template name="select.pagemaster">
+        <xsl:with-param name="pageclass" select="'titlepage'"/>
+      </xsl:call-template>
+    </xsl:variable>
+
+    <xsl:variable name="lot-master-reference">
+      <xsl:call-template name="select.pagemaster">
+        <xsl:with-param name="pageclass" select="'lot'"/>
+      </xsl:call-template>
+    </xsl:variable>
+
+    <!-- ... Much unnecessary stuff (preamble, toc) removed from here ... -->
+
+    <xsl:apply-templates select="$content"/>
+  </xsl:template>
 
   <xsl:include href="custom-fo-titlepage-pocket.xsl"/>
 
