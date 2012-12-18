@@ -174,7 +174,8 @@
           </xsl:if>
 
           <!-- The title -->
-          <xsl:apply-templates select="." mode="titleabbrev.markup"/>
+          <!-- The large-size PDF is single-volume, while pocket is multi-volume. -->
+          <xsl:apply-templates select="." mode="title.markup"/>
         </fo:basic-link>
       </fo:inline>
 
@@ -225,110 +226,33 @@
     set       nop
   </xsl:param>
 
-  <!-- From fo/division.xsl:                                           -->
-  <!-- Generate TOC only in the first book                             -->
-  <xsl:template name="make.book.tocs">
-    <xsl:variable name="lot-master-reference">
-      <xsl:call-template name="select.pagemaster">
-        <xsl:with-param name="pageclass" select="'lot'"/>
-      </xsl:call-template>
-    </xsl:variable>
-
-    <xsl:variable name="toc.params">
-      <xsl:call-template name="find.path.params">
-        <xsl:with-param name="table" select="normalize-space($generate.toc)"/>
-      </xsl:call-template>
-    </xsl:variable>
-
-    <!-- This additional condition makes the ToC only in the first book. -->
-    <xsl:if test="@booktoc = '1'">
-      <xsl:if test="contains($toc.params, 'toc')">
-        <xsl:call-template name="page.sequence">
-          <xsl:with-param name="master-reference"
-            select="$lot-master-reference"/>
-          <xsl:with-param name="element" select="'toc'"/>
-          <xsl:with-param name="gentext-key" select="'TableofContents'"/>
-          <xsl:with-param name="content">
-            <!-- Make a set ToC instead of a division ToC. -->
-            <xsl:call-template name="set.toc">
-              <xsl:with-param name="toc.title.p" 
-                select="contains($toc.params, 'title')"/>
-            </xsl:call-template>
-          </xsl:with-param>
-        </xsl:call-template>
-      </xsl:if>
-    </xsl:if>
-
-    <!-- Other ToCs (figures, etc) are left out here -->
-  </xsl:template>
-
-  <!-- From fo/autotoc.xsl                                          -->
-  <!-- Customized to generate the set toc from under a book element -->
-  <xsl:template name="set.toc">
-    <xsl:param name="toc-context" select="."/>
-
-    <xsl:variable name="id">
-      <xsl:call-template name="object.id"/>
-    </xsl:variable>
-
-    <xsl:variable name="cid">
-      <xsl:call-template name="object.id">
-        <xsl:with-param name="object" select="$toc-context"/>
-      </xsl:call-template>
-    </xsl:variable>
-
-    <!-- Do not select from under the current node (which can be a book), -->
-    <!-- but under the root /set                                          -->
-    <xsl:variable name="nodes" select="/set/book|/set/set|/set/setindex"/>
-
-    <xsl:if test="$nodes">
-      <fo:block id="toc...{$id}"
-        xsl:use-attribute-sets="toc.margin.properties">
-        <xsl:if test="$axf.extensions != 0">
-          <xsl:attribute name="axf:outline-level">1</xsl:attribute>
-          <xsl:attribute name="axf:outline-expand">false</xsl:attribute>
-          <xsl:attribute name="axf:outline-title">
-            <xsl:call-template name="gentext">
-              <xsl:with-param name="key" select="'TableofContents'"/>
-            </xsl:call-template>
-          </xsl:attribute>
-        </xsl:if>
-        <xsl:call-template name="table.of.contents.titlepage"/>
-        <xsl:apply-templates select="$nodes" mode="toc">
-          <xsl:with-param name="toc-context" select="$toc-context"/>
-        </xsl:apply-templates>
-      </fo:block>
-    </xsl:if>
-  </xsl:template>
-
-  <!-- Only first level section titles in chapter ToC. From autotoc.xsl. -->  
+  <!-- Only first level section titles in chapter ToC.
+       Only chapter titles in part ToC.
+       From autotoc.xsl. -->
   <xsl:template match="section" mode="toc">
     <xsl:param name="toc-context" select="."/>
-    
+
     <xsl:variable name="id">
       <xsl:call-template name="object.id"/>
     </xsl:variable>
-    
+
     <xsl:variable name="cid">
       <xsl:call-template name="object.id">
         <xsl:with-param name="object" select="$toc-context"/>
       </xsl:call-template>
     </xsl:variable>
-    
+
     <xsl:variable name="depth" select="count(ancestor::section) + 1"/>
     <xsl:variable name="reldepth"
-      select="count(ancestor::*)-count($toc-context/ancestor::*)"/>
+                  select="count(ancestor::*)-count($toc-context/ancestor::*)"/>
 
     <xsl:variable name="depth.from.context" select="count(ancestor::*)-count($toc-context/ancestor::*)"/>
 
-    <!-- xsl:message>
-      <xsl:text>toc-context: </xsl:text>
-      <xsl:value-of select="local-name($toc-context)"/>
-    </xsl:message -->
-
+    <!-- Vaadin: Modify chapter ToC. -->
     <xsl:variable name="toc.section.depth.vaadin">
       <xsl:choose>
         <xsl:when test="local-name($toc-context) = 'chapter'">1</xsl:when>
+        <xsl:when test="local-name($toc-context) = 'part'">0</xsl:when>
         <xsl:otherwise>
           <xsl:value-of select="$toc.section.depth"/>
         </xsl:otherwise>
@@ -339,94 +263,24 @@
       <xsl:call-template name="toc.line">
         <xsl:with-param name="toc-context" select="$toc-context"/>
       </xsl:call-template>
-      
-      <xsl:if test="$toc.section.depth > $depth and $toc.max.depth > $depth.from.context and section">
+
+      <xsl:if test="$toc.section.depth > $depth 
+                     and $toc.max.depth > $depth.from.context
+                    and section">
         <fo:block id="toc.{$cid}.{$id}">
-          <xsl:attribute name="margin-left">
+          <xsl:attribute name="margin-{$direction.align.start}">
             <xsl:call-template name="set.toc.indent">
               <xsl:with-param name="reldepth" select="$reldepth"/>
             </xsl:call-template>
           </xsl:attribute>
-          
-          <xsl:apply-templates select="section" mode="toc">
+                
+          <xsl:apply-templates select="section|qandaset[$qanda.in.toc != 0]" 
+                               mode="toc">
             <xsl:with-param name="toc-context" select="$toc-context"/>
           </xsl:apply-templates>
         </fo:block>
       </xsl:if>
     </xsl:if>
-  </xsl:template>
-
-  <!-- ==================================================================== -->
-  <!-- PDF Bookmarks                                                        -->
-  <!-- ==================================================================== -->
-
-  <!-- Use volume label in book bookmarks instead of book title. -->
-  <xsl:template match="set|book|part|reference|preface|chapter|appendix|article
-                          |glossary|bibliography|index|setindex
-                          |refentry|refsynopsisdiv
-                          |refsect1|refsect2|refsect3|refsection
-                          |sect1|sect2|sect3|sect4|sect5|section"
-                mode="xep.outline">
-    <xsl:variable name="id">
-      <xsl:call-template name="object.id"/>
-    </xsl:variable>
-    <xsl:variable name="bookmark-label">
-      <!-- Vaadin: Use more distinctive title for volume titles -->
-      <xsl:choose>
-        <xsl:when test="self::book">
-          <!-- Vaadin: Use the abbreviated title as the volume title (TODO: better) -->
-          <xsl:apply-templates select="." mode="object.titleabbrev.markup"/>
-        </xsl:when>
-        <xsl:otherwise>
-          <xsl:apply-templates select="." mode="object.title.markup"/>
-        </xsl:otherwise>
-      </xsl:choose>
-    </xsl:variable>
-
-    <xsl:choose>
-      <!-- Vaadin: Disable the set title from the PDF ToC. -->
-      <xsl:when test="self::set">
-          <xsl:apply-templates select="*" mode="xep.outline"/>
-      </xsl:when>
-
-      <xsl:when test="self::index and $generate.index = 0"/>
-      <xsl:when test="parent::*">
-        <rx:bookmark internal-destination="{$id}">
-          <rx:bookmark-label>
-            <xsl:value-of select="normalize-space($bookmark-label)"/>
-          </rx:bookmark-label>
-          <xsl:apply-templates select="*" mode="xep.outline"/>
-        </rx:bookmark>
-      </xsl:when>
-      <xsl:otherwise>
-        <xsl:if test="$bookmark-label != ''">
-          <rx:bookmark internal-destination="{$id}">
-            <rx:bookmark-label>
-              <xsl:value-of select="normalize-space($bookmark-label)"/>
-            </rx:bookmark-label>
-          </rx:bookmark>
-        </xsl:if>
-        
-        <xsl:variable name="toc.params">
-          <xsl:call-template name="find.path.params">
-            <xsl:with-param name="table" select="normalize-space($generate.toc)"/>
-          </xsl:call-template>
-        </xsl:variable>
-        <xsl:if test="contains($toc.params, 'toc')
-                      and set|book|part|reference|section|sect1|refentry
-                             |article|bibliography|glossary|chapter
-                             |appendix">
-          <rx:bookmark internal-destination="toc...{$id}">
-            <rx:bookmark-label>
-              <xsl:call-template name="gentext">
-                <xsl:with-param name="key" select="'TableofContents'"/>
-              </xsl:call-template>
-            </rx:bookmark-label>
-          </rx:bookmark>
-        </xsl:if>
-        <xsl:apply-templates select="*" mode="xep.outline"/>
-      </xsl:otherwise>
-    </xsl:choose>
   </xsl:template>
 
   <!-- ==================================================================== -->

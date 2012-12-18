@@ -57,7 +57,7 @@ IMAGES =	intro/architecture intro/toolchain \
 			portal/wsrp-architecture
 
 # List of source XML files
-XMLFILES =  book.xml \
+XMLFILES = book-info.xml book-preface.xml book-vol1.xml book-vol2.xml \
 	chapter-addons.xml	chapter-datamodel.xml	chapter-layout.xml	chapter-themes.xml \
 	chapter-advanced.xml	chapter-eclipse.xml	chapter-timeline.xml \
 	chapter-application.xml	chapter-getting-started.xml	chapter-mobile.xml \
@@ -125,16 +125,16 @@ DOCBOOK_POCKET = $(DOCROOT)/build/docbook/conf/custom-fo-docbook-pocket.xsl
 HIGHLIGHTER_CONFIG = -Dxslthl.config="file://$(PWD)/../build/docbook/xsl/highlighting/xslthl-config.xml"
 
 # Process Docbook to FO
-book.fo: $(XMLFILES) images
+book.fo: book.xml $(XMLFILES) images
 	@echo $(VERSION)
 	@echo "Highlighter configuration: $(HIGHLIGHTER_CONFIG)"
 	java -Xms256M -Xmx512M -classpath $(DOCROOT)/build/lib/saxon.jar:$(DOCROOT)/build/lib/xercesImpl.jar:$(DOCROOT)/build/lib/xml-apis.jar:$(DOCROOT)/build/lib/xslthl.jar $(HIGHLIGHTER_CONFIG) com.icl.saxon.StyleSheet -o book.fo book.xml $(DOCBOOK) $(DBPARS)
 # ../build/lib/xalan.jar ... org.apache.xalan.xslt.Process
 
-book-pocket.fo: $(XMLFILES) images
+book-pocket.fo: book-pocket.xml $(XMLFILES) images
 	@echo $(VERSION)
 	@echo "Highlighter configuration: $(HIGHLIGHTER_CONFIG)"
-	java -Xms256M -Xmx512M -classpath $(DOCROOT)/build/lib/saxon.jar:$(DOCROOT)/build/lib/xercesImpl.jar:$(DOCROOT)/build/lib/xml-apis.jar:$(DOCROOT)/build/lib/xslthl.jar $(HIGHLIGHTER_CONFIG) com.icl.saxon.StyleSheet -o book-pocket.fo book.xml $(DOCBOOK_POCKET) $(DBPARS)
+	java -Xms256M -Xmx512M -classpath $(DOCROOT)/build/lib/saxon.jar:$(DOCROOT)/build/lib/xercesImpl.jar:$(DOCROOT)/build/lib/xml-apis.jar:$(DOCROOT)/build/lib/xslthl.jar $(HIGHLIGHTER_CONFIG) com.icl.saxon.StyleSheet -o book-pocket.fo book-pocket.xml $(DOCBOOK_POCKET) $(DBPARS)
 
 XEPPARS = -Dcom.renderx.xep.CONFIG=build/lib/XEP/xep-vaadinfonts.xml -quiet
 
