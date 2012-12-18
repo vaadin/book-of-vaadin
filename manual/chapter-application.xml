@@ -269,7 +269,7 @@ public class HelloWorld extends UI {
         <title>Building the UI</title>
 
         <para>
-            Vaadin user interfaces are built hierarchically from components, where the
+            Vaadin user interfaces are built hierarchically from components, so that the
             leaf components are contained within layout components and other component
             containers. Building the hierarchy starts from the top (or bottom - whichever
             way you like to think about it), from the <classname>UI</classname> class of
@@ -765,7 +765,7 @@ button.addClickListener(new Button.ClickListener() {
 			</para>
 		</section>
 
-		<section>
+		<section xml:id="application.resources.file">
 			<title>File Resources</title>
 
 			<para>
@@ -779,25 +779,67 @@ button.addClickListener(new Button.ClickListener() {
 				standard <classname>java.io.File</classname> class. You can create the
 				file either with an absolute or relative path, but the base path of the
 				relative path depends on the installation of the web server. For example,
-				in Apache Tomcat, the default current directory is the installation path of
-				Tomcat.
+				in Apache Tomcat, the default current directory is the installation path
+				of Tomcat.
 			</para>
 
-			<!-- programlisting><![CDATA[]]></programlisting -->
+            <para>
+                In the following example, we provide an image resource from a file stored
+                in the web application. Notice that the image is stored under the
+                <filename>WEB-INF</filename> folder, which is a special folder that is
+                never accessible using an URL, unlike other folders in a web
+                application. This is a security solution - another would be to store the
+                resource elsewhere in the filesystem.
+            </para>
+
+            <book-example id="application.resources.fileresource" style="float: right"></book-example>
+			<programlisting><?pocket-size 65% ?><![CDATA[// Find the application directory
+String basepath = VaadinService.getCurrent()
+                  .getBaseDirectory().getAbsolutePath();
+
+// Image as a file resource
+FileResource resource = new FileResource(new File(basepath +
+                        "/WEB-INF/images/image.png"));
+
+// Show the image in the application
+Embedded image = new Embedded("Image from file", resource);
+        
+// Let the user view the file in browser or download it
+Link link = new Link("Link to the image file", resource);]]></programlisting>
+
+            <para>
+                The result, as well as the folder structure where the file is stored under
+                a regular Eclipse Vaadin project, is shown in <xref
+                linkend="figure.application.resources.file"/>.
+            </para>
+
+            <figure xml:id="figure.application.resources.file">
+                <title>File Resource</title>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata scale="70" smallscale="70%" align="center" fileref="img/application/resource-fileresource.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
 		</section>
 
-		<section>
+		<section xml:id="application.resources.class">
 			<title>Class Loader Resources</title>
 
 			<para>
 				The <classname>ClassResource</classname> allows resources to be loaded
-				from the deployed package of the application using Java Class Loader. <!-- If you
-				are using Eclipse, you just need to import the resources, such as images,
-				under a package. --> The one-line example below loads an image resource from
-				the application package and displays it in an
-				<classname>Embedded</classname> component.
+				from the class path using Java Class Loader. Normally, the relevant class
+				path entry is the <filename>WEB-INF/classes</filename> folder under the
+				web application, where the Java compilation should compile the Java
+				classes and copy other files from the source tree.
+            </para>
+
+            <para>
+                The one-line example below loads an image resource from the application
+                package and displays it in an <classname>Embedded</classname> component.
 			</para>
 
+            <book-example id="application.resources.classresource" style="float: right"></book-example>
 			<programlisting><?pocket-size 80% ?><![CDATA[mainwindow.addComponent(new Embedded ("",
         new ClassResource("smiley.jpg")));]]></programlisting>
 		</section>
@@ -940,7 +982,7 @@ main.addComponent(new Embedded("Image title", imageresource));]]></programlistin
 				The image will look as follows:
 			</para>
 
-			<figure xml:id="figure.resource.streamresource">
+			<figure xml:id="figure.application.resource.stream">
 				<title>Screenshot of the stream resource example with an embedded image</title>
 				<mediaobject>
 					<imageobject role="html">
@@ -977,53 +1019,26 @@ main.addComponent(new Embedded("Image title", imageresource));]]></programlistin
 			<title>Error Indicator and message</title>
 
 			<para>
-				All components have a built-in error indicator that can be set explicitly
-				with <methodname>setComponentError()</methodname> or can be turned on
-				implicitly if validating the component fails. As with component caption,
-				the placement of the indicator is managed by the layout in which the
-				component is contained. Usually, the error indicator is placed right of
-				the caption text. Hovering the mouse pointer over the field displays the
-				error message.
+				All components have a built-in error indicator that is turned on if
+				validating the component fails, and can be set explicitly with
+				<methodname>setComponentError()</methodname>. Usually, the error indicator
+				is placed right of the component caption. The error indicator is part of
+				the component caption, so its placement is usually managed by the layout
+				in which the component is contained, but some components handle it
+				themselves. Hovering the mouse pointer over the field displays the error
+				message.
 			</para>
+
+			<programlisting><?pocket-size 65% ?><![CDATA[textfield.setComponentError(new UserError("Bad value"));
+button.setComponentError(new UserError("Bad click"));]]></programlisting>
 
 			<para>
-				The following example shows how you can set the component error
-				explicitly. The example essentially validates field value without using an
-				actual validator.
+				The result is shown in <xref
+				linkend="figure.application.errors.error-indicator"/>.
 			</para>
 
-			<programlisting><?pocket-size 65% ?><![CDATA[// Create a field.
-final TextField textfield = new TextField("Enter code");
-main.addComponent(textfield);
-
-// Let the component error be initially clear.
-textfield.setComponentError(null); // (actually the default)
-
-// Have a button right of the field (and align it properly).
-final Button button = new Button("Ok!");
-main.addComponent(button);
-((VerticalLayout)main.getLayout())
-        .setComponentAlignment(button, Alignment.BOTTOM_LEFT);
-
-// Handle button clicks
-button.addListener(new Button.ClickListener() {
-    public void buttonClick(ClickEvent event) {
-        // If the field value is bad, set its error.
-        // (Allow only alphanumeric characters.)
-        if (! ((String) textfield.getValue()).matches("^\\w*$")) {
-            // Put the component in error state and
-            // set the error message.
-            textfield.setComponentError(
-                new UserError("Must be letters and numbers"));
-        } else {
-            // Otherwise clear it.
-            textfield.setComponentError(null);
-        }
-    }
-});]]></programlisting>
-
-			<figure xml:id="figure.error-indicator.example1">
-				<title>Error indicator active</title>
+			<figure xml:id="figure.application.errors.error-indicator">
+				<title>Error Indicator Active</title>
 				<mediaobject>
 					<imageobject role="html">
 						<imagedata align="center" fileref="img/application/errorindicator-example2.png"/>
