@@ -18,13 +18,6 @@
         This chapter describes how to write mobile applications using the Vaadin TouchKit.
     </para>
 
-    <para>
-        <emphasis>This edition is a draft. Many new features that will be included in
-        Vaadin 7 are not yet covered in the draft and some of the content may in fact be
-        outdated. For the most current version, please see the on-line edition available
-        at <uri>http://vaadin.com/book</uri>.</emphasis>
-    </para>
-
     <section xml:id="mobile.overview">
         <title>Overview</title>
 
@@ -38,36 +31,129 @@
             regular web user interfaces of your applications. Just like the purpose of the
             Vaadin Framework is to make desktop-like web applications, the purpose of
             TouchKit is to allow creation of web applications that give the look and feel
-            akin to native mobile applications.
+            of native mobile applications.
+        </para>
+
+        <figure xml:id="figure.mobile.overview.touchkit">
+            <title>The Vornitologist Demo for Vaadin TouchKit</title>
+            <mediaobject>
+                <imageobject>
+                    <imagedata smallscale="100%" scale="70" align="center" fileref="img/mobile/vornitologist-maintabsheet-short.png"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
+
+        <para>
+            Creating a mobile UI is much like a regular Vaadin UI. You can use all the
+            regular Vaadin components and add-ons, as well as the special TouchKit
+            components.
+        </para>
+
+        <programlisting><?pocket-size 65% ?><![CDATA[@Theme("mobiletheme")
+public class SimplePhoneUI extends UI {
+    @Override
+    protected void init(VaadinRequest request) {
+        // Set the window or tab title
+        getPage().setTitle("Hello Phone!");
+        
+        // Use the TouchKit TabBarView for content
+        TabBarView mainView = new TabBarView();
+        setContent(mainView);
+        
+        // Create a view - usually a regular class
+        class MyView extends VerticalLayout {
+            Table table = new Table("Planets", planetData());
+
+            public MyView() {
+                addComponent(new Label("This is a view"));
+                table.setWidth("100%");
+                table.setPageLength(table.size());
+                addComponent(table);
+                addComponent(new Button("Go"));
+                setSpacing(true);
+            }
+        }
+        mainView.addTab(new MyView(), "Planets");
+
+        // Add some more sub-views
+        mainView.addTab(new Label("Dummy"), "Map");
+        mainView.addTab(new Label("Dummy"), "Settings");
+    }
+    ...
+}]]></programlisting>
+
+        <para>
+            The resulting UI is shown in <xref linkend="figure.mobile.overview.example"/>.
+        </para>
+
+        <figure xml:id="figure.mobile.overview.example">
+            <title>The Vornitologist Demo for Vaadin TouchKit</title>
+            <mediaobject>
+                <imageobject>
+                    <imagedata smallscale="100%" scale="70" align="center" fileref="img/mobile/vornitologist-maintabsheet-short.png"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
+
+        <para>
+            TouchKit supports many special mobile browser features, such as geolocation,
+            home screen launching, splash screen, and web app mode, especially in iOS.
         </para>
 
         <para>
-            In this chapter, we first look into the special considerations of mobile
+            In addition to developing regular server-side UIs, TouchKit allows a special
+            <emphasis>offline mode</emphasis>, which is a client-side Vaadin UI that is
+            stored in the browser cache and switched to automatically when the network
+            connection is not available, either when starting the application or while
+            using it. For more information, see <xref linkend="mobile.offline"/>.
+        </para>
+
+        <para>
+            In this chapter, we first consider some special aspects of mobile
             browsing. Then, we look how to create a project that uses TouchKit. TouchKit
             offers a number of specialized mobile components, which are described in a
             dedicated section. We treat phone and tablet applications separately, and
-            discuss testing briefly. Finally, we discuss the limitations of TouchKit
-            briefly. In the chapter, we use a Mobile Mail application as an example for
-            creating a web application that looks very much like a native mobile
-            application.
+            discuss testing briefly.
         </para>
 
-        <para>
-            Vaadin TouchKit is a commercial product licensed under a dual-licensing
-            scheme. The AGPL license allows open-source development, while the CVAL
-            license needs to be purchased for closed-source use, including web deployments
-            and internal use. Commercial licenses can be purchased from the Vaadin
-            Directory, where you can also find the license details and download Vaadin
-            TouchKit.
-        </para>
+        <simplesect xml:id="mobile.overview.examples">
+            <title>Demos and the Tutorial</title>
+
+            <para>
+                The Vornitologist is a demo application that showcases most of the
+                features in TouchKit. You can try it out at <link
+                xlink:href="http://demo.vaadin.com/vornitologist">http://demo.vaadin.com/vornitologist</link>
+                with your iOS or Android device. It comes with a tutorial that gives
+                details about how it works.
+            </para>
+
+            <para>
+                The Mobile Mail is another demo application, which shows how to implement
+                browsing of deep category trees and make forms.
+            </para>
+        </simplesect>
+
+        <simplesect xml:id="mobile.overview.license">
+            <title>Licensing</title>
+
+            <para>
+                Vaadin TouchKit is a commercial product licensed under a dual-licensing
+                scheme. The AGPL license allows open-source development, while the CVAL
+                license needs to be purchased for closed-source use, including web
+                deployments and internal use. Commercial licenses can be purchased from
+                the Vaadin Directory, where you can also find the license details and
+                download Vaadin TouchKit.
+            </para>
+        </simplesect>
     </section>
 
     <section xml:id="mobile.considerations">
         <title>Considerations Regarding Mobile Browsing</title>
 
         <para>
-            When developing applications that support mobile browsing, you need to consider
-            various issues that are different from non-mobile use.
+            When developing web applications that support mobile browsing, you need to
+            consider various issues that are different from non-mobile use. TouchKit is
+            designed to help with these issues.
         </para>
         
         <section xml:id="mobile.considerations.mobile-hi">
@@ -75,30 +161,26 @@
 
             <para>
                 Mobile devices use very different human interfaces than regular
-                computers. Perhaps the most evident feature is that the user can easily change
-                the orientation of the display to switch between portrait and landscape
-                views. This may change not just the dimensions of the display, but also the
-                most useful layout.
+                computers. For example, the screen can be rotated easily to switch between
+                portrait and landscape views. This does not just change the dimensions of
+                the display, but also affects the most useful layout.
             </para>
 
             <para>
-                There is often no physical but a virtual keyboard. You need to ensure that,
-                when the virtual keyboard pops up, it does not hide the input field to which
-                the user is trying to enter data. This should be handled by the browser, but
-                you should in any case check that it does. This is largely a testing issue.
+                The user interface is used with a finger instead of a mouse, so there are
+                no features such as "right-finger-button". Double-tap is not normally used
+                in mobile user interfaces, unlike the double-click with a mouse. Instead,
+                a "long tap" usually has the same meaning as the double click. Finger
+                gestures also play a large role, such as using a vertical swipe gesture
+                for scrolling instead of a scroll bar.
             </para>
 
             <para>
-                There is no "right-finger-button" and double-tap is not normally used in
-                mobile user interfaces unlike the double-click with mouse. Instead, a "long
-                tap" usually has the same meaning as the double click. Finger gestures also
-                play a large role, such as using a vertical swipe gesture for scrolling instead
-                of a scroll bar.
-            </para>
-
-            <para>
-                TouchKit helps with many of these special requirements for mobile
-                applications.
+                There is normally no physical but a virtual keyboard, and the keyboard can
+                change depending on the context. You also need to ensure that it does not
+                hide the input field to which the user is trying to enter data when it
+                pops up. This should be handled by the browser, but is among the issues
+                that requires special testing.
             </para>
         </section>
 
@@ -107,9 +189,10 @@
             
             <para>
                 Mobile Internet connections are often significantly slower than with fixed
-                lines. With a common 384 kbps connection, just loading the Vaadin client-side
-                engine can take several seconds. This can be helped by compiling a widget set
-                that includes only the used components.
+                lines. With a low-end mobile connection, such as 384 kbps, just loading
+                the Vaadin client-side engine can take several seconds. This can be helped
+                by compiling a widget set that includes only the widgets for the used
+                components.
             </para>
 
             <para>
@@ -136,20 +219,21 @@
             <title>Compatibility</title>
 
             <para>
-                The mobile browsing field is currently evolving at fast pace and the special
-                conventions that are introduced by leading manufacturers may, in the next few
-                years, stabilize as new web standards. The browser support in TouchKit
-                concentrates on WebKit, which appears to be emerging as the leading mobile
-                browser core. In addition to Apple's products, also the default browser in
-                Android uses WebKit as the layout engine. Yet there are differences, as the
-                Android's JavaScript engine, which is highly relevant for Vaadin, is the
-                Google Chrome's V8 engine.
+                The mobile browsing field is currently evolving at fast pace and the
+                special conventions that are introduced by leading manufacturers may, in
+                the next few years, stabilize as new web standards. The browser support in
+                TouchKit concentrates on WebKit, which appears to be emerging as the
+                leading mobile browser core. In addition to Apple's products, also the
+                default browser in Android uses WebKit as the layout engine. Yet they have
+                differences, as the Android's JavaScript engine, which is highly relevant
+                for Vaadin, is the Google Chrome's V8 engine.
             </para>
 
             <para>
-                TouchKit aims to follow the quickly evolving APIs of these major platforms,
-                with the assumption that other browsers will follow their lead in
-                standardization. Other platforms will be supported if they rise in popularity.
+                Vaadin TouchKit aims to follow the quickly evolving APIs of these major
+                platforms, with the assumption that other browsers will follow their lead
+                in standardization. Other platforms will be supported if they rise in
+                popularity.
             </para>
 
             <section xml:id="mobile.considerations.compatibility.backbutton">
@@ -157,51 +241,137 @@
 
                 <para>
                     Some mobile devices, especially Android devices, have a dedicated back
-                    button, while iOS devices particularly do not. TouchKit does not provide
-                    any particular support for the button, but as it is a regular browser back
-                    button, you can handle it with URI fragments, as described in <xref
-                        linkend="advanced.urifu"/>. For iOS, the browser back button is hidden if
-                    the user adds the application to the home screen, in which case you need
-                    to implement application-specific logic for the back-navigation.
+                    button, while iOS devices in particular do not. TouchKit does not
+                    provide any particular support for the button, but as it is a regular
+                    browser back button, you can handle it with URI fragments, as
+                    described in <xref linkend="advanced.urifu"/>. For iOS, the browser
+                    back button is hidden if the user adds the application to the home
+                    screen, in which case you need to implement application-specific logic
+                    for the back-navigation.
                 </para>
             </section>
         </section>
     </section>
 
-    <section xml:id="mobile.project">
-        <title>Creating a Project Targeting Multiple Devices</title>
+    <section xml:id="mobile.installation">
+        <title>Installing Vaadin TouchKit</title>
 
-        <section xml:id="mobile.project.installing">
-            <title>Using TouchKit Add-on in a Project</title>
+        <para>
+            You can download and install TouchKit from the Vaadin Directory at <link
+            xlink:href="https://vaadin.com/addon/vaadin-touchkit">https://vaadin.com/addon/vaadin-touchkit</link>
+            as an installation package or get it with Maven. If your project requires the
+            use of the CVAL license, they can be purchased from the Directory.
+        </para>
+
+        <para>
+            See <xref linkend="addons"/> for details regarding add-on installation. The
+            add-on includes a widget set, so you need to compile the widget set for your
+            project.
+        </para>
+        
+        <section xml:id="mobile.project.downloading">
+            <title>Downloading from Vaadin Directory</title>
 
             <para>
-                You can install TouchKit as a Vaadin add-on or use it with Maven with the
-                <literal>vaadin-touchkit</literal> dependency.
-
+            
                 <!-- TODO: maven dep wrong (agpl/cval etc), also more probls. -->
                 <!-- TODO: Reference to the add-on installation. -->
             </para>
+        </section>
 
-            <section xml:id="mobile.project.webxml">
-                <title>Deployment Descriptor</title>
+        <section xml:id="mobile.project.maven">
+            <title>Installing in Maven</title>
+
+            <para>
+                You can install Vaadin TouchKit in a Maven project by adding it a
+                dependency, as described first below. If you are creating a new project,
+                you can use the TouchKit Maven archetype to create a project skeleton.
+            </para>
+
+            <section xml:id="mobile.project.maven.dependency">
+                <title>Defining as a Dependency</title>
 
                 <para>
-                    You need to use the special
-                    <classname>TouchKitApplicationServlet</classname> class instead of the
-                    regular <classname>ApplicationServlet</classname> in the
-                    <filename>web.xml</filename> deployment descriptor.
+                    To use TouchKit in a Vaadin project, you need to include the following
+                    dependency in the POM. The <literal>artifactId</literal> should be
+                    <literal>vaadin-touchkit-agpl</literal> or
+                    <literal>vaadin-touchkit-cval</literal>, depending on your choise for
+                    the license.
+                </para>
+
+                <programlisting>&lt;dependency&gt;
+   &lt;groupId&gt;com.vaadin.addon&lt;/groupId&gt;
+   &lt;artifactId&gt;vaadin-touchkit-<emphasis role="bold">agpl</emphasis>&lt;/artifactId&gt;
+   &lt;version&gt;<emphasis role="bold">LATEST</emphasis>&lt;/version&gt;
+&lt;/dependency&gt;</programlisting>
+
+                <para>
+                    You can use the <parameter>LATEST</parameter> version as shown above
+                    or a specific version by its version number.
                 </para>
 
                 <para>
-                    As TouchKit comes with a custom widget set, you need to define a combining
-                    widget set for your project. The combining widget set descriptor is
-                    automatically generated by the Vaadin Plugin for Eclipse and in Maven when
-                    you install or define the TouchKit add-on.
-
-                    <!-- TODO: Reference to the add-on installation. -->
+                    You also need to define the repository for the Vaadin add-ons under
+                    the <literal>&lt;repositories&gt;</literal> element:
                 </para>
 
-                <programlisting><?pocket-size 65% ?>&lt;servlet&gt;
+                <programlisting><![CDATA[<repository>
+   <id>vaadin-addons</id>
+   <url>http://maven.vaadin.com/vaadin-addons</url>
+</repository>]]></programlisting>
+            </section>
+                
+            <simplesect xml:id="mobile.project.maven.archetype">
+                <title>Using the Archetype</title>
+
+                <para>
+                    You can create a new TouchKit application project using the Maven
+                    archetype.
+                </para>
+
+                <para>
+                    To Be Done.
+                </para>
+            </simplesect>
+        </section>
+    </section>
+
+    <section xml:id="mobile.project">
+        <title>Creating a TouchKit Application</title>
+
+        <para>
+            At minimum, a TouchKit application requires a UI class, which is defined in a
+            deployment descriptor, as usual for Vaadin applications. You usually also need
+            to have a custom theme. To enable various other features, you may need to
+            provide a custom servlet. These and other tasks are described in the following
+            subsections.
+        </para>
+        
+        <section xml:id="mobile.project.webxml">
+            <title>Deployment Descriptor</title>
+
+            <para>
+                The deployment descriptor of a TouchKit application is much like for any
+                Vaadin application. However, you need to use the special
+                <classname>TouchKitServlet</classname> class instead of the regular
+                <classname>VaadinServlet</classname> in the <filename>web.xml</filename>
+                deployment descriptor. 
+            </para>
+
+            <para>
+                If you need to add special logic in the servlet, such as to provide
+                different UIs for different devices or to make certain configuration, you
+                can extend the TouchKit servlet to implement the logic.
+            </para>
+
+            <para>
+                As TouchKit comes with a custom widget set, you need to use a combining
+                widget set for your project. The combining widget set descriptor is
+                automatically generated by the Vaadin Plugin for Eclipse and in Maven when
+                you install or define the TouchKit add-on.
+            </para>
+
+            <programlisting><?pocket-size 65% ?>&lt;servlet&gt;
   &lt;servlet-name&gt;Vaadin Application Servlet&lt;/servlet-name&gt;
   &lt;servlet-class&gt;com.vaadin.addon.touchkit.server.TouchKitApplicationServlet&lt;/servlet-class&gt;
   &lt;init-param&gt;
@@ -214,31 +384,82 @@
     &lt;param-value&gt;<emphasis role="bold">com.vaadin.demo.mobilemail.gwt.MobileMailWidgetSet</emphasis>&lt;/param-value&gt;
   &lt;/init-param&gt;
 &lt;/servlet&gt;</programlisting>
+        </section>
+
+        <section xml:id="mobile.project.servlet">
+            <title>Creating a Custom Servlet</title>
+
+            <para>
+                Some tasks can only be done in the initial request to the server, before
+                the UI is created. You need to make a custom servlet class if you want to
+                use the following TouchKit features:
+            </para>
+
+            <itemizedlist>
+                <listitem>Customize bookmark or home screen icon</listitem>
+                <listitem>Customize splash screen image</listitem>
+                <listitem>Customize status bar in iOS</listitem>
+                <listitem>Use special web app mode in iOS</listitem>
+                <listitem>Provide a fallback UI</listitem>
+                <listitem>Enable offline mode</listitem>
+            </itemizedlist>
+
+            <para>
+                If you modify the TouchKit settings as described later, which the most
+                common task, you can extend the <classname>VaadinServlet</classname>
+                directly. If not, such as if you just add a custom UI provider for a
+                fallback UI, you should extend the <classname>TouchKitServlet</classname>.
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[public class VornitologistServlet extends VaadinServlet {
+    @Override
+    protected void servletInitialized() throws ServletException {
+        super.servletInitialized();
+
+        ... customization ...
+    }
+}]]></programlisting>
+
+            <para>
+                Configuring a fallback UI is covered in <xref
+                linkend="mobile.features.fallback"/>.
+            </para>
+
+            <section xml:id="mobile.project.servlet.settings">
+                <title>TouchKit Settings</title>
+
+                <para>
+                    The <classname>TouchKitSettings</classname> is a 
+                </para>
             </section>
         </section>
 
-        <section xml:id="mobile.project.application">
-            <title>Application</title>
+        <section xml:id="mobile.project.ui">
+            <title>The UI</title>
 
             <para>
-                Mobile applications must extend the
-                <classname>TouchKitApplication</classname> instead of the regular
-                <classname>Application</classname> class. Because much of the browser
-                information is not yet available when the <methodname>init()</methodname>
-                method is called, you should only set basic things like the main window
-                and theme there. The main window must be set and must be a
-                <classname>TouchKitWindow</classname>, not a <classname>Window</classname>
-                as in regular Vaadin applications.
+                Mobile UIs extend the <classname>UI</classname> class as usual. Because
+                much of the browser information is not yet available when the
+                <methodname>init()</methodname> method is called, you should only set
+                basic things like the main window and theme there. The main window must be
+                set and must be a <classname>TouchKitWindow</classname>, not a
+                <classname>Window</classname> as in regular Vaadin applications.
             </para>
 
-            <programlisting><?pocket-size 65% ?><![CDATA[public class MobileMailApplication extends TouchKitApplication {
+            <programlisting><?pocket-size 65% ?><![CDATA[@Theme("mobiletheme")
+public class SimplePhoneUI extends UI {
     @Override
-    public void init() {
-        setMainWindow(new TouchKitWindow());
+    protected void init(VaadinRequest request) {
+        // Set the window or tab title
+        getPage().setTitle("Hello Phone!");
+        
+        // Create the content root layout for the UI
+        TabBarView mainView = new TabBarView();
+        setContent(mainView);
 
-        // Using mobile mail theme
-        setTheme("mobilemail");
-    }]]></programlisting>
+        ...
+    }
+}]]></programlisting>
 
             <para>
                 Most initialization has to be be done in
@@ -265,6 +486,13 @@
                 about the situation. The special mobile components in TouchKit are not
                 guaranteed to work at all in regular browsers. It does give separate user
                 interfaces for phones and tablets, as described in detail later.
+            </para>
+
+            <para>
+                If you need to provide a <emphasis>fallback UI</emphasis> for browsers
+                that are not compatible with TouchKit, such as most regular browsers, you
+                can do so in a custom UI provider, as described in <xref
+                linkend="mobile.features.fallback"/>.
             </para>
         </section>
     </section>
@@ -791,7 +1019,70 @@ bar.removeTab(selectedTab);]]></programlisting>
     </section>
 
     <section xml:id="mobile.features">
-        <title>Mobile Features</title>
+        <title>Advanced Mobile Features</title>
+
+        <section xml:id="mobile.features.fallback">
+            <title>Providing a Fallback UI</title>
+
+            <para>
+                You may need to use the same URL and hence the same servlet for both the
+                mobile TouchKit UI and for regular browsers. In this case, you need to
+                recognize the mobile browsers compatible with Vaadin TouchKit and provide
+                a fallback UI for any other browsers. You can do this by having a custom
+                <classname>UIProvider</classname> that creates the UIs.
+            </para>
+
+            <para>
+                As TouchKit supports WebKit-based browsers, you can do the recognition by
+                checking if the <parameter>user-agent</parameter> string contains the
+                sub-string "<literal>webkit</literal>" as follows:
+            </para>
+
+            <programlisting><?pocket-size 85% ?><![CDATA[public class MyUIProvider
+        extends UIProvider {
+    @Override
+    public Class<? extends UI> getUIClass(
+            UIClassSelectionEvent event) {
+        String userAgent = event.getRequest()
+                .getHeader("user-agent").toLowerCase();
+        if(userAgent.contains("webkit")) {
+            return MyMobileUI.class;
+        } else {
+            return MyFallbackUI.class;
+        }
+    }
+}]]></programlisting>
+
+            <para>
+                The custom UI provider has to be added in a custom servlet class, which
+                you need to define in the <filename>web.xml</filename>, for example as
+                follows:
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[public class MyServlet extends VaadinServlet {
+    private MyUIProvider uiProvider = new MyUIProvider();
+
+    @Override
+    protected void servletInitialized() throws ServletException {
+        super.servletInitialized();
+        
+        getService().addSessionInitListener(
+                new SessionInitListener() {
+            @Override
+            public void sessionInit(SessionInitEvent event)
+                    throws ServiceException {
+                event.getSession().addUIProvider(uiProvider);
+            }
+        });
+
+        ... other custom servlet settings ...
+    }
+}]]></programlisting>
+
+            <para>
+                See the Vornitologist demo for a working example.
+            </para>
+        </section>
 
         <section xml:id="mobile.considerations.geolocation">
             <title>Geolocation</title>
@@ -865,7 +1156,34 @@ bar.removeTab(selectedTab);]]></programlisting>
                 calling <classname>Geolocator</classname><methodname>.detect()</methodname>
                 multiple times.
             </para>
-        </section>    </section>
+        </section>
+
+        <section xml:id="mobile.features.offline">
+            <title>Offline Mode</title>
+
+            <para>
+                While regular Vaadin TouchKit applications are server-side applications,
+                it allows a special <emphasis>offline mode</emphasis>, which is a
+                client-side Vaadin UI that switched to automatically when the network
+                connection is not available. The offline UI is included in the widget set
+                of the regular server-side UI and stored in the browser cache. By
+                providing a special cache manifest, the browser caches the page so
+                strongly that it persists even after browser restart.
+            </para>
+
+            <para>
+                During offline operation, the offline UI can store data in the HTML5 local
+                storage of the mobile browser and then passed to the server-side
+                application when the connection is again available.
+            </para>
+
+            <!-- TODO: Offline theme -->
+
+            <para>
+                See the Vornitologist demo for a complete example of the offline mode.
+            </para>
+        </section>
+    </section>
 
     <section xml:id="mobile.testing">
         <title>Testing and Debugging on Mobile Devices</title>
