@@ -87,10 +87,10 @@ public class SimplePhoneUI extends UI {
         </para>
 
         <figure xml:id="figure.mobile.overview.example">
-            <title>The Vornitologist Demo for Vaadin TouchKit</title>
+            <title>Simple TouchKit UI</title>
             <mediaobject>
                 <imageobject>
-                    <imagedata smallscale="100%" scale="70" align="center" fileref="img/mobile/vornitologist-maintabsheet-short.png"/>
+                    <imagedata smallscale="50%" scale="70" align="center" fileref="img/mobile/simplephoneui.png"/>
                 </imageobject>
             </mediaobject>
         </figure>
@@ -124,7 +124,9 @@ public class SimplePhoneUI extends UI {
                 features in TouchKit. You can try it out at <link
                 xlink:href="http://demo.vaadin.com/vornitologist">http://demo.vaadin.com/vornitologist</link>
                 with your iOS or Android device. It comes with a tutorial that gives
-                details about how it works.
+                details about how it works. The tutorial includes instructions for
+                checking out the demo from the Vaadin repository and how to import it in
+                Eclipse.
             </para>
 
             <para>
@@ -270,13 +272,33 @@ public class SimplePhoneUI extends UI {
         </para>
         
         <section xml:id="mobile.project.downloading">
-            <title>Downloading from Vaadin Directory</title>
+            <title>Installing the JAR</title>
 
             <para>
-            
-                <!-- TODO: maven dep wrong (agpl/cval etc), also more probls. -->
-                <!-- TODO: Reference to the add-on installation. -->
+                You can download the JAR library from the Vaadin Directory. A different
+                JAR is provided for the two licenses, and the Directory asks for your
+                choice. The JAR should be deployed with the web application in the
+                <filename>WEB-INF</filename> folder.
             </para>
+
+            <section xml:id="mobile.project.downloading.dependencies">
+                <title>Library Dependencies</title>
+
+                <para>
+                    TouchKit requires the Reflections library for compiling the widget
+                    set. You can get the JAR from <link
+                    xlink:href="http://code.google.com/p/reflections/">http://code.google.com/p/reflections/</link>.
+                </para>
+
+                <para>
+                    If you otherwise use the Vaadin Plugin for Eclipse and manage the
+                    library dependencies with Ivy, you can add the following dependency
+                    for the unmanaged TouchKit JAR explicitly:
+                </para>
+
+                <programlisting><![CDATA[<dependency org="org.reflections"
+            name="reflections" rev="0.9.8" />]]></programlisting>
+            </section>
         </section>
 
         <section xml:id="mobile.project.maven">
@@ -319,6 +341,11 @@ public class SimplePhoneUI extends UI {
    <id>vaadin-addons</id>
    <url>http://maven.vaadin.com/vaadin-addons</url>
 </repository>]]></programlisting>
+
+                <para>
+                    You also need to enable the widget set compilation in the POM, as
+                    described in <xref linkend="addons.maven.widgetset"/>, and compile it.
+                </para>
             </section>
                 
             <simplesect xml:id="mobile.project.maven.archetype">
@@ -326,18 +353,29 @@ public class SimplePhoneUI extends UI {
 
                 <para>
                     You can create a new TouchKit application project using the Maven
-                    archetype.
+                    <parameter>vaadin-archetype-touchkit</parameter> archetype, as
+                    described in <xref linkend="getting-started.maven"/>.
                 </para>
 
                 <para>
-                    To Be Done.
+                    For example, from command-line, you could do:
+                </para>
+
+                <screen><prompt>$</prompt> <command>mvn</command> archetype:generate \
+  -DarchetypeGroupId=com.vaadin \
+  -DarchetypeArtifactId=vaadin-archetype-application \
+  -DgroupId=<replaceable>example.com</replaceable> -DartifactId=<replaceable>myproject</replaceable> \
+  -Dversion=<replaceable>0.1.0</replaceable> -Dpackaging=war</screen>
+
+                <para>
+                    
                 </para>
             </simplesect>
         </section>
     </section>
 
     <section xml:id="mobile.project">
-        <title>Creating a TouchKit Application</title>
+        <title>Elements of a TouchKit Application</title>
 
         <para>
             At minimum, a TouchKit application requires a UI class, which is defined in a
@@ -400,18 +438,18 @@ public class SimplePhoneUI extends UI {
                 <listitem>Customize splash screen image</listitem>
                 <listitem>Customize status bar in iOS</listitem>
                 <listitem>Use special web app mode in iOS</listitem>
-                <listitem>Provide a fallback UI</listitem>
+                <listitem>Provide a fallback UI (<xref linkend="mobile.features.fallback"/>)</listitem>
                 <listitem>Enable offline mode</listitem>
             </itemizedlist>
 
             <para>
-                If you modify the TouchKit settings as described later, which the most
-                common task, you can extend the <classname>VaadinServlet</classname>
-                directly. If not, such as if you just add a custom UI provider for a
-                fallback UI, you should extend the <classname>TouchKitServlet</classname>.
+                A custom servlet should normally extend the
+                <classname>TouchKitServlet</classname>. You should place your code in
+                <methodname>servletInitialized()</methodname> and call the super method in
+                the beginning.
             </para>
 
-            <programlisting><?pocket-size 65% ?><![CDATA[public class VornitologistServlet extends VaadinServlet {
+            <programlisting><?pocket-size 65% ?><![CDATA[public class MyServlet extends TouchKitServlet {
     @Override
     protected void servletInitialized() throws ServletException {
         super.servletInitialized();
@@ -421,15 +459,149 @@ public class SimplePhoneUI extends UI {
 }]]></programlisting>
 
             <para>
-                Configuring a fallback UI is covered in <xref
-                linkend="mobile.features.fallback"/>.
+                If you need to rather extend some other servlet, possibly in another
+                add-on, it should be trivial to reimplement the functionality of
+                <classname>TouchKitServlet</classname>, which is just to manage the
+                TouchKit settings object.
+            </para>
+        </section>
+
+        <section xml:id="mobile.project.settings">
+            <title>TouchKit Settings</title>
+
+            <para>
+                TouchKit has a number of settings that you can customize for your
+                needs. The <classname>TouchKitSettings</classname> configuration object is
+                managed by <classname>TouchKitServlet</classname>, so if you make any
+                modifications to it, you need to implement a custom servlet, as described
+                earlier.
             </para>
 
-            <section xml:id="mobile.project.servlet.settings">
-                <title>TouchKit Settings</title>
+            <programlisting><?pocket-size 65% ?><![CDATA[public class MyServlet extends TouchKitServlet {
+    @Override
+    protected void servletInitialized() throws ServletException {
+        super.servletInitialized();
+
+        TouchKitSettings s = getTouchKitSettings();
+        ...
+    }
+}]]></programlisting>
+
+            <para>
+                The settings include special settings for iOS devices, which are contained
+                in a separate <classname>IosWebAppSettings</classname> object, available
+                from the TouchKit settings with
+                <methodname>getIosWebAppSettings()</methodname>.
+            </para>
+
+            <section xml:id="mobile.project.settings.splash">
+                <title>Application Icons</title>
 
                 <para>
-                    The <classname>TouchKitSettings</classname> is a 
+                    The location bar, bookmarks, and other places can display an icon for
+                    the web application. You can set the icon, or more exactly icons, in
+                    an <classname>ApplicationIcons</classname> object, which manages icons
+                    for different resolutions. The most properly sized icon for the
+                    context is used. iOS devices prefer icons with 57&#215;57,
+                    72&#215;72, and 144&#215;144 pixels, and Android devices
+                    36&#215;36, 48&#215;48, 72&#215;72, and 96&#215;96 pixels.
+                </para>
+
+                <para>
+                    You can add an icon to the application icons collection with
+                    <methodname>addApplicationIcon()</methodname>.  You
+                    can acquire the base URL for your application from the servlet
+                    context, as shown in the following example.
+                </para>
+
+                <programlisting><?pocket-size 75% ?><![CDATA[TouchKitSettings s = getTouchKitSettings();
+String contextPath = getServletConfig()
+    .getServletContext().getContextPath();
+s.getApplicationIcons().addApplicationIcon(
+    contextPath + "VAADIN/themes/mytheme/icon.png");]]></programlisting>
+
+                <para>
+                    The basic method just takes the icon name, while the other one lets
+                    you define its size. It also has a <parameter>preComposed</parameter>
+                    parameter, which when true, instructs Safari from adding effects to
+                    the icon in iOS.
+                </para>
+            </section>
+
+            <section xml:id="mobile.project.settings.viewport">
+                <title>Viewport Settings</title>
+
+                <para>
+                    The <classname>ViewPortSettings</classname> object, which you can get
+                    from the TouchKit settings with
+                    <methodname>getViewPortSettings()</methodname>, manages settings
+                    related to the display, most importantly the scaling limitations.
+                </para>
+
+                <programlisting><?pocket-size 65% ?><![CDATA[TouchKitSettings s = getTouchKitSettings();
+ViewPortSettings vp = s.getViewPortSettings();
+vp.setViewPortUserScalable(true);
+...]]></programlisting>
+
+                <para>
+                    See the <link
+                    xlink:href="http://developer.apple.com/library/safari/">Safari
+                    Development Library</link> at the Apple developer's site for more
+                    details regarding the functionality in the iOS browser.
+                </para>
+            </section>
+
+            <section xml:id="mobile.project.settings.splash">
+                <title>Startup Image for iOS</title>
+
+                <para>
+                    iOS browser supports a startup (splash) image that is shown while the
+                    application is loading. You can set it in the
+                    <classname>IosWebAppSettings</classname> object with
+                    <methodname>setStartupImage()</methodname>. You can acquire the base
+                    URL for your application from the servlet context, as shown in the
+                    following example.
+                </para>
+
+                <programlisting><?pocket-size 65% ?><![CDATA[TouchKitSettings s = getTouchKitSettings();
+String contextPath = getServletConfig().getServletContext()
+    .getContextPath();
+s.getIosWebAppSettings().setStartupImage(
+    contextPath + "VAADIN/themes/mytheme/startup.png");]]></programlisting>
+
+            </section>
+
+            <section xml:id="mobile.project.settings.webapp">
+                <title>Web App Capability for iOS</title>
+
+                <para>
+                    iOS supports a special web app mode for bookmarks added and started
+                    from the home screen. With the mode enabled, the client may, among
+                    other things, hide the browser's own UI to give more space for the web
+                    application. The mode is enabled by a header that tells the browser
+                    whether the application is designed to be used as a web application
+                    rather than a web page.
+                </para>
+
+                <programlisting><![CDATA[TouchKitSettings s = getTouchKitSettings();
+s.getIosWebAppSettings().setWebAppCapable(true);]]></programlisting>
+
+                <para>
+                    See the <link
+                    xlink:href="http://developer.apple.com/library/safari/">Safari
+                    Development Library</link> at the Apple developer's site for more
+                    details regarding the functionality in the iOS browser.
+                </para>
+            </section>
+
+            <section xml:id="mobile.project.settings.cache">
+                <title>Cache Manifest</title>
+
+                <para>
+                    The <classname>ApplicationCacheSettings</classname> object manages the
+                    cache manifest, which is used to configure how the browser caches the
+                    page and other resources for the web app. See <xref
+                    linkend="mobile.offline"/> for more details about its use.
                 </para>
             </section>
         </section>
@@ -438,12 +610,8 @@ public class SimplePhoneUI extends UI {
             <title>The UI</title>
 
             <para>
-                Mobile UIs extend the <classname>UI</classname> class as usual. Because
-                much of the browser information is not yet available when the
-                <methodname>init()</methodname> method is called, you should only set
-                basic things like the main window and theme there. The main window must be
-                set and must be a <classname>TouchKitWindow</classname>, not a
-                <classname>Window</classname> as in regular Vaadin applications.
+                Mobile UIs extend the <classname>UI</classname> class as usual and
+                construct the user interface from components.
             </para>
 
             <programlisting><?pocket-size 65% ?><![CDATA[@Theme("mobiletheme")
@@ -462,37 +630,15 @@ public class SimplePhoneUI extends UI {
 }]]></programlisting>
 
             <para>
-                Most initialization has to be be done in
-                <methodname>onBrowserDetailsReady()</methodname>, including the decision
-                to use a regular or a mobile browser interface. The decision is usually
-                made using the user-agent information available in the
-                <classname>WebBrowser</classname> class and the width and height of the
-                main window.
-            </para>
-
-        <programlisting><?pocket-size 65% ?><![CDATA[public void onBrowserDetailsReady() {
-    WebBrowser browser = getBrowser();
-    float viewPortWidth = getMainWindow().getWidth();
-
-    if (viewPortWidth < 600) {
-        getMainWindow().setContent(new SmartphoneMainView());
-    } else {
-        getMainWindow().setContent(new TabletMainView());
-    }
-}]]></programlisting>
-
-            <para>
-                The demo application does not actually support regular browsers, just notifies
-                about the situation. The special mobile components in TouchKit are not
-                guaranteed to work at all in regular browsers. It does give separate user
-                interfaces for phones and tablets, as described in detail later.
+                Most commonly, you will use a combination of the major three TouchKit
+                components as the basis of the UI: <classname>TabBarView</classname>,
+                <classname>NavigationView</classname>, or
+                <classname>NavigationManager</classname>.
             </para>
 
             <para>
-                If you need to provide a <emphasis>fallback UI</emphasis> for browsers
-                that are not compatible with TouchKit, such as most regular browsers, you
-                can do so in a custom UI provider, as described in <xref
-                linkend="mobile.features.fallback"/>.
+                If a offline UI is provided, it needs to be enabled in the initialization
+                of the UI, as described in <xref linkend="mobile.offline"/>.
             </para>
         </section>
     </section>
@@ -501,8 +647,9 @@ public class SimplePhoneUI extends UI {
         <title>Mobile User Interface Components</title>
 
         <para>
-            TouchKit introduces a number of components special to mobile device user
-            interfaces.
+            TouchKit introduces a number of components special to mobile user interfaces
+            to give better user interaction and to utilize the special features in mobile
+            devices.
         </para>
 
         <section xml:id="mobile.components.navigationview">
@@ -1028,13 +1175,16 @@ bar.removeTab(selectedTab);]]></programlisting>
                 You may need to use the same URL and hence the same servlet for both the
                 mobile TouchKit UI and for regular browsers. In this case, you need to
                 recognize the mobile browsers compatible with Vaadin TouchKit and provide
-                a fallback UI for any other browsers. You can do this by having a custom
-                <classname>UIProvider</classname> that creates the UIs.
+                a fallback UI for any other browsers. The fallback UI can be a regular
+                Vaadin UI, a "Sorry!" message, or a redirection to an alternate user
+                interface.
             </para>
 
             <para>
-                As TouchKit supports WebKit-based browsers, you can do the recognition by
-                checking if the <parameter>user-agent</parameter> string contains the
+                You can handle the fallback logic in a custom
+                <classname>UIProvider</classname> that creates the UIs in the servlet. As
+                TouchKit supports only WebKit-based browsers, you can do the recognition
+                by checking if the <parameter>user-agent</parameter> string contains the
                 sub-string "<literal>webkit</literal>" as follows:
             </para>
 
@@ -1055,11 +1205,11 @@ bar.removeTab(selectedTab);]]></programlisting>
 
             <para>
                 The custom UI provider has to be added in a custom servlet class, which
-                you need to define in the <filename>web.xml</filename>, for example as
-                follows:
+                you need to define in the <filename>web.xml</filename>, as described in
+                <xref linkend="mobile.project.settings"/>. For example, as follows:
             </para>
 
-            <programlisting><?pocket-size 65% ?><![CDATA[public class MyServlet extends VaadinServlet {
+            <programlisting><?pocket-size 65% ?><![CDATA[public class MyServlet extends TouchKitServlet {
     private MyUIProvider uiProvider = new MyUIProvider();
 
     @Override
@@ -1157,31 +1307,96 @@ bar.removeTab(selectedTab);]]></programlisting>
                 multiple times.
             </para>
         </section>
+    </section>
 
-        <section xml:id="mobile.features.offline">
-            <title>Offline Mode</title>
+    <section xml:id="mobile.offline">
+        <title>Offline Mode</title>
+
+        <para>
+            While regular Vaadin TouchKit applications are server-side applications, it
+            allows a special <emphasis>offline mode</emphasis>, which is a client-side
+            Vaadin UI that switched to automatically when the network connection is not
+            available. The offline UI is included in the widget set of the regular
+            server-side UI and stored in the browser cache. By providing a special cache
+            manifest, the browser caches the page so strongly that it persists even after
+            browser restart.
+        </para>
+
+        <para>
+            During offline operation, the offline UI can store data in the HTML5 local
+            storage of the mobile browser and then passed to the server-side application
+            when the connection is again available.
+        </para>
+
+        <para>
+            See the Vornitologist demo and its source code for a complete example of the
+            offline mode.
+        </para>
+
+        <section xml:id="mobile.offline.cache">
+            <title>Enabling the Cache Manifest</title>
 
             <para>
-                While regular Vaadin TouchKit applications are server-side applications,
-                it allows a special <emphasis>offline mode</emphasis>, which is a
-                client-side Vaadin UI that switched to automatically when the network
-                connection is not available. The offline UI is included in the widget set
-                of the regular server-side UI and stored in the browser cache. By
-                providing a special cache manifest, the browser caches the page so
-                strongly that it persists even after browser restart.
+                HTML5 supports a <emphasis>cache manifest</emphasis>, which makes offline
+                web applications possible. It controls how different resources are
+                cached. The manifest is generated by TouchKit, but you need to enable it
+                in the TouchKit settings. To do so, you need to define a custom servlet,
+                as described in <xref linkend="mobile.project.servlet"/>, and call
+                <methodname>setCacheManifestEnabled(true)</methodname> for the cache
+                settings, as follows:
             </para>
 
+            <programlisting><![CDATA[TouchKitSettings s = getTouchKitSettings();
+...
+s.getApplicationCacheSettings()
+ .setCacheManifestEnabled(true);]]></programlisting>
+
             <para>
-                During offline operation, the offline UI can store data in the HTML5 local
-                storage of the mobile browser and then passed to the server-side
-                application when the connection is again available.
+                 You also need to define a MIME type for the manifest in the
+                 <filename>web.xml</filename> deployment descriptor as follows:
             </para>
+
+            <programlisting><![CDATA[<mime-mapping>
+	<extension>manifest</extension>
+	<mime-type>text/cache-manifest</mime-type>
+</mime-mapping>]]></programlisting>
+
+        </section>
+
+        <section xml:id="mobile.offline.offlinemodesettings">
+            <title>Enabling Offline Mode</title>
+
+            <para>
+                To enable the offline mode, you need to add the
+                <classname>OfflineModeSettings</classname> extension to the UI.
+            </para>
+
+            <programlisting><![CDATA[OfflineModeSettings offline = new OfflineModeSettings();
+...
+offline.extend(this);]]></programlisting>
+
+            <para>
+                You can extend the <classname>OfflineModeSettings</classname> extension to
+                to transfer data conveniently from the offline UI to the server-side, as
+                described in <xref linkend="mobile.offline.data"/>.
+            </para>
+        </section>
+
+        <section xml:id="mobile.offline.data">
+            <title>Sending Data to Server</title>
+
+            <para>
+                Once the connection is available, the offline UI can send any collected
+                data to the server-side. You can send the data from the offline UI, for
+                example, by making a server RPC call to a server-side UI extension, as
+                described in <xref linkend="gwt.rpc"/>.
+            </para>
+        </section>
+
+        <section xml:id="mobile.offline.theme">
+            <title>Offline the Theme</title>
 
             <!-- TODO: Offline theme -->
-
-            <para>
-                See the Vornitologist demo for a complete example of the offline mode.
-            </para>
         </section>
     </section>
 
