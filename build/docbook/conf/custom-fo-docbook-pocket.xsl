@@ -112,6 +112,11 @@
     <xsl:attribute name="font-size">10pt</xsl:attribute>
   </xsl:attribute-set>
 
+  <!-- Use bold instead of italic in replaceable elements -->
+  <xsl:template match="replaceable">
+    <xsl:call-template name="inline.boldmonoseq"/>
+  </xsl:template>
+
   <!-- ==================================================================== -->
   <!-- Table of Contents                                                    -->
   <!-- ==================================================================== -->

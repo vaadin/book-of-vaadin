@@ -1141,10 +1141,9 @@ button.setComponentError(new UserError("Bad click"));]]></programlisting>
 
             <para>
                 You can override the default system messages by implementing the
-                <methodname>getSystemMessages()</methodname> method in the application
-                class. The method should return a
-                <classname>Application.SystemMessages</classname> object. The easiest way
-                to customize the messages is to use a
+                <methodname>getSystemMessages()</methodname> method in the UI class. The
+                method should return a <classname>SystemMessages</classname> object. The
+                easiest way to customize the messages is to use a
                 <classname>CustomizedSystemMessages</classname> object as follows:
             </para>
 
@@ -1161,8 +1160,8 @@ public static SystemMessages getSystemMessages() {
 
             <para>
                 Notice that the special <methodname>getSystemMessages()</methodname>
-                method is not defined in an interface nor does it exist in the
-                <classname>Application</classname> superclass.
+                method is executed using reflection - it is not defined in an interface
+                nor does it exist in the <classname>UI</classname> superclass.
             </para>
         </section>
 		
@@ -1170,66 +1169,34 @@ public static SystemMessages getSystemMessages() {
 			<title>Handling Uncaught Exceptions </title>
 
 			<para>
-				Application development with Vaadin follows the event-driven programming
-				model. Mouse and keyboard events in the client cause (usually
-				higher-level) events on the server-side, which can be handled with
-				listeners, and that is how most of the application logic works. Handling
-				the events can result in exceptions either in the application logic or in
-				the framework itself, but some of them may not be caught properly.
+				Handling events can result in exceptions either in the application logic
+				or in the framework itself, but some of them may not be caught properly by
+				the application. Any such exceptions are eventually caught in
+				<classname>VaadinSession</classname>.
             </para>
 
             <para>
-                For example, in the following code excerpt, we throw an error in an event
-                listener but do not catch it, so it falls to the framework.
+                For example, in the following, we throw an error in an event listener but
+                do not catch it, so it falls to the framework.
             </para>
 
             <programlisting><?pocket-size 70% ?><![CDATA[final Button button = new Button ("Fail Me");
 
-button.addListener(new Button.ClickListener() {
+button.addClickListener(new Button.ClickListener() {
     public void buttonClick(ClickEvent event) {
         // Throw some exception.
         throw new RuntimeException("You can't catch this.");
     }
 });]]></programlisting>
 
-			<para>
-                Any such exceptions that occur in the call chain, but are not caught at
-                any other level, are eventually caught in
-                <classname>VaadinServlet</classname>. The terminal adapter passes all such
-                caught exceptions as events to the error listener of the
-                <classname>Application</classname> instance through the
-                <classname>Terminal.ErrorListener</classname> interface. The
-                <classname>Application</classname> class does not, by default, throw such
-                exceptions forward.
-			</para>
-
             <para>
-                The reason for this error-handling logic lies in the logic that handles
-                component state synchronization between the client and the server. We want
-                to handle <emphasis>all</emphasis> the serialized variable changes in the
-                client request, because otherwise the client-side and server-side
-                component states would become unsynchronized very easily, which could put
-                the entire application in an invalid state.
-            </para>
-			
-			<para>
-				The default implementation of the
-				<classname>Terminal.ErrorListener</classname> interface in the
-				<classname>Application</classname> class simply prints the error to
-				console. It also tries to find out a component related to the error. If
-				the exception occurred in a listener attached to a component, that
-				component is considered as the component related to the exception. If a
-				related component is found, the error handler sets the <emphasis>component
-				error</emphasis> for it, the same attribute which you can set with
-				<methodname>setComponentError()</methodname>.
-			</para>
-
-            <para>
-                In UI, the component error is shown with a small red "!" -sign (in the
-                default theme). If you hover the mouse pointer over it, you will see the
-                entire backtrace of the exception in a large tooltip box, as illustrated
-                in <xref linkend="figure.application.errors.unchecked-exceptions"/> for
-                the above code example.
+                The uncaught exceptions are by default delegated to the
+                <classname>DefaultErrorHandler</classname>, which displays the error as a
+                component error, that is, with a small red "!" -sign (depending on the
+                theme). If the user hovers the mouse pointer over it, the entire backtrace
+                of the exception is shown in a large tooltip box, as illustrated in <xref
+                linkend="figure.application.errors.unchecked-exceptions"/> for the above
+                code example.
             </para>
 
 			<figure xml:id="figure.application.errors.unchecked-exceptions">
@@ -1245,34 +1212,44 @@ button.addListener(new Button.ClickListener() {
 			</figure>
 
 			<para>
-				You can change the logic of handling the terminal errors easily by
-				overriding the <methodname>terminalError()</methodname> method in your
-				application class (the one that inherits
-				<classname>Application</classname>) or by setting a custom error listener
-				with the <methodname>setErrorHandler</methodname> method. You can safely
-				discard the default handling or extend its usage with your custom error
-				handling or logging system. In the example code below, the exceptions are
-				also reported as notifications in the main window.
+                You can customize the default error handling by implementing a custom
+                <interfacename>ErrorHandler</interfacename> and enabling it with
+                <methodname>setErrorHandler()</methodname> in the
+                <classname>UI</classname> or in the <classname>VaadinSession</classname>
+                object. You can either implement the
+                <interfacename>ErrorHandler</interfacename> or extend the
+                <classname>DefaultErrorHandler</classname>. In the following example, we
+                modify the behavior of the default handler.
 			</para>
 			
-			<programlisting><?pocket-size 75% ?><![CDATA[@Override
-public void terminalError(Terminal.ErrorEvent event) {
-    // Call the default implementation.
-    super.terminalError(event);
+			<programlisting><?pocket-size 65% ?><![CDATA[// Here's some code that produces an uncaught exception 
+final VerticalLayout layout = new VerticalLayout();
+final Button button = new Button("Click Me!",
+    new Button.ClickListener() {
+    public void buttonClick(ClickEvent event) {
+        ((String)null).length(); // Null-pointer exception
+    }
+});
+layout.addComponent(button);
 
-    // Some custom behaviour.
-    new Notification(
-        "An unchecked exception occured!",
-        event.getThrowable().toString(),
-        Notification.TYPE_ERROR_MESSAGE)
-            .show(Page.getCurrent());
-}]]></programlisting>
-
-			<para>
-				Handling other exceptions works in the usual way for Java
-				Servlets. Uncaught exceptions are finally caught and handled by the
-				application server.
-			</para>
+// Configure the error handler for the UI
+UI.getCurrent().setErrorHandler(new DefaultErrorHandler() {
+    @Override
+    public void error(com.vaadin.server.ErrorEvent event) {
+        // Find the final cause
+        String cause = "<b>The click failed because:</b><br/>";
+        for (Throwable t = event.getThrowable(); t != null;
+             t = t.getCause())
+            if (t.getCause() == null) // We're at final cause
+                cause += t.getClass().getName() + "<br/>";
+        
+        // Display the error message in a custom fashion
+        layout.addComponent(new Label(cause, ContentMode.HTML));
+           
+        // Do the default error handling (optional)
+        doDefault(event);
+    } 
+});]]></programlisting>
 
 		</section>
 	</section>
@@ -2061,15 +2038,12 @@ main.addListener(new Window.CloseListener(){
             </para>
 
             <para>
-                If your application has a single &ui;, you simply specify the &ui;
-                class by giving the <parameter>&ui;</parameter> parameter with the name
-                of the specific UI class for the servlet. The servlet is then connected
-                to a URL in a standard way for Java Servlets.
+                If your application has a single &ui;, you simply specify the &ui; class
+                with the <parameter>&ui;</parameter> parameter to the servlet. The servlet
+                is then mapped to a URL path in a standard way for Java Servlets.
 			</para>
 
-			<example xml:id="ex.web.xml">
-				<title>web.xml</title>
-				<programlisting><?pocket-size 75% ?>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+            <programlisting><?pocket-size 75% ?>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;web-app
   id="WebApp_ID" version="2.4"
   xmlns="http://java.sun.com/xml/ns/j2ee" 
@@ -2082,9 +2056,16 @@ main.addListener(new Window.CloseListener(){
     &lt;servlet-class&gt;
         com.vaadin.terminal.gwt.server.ApplicationServlet
     &lt;/servlet-class&gt;
+
     &lt;init-param&gt;
       &lt;param-name&gt;&ui;&lt;/param-name&gt;
-      &lt;param-value&gt;<emphasis role="strong">My&uiclass;</emphasis>&lt;/param-value&gt;
+      &lt;param-value&gt;<emphasis role="strong">com.ex.myprj.MyUI</emphasis>&lt;/param-value&gt;
+    &lt;/init-param&gt;
+
+    &lt;!-- If not using the default widget set--&gt;
+    &lt;init-param&gt;
+      &lt;param-name&gt;widgetset&lt;/param-name&gt;
+      &lt;param-value&gt;<emphasis role="strong">com.ex.myprj.MyWidgetSet</emphasis>&lt;/param-value&gt;
     &lt;/init-param&gt;
   &lt;/servlet&gt;
 
@@ -2093,7 +2074,6 @@ main.addListener(new Window.CloseListener(){
     &lt;url-pattern&gt;/*&lt;/url-pattern&gt;
   &lt;/servlet-mapping&gt;
 &lt;/web-app&gt;</programlisting>
-			</example>
 
             <para>
                 The descriptor defines a servlet with name <filename>myservlet</filename>.
@@ -2103,31 +2083,31 @@ main.addListener(new Window.CloseListener(){
                 projects. For some purposes, you may need to use a custom servlet class.
             </para>
 
-			<section xml:id="application.environment.web-xml.uiclass">
-				<title>&uiclass; or Application Class</title>
+			<section xml:id="application.environment.web-xml.widgetset">
+				<title>Widget Set</title>
 
                 <para>
-                    The servlet can take either an application class or the &ui; class
-                    of an application as a parameter. A &ui; class is normally given in
-                    applications with a single &ui; inside a page, while using an
-                    application class as the entry-point allows multiple &ui;s.
-                </para>
-                    
-                <para>
-                    If the <literal>&ui;</literal> parameter is given, its value must be
-                    the class name of the &ui; class, such as
-                    <classname>com.example.My&uiclass;</classname>, including the full
-                    package path to the class. If the class is in the default package, the
-                    package path is obviously not used.
+                    If the UI uses add-on components or custom widgets, it needs a custom
+                    widget set, which is specified with the
+                    <parameter>widgetset</parameter> parameter for the servlet. The
+                    parameter is a class name with the same path but without the
+                    <filename>.gwt.xml</filename> extension as the widget set definition
+                    file. If the parameter is not given, the
+                    <classname>com.vaadin.DefaultWidgetSet</classname> is used, which
+                    contains all the widgets for the built-in Vaadin components.
                 </para>
 
                 <para>
-                    If your application has multiple &ui;s in one page, or for other
-                    purposes, you can extend the <classname>VaadinServlet</classname>
-                    class instead of <classname>&uiclass;</classname> and use your servlet
-                    class for the servlet. For UIs created during the execution of a
-                    servlet, such as for displaying popup windows, you can add new UIs
-                    dynamically to the application instance.
+                    If you use the Vaadin Plugin for Eclipse for creating the project and
+                    compiling the widget set, it automatically generates the project
+                    widget set definition file, which includes all other widget sets it
+                    finds from the class path, and sets the parameter.
+                </para>
+
+                <para>
+                    The widget set must be compiled and deployed with the application, as
+                    described in <xref linkend="addons.compiling"/> or <xref
+                    linkend="clientside.compiling"/>.
                 </para>
             </section>
 
@@ -2241,7 +2221,7 @@ main.addListener(new Window.CloseListener(){
     ...
     &lt;init-param&gt;
       &lt;param-name&gt;UIProvider&lt;/param-name&gt;
-      &lt;param-value&gt;<emphasis role="bold">com.example.my.MyUIProvider</emphasis>&lt;/param-value&gt;
+      &lt;param-value&gt;<emphasis role="bold">com.ex.my.MyUIProvider</emphasis>&lt;/param-value&gt;
     &lt;/init-param&gt;</programlisting>
 
                 <para>
