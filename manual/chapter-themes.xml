@@ -534,40 +534,156 @@ td.another {background: yellow;}]]></programlisting>
         <indexterm startref="term.themes.css" class="endofrange"/>
 	</section>
 	
+	<section xml:id="themes.sass">
+		<title>Syntactically Awesome Stylesheets (Sass)</title>
+
+        <para>
+            Vaadin uses Sass for stylesheets. Sass is an extension of CSS3 that adds
+            nested rules, variables, mixins, selector inheritance, and other features to
+            CSS. Sass can be used in two basic ways, either by compiling SCSS files to CSS
+            or by doing the compilation on the fly.
+        </para>
+
+        <section xml:id="themes.sass.basic">
+            <title>Sass Basics with Vaadin</title>
+
+            <para>
+                We are not going to give in-depth documentation of Sass and refer you to
+                its excellent documentation at <link
+                xlink:href="http://sass-lang.com/">http://sass-lang.com/</link>. In the
+                following, we give just basic introduction to using it with Vaadin.
+            </para>
+
+            <para>
+                You can create a new Sass-based theme with the Eclipse plugin, as
+                described in <xref linkend="themes.eclipse"/>.
+            </para>
+        </section>
+
+        <section xml:id="themes.sass.servlet">
+            <title>Compiling On the Fly</title>
+
+            <para>
+                The easiest way to use Sass themes is to let the Vaadin servlet compile
+                them on the run. In this case, the SCSS source files are placed in the
+                theme folder.
+            </para>
+        </section>
+
+        <section xml:id="themes.sass.compiling">
+            <title>Compiling SASS to CSS</title>
+
+            <para>
+                Sass style sheets can be compiled to CSS, with the
+                <filename>styles.css</filename> of a custom theme as the compilation
+                target. When compiled before deployment, the source files do not need to
+                be in the theme folder.
+            </para>
+        </section>
+    </section>
+
 	<section xml:id="themes.creating">
 		<title>Creating and Using Themes</title>
 
-		<para>
-			Custom themes are placed in <filename>VAADIN/themes</filename> folder of the
-			web application (in the <filename>WebContent</filename> directory) as
-			illustrated in <xref linkend="figure.themes.theme-contents"/>. This location
-			is fixed. You need to have a theme folder for each theme you use in your
-			application, although applications rarely need more than a single theme. For
-			example, if you want to define a theme with the name <varname>mytheme</varname>,
-			you will place it in folder <filename>VAADIN/themes/mytheme</filename>.
-		</para>
+        <para>
+            Custom themes are placed in the <filename>VAADIN/themes</filename> folder of
+            the web application (in an Eclipse project in the
+            <filename>WebContent</filename> directory) as illustrated in <xref
+            linkend="figure.themes.theme-contents"/>. This location is fixed. You need to
+            have a theme folder for each theme you use in your application, although
+            applications rarely need more than a single theme.
+        </para>
 
-		<para>
-			A custom theme must also inherit a built-in theme, as shown in the example
-			below:
-		</para>
+        <section xml:id="themes.creating.sass">
+            <title>Sass Themes</title>
 
-		<programlisting><![CDATA[@import "../reindeer/styles.css";
+            <para>
+                You can use Sass themes in Vaadin in two ways, either by compiling them to
+                CSS by yourself or by letting the Vaadin servlet compile them for you
+                on-the-fly when the theme CSS is requested by the browser. The latter way
+                is easier, so we consider that here.
+            </para>
+
+            <para>
+                To define a Sass theme with the name <varname>mytheme</varname>, you
+                can place a file with name <filename>styles.scss</filename> in the
+                theme folder <filename>VAADIN/themes/mytheme</filename>. If no
+                <filename>styles.css</filename> exists in the folder, the Sass file is
+                compiled on-the-fly when the CSS file is requested by a browser.
+            </para>
+
+            <para>
+                A custom Sass theme must include a built-in theme and prefix all rules
+                with a selector for the theme name. With Sass, you can do that by
+                enclosing the rules in a block with a selector with the theme name as
+                follows:
+            </para>
+
+            <programlisting><![CDATA[@import "../reindeer/styles.scss";
+include reindeer;
+
+.mytheme {
+    .v-app {
+        background: yellow;
+    }
+}]]></programlisting>
+
+            <para>
+                Vaadin includes two built-in themes: <literal>reindeer</literal> and
+                <literal>runo</literal>. The latter is a compatibility theme for IT Mill
+                Toolkit 5; there is no longer a "default" theme. See <xref
+                linkend="themes.creating.default"/> and <xref
+                linkend="themes.creating.inheritance"/> below for details on inheriting
+                themes.
+            </para>
+        </section>
+
+        <section xml:id="themes.creating.sass-compiling">
+            <title>Compiling Sass Themes</title>
+
+            <para>
+                You may want to compile a Sass theme for various reasons, the most obvious
+                being that the on-the-fly compilation takes a bit time and makes the load
+                time a bit longer.
+            </para>
+
+            <para>
+                A Sass theme is compiled to CSS with the
+                <filename>vaadin-theme-compiler</filename> JAR, which is included in the
+                Vaadin installation package and is also available by Maven.
+            </para>
+
+            <para>
+                You can compile a theme as follows:
+            </para>
+
+            <screen><prompt>$</prompt><command>java</command> -classpath <parameter>&lt;path-to&gt;/vaadin-theme-compiler-7.0.jar</parameter>
+       com.vaadin.sass.SassCompiler <parameter>mytheme.scss</parameter> <parameter>mytheme.css</parameter></screen>
+        </section>
+
+        <section xml:id="themes.creating.css">
+            <title>Plain Old CSS Themes</title>
+
+            <para>
+                In addition to Sass themes, you can create plain old CSS themes. CSS theme
+                are more restricted than Sass styles - an application can only have one
+                CSS theme while you can have multiple Sass themes.
+            </para>
+
+            <para>
+                A CSS theme is defined in a <filename>styles.css</filename> file in the
+                <filename>VAADIN/themes/mytheme</filename> folder. You need to import the
+                <filename>legacy-styles.css</filename> of the built-in theme as follows:
+            </para>
+
+            <programlisting><![CDATA[@import "../reindeer/legacy-styles.css";
 
 .v-app {
     background: yellow;
 }]]></programlisting>
+        </section>
 
-        <para>
-            Vaadin 6.0 includes two built-in themes: <literal>reindeer</literal> and
-            <literal>runo</literal>. The latter is a compatibility theme for IT Mill
-            Toolkit 5; there is no longer a "default" theme. See <xref
-            linkend="themes.creating.default"/> and <xref
-            linkend="themes.creating.inheritance"/> below for details on inheriting
-            themes.
-		</para>
-
-		<section>
+        <section xml:id="themes.creating.standard-components">
 			<title>Styling Standard Components</title>
 
 			<para>
@@ -926,7 +1042,7 @@ public class MyRoot extends Root {
 		</section>
 
 		<section xml:id="themes.creating.using">
-			<title>Using Themes</title>
+			<title>Using Themes in an UI</title>
 
 			<para>
 				Using a theme is simple, you just set it for a
@@ -960,54 +1076,6 @@ public class MyRoot extends Root {
 			</para>
 		</section>
 	</section>
-
-	<section xml:id="themes.sass">
-		<title>Themeing with Sass</title>
-
-        <para>
-            In addition to plain CSS, you can write Vaadin themes with Sass. Sass adds
-            nested rules, variables, mixins, selector inheritance, and other features to
-            CSS3. Sass can be used in two basic ways, either by compiling SCSS files to
-            CSS or by doing the compilation on the fly.
-        </para>
-
-        <section xml:id="themes.sass.basic">
-            <title>Sass Basics with Vaadin</title>
-
-            <para>
-                We are not going to give in-depth documentation of Sass and refer you to
-                its excellent documentation at <link
-                xlink:href="http://sass-lang.com/">http://sass-lang.com/</link>. In the
-                following, we give just basic introduction to using it with Vaadin.
-            </para>
-
-            <para>
-                You can create a new Sass-based theme with the Eclipse plugin, as
-                described in <xref linkend="themes.eclipse"/>.
-            </para>
-        </section>
-
-        <section xml:id="themes.sass.servlet">
-            <title>Compiling On the Fly</title>
-
-            <para>
-                The easiest way to use Sass themes is to let the Vaadin servlet compile
-                them on the run. In this case, the SCSS source files are placed in the
-                theme folder.
-            </para>
-        </section>
-
-        <section xml:id="themes.sass.compiling">
-            <title>Compiling SASS to CSS</title>
-
-            <para>
-                Sass style sheets can be compiled to CSS, with the
-                <filename>styles.css</filename> of a custom theme as the compilation
-                target. When compiled before deployment, the source files do not need to
-                be in the theme folder.
-            </para>
-        </section>
-    </section>
 
 	<section xml:id="themes.eclipse">
 		<title>Creating a Theme in Eclipse</title>
