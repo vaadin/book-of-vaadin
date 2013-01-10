@@ -181,6 +181,17 @@ l10n: fi_FI
 FI_TRANSLATED := book.po
 
 ################################################################################
+# Chapter Extraction
+################################################################################
+
+vaadin-charts.pdf: book.pdf
+	pdftk A=book.pdf cat A439-474 output vaadin-charts.pdf
+
+publish-charts: vaadin-charts.pdf
+	scp vaadin-charts.pdf vaadin@vaadin.com:download/book-of-vaadin/vaadin-charts/pdf/
+	scp book.pdf vaadin@vaadin.com:download/book-of-vaadin/vaadin-charts/pdf/book-of-vaadin.pdf
+
+################################################################################
 # Misc
 ################################################################################
 
