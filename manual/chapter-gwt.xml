@@ -473,33 +473,33 @@ public class MyComponentConnector
             <title>Communication with the Server-Side</title>
             
             <para>
-                The main task of a connector is to handle communicating user interaction
-                to the server-side and receive state changes to be displayed to the user.
+                The main task of a connector is to communicate user interaction with the
+                widget to the server-side and receive state changes from the server-side
+                and relay them to the widget.
             </para>
 
             <para>
-                State changes are communicated to and from the server-side through a
-                <emphasis>shared state</emphasis> interface, as described in <xref
-                linkend="gwt.shared-state"/>. The serialization of the state data is
-                handled completely transparently.
+                Server-to-client communication is normally done using a <emphasis>shared
+                state</emphasis>, as described in <xref linkend="gwt.shared-state"/>. The
+                serialization of the state data is handled completely transparently.
             </para>
 
             <para>
-                In addition, a connector can make remote procedure calls (RPC) to the
-                server-side and also the server-side component can make RPC calls to the
-                connector. For a thorough description of the RPC mechanism, refer to <xref
-                linkend="gwt.rpc"/>.
+                For client-to-server communication, a connector can make remote procedure
+                calls (RPC) to the server-side. Also, the server-side component can make
+                RPC calls to the connector. For a thorough description of the RPC
+                mechanism, refer to <xref linkend="gwt.rpc"/>.
             </para>
         </section>
     </section>
 
     <section xml:id="gwt.shared-state">
-        <title>Sharing State</title>
+        <title>Shared State</title>
 
         <para>
-            The basic synchronization between the client-side widget and its server-side
-            counterpart is handled using a <emphasis>shared state</emphasis>. The shared
-            state is serialized transparently and communicated to the other side.
+            The basic communication from a server-side component to its the client-side
+            widget counterpart is handled using a <emphasis>shared state</emphasis>. The
+            shared state is serialized transparently. It is read-only on the client-side.
         </para>
 
         <para>
@@ -508,7 +508,7 @@ public class MyComponentConnector
             for the properties that are to be synchronized.
         </para>
 
-        <programlisting><?pocket-size 65% ?><![CDATA[public class MyComponentState extends ComponentState {
+        <programlisting><?pocket-size 75% ?><![CDATA[public class MyComponentState extends ComponentState {
     private String text;
 
     public String getText() {
@@ -520,8 +520,15 @@ public class MyComponentConnector
     }
 }]]></programlisting>
 
+        <para>
+            You can also use public member variables and access them directly. However, if
+            you do have setters and getters, as in the above example, the corresponding
+            member variables may not be public or they will create a name conflict during
+            serialization.
+        </para>
+
         <section xml:id="gwt.shared-state.component">
-            <title>Handling Shared State on Server-Side</title>
+            <title>Accessing Shared State on Server-Side</title>
 
             <para>
                 A server-side component can access the shared state with the
@@ -575,11 +582,11 @@ public MyComponentState getState() {
             <title>Handing Shared State in a Connector</title>
 
             <para>
-                A connector can access the shared state with the
-                <methodname>getState()</methodname> method. To prevent casting the shared
-                state object every time, it is recommended that you override the base
-                implementation with one that returns the proper shared state type, as
-                follows:
+                A connector can access a shared state with the
+                <methodname>getState()</methodname> method. The access should be
+                read-only. To prevent casting the shared state object every time, it is
+                recommended that you override the base implementation with one that
+                returns the proper shared state type, as follows:
             </para>
 
             <programlisting><?pocket-size 65% ?><![CDATA[@Override
@@ -599,7 +606,7 @@ public MyComponentState getState() {
 public void onStateChanged(StateChangeEvent stateChangeEvent) {
     super.onStateChanged(stateChangeEvent);
 		
-    // TODO do something useful
+    // Do something useful with the data
     final String text = getState().getText();
     getWidget().setText(text);
 }]]></programlisting>
@@ -1702,7 +1709,9 @@ layout.addComponent(mycomponent);]]></programlisting>
                     shared state and RPC for the component.
                 </para>
 
-                <programlisting><?pocket-size 65% ?><![CDATA[@JavaScript({"mylibrary.js", "mycomponent-connector.js"})
+                <programlisting><?pocket-size 65% ?><![CDATA[package com.vaadin.book.examples.client.js;
+
+@JavaScript({"mylibrary.js", "mycomponent-connector.js"})
 public class MyComponent extends AbstractJavaScriptComponent {
     public interface ValueChangeListener extends Serializable {
         void valueChange();
@@ -1726,6 +1735,32 @@ public class MyComponent extends AbstractJavaScriptComponent {
         return (MyComponentState) super.getState();
     }
 }]]></programlisting>
+
+                <para>
+                    Notice later when creating the JavaScript connector that its name must
+                    match the package name of this server-side class.
+                </para>
+
+                <para>
+                    The shared state of the component is as follows:
+                </para>
+
+                <programlisting><?pocket-size 65% ?><![CDATA[public class MyComponentState extends JavaScriptComponentState {
+    private String value;
+    
+    public String getValue() {
+        return value;
+    }
+    
+    public void setValue(String value) {
+        this.value = value;
+    }
+}]]></programlisting>
+
+                <para>
+                    You can also have just public member variables, but if you do have
+                    setters and getters, as above, the member variables may not be public.
+                </para>
             </section>
         </section>
 
@@ -1754,7 +1789,7 @@ public class MyComponent extends AbstractJavaScriptComponent {
                 with the current state as synchronized from the server-side.
             </para>
 
-            <programlisting><?pocket-size 65% ?><![CDATA[window.com_vaadin_book_examples_gwt_js_MyComponent =
+            <programlisting><?pocket-size 65% ?><![CDATA[window.com_vaadin_book_examples_client_js_MyComponent =
 function() {
     // Create the component
     var mycomponent =

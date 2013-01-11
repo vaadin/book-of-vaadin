@@ -360,12 +360,10 @@ public class HelloWorld extends UI {
             </para>
 
             <para>
-                The subsequent sections describe some basic application patterns. You may
-                also want to consider the advanced architectures presented in <xref
-                linkend="advanced.patterns"/>. The <xref linkend="advanced.global"/>
-                discusses the problem of passing essentially global references around, a
-                common problem which is also visited in later in this section, in <xref
-                linkend="application.architecture.accessing"/>.
+                The subsequent sections describe some basic application patterns. The
+                <xref linkend="advanced.global"/> discusses the problem of passing
+                essentially global references around, a common problem which is also
+                visited in <xref linkend="application.architecture.accessing"/>.
             </para>
         </section>
 
@@ -482,6 +480,63 @@ MyView myview = new MyView();]]></programlisting>
                 cases, you may need to integrate the Vaadin applications with the other
                 website. You can use the embedding techniques described in <xref
                 linkend="application.embedding"/>.
+            </para>
+        </section>
+
+        <section xml:id="advanced.patterns.layering">
+            <title>Layered Architectures</title>
+
+            <para>
+                Layered architectures, where each layer has a clearly distinct
+                responsibility, are probably the most common architectures. Typically,
+                applications follow at least a three-layer architecture:
+            </para>
+
+            <itemizedlist>
+                <listitem>User interface (or presentation) layer</listitem>
+                <listitem>Domain layer</listitem>
+                <listitem>Data store layer</listitem>
+            </itemizedlist>
+
+            <para>
+                Such an architecture starts from a <emphasis>domain model</emphasis>,
+                which defines the data model and the "business logic" of the application,
+                typically as POJOs. A user interface is built on top of the domain model,
+                in our context with the Vaadin Framework. The Vaadin user interface could
+                be bound directly to the data model through the Vaadin Data Model,
+                described in <xref linkend="datamodel"/>. Beneath the domain model lies a
+                data store, such as a relational database. The dependencies between the
+                layers are restricted so that a higher layer may depend on a lower one,
+                but never the other way around.
+            </para>
+
+            <figure xml:id="figure.advanced.patterns.layering">
+                <title>Three-Layer Architecture</title>
+                <mediaobject>
+                    <imageobject role="html">
+                        <imagedata align="center" fileref="img/jpacontainer/three-layer-architecture-lo.png"/>
+                    </imageobject>
+                    <imageobject role="fo">
+                        <imagedata scale="75" smallscale="100%" align="center" fileref="img/jpacontainer/three-layer-architecture-hi.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+            
+            <para>
+                An <emphasis>application layer</emphasis> (or <emphasis>service
+                layer</emphasis>) is often distinguished from the domain layer, offering
+                the domain logic as a service, which can be used by the user interface
+                layer, as well as for other uses. In Java EE development, Enterprise
+                JavaBeans (EJBs) are typically used for building this layer.
+            </para>
+
+            <para>
+                An <emphasis>infrastructure layer</emphasis> (or <emphasis>data access
+                layer</emphasis>) is often distinguished from the data store layer, with a
+                purpose to abstract the data store. For example, it could involve a
+                persistence solution such as JPA and an EJB container. This layer becomes
+                relevant with Vaadin when binding Vaadin components to data with the
+                JPAContainer, as described in <xref linkend="jpacontainer"/>.
             </para>
         </section>
 
@@ -2031,16 +2086,15 @@ main.addListener(new Window.CloseListener(){
 				<filename>web.xml</filename> in the <filename>WEB-INF</filename> directory
 				of a web application. It is a standard component in Java EE describing how
 				a web application should be deployed. The structure of the deployment
-				descriptor is illustrated by the following example. You simply deploy
-				applications as servlets implemented by the special
-				<methodname>com.vaadin.terminal.gwt.server.ApplicationServlet</methodname>
-				wrapper class.
+				descriptor is illustrated by the following example. You simply deploy UIs
+				wrapped in servlets using the
+				<methodname>com.vaadin.server.VaadinServlet</methodname> class.
             </para>
 
             <para>
-                If your application has a single &ui;, you simply specify the &ui; class
-                with the <parameter>&ui;</parameter> parameter to the servlet. The servlet
-                is then mapped to a URL path in a standard way for Java Servlets.
+                You simply specify the &ui; class with the <parameter>&ui;</parameter>
+                parameter to the servlet. The servlet is then mapped to a URL path in a
+                standard way for Java Servlets.
 			</para>
 
             <programlisting><?pocket-size 75% ?>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
@@ -2054,7 +2108,7 @@ main.addListener(new Window.CloseListener(){
   &lt;servlet&gt;
     &lt;servlet-name&gt;<emphasis role="strong">myservlet</emphasis>&lt;/servlet-name&gt;
     &lt;servlet-class&gt;
-        com.vaadin.terminal.gwt.server.ApplicationServlet
+        com.vaadin.server.VaadinServlet
     &lt;/servlet-class&gt;
 
     &lt;init-param&gt;
@@ -2077,10 +2131,10 @@ main.addListener(new Window.CloseListener(){
 
             <para>
                 The descriptor defines a servlet with name <filename>myservlet</filename>.
-                The servlet class,
-                <classname>com.vaadin.terminal.gwt.server.ApplicationServlet</classname>,
+                The servlet class, <classname>com.vaadin.server.VaadinServlet</classname>,
                 is provided by Vaadin framework and is normally the same for all Vaadin
-                projects. For some purposes, you may need to use a custom servlet class.
+                projects. For some purposes, you may need to use a custom servlet class,
+                as described earlier.
             </para>
 
 			<section xml:id="application.environment.web-xml.widgetset">
