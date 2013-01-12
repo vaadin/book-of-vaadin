@@ -3521,88 +3521,21 @@ Link link = new Link("Send Message", new ExternalResource(
         </section>
     </section>
 
-    <section xml:id="advanced.patterns">
-        <title>Advanced Application Architectures</title>
-
-        <para>
-            In this section, we discuss some architectural patterns used with Vaadin.
-        </para>
-
-        <section xml:id="advanced.patterns.layering">
-            <title>Layered Architectures</title>
-
-            <para>
-                Layered architectures, where each layer has a clearly distinct
-                responsibility, are probably the most common architectures. Typically,
-                applications follow at least a three-layer architecture:
-            </para>
-
-            <itemizedlist>
-                <listitem>User interface (or presentation) layer</listitem>
-                <listitem>Domain layer</listitem>
-                <listitem>Data store layer</listitem>
-            </itemizedlist>
-
-            <para>
-                Such an architecture starts from a <emphasis>domain model</emphasis>,
-                which defines the data model and the "business logic" of the application,
-                typically as POJOs. A user interface is built on top of the domain model,
-                in our context with the Vaadin Framework. The Vaadin user interface could
-                be bound directly to the data model through the Vaadin Data Model,
-                described in <xref linkend="datamodel"/>. Beneath the domain model lies a
-                data store, such as a relational database. The dependencies between the
-                layers are restricted so that a higher layer may depend on a lower one,
-                but never the other way around.
-            </para>
-
-            <figure xml:id="figure.advanced.patterns.layering">
-                <title>Three-Layer Architecture</title>
-                <mediaobject>
-                    <imageobject role="html">
-                        <imagedata align="center" fileref="img/jpacontainer/three-layer-architecture-lo.png"/>
-                    </imageobject>
-                    <imageobject role="fo">
-                        <imagedata scale="75" smallscale="100%" align="center" fileref="img/jpacontainer/three-layer-architecture-hi.png"/>
-                    </imageobject>
-                </mediaobject>
-            </figure>
-            
-            <para>
-                An <emphasis>application layer</emphasis> (or <emphasis>service
-                layer</emphasis>) is often distinguished from the domain layer, offering
-                the domain logic as a service, which can be used by the user interface
-                layer, as well as for other uses. In Java EE development, Enterprise
-                JavaBeans (EJBs) are typically used for building this layer.
-            </para>
-
-            <para>
-                An <emphasis>infrastructure layer</emphasis> (or <emphasis>data access
-                layer</emphasis>) is often distinguished from the data store layer, with a
-                purpose to abstract the data store. For example, it could involve a
-                persistence solution such as JPA and an EJB container. This layer becomes
-                relevant with Vaadin when binding Vaadin components to data with the
-                JPAContainer, as described in <xref linkend="jpacontainer"/>.
-            </para>
-        </section>
-    </section>
-
     <section xml:id="advanced.global">
         <title>Accessing Session-Global Data</title>
 
         <para>
             Applications typically need to access some objects from practically all user
             interface code, such as a user object, a business data model, or a database
-            connection. This data is typically initialized and managed in the application
-            class. Some such data is built-in into the <classname>Application</classname>
-            class, such as the locale.
+            connection. This data is typically initialized and managed in the UI class of
+            the application, or in the session or servlet.
         </para>
 
         <para>
-            You can access the application object from any user interface component using
-            the <methodname>getApplication()</methodname> method. For example:
+            For example, you could hold it in the UI class as follows:
         </para>
 
-        <programlisting><?pocket-size 65% ?><![CDATA[class MyApplication extends Application {
+        <programlisting><?pocket-size 65% ?><![CDATA[class MyUI extends UI {
     UserData userData;
 
     public void init() {
@@ -3612,23 +3545,27 @@ Link link = new Link("Send Message", new ExternalResource(
     public UserData getUserData() {
         return userData;
     }
-}
+}]]></programlisting>
 
-...
-data = ((MyApplication)component.getApplication()).getUserData();]]></programlisting>
+        <para>
+            Vaadin offers two ways to access the UI object: with
+            <methodname>getUI()</methodname> method from any component and the global
+            <methodname>UI.getCurrent()</methodname> method.
+        </para>
 
-        <simplesect xml:id="advanced.global.passing.problem">
-            <title>The Problem</title>
+        <para>
+            The <methodname>getUI()</methodname> works as follows:
+        </para>
 
-            <para>
-                The basic problem in accessing session-global data is that the
-                <methodname>getApplication()</methodname> method works only after the
-                component has been attached to the application. Before that, it returns
-                <parameter>null</parameter>. This is the case in constructors of
-                components, such as a <classname>CustomComponent</classname>:
-            </para>
+        <programlisting><?pocket-size 75% ?><![CDATA[data = ((MyUI)component.getUI()).getUserData();]]></programlisting>
 
-            <programlisting><?pocket-size 65% ?><![CDATA[class MyComponent extends CustomComponent {
+        <para>
+            This does not, however work in many cases, because it requires that the
+            components are attached to the UI. That is not the case most of the time when
+            the UI is still being built, such as in constructors.
+        </para>
+
+        <programlisting><?pocket-size 65% ?><![CDATA[class MyComponent extends CustomComponent {
     public MyComponent() {
         // This fails with NullPointerException
         Label label = new Label("Country: " +
@@ -3638,6 +3575,25 @@ data = ((MyApplication)component.getApplication()).getUserData();]]></programlis
     }
 }]]></programlisting>
 
+
+        <para>
+            The global access methods for the currently served servlet, session, and UI
+            allow an easy way to access the data:
+        </para>
+
+        <programlisting><![CDATA[data = ((MyUI) UI.getCurrent()).getUserData();]]></programlisting>
+
+        <simplesect xml:id="advanced.global.passing.problem">
+            <title>The Problem</title>
+
+            <para>
+                The basic problem in accessing session-global data is that the
+                <methodname>getUI()</methodname> method works only after the
+                component has been attached to the application. Before that, it returns
+                <parameter>null</parameter>. This is the case in constructors of
+                components, such as a <classname>CustomComponent</classname>:
+            </para>
+
             <para>
                 Using a static variable or a singleton implemented with such to give a
                 global access to user session data is not possible, because static
@@ -3645,22 +3601,6 @@ data = ((MyApplication)component.getApplication()).getUserData();]]></programlis
                 session. This can be handy for communicating data between the concurrent
                 sessions, but creates a problem within a session.
             </para>
-
-            <para>
-                For example, the following would not work:
-            </para>
-
-            <programlisting><?pocket-size 65% ?><![CDATA[class MyApplication extends Application {
-    static UserData userData;
-
-    public void init() {
-        userData = new UserData();
-    }
-
-    public static UserData getUserData() {
-        return userData;
-    }
-}]]></programlisting>
 
             <para>
                 The data would be shared by all users and be reinitialized every time a

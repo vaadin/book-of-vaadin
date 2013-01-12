@@ -45,7 +45,6 @@ IMAGES =	intro/architecture intro/toolchain \
 			vaadin-logo book-example \
 			eclipse/editor-design-2-crop eclipse/widgetset-compiling-toolbar \
 			datamodel/datamodel-interfaces datamodel/beanitem-doublebinding \
-			rapid/domain-model \
 			mobile/navigationview mobile/navigationpanel \
 			testbench/webdriver-use \
 			testbench/tt-workflow testbench/tt-architecture-simple testbench/tt-recorder-workflow \
@@ -61,7 +60,7 @@ XMLFILES = book-info.xml book-preface.xml book-vol1.xml book-vol2.xml \
 	chapter-addons.xml	chapter-datamodel.xml	chapter-layout.xml	chapter-themes.xml \
 	chapter-advanced.xml	chapter-eclipse.xml	chapter-timeline.xml \
 	chapter-application.xml	chapter-getting-started.xml	chapter-mobile.xml \
-	chapter-architecture.xml	chapter-gwt.xml	chapter-rapid.xml	chapter-vaadin.xml \
+	chapter-architecture.xml	chapter-gwt.xml	chapter-vaadin.xml \
 	chapter-calendar.xml	chapter-introduction.xml	chapter-sqlcontainer.xml \
 	chapter-components.xml	chapter-jpacontainer.xml \
 	chapter-testbench.xml chapter-portal.xml
