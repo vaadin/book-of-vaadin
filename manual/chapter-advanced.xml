@@ -15,14 +15,7 @@
         applications.
     </para>
 
-    <para>
-        <emphasis>This edition is a draft. Many new features that will be included in
-        Vaadin 7 are not yet covered in this chapter and some of the content may in fact
-        be outdated. For the most current version, please see the on-line edition
-        available at <uri>http://vaadin.com/book</uri>.</emphasis>
-    </para>
-
-	<section xml:id="application.windows">
+	<section xml:id="advanced.windows">
 		<title>Handling Browser Windows</title>
 
         <para>
@@ -51,8 +44,8 @@
             The UIs of an application share the same user session, that is, the
             <classname>VaadinSession</classname> object, as described in <xref
             linkend="application.lifecycle.session"/>. Each UI is identified by a URL that
-            is used to access it, which makes it possible to bookmark application
-            UIs. UIs can even be created dynamically based on the URLs.
+            is used to access it, which makes it possible to bookmark application UIs. UI
+            instances can even be created dynamically based on the URLs.
 		</para>
 
 		<itemizedlist>
@@ -85,77 +78,154 @@
 			linkend="application.windows.caveats"/>.
 		</para>
 		
-		<section>
-			<title>Creating New Application-Level Windows</title>
+        <section xml:id="advanced.windows.popup">
+			<title>Opening Popup Windows</title>
 
-			<para>
-				Creating a new application-level window is much like creating a sub-window
-				(see <xref linkend="layout.sub-window"/>), except that the window is added
-				with <methodname>addWindow()</methodname> to the application object
-				instead of the main window.
-			</para>
+            <para>
+                Popup windows are native browser windows or tabs opened by user
+                interaction with an existing window.  Due to browser security reasons, it
+                is made incovenient for a web page to open popup windows using JavaScript
+                commands. At the least, the browser will ask for a permission to open the
+                popup, if it is possible at all. This limitation can be circumvented by
+                letting the browser open the new window or tab directly by its URL when
+                the user clicks some target. This is realized in Vaadin with the
+                <classname>BrowserWindowOpener</classname> component extension, which
+                causes the browser to open a window or tab when the component is clicked.
+            </para>
 
-			<programlisting><?pocket-size 65% ?><![CDATA[public class WindowTestApplication extends Application {
-    public void init() {
-        // First create the main window.
-        final Window main = new Window ("My Test Application");
-        setMainWindow(main);
-         
-        // Create another application-level window.
-        final Window mywindow = new Window("Second Window");
+            <section xml:id="advanced.windows.popup.ui">
+                <title>The Popup Window UI</title>
+
+                <para>
+                    A popup Window displays an <classname>UI</classname>. The UI of a
+                    popup window is defined just like a main UI in a Vaadin application,
+                    and it can have a theme, title, and so forth.
+                </para>
+
+                <para>
+                    For example:
+                </para>
+
+                <programlisting><?pocket-size 65% ?><![CDATA[@Theme("book-examples")
+public static class MyPopupUI extends UI {
+    @Override
+    protected void init(VaadinRequest request) {
+        getPage().setTitle("Popup Window");
         
-        // Manually set the name of the window.
-        mywindow.setName("mywindow");
-        
-        // Add some content to the window.
-        mywindow.addComponent(new Label("Has content."));
-
-        // Add the window to the application.
-        addWindow(mywindow);
+        // Have some content for it
+        VerticalLayout content = new VerticalLayout();
+        Label label =
+            new Label("I just popped up to say hi!");
+        label.setSizeUndefined();
+        content.addComponent(label);
+        content.setComponentAlignment(label,
+            Alignment.MIDDLE_CENTER);
+        content.setSizeFull();
+        setContent(content);
     }
 }]]></programlisting>
+            </section>
 
-			<para>
-				This creates the window object that a user can view by opening a URL in
-				a browser. Creating an application-level window object does not open a new
-				browser window automatically to view the object, but if you wish to open
-				one, you have to do it explicitly as shown below. An application-level
-				window has a unique URL, which is based on the application URL and the
-				name of the window given with the <methodname>setName()</methodname>
-				method. For example, if the application URL is
-				<uri>http://localhost:8080/myapp/</uri> and the window name is
-				<literal>mywindow</literal>, the URL for the window will be
-				<uri>http://localhost:8080/myapp/mywindow/</uri>. If the name of a window
-				is not explicitly set with <methodname>setName()</methodname>, an
-				automatically generated name will be used. The name can be retrieved with
-				the <methodname>getName()</methodname> method and the entire URL with
-				<methodname>getURL()</methodname>.
-			</para>
+            <section xml:id="advanced.windows.popup.popping">
+                <title>Popping It Up</title>
 
-			<para>
-				There are three typical ways to open a new window: using the
-				<methodname>open()</methodname> method of <classname>Window</classname>
-				class, a <classname>Link</classname>, or referencing it from HTML or
-				JavaScript code written inside a <classname>Label</classname> component.
-			</para>
+                <para>
+                    A popup window is opened using the
+                    <classname>BrowserWindowOpener</classname> extension, which you can
+                    attach to any component.
+                </para>
 
-			<para>
-				The <classname>Window</classname> <methodname>open()</methodname> method
-				takes as parameters a resource to open and the target name. You can use
-				<classname>ExternalResource</classname> to open a specific URL, which you
-				get from the window to be opened with the
-				<methodname>getURL()</methodname> method.
-			</para>
+                <para>
+                    You can configure the features of the popup window with
+                    <methodname>setFeatures()</methodname>. It takes as its parameter a
+                    semicolon-separated list of window features, as defined in the HTML
+                    specification.
+                </para>
 
-			<programlisting><?pocket-size 65% ?><![CDATA[/* Create a button to open a new window. */
-main.addComponent(new Button("Click to open new window",
-                  new Button.ClickListener() { 
-    public void buttonClick(ClickEvent event) {
-        // Open the window.
-        main.open(new ExternalResource(mywindow.getURL()),
-                  "_new");
-    }      
-}));]]></programlisting>
+                <variablelist>
+                    <varlistentry>
+                        <term><varname>status</varname>=<parameter>0|1</parameter></term>
+                        <listitem>Whether the status bar at the bottom of the window should be enabled.</listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><varname></varname><parameter></parameter></term>
+                        <listitem></listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><varname>scrollbars</varname></term>
+                        <listitem>Enables scrollbars in the window if the document area is bigger than the view area of the window.</listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><varname>resizable</varname></term>
+                        <listitem>Allows the user to resize the browser window (no effect for tabs).</listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><varname>menubar</varname></term>
+                        <listitem>Enables the browser menu bar.</listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><varname>location</varname></term>
+                        <listitem>Enables the location bar.</listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><varname>toolbar</varname></term>
+                        <listitem>Enables the browser toolbar.</listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><varname>height</varname>=<parameter>value</parameter></term>
+                        <listitem>Specifies the height of the window in pixels.</listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><varname>width</varname>=<parameter>value</parameter></term>
+                        <listitem>Specifies the width of the window in pixels.</listitem>
+                    </varlistentry>
+                </variablelist>
+
+                <para>
+                    For example:
+                </para>
+
+                <programlisting><?pocket-size 65% ?><![CDATA[// Create an opener extension
+BrowserWindowOpener opener = new BrowserWindowOpener(MyPopupUI.class);
+opener.setFeatures("height=200,width=300,resizable");
+
+// Attach it to a button
+Button button = new Button("Pop It Up");
+opener.extend(button);]]></programlisting>
+
+                <para>
+                    The resulting popup window is shown in <xref
+                    linkend="figure.advanced.windows.popup.popping"/>.
+                </para>
+
+                <figure xml:id="figure.advanced.windows.popup.popping">
+                    <title>A Popup Window</title>
+                    <mediaobject>
+                        <imageobject role="html">
+                            <imagedata align="center" fileref="img/advanced/windows-popup.png"/>
+                        </imageobject>
+                        <imageobject role="fo">
+                            <imagedata scale="70" smallscale="80%" align="center" fileref="img/advanced/windows-popup.png"/>
+                        </imageobject>
+                    </mediaobject>
+                </figure>
+
+                <section xml:id="advanced.windows.popup.target">
+                    <title>Popup Window Name (Target)</title>
+                </section>
+
+                <section xml:id="advanced.windows.popup.target">
+                    <title>URL and Session</title>
+
+                    <para>
+                        The URL path for a popup window UI is by default determined from
+                        the UI class name, by prefixig it with
+                        "<literal>popup/</literal>". For example, for the example UI giver
+                        earlier, the URL would be
+                        <literal>/book-examples/book/popup/MyPopupUI</literal>.
+                    </para>
+                </section>
+            </section>
 
 			<para>
 				The target name is one of the default HTML target names (<parameter>_new</parameter>, <parameter>_blank</parameter>, <parameter>_top</parameter>, etc.) or a custom target name.  How the window is
