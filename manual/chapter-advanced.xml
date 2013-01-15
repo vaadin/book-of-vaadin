@@ -18,14 +18,6 @@
 	<section xml:id="advanced.windows">
 		<title>Handling Browser Windows</title>
 
-        <para>
-            <emphasis>This section is not yet fully updated for Vaadin 7. The
-            <classname>Window</classname> class in Vaadin 6 has largely been replaced by
-            <classname>&uiclass;</classname> in Vaadin 7. In Vaadin 7, a
-            <classname>Window</classname> refers only to a sub-window. However, much of
-            the old window functionality is not yet implemented for &ui;s.</emphasis>
-        </para>
-
 		<para>
             The UI of a Vaadin application runs in a web page displayed in a browser
             window or tab. An application can be used from multiple UIs in different
@@ -39,14 +31,6 @@
             <emphasis>sub-window</emphasis> inside a page, as described in <xref
             linkend="layout.sub-window"/>.
         </para>
-
-        <para>
-            The UIs of an application share the same user session, that is, the
-            <classname>VaadinSession</classname> object, as described in <xref
-            linkend="application.lifecycle.session"/>. Each UI is identified by a URL that
-            is used to access it, which makes it possible to bookmark application UIs. UI
-            instances can even be created dynamically based on the URLs.
-		</para>
 
 		<itemizedlist>
 			<listitem>
@@ -65,17 +49,28 @@
 				entry-point to some content provided by an application.
 			</listitem>
 			<listitem>
-				<emphasis>Embedding windows</emphasis>. Windows can be embedded in web
+				<emphasis>Embedding UIs</emphasis>. UIs can be embedded in web
 				pages, thus making it possible to provide different views to an
 				application from different pages or even from the same page, while keeping
 				the same session. See <xref linkend="application.embedding"/>.
 			</listitem>
 		</itemizedlist>
 
+        <para>
+            Use of multiple windows in an application may require defining and providing
+            different UIs for the different windows. The UIs of an application share the
+            same user session, that is, the <classname>VaadinSession</classname> object,
+            as described in <xref linkend="application.lifecycle.session"/>. Each UI is
+            identified by a URL that is used to access it, which makes it possible to
+            bookmark application UIs. UI instances can even be created dynamically based
+            on the URLs or other request parameters, such as browser information, as
+            described in <xref linkend="application.lifecycle.ui"/>.
+		</para>
+
 		<para>
-			Because of the special nature of AJAX applications, these uses require some
-			caveats. We will go through them later in <xref
-			linkend="application.windows.caveats"/>.
+			Because of the special nature of AJAX applications, use of multiple windows
+			uses require some caveats. We will go through them later in <xref
+			linkend="advanced.windows.caveats"/>.
 		</para>
 		
         <section xml:id="advanced.windows.popup">
@@ -106,7 +101,7 @@
                     For example:
                 </para>
 
-                <programlisting><?pocket-size 65% ?><![CDATA[@Theme("book-examples")
+                <programlisting><?pocket-size 75% ?><![CDATA[@Theme("book-examples")
 public static class MyPopupUI extends UI {
     @Override
     protected void init(VaadinRequest request) {
@@ -132,7 +127,8 @@ public static class MyPopupUI extends UI {
                 <para>
                     A popup window is opened using the
                     <classname>BrowserWindowOpener</classname> extension, which you can
-                    attach to any component.
+                    attach to any component. The constructor of the extension takes the
+                    class object of the UI class to be opened as a parameter.
                 </para>
 
                 <para>
@@ -185,8 +181,9 @@ public static class MyPopupUI extends UI {
                     For example:
                 </para>
 
-                <programlisting><?pocket-size 65% ?><![CDATA[// Create an opener extension
-BrowserWindowOpener opener = new BrowserWindowOpener(MyPopupUI.class);
+                <programlisting><?pocket-size 75% ?><![CDATA[// Create an opener extension
+BrowserWindowOpener opener =
+    new BrowserWindowOpener(MyPopupUI.class);
 opener.setFeatures("height=200,width=300,resizable");
 
 // Attach it to a button
@@ -209,424 +206,70 @@ opener.extend(button);]]></programlisting>
                         </imageobject>
                     </mediaobject>
                 </figure>
-
-                <section xml:id="advanced.windows.popup.target">
-                    <title>Popup Window Name (Target)</title>
-                </section>
-
-                <section xml:id="advanced.windows.popup.target">
-                    <title>URL and Session</title>
-
-                    <para>
-                        The URL path for a popup window UI is by default determined from
-                        the UI class name, by prefixig it with
-                        "<literal>popup/</literal>". For example, for the example UI giver
-                        earlier, the URL would be
-                        <literal>/book-examples/book/popup/MyPopupUI</literal>.
-                    </para>
-                </section>
             </section>
 
-			<para>
-				The target name is one of the default HTML target names (<parameter>_new</parameter>, <parameter>_blank</parameter>, <parameter>_top</parameter>, etc.) or a custom target name.  How the window is
-				exactly opened depends on the browser. Browsers that support tabbed
-				browsing can open the window in another tab, depending on the browser
-				settings.
-			</para>
+            <section xml:id="advanced.windows.popup.target">
+                <title>Popup Window Name (Target)</title>
 
-			<para>
-				Another typical way to open windows is to use a <classname>Link</classname>
-				component with the window URL as an
-				<classname>ExternalResource</classname>.
-			</para>
+                <para>
+                    The target name is one of the default HTML target names
+                    (<parameter>_new</parameter>, <parameter>_blank</parameter>,
+                    <parameter>_top</parameter>, etc.) or a custom target name.  How the
+                    window is exactly opened depends on the browser. Browsers that support
+                    tabbed browsing can open the window in another tab, depending on the
+                    browser settings.
+                </para>
+            </section>
 
-			<programlisting><?pocket-size 65% ?><![CDATA[/* Add a link to the second window. */
-Link link = new Link("Click to open second window",
-                     new ExternalResource(mywindow.getURL()));
-link.setTargetName("second");
-link.setTargetHeight(300);
-link.setTargetWidth(300);
-link.setTargetBorder(Link.TARGET_BORDER_DEFAULT);
-main.addComponent(link);]]></programlisting>
-
-			<para>
-				Using a <classname>Link</classname> allows you to specify parameters for
-				the window that opens by clicking on the link. Above, we set the
-				dimensions of the window and specify what window controls the window
-				should contain. The <parameter>Link.TARGET_BORDER_DEFAULT</parameter>
-				specifies to use the default, which includes most of the usual window
-				controls, such as the menu, the toolbar, and the status bar.
-			</para>
-
-			<para>
-				Another way to allow the user to open a window is to insert the URL in
-				HTML code inside a <classname>Label</classname>. This allows even more
-				flexibility in specifying how the window should be opened.
-			</para>
-
-			<programlisting><?pocket-size 65% ?><![CDATA[// Add the link manually inside a Label.
-main.addComponent(
-    new Label("Second window: <a href='" + mywindow.getURL()
-              + "' target='second'>click to open</a>",
-              Label.CONTENT_XHTML));
-main.addComponent(
-    new Label("The second window can be accessed through URL: "
-              + mywindow.getURL()));]]></programlisting>
-
-			<para>
-				When an application-level window is closed in the browser the
-				<methodname>close()</methodname> method is normally called just like
-				for a child window and the <classname>Window</classname> object is
-				purged from the application. However, there are situations where
-				<methodname>close()</methodname> might not be called. See
-				<xref linkend="application.windows.closing"/> for more information. 
-			</para>
-
-		</section>
-
-		<section xml:id="application.windows.adhoc">
-			<title>Creation of Windows When Requested</title>
-			
-			<para>
-				You can create a window object dynamically by its URL sub-path when it is
-				first requested by overriding the <methodname>getWindow()</methodname>
-				method of the <classname>Application</classname> class. The method gets a
-				window name as its parameter and must return the corresponding
-				<classname>Window</classname> object. The window name is determined from
-				the first URL path element after the application URL (the name may not
-				contain slashes). See the notes below for setting the actual name of the
-				dynamically created windows below.
-			</para>
-
-            <para>
-                The following example allows opening windows with a window name that
-                begins with "<literal>planet-</literal>" prefix. Since the method is
-                called for <emphasis>every</emphasis> browser request for the
-                application, we filter only the requests where a window with the given
-                name does not yet exist.
-            </para>
-
-            <programlisting><?pocket-size 65% ?><![CDATA[public class WindowTestApplication extends Application {
-    ...
-
-    @Override
-    public Window getWindow(String name) {
-        // If a dynamically created window is requested, but
-        // it does not exist yet, create it.
-        if (name.startsWith("planet-") &&
-              super.getWindow(name) == null) {
-            String planetName =
-                    name.substring("planet-".length());
-
-            // Create the window object.
-            Window newWindow =
-                    new Window("Window about " + planetName);
-            
-            // DANGEROUS: Set the name explicitly. Otherwise,
-            // an automatically generated name is used, which
-            // is usually safer.
-            newWindow.setName(name);
-
-            // Put some content in it.
-            newWindow.addComponent(
-                new Label("This window contains details about " +
-                          planetName + "."));
-            
-            // Add it to the application as a regular
-            // application-level window.
-            addWindow(newWindow);
-            
-            return newWindow;
-        }
-
-        // Otherwise the Application object manages existing
-        // windows by their name.
-        return super.getWindow(name);
-    }]]></programlisting>
-
-            <para>
-                The window name must be a unique indentifier for each
-                <classname>Window</classname> object instance. If you use
-                <methodname>setName()</methodname> to set the window name explicitly, as
-                we did above, any browser window that has the same URL (within the same
-                browser) would open the <emphasis>same</emphasis> window object. This is
-                dangerous and <emphasis>generally not recommended</emphasis>, because the
-                browser windows would share the same window object. Opening two windows
-                with the same static name would immediately lead to a synchronization
-                error, as is shown in <xref
-                linkend="figure.application.window.dynamic.error"/> below. (While also the
-                window captions are same, they are irrelevant for this problem.)
-            </para>
-
-            <figure xml:id="figure.application.window.dynamic.error">
-                <title>Synchronization Error Between Windows with the Same Name</title>
-                <mediaobject>
-                    <imageobject role="html">
-                        <imagedata align="center" fileref="img/application/window-application-dynamic-3.png"/>
-                    </imageobject>
-                    <imageobject role="fo">
-                        <imagedata scale="70" smallscale="100%" align="center" fileref="img/application/window-application-dynamic-3.png"/>
-                    </imageobject>
-                </mediaobject>
-            </figure>
-
-            <para>
-                There are some cases where setting the name explicitly is useful. The
-                launch application below is one example, as it always opens the other
-                windows in a window target that is specific to the window name, thereby
-                never creating two windows with the same URL. Similarly, if you had
-                embedded the application in a browser frame and the link would open the
-                window in a frame, you would not have problems. Having a single window
-                instance for a URL is also useful if the browser crashes and the user
-                opens the window again, as it will have kept its previous (server-side)
-                state.
-            </para>
+            <section xml:id="advanced.windows.popup.target">
+                <title>URL and Session</title>
+                
+                <para>
+                    The URL path for a popup window UI is by default determined from
+                    the UI class name, by prefixig it with
+                    "<literal>popup/</literal>". For example, for the example UI giver
+                    earlier, the URL would be
+                    <literal>/book-examples/book/popup/MyPopupUI</literal>.
+                </para>
+            </section>
         </section>
 
-        <section xml:id="application.windows.dynamic">
-            <title>Dynamic Multi-Window Applications</title>
-            
-            <para>
-                Having multiple browser windows or tabs open in the same website and even
-                the same page is one of the basic use cases of web browsing. The creation
-                of <classname>Window</classname> objects described in the previous section
-                allows opening multiple special-purpose windows with different URLs, but
-                how to open multiple windows with the same URL? The solution is based on
-                the fact that Vaadin doesn't identify windows only by their URL subpath,
-                but also by an invisible window name.
-            </para>
-
-            <para>
-                Leaving the window name to be automatically generated allows opening
-                multiple windows with the same URL, while each of the windows will have a
-                separate state. The URL in the location bar stays unchanged and the
-                generated window name is used only for the Ajax communications to identify
-                the window object. A generated name is a string representation of a unique
-                random number, such as "<literal>1928676448</literal>". You should be
-                aware of the generated window names when overriding the
-                <methodname>getWindow()</methodname> method (and not unintentionally
-                create a new window instance dynamically for each such request). The
-                condition in the above example would also filter out the requests for an
-                already existing window with a generated name.
-            </para>
-
-            <para>
-                <xref linkend="figure.application.window.dynamic.new"/> shows a
-                dynamically created application-level window with the URL shown in the
-                address bar. The URL for the application is here
-                <uri>http://localhost:8080/book-examples/windowexample/</uri>, including
-                the application context, application path. The dynamically created
-                window's name is <uri>planet-mars</uri>.
-            </para>
-
-            <figure xml:id="figure.application.window.dynamic.new">
-                <title>A Dynamically Created Window</title>
-                <mediaobject>
-                    <imageobject role="html">
-                        <imagedata align="center" fileref="img/application/window-application-dynamic-1.png"/>
-                    </imageobject>
-                    <imageobject role="fo">
-                        <imagedata scale="90" smallscale="100%" align="center" fileref="img/application/window-application-dynamic-1.png"/>
-                    </imageobject>
-                </mediaobject>
-            </figure>
-
-            <para>
-                The application knows the windows it already has and can return them
-                after the creation. The application also handles closing and
-                destruction of application-level window objects, as discussed in <xref
-                    linkend="application.windows.closing"/>.
-            </para>
-
-            <para>
-                Such dynamic windows could be opened as in the following example:
-            </para>
-			
-            <programlisting><?pocket-size 65% ?><![CDATA[public void init() {
-    final Window main = new Window("Window Test");
-    setMainWindow(main);
-
-    // Have some IDs for the dynamically creatable windows.
-    final String[] items = new String[] { "mercury", "venus",
-            "earth", "mars", "jupiter", "saturn", "uranus",
-            "neptune" };
-    
-    // Create a list of links to each of the available window.
-    for (int i = 0; i < items.length; i++) {
-        // Create a URL for the window.
-        String windowUrl = getURL() + "planet-" + items[i];
-        
-        // Create a link to the window URL. Using the 
-        // item ID for the target also opens it in a new
-        // browser window (or tab) unique to the window name.
-        main.addComponent(
-            new Link("Open window about " + items[i],
-                     new ExternalResource(windowUrl),
-                     items[i], -1, -1, Window.BORDER_DEFAULT));
-    }
-}]]></programlisting>
-        			
-			<figure xml:id="figure.application.window.dynamic.main">
-				<title>Opening Windows</title>
-				<mediaobject>
-					<imageobject role="html">
-						<imagedata align="center" fileref="img/application/window-application-dynamic-2.png"/>
-					</imageobject>
-					<imageobject role="fo">
-						<imagedata scale="90" smallscale="100%" align="center" fileref="img/application/window-application-dynamic-2.png"/>
-					</imageobject>
-				</mediaobject>
-			</figure>
-		</section>
-
-		<section xml:id="application.windows.closing">
-			<title>Closing Windows</title>
-
-			<para>
-				When the user closes an application-level window, the Client-Side Engine
-				running in the browser will report the event to the server before the page
-				is actually removed. You can catch the event with a
-				<classname>Window.CloseListener</classname>, as is done in the example
-				below.
-			</para>
-
-			<programlisting><?pocket-size 65% ?><![CDATA[newWindow.addListener(new Window.CloseListener() {
-    @Override
-    public void windowClose(CloseEvent e) {
-        // Do something.
-        System.out.println(e.getWindow().getName() +
-                           " was closed");
-
-        // Add a text to the main window about closing.
-        // (This does not update the main window.)
-        getMainWindow().addComponent(
-            new Label("Window '" + e.getWindow().getName() +
-                      "' was closed."));
-    }
-});]]></programlisting>
-
-			<para>
-				Notice that the change to the server-side state of the main window (or
-				another application-level window) does not refresh the window in the
-				browser, so the change will be unseen until user interaction or polling
-				refreshes the window. This problem and its dangers are discussed in <xref
-				linkend="application.windows.caveats"/> below.
-			</para>
-
-			<para>
-				The close event does not occur if the browser crashes or the connection
-				is otherwise severed violently. In such a situation, the window object will
-				be left hanging, which could become a resource problem if you allow the
-				users to open many such application-level windows. The positive side is
-				that the user can reconnect to the window using the window URL.
-			</para>
-		</section>
-
-		<section xml:id="application.windows.caveats">
+		<section xml:id="advanced.windows.caveats">
 			<title>Caveats in Using Multiple Windows</title>
 
 			<section>
 				<title>Communication Between Windows</title>
 				
 				<para>
-					For cases where you need communication between windows, we recommend
-					using floating child windows. In Vaadin Release 5, an
-					application window can not update the data in other windows. The
-					contents of a window can only be updated when the particular window makes
-					a request to the server. The request can be caused by user input or
-					through polling.
+                    Handling communication between multiple browser windows is not quite
+                    as straight-forward as it is with sub-windows, as an UI running in a
+                    browser window can not easily update the data shown in other
+                    windows. The contents of a UI are normally updated only when the UI
+                    makes a request to the server. The request can be caused by user input
+                    or through polling. You could also use server push.
 				</para>
 
 				<para>
-					Changing the server-side state of a window while processing a user event
-					from another window can potentially cause serious problems. Changing
-					the client-side state of a window does not always immediately
-					communicate the changes to the server. The server-side state can therefore
-					be out of sync with the client-side state.
+					However, changing the server-side state of a UI while processing a
+					user event from another UI can potentially cause serious
+					problems. Changing the client-side state of a UI does not always
+					immediately communicate the changes to the server. The server-side
+					state can therefore be out of sync with the client-side state.
 				</para>
 
-				<figure xml:id="figure.window.polling">
-					<title>Communication Between Two Application-Level Windows</title>
+				<figure xml:id="figure.advanced.windows.polling">
+					<title>Communication Between Two Browser Windows</title>
 					<mediaobject>
 						<imageobject role="html">
-							<imagedata align="center" fileref="img/application/window-polling-example1.png"/>
+							<imagedata align="center" fileref="img/advanced/window-polling-example1.png"/>
 						</imageobject>
 						<imageobject role="fo">
-							<imagedata scale="50" smallscale="100%" align="center" fileref="img/application/window-polling-example1.png"/>
+							<imagedata scale="50" smallscale="100%" align="center" fileref="img/advanced/window-polling-example1.png"/>
 						</imageobject>
 					</mediaobject>
 				</figure>
 
-				<para>
-					The following example creates a second window that changes the
-					contents of the main window, as illustrated in the figure above. In
-					this simple case, changing the main window contents is safe.
-				</para>
-
-				<programlisting><?pocket-size 65% ?><![CDATA[// Create a table in the main window to hold items added
-// in the second window
-final Table table = new Table();
-table.setPageLength(5);
-table.getSize().setWidth(100, Size.UNITS_PERCENTAGE);
-table.addContainerProperty("Name", String.class, "");
-main.addComponent(table);
-
-// Create the second window
-final Window adderWindow = new Window("Add Items");
-adderWindow.setName("win-adder");
-main.getApplication().addWindow(adderWindow);
-
-// Create selection component to add items to the table
-final NativeSelect select = new NativeSelect("Select item to add");
-select.setImmediate(true);
-adderWindow.addComponent(select);
-
-// Add some items to the selection
-String items[] = new String[]{"- Select -", "Mercury", "Venus", 
-        "Earth", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune"};
-for (int i=0; i<items.length; i++)
-    select.addItem(items[i]);
-select.setNullSelectionItemId(items[0]);
-
-// When an item is selected in the second window, add
-// table in the main window
-select.addListener(new ValueChangeListener() {
-    public void valueChange(ValueChangeEvent event) {
-        // If the selected value is something else
-        // but a null selection item.
-        if (select.getValue() != null) {
-            // Add the selected item to the table
-            // in the main window
-            table.addItem(new Object[]{select.getValue()},
-                          new Integer(table.size()));
-        }
-    }
-});
-
-// Link to open the selection window
-Link link = new Link("Click to open second window",
-                     new ExternalResource(adderWindow.getURL()),
-                     "_new", 50, 200,
-                     Link.TARGET_BORDER_DEFAULT);
-main.addComponent(link);
-
-// Enable polling to update the main window
-ProgressIndicator poller = new ProgressIndicator();
-poller.addStyleName("invisible");
-main.addComponent(poller);]]></programlisting>
-
-				<para>
-					The example uses an invisible <classname>ProgressIndicator</classname>
-					to implement polling. This is sort of a trick and a more proper API
-					for polling is under design. Making the progress indicator invisible
-					requires the following CSS style definition:
-				</para>
-
-				<programlisting><![CDATA[.v-progressindicator-invisible {
-    display: none;
-}]]></programlisting>
-
-
+                <!-- TODO: Provide an example. The old example was in MagiTestApplication.java (TK5.2) -->
 			</section>
 		</section>
 	</section>
