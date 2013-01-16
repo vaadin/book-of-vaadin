@@ -52,7 +52,7 @@
 				<emphasis>Embedding UIs</emphasis>. UIs can be embedded in web
 				pages, thus making it possible to provide different views to an
 				application from different pages or even from the same page, while keeping
-				the same session. See <xref linkend="application.embedding"/>.
+				the same session. See <xref linkend="advanced.embedding"/>.
 			</listitem>
 		</itemizedlist>
 
@@ -274,217 +274,342 @@ opener.extend(button);]]></programlisting>
 		</section>
 	</section>
 
-    <!-- TODO Vaadin 7: Is this up-to-date? -->
-	<section xml:id="application.embedding">
+	<section xml:id="advanced.embedding">
 		<title>Embedding UIs in Web Pages</title>
 
-        <para>
-            <emphasis>This section is significantly outdated and will be revised in the
-            final edition of the book.</emphasis>
-        </para>
-
 		<para>
-			Many web sites are not all Ajax, but Ajax is used only for specific
+			Many web sites are not all Vaadin, but Vaadin UIs are used only for specific
 			functionalities. In practice, many web applications are a mixture of dynamic
-			web pages and Ajax applications embedded in such pages.
+			web pages, such as JSP, and Vaadin UIs embedded in such pages.
 		</para>
 
 		<para>
-			Embedding Vaadin UIs is easy and there are several different ways to
-			embed them. One is to have a <literal>&lt;div&gt;</literal> placeholder for
-			the web application and load the Vaadin Client-Side Engine with a simple
-			JavaScript code. Another method is even easier, which is to simply use the
-			<literal>&lt;iframe&gt;</literal> element.  Both of these methods have
-			advantages and disadvantages. The <literal>&lt;div&gt;</literal> method can
-			only embed one application in a page, while the
-			<literal>&lt;iframe&gt;</literal> method can embed as many as needed. One
-			disadvantage of the <literal>&lt;iframe&gt;</literal> method is that the size
-			of the <literal>&lt;iframe&gt;</literal> element is not flexible according to
-			the content while the <literal>&lt;div&gt;</literal> method allows such
+			Embedding Vaadin UIs in web pages is easy and there are several different ways
+			to embed them. One is to have a <literal>&lt;div&gt;</literal> placeholder for
+			the UI and load the Vaadin Client-Side Engine with a simple JavaScript
+			code. Another method is even easier, which is to simply use the
+			<literal>&lt;iframe&gt;</literal> element. Both of these methods have
+			advantages and disadvantages. One disadvantage of the
+			<literal>&lt;iframe&gt;</literal> method is that the size of the
+			<literal>&lt;iframe&gt;</literal> element is not flexible according to the
+			content while the <literal>&lt;div&gt;</literal> method allows such
 			flexibility. The following sections look closer into these two embedding
 			methods. Additionally, the Vaadin XS add-on allows embedding Vaadin
-			applications in websites running in another server.
+			UIs in websites running in another server.
 		</para>
 
-		<section xml:id="application.embedding.div">
+		<section xml:id="advanced.embedding.div">
 			<title>Embedding Inside a <literal>div</literal> Element</title>
 
 			<para>
-				You can embed a Vaadin application inside a web page with a
-				method that is equivalent to loading the initial page content from the
-				application servlet in a non-embedded application. Normally, the
-				<classname>ApplicationServlet</classname> servlet generates an initial
-				page that contains the correct parameters for the specific
-				application. You can easily configure it to load multiple Vaadin
-				applications on the same page, assuming that they use the same widget set.
+				You can embed one or more Vaadin UIs inside a web page with a method that
+				is equivalent to loading the initial page content from the Vaadin servlet
+				in a non-embedded UI. Normally, the <classname>VaadinServlet</classname>
+				generates an initial page that contains the correct parameters for the
+				specific UI. You can easily configure it to load multiple Vaadin UIs in
+				the same page. They can have different widget sets and different themes.
 			</para>
+
+            <para>
+                Embedding an UI requires the following basic tasks:
+            </para>
+
+            <itemizedlist>
+                <listitem>Set up the page header</listitem>
+                <listitem>Include a GWT history frame in the page</listitem>
+                <listitem>Call the <filename>vaadinBootstrap.js</filename> file</listitem>
+                <listitem>Define the <literal>&lt;div&gt;</literal> element for the UI</listitem>
+                <listitem>Configure and initialize the UI</listitem>
+            </itemizedlist>
 
 			<para>
-				 You can view the initial page for your application easily simply by
-				 opening the application in a web browser and viewing the HTML source
-				 code. You could just copy and paste the embedding code from the default
-				 initial page. It has, however, some extra functionality that is not
-				 normally needed: it generates some of the script content with
-				 <methodname>document.write()</methodname> calls, which is useful only
-				 when you are running the application as a portlet in a portal. The method
-				 outlined below is much simpler.
+                Notice that you can view the loader page for the UI easily by opening the
+                UI in a web browser and viewing the HTML source code of the page. You
+                could just copy and paste the embedding code from the page, but some
+                modifications and additional settings are required, mainly related to the
+                URLs that have to be made relative to the page instead of the servlet URL.
 			</para>
 
-			<!-- figure xml:id="figure.embedding.source">
-				<title>Source Code of an Initial Page</title>
-				<mediaobject>
-					<imageobject role="html">
-						<imagedata align="center" fileref="img/application/embedding1.png"/>
-					</imageobject>
-					<imageobject role="fo">
-						<imagedata scale="80" align="center" fileref="img/application/embedding1.png"/>
-					</imageobject>
-				</mediaobject>
-			</figure -->
+            <section xml:id="advanced.embedding.div.head">
+                <title>The Head Matter</title>
 
-			<para>
-				Embedding requires four elements inside the HTML document:
-			</para>
+                <para>
+                    The HTML page in which the Vaadin UI is embedded should be a valid
+                    XHTML document, as defined in the document type. The content of the
+                    head element is largely up to you. The character encoding must be
+                    UTF-8. Some meta declarations are necessary for compatibility. You can
+                    also set the page favicon in the head element.
+                </para>
 
-			<orderedlist>
-				<listitem>
-					<para>
-						In the <literal>&lt;head&gt;</literal> element, you need to define
-						the application URI and parameters and load the Vaadin
-						Client-Side Engine. The <varname>vaadin</varname> variable is an
-						associative map that can contain various runtime data used by the
-						Client-Side Engine of Vaadin. The
-						<varname>vaadinConfigurations</varname> item is itself an
-						associate map that contains parameters for each of the
-						applications embedded in the page. The map must contain the
-						following items:
-					</para>
+                <programlisting><?pocket-size 65% ?>&lt;?xml version="1.0" encoding="UTF-8" ?&gt;
+&lt;!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+          "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"&gt;
+&lt;head&gt;
+  &lt;meta http-equiv="Content-Type"
+        content="text/html; charset=UTF-8" /&gt;
+  &lt;meta http-equiv="X-UA-Compatible"
+        content="IE=9;chrome=1" /&gt;
 
-                    <variablelist>
-                        <varlistentry>
-                            <term><parameter>appUri</parameter></term>
-                            <listitem>
-                                The application URI consists of the context and the
-                                application path. If the context is
-                                <literal>/mycontext</literal> and the application path is
-                                <literal>myapp</literal>, the
-                                <parameter>appUri</parameter> would be
-                                <literal>/mycontext/myapp</literal>.
-                            </listitem>
-                        </varlistentry>
-                        <varlistentry>
-                            <term><parameter>pathInfo</parameter></term>
-                            <listitem>
-                                The <parameter>PATHINFO</parameter> parameter for the
-                                Servlet.
-                            </listitem>
-                        </varlistentry>
-                        <varlistentry>
-                            <term><parameter>themeUri</parameter> (optional)</term>
-                            <listitem>
-                                URI of the application theme. The URI must include
-                                application context and the path to the theme
-                                directory. Themes are, by default, stored under the
-                                <filename>/VAADIN/themes/</filename> path.
-                            </listitem>
-                        </varlistentry>
-                        <varlistentry>
-                            <term><parameter>versionInfo</parameter></term>
-                            <listitem>
-                                This parameter is itself an associative map that contains two
-                                parameters: <parameter>vaadinVersion</parameter> contains
-                                the version number of the Vaadin version used by the
-                                application. The <parameter>applicationVersion</parameter>
-                                parameter contains the version of the particular
-                                application. The contained parameters are optional, but
-                                the <parameter>versionInfo</parameter> parameter itself is
-                                not.
-                            </listitem>
-                        </varlistentry>
-                    </variablelist>
+  &lt;title&gt;<replaceable>This is my Embedding Page</replaceable>&lt;/title&gt;
+  
+  &lt;!-- Set up the favicon from the Vaadin theme --&gt;
+  &lt;link rel="shortcut icon" type="image/vnd.microsoft.icon"
+        href="/VAADIN/themes/<replaceable>reindeer</replaceable>/favicon.ico" /&gt;
+  &lt;link rel="icon" type="image/vnd.microsoft.icon"
+           href="/VAADIN/themes/<replaceable>reindeer</replaceable>/favicon.ico" /&gt; 
+&lt;/head&gt;</programlisting>
+            </section>
+            
+            <section xml:id="advanced.embedding.div.body">
+                <title>The Body Matter</title>
 
-					<para>
-						The following example defines two applications to run in the same
-						window: the Calculator and Hello World examples. In the example,
-						the application context is <literal>/mycontext</literal>.
-					</para>
+                <para>
+                    The page content must include some Vaadin-related definitions before
+                    you can embed Vaadin UIs in it.
+                </para>
 
-					<programlisting><?pocket-size 65% ?>&lt;script type="text/javascript"&gt;
-  var vaadin = {
-    vaadinConfigurations: {
-      '<emphasis role="bold">calc</emphasis>': {
-        appUri:'<emphasis role="bold">/mycontext/Calc</emphasis>',
-        pathInfo: '<emphasis role="bold">/</emphasis>',
-        themeUri: '<emphasis role="bold">/mycontext/VAADIN/themes/example</emphasis>',
-        versionInfo : {
-          vaadinVersion: "6.7.6",
-          applicationVersion: "NONVERSIONED"
-        }
+                <para>
+                    The <filename>vaadinBootstrap.js</filename> script makes definitions
+                    for starting up the UI. It must be called before initializing the
+                    UI. The source path must be relative to the path of the embedding
+                    page.
+                </para>
+
+                <programlisting>&lt;body&gt;
+  &lt;script type="text/javascript"
+          src="<replaceable>./</replaceable>VAADIN/vaadinBootstrap.js"&gt;&lt;/script&gt;</programlisting>
+
+                <para>
+                    The bootstrap script is served by the Vaadin servlet from inside the
+                    <filename>vaadin-server</filename> JAR.
+                </para>
+
+                <para>
+                    Vaadin, or more exactly GWT, requires an invisible history frame,
+                    which is used for tracking the page or fragment history in the
+                    browser.
+                </para>
+
+                <programlisting><?pocket-size 75% ?><![CDATA[  <iframe tabindex="-1" id="__gwt_historyFrame"
+          style="position: absolute; width: 0; height: 0;
+                 border: 0; overflow: hidden"
+          src="javascript:false"></iframe>]]></programlisting>
+            </section>
+
+            <section xml:id="advanced.embedding.div.div">
+                <title>UI Placeholder Element</title>
+
+                <para>
+                    A Vaadin UI is embedded in a placeholder
+                    <literal>&lt;div&gt;</literal> element. It should have the following
+                    features:
+                </para>
+
+                <itemizedlist>
+                    <listitem>The <literal>&lt;div&gt;</literal> element must have an
+                    <literal>id</literal> attribute, which must be a unique ID in the
+                    page, normally something that identifies the servlet of the UI
+                    uniquely. </listitem>
+
+                    <listitem>It must have at least the <literal>v-app</literal> style
+                    class.</listitem>
+
+                    <listitem>it should have a nested <literal>&lt;div&gt;</literal>
+                    element with <literal>v-app-loading</literal> style class. This is a
+                    placeholder for the loading indicator that is displayed while the UI
+                    is being loaded.</listitem>
+
+                    <listitem>It should also contain a <literal>&lt;noscript&gt;</literal>
+                    element that is shown if the browser does not support JavaScript or it
+                    has been disabled. The content of the element should instruct the use
+                    to enable JavaScript in the browser.</listitem>
+                </itemizedlist>
+
+                <para>
+                    The placeholder element can include style settings, typically a width
+                    and height. If the sizes are not defined, the UI will have an
+                    undefined size in the particular dimension, which must be in
+                    accordance with the sizing of the UI components.
+                </para>
+
+                <para>
+                    For example:
+                </para>
+
+                <programlisting><?pocket-size 75% ?>&lt;div style="<replaceable>width: 300px; border: 2px solid green;</replaceable>"
+     id="helloworldui" class="v-app"&gt;
+  &lt;div class="v-app-loading"&gt;&lt;/div&gt;
+  &lt;noscript&gt;<replaceable>You have to enable javascript in your browser to</replaceable>
+            <replaceable>use an application built with Vaadin.</replaceable>&lt;/noscript&gt;
+&lt;/div&gt;</programlisting>
+
+            </section>
+
+            <section xml:id="advanced.embedding.div.init">
+                <title>Initializing the UI</title>
+
+                <para>
+                    The UI is loaded by calling the <literal>initApplication()</literal>
+                    method for the <literal>vaadin</literal> object defined in the
+                    bootstrap script. Before calling it, you should check that the
+                    bootstrap script was loaded properly.
+                </para>
+
+                <programlisting><?pocket-size 75% ?>&lt;script type="text/javascript"&gt;//&lt;![CDATA[
+  if (!window.vaadin)
+      alert("<replaceable>Failed to load the bootstrap JavaScript:</replaceable>"+
+            "<replaceable>VAADIN/vaadinBootstrap.js</replaceable>");</programlisting>
+
+                <para>
+                    The <literal>initApplication()</literal> takes two parameters. The
+                    first parameter is the UI identifier, exactly as given as the
+                    <literal>id</literal> attribute of the placeholder element. The second
+                    parameter is an associative map that contains parameters for the
+                    UI. 
+                </para>
+
+                <para>
+                    The map must contain the following items:
+                </para>
+
+                <variablelist>
+                    <varlistentry>
+                        <term><parameter>browserDetailsUrl</parameter></term>
+                        <listitem>
+                            <para>
+                                This should be the URL path (relative to the embedding
+                                page) to the Vaadin servlet of the UI. It is used by the
+                                bootstrap to communicate browser details.
+                            </para>
+
+                            <para>
+                                Notice that this parameter not included in the loader page
+                                generated by the servlet, as in that case it can default
+                                to the current URL.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><parameter>widgetset</parameter></term>
+                        <listitem>
+                            This should be the exact class name of the widget set for the
+                            UI, that is, without the <filename>.gwt.xml</filename> file
+                            name extension. If the UI has no compiled widget set, you can
+                            use the <classname>com.vaadin.DefaultWidgetSet</classname>.
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><parameter>theme</parameter></term>
+                        <listitem>
+                            Name of the theme. It must exist under the
+                            <filename>VAADIN/themes</filename> folder.
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><parameter>versionInfo</parameter></term>
+                        <listitem>
+                            This parameter is itself an associative map that can contain
+                            two parameters: <parameter>vaadinVersion</parameter> contains
+                            the version number of the Vaadin version used by the
+                            application. The <parameter>applicationVersion</parameter>
+                            parameter contains the version of the particular
+                            application. The contained parameters are optional, but the
+                            <parameter>versionInfo</parameter> parameter itself is not.
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><parameter>vaadinDir</parameter></term>
+                        <listitem>
+                            Relative path to the <filename>VAADIN</filename> directory. It
+                            is relative to the URL of the embedding page.
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><parameter>heartbeatInterval</parameter></term>
+                        <listitem>
+                            The <parameter>hearbeatInterval</parameter> parameter defines
+                            the frequency of the keep-alive hearbeat for the UI in
+                            seconds, as described in <xref
+                            linkend="application.lifecycle.ui-expiration"/>.
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><parameter>debug</parameter></term>
+                        <listitem>
+                            The parameter defines whether the debug window, as described in
+                            <xref linkend="advanced.debug-production-modes"/>, is enabled.
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><parameter>standalone</parameter></term>
+                        <listitem>
+                            The parameter defines whether the UI is rendered on its own in
+                            the browser window or in some context. A standalone UI may do
+                            things that might interfere with other parts of the page, such
+                            as change the page title and request focus when it is
+                            loaded. When embedding, the UI is not standalone, so you may
+                            want to set the parameter as <parameter>false</parameter>.
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><parameter>authErrMsg</parameter>, <parameter>comErrMsg</parameter>, and <parameter>sessExpMsg</parameter></term>
+                        <listitem>
+                            These three parameters define the client-side error messages
+                            for authentication error, communication error, and session
+                            expiration, respectively. The parameters are associative maps
+                            themselves and must contain two key-value pairs:
+                            <parameter>message</parameter>, which should contain the error
+                            text in HTML, and <parameter>caption</parameter>, which should
+                            be the error caption.
+                        </listitem>
+                    </varlistentry>
+                </variablelist>
+
+                <para>
+                    For example:
+                </para>
+
+                <programlisting><?pocket-size 75% ?>  vaadin.initApplication("<replaceable>helloworldui</replaceable>", {
+      "browserDetailsUrl": "<replaceable>helloworld</replaceable>",
+      "widgetset": "<replaceable>com.example.MyWidgetSet</replaceable>",
+      "theme": "<replaceable>mytheme</replaceable>",
+      "versionInfo": {"vaadinVersion": "<replaceable>7.0.0</replaceable>"},
+      "vaadinDir": "<replaceable>VAADIN/</replaceable>",
+      "heartbeatInterval": <replaceable>300</replaceable>,
+      "debug": <replaceable>true</replaceable>,
+      "standalone": false,
+      "authErrMsg": {
+          "message": "<replaceable>Take note of any unsaved data, "+
+                     "and &lt;u&gt;click here&lt;\/u&gt; to continue.</replaceable>",
+          "caption": "Authentication problem"
       },
-      '<emphasis role="bold">hello</emphasis>': {
-        appUri:'<emphasis role="bold">/mycontext/HelloWorld</emphasis>',
-        pathInfo: '<emphasis role="bold">/</emphasis>',
-        themeUri: '<emphasis role="bold">/mycontext/VAADIN/themes/example</emphasis>',
-        versionInfo : {}
+      "comErrMsg": {
+          "message": "<replaceable>Take note of any unsaved data, "+
+                     "and &lt;u&gt;click here&lt;\/u&gt; to continue.</replaceable>",
+          "caption": "Communication problem"
+      },
+      "sessExpMsg": {
+          "message": "<replaceable>Take note of any unsaved data, "+
+                     "and &lt;u&gt;click here&lt;\/u&gt; to continue.</replaceable>",
+          "caption": "Session Expired"
       }
-    }};
+  });//]]&gt;
 &lt;/script&gt;</programlisting>
-				</listitem>
 
-				<listitem>
-					<para>
-						Loading the Vaadin Client-Side Engine, that is, the widget set, is
-						done with the following kind of line in the
-						<literal>&lt;head&gt;</literal> element:
-					</para>
+                <para>
+                    Notice that many of the parameters are normally deployment parameters,
+                    specified in the deployment descriptor, as described in <xref
+                    linkend="application.environment.parameters"/>.
+                </para>
+            </section>
 
-					<programlisting><?pocket-size 65% ?>&lt;script language='javascript' src='/<emphasis role="bold">mycontext</emphasis>/VAADIN/widgetsets/com.vaadin.terminal.gwt.DefaultWidgetSet/com.vaadin.terminal.gwt.DefaultWidgetSet.nocache.js'&gt;&lt;/script&gt;</programlisting>
+            <section xml:id="advanced.embedding.div.summary">
+                <title>Summary of Div Embedding</title>
 
-					<para>
-						The engine URI consists of the context of the web application,
-						<literal>mycontext</literal> above, followed by the path to the
-						JavaScript (<filename>.js</filename>) file of the widget set,
-						relative to the web application root (the
-						<filename>WebContent</filename> directory in Eclipse). The line
-						above assumes the use of the default widget set in Vaadin. If you
-						have made custom widgets that are defined in a custom widget set,
-						you need to use the path to the compiled widget set file. Widget
-						sets must be compiled under the
-						<filename>WebContent/VAADIN/widgetsets</filename> directory.
-					</para>
-
-				</listitem>
-				<listitem>
-					<para>
-						In the <literal>&lt;html&gt;</literal> element, you need to do a
-						routine inclusion of GWT history <literal>iframe</literal>
-						element as follows:
-					</para>
-
-					<programlisting><?pocket-size 65% ?>&lt;iframe id="__gwt_historyFrame"
-        style="width:0;height:0;border:0"&gt;&lt;/iframe&gt;</programlisting>
-
-				</listitem>
-				<listitem>
-					<para>
-						The location of the Vaadin application is defined with a
-						<literal>div</literal> placeholder element having
-						<literal>id="calc"</literal>, where the identifier is the
-						same as in the <parameter>vaadinConfigurations</parameter>
-						parameter, as follows:
-					</para>
-
-					<programlisting>&lt;div id="<emphasis role="bold">calc</emphasis>"&gt;&lt;/div&gt;</programlisting>
-
-                    <para>
-                        The embedding element should not be self-closing.
-                    </para>
-				</listitem>
-			</orderedlist>
-
-			<para>
-				Below is a complete example of embedding an application.
-			</para>
+                <para>
+                    Below is a complete example of embedding an UI in a
+                    <literal>&lt;div&gt;</literal> element.
+                </para>
 
 			<programlisting><?pocket-size 65% ?><![CDATA[<?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
@@ -493,83 +618,110 @@ opener.extend(button);]]></programlisting>
 <head>
   <meta http-equiv="Content-Type"
         content="text/html; charset=UTF-8" />
+  <meta http-equiv="X-UA-Compatible"
+        content="IE=9;chrome=1" />
 
   <title>Embedding a Vaadin Application in HTML Page</title>
   
-  <!-- Define the application configuration -->
-  <script type="text/javascript">
-    var vaadin = {
-      vaadinConfigurations: {
-        helloworld: {
-          appUri:'/book-examples/helloworld',
-          pathInfo: '/',
-          themeUri:'/book-examples/VAADIN/themes/book-examples',
-          versionInfo : {}}
-      }};
-  </script>
-  
-  <!-- Load the widget set, that is, the Client-Side Engine -->
-  <script language='javascript' src='/book-examples/VAADIN/widgetsets/com.vaadin.book.widgetset.BookExamplesWidgetSet/com.vaadin.book.widgetset.BookExamplesWidgetSet.nocache.js'></script>
-
-  <!-- Load the style sheet -->
-  <link rel="stylesheet"
-        type="text/css"
-        href="/book-examples/VAADIN/themes/book-examples/styles.css"/>
+  <!-- Set up the favicon from the Vaadin theme -->
+  <link rel="shortcut icon" type="image/vnd.microsoft.icon"
+        href="/VAADIN/themes/reindeer/favicon.ico" />
+  <link rel="icon" type="image/vnd.microsoft.icon"
+           href="/VAADIN/themes/reindeer/favicon.ico" /> 
 </head>
 
 <body>
-  <!-- GWT requires an invisible history frame is needed for -->
-  <!-- page/fragment history in the browser                  -->
-  <iframe tabIndex="-1" id="__gwt_historyFrame" style="position:absolute;width:0;height:0;border:0;overflow:hidden;" src="javascript:false"></iframe>
+  <!-- Loads the Vaadin widget set, etc. -->
+  <script type="text/javascript"
+          src="VAADIN/vaadinBootstrap.js"></script>
 
-  <h1>Embedding a Vaadin Application</h1>
+  <!-- GWT requires an invisible history frame. It is   -->
+  <!-- needed for page/fragment history in the browser. -->
+  <iframe tabindex="-1" id="__gwt_historyFrame"
+          style="position: absolute; width: 0; height: 0;
+                 border: 0; overflow: hidden"
+          src="javascript:false"></iframe>  
+
+  <h1>Embedding a Vaadin UI</h1>
     
   <p>This is a static web page that contains an embedded Vaadin
      application. It's here:</p>
 
   <!-- So here comes the div element in which the Vaadin -->
   <!-- application is embedded.                          -->
-  <div id="helloworld" style="border: 2px solid green;"></div>
+  <div style="width: 300px; border: 2px solid green;"
+       id="helloworld" class="v-app">
+
+    <!-- Optional placeholder for the loading indicator -->
+    <div class=" v-app-loading"></div>
+
+    <!-- Alternative fallback text -->
+    <noscript>You have to enable javascript in your browser to
+              use an application built with Vaadin.</noscript>
+  </div>
+  
+  <script type="text/javascript">//<![CDATA[
+    if (!window.vaadin)
+        alert("Failed to load the bootstrap JavaScript: "+
+              "VAADIN/vaadinBootstrap.js");
+
+    /* The UI Configuration */
+	vaadin.initApplication("helloworld", {
+	    "browserDetailsUrl": "helloworld",
+	    "widgetset": "com.example.MyWidgetSet",
+	    "theme": "mytheme",
+	    "versionInfo": {"vaadinVersion": "7.0.0"},
+	    "vaadinDir": "VAADIN/",
+	    "heartbeatInterval": 300,
+	    "debug": true,
+	    "standalone": false,
+	    "authErrMsg": {
+	        "message": "Take note of any unsaved data, "+
+	                   "and <u>click here<\/u> to continue.",
+	        "caption": "Authentication problem"
+	    },
+	    "comErrMsg": {
+	        "message": "Take note of any unsaved data, "+
+	                   "and <u>click here<\/u> to continue.",
+	        "caption": "Communication problem"
+	    },
+	    "sessExpMsg": {
+	        "message": "Take note of any unsaved data, "+
+	                   "and <u>click here<\/u> to continue.",
+	        "caption": "Session Expired"
+	    }
+	});//]] >
+  </script>
   
   <p>Please view the page source to see how embedding works.</p>
-
-  <noscript>You have to enable javascript in your browser to
-            use an application built with Vaadin.</noscript>
 </body>
 </html>]]></programlisting>
+            </section>
+        </section>
 
-			<para>
-				You can style the embedded application with themes, as described in <xref
-				linkend="themes"/>. The Client-Side Engine loads the theme required by the
-				application. In addition, you can do styling with CSS in the embedding
-				page. In the above example, we added some styling directly to the element.
-			</para>
-		</section>
-
-		<section xml:id="application.embedding.iframe">
+		<section xml:id="advanced.embedding.iframe">
 			<title>Embedding Inside an <literal>iframe</literal> Element</title>
 
 			<para>
-				Embedding a Vaadin application inside an
-				<literal>&lt;iframe&gt;</literal> element is even easier than the method
-				described above, as it does not require definition of any Vaadin specific
-				definitions. The use of <literal>&lt;iframe&gt;</literal> makes it
-				possible to embed multiple web applications or two different views to the
-				same application on the same page.
+				Embedding a Vaadin UI inside an <literal>&lt;iframe&gt;</literal> element
+				is even easier than the method described above, as it does not require
+				definition of any Vaadin specific definitions.
 			</para>
 
 			<para>
-				You can embed an application with an element such as the following:
+				You can embed an UI with an element such as the following:
 			</para>
 
-			<programlisting><?pocket-size 65% ?><![CDATA[<iframe src="/vaadin-examples/Calc"></iframe>]]></programlisting>
+			<programlisting>&lt;iframe src="<replaceable>/myapp/myui</replaceable>"&gt;&lt;/iframe&gt;</programlisting>
 
 			<para>
-				The problem with <literal>&lt;iframe&gt;</literal> elements is that their
-				size of is not flexible depending on the content of the frame, but the
-				content must be flexible to accommodate in the frame. You can set the size
-				of an <literal>&lt;iframe&gt;</literal> element with
-				<literal>height</literal> and <literal>width</literal> attributes.
+				The <literal>&lt;iframe&gt;</literal> elements have several downsides for
+				embedding. One is that their size of is not flexible depending on the
+				content of the frame, but the content must be flexible to accommodate in
+				the frame. You can set the size of an <literal>&lt;iframe&gt;</literal>
+				element with <literal>height</literal> and <literal>width</literal>
+				attributes. Other issues arise from themeing and communication with the
+				frame content and the rest of the page.
 			</para>
 
 			<para>
@@ -641,7 +793,7 @@ opener.extend(button);]]></programlisting>
             </para>
 		</section>
 
-		<section xml:id="application.embedding.xs">
+		<section xml:id="advanced.embedding.xs">
             <title>Cross-Site Embedding with the Vaadin XS Add-on</title>
 
             <para>
@@ -707,11 +859,12 @@ opener.extend(button);]]></programlisting>
             </para>
         </section>
 
-		<section xml:id="application.embedding.jsp">
+        <!-- TODO
+		<section xml:id="advanced.embedding.jsp">
 			<title>Embedding Into JSP and JSF Applications</title>
 
-            <!-- TODO Vaadin 7 alpha 3 -->
         </section>
+         -->
 	</section>
 
 	<section xml:id="advanced.debug-production-modes">
