@@ -733,28 +733,25 @@ button.addClickListener(new Button.ClickListener() {
     </section>
 
 	<section xml:id="application.resources">
-		<title>Referencing Resources</title>
+		<title>Images and Other Resources</title>
 
 		<para>
 			Web applications can display various <emphasis>resources</emphasis>, such as
-			images or downloadable files, that the browser has to load from the server
-			separate from the page in which the application is running. These resources
-			are typically used in <classname>Embedded</classname> (images) or
-			<classname>Link</classname> (downloadable files) user interface
-			components. Various components, such as <classname>TabSheet</classname>, can
-			also include icons, which are also handled as resources.
+			images or downloadable files, that the browser has to load from the
+			server. Image resources are typically displayed in the
+			<classname>Embedded</classname> component or as component icons. Downloadable
+			files are usually provided by clicking a <classname>Link</classname>.
 		</para>
 
 		<para>
-			A web server can handle many of such requests for static resources without
-			having to ask them from the application, or the
-			<classname>Application</classname> object can provide them. For dynamic
-			resources, the user application must be able to create them
-			dynamically. Vaadin provides resource request interfaces for applications so
-			that they can return various kinds of resources, such as files or dynamically
-			created resources. These include the <classname>StreamResource</classname>
-			class and the <interfacename>RequestHandler</interfacename> described in <xref
-			linkend="advanced.requesthandler"/>.
+            There are several ways how such resources can be provided by the web server.
+            Static resources can be provided without having to ask them from the
+            application. For dynamic resources, the user application must be able to
+            create them dynamically. The resource request interfaces in Vaadin allow
+            applications to both refer to static resources as well as dynamically create
+            them. The dynamic creation includes the <classname>StreamResource</classname>
+            class and the <interfacename>RequestHandler</interfacename> described in <xref
+            linkend="advanced.requesthandler"/>.
 		</para>
 
 		<para>
@@ -766,8 +763,8 @@ button.addClickListener(new Button.ClickListener() {
 		</para>
 
 		<para>
-			Notice that using request handlers to create "pages" is not meaningful in
-			Vaadin or in AJAX applications generally. Please see <xref
+			Notice that using request handlers to create "pages" is not normally
+			meaningful in Vaadin or in AJAX applications generally. Please see <xref
 			linkend="architecture.technology.ajax"/> for a detailed explanation.
 		</para>
 
@@ -775,10 +772,10 @@ button.addClickListener(new Button.ClickListener() {
 			<title>Resource Interfaces and Classes</title>
 		
 			<para>
-				Vaadin has two interfaces for resources: a generic
+				The resource classes in Vaadin are grouped under two interfaces: a generic
 				<classname>Resource</classname> interface and a more specific
-				<classname>ApplicationResource</classname> interface for resources
-				provided by the application.
+				<classname>ConnectorResource</classname> interface for resources provided
+				by the servlet.
 			</para>
 
 			<figure xml:id="figure.resource.classdiagram">
@@ -792,41 +789,17 @@ button.addClickListener(new Button.ClickListener() {
 					</imageobject>
 				</mediaobject>
 			</figure>
-
-			<para>
-				<classname>ApplicationResource</classname> resources are managed
-				by the <classname>Application</classname> class. When you create
-				such a resource, you give the application object to the
-				constructor. The constructor registers the resource in the
-				application using the <classname>addResource</classname>
-				method.
-			</para>
-
-			<para>
-				<classname>Application</classname> manages requests for the
-				resources and allows accessing resources using a URI. The URI
-				consists of the base name of the application and a relative name
-				of the resource. The relative name is
-				<literal>"APP/"+resourceid+"/"+filename</literal>, for example
-				<literal>"APP/1/myimage.png"</literal>. The
-				<varname>resourceid</varname> is a generated numeric identifier
-				to make resources unique, and <varname>filename</varname> is the
-				file name of the resource given in the constructor of its
-				class. However, the application using a resource does not usually
-				need to consider its URI. It only needs to give the resource to
-				an appropriate <classname>Embedded</classname> or
-				<classname>Link</classname> or some other user interface
-				component, which manages the rendering of the URI.
-			</para>
 		</section>
 
 		<section xml:id="application.resources.file">
 			<title>File Resources</title>
 
 			<para>
-				File resources are files stored anywhere in the file system. The
-				use of file resources generally falls into two main categories:
-				downloadable files and embedded images.
+				File resources are files stored anywhere in the file system. As such, they
+				can not be retrieved by a regular URL from the server, but need to be
+				requested through the Vaadin servlet. The use of file resources is
+				typically necessary for persistent user data that is not packaged in the
+				web application, which would not be persistent over redeployments.
 			</para>
 
 			<para>
@@ -834,15 +807,15 @@ button.addClickListener(new Button.ClickListener() {
 				standard <classname>java.io.File</classname> class. You can create the
 				file either with an absolute or relative path, but the base path of the
 				relative path depends on the installation of the web server. For example,
-				in Apache Tomcat, the default current directory is the installation path
-				of Tomcat.
+				with Apache Tomcat, the default current directory would be the
+				installation path of Tomcat.
 			</para>
 
             <para>
                 In the following example, we provide an image resource from a file stored
                 in the web application. Notice that the image is stored under the
                 <filename>WEB-INF</filename> folder, which is a special folder that is
-                never accessible using an URL, unlike other folders in a web
+                never accessible using an URL, unlike the other folders of a web
                 application. This is a security solution - another would be to store the
                 resource elsewhere in the filesystem.
             </para>
@@ -934,8 +907,8 @@ Embedded image = new Embedded("My Theme Image", resource);]]></programlisting>
 			</figure>
 
             <para>
-                To use theme resources, you must set the theme for the application. See
-                <xref linkend="themes"/> for more information regarding themes.
+                To use theme resources, you must set the theme for the UI. See <xref
+                linkend="themes"/> for more information regarding themes.
             </para>
 		</section>
 
@@ -943,12 +916,11 @@ Embedded image = new Embedded("My Theme Image", resource);]]></programlisting>
 			<title>Stream Resources</title>
 		
 			<para>
-				Stream resources are application resources that allow creating
-				dynamic resource content. Charts are typical examples of dynamic
-				images. To define a stream resource, you need to implement the
-				<classname>StreamResource.StreamSource</classname> interface and
-				its <methodname>getStream</methodname> method. The method needs
-				to return an <classname>InputStream</classname> from which the
+				Stream resources allow creating dynamic resource content. Charts are
+				typical examples of dynamic images. To define a stream resource, you need
+				to implement the <classname>StreamResource.StreamSource</classname>
+				interface and its <methodname>getStream</methodname> method. The method
+				needs to return an <classname>InputStream</classname> from which the
 				stream can be read.
 			</para>
 
@@ -1005,19 +977,8 @@ public class MyImageSource
 			</para>
 
 			<para>
-				You can use resources in various ways. Some user interface components, such as
-				<classname>Link</classname> and <classname>Embedded</classname>,
-				take their parameters as a resource.
-			</para>
-
-			<para>
-				Below we display the image with the
-				<classname>Embedded</classname> component.  The
-				<classname>StreamResource</classname> constructor gets a
-				reference to the application and registers itself in the
-				application's resources. Assume that <varname>main</varname> is a
-				reference to the main window and <varname>this</varname> is the
-				application object.
+				Below we display the image with the <classname>Embedded</classname>
+				component.
 			</para>
 
 			<programlisting><?pocket-size 65% ?><![CDATA[// Create an instance of our stream source.
@@ -1026,19 +987,20 @@ StreamResource.StreamSource imagesource = new MyImageSource ();
 // Create a resource that uses the stream source and give it a name.
 // The constructor will automatically register the resource in
 // the application.
-StreamResource imageresource =
+StreamResource resource =
         new StreamResource(imagesource, "myimage.png");
 	
 // Create an embedded component that gets its contents
 // from the resource.
-main.addComponent(new Embedded("Image title", imageresource));]]></programlisting>
+layout.addComponent(new Embedded("Image title", resource));]]></programlisting>
 
 			<para>
-				The image will look as follows:
+				The resulting image is shown in <xref
+				linkend="figure.application.resource.stream"/>.
 			</para>
 
 			<figure xml:id="figure.application.resource.stream">
-				<title>Screenshot of the stream resource example with an embedded image</title>
+				<title>A Stream Resource</title>
 				<mediaobject>
 					<imageobject role="html">
 						<imagedata align="center" fileref="img/application/application_streamresource.png"/>
@@ -1048,17 +1010,6 @@ main.addComponent(new Embedded("Image title", imageresource));]]></programlistin
 					</imageobject>
 				</mediaobject>
 			</figure>
-
-			<para>
-				We named the resource as <filename>myimage.png</filename>. The
-				application adds a resource key to the file name of the resource
-				to make it unique.  The full URI will be like
-				<uri>http://localhost:8080/testbench/APP/1/myimage.png</uri>. The
-				end <uri>APP/1/myimage.png</uri> is the
-				<emphasis>relative</emphasis> part of the URI. You can get the
-				relative part of a resource's URI from the application with
-				<methodname>Application.getRelativeLocation()</methodname>.
-			</para>
 
 			<para>
 				Another way to create dynamic content is a request handler, described in
