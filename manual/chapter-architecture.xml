@@ -176,7 +176,7 @@
 						Vaadin makes a separation between the appearance and component
 						structure of the user interface. While the UI logic is handled as
 						Java code, the presentation is defined in
-						<emphasis>themes</emphasis> as CSS or SCSS. Vaadin provides a
+						<emphasis>themes</emphasis> as CSS or Sass. Vaadin provides a
 						number of default themes. User themes can, in addition to style
 						sheets, include HTML templates that define custom layouts and
 						other resources, such as images. Themes are discussed in detail in
@@ -285,9 +285,9 @@
                 inclusion of graphics and other resources.  It is based on a hierarchy of
                 elements marked with start and end tags, such as <literal>&lt;div&gt;
                 ... &lt;/div&gt;</literal>. Vaadin specifically uses XHTML, which is
-                syntactically stricter than regular HTML. Vaadin supports (X)HTML 4, which
-                is the current and the most widely supported version. In addition, it
-                supports some features of HTML5, which is the upcoming version.
+                syntactically stricter than regular HTML. Vaadin uses HTML version 5,
+                although conservatively, to the extent supported by the major browsers,
+                and their currently most widely used versions.
             </para>
 
 			<para>
@@ -326,15 +326,19 @@
                 <emphasis>Sass</emphasis>, or <emphasis>Syntactically Awesome
                 Stylesheets</emphasis>, is an extension of the CSS language, which allows
                 the use of variables, nesting, and many other syntactic features that make
-                the use of CSS easier and clearer. Sass files are compiled automatically
-                to CSS with a compiler included with Vaadin.
+                the use of CSS easier and clearer. Sass has two alternative formats, SCSS,
+                which is a superset of the syntax of CSS3, and an older indented syntax,
+                which is a more concise.
             </para>
 
             <para>
                 Vaadin handles styling with <emphasis>themes</emphasis> defined with CSS
-                or Sass, and associated images and other resources. The use of themes is
-                documented in detail in <xref linkend="themes"/>, which also gives an
-                introduction to CSS.
+                or Sass, and associated images and other resources. Vaadin themes are
+                specifically written in SCSS. In development mode, Sass files are compiled
+                automatically to CSS. For production use, you compile the Sass files to
+                CSS with the included compiler. The use of themes is documented in detail
+                in <xref linkend="themes"/>, which also gives an introduction to CSS and
+                Sass.
             </para>
         </section>
 
@@ -368,8 +372,8 @@
 			<para>
 				The asynchronous requests used in AJAX are made possible by the
 				<methodname>XMLHttpRequest</methodname> class in JavaScript. The API
-				feature is available in all major browsers and, as of 2006, it is under
-				way to become a W3C standard.
+				feature is available in all major browsers and is under way to become a
+				W3C standard.
 			</para>
 
 			<para>
@@ -378,7 +382,8 @@
 				<emphasis>marshalling</emphasis>) of data objects. The Vaadin servlet and
 				the client-side engine handle the serialization of shared state objects
 				from the server-side components to the client-side widgets, as well as
-				serialization of RPC calls from the widgets to the server-side components.
+				serialization of RPC calls between the widgets and the server-side
+				components.
 			</para>
 		</section>
 
@@ -389,12 +394,12 @@
                 <indexterm significance="preferred"><primary>Google Web Toolkit</primary></indexterm>
 
                 The client-side framework of Vaadin is based on the Google Web Toolkit
-                (GWT), of which purpose is to enable the development of client-side web
-                user interfaces easily with Java instead of JavaScript. Client-side
-                modules are developed with Java and compiled into JavaScript with the
-                Vaadin Compiler, which is an extension of the GWT Compiler. The
-                client-side framework also hides much of the HTML DOM manipulation and
-                enables handling browser events in Java.
+                (GWT). Its purpose is to make it possible to develop web user interfaces
+                that run in the browser easily with Java instead of
+                JavaScript. Client-side modules are developed with Java and compiled into
+                JavaScript with the Vaadin Compiler, which is an extension of the GWT
+                Compiler. The client-side framework also hides much of the HTML DOM
+                manipulation and enables handling browser events in Java.
 			</para>
 
 			<para>
@@ -404,8 +409,8 @@
 				server-driven development mode in Vaadin effectively hides all the
 				client-server communications and allows handling user interaction logic in
 				a server-side application. This makes the architecture of an AJAX-based
-				web application much simpler. Nevertheless, Vaadin allows developing also
-				client-side applications when needed, as described in <xref
+				web application much simpler. Nevertheless, Vaadin also allows developing
+				pure client-side applications, as described in <xref
 				linkend="clientsideapp"/>.
 			</para>
 
@@ -460,21 +465,23 @@
 
             <para>
                 The servlets are Java classes that handle HTTP requests passed to them by
-                the server through the <emphasis>Java Servlet API</emphasis>. They
-                generate HTML content as a response. JSP pages, on the other hand, are
-                HTML pages, which allow including Java source code embedded in the
-                pages. They are actually translated to Java source files by the container
-                and then compiled to servlets.
+                the server through the <emphasis>Java Servlet API</emphasis>. They can
+                generate HTML or other content as a response. JSP pages, on the other
+                hand, are HTML pages, which allow including Java source code embedded in
+                the pages. They are actually translated to Java source files by the
+                container and then compiled to servlets.
             </para>
 
             <para>
                 The UIs of server-side Vaadin applications run as servlets. They are
                 wrapped inside a <classname>VaadinServlet</classname> servlet class, which
-                handles session tracking and other tasks. The server-side UIs are
-                implemented as classes extending the <classname>UI</classname> class, as
-                described in <xref linkend="application"/>. The class is given as a
-                parameter to the Vaadin Servlet in the <filename>web.xml</filename>
-                deployment descriptor.
+                handles session tracking and other tasks. On the initial request, it
+                returns a HTML loader page and then mostly JSON responses to synchronize
+                the widgets and their server-side counterparts. It also serves various
+                resources, such as themes. The server-side UIs are implemented as classes
+                extending the <classname>UI</classname> class, as described in <xref
+                linkend="application"/>. The class is given as a parameter to the Vaadin
+                Servlet in the <filename>web.xml</filename> deployment descriptor.
             </para>
 
             <para>
@@ -528,10 +535,11 @@
             The rendering with widgets as well as the communication to the server-side is
             handled in the <classname>ApplicationConnection</classname>. Connecting the
             widgets with their server-side counterparts is done in
-            <emphasis>connectors</emphasis>, which are one of each widget. The framework
-            handles serialization of component state transparently, and includes an RPC
-            mechanism between the two sides. Integration of widgets with their server-side
-            counterpart components is described in <xref linkend="gwt"/>.
+            <emphasis>connectors</emphasis>, and there is one for each widget that has a
+            server-side counterpart. The framework handles serialization of component
+            state transparently, and includes an RPC mechanism between the two
+            sides. Integration of widgets with their server-side counterpart components is
+            described in <xref linkend="gwt"/>.
         </para>
 	</section>
 
@@ -615,10 +623,9 @@ button.addClickListener(new Button.ClickListener() {
 		<para>
 			In the ancient times of C programming, <emphasis>callback functions</emphasis>
 			filled largely the same need as listeners do now. In object-oriented
-			languages, we have only classes and methods, not functions, so the application
+			languages, we usually only have classes and methods, not functions, so the application
 			has to give a class interface instead of a callback function pointer to the
-			framework. However, Vaadin supports defining a method as a listener as well,
-			using the <classname>MethodListener</classname> wrapper.
+			framework.
 		</para>
 
         <para>

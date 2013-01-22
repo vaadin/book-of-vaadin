@@ -75,31 +75,12 @@ public class HelloWorld extends UI {
 
 		<para>
             The &ui; API may seem similar to Java Servlet API, but that is only
-            superficial. Vaadin framework associates requests with sessions so that an
-            application instance is really a session object. Because of this, you can
-            develop web applications much like you would develop desktop applications.
+            superficial. Vaadin framework handles servlet requests internally and
+            associates the requests with user sessions and an UI state. Because of this,
+            you can develop Vaadin applications much like you would develop desktop
+            applications.
 		</para>
 		
-        <note>
-            <title>Restarting Application Session</title>
-
-            <para>
-                When you first open an URL for the application, it creates a new user
-                session. The session is preserved even if you reload the page. However, if
-                you use Eclipse, it likes to do hot deployment to Tomcat and you may
-                experience a problem that the application does not return to its initial
-                state after you modify code. As Tomcat likes to persist sessions on server
-                shutdown, the application state can remain even if you restart the server.
-            </para>
-
-            <para>
-                Adding the <uri>?restartApplication</uri> parameter in the URL tells the
-                Vaadin servlet to create a new <classname>VaadinSession</classname>
-                instance when loading the page. If you also include a URI fragment, the
-                parameter should be given before the fragment.
-            </para>
-        </note>
-
 		<para>
 			The most important task in the initialization is the creation of the initial
 			user interface. This, and the deployment of an UI as a Java Servlet in the
@@ -605,7 +586,7 @@ File baseDir = VaadinService.getCurrent().getBaseDirectory();]]></programlisting
                 The following example follows a typical pattern where you have a
                 <classname>Button</classname> component and a listener that handles user
                 interaction (clicks) communicated to the application as events. Here we define
-                a class that listens click events.
+                a class that listens to click events.
             </para>
 
             <book-example id="application.eventlistener.classlistener" style="float: right"></book-example>
@@ -1588,13 +1569,13 @@ notif.show(Page.getCurrent());]]></programlisting>
                     the memory state of the application. This is done by serializing the
                     application state and then deserializing it after the classes are
                     reloaded. This is, in fact, done with the basic Eclipse setup with
-                    Tomcat and you actually need to give the
-                    <literal>?restartApplication</literal> parameter to the UI to force it
-                    to restart when you reload the page. Tools such as JRebel go even
-                    further by reloading the code in place without need for
-                    serialization. The server can also serialize the application state
-                    when shutting down and restarting, thereby preserving sessions over
-                    restarts.
+                    Tomcat and you may actually need to give the
+                    <literal>?restartApplication</literal> parameter to an UI marked as
+                    <classname>@PreserveOnRefresh</classname> to force it to restart when
+                    you reload the page. Tools such as JRebel go even further by reloading
+                    the code in place without need for serialization. The server can also
+                    serialize the application state when shutting down and restarting,
+                    thereby preserving sessions over restarts.
                 </para>
 
                 <para>
@@ -1752,6 +1733,18 @@ notif.show(Page.getCurrent());]]></programlisting>
 
 			<programlisting><![CDATA[@PreserveOnRefresh
 public class MyUI extends UI {]]></programlisting>
+
+                <para>
+                    Adding the <uri>?restartApplication</uri> parameter in the URL tells
+                    the Vaadin servlet to create a new <classname>UI</classname> instance
+                    when loading the page, even when the
+                    <classname>@PreserveOnRefresh</classname> is enabled. This is often
+                    necessary when developing such an UI in Eclipse, when you need to
+                    restart it after redeploying, because Eclipse likes to persist the
+                    application state between redeployments. If you also include a URI
+                    fragment, the parameter should be given before the fragment.
+                </para>
+
             </simplesect>
         </section>
 
@@ -1991,7 +1984,7 @@ main.addListener(new Window.CloseListener(){
 							application is organized. You can refer
 							to any Java book about the contents of
 							this file. Also see an example in
-							<xref linkend="ex.web.xml" />.
+							<xref linkend="intro.walkthrough" />.
 						</para>
 					</listitem>
 				</varlistentry>
@@ -1999,15 +1992,14 @@ main.addListener(new Window.CloseListener(){
 				<varlistentry>
 					<term>
 						<filename>
-							WEB-INF/lib/vaadin-7.x.x.jar
+							WEB-INF/lib/*.jar
 						</filename>
 					</term>
 					<listitem>
 						<para>
-							This is the Vaadin library. It
-							is included in the product package in
-							<filename>lib</filename>
-							directory.
+							These are the Vaadin libraries and their dependencies. They
+							can be found from the installation package or as loaded by a
+							dependency management system such as Maven or Ivy.
 						</para>
 					</listitem>
 				</varlistentry>
