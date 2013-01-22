@@ -260,8 +260,9 @@
           <xsl:with-param name="element" select="'toc'"/>
           <xsl:with-param name="gentext-key" select="'TableofContents'"/>
           <xsl:with-param name="content">
-            <!-- Make a set ToC instead of a division ToC. -->
-            <xsl:call-template name="set.toc">
+            <!-- Configure which sort of ToC to create.                    -->
+            <!-- 'division' for single-volume ToC, 'set' for multi-volume. -->
+            <xsl:call-template name="division.toc">
               <xsl:with-param name="toc.title.p" 
                 select="contains($toc.params, 'title')"/>
             </xsl:call-template>
