@@ -19,9 +19,10 @@
 
 	<para>
 		This chapter provides details about using and creating <emphasis>themes</emphasis>
-		that control the visual look of web applications. Themes consist of Cascading
-		Style Sheets (CSS) and other theme resources such as images. We provide an
-		introduction to CSS, especially concerning the styling of HTML by element classes.
+		that control the visual look of web applications. Themes are created using Sass,
+		which is an extension of CSS (Cascading Style Sheets), or with plain CSS. We
+		provide an introduction to CSS, especially concerning the styling of HTML by
+		element classes.
 	</para>
 
     <para>
@@ -36,20 +37,25 @@
 
 		<para>
 			Vaadin separates the appearance of the user interface from its logic using
-			<emphasis>themes</emphasis>. Themes can include CSS style sheets, custom HTML
+			<emphasis>themes</emphasis>. Themes can include Sass or CSS style sheets, custom HTML
 			layouts, and any necessary graphics. Theme resources can also be accessed from
-			an application as <classname>ThemeResource</classname> objects.
+			application code as <classname>ThemeResource</classname> objects.
 		</para>
 
 		<para>
-			Custom themes are placed under the
-			<filename>WebContent/VAADIN/themes/</filename> folder of the web application.
-			This location is fixed -- the <filename>VAADIN</filename> folder specifies
-			that these are static resources specific to Vaadin. The folder should normally
-			contain also the built-in themes, although you can let them be loaded
-			dynamically from the Vaadin JAR (even though that is somewhat inefficient).
-			<xref linkend="figure.themes.theme-contents"/> illustrates the contents of a
-			theme.
+			Custom themes are placed under the <filename>VAADIN/themes/</filename> folder
+			of the web application (under <filename>WebContent</filename> in Eclipse).
+			This location is fixed -- the <filename>VAADIN</filename> folder contains
+			static resources that are served by the Vaadin servlet. The servlet augments
+			the files stored in the folder by resources found from corresponding
+			<filename>VAADIN</filename> folders contained in JARs in the class path. For
+			example, the built-in themes are stored in the
+			<filename>vaadin-themes.jar</filename>.
+        </para>
+
+        <para>
+            <xref linkend="figure.themes.theme-contents"/> illustrates the contents of a
+            theme.
 		</para>
 
 		<figure xml:id="figure.themes.theme-contents">
@@ -67,11 +73,18 @@
 		<para>
 			The name of a theme folder defines the name of the theme. The name is used in
 			the <literal>@Theme</literal> annotation that sets the theme. A theme must
-			contain the <filename>styles.css</filename> stylesheet, but other contents
-			have free naming. We suggest a convention for naming the folders as
-			<filename>img</filename> for images, <filename>layouts</filename> for custom
-			layouts, and <filename>css</filename> for additional stylesheets.
+			contain either a <filename>styles.scss</filename> for Sass themes, or
+			<filename>styles.css</filename> stylesheet for plain CSS themes, but other
+			contents have free naming. We recommend that you have the actual theme content
+			in a SCSS file named after the theme, such as
+			<filename>mytheme.scss</filename>, to make the names more unique.
 		</para>
+
+        <para>
+            We also suggest a convention for naming the folders as
+            <filename>img</filename> for images, <filename>layouts</filename> for custom
+            layouts, and <filename>css</filename> for additional stylesheets.
+        </para>
 
 		<para>
 			Custom themes that use an existing complete theme need to inherit the
@@ -82,14 +95,14 @@
 		</para>
 
 		<para>
-			You use a theme with by specifying it with the <literal>@Theme</literal>
+			You use a theme by specifying it with the <literal>@Theme</literal>
 			annotation for the &ui; class of the application as follows:
 		</para>
 
 		<programlisting><![CDATA[@Theme("mytheme")
-public class MyRoot extends Root {
+public class MyUI extends UI {
     @Override
-    protected void init(WrappedRequest request) {
+    protected void init(VaadinRequest request) {
         ...
     }
 }]]></programlisting>
@@ -540,9 +553,42 @@ td.another {background: yellow;}]]></programlisting>
         <para>
             Vaadin uses Sass for stylesheets. Sass is an extension of CSS3 that adds
             nested rules, variables, mixins, selector inheritance, and other features to
-            CSS. Sass can be used in two basic ways, either by compiling SCSS files to CSS
-            or by doing the compilation on the fly.
+            CSS. Sass supports two formats for stylesheet: Vaadin themes are written in
+            SCSS (<filename>.scss</filename>), which is a superset of CSS3, but Sass also
+            allows a more concise indented format (<filename>.sass</filename>).
         </para>
+
+        <para>
+            Sass can be used in two basic ways in Vaadin applications, either by compiling
+            SCSS files to CSS or by doing the compilation on the fly. The latter way is
+            possible if the development mode is enabled in the deployment descriptor for
+            the Vaadin servlet.
+        </para>
+
+        <section xml:id="themes.sass.features">
+            <title>Sass Overview</title>
+
+            <section xml:id="themes.sass.features.variables">
+                <title>Variables</title>
+
+            </section>
+
+            <section xml:id="themes.sass.features">
+                <title>Nesting</title>
+
+            </section>
+
+            <section xml:id="themes.sass.features">
+                <title>Mixins</title>
+
+            </section>
+
+            <section xml:id="themes.sass.features">
+                <title>Selector Inheritance</title>
+
+            </section>
+
+        </section>
 
         <section xml:id="themes.sass.basic">
             <title>Sass Basics with Vaadin</title>
@@ -568,10 +614,17 @@ td.another {background: yellow;}]]></programlisting>
                 them on the run. In this case, the SCSS source files are placed in the
                 theme folder.
             </para>
+
+            <para>
+                The on-the-fly compilation takes a bit time, so it is only available when
+                the Vaadin servlet is in the development mode, as described in <xref
+                linkend="application.environment.parameters"/>. For production, you should
+                compile the theme to CSS.
+            </para>
         </section>
 
         <section xml:id="themes.sass.compiling">
-            <title>Compiling SASS to CSS</title>
+            <title>Compiling Sass to CSS</title>
 
             <para>
                 Sass style sheets can be compiled to CSS, with the
@@ -579,6 +632,33 @@ td.another {background: yellow;}]]></programlisting>
                 target. When compiled before deployment, the source files do not need to
                 be in the theme folder.
             </para>
+
+            <screen><command>java</command> <parameter>-cp</parameter> <replaceable>'../../../WEB-INF/lib/*'</replaceable> com.vaadin.sass.SassCompiler styles.scss styles.css</screen>
+
+            <para>
+                The <parameter>-cp</parameter> parameter should point to the class path
+                where the Vaadin JARs are located. In the above example, they are assumed
+                to be locate in the <filename>WEB-INF/lib</filename> folder of the web
+                application.
+            </para>
+
+            <para>
+                If you have loaded the Vaadin libraries using Ivy, as is the case with
+                projects created with the Vaadin Plugin for Eclipse, the Vaadin libraries
+                are stored in Ivy's local repository. Its folder hierarchy is somewhat
+                scattered, so we recommend that you retrieve the libraries to a single
+                folder. With Apache Ant, you can do that with an Ivy task as shown in the
+                following example:
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[<project xmlns:ivy="antlib:org.apache.ivy.ant">
+  ...
+  <target name="resolve" depends="init">
+    <ivy:retrieve
+        pattern="${result-dir}/lib/[module]-[type]-[artifact]-[revision].[ext]"/>
+  </target>
+</project>]]></programlisting>
+
         </section>
     </section>
 
@@ -1155,9 +1235,9 @@ public class MyRoot extends Root {
 							<para>
 								The setting allows the wizard to write a code statement
 								that enables the theme in the constructor of the selected
-								application class(es). If you need to control the theme
-								with dynamic logic, you can leave the setting unchecked or
-								change the generated line later.
+								application (UI) class(es). If you need to control the
+								theme with dynamic logic, you can leave the setting
+								unchecked or change the generated line later.
 							</para>
 						</listitem>
 					</varlistentry>
@@ -1184,7 +1264,8 @@ public class MyRoot extends Root {
 		<para>
 			The wizard creates the theme folder under the
 			<filename>WebContent/VAADIN/themes</filename> folder and the actual style
-			sheet as <filename>styles.css</filename>, as illustrated in <xref
+			sheet as <filename>mytheme.scss</filename> and
+			<filename>styles.scss</filename> files, as illustrated in <xref
 			linkend="figure.eclipse.theme.created"/>.
 		</para>
 
