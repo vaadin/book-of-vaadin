@@ -967,15 +967,15 @@
   <!-- The print location (custom element). -->
   <xsl:template match="printer" mode="book.titlepage.verso.mode">
     <fo:block>
-      <xsl:text>Printed in </xsl:text>
+      <xsl:text>Printed by </xsl:text>
 
-      <!-- No printer name. -->
-      <!-- <xsl:value-of select="orgname"  < xsl:text>, </xsl:text> -->
+      <xsl:value-of select="orgname"/>
 
+      <xsl:text> in </xsl:text>
       <xsl:value-of select="address/city"/>
       <xsl:text>, </xsl:text>
       <xsl:value-of select="address/country"/>
-      <xsl:text>.</xsl:text>
+      <xsl:text>, 2013.</xsl:text>
     </fo:block>
   </xsl:template>
 

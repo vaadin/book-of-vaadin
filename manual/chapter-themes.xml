@@ -25,13 +25,6 @@
 		element classes.
 	</para>
 
-    <para>
-        <emphasis>This chapter is a draft. Many new features that will be included in the
-        final version of Vaadin 7 are not yet covered in the draft and some of the content
-        may be outdated. For the most current version, please see the on-line edition
-        available at <uri>http://vaadin.com/book</uri>.</emphasis>
-    </para>
-
 	<section xml:id="themes.overview">
 		<title>Overview</title>
 
@@ -571,23 +564,121 @@ td.another {background: yellow;}]]></programlisting>
             <section xml:id="themes.sass.features.variables">
                 <title>Variables</title>
 
+                <para>
+                    Sass allows defining variables that can be used in the rules.
+                </para>
+
+                <programlisting><![CDATA[$textcolor: blue;
+
+.v-button-caption {
+  color: $textcolor;
+}]]></programlisting>
+
+                <para>
+                    The above rule would be compiled to CSS as:
+                </para>
+
+                <programlisting><![CDATA[.v-button-caption {
+  color: blue;
+}]]></programlisting>
+
+                <para>
+                    Also mixins can have variables as parameters, as explained later.
+                </para>
             </section>
 
             <section xml:id="themes.sass.features">
                 <title>Nesting</title>
+
+                <para>
+                    Sass supports nested rules, which are compiled into
+                    inside-selectors. For example:
+                </para>
+
+                <programlisting><![CDATA[.v-app {
+  background: yellow;
+  
+  .mybutton {
+    font-style: italic;
+    
+    .v-button-caption {
+      color: blue;
+    }
+  }
+}]]></programlisting>
+
+                <para>
+                    is compiled as:
+                </para>
+
+                <programlisting><![CDATA[.v-app {
+  background: yellow;
+}
+
+.v-app .mybutton {
+    font-style: italic;
+}
+
+.v-app .mybutton .v-button-caption {
+  color: blue;
+}]]></programlisting>
 
             </section>
 
             <section xml:id="themes.sass.features">
                 <title>Mixins</title>
 
+                <para>
+                    Mixins are rules that can be included in other rules. You define a
+                    mixin rule by prefixing it with the <literal>@mixin</literal> keyword
+                    and the name of the mixin. You can then use
+                    <literal>@include</literal> to apply it to another rule. You can also
+                    pass parameters to it, which are handled as local variables in the
+                    mixin.
+                </para>
+
+                <para>
+                    For example:
+                </para>
+
+                <programlisting><![CDATA[@mixin mymixin {
+  background: yellow;
+}
+
+@mixin othermixin($param) {
+  margin: $param;
+}
+
+.v-button-caption {
+  @include mymixin;
+  @include othermixin(10px);
+}]]></programlisting>
+
+                <para>
+                    The above SCSS would translated to the following CSS:
+                </para>
+
+                <programlisting><![CDATA[.v-button-caption {
+  background: yellow;
+  margin: 10px;
+}]]></programlisting>
+
+                <para>
+                    You can also have nested rules in a mixin, which makes them especially
+                    powerful.
+                </para>
+
+                <para>
+                    Vaadin themes are defined as mixins to allow use of multiple themes.
+                </para>
             </section>
 
+            <!-- TODO 
             <section xml:id="themes.sass.features">
                 <title>Selector Inheritance</title>
 
             </section>
-
+            -->
         </section>
 
         <section xml:id="themes.sass.basic">
@@ -667,8 +758,8 @@ td.another {background: yellow;}]]></programlisting>
 
         <para>
             Custom themes are placed in the <filename>VAADIN/themes</filename> folder of
-            the web application (in an Eclipse project in the
-            <filename>WebContent</filename> directory) as illustrated in <xref
+            the web application (in an Eclipse project under the
+            <filename>WebContent</filename> folder), as was illustrated in <xref
             linkend="figure.themes.theme-contents"/>. This location is fixed. You need to
             have a theme folder for each theme you use in your application, although
             applications rarely need more than a single theme.
@@ -680,65 +771,73 @@ td.another {background: yellow;}]]></programlisting>
             <para>
                 You can use Sass themes in Vaadin in two ways, either by compiling them to
                 CSS by yourself or by letting the Vaadin servlet compile them for you
-                on-the-fly when the theme CSS is requested by the browser. The latter way
-                is easier, so we consider that here.
+                on-the-fly when the theme CSS is requested by the browser.
             </para>
 
             <para>
-                To define a Sass theme with the name <varname>mytheme</varname>, you
-                can place a file with name <filename>styles.scss</filename> in the
-                theme folder <filename>VAADIN/themes/mytheme</filename>. If no
+                To define a Sass theme with the name <varname>mytheme</varname>, you must
+                place a file with name <filename>styles.scss</filename> in the theme
+                folder <filename>VAADIN/themes/mytheme</filename>. If no
                 <filename>styles.css</filename> exists in the folder, the Sass file is
-                compiled on-the-fly when the CSS file is requested by a browser.
+                compiled on-the-fly when the theme is requested by a browser.
             </para>
 
             <para>
-                A custom Sass theme must include a built-in theme and prefix all rules
-                with a selector for the theme name. With Sass, you can do that by
-                enclosing the rules in a block with a selector with the theme name as
+                We recommend that you organize the theme in at least two SCSS files so
+                that you import the actual theme from a Sass file that is named more
+                uniquely than the <filename>styles.scss</filename>, to make it more
+                distinquishable in the editor. This is also how the Vaadin Plugin for
+                Eclipse creates a new theme.
+            </para>
+
+            <para>
+                All rules in a theme should be prefixed with a selector for the theme
+                name. You can do that in Sass by enclosing the rules in a nested rule with
+                a selector for the theme name. Themes are defined as mixins, so after you
+                import them mixin definition, you can include them in the theme rule as
                 follows:
             </para>
 
-            <programlisting><![CDATA[@import "../reindeer/styles.scss";
-include reindeer;
+            <programlisting><![CDATA[@import "mytheme.scss";
 
 .mytheme {
-    .v-app {
-        background: yellow;
-    }
+  @include mytheme;
 }]]></programlisting>
 
             <para>
-                Vaadin includes two built-in themes: <literal>reindeer</literal> and
-                <literal>runo</literal>. The latter is a compatibility theme for IT Mill
-                Toolkit 5; there is no longer a "default" theme. See <xref
-                linkend="themes.creating.default"/> and <xref
-                linkend="themes.creating.inheritance"/> below for details on inheriting
-                themes.
-            </para>
-        </section>
-
-        <section xml:id="themes.creating.sass-compiling">
-            <title>Compiling Sass Themes</title>
-
-            <para>
-                You may want to compile a Sass theme for various reasons, the most obvious
-                being that the on-the-fly compilation takes a bit time and makes the load
-                time a bit longer.
+                The actual theme mixin should be defined as follows:
             </para>
 
-            <para>
-                A Sass theme is compiled to CSS with the
-                <filename>vaadin-theme-compiler</filename> JAR, which is included in the
-                Vaadin installation package and is also available by Maven.
-            </para>
+            <programlisting><![CDATA[@import "../reindeer/reindeer.scss";
 
-            <para>
-                You can compile a theme as follows:
-            </para>
+@mixin mytheme {
+  @include reindeer;
 
-            <screen><prompt>$</prompt><command>java</command> -classpath <parameter>&lt;path-to&gt;/vaadin-theme-compiler-7.0.jar</parameter>
-       com.vaadin.sass.SassCompiler <parameter>mytheme.scss</parameter> <parameter>mytheme.css</parameter></screen>
+  /* An actual theme rule */
+  .v-button {
+    color: blue;
+  }
+}
+]]></programlisting>
+
+            <section xml:id="themes.creating.sass.builtin">
+                <title>Built-in Themes</title>
+
+                <para>
+                    Vaadin includes three built-in themes:
+                </para>
+
+                <itemizedlist>
+                    <listitem><literal>reindeer</literal>, the primary theme in Vaadin 6 and 7</listitem>
+                    <listitem><literal>runo</literal>, the default theme in IT Mill Toolkit 5</listitem>
+                    <listitem><literal>chameleon</literal>, an easily customizable alternative theme</listitem>
+                </itemizedlist>
+
+                <para>
+                    You can find more themes as add-ons from the <link
+                    xlink:href="http://vaadin.com/directory">Vaadin Directory</link>.
+                </para>
+            </section>
         </section>
 
         <section xml:id="themes.creating.css">
