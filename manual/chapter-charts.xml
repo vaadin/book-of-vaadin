@@ -449,6 +449,23 @@ conf.addSeries(series2);]]></programlisting>
                     </tbody>
                 </tgroup>
             </table>
+
+            <section xml:id="charts.charttypes.line.plotoptions">
+                <title>Plot Options</title>
+
+                <para>
+                    The <parameter>color</parameter> property in the line plot options
+                    defines the line color, <parameter>lineWidth</parameter> the line
+                    width, and <parameter>dashStyle</parameter> the dash pattern for the
+                    lines.
+                </para>
+
+                <para>
+                    See <xref linkend="charts.charttypes.scatter"/> for plot options
+                    regarding markers and other data point properties. The markers can
+                    also be configured for each data point.
+                </para>
+            </section>
         </section>
 
         <section xml:id="charts.charttypes.area">
@@ -494,15 +511,6 @@ conf.addSeries(series2);]]></programlisting>
             </table>
 
             <para>
-                Area charts support <emphasis>stacking</emphasis>, so that multiple series
-                are piled on top of each other. You enable stacking from the plot options
-                with <methodname>setStacking()</methodname>. The
-                <parameter>Stacking.NORMAL</parameter> does a normal summative stacking,
-                while the <parameter>Stacking.PERCENT</parameter> handles them as
-                proportions.
-            </para>
-
-            <para>
                 In area range charts, the area between a lower and upper value is painted
                 with a transparent color. The data series must specify the minimum and
                 maximum values for the Y coordinates, defined either with
@@ -511,6 +519,39 @@ conf.addSeries(series2);]]></programlisting>
                 <classname>DataSeries</classname>, described in <xref
                 linkend="charts.data.dataseries"/>.
             </para>
+
+            <section xml:id="charts.charttypes.area.plotoptions">
+                <title>Plot Options</title>
+
+                <para>
+                    Area charts support <emphasis>stacking</emphasis>, so that multiple
+                    series are piled on top of each other. You enable stacking from the
+                    plot options with <methodname>setStacking()</methodname>. The
+                    <parameter>Stacking.NORMAL</parameter> stacking mode does a normal
+                    summative stacking, while the <parameter>Stacking.PERCENT</parameter>
+                    handles them as proportions.
+                </para>
+
+                <para>
+                    The fill color for the area is defined with the
+                    <parameter>fillColor</parameter> property and its transparency with
+                    <parameter>fillOpacity</parameter> (the opposite of transparency) with
+                    a value between 0.0 and 1.0.
+                </para>
+
+                <para>
+                    The <parameter>color</parameter> property in the line plot options
+                    defines the line color, <parameter>lineWidth</parameter> the line
+                    width, and <parameter>dashStyle</parameter> the dash pattern for the
+                    lines.
+                </para>
+
+                <para>
+                    See <xref linkend="charts.charttypes.scatter"/> for plot options
+                    regarding markers and other data point properties. The markers can
+                    also be configured for each data point.
+                </para>
+            </section>
         </section>
 
         <section xml:id="charts.charttypes.columnbar">
@@ -569,6 +610,163 @@ conf.addSeries(series2);]]></programlisting>
             <para>
                 See the API documentation for details regarding the plot options.
             </para>
+        </section>
+
+        <section xml:id="charts.charttypes.scatter">
+            <title>Scatter Charts</title>
+
+            <para>
+                Scatter charts display a set of unconnected data points. The name refers
+                to freely given X and Y coordinates, so the
+                <classname>DataSeries</classname> or
+                <classname>ContainerSeries</classname> are usually the most meaningful
+                data series types for scatter charts.
+            </para>
+
+            <figure xml:id="figure.charts.charttypes.scatter">
+                <title>Scatter Chart</title>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata scale="60" smallscale="65%" align="center" fileref="img/charts/charts-scatter.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+
+            <para>
+                The chart type of a scatter chart is
+                <parameter>ChartType.SCATTER</parameter>. Its options can be configured in
+                a <classname>PlotOptionsScatter</classname> object, although it does not
+                have any chart-type specific options.
+            </para>
+
+            <programlisting><?pocket-size 75% ?><![CDATA[Chart chart = new Chart(ChartType.SCATTER);
+chart.setWidth("500px");
+chart.setHeight("500px");
+        
+// Modify the default configuration a bit
+Configuration conf = chart.getConfiguration();
+conf.setTitle("Random Sphere");
+conf.getLegend().setEnabled(false); // Disable legend
+
+PlotOptionsScatter options = new PlotOptionsScatter();
+// ... Give overall plot options here ...
+conf.setPlotOptions(options);
+        
+DataSeries series = new DataSeries();
+for (int i=0; i<300; i++) {
+    double lng = Math.random() * 2 * Math.PI;
+    double lat = Math.random() * Math.PI - Math.PI/2;
+    double x   = Math.cos(lat) * Math.sin(lng);
+    double y   = Math.sin(lat);
+    double z   = Math.cos(lng) * Math.cos(lat);
+    
+    DataSeriesItem point = new DataSeriesItem(x,y);
+    Marker marker = new Marker();
+    // Make settings as described later
+    point.setMarker(marker);
+    series.add(point);
+}
+conf.addSeries(series);]]></programlisting>
+
+            <para>
+                The result was shown in <xref linkend="figure.charts.charttypes.scatter"/>.
+            </para>
+
+            <section xml:id="charts.charttypes.scatter.markers">
+                <title>Data Point Markers</title>
+
+                <para>
+                    Scatter charts and other charts that display data points, such as line
+                    and spline charts, visualize the points with
+                    <emphasis>markers</emphasis>. The markers can be configured with the
+                    <classname>Marker</classname> property objects available from the plot
+                    options of the relevant chart types, as well as at the level of each
+                    data point, in the <classname>DataSeriesItem</classname>. You need to
+                    create the marker and apply it with the
+                    <methodname>setMarker()</methodname> method in the plot options or the
+                    data series item.
+                </para>
+
+                <para>
+                    For example, to set the marker for an individual data point:
+                </para>
+
+                <programlisting><![CDATA[DataSeriesItem point = new DataSeriesItem(x,y);
+Marker marker = new Marker();
+// ... Make any settings ...
+point.setMarker(marker);
+series.add(point);]]></programlisting>
+            </section>
+
+            <section xml:id="charts.charttypes.scatter.markerproperties">
+                <title>Marker Shape Properties</title>
+
+                <para>
+                    A marker has a <parameter>lineColor</parameter> and a
+                    <parameter>fillColor</parameter>, which are set using a
+                    <classname>Color</classname> object. Both solid colors and gradients
+                    are supported.  You can use a <classname>SolidColor</classname> to
+                    specify a solid fill color by RGB values or choose from a selection of
+                    predefined colors in the class.
+                </para>
+
+                <programlisting><![CDATA[// Set line width and color
+marker.setLineWidth(1); // Normally zero width
+marker.setLineColor(SolidColor.BLACK);
+
+// Set RGB fill color
+int level = (int) Math.round((1-z)*127);
+marker.setFillColor(
+        new SolidColor(255-level, 0, level));
+point.setMarker(marker);
+series.add(point);]]></programlisting>
+
+                <para>
+                    You can also use a color gradient with
+                    <classname>GradientColor</classname>. Both linear and radial gradients
+                    are supported, with multiple color stops.
+                </para>
+
+                <para>
+                    Marker size is determined by the <parameter>radius</parameter>
+                    parameter, which is given in pixels. The actual visual radius includes
+                    also the line width.
+                </para>
+
+                <programlisting><![CDATA[marker.setRadius((z+1)*5);]]></programlisting>
+            </section>
+
+            <section xml:id="charts.charttypes.scatter.markersymbols">
+                <title>Marker Symbols</title>
+
+                <para>
+                    Markers are visualized either with a shape or an image symbol. You can
+                    choose the shape from a number of built-in shapes defined in the
+                    <classname>MarkerSymbolEnum</classname> enum
+                    (<parameter>CIRCLE</parameter>, <parameter>SQUARE</parameter>,
+                    <parameter>DIAMOND</parameter>, <parameter>TRIANGLE</parameter>, or
+                    <parameter>TRIANGLE_DOWN</parameter>). These shapes are drawn with a
+                    line and fill, which you can set as described above.
+                </para>
+
+                <programlisting><![CDATA[marker.setSymbol(MarkerSymbolEnum.DIAMOND);]]></programlisting>
+
+                <para>
+                    You can also use any image accessible by a URL by using a
+                    <classname>MarkerSymbolUrl</classname> symbol. If the image is
+                    deployed with your application, such as in a theme folder, you can
+                    determine its URL as follows:
+                </para>
+
+                <programlisting><?pocket-size 65% ?><![CDATA[String url = VaadinServlet.getCurrent().getServletContext()
+    .getContextPath() + "/VAADIN/themes/mytheme/img/smiley.png";
+marker.setSymbol(new MarkerSymbolUrl(url));]]></programlisting>
+
+                <para>
+                    The line, radius, and color properties are not applicable to image
+                    symbols.
+                </para>
+            </section>
         </section>
 
         <section xml:id="charts.charttypes.pie">
@@ -656,8 +854,8 @@ conf.setPlotOptions(options);]]></programlisting>
                 </para>
 
             <programlisting><?pocket-size 75% ?><![CDATA[DataSeries series = new DataSeries();
-series.addData(new DataSeriesItem("Mercury", 4900));
-series.addData(new DataSeriesItem("Venus", 12100));
+series.add(new DataSeriesItem("Mercury", 4900));
+series.add(new DataSeriesItem("Venus", 12100));
 ...
 conf.addSeries(series);]]></programlisting>
 
@@ -670,7 +868,7 @@ conf.addSeries(series);]]></programlisting>
             <programlisting><?pocket-size 75% ?><![CDATA[// Slice one sector out
 DataSeriesItem earth = new DataSeriesItem("Earth", 12800);
 earth.setSliced(true);
-series.addData(earth);]]></programlisting>
+series.add(earth);]]></programlisting>
             </section>
 
             <section xml:id="charts.charttypes.pie.donut">
@@ -722,27 +920,6 @@ outerSeries.setPlotOptions(outerSeriesOptions);
                     </mediaobject>
                 </figure>
             </section>
-        </section>
-
-        <section xml:id="charts.charttypes.scatter">
-            <title>Scatter Charts</title>
-
-            <para>
-                Scatter charts display a set of unconnected data points. The name refers
-                to freely given X and Y coordinates, so the
-                <classname>DataSeries</classname> or
-                <classname>ContainerSeries</classname> are usually the most meaningful
-                data series types for scatter charts.
-            </para>
-
-            <para>
-                The chart type of a scatter chart is
-                <parameter>ChartType.SCATTER</parameter>. Its options can be configured in
-                a <classname>PlotOptionsScatter</classname> object, although it does not
-                have any chart-type specific options. The style of the data point markers
-                can be set in the plot options of the chart or series, or individually in
-                the <classname>DataSeriesItem</classname> objects.
-            </para>
         </section>
 
         <section xml:id="charts.charttypes.gauge">
@@ -911,8 +1088,10 @@ conf.addSeries(series);]]></programlisting>
                 Most chart types having two axes can be displayed in
                 <emphasis>polar</emphasis> coordinates, where the X axis is curved on a
                 circle and Y axis from the center of the circle to its rim. Polar chart is
-                not a chart type, but can be enabled for most chart type with
-                <methodname>setPolar(true)</methodname> in the chart model parameters.
+                not a chart type in itself, but can be enabled for most chart types with
+                <methodname>setPolar(true)</methodname> in the chart model
+                parameters. Therefore all chart type specific features are usable with
+                polar charts.
             </para>
 
             <para>
@@ -1094,6 +1273,7 @@ conf.setPlotOptions(plotOptions);]]></programlisting>
                 for more information about the chart-specific options, and the
                 <classname>AbstractPlotOptions</classname> for the shared plot options.
             </para>
+
         </section>
 
         <section xml:id="charts.configuration.axes">
@@ -1171,6 +1351,22 @@ xaxis.setCategories("Mercury", "Venus", "Earth",
                     For a complete reference of the many configuration parameters for the
                     labels, please refer to the JavaDoc API documentation of Vaadin
                     Charts.
+                </para>
+            </section>
+
+            <section xml:id="charts.configuration.axes.extremes">
+                <title>Axis Range</title>
+
+                <para>
+                    The axis range is normally set automatically to fit the data, but can
+                    also be set explicitly. The <emphasis>extremes</emphasis> property in
+                    the axis configuration defines the minimum and maximum values of the
+                    axis range. You can set them either individually with
+                    <methodname>setMin()</methodname> and
+                    <methodname>setMax()</methodname>, or together with
+                    <methodname>setExtremes()</methodname>. Changing the extremes
+                    programmatically requires redrawing the chart with
+                    <methodname>drawChart()</methodname>.
                 </para>
             </section>
         </section>
@@ -1262,10 +1458,10 @@ conf.addSeries(series);]]></programlisting>
 
             <programlisting><![CDATA[DataSeries series = new DataSeries();
 series.setName("Total Reindeer Population");
-series.addData(new DataSeriesItem(1959, 181091));
-series.addData(new DataSeriesItem(1960, 201485));
-series.addData(new DataSeriesItem(1961, 188105));
-series.addData(new DataSeriesItem(1962, 177206));
+series.add(new DataSeriesItem(1959, 181091));
+series.add(new DataSeriesItem(1960, 201485));
+series.add(new DataSeriesItem(1961, 188105));
+series.add(new DataSeriesItem(1962, 177206));
 
 // Modify the color of one point
 series.get(1960, 201485)
@@ -1274,38 +1470,105 @@ conf.addSeries(series);]]></programlisting>
 
             <para>
                 Data points are associated with some visual representation parameters:
-                marker style, selected state, legend index, sliced (for pie charts), and
-                dial style (for gauges).
+                marker style, selected state, legend index, and dial style (for
+                gauges). Most of them can be configured at the level of individual data
+                series items, the series, or in the overall plot options for the
+                chart. The configuration options are described in <xref
+                linkend="charts.configuration"/>. Some parameters, such as the sliced
+                option for pie charts is only meaningful to configure at item level.
             </para>
 
-            <!-- TODO: Is this true?
+            <section xml:id="charts.data.dataseries.add">
+                <title>Adding and Removing Data Items</title>
+
+                <para>
+                    New <classname>DataSeriesItem</classname> items are added to a series
+                    with the <methodname>add()</methodname> method. The basic method takes
+                    just the data item, but the other method takes also two boolean
+                    parameters. If the <parameter>updateChart</parameter> parameter is
+                    <literal>false</literal>, the chart is not updated immediately. This
+                    is useful if you are adding many points in the same request.
+                </para>
+
+                <para>
+                    The <parameter>shift</parameter> parameter, when
+                    <literal>true</literal>, causes removal of the first data point in the
+                    series in an optimized manner, thereby allowing an animated chart that
+                    moves to left as new points are added. This is most meaningful with
+                    data with even intervals.
+                </para>
+
+                <para>
+                    You can remove data points with the <methodname>remove()</methodname>
+                    method in the series. Removal is generally not animated, unless a data
+                    point is added in the same change, as is caused by the
+                    <parameter>shift</parameter> parameter for the
+                    <methodname>add()</methodname>.
+                </para>
+            </section>
+
+            <section xml:id="charts.data.dataseries.update">
+                <title>Updating Data Items</title>
+                
+                <para>
+                    If you update the properties of a
+                    <classname>DataSeriesItem</classname> object, you need to call
+                    <methodname>update()</methodname> method for the series with the item
+                    as the parameter. Changing the coordinates of a data point in this way
+                    causes animation of the change.
+                </para>
+            </section>
+
             <section xml:id="charts.data.dataseries.range">
                 <title>Range Data</title>
 
                 <para>
                     Range charts expect the Y values to be specified as minimum-maximum
-                    value pairs.
+                    value pairs. The <classname>DataSeriesItem</classname> provides
+                    <methodname>setLow()</methodname> and
+                    <methodname>setHigh()</methodname> methods to set the minimum and
+                    maximum values of a data point, as well as a number of constructors
+                    that accept the values.
+                </para>
+
+            <programlisting><![CDATA[RangeSeries series =
+    new RangeSeries("Temperature Extremes");
+
+// Give low-high values in constructor
+series2.add(new DataSeriesItem(0, -51.5, 10.9));
+series2.add(new DataSeriesItem(1, -49.0, 11.8));
+
+// Set low-high values with setters
+DataSeriesItem point2 = new DataSeriesItem();
+point2.setX(2);
+point2.setLow(-44.3);
+point2.setHigh(17.5);
+series2.add(point2);]]></programlisting>
+
+                <para>
+                    The <classname>RangeSeries</classname> offers a slightly simplified
+                    way of adding ranged data points, as described in <xref
+                    linkend="charts.data.rangeseries"/>.
                 </para>
             </section>
-            -->
         </section>
 
         <section xml:id="charts.data.rangeseries">
             <title>Range Series</title>
 
             <para>
-                The <classname>RangeSeries</classname> allows specifying data with
-                minimum-maximum value ranges in the Y axis, which you use in range charts,
-                as described in <xref linkend="charts.charttypes.rangecharts"/>. The data
-                in a range series is unmodifiable - you can only give the data points in
-                the constructor and with <methodname>setData()</methodname>.
+                The <classname>RangeSeries</classname> is a helper class that extends
+                <classname>DataSeries</classname> to allow specifying interval data a bit
+                easier, with a list of minimum-maximum value ranges in the Y axis. You can
+                use the series in range charts, as described in <xref
+                linkend="charts.charttypes.rangecharts"/>.
             </para>
 
             <para>
                 For X axis, the coordinates are generated at fixed intervals starting from
-                the value specified in the <literal>pointStart</literal> property (default
-                is 0) at intervals specified in <literal>pointInterval</literal> property
-                (default is 1.0).
+                the value specified with the <literal>pointStart</literal> property
+                (default is 0) at intervals specified with the
+                <literal>pointInterval</literal> property (default is 1.0).
             </para>
 
             <section xml:id="charts.data.rangeseries.data">
