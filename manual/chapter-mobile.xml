@@ -439,13 +439,9 @@ public class SimplePhoneUI extends UI {
                 Vaadin application. However, you need to use the special
                 <classname>TouchKitServlet</classname> class instead of the regular
                 <classname>VaadinServlet</classname> in the <filename>web.xml</filename>
-                deployment descriptor. 
-            </para>
-
-            <para>
-                If you need to add special logic in the servlet, such as to provide
-                different UIs for different devices or to make certain configuration, you
-                can extend the TouchKit servlet to implement the logic.
+                deployment descriptor.  Often you need to make some configuration or add
+                special logic in a custom servlet, as described in the next section, in
+                which case you need to define your servlet in the deployment descriptor.
             </para>
 
             <para>
@@ -456,16 +452,18 @@ public class SimplePhoneUI extends UI {
             </para>
 
             <programlisting><?pocket-size 65% ?>&lt;servlet&gt;
-  &lt;servlet-name&gt;Vaadin Application Servlet&lt;/servlet-name&gt;
-  &lt;servlet-class&gt;com.vaadin.addon.touchkit.server.TouchKitApplicationServlet&lt;/servlet-class&gt;
+  &lt;servlet-name&gt;Vaadin UI Servlet&lt;/servlet-name&gt;
+  &lt;servlet-class&gt;
+    <emphasis role="bold">com.vaadin.addon.touchkit.server.TouchKitServlet</emphasis>
+  &lt;/servlet-class&gt;
   &lt;init-param&gt;
-    &lt;description&gt;Vaadin application class to start&lt;/description&gt;
-    &lt;param-name&gt;application&lt;/param-name&gt;
-    &lt;param-value&gt;<emphasis role="bold">com.vaadin.demo.mobilemail.MobileMailApplication</emphasis>&lt;/param-value&gt;
+    &lt;description&gt;Vaadin UI class to start&lt;/description&gt;
+    &lt;param-name&gt;ui&lt;/param-name&gt;
+    &lt;param-value&gt;<emphasis role="bold">com.example.myapp.MyMobileUI</emphasis>&lt;/param-value&gt;
   &lt;/init-param&gt;
   &lt;init-param&gt;
     &lt;param-name&gt;widgetset&lt;/param-name&gt;
-    &lt;param-value&gt;<emphasis role="bold">com.vaadin.demo.mobilemail.gwt.MobileMailWidgetSet</emphasis>&lt;/param-value&gt;
+    &lt;param-value&gt;<emphasis role="bold">com.example.myapp.MyAppWidgetSet</emphasis>&lt;/param-value&gt;
   &lt;/init-param&gt;
 &lt;/servlet&gt;</programlisting>
         </section>
@@ -685,6 +683,47 @@ public class SimplePhoneUI extends UI {
             <para>
                 If a offline UI is provided, it needs to be enabled in the initialization
                 of the UI, as described in <xref linkend="mobile.offline"/>.
+            </para>
+        </section>
+
+        <!-- TODO
+        <section xml:id="mobile.project.phonevstablet">
+            <title>Phone and Tablet UIs</title>
+
+            <para>
+                The displays in mobile phones and tablets can have very different sizes,
+                so you may want to provide optimized views for each. You can get the
+                display size in pixels from the browser info
+            </para>
+        </section>
+        -->
+
+        <section xml:id="mobile.project.widgetset">
+            <title>Mobile Widget Set</title>
+
+            <para>
+                TouchKit includes a widget set and therefore requires compiling a project
+                widget set that includes it, as described in <xref
+                linkend="addons.compiling"/>. The project widget set descriptor is
+                automatically generated during the compilation process, whether you use
+                Maven or the Eclipse plugin.
+            </para>
+
+            <para>
+                With certain TouhcKit tasks, such as when defining an optimized widget set
+                as described in <xref linkend="mobile.optimization"/>, you need to provide
+                a hand-modified widget set descriptor. In such case, you need to prevent
+                the automatic generation of the descriptor with the following line in it:
+            </para>
+
+            <programlisting>&lt;!-- WS Compiler: manually edited  --&gt;</programlisting>
+
+            <para>
+                Note that if you have a TouchKit UI in a same project as a non-TouchKit
+                UI, you probably do not want to compile the TouchKit widget set into its
+                widget set. As the automatic generation of the descriptor includes all the
+                widget sets that it finds from the class path, the result can be
+                unwanted. You can use a manually edited descriptor also in that case.
             </para>
         </section>
     </section>
@@ -1289,7 +1328,7 @@ bar.removeTab(selectedTab);]]></programlisting>
             </para>
         </section>
 
-        <section xml:id="mobile.considerations.geolocation">
+        <section xml:id="mobile.features.geolocation">
             <title>Geolocation</title>
 
             <para>
@@ -1361,6 +1400,46 @@ bar.removeTab(selectedTab);]]></programlisting>
                 calling <classname>Geolocator</classname><methodname>.detect()</methodname>
                 multiple times.
             </para>
+
+            <section xml:id="mobile.features.geolocation.map">
+                <title>Displaying Position on a Map</title>
+
+                <para>
+                    Geographical positions are often visualized with a map. There are
+                    countless ways to do that, for example, in Vornitologist we use the
+                    <link
+                    xlink:href="http://vaadin.com/directory#addon/openlayers-wrapper">OpenLayers
+                    Wrapper</link> add-on component.
+                </para>
+
+                <para>
+                    The OpenLayers Wrapper add-on contains a custom widget set, which
+                    needs to be included in the project widget set. In addition, the
+                    OpenLayers JavaScript library needs to be referenced in the widget set
+                    descriptor. You need to edit it manually and include the following
+                    lines:
+                </para>
+
+
+                <programlisting>&lt;!-- WS Compiler: manually edited  --&gt;
+&lt;script src="OpenLayers.js"&gt;&lt;/script&gt;
+&lt;inherits name="org.vaadin.vol.VolWidgetset" /&gt;</programlisting>
+
+                <para>
+                    The <classname>MapView</classname> in Vornitologist populates a vector
+                    layer containing markers of the latest observations.
+                </para>
+
+                <programlisting><?pocket-size 75% ?><![CDATA[public class MapView extends NavigationView
+   implements PositionCallback, VectorSelectedListener {
+    public static StyleMap STYLEMAP_BIRD_MARKER;
+    
+    private OpenLayersMap openLayersMap;
+    private double latestLongitude;
+    private double latestLatitude;
+    private VectorLayer markerLayer = new VectorLayer();
+    ...]]]></programlisting>
+            </section>
         </section>
     </section>
 
