@@ -1204,76 +1204,320 @@ layout.addComponent(new Button("OK", new ClickListener() {
             <primary><classname>Container</classname></primary>
         </indexterm>
 
-		<para>
-			<classname>Container</classname> is the highest-level of the data model
-			interfaces supported by Vaadin. It provides a very flexible way of managing a
-			set of items that share common properties. Contained items are identified by
-			an <emphasis>item identifier</emphasis> or <emphasis>IID</emphasis>.
+        <para>
+            The <classname>Container</classname> interface is the highest containment
+            level of the Vaadin data model, for containing items (rows) which in turn
+            contain properties (columns). Containers can therefore represent tabular data,
+            which can be viewed in a <classname>Table</classname> or some other selection
+            component, as well as hierarchical data.
         </para>
 
         <para>
-            Items can be added to a container with the <methodname>addItem()</methodname>
-            method.  Notice that the actual item is not passed as a parameter to the
-            method, only the item ID, as the interface assumes that the container
-            implementation knows how to create the item. The parameterless version of the
-            method uses an automatically generated item ID. Implementations can provide
-            methods to add externally created items, or they can assume that the item ID
-            is also the item itself.
+            The items contained in a container are identified by an <emphasis>item
+            identifier</emphasis> or <emphasis>IID</emphasis>, and the properties by a
+            <emphasis>property identifier</emphasis> or <emphasis>PID</emphasis>.
         </para>
 
-        <para>
-            Properties can be requested from container by first requesting an item with
-            <methodname>getItem()</methodname> and then getting the properties from the
-            item with <methodname>getItemProperty()</methodname>. You can also get a
-            property directly by the item and property ids with
-            <methodname>getContainerProperty()</methodname>.
-		</para>
+        <section xml:id="datamodel.container.intro">
+            <title>Basic Use of Containers</title>
 
-		<para>
-			The <classname>Container</classname> interface was designed with flexibility
-			and efficiency in mind. It contains inner interfaces that containers can
-			optionally implement for ordering the items sequentially, indexing the items,
-			and accessing them hierarchically. Such ordering models provide the basis for
-			the <classname>Table</classname>, <classname>Tree</classname>, and
-			<classname>Select</classname> components. As with other data model interfaces,
-			the <classname>Container</classname> supports events for notifying about
-			changes made to their contents.
-		</para>
+            <para>
+                The basic use of containers involves creating one, adding items to it, and
+                binding it as a container data source of a component.
+            </para>
 
-		<para>
-			As containers can be unordered, ordered, indexed, or hierarchical, they can
-			interface practically any kind of data representation. Vaadin includes data
-			connectors for some common data sources, such as the simple tabular data, with
-			<classname>IndexedContainer</classname>, and the filesystem, with
-			<classname>FilesystemContainer</classname>.
-		</para>
+            <section xml:id="datamodel.container.intro.creating">
+                <title>Default Containers and Delegation</title>
 
-		<para>
-			In addition to generic container implementations, also many user interface
-			components are containers as themselves, in addition to being properties. This
-			is especially true for selection components, that is, those that implement
-			<classname>Select</classname>, because they are containers that contain
-			selectable items. Their property is the currently selected item.  This is
-			useful as it allows binding components to view and updating each others' data
-			directly, and makes it easy to reuse already constructed data models, for
-			example, a form could edit a row (item) of a table directly, and the table
-			could use a database container as its underlying container. The fields of the
-			form would correspond to the properties of the item, that is, the cells of the
-			table row.
-		</para>
+                <para>
+                    Before saying anything about creation of containers, it should be
+                    noted that all components that can be bound to a container data source
+                    are by default bound to a default container. For example,
+                    <classname>Table</classname> is bound to a
+                    <classname>IndexedContainer</classname>, <classname>Tree</classname>
+                    to a <classname>HierarchicalContainer</classname>, and so forth.
+                </para>
 
-		<para>
-			The library contains a set of utilities for converting between different
-			container implementations by adding external ordering or hierarchy into
-			existing containers. In-memory containers implementing indexed and
-			hierarchical models provide easy-to-use tools for setting up in-memory data
-			storages. Such default container implementations include
-			<classname>IndexedContainer</classname>, which can be thought of as a
-			generalization of a two-dimensional data table, and
-			<classname>BeanItemContainer</classname>, which maps standard Java objects
-			(beans) to items of an indexed container. In addition, the built-in containers
-			include a hierarchical container for direct file system browsing.
-		</para>
+                <para>
+                    All of the user interface components using containers also implement
+                    the relevant container interfaces themselves, so that the access to
+                    the underlying data source is delegated through the component.
+                </para>
+
+                <programlisting><?pocket-size 75% ?><![CDATA[// Create a table with one column
+Table table = new Table("My Table");
+table.addContainerProperty("col1", String.class, null);
+
+// Access items and properties through the component
+table.addItem("row1"); // Create item by explicit ID
+Item item1 = table.getItem("row1");
+Property property1 = table.getItemProperty("col1");
+property1.setValue("some given value");
+
+// Equivant access through the container
+Container container = table.getContainerDataSource();
+container.addItem("row2");
+Item item2 = container.getItem("row2");
+Property property2 = table.getItemProperty("col1");
+property2.setValue("another given value");]]></programlisting>
+            </section>
+
+            <section xml:id="datamodel.container.intro.creating">
+                <title>Creating and Binding a Container</title>
+
+                <para>
+                    A container is created and bound to a component as follows:
+                </para>
+
+                <programlisting><?pocket-size 70% ?><![CDATA[// Create a container
+Container container = new IndexedContainer();
+
+// Define the properties (columns) if required by container
+container.addContainerProperty("name", String.class, "none");
+container.addContainerProperty("volume", Double.class, 0.0);
+
+... add items ...
+
+// Bind it to a component
+Table table = new Table("My Table");
+table.setContainerDataSource(container);]]></programlisting>
+
+                <para>
+                    Most components also allow passing the container in the constructor.
+                    Creation depends on the container type. For some containers, such as
+                    the <classname>IndexedContainer</classname>, you need to define the
+                    contained properties (columns) as was done above, while some others
+                    determine them otherwise. The definition of a property with
+                    <methodname>addContainerProperty()</methodname> requires a unique
+                    property ID, type, and a default value. You can also give
+                    <parameter>null</parameter>.
+                </para>
+
+                <para>
+                    Vaadin has a several built-in in-memory container implementations,
+                    such as <classname>IndexedContainer</classname> and
+                    <classname>BeanItemContainer</classname>, which are easy to use for
+                    setting up nonpersistent data storages. For persistent data, either
+                    the built-in <classname>SQLContainer</classname> or the
+                    <classname>JPAContainer</classname> add-on container can be used.
+                </para>
+            </section>
+
+            <section xml:id="datamodel.container.intro.adding">
+                <title>Adding Items and Accessing Properties</title>
+
+                <para>
+                    Items can be added to a container with the
+                    <methodname>addItem()</methodname> method. The parameterless version
+                    of the method automatically generates the item ID.
+                </para>
+
+                <programlisting><![CDATA[// Create an item
+Object itemId = container.addItem();]]></programlisting>
+
+                <para>
+                    Properties can be requested from container by first requesting an item
+                    with <methodname>getItem()</methodname> and then getting the
+                    properties from the item with
+                    <methodname>getItemProperty()</methodname>.
+                </para>
+
+
+                <programlisting><![CDATA[// Get the item object
+Item item = container.getItem(itemId);
+
+// Access a property in the item
+Property<String> nameProperty =
+        item.getItemProperty("name");
+
+// Do something with the property
+nameProperty.setValue("box");]]></programlisting>
+
+                <para>
+                    You can also get a property directly by the item and property ids with
+                    <methodname>getContainerProperty()</methodname>.
+                </para>
+
+                <programlisting><?pocket-size 65% ?><![CDATA[container.getContainerProperty(itemId, "volume").setValue(5.0);]]></programlisting>
+            </section>
+
+            <section xml:id="datamodel.container.intro.givenid">
+                <title>Adding Items by Given ID</title>
+
+                <para>
+                    Some containers, such as <classname>IndexedContainer</classname> and
+                    <classname>HierarchicalContainer</classname>, allow adding items by a
+                    given ID, which can be any <classname>Object</classname>.
+                </para>
+
+                <programlisting><![CDATA[Item item = container.addItem("agivenid");
+item.getItemProperty("name").setValue("barrel");
+Item.getItemProperty("volume").setValue(119.2);]]></programlisting>
+
+                <para>
+                    Notice that the actual item <emphasis>is not</emphasis> given as a
+                    parameter to the method, only its ID, as the interface assumes that
+                    the container itself creates all the items it contains. Some container
+                    implementations can provide methods to add externally created items,
+                    and they can even assume that the item ID object is also the item
+                    itself. Lazy containers might not create the item immediately, but
+                    lazily when it is accessed by its ID.
+                </para>
+            </section>
+        </section>
+
+        <section xml:id="datamodel.container.inner">
+            <title>Container Subinterfaces</title>
+
+            <para>
+                The <classname>Container</classname> interface contains inner interfaces
+                that container implementations can implement to fulfill different features
+                required by components that present container data.
+            </para>
+
+            <variablelist>
+                <varlistentry>
+                    <term><interfacename>Container.Filterable</interfacename></term>
+                    <listitem>
+                        <para>
+                            Filterable containers allow filtering the contained items by
+                            filters, as described in <xref
+                            linkend="datamodel.container.filtered"/>.
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><interfacename>Container.Hierarchical</interfacename></term>
+                    <listitem>
+                        <para>
+                            Hierarchical containers allow representing hierarchical
+                            relationships between items and are required by the
+                            <classname>Tree</classname> and
+                            <classname>TreeTable</classname> components. The
+                            <classname>HierarchicalContainer</classname> is a built-in
+                            in-memory container for hierarchical data, and is used as the
+                            default container for the tree components. The
+                            <classname>FilesystemContainer</classname> provides access to
+                            browsing the content of a file system. Also
+                            <classname>JPAContainer</classname> is hierarchical, as
+                            described in <xref
+                            linkend="jpacontainer.usage.hierarchical"/>.
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><interfacename>Container.Indexed</interfacename></term>
+                    <listitem>
+                        <para>
+                            An indexed container allows accessing items by an index
+                            number, not just their item ID. This feature is required by
+                            some components, especially <classname>Table</classname>,
+                            which needs to provide lazy access to large containers. The
+                            <classname>IndexedContainer</classname> is a basic in-memory
+                            implementation, as described in <xref
+                            linkend="datamodel.container.indexedcontainer"/>.
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><interfacename>Container.Ordered</interfacename></term>
+                    <listitem>
+                        <para>
+                            An ordered container allows traversing the items in successive
+                            order in either direction. Most built-in containers are
+                            ordered.
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><interfacename>Container.SimpleFilterable</interfacename></term>
+                    <listitem>
+                        <para>
+                            This interface enables filtering a container by string
+                            matching with
+                            <methodname>addContainerFilter()</methodname>. The filtering
+                            is done by either searching the given string anywhere in a
+                            property value, or as its prefix.
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><interfacename>Container.Sortable</interfacename></term>
+                    <listitem>
+                        <para>
+                            A sortable container is required by some components that allow
+                            sorting the content, such as <classname>Table</classname>,
+                            where the user can click a column header to sort the table by
+                            the column. Some other components, such as
+                            <classname>Calendar</classname>, may require that the content
+                            is sorted to be able to display it properly. Depending on the
+                            implementation, sorting can be done only when the
+                            <methodname>sort()</methodname> method is called, or the
+                            container is automatically kept in order according to the last
+                            call of the method.
+                        </para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+
+            <para>
+                See the API documentation for a detailed description of the interfaces.
+            </para>
+        </section>
+
+        <section xml:id="datamodel.container.indexedcontainer">
+            <title><classname>IndexedContainer</classname></title>
+
+            <para>
+                The <classname>IndexedContainer</classname> is an in-memory container that
+                implements the <interfacename>Indexed</interfacename> interface to allow
+                referencing the items by an index. <classname>IndexedContainer</classname> is
+                used as the default container in most selection components in Vaadin.
+            </para>
+
+            <para>
+                The properties need to be defined with
+                <methodname>addContainerProperty()</methodname>, which takes the property
+                ID, type, and a default value. This must be done before any items are
+                added to the container.
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[// Create the container
+IndexedContainer container = new IndexedContainer();
+        
+// Define the properties (columns)
+container.addContainerProperty("name", String.class, "noname");
+container.addContainerProperty("volume", Double.class, -1.0d);
+
+// Add some items
+Object content[][] = {{"jar", 2.0}, {"bottle", 0.75},
+                      {"can", 1.5}};
+for (Object[] row: content) {
+    Item newItem = container.getItem(container.addItem());
+    newItem.getItemProperty("name").setValue(row[0]);
+    newItem.getItemProperty("volume").setValue(row[1]);
+}]]></programlisting>
+
+            <para>
+                New items are added with <methodname>addItem()</methodname>, which returns
+                the item ID of the new item, or by giving the item ID as a parameter as
+                was described earlier. Note that the <classname>Table</classname>
+                component, which has <classname>IndexedContainer</classname> as its
+                default container, has a conveniency <methodname>addItem()</methodname>
+                method that allows adding items as object vectors containing the property
+                values.
+            </para>
+
+            <para>
+                The container implements the
+                <interfacename>Container.Indexed</interfacename> feature to allow
+                accessing the item IDs by their index number, with
+                <methodname>getIdByIndex()</methodname>, etc. The feature is required
+                mainly for internal purposes of some components, such as
+                <classname>Table</classname>, which uses it to enable lazy transmission of
+                table data to the client-side.
+            </para>
+        </section>
 
         <section xml:id="datamodel.container.beancontainer">
             <title><classname>BeanContainer</classname></title>
