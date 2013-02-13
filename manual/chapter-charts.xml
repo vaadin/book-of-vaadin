@@ -1687,6 +1687,121 @@ conf.addxAxis(xaxis);]]></programlisting>
 
         </section>
     </section>
+
+    <section xml:id="charts.advanced">
+        <title>Advanced Uses</title>
+
+        <section xml:id="charts.advanced.export">
+            <title>Server-Side Rendering and Exporting</title>
+
+            <para>
+                In addition to using charts in Vaadin UIs, you may also need to provide
+                them as images or in downloadable documents. Vaadin Charts can be rendered
+                on the server-side using a headless JavaScript execution environment, such
+                as <link xlink:href="http://phantomjs.org/">PhantomJS</link>. 
+            </para>
+
+            <para>
+                Vaadin Charts supports a HighCharts remote export service, but the SVG
+                Generator based on PhantomJS is almost as easy to use and allows much more
+                powerful uses.
+            </para>
+
+            <section xml:id="charts.advanced.export.exporting">
+                <title>Using a Remote Export Service</title>
+
+                <para>
+                    HighCharts has a simple built-in export functionality that does the
+                    export in a remote export server. HighCharts provides a default export
+                    service, but you can also configure your own.
+                </para>
+
+                <para>
+                    You can enable the built-in export function by setting
+                    <methodname>setExporting(true)</methodname> in the chart
+                    configuration.
+                </para>
+
+                <programlisting><![CDATA[chart.getConfiguration().setExporting(true);]]></programlisting>
+
+                <para>
+                    To configure it further, you can provide a
+                    <classname>Exporting</classname> object with custom settings.
+                </para>
+
+                <programlisting><![CDATA[// Create the export configuration
+Exporting exporting = new Exporting(true);
+        
+// Customize the file name of the download file
+exporting.setFilename("mychartfile.pdf");
+
+// Enable export of raster images 
+exporting.setEnableImages(true);
+
+// Use the exporting configuration in the chart
+chart.getConfiguration().setExporting(exporting);]]></programlisting>
+
+                <para>
+                    If you only want to enable download, you can disable the print button
+                    as follows:
+                </para>
+
+                <programlisting><![CDATA[ExportButton printButton = new ExportButton();
+printButton.setEnabled(false);
+exporting.setPrintButton(printButton);]]></programlisting>
+
+                <para>
+                    The functionality uses a HighCharts export service by default. To use
+                    your own, you need to set up one and then configure it in the
+                    exporting configuration as follows:
+                </para>
+
+                <programlisting><![CDATA[exporting.setUrl("http://my.own.server.com");]]></programlisting>
+            </section>
+
+            <section xml:id="charts.advanced.export.svggenerator">
+                <title>Using the SVG Generator</title>
+
+                <para>
+                    The <classname>SVGGenerator</classname> in Vaadin Charts provides an
+                    advanced way to render the Chart into SVG format on the
+                    server-side. SVG is well supported by many applications, can be
+                    converted to virtually any other graphics format, and can be passed to
+                    PDF report generators.
+                </para>
+
+                <para>
+                    The generator uses PhantomJS to render the chart on the
+                    server-side. You need to install it from <link
+                    xlink:href="http://phantomjs.org/">phantomjs.org</link>. After
+                    installation, PhantomJS should be in your system path. If not, you can
+                    set the <parameter>phantom.exec</parameter> system property for the
+                    JRE to point to the PhantomJS binary.
+                </para>
+
+                <para>
+                    To generate the SVG image content as a string (it's XML), simply call
+                    the <methodname>generate()</methodname> method in the
+                    <classname>SVGGenerator</classname> singleton and pass it the chart
+                    configuration.
+                </para>
+
+                <programlisting><![CDATA[String svg = SVGGenerator.getInstance()
+    .generate(chart.getConfiguration());]]></programlisting>
+
+                <para>
+                    You can then use the SVG image as you like, for example, for download
+                    from a <classname>StreamResource</classname>, or include it in a HTML,
+                    PDF, or other document. You can use SVG tools such as the <link
+                    xlink:href="http://xmlgraphics.apache.org/batik/">Batik</link> or
+                    <link xlink:href="http://itextpdf.com/">iText</link> libraries to
+                    generate documents. For a complete example, you can check out the
+                    Charts Export Demo from the Subversion repository at
+                    <uri>http://dev.vaadin.com/svn/addons/vaadin-charts/chart-export-demo</uri>.
+                </para>
+            </section>
+        </section>
+    </section>
 </chapter>
 
 <!-- Keep this comment at the end of the file
