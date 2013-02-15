@@ -1042,34 +1042,34 @@ panel.setContent(content);]]></programlisting>
             </para>
 
             <para>
-                In the following example, the <classname>Embedded</classname> component
-                has undefined size in both dimensions by default, but we also have to set
-                undefined size for the root layout of the panel as the default
-                <classname>VerticalLayout</classname> only has undefined height by
-                default.
+                In the following example, we have a 300 pixels wide and very high
+                <classname>Image</classname> component as the panel content.
             </para>
 
-            <programlisting><?pocket-size 65% ?><![CDATA[// Serve the image from the theme
-Resource rsrc = new ThemeResource("img/embedded-journalist.jpg");
+            <programlisting><?pocket-size 65% ?><![CDATA[// Display an image stored in theme
+Image image = new Image(null,
+    new ThemeResource("img/Ripley_Scroll-300px.jpg"));
         
-// Display the image without caption
-Embedded image = new Embedded(null, rsrc);
+// To enable scrollbars, the size of the panel content
+// must not be relative to the panel size
 image.setSizeUndefined(); // Actually the default
 
-// The panel will give it scrollbars. The root layout
-// (VerticalLayout) must have undefined width to make the
-// horizontal scroll bar appear.
-Panel panel = new Panel("Embedding");
-panel.setWidth("400px");
+// The panel will give it scrollbars.
+Panel panel = new Panel("Scroll");
+panel.setWidth("300px");
 panel.setHeight("300px");
-panel.getContent().setSizeUndefined();
-panel.addComponent(image);
+panel.setContent(image);
 
 layout.addComponent(panel);]]></programlisting>
 
+            <!-- Copyright Notice: The Ripley Scroll is out of copyright. -->
+
             <para>
                 The result is shown in <xref
-                linkend="figure.layout.panel.scrolling"/>.
+                linkend="figure.layout.panel.scrolling"/>. Notice that also the horizontal
+                scrollbar has appeared even though the panel has the same width as the
+                content (300 pixels) - the 300px width for the panel includes the panel
+                border and vertical scrollbar.
             </para>
 
 			<figure xml:id="figure.layout.panel.scrolling">
@@ -1081,72 +1081,22 @@ layout.addComponent(panel);]]></programlisting>
 				</mediaobject>
 			</figure>	
 
-            <!-- TODO include the copyright information somewhere:
-                 embedded-journalist.jpg
-
-                 http://en.wikipedia.org/wiki/File:Army.mil-2007-06-26-111327.jpg
-
-                 Staff Sgt. Michael L. Casteel
-
-                 This image is a work of a U.S. Army soldier or employee, taken or made
-                 during the course of the person's official duties. As a work of the
-                 U.S. federal government, the image is in the public domain. -->
-
             <indexterm xml:id="term.layout.panel.scrolling.scrollable" class="startofrange">
                 <primary><interfacename>Scrollable</interfacename></primary>
             </indexterm>
 
             <simplesect xml:id="layout.panel.scrolling.programmatic">
-                <title>Programmatic Scrolling with <interfacename>Scrollable</interfacename></title>
+                <title>Programmatic Scrolling</title>
 
                 <para>
                     <classname>Panel</classname> implements the
                     <interfacename>Scrollable</interfacename> interface to allow
-                    <emphasis>programmatic scrolling</emphasis>. You first need to enable
-                    programmatic scrolling with <methodname>setScrollable(true)</methodname>,
-                    after which you can set the scroll position in pixels with
+                    programmatic scrolling. You can set the scroll position in pixels with
                     <methodname>setScrollTop()</methodname> and
-                    <methodname>setScrollLeft()</methodname>.
+                    <methodname>setScrollLeft()</methodname>. You can also get the scroll
+                    position set previously, but scrolling the panel in the browser does
+                    not update the scroll position to the server-side.
                 </para>
-
-                <para>
-                    Consider the following example:
-                </para>
-
-                <programlisting><?pocket-size 65% ?><![CDATA[final Panel panel = new Panel("Scrolling Panel");
-panel.setHeight("300px");
-panel.setWidth("400px");
-panel.getContent().setHeight("1000px");
-panel.setScrollable(true);
-        
-layout.addComponent(panel);
-
-HorizontalLayout scrollButtons = new HorizontalLayout();
-layout.addComponent(scrollButtons);
-        
-Button scrollUp = new Button("Scroll Up");
-scrollUp.addListener(new Button.ClickListener() {
-    public void buttonClick(ClickEvent event) {
-        int scrollPos = panel.getScrollTop() - 250;
-        if (scrollPos < 0)
-            scrollPos = 0;
-        panel.setScrollTop(scrollPos);
-    }
-});
-scrollButtons.addComponent(scrollUp);
-        
-Button scrollDown = new Button("Scroll Down");
-scrollDown.addListener(new Button.ClickListener() {
-    public void buttonClick(ClickEvent event) {
-        int scrollPos = panel.getScrollTop();
-        if (scrollPos > 1000)
-            scrollPos = 1000;
-        panel.setScrollTop(scrollPos + 250);
-    }
-});
-scrollButtons.addComponent(scrollDown);]]></programlisting>
-
-            <!-- TODO: Screenshot -->
 
                 <indexterm startref="term.layout.panel.scrolling.scrollable" class="endofrange"/>
                 <indexterm startref="term.layout.panel.scrolling.scrollbars" class="endofrange"/>

@@ -205,30 +205,18 @@
 				</para>
 
 				<para>
-					A component does not know its parent when the component is created, so
-					you can not refer to the parent in the constructor with
-					<methodname>getParent()</methodname>. Also, it is not possible to
-					fetch a reference to the application object with
-					<methodname>getApplication()</methodname> before having a parent. For
-					example, the following is invalid:
-				</para>
-
-				<programlisting><?pocket-size 65% ?><![CDATA[public class AttachExample extends CustomComponent {
-    public AttachExample() {
-        // ERROR: We can't access the application object yet.
-        ClassResource r = new ClassResource("smiley.jpg");
-        Embedded image = new Embedded("Image:", r); 
-        setCompositionRoot(image);
-    }
-}]]></programlisting>
+					A component does not know its parent when the component is still being
+					created, so you can not refer to the parent in the constructor with
+					<methodname>getParent()</methodname>.
+                </para>
 
 				<para>
-					Adding a component to an application triggers calling the
-					<methodname>attach()</methodname> method for the
-					component. Correspondingly, removing a component from a container
-					triggers calling the <methodname>detach()</methodname> method. If the
-					parent of an added component is already connected to the application,
-					the <methodname>attach()</methodname> is called immediately from
+					Attaching a component to an UI triggers a call to its
+					<methodname>attach()</methodname> method. Correspondingly, removing a
+					component from a container triggers calling the
+					<methodname>detach()</methodname> method. If the parent of an added
+					component is already connected to the UI, the
+					<methodname>attach()</methodname> is called immediately from
 					<methodname>setParent()</methodname>.
 				</para>
 
@@ -242,7 +230,7 @@
         
         // Now we know who ultimately owns us.
         ClassResource r = new ClassResource("smiley.jpg");
-        Embedded image = new Embedded("Image:", r); 
+        Image image = new Image("Image:", r); 
         setCompositionRoot(image);
     }
 }]]></programlisting>
@@ -6010,203 +5998,216 @@ services.addItem("Car Service", null, mycommand);]]></programlisting>
 	</section>
 
 	<section xml:id="components.embedded">
-		<title><classname>Embedded</classname></title>
+		<title>Embedded Resources</title>
 
 		<para>
-			The <classname>Embedded</classname> component allows displaying embedded media
-			objects, such as images, animations, or any embeddable media type supported by
-			the browser. The contents of an <classname>Embedded</classname> component are
-			managed as <emphasis>resources</emphasis>. For documentation on resources, see
-			<xref linkend="application.resources"/>.
+            You can embed images in Vaadin UIs with the <classname>Image</classname>
+            component, Adobe Flash graphics with <classname>Flash</classname>, and other
+            web content with <classname>BrowserFrame</classname>. There is also a generic
+            <classname>Embedded</classname> component for embedding other object
+            types. The embedded content is referenced as <emphasis>resources</emphasis>,
+            as described in <xref linkend="application.resources"/>.
 		</para>
 
 		<para>
-			The following example displays an image from the same Java package as the
-			class itself using the class loader.
+			The following example displays an image as a class resource loaded with the
+			class loader:
 		</para>
 
-		<programlisting><![CDATA[Embedded image = new Embedded("Yes, logo:",
+		<programlisting><![CDATA[Image image = new Image("Yes, logo:",
     new ClassResource("vaadin-logo.png"));
 main.addComponent(image);]]></programlisting>
 
-        <!-- TODO CRITICAL: Replace with Vaadin logo. -->
-		<figure>
-			<title>Embedded Image</title>
-			<mediaobject>
-				<imageobject role="html">
-					<imagedata align="center" fileref="img/components/embedded-example1.png"/>
-				</imageobject>
-				<imageobject role="fo">
-					<imagedata scale="75" smallscale="100%" align="center" fileref="img/components/embedded-example1.png"/>
-				</imageobject>
-			</mediaobject>
-		</figure>
+        <para>
+            The caption can be given as null to disable it. An empty string displays an
+            empty caption which takes a bit space. The caption is managed by the
+            containing layout.
+        </para>
 
-		<para>
-			The <classname>Embedded</classname> component supports several different
-			content types, which are rendered differently in HTML. You can set the content
-			type with <methodname>setType()</methodname>, although for images, as in the
-			above example, the type is determined automatically.
-		</para>
-        
-        <variablelist>
-            <varlistentry>
-                <term><parameter>Embedded.TYPE_OBJECT</parameter></term>
-                <listitem>
-                    The default embedded type, allows embedding certain file types inside
-                    HTML <tag>&lt;object&gt;</tag> and <tag>&lt;embed&gt;</tag> elements.
-                </listitem>
-            </varlistentry>
-            <varlistentry>
-                <term><parameter>Embedded.TYPE_IMAGE</parameter></term>
-                <listitem>
-                    Embeds an image inside a HTML <tag>&lt;img&gt;</tag> element.
-                </listitem>
-            </varlistentry>
-            <varlistentry>
-                <term><parameter>Embedded.TYPE_BROWSER</parameter></term>
-                <listitem>
-                    Embeds a browser frame inside a HTML <tag>&lt;iframe&gt;</tag>
-                    element.
-                </listitem>
-            </varlistentry>
-        </variablelist>
+        <para>
+            You can set an altenative text for an embedded resource with
+            <methodname>setAlternateText()</methodname>, which can be shown if images are
+            disabled in the browser for some reason. The text can be used for
+            accessibility purposes, such as for text-to-speech generation.
+        </para>
 
-		<section>
-			<title>Embedded Objects</title>
-
-			<para>
-				The <parameter>Embedded.TYPE_OBJECT</parameter> is the default and most
-				generic embedded type, which allows embedding media objects inside HTML
-				<tag>&lt;object&gt;</tag> and <tag>&lt;embed&gt;</tag> elements. You need
-				define the MIME type for the object type.
-			</para>
-
-			<para>
-				Currently, only Shockwave Flash animations are supported (MIME type
-				<literal>application/x-shockwave-flash</literal>).
-			</para>
-
-			<programlisting><?pocket-size 65% ?><![CDATA[// Create a Shockware Flash resource
-final ClassResource flashResource =
-    new ClassResource("itmill_spin.swf");
-
-// Display the resource in a Embedded compoant
-final Embedded embedded =
-    new Embedded("Embedded Caption", flashResource);
-
-// This is the default type, but we set it anyway.
-embedded.setType(Embedded.TYPE_OBJECT);
-
-// This is recorgnized automatically, but set it anyway.
-embedded.setMimeType("application/x-shockwave-flash");]]></programlisting>
-
-			<para>
-				You can set object parameters with
-				<methodname>setParameter()</methodname>, which takes a parameter's name
-				and value as strings. The object parameters are included in the HTML as
-				<tag>&lt;param&gt;</tag> elements.
-			</para>
-		</section>
-		
-		<section>
-			<title>Embedded Images</title>
-
-			<para>
-				Images are embedded with the type
-				<parameter>Embedded.TYPE_IMAGE</parameter>, although you do not normally
-				need to set the type explicitly, as it is recognized automatically from
-				the MIME type of the resource, as in the example above.
-			</para>
+		<section xml:id="components.embedded.image">
+			<title>Embedded <classname>Image</classname></title>
 
             <para>
-                <classname>Embedded</classname> component has by default undefined size in
-                both directions, so it will automatically fit the size of the embedded
+                The <classname>Image</classname> component allows embedding an image
+                resource in a Vaadin UI.
+            </para>
+
+		<programlisting><![CDATA[// Serve the image from the theme
+Resource res = new ThemeResource("img/myimage.png");
+
+// Display the image without caption
+Image image = new Image(null, res);
+layout.addComponent(image);]]></programlisting>
+
+
+            <para>
+                The <classname>Image</classname> component has by default undefined size
+                in both directions, so it will automatically fit the size of the embedded
                 image.
 
                 <indexterm><primary>scroll bars</primary></indexterm>
 
-                If you want scrolling with scroll bars, you can put the
-                <classname>Embedded</classname> inside a <classname>Panel</classname> that
-                has a defined size to enable scrolling, as described in <xref
-                linkend="layout.panel.scrolling"/>. You can also give it a
-                defined size and set the <literal>overflow: auto</literal> CSS property
-                for it in a theme.
-                <indexterm>overflow CSS property</indexterm>
+                If you want scrolling with scroll bars, you can put the image inside a
+                <classname>Panel</classname> that has a defined size to enable scrolling,
+                as described in <xref linkend="layout.panel.scrolling"/>. You can also put
+                it inside some other component container and set the <literal>overflow:
+                auto</literal> CSS property for the container element in a theme to enable
+                automatic scrollbars.  <indexterm>overflow CSS property</indexterm>
             </para>
 
-			<para>
-				You can find another example of displaying an image from
-				<classname>FileResource</classname> in <xref
-				linkend="components.upload"/>. Another example, in <xref
-				linkend="application.resources.stream"/>, shows how you can generate the
-				content of an <classname>Embedded</classname> component dynamically using
-				a <classname>StreamResource</classname>.
-			</para>
-			
-			<para>
-				If you have a dynamically generated image, for example with a
-				<classname>StreamResource</classname>, and the data changes, you need to
-				reload the image in the browser. Because of how caching is handled in some
-				browsers, you are best off by renaming the filename of the resource with a
-				unique name, such as one including a timestamp. You should set cache time
-				to zero with <methodname>setCacheTime()</methodname> for the resource
-				object when you create it.
+            <book-example id="component.embedded.scrolling-css"></book-example>
 
-				<!-- BUG #2470. -->
-			</para>
+            <section xml:id="components.embedded.image.generated">
+                <title>Generating and Reloading Images</title>
 
-			<programlisting><?pocket-size 65% ?><![CDATA[// Create the stream resource with some initial filename.
+                <para>
+                    You can also generate the image content dynamically using a
+                    <classname>StreamResource</classname>, as described in <xref
+                    linkend="application.resources.stream"/>, or with a
+                    <classname>RequestHandler</classname>.
+                </para>
+
+                <para>
+                    If the image changes, the browser needs to reload it. Simply updating
+                    the stream resource is not enough. Because of how caching is handled
+                    in some browsers, you can cause a reload easiest by renaming the
+                    filename of the resource with a unique name, such as one including a
+                    timestamp. You should set cache time to zero with
+                    <methodname>setCacheTime()</methodname> for the resource object when
+                    you create it.
+
+                    <!-- BUG #2470. -->
+                </para>
+
+                <programlisting><?pocket-size 65% ?><![CDATA[// Create the stream resource with some initial filename
 StreamResource imageResource =
     new StreamResource(imageSource, "initial-filename.png");
 
-// Instruct browser not to cache the image.
+// Instruct browser not to cache the image
 imageResource.setCacheTime(0);
 
-// Display the image in an Embedded component.
-Embedded embedded = new Embedded("", imageResource);]]></programlisting>
+// Display the image
+Image image = new Image(null, imageResource);]]></programlisting>
 
-			<para>
-				When refreshing, you also need to call
-				<methodname>requestRepaint()</methodname> for the
-				<classname>Embedded</classname> object.
-			</para>
+                <para>
+                    When refreshing, you also need to call
+                    <methodname>markAsDirty()</methodname> for the
+                    <classname>Image</classname> object.
+                </para>
 
-			<programlisting><?pocket-size 65% ?><![CDATA[// This needs to be done, but is not sufficient.
-embedded.requestRepaint();
+                <programlisting><?pocket-size 65% ?><![CDATA[// This needs to be done, but is not sufficient
+image.markAsDirty();
 
-// Generate a filename with a timestamp.
+// Generate a filename with a timestamp
 SimpleDateFormat df = new SimpleDateFormat("yyyyMMddHHmmssSSS");
 String filename = "myfilename-" + df.format(new Date()) + ".png";
 
-// Replace the filename in the resource.
+// Replace the filename in the resource
 imageResource.setFilename(makeImageFilename());]]></programlisting>
+            </section>
+        </section>
+		
+		<section xml:id="components.embedded.flash">
+			<title>Adobe <classname>Flash</classname> Graphics</title>
 
 			<para>
-				You can find more detailed information about the
-				<classname>StreamResource</classname> in <xref
-				linkend="application.resources.stream"/>.
+                The <classname>Flash</classname> component allows embedding Adobe Flash
+                animations in Vaadin UIs.
 			</para>
-			
-		</section>
-		
-		<section>
-			<title>Browser Frames</title>
+
+			<programlisting><![CDATA[Flash flash = new Flash(null,
+    new ThemeResource("img/vaadin_spin.swf"));
+layout.addComponent(flash);]]></programlisting>
 
 			<para>
-				The browser frame type allows you to embed external content inside an HTML
-				<tag>&lt;iframe&gt;</tag> element. You can refer to a URL with an
-				<classname>ExternalResource</classname> object. URLs are given with the
-				standard Java <classname>URL</classname> class.
+				You can set Flash parameters with <methodname>setParameter()</methodname>,
+				which takes a parameter's name and value as strings. You can also set the
+				<parameter>codeBase</parameter>, <parameter>archive</parameter>, and
+				<parameter>standBy</parameter> attributes for the Flash object element in
+				HTML.
 			</para>
-
-			<programlisting><?pocket-size 65% ?><![CDATA[URL url = new URL("http://dev.vaadin.com/");
-Embedded browser = new Embedded("", new ExternalResource(url));
-browser.setType(Embedded.TYPE_BROWSER);
-main.addComponent(browser);]]></programlisting>
-
 		</section>
 		
+		<section xml:id="components.embedded.browserframe">
+			<title><classname>BrowserFrame</classname></title>
+
+			<para>
+				The <classname>BrowserFrame</classname> allows embedding web content
+				inside an HTML <tag>&lt;iframe&gt;</tag> element. You can refer to an
+				external URL with <classname>ExternalResource</classname>.
+			</para>
+
+            <para>
+                As the <classname>BrowserFrame</classname> has undefined size by default,
+                it is critical that you define a meaningful size for it, either fixed or
+                relative.
+            </para>
+
+			<programlisting><?pocket-size 65% ?><![CDATA[BrowserFrame browser = new BrowserFrame("Browser",
+    new ExternalResource("http://demo.vaadin.com/sampler/"));
+browser.setWidth("600px");
+browser.setHeight("400px");
+layout.addComponent(browser);]]></programlisting>
+
+            <para>
+                Notice that web pages can prevent embedding them in an <tag>&lt;iframe&gt;</tag>.
+            </para>
+		</section>
+
+		<section xml:id="components.embedded.embedded">
+			<title>Generic <classname>Embedded</classname> Objects</title>
+
+            <para>
+                The generic <classname>Embedded</classname> component allows embedding all
+                sorts of objects, such as SVG graphics, Java applets, and PDF documents,
+                in addition to the images, Flash graphics, and browser frames which you
+                can embed with the specialized components.
+            </para>
+
+            <para>
+                For example, to display a Flash animation:
+            </para>
+
+			<programlisting><![CDATA[// A resource reference to some object
+Resource res = new ThemeResource("img/vaadin_spin.swf");
+
+// Display the object
+Embedded object = new Embedded("My Object", res);
+layout.addComponent(object);]]></programlisting>
+
+            <para>
+                Or an SVG image:
+            </para>
+
+			<programlisting><![CDATA[// A resource reference to some object
+Resource res = new ThemeResource("img/reindeer.svg");
+
+// Display the object
+Embedded object = new Embedded("My SVG", res);
+object.setMimeType("image/svg+xml"); // Unnecessary
+layout.addComponent(object);]]></programlisting>
+
+            <para>
+                The MIME type of the objects is usually detected automatically from the
+                filename extension with the <classname>FileTypeResolver</classname>
+                utility in Vaadin. If not, you can set it explicitly with
+                <methodname>setMimeType()</methodname>, as was done in the example above
+                (where it was actually unnecessary).
+            </para>
+
+            <para>
+                Some embeddable object types may require special support in the
+                browser. You should make sure that there is a proper fallback mechanism if
+                the browser does not support the embedded type.
+            </para>
+        </section>
 	</section>
 
 	<section xml:id="components.upload">
@@ -6282,7 +6283,7 @@ Upload upload = new Upload("Upload the file here", this);]]></programlisting>
 			The following example allows uploading images to
 			<filename>/tmp/uploads</filename> directory in (UNIX) filesystem (the
 			directory must exist or the upload fails). The component displays the last
-			uploaded image in an <classname>Embedded</classname> component.
+			uploaded image in an <classname>Image</classname> component.
 		</para>
 
         <book-example id="component.upload.basic" style="float: right"/>
@@ -6295,7 +6296,7 @@ Panel panel = new Panel("Cool Image Storage");
 panel.addComponent(upload);
         
 // Show uploaded file in this placeholder
-final Embedded image = new Embedded("Uploaded Image");
+final Image image = new Image("Uploaded Image");
 image.setVisible(false);
 panel.addComponent(image);
 
