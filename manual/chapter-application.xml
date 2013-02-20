@@ -1053,7 +1053,7 @@ button.setComponentError(new UserError("Bad click"));]]></programlisting>
             </para>
 
             <para>
-                System messages are strings managed in
+                System messages are strings managed in the
                 <classname>SystemMessages</classname> class.
             </para>
 
@@ -1131,29 +1131,29 @@ button.setComponentError(new UserError("Bad click"));]]></programlisting>
             </para>
 
             <para>
-                You can override the default system messages by implementing the
-                <methodname>getSystemMessages()</methodname> method in the UI class. The
-                method should return a <classname>SystemMessages</classname> object. The
-                easiest way to customize the messages is to use a
-                <classname>CustomizedSystemMessages</classname> object as follows:
+                You can override the default system messages by setting the
+                <interfacename>SystemMessagesProvider</interfacename> in the
+                <classname>VaadinService</classname>. You need to implement the
+                <methodname>getSystemMessages()</methodname> method, which should return a
+                <classname>SystemMessages</classname> object. The easiest way to customize
+                the messages is to use a <classname>CustomizedSystemMessages</classname>
+                object as follows:
             </para>
 
-			<programlisting><?pocket-size 65% ?><![CDATA[// Override the default implementation
-public static SystemMessages getSystemMessages() {
-    CustomizedSystemMessages messages =
-            new CustomizedSystemMessages();
-    messages.setSessionExpiredCaption("Ohno, session expired!");
-    messages.setSessionExpiredMessage("Don't idle!");
-    messages.setSessionExpiredNotificationEnabled(true);
-    messages.setSessionExpiredURL("http://vaadin.com/");
-    return messages;
-}]]></programlisting>
-
-            <para>
-                Notice that the special <methodname>getSystemMessages()</methodname>
-                method is executed using reflection - it is not defined in an interface
-                nor does it exist in the <classname>UI</classname> superclass.
-            </para>
+			<programlisting><?pocket-size 65% ?><![CDATA[VaadinService.getCurrent().setSystemMessagesProvider(
+    new SystemMessagesProvider() {
+    @Override
+    public SystemMessages getSystemMessages(
+        SystemMessagesInfo systemMessagesInfo) {
+        CustomizedSystemMessages messages =
+                new CustomizedSystemMessages();
+        messages.setCommunicationErrorCaption("Comm Err");
+        messages.setCommunicationErrorMessage("This is bad.");
+        messages.setCommunicationErrorNotificationEnabled(true);
+        messages.setCommunicationErrorURL("http://vaadin.com/");
+        return messages;
+    }
+});]]></programlisting>
         </section>
 		
         <section xml:id="application.errors.unchecked-exceptions">
@@ -1162,32 +1162,13 @@ public static SystemMessages getSystemMessages() {
 			<para>
 				Handling events can result in exceptions either in the application logic
 				or in the framework itself, but some of them may not be caught properly by
-				the application. Any such exceptions are eventually caught in
-				<classname>VaadinSession</classname>.
-            </para>
-
-            <para>
-                For example, in the following, we throw an error in an event listener but
-                do not catch it, so it falls to the framework.
-            </para>
-
-            <programlisting><?pocket-size 70% ?><![CDATA[final Button button = new Button ("Fail Me");
-
-button.addClickListener(new Button.ClickListener() {
-    public void buttonClick(ClickEvent event) {
-        // Throw some exception.
-        throw new RuntimeException("You can't catch this.");
-    }
-});]]></programlisting>
-
-            <para>
-                The uncaught exceptions are by default delegated to the
-                <classname>DefaultErrorHandler</classname>, which displays the error as a
-                component error, that is, with a small red "!" -sign (depending on the
-                theme). If the user hovers the mouse pointer over it, the entire backtrace
-                of the exception is shown in a large tooltip box, as illustrated in <xref
-                linkend="figure.application.errors.unchecked-exceptions"/> for the above
-                code example.
+				the application. Any such exceptions are eventually caught by the
+				framework. It delegates the exceptions to the
+				<classname>DefaultErrorHandler</classname>, which displays the error as a
+				component error, that is, with a small red "!" -sign (depending on the
+				theme). If the user hovers the mouse pointer over it, the entire backtrace
+				of the exception is shown in a large tooltip box, as illustrated in <xref
+				linkend="figure.application.errors.unchecked-exceptions"/>.
             </para>
 
 			<figure xml:id="figure.application.errors.unchecked-exceptions">
@@ -1205,9 +1186,9 @@ button.addClickListener(new Button.ClickListener() {
 			<para>
                 You can customize the default error handling by implementing a custom
                 <interfacename>ErrorHandler</interfacename> and enabling it with
-                <methodname>setErrorHandler()</methodname> in the
-                <classname>UI</classname> or in the <classname>VaadinSession</classname>
-                object. You can either implement the
+                <methodname>setErrorHandler()</methodname> in any of the components in the
+                component hierarchy, including the <classname>UI</classname>, or in the
+                <classname>VaadinSession</classname> object. You can either implement the
                 <interfacename>ErrorHandler</interfacename> or extend the
                 <classname>DefaultErrorHandler</classname>. In the following example, we
                 modify the behavior of the default handler.
@@ -1242,6 +1223,10 @@ UI.getCurrent().setErrorHandler(new DefaultErrorHandler() {
     } 
 });]]></programlisting>
 
+            <para>
+                The above example also demonstrates how to dig up the final cause from the
+                cause stack.
+            </para>
 		</section>
 	</section>
 
@@ -1259,11 +1244,13 @@ UI.getCurrent().setErrorHandler(new DefaultErrorHandler() {
         <para>
             There are two ways to create a notification. The easiest is to use a static
             shorthand <methodname>Notification.show()</methodname> method, which takes the
-            caption of the notification as a parameter and displays it in the current
-            page.
+            caption of the notification as a parameter, and an optional description and
+            notification type, and displays it in the current page.
         </para>
 
-        <programlisting><![CDATA[Notification.show("This is a warning");]]></programlisting>
+        <programlisting><![CDATA[Notification.show("This is the caption",
+                  "This is the description",
+                  Notification.Type.WARNING_MESSAGE);]]></programlisting>
 
         <figure xml:id="figure.notification.example1">
             <title>Notification</title>
@@ -1294,11 +1281,11 @@ UI.getCurrent().setErrorHandler(new DefaultErrorHandler() {
             The caption and description are by default written on the same line. If you
             want to have a line break between them, use the XHTML line break markup
             "<literal>&lt;br/&gt;</literal>" if HTML is enabled, or
-            "<literal>\n</literal>" if not. When HTML is enabled (it is by default), you
-            can use any XHTML markup in the caption and description of a notification. If
-            it is possible to get the notification content from user input, you should
-            either disallow HTML with
-            <methodname>setHtmlContentAllowed(false)</methodname> or sanitize the content
+            "<literal>\n</literal>" if not. HTML is disabled by default, but can be
+            enabled with <methodname>setHtmlContentAllowed(true)</methodname>. When
+            enabled, you can use any XHTML markup in the caption and description of a
+            notification. If it is in any way possible to get the notification content
+            from user input, you should either disallow HTML or sanitize the content
             carefully, as noted in <xref linkend="advanced.security.sanitizing"/>.
         </para>
 
@@ -1321,7 +1308,7 @@ UI.getCurrent().setErrorHandler(new DefaultErrorHandler() {
                 The notification type defines the overall default style and behaviour of a
                 notification. If no notification type is given, the "humanized" type is
                 used as the default. The notification types, listed below, are defined in
-                the <classname>Notification</classname> class.
+                the <classname>Notification.Type</classname> class.
             </para>
                 
             <variablelist>
@@ -1427,7 +1414,7 @@ UI.getCurrent().setErrorHandler(new DefaultErrorHandler() {
                 need to show it in the current page.
             </para>
 
-            <programlisting><?pocket-size 65% ?><![CDATA[// Notification with default settings for a warning
+            <programlisting><![CDATA[// Notification with default settings for a warning
 Notification notif = new Notification(
     "Warning",
     "<br/>Area of reindeer husbandry",
@@ -1435,7 +1422,7 @@ Notification notif = new Notification(
 
 // Customize it
 notif.setDelayMsec(20000);
-notif.setPosition(Notification.POSITION_BOTTOM_RIGHT);
+notif.setPosition(Position.BOTTOM_RIGHT);
 notif.setStyleName("mystyle");
 notif.setIcon(new ThemeResource("img/reindeer.png"));
                 
@@ -1445,37 +1432,24 @@ notif.show(Page.getCurrent());]]></programlisting>
             <para>
                 The <methodname>setPosition()</methodname> method allows setting the
                 positioning of the notification. The method takes as its parameter any of
-                the constants:
+                the constants defined in the <classname>Position</classname> enum.
             </para>
 
-            <informaltable frame="none">
-                <tgroup cols="1" align="left">
-                    <tbody>
-                        <row valign="top" rowsep="0"><entry colsep="0"><parameter>Notification.POSITION_CENTERED</parameter></entry></row>
-                        <row valign="top" rowsep="0"><entry colsep="0"><parameter>Notification.POSITION_CENTERED_TOP</parameter></entry></row>
-                        <row valign="top" rowsep="0"><entry colsep="0"><parameter>Notification.POSITION_CENTERED_BOTTOM</parameter></entry></row>
-                        <row valign="top" rowsep="0"><entry colsep="0"><parameter>Notification.POSITION_TOP_LEFT</parameter></entry></row>
-                        <row valign="top" rowsep="0"><entry colsep="0"><parameter>Notification.POSITION_TOP_RIGHT</parameter></entry></row>
-                        <row valign="top" rowsep="0"><entry colsep="0"><parameter>Notification.POSITION_BOTTOM_LEFT</parameter></entry></row>
-                        <row valign="top" rowsep="0"><entry colsep="0"><parameter>Notification.POSITION_BOTTOM_RIGHT</parameter></entry></row>
-                    </tbody>
-                </tgroup>
-            </informaltable>
-
             <para>
-                The <methodname>setDelayMSec()</methodname> allows you to set the time in
+                The <methodname>setDelayMSec()</methodname> allows setting the time in
                 milliseconds for how long the notification is displayed. Parameter value
                 <literal>-1</literal> means that the message is displayed until the user
                 clicks the message box. It also prevents interaction with other parts of
-                the application window, as is default behaviour for error messages. It
-                does not, however, add a close box that the error notification has.
+                the application window, which is the default behaviour for error
+                notifications. It does not, however, add a close box that the error
+                notification has.
             </para>
         </section>
 
         <section xml:id="application.notifications.css">
             <title>Styling with CSS</title>
 
-            <programlisting><?pocket-size 65% ?><![CDATA[.v-Notification {}
+            <programlisting><![CDATA[.v-Notification {}
   .popupContent {}
     .gwt-HTML {}
       h1 {}
@@ -1509,7 +1483,7 @@ notif.show(Page.getCurrent());]]></programlisting>
             </para>
 
             <figure xml:id="figure.application.errors.notifications.css">
-                <title>Styled Notification</title>
+                <title>A Styled Notification</title>
                 <mediaobject>
                     <imageobject role="html">
                         <imagedata align="center" fileref="img/application/notification-customization.png"/>
@@ -1542,8 +1516,8 @@ notif.show(Page.getCurrent());]]></programlisting>
                 linkend="application.environment"/>. Deploying reads the
                 <filename>web.xml</filename> deployment descriptor in the application to
                 register servlets for specific URL paths and loads the classes.
-                Deployment does not yet run any code in the application, although static
-                blocks in classes are executed when they are loaded.
+                Deployment does not yet normally run any code in the application,
+                although static blocks in classes are executed when they are loaded.
             </para>
 
             <section xml:id="application.lifecycle.deployment.redeployment">
@@ -1573,24 +1547,25 @@ notif.show(Page.getCurrent());]]></programlisting>
                     the memory state of the application. This is done by serializing the
                     application state and then deserializing it after the classes are
                     reloaded. This is, in fact, done with the basic Eclipse setup with
-                    Tomcat and you may actually need to give the
-                    <literal>?restartApplication</literal> parameter to an UI marked as
-                    <classname>@PreserveOnRefresh</classname> to force it to restart when
-                    you reload the page. Tools such as JRebel go even further by reloading
-                    the code in place without need for serialization. The server can also
-                    serialize the application state when shutting down and restarting,
-                    thereby preserving sessions over restarts.
+                    Tomcat and if a UI is marked as
+                    <classname>@PreserveOnRefresh</classname>, you may actually need to
+                    give the <literal>?restartApplication</literal> URL parameter to force
+                    it to restart when you reload the page. Tools such as JRebel go even
+                    further by reloading the code in place without need for
+                    serialization. The server can also serialize the application state
+                    when shutting down and restarting, thereby preserving sessions over
+                    restarts.
                 </para>
 
                 <para>
                     Serialization requires that the applications are
                     <emphasis>serializable</emphasis>, that is, all classes implement the
                     <interfacename>Serializable</interfacename> interface. All Vaadin
-                    classes do, and if you extend them or implement interfaces, you
-                    usually just need to provide the serialization key, which is
-                    automatically generated by Eclipse if you use it. Serialization is
-                    also used for clustering and cloud computing, such as with Google App
-                    Engine, as described in <xref linkend="advanced.gae"/>.
+                    classes do. If you extend them or implement interfaces, you can
+                    provide an optional serialization key, which is automatically
+                    generated by Eclipse if you use it. Serialization is also used for
+                    clustering and cloud computing, such as with Google App Engine, as
+                    described in <xref linkend="advanced.gae"/>.
                 </para>
             </section>
         </section>
@@ -1651,7 +1626,7 @@ notif.show(Page.getCurrent());]]></programlisting>
                 provides access also to the lower-level session objects,
                 <interfacename>HttpSession</interfacename> and
                 <interfacename>PortletSession</interfacename>, through a
-                <classname>SessionWrapper</classname>. You can also access to the
+                <classname>WrappedSession</classname>. You can also access to the
                 deployment configuration through <classname>VaadinSession</classname>, as
                 described in <xref linkend="application.environment.configuration"/>.
             </para>
@@ -1663,16 +1638,24 @@ notif.show(Page.getCurrent());]]></programlisting>
         </section>
 
         <section xml:id="application.lifecycle.ui">
-            <title>Loading an UI</title>
+            <title>Loading a UI</title>
+
+            <para>
+                When a browser first accesses a URL mapped to the servlet of a particular
+                UI, the Vaadin servlet generates a loader page. The page loads the
+                client-side engine (widget set), which in turn loads the UI in a separate
+                request to the Vaadin servlet.
+            </para>
 
             <para>
                 <indexterm><primary><classname>UIProvider</classname></primary></indexterm>
                 <indexterm><primary><classname>DefaultUIProvider</classname></primary></indexterm>
                 <indexterm><primary><classname>BrowserWindowOpener</classname></primary></indexterm>
 
-                A <classname>UI</classname> instance is created by the Vaadin servlet when
-                a browser accesses a URL mapped to the servlet of the particular UI. The
-                servlet creates the UIs using a <classname>UIProvider</classname>
+                A <classname>UI</classname> instance is created when the client-side
+                engine makes its first request.
+
+                The servlet creates the UIs using a <classname>UIProvider</classname>
                 registered in the <classname>VaadinSession</classname> instance. A session
                 has at least a <classname>DefaultUIProvider</classname> for managing UIs
                 opened by the user. If the application lets the user open popup windows
@@ -1684,21 +1667,38 @@ notif.show(Page.getCurrent());]]></programlisting>
                 <indexterm><primary><classname>VaadinRequest</classname></primary></indexterm>
                 <indexterm><primary><methodname>init()</methodname></primary></indexterm>
 
-                The <methodname>init()</methodname> method for a UI is called during the
-                initial request, which the method gets as a
+                Once a new UI is created, its <methodname>init()</methodname> method is
+                called. The method gets the request as a
                 <classname>VaadinRequest</classname>.
             </para>
 
-            <para>
-                After initialization of the <classname>UI</classname> instance, the
-                servlet generates the loader page for the application. The HTML content of
-                the page is generated as an HTML DOM object, which can be customized by
-                implementing a <interfacename>BootstrapListener</interfacename> that
-                modifies the DOM object. You can also use entirely custom loader code,
-                such as in a static HTML page, as described in <xref
-                linkend="advanced.embedding"/>. The loader page loads the client-side
-                engine, which in turn loads the page content in a separate request.
-            </para>
+            <simplesect xml:id="application.lifecycle.ui.loaderpage">
+                <title>Customizing the Loader Page</title>
+
+                <para>
+                    The HTML content of the loader page is generated as an HTML DOM
+                    object, which can be customized by implementing a
+                    <interfacename>BootstrapListener</interfacename> that modifies the DOM
+                    object. To do so, you need to extend the
+                    <classname>VaadinServlet</classname> and add a
+                    <interfacename>SessionInitListener</interfacename> to the servlet with
+                    <methodname>addSessionInitListener()</methodname>. You can then add
+                    the bootstrap listener to a session with
+                    <methodname>addBootstrapListener()</methodname> when the session is
+                    initialized.
+                </para>
+
+                <para>
+                    Loading the widget set is handled in the loader page with functions
+                    defined in a separate <filename>vaadinBootstrap.js</filename> script.
+                </para>
+
+                <para>
+                    You can also use entirely custom loader code, such as in a
+                    static HTML page, as described in <xref
+                    linkend="advanced.embedding"/>.
+                </para>
+            </simplesect>
 
             <simplesect xml:id="application.lifecycle.ui.uiprovider">
                 <title>Custom UI Providers</title>
@@ -1712,8 +1712,7 @@ notif.show(Page.getCurrent());]]></programlisting>
                     until one returns an UI (otherwise they return null). You can add a UI
                     provider to a session most conveniently by implementing a custom
                     servlet and adding the UI provider to sessions in a
-                    <interfacename>SessionInitListener</interfacename>, or by implementing
-                    a custom session class.
+                    <interfacename>SessionInitListener</interfacename>.
                 </para>
 
                 <para>
@@ -1771,8 +1770,8 @@ public class MyUI extends UI {]]></programlisting>
             </para>
 
             <para>
-                When the UI cleanup happens, a <classname>CleanupEvent</classname> is sent
-                to all <classname>CleanupListener</classname>s added to the UI. When the
+                When the UI cleanup happens, a <classname>DetachEvent</classname> is sent
+                to all <classname>DetachListener</classname>s added to the UI. When the
                 <classname>UI</classname> is detached from the session,
                 <methodname>detach()</methodname> is called for it.
             </para>
@@ -1824,8 +1823,7 @@ public class MyUI extends UI {]]></programlisting>
 				will still receive the response from the final request. You typically want
 				to redirect the user to another URL at this point, using the
 				<methodname>setLocation()</methodname> method in
-				<classname>Page</classname>. You just have to call it before closing the
-				session.
+				<classname>Page</classname>.
 			</para>
 
 			<para>
@@ -1904,17 +1902,14 @@ main.addListener(new Window.CloseListener(){
 			can be a Vaadin application or some other servlet, and static resources such
 			as HTML files. Such a web application is normally packaged as WAR (Web
 			application ARchive) file, which can be deployed to a Java application server
-			(or a servlet container to be exact).
+			(or a servlet container to be exact). A WAR file, which has the
+			<filename>.war</filename> extension, is a subtype of JAR (Java ARchive), and
+			like a regular JAR is a ZIP-compressed file with a special content structure.
         </para>
 
         <para>
             For a detailed tutorial on how web applications are packaged, please refer to
-            any Java book that discusses Java Servlets. Sun has an excellent reference
-            online at
-			<link
-				xlink:href="http://java.sun.com/j2ee/tutorial/1_3-fcs/doc/WCC3.html">
-				http://java.sun.com/j2ee/tutorial/1_3-fcs/doc/WCC3.html
-			</link>.
+            any Java book that discusses Java Servlets.
         </para>
 
         <para>
@@ -1983,12 +1978,10 @@ main.addListener(new Window.CloseListener(){
 					</term>
 					<listitem>
 						<para>
-							This is the standard web application
-							descriptor that defines how the
-							application is organized. You can refer
-							to any Java book about the contents of
-							this file. Also see an example in
-							<xref linkend="intro.walkthrough" />.
+							This is the standard web application descriptor that defines
+							how the application is organized. You can refer to any Java
+							book about the contents of this file. It is not needed with
+							Servlet API 3.0.
 						</para>
 					</listitem>
 				</varlistentry>
@@ -2053,16 +2046,17 @@ main.addListener(new Window.CloseListener(){
 				The deployment descriptor is an XML file with the name
 				<filename>web.xml</filename> in the <filename>WEB-INF</filename> directory
 				of a web application. It is a standard component in Java EE describing how
-				a web application should be deployed. The structure of the deployment
-				descriptor is illustrated by the following example. You simply deploy UIs
-				wrapped in servlets using the
-				<methodname>com.vaadin.server.VaadinServlet</methodname> class.
+				a web application should be deployed. The descriptor is not needed with
+				Servlet API 3.0, where you can define servlets also as web fragments, with
+				the <classname>@WebServlet</classname> annotation, or programmatically.
             </para>
 
-            <para>
-                You simply specify the &ui; class with the <parameter>&ui;</parameter>
-                parameter to the servlet. The servlet is then mapped to a URL path in a
-                standard way for Java Servlets.
+			<para>
+                The following example illustrates the structure of a deployment
+                descriptor. You simply specify the UI class with the
+                <parameter>UI</parameter> parameter for the
+                <classname>com.vaadin.server.VaadinServlet</classname>. The servlet is
+                then mapped to a URL path in a standard way for Java Servlets.
 			</para>
 
             <programlisting><?pocket-size 75% ?>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
@@ -2098,11 +2092,10 @@ main.addListener(new Window.CloseListener(){
 &lt;/web-app&gt;</programlisting>
 
             <para>
-                The descriptor defines a servlet with name <filename>myservlet</filename>.
+                The descriptor defines a servlet with the name <filename>myservlet</filename>.
                 The servlet class, <classname>com.vaadin.server.VaadinServlet</classname>,
                 is provided by Vaadin framework and is normally the same for all Vaadin
-                projects. For some purposes, you may need to use a custom servlet class,
-                as described earlier.
+                projects. For some purposes, you may need to use a custom servlet class.
             </para>
 
 			<section xml:id="application.environment.web-xml.widgetset">
@@ -2127,9 +2120,11 @@ main.addListener(new Window.CloseListener(){
                 </para>
 
                 <para>
-                    The widget set must be compiled and deployed with the application, as
-                    described in <xref linkend="addons.compiling"/> or <xref
-                    linkend="clientside.compiling"/>.
+                    Unless using the default widget set (which is included in the
+                    <filename>vaadin-client-compiled</filename> JAR), the widget set must
+                    be compiled, as described in <xref linkend="addons.compiling"/> or
+                    <xref linkend="clientside.compiling"/>, and properly deployed with the
+                    application.
                 </para>
             </section>
 
@@ -2192,10 +2187,12 @@ main.addListener(new Window.CloseListener(){
             <title>Other Deployment Parameters</title>
 
             <para>
-                A deployment descriptor can have many parameters and options that
-                control the execution of a servlet. You can find a complete
-                documentation of the deployment descriptor in Java Servlet
-                Specification at <uri>http://java.sun.com/products/servlet/</uri>.
+                A deployment descriptor can have many parameters and options that control
+                the execution of a servlet. You can find complete documentation of the
+                deployment descriptor in the appropriate <link
+                xlink:href="http://wiki.apache.org/tomcat/Specifications">Java Servlet
+                Specification</link>.
+                <!-- JCP or Oracle don't seem to have a proper index URL. -->
             </para>
 
             <para>
@@ -2213,8 +2210,8 @@ main.addListener(new Window.CloseListener(){
                     By default, Vaadin applications run in <emphasis>debug mode</emphasis>
                     (or <emphasis>development mode</emphasis>), which should be used
                     during development. This enables various debugging features. For
-                    production use, you should have put in your
-                    <filename>web.xml</filename> the following parameter:
+                    production use, you should have the following setting in your
+                    <filename>web.xml</filename>:
                 </para>
 
                 <programlisting><![CDATA[<context-param>
@@ -2261,7 +2258,7 @@ main.addListener(new Window.CloseListener(){
                     linkend="application.lifecycle.ui-expiration"/>. If the user closes
                     the browser window of a Vaadin application or navigates to another
                     page, the Client-Side Engine running in the page stops sending
-                    heartbeat to the server, and the server cleans up the
+                    heartbeat to the server, and the server eventually cleans up the
                     <classname>UI</classname> instance.
                 </para>
 
