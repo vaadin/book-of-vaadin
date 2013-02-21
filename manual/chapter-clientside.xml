@@ -11,7 +11,7 @@
 	<title>Client-Side Vaadin Development</title>
 
     <para>
-        This chapter gives an overview of the Vaadin client-side framework, it's
+        This chapter gives an overview of the Vaadin client-side framework, its
         architecture, and development tools.
     </para>
 
@@ -59,8 +59,8 @@
             essentially a set of widgets paired with <emphasis>connectors</emphasis> that
             serialize their state and events with the server-side counterpart
             components. The client-side engine is technically called a <emphasis>widget
-            set</emphasis>, to describe the practice of combining different widget sets
-            using inheritance.
+            set</emphasis>, to describe the fact that it mostly consists of widgets and
+            that widget sets can be combined, as described later.
         </para>
     </section>
     
@@ -87,7 +87,7 @@
         </para>
 
         <para>
-            When defining a widget sets to build the Vaadin client-side engine, the only
+            When defining a widget set to build the Vaadin client-side engine, the only
             necessary task is to inherit a base widget set. If you are developing a
             regular widget set, you should normally inherit the
             <classname>DefaultWidgetSet</classname>.
@@ -101,7 +101,7 @@
 
 <module>
     <!-- Inherit the default widget set -->
-    <inherits name="com.vaadin.terminal.gwt.DefaultWidgetSet" />
+    <inherits name="com.vaadin.DefaultWidgetSet" />
 </module>]]></programlisting>
 
         <para>
@@ -156,7 +156,7 @@
             <para>
                 The <parameter>value</parameter> attribute should match your browser. The
                 browsers supported by GWT depend on the GWT version, below is a list of
-                browser identifiers supported by GWT 2.0.
+                browser identifiers supported by GWT.
             </para>
             
             <table>
@@ -170,28 +170,28 @@
                     </thead>
                     <tbody>
                         <row valign="top">
-                            <entry>gecko1_8</entry>
-                            <entry>Mozilla Firefox 1.5 and later</entry>
-                        </row>
-                        <row valign="top">
-                            <entry>gecko</entry>
-                            <entry>Mozilla Firefox 1.0 (<emphasis>obsolete</emphasis>)</entry>
-                        </row>
-                        <row valign="top">
                             <entry>ie6</entry>
                             <entry>Internet Explorer 6</entry>
                         </row>
                         <row valign="top">
                             <entry>ie8</entry>
                             <entry>Internet Explorer 8</entry>
-                            </row>
+                        </row>
+                        <row valign="top">
+                            <entry>gecko1_8</entry>
+                            <entry>Mozilla Firefox 1.5 and later</entry>
+                        </row>
                         <row valign="top">
                             <entry>safari</entry>
                             <entry>Apple Safari and other Webkit-based browsers including Google Chrome</entry>
-                            </row>
+                        </row>
                         <row valign="top">
                             <entry>opera</entry>
-                                <entry>Opera</entry>
+                            <entry>Opera</entry>
+                        </row>
+                        <row valign="top">
+                            <entry>ie9</entry>
+                            <entry>Internet Explorer 9</entry>
                         </row>
                     </tbody>
                 </tgroup>
@@ -262,27 +262,22 @@
             <title>Compiling with Ant</title>
 
             <para>
-                You can find a script template for compiling widget sets with Ant at the
-                URL <link
-                xlink:href="https://vaadin.com/download/misc/build-widgetset-vaadin7.xml">https://vaadin.com/download/misc/build-widgetset-vaadin7.xml</link>.
-                You can copy the build script to your project and, once configured, use it
-                by entering:
+                You can find a script template for compiling widget sets with Ant and Ivy
+                at the <link xlink:href="http://vaadin.com/download/">Vaadin download
+                page</link>. You can copy the build script to your project and, once
+                configured, run it with Ant.
             </para>
-
-            <screen><prompt>$</prompt> <command>ant -f build-widgetset-vaadin7.xml</command></screen>
-
-            <!-- TODO Vaadin 7 -->
         </section>
 
         <section xml:id="clientside.compiling.maven">
             <title>Compiling with Maven</title>
 
             <para>
-                You can compile the widget set with the <literal>gwt:compile</literal>
+                You can compile the widget set with the <literal>vaadin:compile</literal>
                 goal as follows:
             </para>
 
-            <screen><prompt>$</prompt> <command>mvn</command> <parameter>gwt:compile</parameter></screen>
+            <screen><prompt>$</prompt> <command>mvn</command> <parameter>vaadin:compile</parameter></screen>
         </section>
     </section>
 
@@ -325,7 +320,7 @@
 
             <programlisting><?pocket-size 75% ?><![CDATA[package com.example.myapp.client;
 
-import com.google.clientside.user.client.ui.Label;
+import com.google.gwt.user.client.ui.Label;
 
 public class MyWidget extends Label {
     public static final String CLASSNAME = "mywidget";
@@ -385,7 +380,7 @@ public class MyWidget extends Label {
                 The Development Mode compiles the client-side module (or widget set),
                 launches the application in the browser, and allows debugging the
                 client-side code in Eclipse. You can launch the Development Mode by
-                running the <classname>com.google.clientside.dev.DevMode</classname> class. It
+                running the <classname>com.google.gwt.dev.DevMode</classname> class. It
                 requires some parameters, as described later.
             </para>
 
@@ -464,7 +459,7 @@ public class MyWidget extends Label {
                 <listitem>
                     <para>
                         You need to set a redirect property in the
-                        <filename>.clientside.xml</filename> module descriptor as follows:
+                        <filename>.gwt.xml</filename> module descriptor as follows:
                     </para>
 
                     <programlisting><?pocket-size 65% ?><![CDATA[<set-configuration-property name="devModeRedirectEnabled" value="true" />]]></programlisting>
@@ -472,7 +467,7 @@ public class MyWidget extends Label {
                     <para>
                         In addition, you need the <literal>xsiframe</literal> linker. It
                         is included in the
-                        <classname>com.vaadin.terminal.clientside.DefaultWidgetSet</classname> as
+                        <classname>com.vaadin.DefaultWidgetSet</classname> as
                         well as in the <classname>com.vaadin.Vaadin</classname>
                         module. Otherwise, you need to include it with:
                     </para>
@@ -496,7 +491,7 @@ public class MyWidget extends Label {
                     <orderedlist>
                         <listitem>
                             The main class to execute should be
-                            <classname>com.google.clientside.dev.codeserver.CodeServer</classname>.
+                            <classname>com.google.gwt.dev.codeserver.CodeServer</classname>.
                         </listitem>
                         <listitem>
                             The application takes the fully-qualified class name of the
@@ -512,7 +507,7 @@ public class MyWidget extends Label {
             </orderedlist>
 
             <para>
-                The above configuration only needs to be once to enable the
+                The above configuration only needs to be done once to enable the
                 SuperDevMode. After that, you can launch the mode as follows:
             </para>
 
