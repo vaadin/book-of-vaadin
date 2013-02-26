@@ -7,8 +7,12 @@ DOCROOT = ..
 DOCBOOK = docbook-xsl-1.76.1
 MANUALPATH = manual
 
+JAVAPARS = -Xms256M -Xmx512M
+
 # Document language; this is the default, translations can override this.
 DBLANGUAGE = en
+
+PROFILE = profile.condition=print 
 
 DBEXTRAPARS = l10n.gentext.language=$(DBLANGUAGE)
 
@@ -75,6 +79,8 @@ DATE = `date +'%Y-%m-%d'`
 # Determine Vaadin version number
 VERSION = `cat $(DOCROOT)/build/VERSION.properties|sed -e 's/^version=\([0-9]\+\.[0-9]\+\).\+/\1/'`
 
+JAVACLASSPATH = $(DOCROOT)/build/lib/saxon.jar:$(DOCROOT)/build/lib/xercesImpl.jar:$(DOCROOT)/build/lib/xml-apis.jar:$(DOCROOT)/build/lib/xslthl.jar
+
 ################################################################################
 # Image conversions
 ################################################################################
@@ -115,6 +121,7 @@ $(TRGICONS): img/icons/%.png: original-drawings/icons/%.svg
 #     A4: Make A4 page size. 
 #         $ make book.pdf A4=1
 
+DBROOT = $(DOCROOT)/build/docbook
 DOCBOOK = $(DOCROOT)/build/docbook/conf/custom-fo-docbook.xsl
 DOCBOOK_POCKET = $(DOCROOT)/build/docbook/conf/custom-fo-docbook-pocket.xsl
 #HIGHLIGHTER_CONFIG = -Dxslthl.config=$(PWD)/../build/docbook/xsl/highlighting/xslthl-config.xml
@@ -123,18 +130,25 @@ DOCBOOK_POCKET = $(DOCROOT)/build/docbook/conf/custom-fo-docbook-pocket.xsl
 # It must be given as an absolute URL.
 HIGHLIGHTER_CONFIG = -Dxslthl.config="file://$(PWD)/../build/docbook/xsl/highlighting/xslthl-config.xml"
 
+# Create profiled print book with a profiling pass
+book-print.xml: book.xml $(XMLFILES) images
+	java $(JAVAPARS) -classpath $(JAVACLASSPATH) com.icl.saxon.StyleSheet -o book-print.xml \
+		 book.xml $(DBROOT)/xsl/profiling/profile.xsl $(PROFILE)
+
 # Process Docbook to FO
 book.fo: book.xml $(XMLFILES) images
 	@echo $(VERSION)
 	@echo "Highlighter configuration: $(HIGHLIGHTER_CONFIG)"
-	java -Xms256M -Xmx512M -classpath $(DOCROOT)/build/lib/saxon.jar:$(DOCROOT)/build/lib/xercesImpl.jar:$(DOCROOT)/build/lib/xml-apis.jar:$(DOCROOT)/build/lib/xslthl.jar $(HIGHLIGHTER_CONFIG) com.icl.saxon.StyleSheet -o book.fo book.xml $(DOCBOOK) $(DBPARS)
+	java $(JAVAPARS) -classpath $(JAVACLASSPATH) $(HIGHLIGHTER_CONFIG) com.icl.saxon.StyleSheet -o book.fo \
+		 book.xml $(DOCBOOK) $(DBPARS)
 # ../build/lib/xalan.jar ... org.apache.xalan.xslt.Process
 
 # Use book-pocket.xml for two-volume version
-book-pocket.fo: book.xml $(XMLFILES) images
+book-pocket.fo: book-print.xml $(XMLFILES) images
 	@echo $(VERSION)
 	@echo "Highlighter configuration: $(HIGHLIGHTER_CONFIG)"
-	java -Xms256M -Xmx512M -classpath $(DOCROOT)/build/lib/saxon.jar:$(DOCROOT)/build/lib/xercesImpl.jar:$(DOCROOT)/build/lib/xml-apis.jar:$(DOCROOT)/build/lib/xslthl.jar $(HIGHLIGHTER_CONFIG) com.icl.saxon.StyleSheet -o book-pocket.fo book.xml $(DOCBOOK_POCKET) $(DBPARS)
+	java $(JAVAPARS) -classpath $(JAVACLASSPATH) $(HIGHLIGHTER_CONFIG) com.icl.saxon.StyleSheet -o book-pocket.fo \
+		 book-print.xml $(DOCBOOK_POCKET) $(DBPARS)
 
 XEPPARS = -Dcom.renderx.xep.CONFIG=build/lib/XEP/xep-vaadinfonts.xml -quiet
 
