@@ -1494,10 +1494,12 @@ name.addShortcutListener(
         </indexterm>
 
 		<para>
-			Vaadin does not currently have any special support for
-			printing. Printing on the server-side is, in any case, largely independent from the
-			web UI of an application. You just have to take care that the printing does
-			not block server requests, possibly by running printing in another thread.
+			Vaadin does not have any special support for printing. There are two basic
+			ways to print - in a printer controlled by the application server or by the
+			user from the web browser. Printing in the application server is largely
+			independent of the UI, you just have to take care that printing commands do
+			not block server requests, possibly by running the print commands in another
+			thread.
 		</para>
 
 		<para>
@@ -1509,86 +1511,173 @@ name.addShortcutListener(
                 <secondary><methodname>print()</methodname></secondary>
             </indexterm>
             
-			For client-side printing, most browsers support printing the web page. Vaadin
-			does not explicitly support launching the printing in browser, but you can
-			easily use the JavaScript <methodname>print()</methodname> method that opens
-			the print window of the browser.
-		</para>
+			For client-side printing, most browsers support printing the web page. You can
+			either print the current or a special print page that you open. The page can
+			be styled for printing with special CSS rules, and you can hide unwanted
+			elements. You can also print other than Vaadin UI content, such as HTML or
+			PDF.
+        </para>
 
-        <indexterm><primary>JavaScript</primary><secondary><methodname>executeJavaScript()</methodname></secondary></indexterm>
-        <indexterm><primary><methodname>executeJavaScript()</methodname></primary></indexterm>
+        <section xml:id="advanced.printing.browserwindow">
+            <title>Printing the Browser Window</title>
 
-		<programlisting><?pocket-size 65% ?><![CDATA[final Button print = new Button("Print This Page");
-print.addListener(new ClickListener() {
+            <para>
+                Vaadin does not have special support for launching the printing in
+                browser, but you can easily use the JavaScript
+                <methodname>print()</methodname> method that opens the print window of the
+                browser.
+            </para>
+
+            <indexterm><primary>JavaScript</primary><secondary><methodname>execute()</methodname></secondary></indexterm>
+
+            <book-example id="advanced.printing.this" style="float: right"></book-example>
+            <programlisting><?pocket-size 65% ?><![CDATA[Button print = new Button("Print This Page");
+print.addClickListener(new Button.ClickListener() {
     public void buttonClick(ClickEvent event) {
-        print.getWindow().executeJavaScript("print();");
+        // Print the current page
+        JavaScript.getCurrent().execute("print();");
     }
 });]]></programlisting>
 
-		<para>
-			This button would print the current page, including the button itself. Often,
-			you want to be able to print a report or receipt and it should not have any
-			visible UI components. In such a case, you could offer it as a PDF resource,
-			or you could open a new window, as is done below, and automatically launch
-			printing.
-		</para>
+            <para>
+                The button in the above example would print the current page, including
+                the button itself. You can hide such elements in CSS, as well as otherwise
+                style the page for printing. Style definitions for printing are defined
+                inside a <literal>@media print {}</literal> block in CSS.
+            </para>
+        </section>
 
-		<programlisting><?pocket-size 65% ?><![CDATA[// A button to open the printer-friendly page.
-Button print = new Button("Click to Print");
+        <section xml:id="advanced.printing.opening">
+            <title>Opening a Print Window</title>
 
-print.addListener(new Button.ClickListener() {
-	public void buttonClick(ClickEvent event) {
-        // Create a window that contains what you want to print
-        Window window = new Window("Window to Print");
+            <para>
+                You can open a browser window with a special UI for print content and
+                automatically launch printing the content.
+            </para>
 
+            <book-example id="advanced.printing.open" style="float: right"></book-example>
+            <programlisting><?pocket-size 75% ?><![CDATA[public static class PrintUI extends UI {
+    @Override
+    protected void init(VaadinRequest request) {
         // Have some content to print
-        window.addComponent(new Label(
-                "<h1>Here's some dynamic content</h1>\n" +
-                "<p>This is to be printed to the printer.</p>",
-                Label.CONTENT_XHTML));
-
-        // Add the printing window as a new application-level
-        // window
-        getApplication().addWindow(window);
-
-        // Open it as a popup window with no decorations
-        getWindow().open(new ExternalResource(window.getURL()),
-                "_blank", 500, 200,  // Width and height 
-                Window.BORDER_NONE); // No decorations
-
-        // Print automatically when the window opens.
-        // This call will block until the print dialog exits!
-        window.executeJavaScript("print();");
-
-        // Close the window automatically after printing
-        window.executeJavaScript("self.close();");
+        setContent(new Label(
+            "<h1>Here's some dynamic content</h1>\n" +
+            "<p>This is to be printed.</p>",
+            ContentMode.HTML));
+        
+        // Print automatically when the window opens
+        JavaScript.getCurrent().execute(
+            "setTimeout(function() {" +
+            "  print(); self.close();}, 0);");
     }
-});]]></programlisting>
+}
+...
 
-		<para>
-			How the browser opens the window, as an actual (popup) window or just a tab, depends
-			on the browser. Notice that calling the <methodname>print()</methodname> method in the
-            window will block the entire application until the print dialog exits.
+// Create an opener extension
+BrowserWindowOpener opener =
+        new BrowserWindowOpener(PrintUI.class);
+opener.setFeatures("height=200,width=400,resizable");
+    
+// A button to open the printer-friendly page.
+Button print = new Button("Click to Print");
+opener.extend(print);]]></programlisting>
 
-            <indexterm><primary><classname>Window</classname></primary><secondary>closing</secondary></indexterm>
+            <para>
+                How the browser opens the window, as an actual (popup) window or just a tab, depends
+                on the browser.
 
-            After printing, we automatically close the window with another JavaScript
-            call, as there is no <methodname>close()</methodname> method in
-            <classname>Window</classname>.
-		</para>
+                <indexterm><primary><classname>Window</classname></primary><secondary>closing</secondary></indexterm>
 
-        <indexterm startref="term.advanced.printing.print" class="endofrange"/>
-        <indexterm startref="term.advanced.printing.JavaScript.print" class="endofrange"/>
+                After printing, we automatically close the window with another JavaScript
+                call, as there is no <methodname>close()</methodname> method in
+                <classname>Window</classname>.
+            </para>
 
-		<para>
-            <indexterm><primary>PDF</primary></indexterm>
+            <indexterm startref="term.advanced.printing.print" class="endofrange"/>
+            <indexterm startref="term.advanced.printing.JavaScript.print" class="endofrange"/>
+        </section>
 
-			Printing as PDF would not require creating a <classname>Window</classname>
-			object, but you would need to provide the content as a static or a dynamic
-			resource for the <methodname>open()</methodname> method. Printing a PDF file
-			would obviously require a PDF viewer cabability (such as Adobe Reader) in the
-			browser.
-		</para>
+        <section xml:id="advanced.printing.pdf">
+            <title>Printing PDF</title>
+
+            <para>
+                <indexterm><primary>PDF</primary></indexterm>
+
+                To print content as PDF, you need to provide the downloadable content as a
+                static or a dynamic resource, such as a
+                <classname>StreamResource</classname>.
+            </para>
+
+            <para>
+                You can let the user open the resource using a <classname>Link</classname>
+                component, or some other component with a
+                <classname>PopupWindowOpener</classname> extension. When such a link or
+                opener is clicked, the browser opens the PDF in the browser, in an
+                external viewer (such as Adobe Reader), or lets the user save the
+                document.
+            </para>
+
+            <para>
+                It is crucial to notice that clicking a <classname>Link</classname> or a
+                <classname>PopupWindowOpener</classname> is a client-side operation. If
+                you get the content of the dynamic PDF from the same UI state, you can not
+                have the link or opener enabled, as then clicking it would not get the
+                current UI content. Instead, you have to create the resource object before
+                the link or opener are clicked. This usually requires a two-step
+                operation, or having the print operation available in another view.
+            </para>
+
+            <book-example id="advanced.printing.pdfgeneration" style="float: right"></book-example>
+            <programlisting><?pocket-size 65% ?><![CDATA[// A user interface for a (trivial) data model from which
+// the PDF is generated.
+final TextField name = new TextField("Name");
+name.setValue("Slartibartfast");
+
+// This has to be clicked first to create the stream resource
+final Button ok = new Button("OK");
+
+// This actually opens the stream resource
+final Button print = new Button("Open PDF");
+print.setEnabled(false);
+
+ok.addClickListener(new ClickListener() {
+    @Override
+    public void buttonClick(ClickEvent event) {
+        // Create the PDF source and pass the data model to it
+        StreamSource source =
+            new MyPdfSource((String) name.getValue());
+        
+        // Create the stream resource and give it a file name
+        String filename = "pdf_printing_example.pdf";
+        StreamResource resource =
+                new StreamResource(source, filename);
+        
+        // These settings are not usually necessary. MIME type
+        // is detected automatically from the file name, but
+        // setting it explicitly may be necessary if the file
+        // suffix is not ".pdf".
+        resource.setMIMEType("application/pdf");
+        resource.getStream().setParameter(
+                "Content-Disposition",
+                "attachment; filename="+filename);
+
+        // Extend the print button with an opener
+        // for the PDF resource
+        BrowserWindowOpener opener =
+                new BrowserWindowOpener(resource);
+        opener.extend(print);
+      
+        name.setEnabled(false);
+        ok.setEnabled(false);
+        print.setEnabled(true);
+    }
+});
+
+layout.addComponent(name);
+layout.addComponent(ok);
+layout.addComponent(print);]]></programlisting>
+
+        </section>
 
         <indexterm startref="term.advanced.printing" class="endofrange"/>
 	</section>
@@ -1678,25 +1767,31 @@ print.addListener(new Button.ClickListener() {
 				You can put raw XHTML content in many components, such as the
 				<classname>Label</classname> and <classname>CustomLayout</classname>, as
 				well as in tooltips and notifications. In such cases, you should make sure
-				that if the content has any possibility to come from user input, the input
-				is well sanitized before displaying it. Otherwise, a malicious user can
-				easily make a cross-site scripting attack by injecting offensive
-				JavaScript code in such components.
+				that if the content has any possibility to come from user input, you must
+				make sure that the content is safe before displaying it. Otherwise, a
+				malicious user can easily make a <link
+				xlink:href="http://en.wikipedia.org/wiki/Cross-site_scripting">cross-site
+				scripting attack</link> by injecting offensive JavaScript code in such
+				components. See other sources for more information about cross-site
+				scripting.
 			</para>
 
 			<para>
 				Offensive code can easily be injected with
 				<literal>&lt;script&gt;</literal> markup or in tag attributes as events,
-				such as <parameter>onLoad</parameter>. Cross-site scripting
-				vulnerabilities are browser dependent, depending on the situations in
-				which different browsers execute scripting markup.
+				such as <parameter>onLoad</parameter>. <!-- TODO Consider an example,
+				Alice, Bob, etc. --> Cross-site scripting vulnerabilities are browser
+				dependent, depending on the situations in which different browsers execute
+				scripting markup.
 			</para>
 
 			<para>
-				There is no generic way to sanitize user input as different applications
-				can allow different kinds of input. Pruning (X)HTML tags out is somewhat
-				simple, but some applications may need to allow (X)HTML.  It is therefore
-				the responsibility of the application to sanitize the input.
+				Therefore, if the content created by one user is shown to other users, the
+				content must be sanitized. There is no generic way to sanitize user input,
+				as different applications can allow different kinds of input. Pruning
+				(X)HTML tags out is somewhat simple, but some applications may need to
+				allow (X)HTML content. It is therefore the responsibility of the
+				application to sanitize the input.
 			</para>
 
 			<para>
@@ -1727,8 +1822,334 @@ print.addListener(new Button.ClickListener() {
 		</section>
 	</section>
 
-	<section xml:id="advanced.urifu">
-		<title>URI Fragment and History Management with <classname>UriFragmentUtility</classname></title>
+	<section xml:id="advanced.navigator">
+		<title>Navigating in an Application</title>
+
+        <para>
+            Plain Vaadin applications do not have normal web page navigation as they
+            usually run on a single page, as all Ajax applications do. Quite commonly,
+            however, applications have different views between which the user should be
+            able to navigate. The <classname>Navigator</classname> in Vaadin can be used
+            for most cases of navigation. Views managed by the navigator automatically get
+            a distinct URI fragment, which can be used to be able to bookmark the views
+            and their states and to go back and forward in the browser history.
+        </para>
+
+        <section xml:id="application.navigator.navigating">
+            <title>Setting Up for Navigation</title>
+
+            <para>
+                The <classname>Navigator</classname> class manages a collection of
+                <emphasis>views</emphasis> that implement the
+                <interfacename>View</interfacename> interface. The views can be either
+                registered beforehand or acquired from a <emphasis>view
+                provider</emphasis>.  When registering, the views must have a name
+                identifier and be added to a navigator with
+                <methodname>addView()</methodname>. You can register new views at any
+                point. Once registered, you can navigate to them with
+                <methodname>navigateTo()</methodname>.
+            </para>
+
+            <para>
+                <classname>Navigator</classname> manages navigation in a component
+                container, which can be either a
+                <interfacename>ComponentContainer</interfacename> (most layouts) or a
+                <interfacename>SingleComponentContainer</interfacename>
+                (<classname>UI</classname>, <classname>Panel</classname>, or
+                <classname>Window</classname>). The component container is managed through
+                a <interfacename>ViewDisplay</interfacename>. Two view displays are
+                defined: <classname>ComponentContainerViewDisplay</classname> and
+                <classname>SingleComponentContainerViewDisplay</classname>, for the
+                respective component container types. Normally, you can let the navigator
+                create the view display internally, as we do in the example below, but you
+                can also create it yourself to customize it.
+            </para>
+
+            <para>
+                Let us consider the following UI with two views: start and main. Here, we
+                define their names with enums to be typesafe. We manage the navigation
+                with the UI class itself, which is a
+                <interfacename>SingleComponentContainer</interfacename>.
+            </para>
+
+            <book-example id="advanced.navigator.basic" style="float: right"/>
+            <programlisting><![CDATA[public class NavigatorUI extends UI {
+    Navigator navigator;
+    protected static final String MAINVIEW = "main";
+
+    @Override
+    protected void init(VaadinRequest request) {
+        getPage().setTitle("Navigation Example");
+        
+        // Create a navigator to control the views
+        navigator = new Navigator(this, this);
+        
+        // Create and register the views
+        navigator.addView("", new StartView());
+        navigator.addView(MAINVIEW, new MainView());
+    }
+}]]></programlisting>
+
+            <para>
+                The <classname>Navigator</classname> automatically sets the URI fragment
+                of the application URL.  It also registers a
+                <interfacename>URIFragmentChangedListener</interfacename> in the page <phrase condition="web">(see
+                <xref linkend="advanced.urifu"/>)</phrase> to show the view identified by the URI
+                fragment if entered or navigated to in the browser. This also enables
+                browser navigation history in the application.
+            </para>
+
+            <section xml:id="application.navigator.navigating.viewprovider">
+                <title>View Providers</title>
+
+                <para>
+                    You can create new views dynamically using a <emphasis>view
+                    provider</emphasis> that implements the
+                    <interfacename>ViewProvider</interfacename> interface. A provider is
+                    registered in <classname>Navigator</classname> with
+                    <methodname>addProvider()</methodname>.
+                </para>
+
+                <para>
+                    The <methodname>ClassBasedViewProvider</methodname> is a view provider
+                    that can dynamically create new instances of a specified view class
+                    based on the view name.
+                </para>
+
+                <para>
+                    The <methodname>StaticViewProvider</methodname> returns an existing
+                    view instance based on the view name. The
+                    <methodname>addView()</methodname> in <classname>Navigator</classname>
+                    is actually just a shorthand for creating a static view provider for
+                    each registered view.
+                </para>
+           </section>
+
+            <section xml:id="application.navigator.navigating.viewchangelistener">
+                <title>View Change Listeners</title>
+
+                <para>
+                    You can handle view changes also by implementing a
+                    <interfacename>ViewChangeListener</interfacename> and adding it to a
+                    <classname>Navigator</classname>. When a view change occurs, a
+                    listener receives a <classname>ViewChangeEvent</classname> object,
+                    which has references to the old and the activated view, the name of
+                    the activated view, as well as the fragment parameters.
+                </para>
+            </section>
+        </section>
+
+        <section xml:id="application.navigator.view">
+            <title>Implementing a View</title>
+
+            <para>
+                Views can be any objects that implement the
+                <interfacename>View</interfacename> interface. When the
+                <methodname>navigateTo()</methodname> is called for the navigator, or the
+                application is opened with the URI fragment associated with the view, the
+                navigator switches to the view and calls its
+                <methodname>enter()</methodname> method.
+            </para>
+
+            <para>
+                To continue with the example, consider the following simple start view
+                that just lets the user to navigate to the main view. It only pops up a
+                notification when the user navigates to it and displays the navigation
+                button.
+            </para>
+
+            <book-example id="advanced.navigator.basic" style="float: right"/>
+            <programlisting><?pocket-size 65% ?><![CDATA[/** A start view for navigating to the main view */
+public class StartView extends VerticalLayout implements View {
+    public StartView() {
+        setSizeFull();
+
+        Button button = new Button("Go to Main View",
+                new Button.ClickListener() {
+            @Override
+            public void buttonClick(ClickEvent event) {
+                navigator.navigateTo(MAINVIEW);
+            }
+        });
+        addComponent(button);
+        setComponentAlignment(button, Alignment.MIDDLE_CENTER);
+    }        
+        
+    @Override
+    public void enter(ViewChangeEvent event) {
+        Notification.show("Welcome to the Animal Farm");
+    }
+}]]></programlisting>
+
+            <para>
+                You can initialize the view content in the constructor, as was done in the
+                example above, or in the <methodname>enter()</methodname> method. The
+                advantage with the latter method is that the view is attached to the view
+                container as well as to the UI at that time, which is not the case in the
+                constructor.
+            </para>
+        </section>
+
+        <section xml:id="application.navigator.urifragment">
+            <title>Handling URI Fragment Path</title>
+
+            <para>
+                URI fragment part of a URL is the part after a hash <literal>#</literal>
+                character. Is used for within-UI URLs, because it is the only part of the
+                URL that can be changed with JavaScript from within a page without
+                reloading the page. The URLs with URI fragments can be used for
+                hyperlinking and bookmarking, as well as browser history, just like any
+                other URLs. In addition, an exclamation mark <literal>#!</literal> after
+                the hash marks that the page is a stateful AJAX page, which can be crawled
+                by search engines. Crawling requires that the application also responds to
+                special URLs to get the searchable content. URI fragments are managed by
+                <classname>Page</classname>, which provides a low-level API.
+            </para>
+
+            <para>
+                URI fragments can be used with <classname>Navigator</classname> in two
+                ways: for navigating to a view and to a state within a view. The URI
+                fragment accepted by <methodname>navigateTo()</methodname> can have the
+                view name at the root, followed by fragment parameters after a slash
+                ("<literal>/</literal>"). These parameters are passed to the
+                <methodname>enter()</methodname> method in the
+                <interfacename>View</interfacename>.
+            </para>
+
+            <para>
+                In the following example, we implement within-view navigation.
+            </para>
+
+            <book-example id="advanced.navigator.basic" style="float: right"/>
+            <programlisting><?pocket-size 65% ?><![CDATA[/** Main view with a menu */
+public class MainView extends VerticalLayout implements View {
+    Panel panel;
+
+    // Menu navigation button listener
+    class ButtonListener implements Button.ClickListener {
+
+        String menuitem;
+        public ButtonListener(String menuitem) {
+            this.menuitem = menuitem;
+        }
+
+        @Override
+        public void buttonClick(ClickEvent event) {
+            // Navigate to a specific state
+            navigator.navigateTo(MAINVIEW + "/" + menuitem);
+        }
+    }
+
+    public MainView() {
+        setSizeFull();
+        
+        // Layout with menu on left and view area on right
+        HorizontalLayout hLayout = new HorizontalLayout();
+        hLayout.setSizeFull();
+
+        // Have a menu on the left side of the screen
+        Panel menu = new Panel("List of Equals");
+        menu.setHeight("100%");
+        menu.setWidth(null);
+        VerticalLayout menuContent = new VerticalLayout();
+        menuContent.addComponent(new Button("Pig",
+                  new ButtonListener("pig")));
+        menuContent.addComponent(new Button("Cat",
+                  new ButtonListener("cat")));
+        menuContent.addComponent(new Button("Dog",      
+                  new ButtonListener("dog")));
+        menuContent.addComponent(new Button("Reindeer",
+                  new ButtonListener("reindeer")));
+        menuContent.addComponent(new Button("Penguin",
+                  new ButtonListener("penguin")));
+        menuContent.addComponent(new Button("Sheep",
+                  new ButtonListener("sheep")));
+        menuContent.setWidth(null);
+        menuContent.setMargin(true);
+        menu.setContent(menuContent);
+        hLayout.addComponent(menu);
+
+        // A panel that contains a content area on right
+        panel = new Panel("An Equal");
+        panel.setSizeFull();
+        hLayout.addComponent(panel);
+        hLayout.setExpandRatio(panel, 1.0f);
+
+        addComponent(hLayout);
+        setExpandRatio(hLayout, 1.0f);
+        
+        // Allow going back to the start
+        Button logout = new Button("Logout",
+                   new Button.ClickListener() {
+            @Override
+            public void buttonClick(ClickEvent event) {
+                navigator.navigateTo("");
+            }
+        });
+        addComponent(logout);
+    }        
+    
+    @Override
+    public void enter(ViewChangeEvent event) {
+        VerticalLayout panelContent = new VerticalLayout();
+        panelContent.setSizeFull();
+        panelContent.setMargin(true);
+        panel.setContent(panelContent); // Also clears
+
+        if (event.getParameters() == null
+            || event.getParameters().isEmpty()) {
+            panelContent.addComponent(
+                new Label("Nothing to see here, " +
+                          "just pass along."));
+            return;
+        }
+
+        // Display the fragment parameters
+        Label watching = new Label(
+            "You are currently watching a " +
+            event.getParameters());
+        watching.setSizeUndefined();
+        panelContent.addComponent(watching);
+        panelContent.setComponentAlignment(watching,
+            Alignment.MIDDLE_CENTER);
+        
+        // Some other content
+        Embedded pic = new Embedded(null,
+            new ThemeResource("img/" + event.getParameters() +
+                              "-128px.png"));
+        panelContent.addComponent(pic);
+        panelContent.setExpandRatio(pic, 1.0f);
+        panelContent.setComponentAlignment(pic,
+                Alignment.MIDDLE_CENTER);
+
+        Label back = new Label("And the " +
+            event.getParameters() + " is watching you");
+        back.setSizeUndefined();
+        panelContent.addComponent(back);
+        panelContent.setComponentAlignment(back,
+            Alignment.MIDDLE_CENTER);
+    }
+}]]></programlisting>
+
+            <para>
+                The main view is shown in <xref
+                    linkend="figure.advanced.navigator.mainview"/>. At this point, the URL would
+                be <literal>http://localhost:8080/myapp#!main/reindeer</literal>.
+            </para>
+
+            <figure xml:id="figure.advanced.navigator.mainview">
+                <title>Navigator Main View</title>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata smallscale="100%" align="center" fileref="img/advanced/navigator-mainview.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+        </section>
+    </section>
+
+    <section xml:id="advanced.urifu" condition="web">
+        <title>URI Fragment and History Management with <classname>UriFragmentUtility</classname></title>
 
         <para>
             <emphasis>This section is not yet updated for Vaadin 7. The
@@ -1845,284 +2266,6 @@ urifu.addListener(new FragmentChangedListener() {
                 </imageobject>
             </mediaobject>
         </figure>
-    </section>
-
-	<section xml:id="advanced.navigator">
-		<title>Navigating in an Application</title>
-
-        <para>
-            Plain Vaadin applications do not have normal web page navigation as they
-            usually run on a single page, as all Ajax applications do. Quite commonly,
-            however, applications have different views between which the user should be
-            able to navigate. The <classname>Navigator</classname> in Vaadin can be used
-            for most cases of navigation. Views managed by the navigator automatically get
-            a distinct URI fragment, which can be used to be able to bookmark the views
-            and their states and to go back and forward in the browser history.
-        </para>
-
-        <section xml:id="application.navigator.navigating">
-            <title>Setting Up for Navigation</title>
-
-            <para>
-                The <classname>Navigator</classname> class manages a collection of
-                <emphasis>views</emphasis> that implement the
-                <interfacename>View</interfacename> interface. The views can be either
-                registered beforehand or acquired from a <emphasis>view
-                provider</emphasis>.  When registering, the views must have a name
-                identifier and be added to a navigator with
-                <methodname>addView()</methodname>. You can register new views at any
-                point. Once registered, you can navigate to them with
-                <methodname>navigateTo()</methodname>.
-            </para>
-
-            <para>
-                The views managed by the <classname>Navigator</classname> are displayed in a
-                <interfacename>ViewDisplay</interfacename>. The framework includes a
-                <classname>SimpleViewDisplay</classname> component, which can be used in most
-                cases to display views.
-            </para>
-
-            <para>
-                Let us consider the following application with two views: start and
-                main. Here, we define their names with enums to be typesafe.
-            </para>
-
-            <book-example id="advanced.navigator.basic" style="float: right"/>
-            <programlisting><?pocket-size 65% ?><![CDATA[public class NavigatorRoot extends Root {
-    Navigator  navigator;
-    
-    enum Views {START, MAIN};
-
-    @Override
-    protected void init(WrappedRequest request) {
-        getPage().setTitle("Navigation Example");
-        
-        // Fill the page with a view display
-        SimpleViewDisplay viewDisplay = new SimpleViewDisplay();
-        viewDisplay.setSizeFull();
-        setContent(viewDisplay);
-
-        // Create the navigator to control the page
-        navigator = new Navigator(Page.getCurrent(),
-                                  viewDisplay);
-        
-        // Create and register the views
-        navigator.addView(Views.START.name(), new StartView());
-        navigator.addView(Views.MAIN.name(), new MainView());
-
-        // Navigate to the start view
-        navigator.navigateTo(Views.START.name());
-    }
-}]]></programlisting>
-
-            <para>
-                The <classname>Navigator</classname> automatically sets the URI fragment
-                of the application URL.  It also registers a
-                <interfacename>FragmentChangeListener</interfacename> in the page (see
-                <xref linkend="advanced.urifu"/>) to show the view identified by the URI
-                fragment if entered or navigated to in the browser. This also enables
-                browser navigation history in the application.
-            </para>
-
-            <section xml:id="application.navigator.navigating.viewprovider">
-                <title>View Providers</title>
-
-                <para>
-                    You can create new views dynamically using a <emphasis>view
-                    provider</emphasis> that implement the
-                    <interfacename>ViewProvider</interfacename> interface. A provider is
-                    registered in <classname>Navigator</classname> with
-                    <methodname>registerProvider()</methodname>.
-                </para>
-
-                <para>
-                    The <methodname>ClassBasedViewProvider</methodname> is a view provider
-                    that can dynamically create new instances of a specified view class
-                    based on the view name.
-                </para>
-
-                <para>
-                    The <methodname>StaticViewProvider</methodname> returns an existing
-                    view instance based on the view name. The
-                    <methodname>addView()</methodname> in <classname>Navigator</classname>
-                    is actually just a shorthand for creating a static view provider for
-                    each registered view.
-                </para>
-           </section>
-
-            <section xml:id="application.navigator.navigating.viewchangelistener">
-                <title>View Change Listeners</title>
-
-                <para>
-                    You can handle view changes also by implementing a
-                    <interfacename>ViewChangeListener</interfacename> and adding it to a
-                    <classname>Navigator</classname>. When a view change occurs, a
-                    listener receives a <classname>ViewChangeEvent</classname> object,
-                    which has references to the old and the activated view, the name of
-                    the activated view, as well as the fragment parameters.
-                </para>
-            </section>
-        </section>
-
-        <section xml:id="application.navigator.view">
-            <title>Implementing a View</title>
-
-            <para>
-                Views can be any objects that implement the
-                <interfacename>View</interfacename> interface. When the
-                <methodname>navigateTo()</methodname> is called for the navigator, or the
-                application is opened with the URI fragment associated with the view, it
-                switches to the view and calls its <methodname>navigateTo()</methodname>
-                method.
-            </para>
-
-            <para>
-                To continue with the example, consider the following simple view just lets the
-                user to navigate to the other view. It doesn't do anything special when the
-                user navigates to it.
-            </para>
-
-            <book-example id="advanced.navigator.basic" style="float: right"/>
-            <programlisting><?pocket-size 65% ?><![CDATA[/** A start view for navigating to the main view */
-public class StartView extends VerticalLayout implements View {
-    public StartView() {
-        setSizeFull();
-
-        Button button = new Button("Go to Main View",
-                new Button.ClickListener() {
-            @Override
-            public void buttonClick(ClickEvent event) {
-                navigator.navigateTo(Views.MAIN.name());
-            }
-        });
-        addComponent(button);
-        setComponentAlignment(button, Alignment.MIDDLE_CENTER);
-    }        
-        
-    @Override
-    public void navigateTo(String fragmentParameters) {
-        // Nothing to do here really
-    }
-}]]></programlisting>
-        </section>
-
-        <section xml:id="application.navigator.urifragment">
-            <title>Handling URI Fragment Path</title>
-
-            <para>
-                URI fragments can be used with <classname>Navigator</classname> in two
-                ways: for navigating to a specific view and for navigating to a state
-                within the view. The URI fragment accepted by
-                <methodname>navigateTo()</methodname> can have the view name at the root,
-                followed by fragment parameters after a slash
-                ("<literal>/</literal>"). These parameters are passed to the
-                <methodname>navigateTo()</methodname> method in the
-                <interfacename>View</interfacename>.
-            </para>
-
-            <para>
-                In the following example, we implement within-view navigation.
-            </para>
-
-            <book-example id="advanced.navigator.basic" style="float: right"/>
-            <programlisting><?pocket-size 65% ?><![CDATA[/** Main view with a menu */
-public class MainView extends VerticalLayout implements View {
-
-    // Menu navigation button listener
-    class ButtonListener implements Button.ClickListener {
-        String menuitem;
-        public ButtonListener(String menuitem) {
-            this.menuitem = menuitem;
-        }
-
-        @Override
-        public void buttonClick(ClickEvent event) {
-            // Navigate to a specific state
-            navigator.navigateTo(Views.MAIN.name() +
-                                 "/" + menuitem);
-        }
-    }
-
-    public MainView() {
-        setSizeFull();
-        
-        // Layout with menu on left and view area on right
-        HorizontalLayout hLayout = new HorizontalLayout();
-        hLayout.setSizeFull();
-
-        // Have a menu on the left side of the screen
-        Panel menu = new Panel("Menu");
-        menu.addComponent(new Button("Cat",
-                  new ButtonListener("cat")));
-        menu.addComponent(new Button("Dog",      
-                  new ButtonListener("dog")));
-        menu.addComponent(new Button("Reindeer",
-                  new ButtonListener("reindeer")));
-        menu.addComponent(new Button("Penguin",
-                  new ButtonListener("penguin")));
-        menu.addComponent(new Button("Sheep",
-                  new ButtonListener("sheep")));
-        menu.setHeight("100%");
-        menu.setWidth(null);
-        menu.getContent().setWidth(null);
-        hLayout.addComponent(menu);
-
-        // Have a panel that contains a content area on the right
-        panel = new Panel("Content Panel");
-        panel.setSizeFull();
-        hLayout.addComponent(panel);
-        hLayout.setExpandRatio(panel, 1.0f);
-
-        addComponent(hLayout);
-        setExpandRatio(hLayout, 1.0f);
-        
-        // Allow going back to the start
-        Button logout = new Button("Logout",
-                   new Button.ClickListener() {
-            @Override
-            public void buttonClick(ClickEvent event) {
-                navigator.navigateTo(Views.START.name());
-            }
-        });
-        addComponent(logout);
-    }        
-    
-    @Override
-    public void navigateTo(String fragmentParameters) {
-        panel.removeAllComponents();
-
-        if (fragmentParameters == null) {
-            panel.addComponent(
-                new Label("Nothing to see here, " +
-                          "just pass along."));
-            return;
-        }
-
-        // Display some content
-        panel.addComponent(
-            new Label("You are currently watching a " +
-                      fragmentParameters));
-        panel.addComponent(new Image(null,
-            new ThemeResource("img/" + fragmentParameters +
-                              "-128px.png")));
-    }
-}]]></programlisting>
-
-            <para>
-                The main view is shown in <xref
-                    linkend="figure.advanced.navigator.mainview"/>. At this point, the URL would
-                be <literal>http://localhost:8080/myapp#MAIN/reindeer</literal>.
-            </para>
-
-            <figure xml:id="figure.advanced.navigator.mainview">
-                <title>Navigator Main View</title>
-                <mediaobject>
-                    <imageobject>
-                        <imagedata smallscale="100%" align="center" fileref="img/advanced/navigator-mainview.png"/>
-                    </imageobject>
-                </mediaobject>
-            </figure>
-        </section>
     </section>
 
     <!-- TODO Vaadin 7: Rewrite 
@@ -3365,29 +3508,30 @@ JavaScript.getCurrent().execute("alert('Hello')");]]></programlisting>
         </section>
 
         <section xml:id="advanced.javascript.callback">
-            <title>Handling JavaScript Callbacks</title>
+            <title>Handling JavaScript Function Callbacks</title>
 
             <para>
                 You can make calls with JavaScript from the client-side to the
                 server-side. This requires that you register JavaScript call-back methods
                 from the server-side. You need to implement and register a
-                <classname>JavaScriptCallback</classname> with
-                <methodname>addCallback()</methodname> in the current
-                <classname>JavaScript</classname> object. A callback requires a method
-                name, with an optional package path, given for the
-                <methodname>addCallback()</methodname>. You only need to implement the
+                <classname>JavaScriptFunction</classname> with
+                <methodname>addFunction()</methodname> in the current
+                <classname>JavaScript</classname> object. A function requires a
+                name, with an optional package path, which are given to the
+                <methodname>addFunction()</methodname>. You only need to implement the
                 <methodname>call()</methodname> method to handle calls from the
                 client-side JavaScript.
             </para>
 
-            <programlisting><?pocket-size 65% ?><![CDATA[JavaScript.getCurrent().addCallback("com.example.foo.myfunc",
-                                    new JavaScriptCallback() {
+            <programlisting><?pocket-size 65% ?><![CDATA[
+JavaScript.getCurrent().addFunction("com.example.foo.myfunc",
+                                    new JavaScriptFunction() {
     @Override
     public void call(JSONArray arguments) throws JSONException {
         Notification.show("Received call");
     }
 });
-        
+
 Link link = new Link("Send Message", new ExternalResource(
         "javascript:com.example.foo.myfunc()"));]]></programlisting>
 
@@ -3525,17 +3669,23 @@ Link link = new Link("Send Message", new ExternalResource(
             <itemizedlist>
                 <listitem>
                     <para>
-                        Pass a reference to the global data as a parameter.
+                        Pass a reference to the global data as a parameter
                     </para>
                 </listitem>
                 <listitem>
                     <para>
-                        Initialize components in <methodname>attach()</methodname> method.
+                        Initialize components in <methodname>attach()</methodname> method
                     </para>
                 </listitem>
                 <listitem>
                     <para>
-                        Store a reference to global data using the <emphasis>ThreadLocal Pattern</emphasis>.
+                        Initialize components in the <methodname>enter()</methodname> method of
+                        the navigation view (if using navigation)
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        Store a reference to global data using the <emphasis>ThreadLocal Pattern</emphasis>
                     </para>
                 </listitem>
             </itemizedlist>
@@ -3641,12 +3791,12 @@ class MyComponent extends CustomComponent {
 
             <para>
                 Vaadin uses the ThreadLocal pattern for allowing global access to the
-                <classname>Application</classname>, <classname>&uiclass;</classname>,
-                and <classname>Page</classname> objects of the currently processed server
+                <classname>Application</classname>, <classname>&uiclass;</classname>, and
+                <classname>Page</classname> objects of the currently processed server
                 request with a static <methodname>getCurrent()</methodname> method in all
                 the respective classes. This section explains why the pattern is used in
-                Vaadin and how it works. The explanation is given as an implementation, if
-                you find a need to reimplement the pattern for some reason.
+                Vaadin and how it works. You may also need to reimplement the pattern for
+                some purpose.
             </para>
 
             <!-- TODO Vaadin 7: Clean up what is no longer necessary -->
@@ -3681,6 +3831,7 @@ class MyComponent extends CustomComponent {
                 </mediaobject>
             </figure>
 
+            <!-- TODO Vaadin 7 reimplement
             <para>
                 It is possible to implement such switching either with the
                 <classname>TransactionListener</classname> or
@@ -3689,7 +3840,7 @@ class MyComponent extends CustomComponent {
                 <methodname>onRequestStart()</methodname>, respectively. We use the former
                 interface in the example code in this section, as the latter interface has
                 to be implemented in the application class.
-            </para>
+            </para>-->
 
             <para>
                 The second problem is that servlet containers typically do thread pooling
@@ -3715,6 +3866,7 @@ class MyComponent extends CustomComponent {
                 </mediaobject>
             </figure>
 
+<!--
             <para>
                 Notice that if you use a <classname>TransactionListener</classname>, the
                 listeners are attached to the web application context (in practice a user
@@ -3857,7 +4009,7 @@ public class ThreadLocalApplication extends Application {
         main.addComponent(new MyComponent());
     }
 }]]></programlisting>
-
+-->
             <indexterm startref="term.advanced.global.threadlocal" class="endofrange"/>
         </section>
     </section>
