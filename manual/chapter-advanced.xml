@@ -69,8 +69,8 @@
 
 		<para>
 			Because of the special nature of AJAX applications, use of multiple windows
-			uses require some caveats. We will go through them later in <xref
-			linkend="advanced.windows.caveats"/>.
+			uses require some caveats. <!-- TODO Re-enable We will go through them later in <xref
+			linkend="advanced.windows.caveats"/>. -->
 		</para>
 		
         <section xml:id="advanced.windows.popup">
@@ -191,8 +191,8 @@ Button button = new Button("Pop It Up");
 opener.extend(button);]]></programlisting>
 
                 <para>
-                    The resulting popup window is shown in <xref
-                    linkend="figure.advanced.windows.popup.popping"/>.
+                    The resulting popup window, which appears when the button is clicked,
+                    is shown in <xref linkend="figure.advanced.windows.popup.popping"/>.
                 </para>
 
                 <figure xml:id="figure.advanced.windows.popup.popping">
@@ -234,7 +234,7 @@ opener.extend(button);]]></programlisting>
             </section>
         </section>
 
-		<section xml:id="advanced.windows.caveats">
+		<!-- TODO Re-enable <section xml:id="advanced.windows.caveats">
 			<title>Caveats in Using Multiple Windows</title>
 
 			<section>
@@ -268,11 +268,10 @@ opener.extend(button);]]></programlisting>
 						</imageobject>
 					</mediaobject>
 				</figure>
-
+                -->
                 <!-- TODO: Provide an example. The old example was in MagiTestApplication.java (TK5.2) -->
-			</section>
-		</section>
-	</section>
+			<!-- </section> -->
+    </section>
 
 	<section xml:id="advanced.embedding">
 		<title>Embedding UIs in Web Pages</title>
@@ -286,7 +285,7 @@ opener.extend(button);]]></programlisting>
 		<para>
 			Embedding Vaadin UIs in web pages is easy and there are several different ways
 			to embed them. One is to have a <literal>&lt;div&gt;</literal> placeholder for
-			the UI and load the Vaadin Client-Side Engine with a simple JavaScript
+			the UI and load the Vaadin Client-Side Engine with some simple JavaScript
 			code. Another method is even easier, which is to simply use the
 			<literal>&lt;iframe&gt;</literal> element. Both of these methods have
 			advantages and disadvantages. One disadvantage of the
@@ -330,7 +329,13 @@ opener.extend(button);]]></programlisting>
                 URLs that have to be made relative to the page instead of the servlet URL.
 			</para>
 
-            <section xml:id="advanced.embedding.div.head">
+            <para condition="print">
+                <emphasis>The DIV embedding API is about to change soon after printing
+                this book edition. A tutorial that describes the feature should be made
+                available at the Vaadin website.</emphasis>
+            </para>
+
+            <section xml:id="advanced.embedding.div.head" condition="web">
                 <title>The Head Matter</title>
 
                 <para>
@@ -342,8 +347,7 @@ opener.extend(button);]]></programlisting>
                 </para>
 
                 <programlisting><?pocket-size 65% ?>&lt;?xml version="1.0" encoding="UTF-8" ?&gt;
-&lt;!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
-          "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"&gt;
+&lt;!DOCTYPE html&gt;
 &lt;head&gt;
   &lt;meta http-equiv="Content-Type"
         content="text/html; charset=UTF-8" /&gt;
@@ -360,7 +364,7 @@ opener.extend(button);]]></programlisting>
 &lt;/head&gt;</programlisting>
             </section>
             
-            <section xml:id="advanced.embedding.div.body">
+            <section xml:id="advanced.embedding.div.body" condition="web">
                 <title>The Body Matter</title>
 
                 <para>
@@ -385,7 +389,7 @@ opener.extend(button);]]></programlisting>
                 </para>
 
                 <para>
-                    Vaadin, or more exactly GWT, requires an invisible history frame,
+                    Vaadin, or more precisely GWT, requires an invisible history frame,
                     which is used for tracking the page or fragment history in the
                     browser.
                 </para>
@@ -396,7 +400,7 @@ opener.extend(button);]]></programlisting>
           src="javascript:false"></iframe>]]></programlisting>
             </section>
 
-            <section xml:id="advanced.embedding.div.div">
+            <section xml:id="advanced.embedding.div.div" condition="web">
                 <title>UI Placeholder Element</title>
 
                 <para>
@@ -445,7 +449,7 @@ opener.extend(button);]]></programlisting>
 
             </section>
 
-            <section xml:id="advanced.embedding.div.init">
+            <section xml:id="advanced.embedding.div.init" condition="web">
                 <title>Initializing the UI</title>
 
                 <para>
@@ -494,15 +498,17 @@ opener.extend(button);]]></programlisting>
                         <listitem>
                             This should be the exact class name of the widget set for the
                             UI, that is, without the <filename>.gwt.xml</filename> file
-                            name extension. If the UI has no compiled widget set, you can
+                            name extension. If the UI has no custom widget set, you can
                             use the <classname>com.vaadin.DefaultWidgetSet</classname>.
                         </listitem>
                     </varlistentry>
                     <varlistentry>
                         <term><parameter>theme</parameter></term>
                         <listitem>
-                            Name of the theme. It must exist under the
-                            <filename>VAADIN/themes</filename> folder.
+                            Name of the theme, such as one of the built-in themes
+                            (<literal>reindeer</literal>, <literal>runo</literal>, or
+                            <literal>chameleon</literal>) or a custom theme. It must exist
+                            under the <filename>VAADIN/themes</filename> folder.
                         </listitem>
                     </varlistentry>
                     <varlistentry>
@@ -543,12 +549,13 @@ opener.extend(button);]]></programlisting>
                     <varlistentry>
                         <term><parameter>standalone</parameter></term>
                         <listitem>
-                            The parameter defines whether the UI is rendered on its own in
-                            the browser window or in some context. A standalone UI may do
-                            things that might interfere with other parts of the page, such
-                            as change the page title and request focus when it is
-                            loaded. When embedding, the UI is not standalone, so you may
-                            want to set the parameter as <parameter>false</parameter>.
+                            This parameter should be <parameter>false</parameter> when
+                            embedding. <phrase condition="web">The parameter defines
+                            whether the UI is rendered on its own in the browser window or
+                            in some context. A standalone UI may do things that might
+                            interfere with other parts of the page, such as change the
+                            page title and request focus when it is loaded. When
+                            embedding, the UI is not standalone.</phrase>
                         </listitem>
                     </varlistentry>
                     <varlistentry>
@@ -603,7 +610,7 @@ opener.extend(button);]]></programlisting>
                 </para>
             </section>
 
-            <section xml:id="advanced.embedding.div.summary">
+            <section xml:id="advanced.embedding.div.summary" condition="web">
                 <title>Summary of Div Embedding</title>
 
                 <para>
@@ -909,11 +916,19 @@ opener.extend(button);]]></programlisting>
                 Running an application in the debug mode enables the client-side Debug
                 Window in the browser. You can open the Debug Window by adding
                 "<uri>?debug</uri>" to the application URL, for example,
-                <uri>http://localhost:8080/myapp/?debug</uri>. The Debug Window, shown in
-                <xref linkend="figure.debug.window"/>, consists of buttons controlling the
-                debugging features and a scrollable log of debug messages.
+                <uri>http://localhost:8080/myapp/?debug</uri>. The Debug Window has
+                buttons for controlling the debugging features and a scrollable log of
+                debug messages.
             </para>
 
+            <para condition="print">
+                <emphasis>The debug window has many more features than documented here and
+                will be redesigned in Vaadin 7.1 after publication of this print
+                edition. Please refer to updated documentation published at a later
+                time.</emphasis>
+            </para>
+
+            <!-- TODO Update the image
 			<figure id="figure.debug.window">
 				<title>Debug Window</title>
 				<mediaobject>
@@ -925,7 +940,9 @@ opener.extend(button);]]></programlisting>
 					</imageobject>
 				</mediaobject>
 			</figure>
+            -->
 
+            <!--
 			<variablelist>
 				<varlistentry>
 					<term><guibutton>Clear console</guibutton></term>
@@ -959,17 +976,18 @@ opener.extend(button);]]></programlisting>
 					</listitem>
 				</varlistentry>
 			</variablelist>
-
+            -->
 			<para>
-				If you use the Firebug plugin in Mozilla Firefox, the log messages will
-				also be printed to the Firebug console. In such a case, you may want to
-				enable client-side debugging without showing the Debug Window with
-				"<uri>?debug=quiet</uri>" in the URL. In the quiet debug mode, log
-				messages will only be printed to the Firebug console.
+				If you use the Firebug plugin for Firefox or the Developer Tools console
+				in Chrome, the log messages will also be printed to the Firebug
+				console. In such a case, you may want to enable client-side debugging
+				without showing the Debug Window with "<uri>?debug=quiet</uri>" in the
+				URL. In the quiet debug mode, log messages will only be printed to the
+				console of the browser debugger.
 			</para>
 		</section>
 
- 		<section>
+ 		<section xml:id="debug.mode.analyze">
 			<title>Analyzing Layouts</title>
 			<para>
 				The <guilabel>Analyze layouts</guilabel> button analyzes the currently
@@ -1055,11 +1073,12 @@ Relative sizes were replaced by undefined sizes, components may not render as ex
 		<section>
 			<title>Debug Functions for Component Developers</title>
 
+            <!-- TODO Check this functionality better -->
 			<para>
 				You can take advantage of the debug mode when developing client-side
 				components. The static function
 				<methodname>ApplicationConnection.getConsole()</methodname> will return a
-				reference to a <classname>Console</classname> object which contains
+				reference to a <classname>VConsole</classname> object which contains
 				logging methods such as <methodname>log(String msg)</methodname> and
 				<methodname>error(String msg)</methodname>.  These functions will print
 				messages to the Debug Window and Firebug console in the same way as other
