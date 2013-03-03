@@ -30,7 +30,7 @@
             Vaadin components consist of two parts: a server-side and a client-side
             component. The latter are also called <emphasis>widgets</emphasis> in Google
             Web Toolkit (GWT) parlance. A Vaadin application uses the API of the
-            server-side component, which is "painted" as a client-side widget in the
+            server-side component, which is rendered as a client-side widget in the
             browser. As on the server-side, the client-side widgets form a hierarchy of
             layout widgets and regular widgets as the leaves.
         </para>
@@ -65,7 +65,7 @@
 
         <para>
             The state of a server-side component is synchronized automatically to the
-            client-side widget and back using a <emphasis>shared state</emphasis>
+            client-side widget using a <emphasis>shared state</emphasis>
             object. A shared state object implements the
             <interfacename>ComponentState</interfacename> interface and it is used both in
             the server-side and the client-side component. On the client-side, a connector
@@ -78,12 +78,16 @@
 
         <para>
             The state sharing assumes that state is defined with standard Java types, such
-            as integers, doubles, ...
+            as primitive and boxed primitive types, <classname>String</classname>, arrays,
+            and certain collections (<classname>List</classname>,
+            <classname>Set</classname>, and <classname>Map</classname>) of the supported
+            types. Also the Vaadin <classname>Connector</classname> and some special
+            internal types can be shared.
         </para>
 
         <para>
             In addition to state, both server- and client-side can make remote procedure
-            calls (RPC) on the other side. RPC is used foremost for event
+            calls (RPC) to the other side. RPC is used foremost for event
             notifications. For example, when a client-side connector of a button receives
             a click, it sends the event to the server-side using RPC.
         </para>
@@ -149,7 +153,7 @@
                 <listitem>
                     <para>
                         In the <guilabel>New Component Wizard</guilabel>, make the following
-                        settins.
+                        settings.
                     </para>
 
                     <screenshot>
@@ -179,7 +183,7 @@
                                     The parent package under which the new server-side
                                     component should be created. If the project does not
                                     already have a widget set, one is created under this
-                                    package in <package>widgetset</package>
+                                    package in the <package>widgetset</package>
                                     subpackage. The subpackage will contain the
                                     <filename>.gwt.xml</filename> descriptor that defines
                                     the widget set and the new widget stub under the
@@ -195,7 +199,7 @@
 									component</emphasis>. The name of the client-side
 									widget stub will be the same but with
 									"-<classname>Widget</classname>" suffix, for example,
-									<classname>MycomponentWidget</classname>. You can
+									<classname>MyComponentWidget</classname>. You can
 									rename the classes afterwards.
 								</para>
 							</listitem>
@@ -295,7 +299,9 @@
 			<para>
 				You can refactor the package structure if you find need for it, but GWT
 				compiler requires that the client-side code <emphasis>must</emphasis>
-				always be stored under a package named "<filename>client</filename>".
+				always be stored under a package named "<filename>client</filename>" or a
+				package defined with a <literal>source</literal> element in the widget set
+				descriptor.
 			</para>
         </section>
 
@@ -382,8 +388,8 @@
         <title>Creating a Server-Side Component</title>
 
         <para>
-            Normal server-side Vaadin applications interface with a server-side component
-            that is rendered on the client-side using the widget counterpart. A
+            Typical server-side Vaadin applications use server-side components
+            that are rendered on the client-side using their counterpart widgets. A
             server-side component must manage state synchronization between the widget on
             the client-side, in addition to any server-side logic.
         </para>
@@ -402,10 +408,13 @@
     }
 
     @Override
-    public MyComponentState getState() {
+    protected MyComponentState getState() {
         return (MyComponentState) super.getState();
     }
 }]]></programlisting>
+
+            <!-- Note: The getState() should be protected to avoid leaking implementation
+            details. -->
 
         </section>
     </section>
@@ -432,13 +441,6 @@
             <programlisting><?pocket-size 65% ?><![CDATA[@Connect(MyComponent.class)
 public class MyComponentConnector
         extends AbstractComponentConnector {
-    public MyComponentConnector() {    
-    }
-
-    @Override
-    protected Widget createWidget() {
-        return GWT.create(MyComponentWidget.class);
-    }
 
     @Override
     public MyComponentWidget getWidget() {
@@ -492,7 +494,8 @@ public class MyComponentConnector
         <para>
             The basic communication from a server-side component to its the client-side
             widget counterpart is handled using a <emphasis>shared state</emphasis>. The
-            shared state is serialized transparently. It is read-only on the client-side.
+            shared state is serialized transparently. It should be considered read-only on
+            the client-side, as it is not serialized back to the server-side.
         </para>
 
         <para>
@@ -514,6 +517,7 @@ public class MyComponentConnector
 }]]></programlisting>
 
         <para>
+            <!-- The following is the recommended way. TODO change it. -->
             You can also use public member variables and access them directly. However, if
             you do have setters and getters, as in the above example, the corresponding
             member variables may not be public or they will create a name conflict during
@@ -531,9 +535,8 @@ public class MyComponentConnector
             </para>
 
             <para>
-                To prevent casting the shared state object every time, it is recommended
-                that you override the base implementation with one that returns the proper
-                shared state type, as follows:
+                It is required that you override the base implementation with one that
+                returns the proper shared state type, as follows:
             </para>
 
             <programlisting><![CDATA[@Override
@@ -551,24 +554,6 @@ public MyComponentState getState() {
     ....
 }]]></programlisting>
 
-            <para>
-                After you make changes to the shared state object in the server-side
-                component, you need to call <methodname>requestRepaint()</methodname> to
-                inform the framework that the state has changed and the client-side widget
-                needs to be repainted by synchronizing the state.
-            </para>
-
-            <para>
-                For example, the server-side component could offer a setter for a
-                component property, which delegates the property to the shared state
-                object and requests the repaint:
-            </para>
-
-            <programlisting><![CDATA[void setText(String text) {
-    // update shared state
-    getState().setText(text);
-    requestRepaint();
-}]]></programlisting>
         </section>
 
         <section xml:id="gwt.shared-state.connector">
@@ -577,9 +562,8 @@ public MyComponentState getState() {
             <para>
                 A connector can access a shared state with the
                 <methodname>getState()</methodname> method. The access should be
-                read-only. To prevent casting the shared state object every time, it is
-                recommended that you override the base implementation with one that
-                returns the proper shared state type, as follows:
+                read-only. It is required that you override the base implementation with
+                one that returns the proper shared state type, as follows:
             </para>
 
             <programlisting><?pocket-size 65% ?><![CDATA[@Override
@@ -616,6 +600,7 @@ public void onStateChanged(StateChangeEvent stateChangeEvent) {
                 referring to their connectors, which are shared.
             </para>
 
+            <!-- TODO Update to use public member instead of getter and setter. -->
             <programlisting><?pocket-size 65% ?><![CDATA[public class MyComponentState extends ComponentState {
     private Connector otherComponent;
 
@@ -753,8 +738,21 @@ if (ref != null) {
             <para>
                 The above example defines a single <methodname>clicks()</methodname> RPC
                 call, which takes a <classname>MouseEventDetails</classname> object as the
-                parameter. You can pass any serializable Java objects in RPC calls and
-                Vaadin handles the serialization.
+                parameter.
+            </para>
+
+            <para>
+                You can pass the most common standard Java types, such as primitive and
+                boxed primitive types, <classname>String</classname>, and arrays and some
+                collections (<classname>List</classname>, <classname>Set</classname>, and
+                <classname>Map</classname>) of the supported types. Also the Vaadin
+                <classname>Connector</classname> and some special internal types can be
+                passed.
+            </para>
+
+            <para>
+                An RPC method must return void - the widget set compiler should complain
+                if it doesn't.
             </para>
 
             <section xml:id="gwt.rpc.server-side.calling">
@@ -835,7 +833,7 @@ public class MyComponentConnector
 
         <para>
             Also a &ui; can be extended in a similar fashion. In fact, some Vaadin
-            features such as notifications are &ui; extensions.
+            features such as the JavaScript execution are UI extensions.
         </para>
 
         <para>
@@ -850,9 +848,9 @@ public class MyComponentConnector
             <para>
                 The server-side API for an extension consists of class that extends (in
                 the Java sense) the <classname>AbstractExtension</classname> class. It
-                needs to have an <emphasis>extend()</emphasis> method that takes the
-                extended component or &ui; as a parameter and passes it to the
-                <emphasis>super.extend()</emphasis>.
+                typically has an <emphasis>extend()</emphasis> method, a constructor, or a
+                static helper method that takes the extended component or &ui; as a
+                parameter and passes it to <emphasis>super.extend()</emphasis>.
             </para>
 
             <para>
@@ -878,7 +876,7 @@ layout.addComponent(password);]]></programlisting>
                 Adding a feature in such a "reverse" way is a bit unusual in the Vaadin
                 API, but allows type safety for extensions, as the method can limit the
                 target type to which the extension can be applied, and whether it is a
-                component or &ui;.
+                regular component or a &ui;.
             </para>
         </section>
 
@@ -898,13 +896,13 @@ layout.addComponent(password);]]></programlisting>
                 <methodname>extend()</methodname> method, which allows hooking to the
                 extended component. The normal extension mechanism is to modify the
                 extended component as needed and add event handlers to it to handle user
-                interaction. A connector can share a state with the server-side extension
-                as well as make RPC calls just like with normal components.
+                interaction. An extension connector can share a state with the server-side
+                extension as well as make RPC calls, just like with components.
             </para>
 
             <para>
                 In the following example, we implement a "Caps Lock warning" extension. It
-                listens for changes in the Caps Lock state and displays a floating warning
+                listens for changes in Caps Lock state and displays a floating warning
                 element over the extended component if the Caps Lock is on.
             </para>
 
@@ -1004,7 +1002,7 @@ public class CapsLockWarningConnector
 }]]></programlisting>
 
             <para>
-                In addition, all Vaadin components get the <literal>v-connector</literal>
+                In addition, all Vaadin components get the <literal>v-widget</literal>
                 class. If it extends an existing Vaadin or GWT widget, it will inherit
                 CSS classes from that as well.
             </para>
@@ -1076,14 +1074,14 @@ public class CapsLockWarningConnector
         <para>
             Component containers, such as layout components, are a special group of
             components that require some consideration. In addition to handling state,
-            they need to manage the serialization of their contained components to the
-            other side.
+            they need to manage communicating the hierarchy of their contained components
+            to the other side.
         </para>
 
         <para>
             The easiest way to implement a component container is extend the
             <classname>AbstractComponentContainer</classname>, which handles the
-            serialization of the container server-side components to the client-side.
+            synchronization of the container server-side components to the client-side.
         </para>
 
         <!-- TODO Vaadin 7: https://vaadin.com/wiki/-/wiki/Main/Creating%20a%20simple%20component%20container -->
@@ -1230,7 +1228,7 @@ public class CapsLockWarningConnector
             </orderedlist>
         </section>
 
-        <section xml:id="gwt.addons.ant">
+        <section xml:id="gwt.addons.ant" condition="web">
             <title>Building Add-on with Ant</title>
 
             <para>
@@ -1528,9 +1526,8 @@ public class CapsLockWarningConnector
                     <para>
                         Create a connector class, such as
                         <classname>MyConnector</classname>, that extends
-                        <classname>Vaadin6Connector</classname>. Implement the
-                        <methodname>createWidget()</methodname> method as
-                        <literal>GWT.create(MyWidget.class)</literal>.
+                        <classname>LegacyConnector</classname>. Implement the
+                        <methodname>getWidget()</methodname> method.
                     </para>
                 </listitem>
                 <listitem>
@@ -1544,7 +1541,7 @@ public class CapsLockWarningConnector
                 <listitem>
                     <para>
                         Have the server-side component implement the
-                        <interface>Vaadin6Component</interface> interface to enable
+                        <interface>LegacyComponent</interface> interface to enable
                         compatibility handling.
                     </para>
                 </listitem>
@@ -1560,17 +1557,17 @@ public class CapsLockWarningConnector
     </section>
 
     <section xml:id="gwt.javascript">
-        <title>Integrating JavaScript Components</title>
+        <title>Integrating JavaScript Components and Extensions</title>
 
         <indexterm xml:id="term.gwt.javascript" class="startofrange">
             <primary>JavaScript integration</primary>
         </indexterm>
 
         <para>
-            Vaadin allows simplified integration of pure JavaScript components. The
-            JavaScript connector code is published from the server-side. As the JavaScript
-            integration does not involve GWT programming, no widget set compilation is
-            needed.
+            Vaadin allows simplified integration of pure JavaScript components, as well as
+            component and UI extensions. The JavaScript connector code is published from
+            the server-side. As the JavaScript integration does not involve GWT
+            programming, no widget set compilation is needed.
         </para>
 
         <section xml:id="gwt.javascript.example">
@@ -1632,7 +1629,7 @@ mylibrary.MyComponent = function (element) {
                 following definition:
             </para>
 
-            <programlisting><?pocket-size 65% ?><![CDATA[<script language="javascript" type="text/javascript"
+            <programlisting><?pocket-size 65% ?><![CDATA[<script type="text/javascript"
         src="mylibrary.js"></script>]]></programlisting>
 
             <para>
@@ -1643,7 +1640,7 @@ mylibrary.MyComponent = function (element) {
 <div id="foo"></div>
     
 <!-- Create the component and bind it to the placeholder -->
-<script language="javascript" type="text/javascript">
+<script type="text/javascript">
     foo = new mylibrary.MyComponent(
             document.getElementById("foo"));
     foo.click = function () {
@@ -1684,7 +1681,8 @@ mylibrary.MyComponent = function (element) {
 mycomponent.setValue("Server-side value");
 
 // Process a value input by the user from the client-side
-mycomponent.addListener(new MyComponent.ValueChangeListener() {
+mycomponent.addValueChangeListener(
+        new MyComponent.ValueChangeListener() {
     @Override
     public void valueChange() {
         Notification.show("Value: " + mycomponent.getValue());
@@ -1702,6 +1700,7 @@ layout.addComponent(mycomponent);]]></programlisting>
                     shared state and RPC for the component.
                 </para>
 
+                <!-- TODO: make addListener() public in original example, getState() protected. -->
                 <programlisting><?pocket-size 65% ?><![CDATA[package com.vaadin.book.examples.client.js;
 
 @JavaScript({"mylibrary.js", "mycomponent-connector.js"})
@@ -1711,7 +1710,7 @@ public class MyComponent extends AbstractJavaScriptComponent {
     }
     ArrayList<ValueChangeListener> listeners =
             new ArrayList<ValueChangeListener>();
-    void addListener(ValueChangeListener listener) {
+    public void addListener(ValueChangeListener listener) {
         listeners.add(listener);
     }
     
@@ -1724,7 +1723,7 @@ public class MyComponent extends AbstractJavaScriptComponent {
     }
 
     @Override
-    public MyComponentState getState() {
+    protected MyComponentState getState() {
         return (MyComponentState) super.getState();
     }
 }]]></programlisting>
@@ -1761,9 +1760,9 @@ public class MyComponent extends AbstractJavaScriptComponent {
             <title>Defining a JavaScript Connector</title>
 
             <para>
-                A JavaScript connector is an class that initializes the JavaScript
-                component and handles communication between the server-side code and the
-                integrated JavaScript code.
+                A JavaScript connector is a function that initializes the JavaScript
+                component and handles communication between the server-side and the
+                JavaScript code. <!-- TOD Clarify - code? -->
             </para>
 
             <para>
@@ -1776,7 +1775,7 @@ public class MyComponent extends AbstractJavaScriptComponent {
 
             <para>
                 The Vaadin client-side framework adds a number of methods to the connector
-                class. The <methodname>this.getElement()</methodname> method returns the
+                function. The <methodname>this.getElement()</methodname> method returns the
                 HTML DOM element of the component. The
                 <methodname>this.getState()</methodname> returns a shared state object
                 with the current state as synchronized from the server-side.
@@ -1802,7 +1801,7 @@ function() {
 
             <para>
                 In the above example, we pass user interaction using the JavaScript RPC
-                mechanism, as described later in <xref linkend="gwt.javascript.rpc"/>.
+                mechanism, as described in the next section.
             </para>
         </section>
 
@@ -1878,7 +1877,8 @@ function() {
                 </para>
 
                 <para>
-                    You can pass any native types in the parameters.
+                    You can pass anything that is valid in JSON notation in the
+                    parameters.
                 </para>
             </section>
         </section>

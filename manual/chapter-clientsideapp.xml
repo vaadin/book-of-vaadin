@@ -70,8 +70,8 @@
            linkend="clientsideapp.entrypoint"/>. The user interface is built from
            <emphasis>widgets</emphasis> hierarchically, just like with server-side Vaadin
            UIs. The built-in widgets and their relationships are catalogued in <xref
-           linkend="widgets"/>. You can also use widgets in Vaadin add-ons (the ones that
-           have them) or make your own.
+           linkend="widgets"/>. You can also use many of the widgets in Vaadin add-ons
+           that have them, or make your own.
         </para>
 
         <para>
@@ -179,32 +179,63 @@ public class MyEntryPoint implements EntryPoint {
             </para>
 
             <para>
-                Any static resources, such as images or CSS stylesheets, must be contained
-                in the <filename>public</filename> folder (not a Java package) under the
-                folder of the descriptor file. When the module is compiled, the resources
-                are copied to the output folder.
+                You can put static resources, such as images or CSS stylesheets, in a
+                <filename>public</filename> folder (not a Java package) under the folder
+                of the descriptor file. When the module is compiled, the resources are
+                copied to the output folder. Normally in pure client-side application
+                development, it is easier to load them in the HTML host file or in a
+                <classname>ClientBundle</classname> (see GWT documentation), but these
+                methods are not compatible with server-side component integration, if you
+                use the resources for that purpose as well.
             </para>
         </section>
     </section>
 
     <section xml:id="clientsideapp.compiling">
-        <title>Compiling a Client-Side Application</title>
+        <title>Compiling and Running a Client-Side Application</title>
 
         <para>
-            The application needs to be compiled with into JavaScript to run it in a
-            browser. During development, it is easiest to do that with the Vaadin
-            Development Mode, which also allows debugging. You need to execute the
-            <classname>com.google.clientside.dev.DevMode</classname> class in the Vaadin
-            JAR with the following parameters:
+            <emphasis>Compilation of client-side modules other than widget sets with the
+            Vaadin Plugin for Eclipse has recent changes and limitations at the time of
+            writing of this edition and the information given here may not be
+            accurate.</emphasis>
         </para>
 
-        <programlisting><![CDATA[-war com.example.myapp.MyModule
--startupUrl http://localhost:8080/myproject
-warname -bindAddress 127.0.0.1]]></programlisting>
+        <para>
+            The application needs to be compiled into JavaScript to run it in a
+            browser. For deployment, and also initially for the first time when running
+            the Development Mode, you need to do the compilation with the Vaadin Client
+            Compiler, as described in <xref linkend="clientside.compiling"/>.
+        </para>
 
         <para>
-            For deployment, you need to do the compilation with the Vaadin Client
-            Compiler, as described in <xref linkend="clientside.compiling"/>.
+            During development, it is easiest to compile with the Development Mode, which
+            also allows debugging when you run it in debug mode in an IDE. To launch it,
+            you need to execute the
+            <classname>com.google.clientside.dev.DevMode</classname> class in the Vaadin
+            JAR with the parameters such as the following:
+        </para>
+
+        <programlisting><?pocket-size 65% ?><![CDATA[-noserver -war WebContent/clientside com.example.myapp.MyModule
+-startupUrl http://localhost:8080/myproject/loaderpage.html
+-bindAddress 127.0.0.1]]></programlisting>
+
+        <para>
+            See <xref linkend="clientside.debugging.devmode"/> for a description of the
+            parameters. The <parameter>startupUrl</parameter> should be the URL of the
+            host page described in <xref linkend="clientsideapp.loading"/>.
+        </para>
+
+        <para>
+            In Eclipse, you can create a launch configuration to do the task, for example
+            by creating it in the Vaadin section of project preferences and then modifying
+            it appropriately.
+        </para>
+
+        <para>
+            The parameter for the <parameter>-war</parameter> should be a path to a
+            deployment folder that contains the compiled client-side module, in Eclipse
+            under <filename>WebContent</filename>.
         </para>
     </section>
 
@@ -212,9 +243,9 @@ warname -bindAddress 127.0.0.1]]></programlisting>
         <title>Loading a Client-Side Application</title>
 
         <para>
-            You can load the JavaScript code of a client-side application in an HTML page
-            by including it with a <literal>&lt;script&gt;</literal> tag, for example as
-            follows:
+            You can load the JavaScript code of a client-side application in an HTML
+            <emphasis>host page</emphasis> by including it with a
+            <literal>&lt;script&gt;</literal> tag, for example as follows:
         </para>
 
         <programlisting><?pocket-size 65% ?><![CDATA[<html xmlns="http://www.w3.org/1999/xhtml">
@@ -234,7 +265,7 @@ warname -bindAddress 127.0.0.1]]></programlisting>
     <h1>A Pure Client-Side Application</h1>
     
     <script type="text/javascript" language="javascript"
-            src="VAADIN/widgetset/com.example.myapp.MyModule/
+            src="clientside/com.example.myapp.MyModule/
                  com.example.myapp.MyModule.nocache.js">
     </script>
   </body>
@@ -243,7 +274,7 @@ warname -bindAddress 127.0.0.1]]></programlisting>
         <para>
             The JavaScript module is loaded in a <literal>&lt;script&gt;</literal>
             element. The <literal>src</literal> parameter should be a relative
-            link from the page to the compiled JavaScript module.
+            link from the host page to the compiled JavaScript module.
         </para>
         
         <para>
@@ -252,6 +283,11 @@ warname -bindAddress 127.0.0.1]]></programlisting>
             example. The exact path to the style file depends on your project
             structure - the example is given for a regular Vaadin application where
             themes are contained in the <filename>VAADIN</filename> folder in the WAR.
+        </para>
+
+        <para>
+            In addition to CSS and scripts, you can load any other resources needed by the
+            client-side application in the host page.
         </para>
     </section>
 
