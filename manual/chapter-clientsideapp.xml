@@ -14,27 +14,22 @@
         This chapter describes how to develop client-side Vaadin applications.
     </para>
 
-    <para>
-        <emphasis>This edition is a draft. Many new features that will be included in
-        Vaadin 7 are not yet covered in the draft and some of the content may in fact be
-        outdated. For the most current version, please see the on-line edition available
-        at <uri>http://vaadin.com/book</uri>.</emphasis>
-    </para>
-
     <section xml:id="clientsideapp.overview">
         <title>Overview</title>
 
         <para>
             Vaadin allows developing client-side modules that run in the browser.
-            Client-side modules can use the same widgets, themes, and back-end services as
-            server-side Vaadin applications. Client-side applications can run in the
-            browser, even with no further server communications. When paired with a
-            server-side service to gain access to data storage and server-side business
-            logic, client-side applications can be considered "fat clients", in comparison
-            to the "thin client" approach of the server-side Vaadin applications. Fat
-            clients are useful for a range of purposes when you have a need for highly
-            responsive UI logic, such as for games or for serving a huge number of clients
-            with possibly stateless server-side code.
+            Client-side modules can use all the GWT widgets and some Vaadin-specific
+            widgets, as well as the same themes as server-side Vaadin
+            applications. Client-side applications run in the browser, even with no
+            further server communications. When paired with a server-side service to gain
+            access to data storage and server-side business logic, client-side
+            applications can be considered "fat clients", in comparison to the "thin
+            client" approach of the server-side Vaadin applications. The services can use
+            the same back-end services as server-side Vaadin applications. Fat clients are
+            useful for a range of purposes when you have a need for highly responsive UI
+            logic, such as for games or for serving a huge number of clients with possibly
+            stateless server-side code.
         </para>
 
 		<figure xml:id="figure.clientsideapp.overview.architecture" float="center" floatstyle="before">
@@ -75,7 +70,8 @@
            linkend="clientsideapp.entrypoint"/>. The user interface is built from
            <emphasis>widgets</emphasis> hierarchically, just like with server-side Vaadin
            UIs. The built-in widgets and their relationships are catalogued in <xref
-           linkend="widgets"/>. You can also use Vaadin add-on widgets or make your own.
+           linkend="widgets"/>. You can also use widgets in Vaadin add-ons (the ones that
+           have them) or make your own.
         </para>
 
         <para>
@@ -107,7 +103,7 @@
             server-side storage, and transmit the data to the server when the connection
             is again available. Such a pattern is commonly used with Vaadin TouchKit.<!-- Use
             of a client-side application to provide an off-line mode is described in <xref
-            linkend="clientsideapp.offline"/>-->.
+            linkend="clientsideapp.offline"/>.-->
         </para>
     </section>
 
@@ -126,11 +122,11 @@
 
         <programlisting><?pocket-size 65% ?><![CDATA[package com.example.myapp.client;
 
-import com.google.clientside.core.client.EntryPoint;
-import com.google.clientside.event.dom.client.ClickEvent;
-import com.google.clientside.event.dom.client.ClickHandler;
-import com.google.clientside.user.client.ui.RootPanel;
-import com.vaadin.terminal.clientside.client.ui.button.VButton;
+import com.google.gwt.core.client.EntryPoint;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.ui.RootPanel;
+import com.vaadin.ui.VButton;
 
 public class MyEntryPoint implements EntryPoint {
     @Override
@@ -165,16 +161,26 @@ public class MyEntryPoint implements EntryPoint {
 
             <programlisting><?pocket-size 65% ?><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE module PUBLIC
-    "-//Google Inc.//DTD Google Web Toolkit 1.7.0//EN"
-    "http://google-web-toolkit.googlecode.com/svn/tags/1.7.0/distro-source/core/src/gwt-module.dtd">
+"-//Google Inc.//DTD Google Web Toolkit 1.7.0//EN"
+"http://google-web-toolkit.googlecode.com/svn/tags/1.7.0/distro-source/core/src/gwt-module.dtd">
 <module>
+    <!-- Builtin Vaadin and GWT widgets -->
+    <inherits name="com.vaadin.Vaadin" />
+
     <!-- The entry-point for the client-side application -->
     <entry-point class="com.example.myapp.client.MyEntryPoint"/>
 </module>]]></programlisting>
 
             <para>
+                You might rather want to inherit the
+                <classname>com.google.gwt.user.User</classname> to get just the basic GWT
+                widgets, and not the Vaadin-specific widgets and classes, most of which
+                are unusable in pure client-side applications.
+            </para>
+
+            <para>
                 Any static resources, such as images or CSS stylesheets, must be contained
-                in a <filename>public</filename> folder (not a Java package) under the
+                in the <filename>public</filename> folder (not a Java package) under the
                 folder of the descriptor file. When the module is compiled, the resources
                 are copied to the output folder.
             </para>
@@ -185,29 +191,28 @@ public class MyEntryPoint implements EntryPoint {
         <title>Compiling a Client-Side Application</title>
 
         <para>
-            The application needs to be compiled with the Vaadin Compiler into
-            JavaScript. We covered the basics of the client-side module compilation in
-            <xref linkend="clientside.compiling"/>. In the following, we see how to
-            compile client-side applications.
+            The application needs to be compiled with into JavaScript to run it in a
+            browser. During development, it is easiest to do that with the Vaadin
+            Development Mode, which also allows debugging. You need to execute the
+            <classname>com.google.clientside.dev.DevMode</classname> class in the Vaadin
+            JAR with the following parameters:
         </para>
 
-        <para>
-            Probably the easiest way to compile a client-side application is to use
-            the Vaadin Development Mode, which also allows debugging. You need to
-            execute the <classname>com.google.clientside.dev.DevMode</classname> class
-            in the Vaadin JAR with the following parameters:
-        </para>
-
-        <programlisting><![CDATA[-noserver -war warname com.example.myapp.MyModule
+        <programlisting><![CDATA[-war com.example.myapp.MyModule
 -startupUrl http://localhost:8080/myproject
 warname -bindAddress 127.0.0.1]]></programlisting>
+
+        <para>
+            For deployment, you need to do the compilation with the Vaadin Client
+            Compiler, as described in <xref linkend="clientside.compiling"/>.
+        </para>
     </section>
 
     <section xml:id="clientsideapp.loading">
         <title>Loading a Client-Side Application</title>
 
         <para>
-            You can load the JavaScript code of a client-side application in a HTML page
+            You can load the JavaScript code of a client-side application in an HTML page
             by including it with a <literal>&lt;script&gt;</literal> tag, for example as
             follows:
         </para>
@@ -222,15 +227,16 @@ warname -bindAddress 127.0.0.1]]></programlisting>
     <!-- Load the Vaadin style sheet -->
     <link rel="stylesheet"
           type="text/css"
-          href="/myproject/VAADIN/themes/reindeer/styles.css"/>
+          href="/myproject/VAADIN/themes/reindeer/legacy-styles.css"/>
   </head>
 
   <body>
     <h1>A Pure Client-Side Application</h1>
     
     <script type="text/javascript" language="javascript"
-            src="com.example.myapp.MyModule/com.example.myapp.MyM
-                 odule.nocache.js"></script>
+            src="VAADIN/widgetset/com.example.myapp.MyModule/
+                 com.example.myapp.MyModule.nocache.js">
+    </script>
   </body>
 </html>]]></programlisting>
 
