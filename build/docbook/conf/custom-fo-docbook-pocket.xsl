@@ -452,9 +452,10 @@
     <xsl:param name="element" select="local-name(.)"/>
     <xsl:param name="master-reference" select="''"/>
 
-    <!-- Start normal numbering from the first chapter of the first part of the first book. -->    
+    <!-- To start from the first chapter of the first part of the first book: set/book[1]/* -->
+    <!-- To start from the first chapter of the only book: book/* -->
     <xsl:variable name="first.book.content"
-      select="ancestor::set/book[1]/*[
+      select="ancestor::book/*[
               not(self::title or
               self::subtitle or
               self::titleabbrev or
@@ -466,11 +467,12 @@
               self::lot)][1]"/>
 
     <xsl:choose>
-      <!-- double-sided output -->
+    <!-- double-sided output -->
       <xsl:when test="$double.sided != 0">
         <xsl:choose>
           <!-- Vaadin: Start ToC numbering from 'i'. -->
           <xsl:when test="$element = 'toc'">1</xsl:when>
+          <xsl:when test="$element = 'book'">1</xsl:when> <!-- For single-volume numbering -->
           <xsl:when test="$element = 'preface'">auto-odd</xsl:when>
           <xsl:when test="generate-id($first.book.content) =
                           generate-id(.)">1</xsl:when>
