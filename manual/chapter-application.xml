@@ -1635,6 +1635,49 @@ notif.show(Page.getCurrent());]]></programlisting>
                 A session ends after the last <classname>UI</classname> instance expires
                 or is closed, as described later.
             </para>
+
+            <section xml:id="application.lifecycle.session.init">
+                <title>Handling Session Initialization and Destruction</title>
+
+                <para>
+                    You can handle session initialization and destruction by implementing
+                    a <interfacename>SessionInitListener</interfacename> or
+                    <interfacename>SessionDestroyListener</interfacename>, respectively,
+                    to the <classname>VaadinService</classname>. You can do that best by
+                    extending and <classname>VaadinServlet</classname> overriding the
+                    <methodname>servletInitialized()</methodname> method.
+                </para>
+
+                <programlisting><?pocket-size 65% ?><![CDATA[public class MyCustomServlet extends VaadinServlet
+    implements SessionInitListener, SessionDestroyListener {
+
+    @Override
+    protected void servletInitialized() throws ServletException {
+        super.servletInitialized();
+        getService().addSessionInitListener(this);
+        getService().addSessionDestroyListener(this);
+    }
+
+    @Override
+    public void sessionInit(SessionInitEvent event)
+            throws ServiceException {
+        // Do session start stuff here
+    }
+
+    @Override
+    public void sessionDestroy(SessionDestroyEvent event) {
+        // Do session end stuff here
+    }
+}]]></programlisting>
+
+                <para>
+                    You need to configure the custom servlet class in the
+                    <parameter>servlet-class</parameter> parameter in the
+                    <filename>web.xml</filename> descriptor instead of the
+                    <classname>VaadinServlet</classname>, as described in <xref
+                    linkend="application.environment.web-xml"/>.
+                </para>
+            </section>
         </section>
 
         <section xml:id="application.lifecycle.ui">
@@ -1808,6 +1851,12 @@ public class MyUI extends UI {]]></programlisting>
             <para>
                 The related configuration parameters are described in <xref
                 linkend="application.environment.parameters"/>.
+            </para>
+
+            <para>
+                You can handle session expiration on the server-side with a
+                <interfacename>SessionDestroyListener</interfacename>, as described in
+                <xref linkend="application.lifecycle.session"/>.
             </para>
         </section>
 
