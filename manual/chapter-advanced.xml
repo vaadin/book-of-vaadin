@@ -2168,123 +2168,213 @@ public class MainView extends VerticalLayout implements View {
     </section>
 
     <section xml:id="advanced.urifu" condition="web">
-        <title>URI Fragment and History Management with <classname>UriFragmentUtility</classname></title>
-
-        <para>
-            <emphasis>This section is not yet updated for Vaadin 7. The
-            <classname>UriFragmentUtility</classname> is obsolete in Vaadin 7 and URI
-            fragment changes are handled with a
-            <interfacename>FragmentChangedListener</interfacename> and
-            <methodname>setFragment()</methodname> in the <classname>Page</classname>
-            class, for example:
-            <literal>Page.getCurrent().setFragment("foo")</literal>.</emphasis>
-        </para>
+        <title>Managing URI Fragments</title>
 
         <para>
             A major issue in AJAX applications is that as they run in a single web page,
             bookmarking the application URL (or more generally the
             <emphasis>URI</emphasis>) can only bookmark the application, not an
-            application state. This is a problem for many applications such as product
-            catalogs and forums, in which it would be good to provide links to specific
-            products or messages. Consequently, as browsers remember the browsing history
-            by URI, the history and the <guibutton>Back</guibutton> button do not normally
-            work. The solution is to use the <emphasis>fragment</emphasis> part of the
-            URI, which is separated from the primary part (address + path + optional query
-            parameters) of the URI with the hash (#) character. For example:
+            application state. This is a problem for many applications, such as product
+            catalogs and discussion forums, in which it would be good to provide links to
+            specific products or messages. Consequently, as browsers remember the browsing
+            history by URI, the history and the <guibutton>Back</guibutton> button do not
+            normally work. The solution is to use the <emphasis>fragment
+            identifier</emphasis> part of the URI, which is separated from the primary
+            part (address + path + optional query parameters) of the URI with the hash (#)
+            character. For example:
         </para>
 
         <programlisting><?pocket-size 75% ?><![CDATA[http://example.com/path#myfragment]]></programlisting>
 
         <para>
-            The exact syntax of the fragment part is defined in RFC 3986 (Internet
-            standard STD 66) that defines the URI syntax. A fragment may only contain the
-            regular URI <emphasis>path characters</emphasis> (see the standard) and
-            additionally the slash and the question mark.
+            The exact syntax of the fragment identifier part is defined in RFC 3986
+            (Internet standard STD 66) that defines the URI syntax. A fragment may only
+            contain the regular URI <emphasis>path characters</emphasis> (see the
+            standard) and additionally the slash and the question mark.
         </para>
 
         <para>
-            The <classname>UriFragmentUtility</classname> is a special-purpose component
-            that manages the URI fragment; it allows setting the fragment and to handle
-            user-made changes to it. As it is a regular component, though invisible, you
-            must add it to a layout in an application window with the
-            <methodname>addComponent()</methodname>, as usual.
+            Vaadin offers two ways to enable the use of URI fragments: the high-level
+            <classname>Navigator</classname> utility described in <xref
+            linkend="advanced.navigator"/> and the low-level API described here.
         </para>
 
-        <programlisting><?pocket-size 65% ?><![CDATA[public void init() {
-    Window main = new Window("URI Fragment Example");
-    setMainWindow(main);
+        <section xml:id="advanced.urifu.setting">
+            <title>Setting the URI Fragment</title>
 
-    // Create the URI fragment utility
-    final UriFragmentUtility urifu = new UriFragmentUtility();
-    main.addComponent(urifu);]]></programlisting>
+            <para>
+                You can set the current fragment identifier with the
+                <methodname>setUriFragment()</methodname> method in the
+                <classname>Page</classname> object.
+            </para>
 
-        <para>
-            Notice that the utility component can work only when it is attached to the
-            window, so in practice it must be added in the <methodname>init()</methodname>
-            method of the application and must afterwards always remain in the
-            application's user interface.
-        </para>
+            <programlisting><![CDATA[Page.getCurrent().setUriFragment("mars");]]></programlisting>
 
-        <para>
-            You can set the URI fragment with the <methodname>setFragment()</methodname>
-            method of the <classname>UriFragmentUtility</classname> object. The method takes the
-            fragment as a string parameter. In the following example, we have a menu, from
-            which the user can select the URI fragment.
-        </para>
+            <para>
+                Setting the URI fragment causes an
+                <interfacename>UriFragmentChangeEvent</interfacename>, which is processed
+                in the same server request. As with UI rendering, the URI fragment is
+                changed in the browser after the currently processed server request
+                returns the response.
+            </para>
 
-        <programlisting><?pocket-size 65% ?><![CDATA[// Application state menu
-final ListSelect menu = new ListSelect("Select a URI Fragment");
-menu.addItem("mercury");
-menu.addItem("venus");
-menu.addItem("earth");
-menu.addItem("mars");
-menu.setImmediate(true);
-main.addComponent(menu);
+            <para>
+                Prefixing the fragment identifier with an exclamation mark enables the web
+                crawler support described in <xref linkend="advanced.urifu.crawling"/>.
+            </para>
+        </section>
 
-// Set the URI Fragment when menu selection changes
-menu.addListener(new Property.ValueChangeListener() {
-    public void valueChange(ValueChangeEvent event) {
-        String itemid = (String) event.getProperty().getValue();
-        urifu.setFragment(itemid);
+        <section xml:id="advanced.urifu.reading">
+            <title>Reading the URI Fragment</title>
+
+            <para>
+                The current URI fragment can be acquired with the
+                <methodname>getUriFragment()</methodname> method from the current
+                <classname>Page</classname> object. The fragment is known when the
+                <methodname>init()</methodname> method of the UI is called.
+            </para>
+
+            <book-example id="advanced.urifragment.basic" style="float: right"></book-example>
+            <programlisting><![CDATA[// Read initial URI fragment to create UI content
+String fragment = getPage().getUriFragment();
+enter(fragment);]]></programlisting>
+
+            <para>
+                To enable reusing the same code when the URI fragment is changed, as
+                described next, it is usually best to build the relevant part of the UI in
+                a separate method. In the above example, we called an
+                <methodname>enter()</methodname> method, in a way that is similar to
+                handling view changes with <classname>Navigator</classname>.
+            </para>
+        </section>
+
+        <section xml:id="advanced.urifu.listening">
+            <title>Listening for URI Fragment Changes</title>
+
+            <para>
+                After the UI has been initialized, changes in the URI fragment can be
+                handled with a <interfacename>UriFragmentChangeListener</interfacename>.
+                The listeners are called when the URI fragment changes, but not when the
+                UI is initialized, where the current fragment is available from the page
+                object as described earlier.
+            </para>
+
+            <para>
+                For example, we could define the listener as follows in the
+                <methodname>init()</methodname> method of a UI class:
+            </para>
+
+            <book-example id="advanced.urifragment.basic" style="float: right"></book-example>
+            <programlisting><![CDATA[public class MyUI extends UI {
+    @Override
+    protected void init(VaadinRequest request) {
+        getPage().addUriFragmentChangedListener(
+               new UriFragmentChangedListener() {
+           public void uriFragmentChanged(
+                   UriFragmentChangedEvent source) {
+               enter(source.getUriFragment());
+            }
+        });
+
+        // Read the initial URI fragment
+        enter(getPage().getUriFragment());
     }
-});]]></programlisting>
 
-        <para>
-            The URI fragment and any changes to it are passed to an application as
-            <classname>FragmentChangedEvent</classname>s, which you can handle with a
-            <classname>FragmentChangedListener</classname>. You can get the new fragment
-            value with the <methodname>getFragment()</methodname> method from the URI
-            fragment utility component.
-        </para>
-
-        <programlisting><?pocket-size 65% ?><![CDATA[// When the URI fragment is given, use it to set menu selection 
-urifu.addListener(new FragmentChangedListener() {
-    public void fragmentChanged(FragmentChangedEvent source) {
-        String fragment =
-                  source.getUriFragmentUtility().getFragment();
-        if (fragment != null)
-            menu.setValue(fragment);
+    void enter(String fragment) {
+        ... initialize the UI ...
     }
-});]]></programlisting>
+}]]></programlisting>
 
-        <para>
-            <xref linkend="figure.advanced.urifu"/> shows an application that allows
-            specifying the menu selection with a URI fragment and correspondingly sets the
-            fragment when the user selects a menu item, as done in the code examples
-            above.
-        </para>
+            <para>
+                <xref linkend="figure.advanced.urifu"/> shows an application that allows
+                specifying the menu selection with a URI fragment and correspondingly sets
+                the fragment when the user selects a menu item.
+            </para>
 
-        <figure xml:id="figure.advanced.urifu">
-            <title>Application State Management with URI Fragment Utility</title>
-            <mediaobject>
-                <imageobject role="html">
-                    <imagedata align="center" fileref="img/advanced/urifu-1.png"/>
-                </imageobject>
-                <imageobject role="fo">
-                    <imagedata scale="100" smallscale="100%" align="center" fileref="img/advanced/urifu-1.png"/>
-                </imageobject>
-            </mediaobject>
-        </figure>
+            <figure xml:id="figure.advanced.urifu">
+                <title>Application State Management with URI Fragment Utility</title>
+                <mediaobject>
+                    <imageobject role="html">
+                        <imagedata align="center" fileref="img/advanced/urifu-1.png"/>
+                    </imageobject>
+                    <imageobject role="fo">
+                        <imagedata scale="100" smallscale="100%" align="center" fileref="img/advanced/urifu-1.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+        </section>
+
+        <section xml:id="advanced.urifu.crawling">
+            <title>Supporting Web Crawling</title>
+
+            <para>
+                Stateful AJAX applications can not normally be crawled by a search engine,
+                as they run in a single page and a crawler can not navigate the states
+                even if URI fragments are enabled. The Google search engine and crawler
+                <link
+                xlink:href="http://googlewebmastercentral.blogspot.fi/2009/10/proposal-for-making-ajax-crawlable.html">support
+                a convention</link> where the fragment identifiers are prefixed with
+                exclamation mark, such as <literal>#!myfragment</literal>. The servlet
+                needs to have a separate searchable content page accessible with the same
+                URL, but with a <literal>_escaped_fragment_</literal> parameter. For
+                example, for <literal>/myapp/myui#!myfragment</literal> it would be
+                <literal>/myapp/myui?_escaped_fragment_=myfragment</literal>.
+            </para>
+
+            <para>
+                You can provide the crawl content by overriding the
+                <methodname>service()</methodname> method in a custom servlet class. For
+                regular requests, you should call the super implementation in the
+                <classname>VaadinServlet</classname> class.
+            </para>
+
+            <book-example id="advanced.urifragment.basic" style="float: right"></book-example>
+            <programlisting><?pocket-size 65% ?><![CDATA[public class MyCustomServlet extends VaadinServlet
+    @Override
+    protected void service(HttpServletRequest request,
+                           HttpServletResponse response)
+            throws ServletException, IOException {
+        String fragment = request
+            .getParameter("_escaped_fragment_");
+        if (fragment != null) {
+            response.setContentType("text/html");
+            Writer writer = response.getWriter();
+            writer.append("<html><body>"+
+                "<p>Here is some crawlable "+
+                "content about " + fragment + "</p>");
+            
+            // A list of all crawlable pages
+            String items[] = {"mercury", "venus",
+                              "earth", "mars"};
+            writer.append("<p>Index of all content:</p><ul>");
+            for (String item: items) {
+                String url = request.getContextPath() +
+                    request.getServletPath() +
+                    request.getPathInfo() + "#!" + item;
+                writer.append("<li><a href='" + url + "'>" +
+                              item + "</a></li>");
+            }
+            writer.append("</ul></body>");
+        } else
+            super.service(request, response);
+    }
+}]]></programlisting>
+
+            <para>
+                The crawlable content does not need to be human readable. It can provide
+                an index of links to other application states, as we did in the example
+                above. The links should use the "<literal>#!</literal>" notation, but can
+                not be relative to avoid having the <literal>_escaped_fragment_</literal>
+                parameter.
+            </para>
+
+            <para>
+                You need to use the custom servlet class in the
+                <filename>web.xml</filename> deployment descriptor instead of the normal
+                <classname>VaadinServlet</classname> class, as described in <xref
+                linkend="application.environment.web-xml"/>.
+            </para>
+        </section>
     </section>
 
     <!-- TODO Vaadin 7: Rewrite 
