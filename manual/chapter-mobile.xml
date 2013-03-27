@@ -50,12 +50,11 @@
         </para>
 
         <programlisting><?pocket-size 65% ?><![CDATA[@Theme("mobiletheme")
+@Widgetset("com.example.myapp.MyAppWidgetSet")
+@Title("My Mobile App")
 public class SimplePhoneUI extends UI {
     @Override
     protected void init(VaadinRequest request) {
-        // Set the window or tab title
-        getPage().setTitle("Hello Phone!");
-        
         // Use the TouchKit TabBarView for content
         TabBarView mainView = new TabBarView();
         setContent(mainView);
@@ -254,35 +253,60 @@ public class SimplePhoneUI extends UI {
         </section>
     </section>
 
-    <section xml:id="mobile.installation">
+    <section xml:id="mobile.installation" condition="web">
         <title>Installing Vaadin TouchKit</title>
 
         <para>
             You can download and install TouchKit from the Vaadin Directory at <link
             xlink:href="https://vaadin.com/addon/vaadin-touchkit">https://vaadin.com/addon/vaadin-touchkit</link>
-            as an installation package or get it with Maven. If your project requires the
-            use of the CVAL license, they can be purchased from the Directory.
+            as an installation package, or get it with Maven or Ivy. If your project
+            requires the use of the CVAL license, licences can be purchased from the
+            Directory.
         </para>
 
         <para>
-            See <xref linkend="addons"/> for details regarding add-on installation. The
+            Add-on installation is described in detail in <xref linkend="addons"/>. The
             add-on includes a widget set, so you need to compile the widget set for your
             project.
         </para>
         
-        <section xml:id="mobile.project.downloading">
+        <section xml:id="mobile.project.ivy" condition="web">
+            <title>Installing as Ivy Dependency</title>
+
+            <para>
+                If you use the add-on in an Eclipse project created with the Vaadin Plugin
+                for Eclipse, you can define an Ivy dependency to automatically download
+                the library. Include the following declaration inside the
+                <literal>dependencies</literal> section in the
+                <filename>ivy.xml</filename>:
+            </para>
+
+            <programlisting>&lt;dependency org="com.vaadin.addon"
+               name="vaadin-touchkit-agpl"
+               rev="<emphasis role="bold">3.0.0</emphasis>"
+               conf="default->default" /&gt;</programlisting>
+
+            <para>
+                You can use <literal>latest.release</literal> revision tag to always use
+                the latest release. IvyDE should resolve the dependency immediately as you
+                save the file. See <xref linkend="addons.eclipse"/> for further details.
+            </para>
+        </section>
+
+        <section xml:id="mobile.project.downloading" condition="web">
             <title>Installing the Zip Package</title>
 
             <para>
                 Vaadin TouchKit is distributed as a Zip package that contains the TouchKit
                 JAR, a JavaDoc JAR, license texts, and other documentation.  You can
                 download the Zip package from the Vaadin Directory. A different package is
-                provided for the two licenses, and the Directory asks for your choice.
+                provided for each of the two licenses, and the Directory asks for your
+                choice.
             </para>
 
             <para>
-                The JAR should be put in the <filename>WEB-INF/lib</filename> folder of
-                the web application.
+                The TouchKit JAR in the package should be put in the
+                <filename>WEB-INF/lib</filename> folder of the web application.
             </para>
 
             <para>
@@ -298,25 +322,17 @@ public class SimplePhoneUI extends UI {
                     set. You can get the JAR from <link
                     xlink:href="http://code.google.com/p/reflections/">http://code.google.com/p/reflections/</link>.
                 </para>
-
-                <para>
-                    If you use the Vaadin Plugin for Eclipse and manage the Vaadin library
-                    dependencies with Ivy, you can get the Reflections library by adding
-                    the following dependency:
-                </para>
-
-                <programlisting><![CDATA[<dependency org="org.reflections"
-            name="reflections" rev="0.9.8" />]]></programlisting>
             </section>
         </section>
 
-        <section xml:id="mobile.installation.maven">
+        <section xml:id="mobile.installation.maven" condition="web">
             <title>Installing in Maven</title>
 
             <para>
                 You can install Vaadin TouchKit in a Maven project by adding it a
-                dependency, as described first below. If you are creating a new project,
-                you can use the TouchKit Maven archetype to create a project skeleton.
+                dependency, as described first below. <!-- TODO re-enable If you are
+                creating a new project, you can use the TouchKit Maven archetype to create
+                a project skeleton. -->
             </para>
 
             <section xml:id="mobile.installation.maven.dependency">
@@ -356,7 +372,8 @@ public class SimplePhoneUI extends UI {
                     described in <xref linkend="addons.maven.widgetset"/>, and compile it.
                 </para>
             </section>
-                
+            
+            <!-- TODO re-enable when available for Vaadin 7
             <simplesect xml:id="mobile.installation.maven.archetype">
                 <title>Using the Archetype</title>
 
@@ -376,7 +393,7 @@ public class SimplePhoneUI extends UI {
   -DgroupId=<replaceable>example.com</replaceable> -DartifactId=<replaceable>myproject</replaceable> \
   -Dversion=<replaceable>0.1.0</replaceable> -Dpackaging=war</screen>
 
-            </simplesect>
+            </simplesect> -->
         </section>
 
         <section xml:id="mobile.installation.vornitologist">
@@ -407,7 +424,7 @@ public class SimplePhoneUI extends UI {
                     In <guilabel>SCM URL</guilabel>, select <guilabel>svn</guilabel> and
                     enter URL for the repository. You can find the current repository URL
                     from the TouchKit add-on page at <link
-                    xlink:href="http://vaadin.com/addon/vaadin-touchkit">http://vaadin.com/addon/vaadin-touchkit</link>.
+                    xlink:href="http://dev.vaadin.com/svn/addons/TouchKit">http://dev.vaadin.com/svn/addons/TouchKit</link>.
                 </listitem>
 
                 <listitem>Click <guibutton>Finish</guibutton>.</listitem>
@@ -444,13 +461,6 @@ public class SimplePhoneUI extends UI {
                 which case you need to define your servlet in the deployment descriptor.
             </para>
 
-            <para>
-                As TouchKit comes with a custom widget set, you need to use a combining
-                widget set for your project. The combining widget set descriptor is
-                automatically generated by the Vaadin Plugin for Eclipse and in Maven when
-                you install or define the TouchKit add-on.
-            </para>
-
             <programlisting><?pocket-size 65% ?>&lt;servlet&gt;
   &lt;servlet-name&gt;Vaadin UI Servlet&lt;/servlet-name&gt;
   &lt;servlet-class&gt;
@@ -460,10 +470,6 @@ public class SimplePhoneUI extends UI {
     &lt;description&gt;Vaadin UI class to start&lt;/description&gt;
     &lt;param-name&gt;ui&lt;/param-name&gt;
     &lt;param-value&gt;<emphasis role="bold">com.example.myapp.MyMobileUI</emphasis>&lt;/param-value&gt;
-  &lt;/init-param&gt;
-  &lt;init-param&gt;
-    &lt;param-name&gt;widgetset&lt;/param-name&gt;
-    &lt;param-value&gt;<emphasis role="bold">com.example.myapp.MyAppWidgetSet</emphasis>&lt;/param-value&gt;
   &lt;/init-param&gt;
 &lt;/servlet&gt;</programlisting>
         </section>
@@ -659,12 +665,11 @@ s.getIosWebAppSettings().setWebAppCapable(true);]]></programlisting>
             </para>
 
             <programlisting><?pocket-size 65% ?><![CDATA[@Theme("mobiletheme")
+@Widgetset("com.example.myapp.MyAppWidgetSet")
+@Title("My Simple App")
 public class SimplePhoneUI extends UI {
     @Override
     protected void init(VaadinRequest request) {
-        // Set the window or tab title
-        getPage().setTitle("Hello Phone!");
-        
         // Create the content root layout for the UI
         TabBarView mainView = new TabBarView();
         setContent(mainView);
@@ -672,6 +677,14 @@ public class SimplePhoneUI extends UI {
         ...
     }
 }]]></programlisting>
+
+            <para>
+                As TouchKit comes with a custom widget set, you need to use a combining
+                widget set for your project, defined with the
+                <literal>@Widgetset</literal> annotation for the UI. The combining widget
+                set descriptor is automatically generated by the Vaadin Plugin for Eclipse
+                and in Maven when you install or define the TouchKit add-on.
+            </para>
 
             <para>
                 Most commonly, you will use a combination of the major three TouchKit
@@ -977,8 +990,7 @@ protected void onBecomingVisible() {
                 <methodname>setTargetView()</methodname>.
             </para>
 
-            <programlisting><?pocket-size 75% ?><![CDATA[
-NavigationView view = new NavigationView("A View");
+            <programlisting><?pocket-size 75% ?><![CDATA[NavigationView view = new NavigationView("A View");
 ...
 NavigationButton button = new NavigationButton("Click");
 button.setTargetView(view);
@@ -1014,12 +1026,11 @@ button.setTargetView(view);
             <para>
                 <classname>Popover</classname> is much like a regular Vaadin sub-window,
                 useful for quickly displaying some options or a small form related to an
-                action. Unlike regular sub-windows, it does not support dragging or resizing
-                by the user. It can have a caption, but usually does not. As sub-windows
-                usually require a rather large screen size, the <classname>Popover</classname>
-                is mainly applicable to tablet devices. When used on smaller devices, such as
-                phones, the <classname>Popover</classname> automatically fills the entire
-                screen.
+                action. Unlike regular sub-windows, it does not support dragging or
+                resizing by the user. As sub-windows usually require a rather large screen
+                size, the <classname>Popover</classname> is most useful for tablet
+                devices. When used on smaller devices, such as phones, the
+                <classname>Popover</classname> automatically fills the entire screen.
             </para>
 
             <figure xml:id="figure.mobile.components.popover">
@@ -1032,54 +1043,110 @@ button.setTargetView(view);
             </figure>
 
             <para>
-                In the following example, we extend <classname>Popover</classname> to use it. It
-                is modal by default. Notice that the screen size is not available in the
-                constructor, so we have to postpone using it to the
-                <methodname>attach()</methodname> method.
+                It is customary to use a <classname>NavigationView</classname> to have
+                border decorations and caption. In the following, we subclass
+                <classname>Popover</classname> to create the content.
             </para>
 
-            <para>
-                Popover windows are added to an application-level <classname>Window</classname>
-                object with <methodname>addWindow()</methodname>, just like sub-windows in a
-                regular Vaadin application.
-            </para>
+            <programlisting><?pocket-size 75% ?><![CDATA[class DetailsPopover extends Popover {
+    public DetailsPopover() {
+        setWidth("350px");
+        setHeight("65%");
 
-            <programlisting><?pocket-size 65% ?><![CDATA[if (event.getButton() == emailButton) {
-    ComposeView composeView = new ComposeView(smartphone);
-    getWindow().addWindow(composeView);
-    return;
+        // Have some details to display
+        VerticalLayout layout = new VerticalLayout();
+        ...
+
+        NavigationView c = new NavigationView(layout);
+        c.setCaption("Details");
+        setContent(c);
+    }
 }]]></programlisting>
 
             <para>
-                The resulting user interface in a tablet device is shown in <xref
+                A <classname>Popover</classname> can be opened relative to a component by
+                calling <methodname>showRelativeTo()</methodname>. In the following
+                example, we open the popover when a table item is clicked.
+            </para>
+
+            <programlisting><?pocket-size 75% ?><![CDATA[
+Table table = new Table("Planets", planetData());
+table.addItemClickListener(new ItemClickListener() {
+    @Override
+    public void itemClick(ItemClickEvent event) {
+        DetailsPopover popover = new DetailsPopover();
+
+        // Show it relative to the navigation bar of
+        // the current NavigationView.
+        popover.showRelativeTo(view.getNavigationBar());
+    }
+});]]></programlisting>
+
+            <para>
+                You can also add the <classname>Popover</classname> to the
+                <classname>UI</classname> with <methodname>addWindow()</methodname>.
+            </para>
+
+            <section xml:id="mobile.components.popover.close" condition="web">
+                <title>Closing a Popover</title>
+
+                <para>
+                    When <parameter>closable</parameter> is enabled in a
+                    <classname>Popover</classname>, as it is by default, it can be closed
+                    by clicking anywhere outside the popup area. This may not be enough if
+                    the popover fills the entire screen, in which case the user gets
+                    stuck. The popover can be closed programmatically by calling
+                    <methodname>close()</methodname>. You can, for example, add a
+                    <interfacename>MouseEvents.ClickListener</interfacename> to the
+                    popover to allow closing it by clicking anywhere inside it.
+                </para>
+
+                <para>
+                    If the popover has editable fields, you may want to have a close
+                    button in the navigation bar of the
+                    <classname>NavigationView</classname>. In the following example, we
+                    add a close button to the right slot of the navigation bar (you need
+                    to include the icon in your theme).
+                </para>
+
+                <programlisting><?pocket-size 75% ?><![CDATA[class DetailsPopover extends Popover
+      implements Button.ClickListener {
+    public DetailsPopover(Table table, Object itemId) {
+        setWidth("350px");
+        setHeight("65%");
+        Layout layout = new FormLayout();
+        ... create the content ...
+
+        // Decorate with navigation view
+        NavigationView content = new NavigationView(layout);
+        content.setCaption("Details");
+        setContent(content);
+
+        // Have a close button
+        Button close = new Button(null, this);
+        close.setIcon(new ThemeResource("close64.png"));
+        content.setRightComponent(close);
+    }
+
+    public void buttonClick(ClickEvent event) {
+        close();
+    }
+}]]></programlisting>
+
+                <para>
+                    Such a popover is shown in a tablet device as illustrated <xref
                     linkend="figure.mobile.components.popover.tablet"/>.
-            </para>
+                </para>
 
-            <figure xml:id="figure.mobile.components.popover.tablet">
-                <title><classname>Popover</classname> in a Tablet Device</title>
-                <mediaobject>
-                    <imageobject>
-                        <imagedata smallscale="100%" scale="70" align="center" fileref="img/mobile/vornitologist-observations-popup-tablet.png"/>
-                    </imageobject>
-                </mediaobject>
-            </figure>
-
-            <para>
-                Alternatively, you can call the <methodname>showRelativeTo()</methodname>,
-                which displays the sub-window relative to an existing component in the user
-                interface.
-            </para>
-
-            <programlisting><?pocket-size 65% ?><![CDATA[Popover popover = new Popover();
-popover.setContent(mailboxHierarchyView);
-popover.setClosable(true);
-popover.showRelativeTo(showMailboxHierarchyButton);
-popover.setHeight(getParent().getHeight() - 100, UNITS_PIXELS);]]></programlisting>
-
-            <para>
-                In this case, you should not call <methodname>addWindow()</methodname>
-                explicitly.
-            </para>
+                <figure xml:id="figure.mobile.components.popover.tablet">
+                    <title><classname>Popover</classname> in a Tablet Device</title>
+                    <mediaobject>
+                        <imageobject>
+                            <imagedata smallscale="100%" scale="70" align="center" fileref="img/mobile/vornitologist-observations-popup-tablet.png"/>
+                        </imageobject>
+                    </mediaobject>
+                </figure>
+            </section>
 
             <section xml:id="mobile.components.popover.css">
                 <title>Styling with CSS</title>
