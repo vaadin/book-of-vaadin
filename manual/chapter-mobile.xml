@@ -116,7 +116,7 @@ public class SimplePhoneUI extends UI {
         </para>
 
         <simplesect xml:id="mobile.overview.examples">
-            <title>Vornitologist and Mobile Mail Demos</title>
+            <title>Vornitologist, Mobile Mail, and Book Demos</title>
 
             <para>
                 The Vornitologist is a demo application that showcases most of the
@@ -130,6 +130,12 @@ public class SimplePhoneUI extends UI {
             <para>
                 The Mobile Mail is another demo application, which shows how to implement
                 browsing of deep category trees and make forms.
+            </para>
+
+            <para>
+                Some of the examples in this chapter can be seen in action at <link
+                xlink:href="http://demo.vaadin.com/book-examples-vaadin7/touchkitcomponents/">http://demo.vaadin.com/book-examples-vaadin7/touchkitcomponents</link>
+                with a TouchKit-compatible device or browser (such as Chrome).
             </para>
         </simplesect>
 
@@ -975,14 +981,37 @@ protected void onBecomingVisible() {
 
             <para>
                 The <classname>NavigationButton</classname> is a special version of the
-                regular <classname>Button</classname> designed for navigation inside a
-                <classname>NavigationManager</classname>, as described in <xref
-                    linkend="mobile.components.navigationpanel"
-                    xrefstyle="select:label"/>. Clicking the button will automatically navigate to
-                the defined target view. The view change animation does not need to make a
-                server request first, but starts immediately after clicking the button. If you
-                leave the target view empty, an empty placeholder view is shown in the
-                animation. The view is filled after it gets the content from the server.
+                regular <classname>Button</classname> component, designed for navigation
+                inside a <classname>NavigationManager</classname> (see <xref
+                linkend="mobile.components.navigationpanel"/>). Clicking a navigation
+                button will automatically navigate to the defined target view. The view
+                change animation does not need to make a server request first, but starts
+                immediately after clicking the button. If you leave the target view empty,
+                an empty placeholder view is shown in the animation. The view is filled
+                after it gets the content from the server.
+            </para>
+
+            <para>
+                A navigation button does not have a particular border by default, because
+                multiple navigation buttons are typically used inside a
+                <classname>VerticalComponentGroup</classname> to create menus, as
+                illustrated in <xref
+                linkend="figure.mobile.components.navigationbutton"/>.
+            </para>
+
+            <figure xml:id="figure.mobile.components.navigationbutton">
+                <title><classname>NavigationButton</classname>s inside a vertical component group</title>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata smallscale="50%" scale="70" align="center" fileref="img/mobile/verticalcomponentgroup.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+
+            <para>
+                A navigation button has a caption and can have an icon. If not given
+                explicitly, the caption is taken from the caption of the navigation view
+                if it is initialized before the button.
             </para>
 
             <para>
@@ -990,18 +1019,40 @@ protected void onBecomingVisible() {
                 <methodname>setTargetView()</methodname>.
             </para>
 
-            <programlisting><?pocket-size 75% ?><![CDATA[NavigationView view = new NavigationView("A View");
-...
-NavigationButton button = new NavigationButton("Click");
-button.setTargetView(view);
-...]]></programlisting>
+            <programlisting><?pocket-size 70% ?><![CDATA[box.addComponent(new NavigationButton(new PopoverView()));
+box.addComponent(new NavigationButton("Decorated Popover",
+                   new DecoratedPopoverView()));]]></programlisting>
 
             <para>
-                Notice that the automatic navigation will only work if the button is inside a
-                <classname>NavigationManager</classname> (in a view inside it). If you just
-                want to use the button as a visual element, you can use it like a regular
-                <classname>Button</classname> and handle the click events with a
-                <classname>ClickListener</classname>.
+                If the navigation view is initialized after the button is clicked, it does
+                not have a caption during the animation. You can define a temporary
+                caption for it with <methodname>setTargetViewCaption()</methodname>. The
+                temporary caption is shown during the slide animation and until the
+                content for the view has been received from the server. Then, it is
+                replaced with the proper caption of the view. The temporary caption is
+                also used as the caption of button if it is not given explicitly.
+            </para>
+
+            <programlisting><?pocket-size 80% ?><![CDATA[NavigationButton toView = new NavigationButton();
+toView.setTargetView(new MyView());
+toView.setTargetViewCaption("My View");
+group.addComponent(toView);
+
+...
+class MyView extends NavigationView {
+    protected void onBecomingVisible() {
+        super.onBecomingVisible();
+        setCaption("My View");
+        ...
+    }
+}]]></programlisting>
+
+            <para>
+                Notice that the automatic navigation will only work if the button is
+                inside a <classname>NavigationManager</classname> (in a view managed by
+                it). If you just want to use the button as a visual element, you can use
+                it like a regular <classname>Button</classname> and handle the click
+                events with a <classname>ClickListener</classname>.
             </para>
 
             <section xml:id="mobile.components.navigationbutton.css">
@@ -1109,7 +1160,7 @@ table.addItemClickListener(new ItemClickListener() {
                     to include the icon in your theme).
                 </para>
 
-                <programlisting><?pocket-size 75% ?><![CDATA[class DetailsPopover extends Popover
+                <programlisting><?pocket-size 70% ?><![CDATA[class DetailsPopover extends Popover
       implements Button.ClickListener {
     public DetailsPopover(Table table, Object itemId) {
         setWidth("350px");
@@ -1164,23 +1215,126 @@ table.addItemClickListener(new ItemClickListener() {
             </section>
         </section>
 
+        <section xml:id="mobile.components.swipeview">
+            <title><classname>SwipeView</classname></title>
+
+            <para>
+                The <classname>SwipeView</classname> is a wrapper that allows navigating
+                between views by swiping them horizontally left or right. The component
+                works together with a <classname>NavigationManager</classname> (see <xref
+                linkend="mobile.components.swipeview"/>) to change between the views when
+                swiped, and to animate the change. A <classname>SwipeView</classname>
+                should be an immediate child of the
+                <classname>NavigationManager</classname>, but can contain a
+                <classname>NavigationView</classname> to provide button navigation as
+                well.
+            </para>
+
+            <para>
+                Let us have a selection of photographs to browse. We extend
+                <classname>NavigationManager</classname> that creates the slide effect and
+                create actual image views dynamically. In the constructor, we create the
+                two first ones.
+            </para>
+
+            <programlisting><?pocket-size 75% ?><![CDATA[class SlideShow extends NavigationManager
+      implements NavigationListener {
+    String imageNames[] = {"Mercury.jpg", "Venus.jpg",
+        "Earth.jpg", "Mars.jpg", "Jupiter.jpg",
+        "Saturn.jpg", "Uranus.jpg", "Neptune.jpg"};
+    int pos = 0;
+
+    public SlideShow() {
+        // Set up the initial views
+        navigateTo(createView(pos));
+        setNextComponent(createView(pos+1));
+        
+        addNavigationListener(this);
+    }]]></programlisting>
+
+            <para>
+                The individual views have a <classname>SwipeView</classname> and the top.
+            </para>
+
+            <programlisting><?pocket-size 75% ?><![CDATA[    SwipeView createView(int pos) {
+        SwipeView view = new SwipeView();
+        view.setSizeFull();
+        
+        // Use an inner layout to center the image
+        VerticalLayout layout = new VerticalLayout();
+        layout.setSizeFull();
+
+        Image image = new Image(null, new ThemeResource(
+            "planets/" + imageNames[pos]));
+        layout.addComponent(image);
+        layout.setComponentAlignment(image,
+            Alignment.MIDDLE_CENTER);
+
+        view.setContent(layout);
+        return view;
+    }]]></programlisting>
+
+            <para>
+                When the view is swiped to either direction, we need to
+                set the next image in that direction dynamically in the
+                <classname>NavigationManager</classname>.
+            </para>
+
+            <programlisting><?pocket-size 75% ?><![CDATA[@Override
+public void navigate(NavigationEvent event) {
+    switch (event.getDirection()) {
+        case FORWARD:
+            if (++pos < imageNames.length-1)
+                setNextComponent(createView(pos+1));
+            break;
+        case BACK:
+            if (--pos > 0)
+                setPreviousComponent(createView(pos-1));
+    }
+}]]></programlisting>
+        </section>
+
         <section xml:id="mobile.components.switch">
             <title><classname>Switch</classname></title>
 
             <para>
-                The <classname>Switch</classname> component is a
-                <classname>CheckBox</classname> that looks like the switch button in Apple
-                iOS.
+                The <classname>Switch</classname> component is a two-state selector that
+                can be toggled either by tapping or sliding and looks like the switch
+                button in Apple iOS. It extends <classname>CheckBox</classname> and has
+                therefore <classname>Boolean</classname> value type. The caption is
+                managed by the containing layout.
             </para>
 
-            <programlisting><![CDATA[Switch switch = new Switch();
-switch.setCaption("Do I look like iOS?");
-layout.addComponent(switch);]]></programlisting>
+            <programlisting><![CDATA[VerticalComponentGroup group =
+        new VerticalComponentGroup();
+Switch myswitch = new Switch("To be or not to be?");
+myswitch.setValue(true);
+group.addComponent(myswitch);]]></programlisting>
 
-        <section xml:id="mobile.components.switch.css">
-            <title>Styling with CSS</title>
+            <para>
+                As with other field components, you can handle value changes with a
+                <interfacename>ValueChangeListener</interfacename>. Use
+                <methodname>setImmediate(true)</methodname> to get them immediately when
+                toggled.
+            </para>
 
-            <programlisting><![CDATA[.v-touchkit-switch { }
+            <para>
+                The result is shown in <xref linkend="figure.mobile.components.switch"/>.
+            </para>
+
+            <figure xml:id="figure.mobile.components.switch">
+                <title><classname>Switch</classname></title>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata smallscale="70%" scale="70" align="center" fileref="img/mobile/switch.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+
+            <section xml:id="mobile.components.switch.css">
+                <title>Styling with CSS</title>
+
+                <programlisting><![CDATA[.v-touchkit-switch { }
   .v-touchkit-switch-slider { }]]></programlisting>
 
                 <para>
@@ -1192,19 +1346,41 @@ layout.addComponent(switch);]]></programlisting>
 		
 		<section xml:id="mobile.components.verticalcomponentgroup">
             <title><classname>VerticalComponentGroup</classname></title>
+
 			<para>
-				The <classname>VerticalComponentGroup</classname> is a layout component for grouping
-                components in the vertical stack. The most typical use of the 
-                <classname>VerticalComponentGroup</classname> is to make vertical navigation menus 
-                containing <classname>NavigationButton</classname>s for the mobile application.
-				The <classname>VerticalComponentGroup</classname> and 
-				<classname>HorizontalComponentGroup</classname> both extend 
-				<classname>AbstractComponentGroup</classname> which is inherited from the 
-				<classname>AbstractComponentContainer</classname>.
-				In the client side both component group widgets are extending the lightweigth 
-				<classname>FlowPanel</classname>.
+				The <classname>VerticalComponentGroup</classname> is a layout component
+				for grouping components in a vertical stack with a border. Component
+				captions are placed left of the components, and the components are aligned
+				right. The component group is typically used for forms or with
+				<classname>NavigationButton</classname> to create navigation menus.
 			</para>
 			
+            <programlisting><?pocket-size 75% ?><![CDATA[VerticalComponentGroup group =
+    new VerticalComponentGroup("TouchKit Components");
+group.setWidth("100%");
+        
+// Navigation to sub-views
+group.addComponent(new NavigationButton(
+    new PopoverView()));
+group.addComponent(new NavigationButton(
+    new DecoratedPopoverView()));
+
+layout.addComponent(box);]]></programlisting>
+
+            <para>
+                The result is shown in <xref
+                linkend="figure.mobile.components.verticalcomponentgroup"/>.
+            </para>
+
+            <figure xml:id="figure.mobile.components.verticalcomponentgroup">
+                <title><classname>VerticalComponentGroup</classname></title>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata smallscale="70%" scale="70" align="center" fileref="img/mobile/verticalcomponentgroup.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+
 			<section xml:id="mobile.components.verticalcomponentgroup.css">
                 <title>Styling with CSS</title>
 
@@ -1219,27 +1395,37 @@ layout.addComponent(switch);]]></programlisting>
 		</section>
 		
 		<section xml:id="mobile.components.horizontalcomponentgroup">
-            <title><classname>HorizontalComponentGroup</classname></title>
+            <title><classname>HorizontalButtonGroup</classname></title>
 			<para>
-				The <classname>HorizontalComponentGroup</classname> is mainly intended to group buttons
-				 inside the <classname>VerticalComponentGroup</classname> slots.
+				The <classname>HorizontalButtonGroup</classname> is intended for grouping
+				buttons inside the slots of a
+				<classname>VerticalComponentGroup</classname> with a special button group
+				style.
 			</para>
 			
-			<programlisting><?pocket-size 65% ?><![CDATA[HorizontalComponentGroup horizontalCGroup = new HorizontalComponentGroup();
-horizontalCGroup.addComponent(new Button("First"));
-horizontalCGroup.addComponent(new Button("Another"));
+			<programlisting><?pocket-size 75% ?><![CDATA[VerticalComponentGroup vertical =
+        new VerticalComponentGroup();
+vertical.addComponent(new TextField("Name"));
 
-NavigationButton navButton = new NavigationButton();
-button.setIcon(new ThemeResource("../runo/icons/32/ok.png"));
-        
-VerticalComponentGroup verticalCGroup = new VerticalComponentGroup();
-verticalCGroup.setMargin(true);
+HorizontalButtonGroup buttons =
+        new HorizontalButtonGroup();
+buttons.addComponent(new Button("OK"));
+buttons.addComponent(new Button("Cancel"));
+vertical.addComponent(buttons);]]></programlisting>
 
-verticalCGroup.addComponent(horizontalCGroup);
-verticalCGroup.addComponent(new Button("Button"));
-verticalCGroup.addComponent(new TextField("TF's caption"));
-verticalCGroup.addComponent(navButton);]]></programlisting>
-			
+            <para>
+                The result is shown in <xref
+                linkend="figure.mobile.components.horizontalbuttongroup"/>
+            </para>
+
+            <figure xml:id="figure.mobile.components.horizontalbuttongroup">
+                <title><classname>HorizontalButtonGroup</classname></title>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata smallscale="70%" scale="70" align="center" fileref="img/mobile/horizontalbuttongroup.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
 		</section>
 
         <section xml:id="mobile.components.tabbarview">
@@ -1267,9 +1453,9 @@ Tab tab = bar.addTab(label);
 tab.setCaption("tab name");
 tab.setIcon(new ThemeResource(...));
 
-//Programmatically modify tab bar
+// Programmatically modify tab bar
 Tab selectedTab = bar.getSelectedTab();
-bar.setSelectedTab(selectedTab); //same as user clicking the tab
+bar.setSelectedTab(selectedTab);
 bar.removeTab(selectedTab);]]></programlisting>
 
             <section xml:id="mobile.components.tabbarview.css">
@@ -1299,6 +1485,15 @@ bar.removeTab(selectedTab);]]></programlisting>
                 the at (<literal>@</literal>) and period (<literal>.</literal>) characters,
                 and possibly a shorthand for <literal>.com</literal>.
             </para>
+
+            <figure xml:id="figure.mobile.components.emailfield">
+                <title><classname>EmailField</classname> while editing</title>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata smallscale="40%" scale="70" align="center" fileref="img/mobile/emailfield.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
         </section>
 
         <section xml:id="mobile.components.numberfield">
@@ -1310,6 +1505,15 @@ bar.removeTab(selectedTab);]]></programlisting>
                 field for mobile devices, so that they will show a numeric virtual keyboard
                 rather than the default alphanumeric.
             </para>
+
+            <figure xml:id="figure.mobile.components.emailfield">
+                <title><classname>NumberField</classname> while editing</title>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata smallscale="40%" scale="70" align="center" fileref="img/mobile/numberfield.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
         </section>
 
         <section xml:id="mobile.components.urlfield">
@@ -1349,7 +1553,7 @@ bar.removeTab(selectedTab);]]></programlisting>
                 sub-string "<literal>webkit</literal>" as follows:
             </para>
 
-            <programlisting><?pocket-size 85% ?><![CDATA[public class MyUIProvider
+            <programlisting><?pocket-size 75% ?><![CDATA[public class MyUIProvider
         extends UIProvider {
     @Override
     public Class<? extends UI> getUIClass(
