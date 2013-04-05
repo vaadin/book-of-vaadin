@@ -1137,12 +1137,18 @@ button.setComponentError(new UserError("Bad click"));]]></programlisting>
                 <methodname>getSystemMessages()</methodname> method, which should return a
                 <classname>SystemMessages</classname> object. The easiest way to customize
                 the messages is to use a <classname>CustomizedSystemMessages</classname>
-                object as follows:
+                object.
             </para>
 
-			<programlisting><?pocket-size 65% ?><![CDATA[VaadinService.getCurrent().setSystemMessagesProvider(
+            <para>
+                You can set the system message provider in the
+                <methodname>servletInitialized()</methodname> method of a custom servlet
+                class, for example as follows:
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[getService().setSystemMessagesProvider(
     new SystemMessagesProvider() {
-    @Override
+    @Override 
     public SystemMessages getSystemMessages(
         SystemMessagesInfo systemMessagesInfo) {
         CustomizedSystemMessages messages =
@@ -1154,6 +1160,11 @@ button.setComponentError(new UserError("Bad click"));]]></programlisting>
         return messages;
     }
 });]]></programlisting>
+
+            <para>
+                See <xref linkend="application.lifecycle.servlet-service"/> for
+                information about customizing Vaadin servlets.
+            </para>
         </section>
 		
         <section xml:id="application.errors.unchecked-exceptions">
@@ -1586,14 +1597,54 @@ notif.show(Page.getCurrent());]]></programlisting>
                 common to both servlets and portlets in a
                 <classname>VaadinService</classname>. It manages sessions, gives access to
                 the deployment configuration information, handles system messages, and
-                does various other tasks. Any servlet type specific tasks are handled in
-                the corresponding <classname>VaadinServletService</classname> or
+                does various other tasks. Any further servlet or portlet specific tasks
+                are handled in the corresponding
+                <classname>VaadinServletService</classname> or
                 <classname>VaadinPortletService</classname>. The service acts as the
                 primary low-level customization layer for processing requests.
             </para>
 
-            <section xml:id="application.lifecycle.servlet-service.customization">
-                <title>Customization</title>
+            <section xml:id="application.lifecycle.servlet-service.servletcustomization" condition="web">
+                <title>Customizing Vaadin Servlet</title>
+
+                <para>
+                    Many common configuration tasks require providing a custom servlet
+                    class. Normally, you handle most customization by overriding the
+                    <methodname>servletInitialized()</methodname> method, where the
+                    <classname>VaadinService</classname> object is available with
+                    <methodname>getService()</methodname> (it would not be available in a
+                    constructor). You should always call
+                    <methodname>super.servletInitialized()</methodname> in the beginning.
+                </para>
+
+                <programlisting><?pocket-size 75% ?><![CDATA[public class MyCustomServlet extends VaadinServlet {
+    @Override
+    protected void servletInitialized()
+            throws ServletException {
+        super.servletInitialized();
+
+        ...
+    }
+}]]></programlisting>
+
+                <para>
+                    To use the custom servlet class, you need to define it in the
+                    <filename>web.xml</filename> deployment descriptor instead of the
+                    regular <classname>VaadinServlet</classname> class, as described in
+                    <xref linkend="application.environment.web-xml"/>.
+                </para>
+            </section>
+
+            <section xml:id="application.lifecycle.servlet-service.portletcustomization" condition="web">
+                <title>Customizing Vaadin Portlet</title>
+
+                <para>
+                    <emphasis>To Be Done</emphasis>
+                </para>
+            </section>
+
+            <section xml:id="application.lifecycle.servlet-service.servicecustomization" condition="web">
+                <title>Customizing Vaadin Service</title>
 
                 <para>
                     To customize <classname>VaadinService</classname>, you first need to
@@ -1644,8 +1695,9 @@ notif.show(Page.getCurrent());]]></programlisting>
                     a <interfacename>SessionInitListener</interfacename> or
                     <interfacename>SessionDestroyListener</interfacename>, respectively,
                     to the <classname>VaadinService</classname>. You can do that best by
-                    extending and <classname>VaadinServlet</classname> overriding the
-                    <methodname>servletInitialized()</methodname> method.
+                    extending <classname>VaadinServlet</classname> and overriding the
+                    <methodname>servletInitialized()</methodname> method, as outlined in
+                    <xref linkend="application.lifecycle.servlet-service"/>.
                 </para>
 
                 <programlisting><?pocket-size 65% ?><![CDATA[public class MyCustomServlet extends VaadinServlet
@@ -2142,10 +2194,12 @@ main.addListener(new Window.CloseListener(){
 &lt;/web-app&gt;</programlisting>
 
             <para>
-                The descriptor defines a servlet with the name <filename>myservlet</filename>.
-                The servlet class, <classname>com.vaadin.server.VaadinServlet</classname>,
-                is provided by Vaadin framework and is normally the same for all Vaadin
-                projects. For some purposes, you may need to use a custom servlet class.
+                The descriptor defines a servlet with the name
+                <filename>myservlet</filename>. The servlet class,
+                <classname>com.vaadin.server.VaadinServlet</classname>, is provided by
+                Vaadin framework and is normally the same for all Vaadin projects. For
+                some purposes, you may need to use a custom servlet class. The class name
+                must include the full package path.
             </para>
 
 			<section xml:id="application.environment.web-xml.widgetset">
