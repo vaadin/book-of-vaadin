@@ -193,7 +193,7 @@ public class SimplePhoneUI extends UI {
         </section>
 
         <section xml:id="mobile.considerations.bandwidth">
-            <title>Bandwidth</title>
+            <title>Bandwidth and Performance</title>
             
             <para>
                 Mobile Internet connections are often significantly slower than with fixed
@@ -210,6 +210,15 @@ public class SimplePhoneUI extends UI {
                 connections typically have latency around 500 ms, and sometimes much higher
                 during hiccups. You may need to limit the use of the immediate mode, text
                 change events, and polling.
+            </para>
+
+            <para>
+                Also the used components affect performance. The TouchKit components are
+                designed to be light-weight. Of the other Vaadin components, some are more
+                light-weight than others. Especially, most other layout components have a
+                more deeper DOM structure and are slower to render than
+                <classname>CssLayout</classname>. TouchKit also includes special styling
+                for <classname>CssLayout</classname>.
             </para>
         </section>
 
@@ -324,192 +333,184 @@ public class SimplePhoneUI extends UI {
         </section>
 
         <section xml:id="mobile.installation.maven" condition="web">
-            <title>Installing in Maven</title>
+            <title>Defining the Maven Dependency</title>
 
             <para>
                 You can install Vaadin TouchKit in a Maven project by adding it a
-                dependency, as described first below. <!-- TODO re-enable If you are
-                creating a new project, you can use the TouchKit Maven archetype to create
-                a project skeleton. -->
+                dependency, as described below, or by using the Maven archetype, as
+                described in the next section.
             </para>
 
-            <section xml:id="mobile.installation.maven.dependency">
-                <title>Defining as a Dependency</title>
+            <para>
+                To use TouchKit in a Vaadin project, you need to include the following
+                dependency in the POM. The <literal>artifactId</literal> should be
+                <literal>vaadin-touchkit-agpl</literal> or
+                <literal>vaadin-touchkit-cval</literal>, depending on your choise for the
+                license.
+            </para>
 
-                <para>
-                    To use TouchKit in a Vaadin project, you need to include the following
-                    dependency in the POM. The <literal>artifactId</literal> should be
-                    <literal>vaadin-touchkit-agpl</literal> or
-                    <literal>vaadin-touchkit-cval</literal>, depending on your choise for
-                    the license.
-                </para>
-
-                <programlisting>&lt;dependency&gt;
+            <programlisting>&lt;dependency&gt;
    &lt;groupId&gt;com.vaadin.addon&lt;/groupId&gt;
    &lt;artifactId&gt;vaadin-touchkit-<emphasis role="bold">agpl</emphasis>&lt;/artifactId&gt;
    &lt;version&gt;<emphasis role="bold">LATEST</emphasis>&lt;/version&gt;
 &lt;/dependency&gt;</programlisting>
 
-                <para>
-                    You can use the <parameter>LATEST</parameter> version as shown above
-                    or a specific version by its version number.
-                </para>
+            <para>
+                You can use the <parameter>LATEST</parameter> version as shown above or a
+                specific version by its version number.
+            </para>
 
-                <para>
-                    You also need to define the repository for the Vaadin add-ons under
-                    the <literal>&lt;repositories&gt;</literal> element:
-                </para>
+            <para>
+                You also need to define the repository for the Vaadin add-ons under the
+                <literal>&lt;repositories&gt;</literal> element:
+            </para>
 
-                <programlisting><![CDATA[<repository>
+            <programlisting><![CDATA[<repository>
    <id>vaadin-addons</id>
    <url>http://maven.vaadin.com/vaadin-addons</url>
 </repository>]]></programlisting>
 
-                <para>
-                    You also need to enable the widget set compilation in the POM, as
-                    described in <xref linkend="addons.maven.widgetset"/>, and compile it.
-                </para>
-            </section>
+            <para>
+                You also need to enable the widget set compilation in the POM, as
+                described in <xref linkend="addons.maven.widgetset"/>, and compile it.
+            </para>
+        </section>
             
-            <simplesect xml:id="mobile.installation.maven.archetype">
-                <title>Using the Archetype</title>
+        <simplesect xml:id="mobile.installation.archetype">
+            <title>Creating a Project with the Maven Archetype</title>
 
-                <para>
-                    You can create a new TouchKit application project using the Maven
-                    <parameter>vaadin-archetype-touchkit</parameter> archetype. Creating
-                    Vaadin projects with Maven is described in more detail in <xref
-                    linkend="getting-started.maven"/>.
-                </para>
+            <para>
+                You can create a new TouchKit application project using the Maven
+                <parameter>vaadin-archetype-touchkit</parameter> archetype. Creating
+                Vaadin projects with Maven is described in more detail in <xref
+                linkend="getting-started.maven"/>.
+            </para>
 
-                <para>
-                    For example, from command-line, you could do:
-                </para>
+            <para>
+                For example, from command-line, you could do:
+            </para>
 
-                <screen><prompt>$</prompt> <command>mvn</command> archetype:generate \
+            <screen><prompt>$</prompt> <command>mvn</command> archetype:generate \
   -DarchetypeGroupId=com.vaadin \
   -DarchetypeArtifactId=vaadin-archetype-touchkit \
   -DarchetypeVersion=3.0.0 \
   -DgroupId=<replaceable>example.com</replaceable> -DartifactId=<replaceable>myproject</replaceable> \
   -Dversion=<replaceable>0.1.0</replaceable> -Dpackaging=war</screen>
 
-                <para>
-                    The generated project has the following source files:
-                </para>
+            <para>
+                The generated project has the following source files:
+            </para>
 
-                <variablelist>
-                    <varlistentry>
-                        <term><filename>MyTouchKitUI.java</filename></term>
-                        <listitem>
-                            <para>
-                                The mobile UI for the TouchKit application. See <xref
-                                linkend="mobile.project.ui"/> for the basics of a TouchKit
-                                UI.
-                            </para>
-                        </listitem>
-                    </varlistentry>
-                    <varlistentry>
-                        <term><filename>MyFallbackUI.java</filename></term>
-                        <listitem>
-                            <para>
-                                A fallback UI for browsers unsupported by TouchKit, such
-                                as regular desktop browsers. See <xref
-                                linkend="mobile.features.fallback"/> for more information
-                                about fallback UIs.
-                            </para>
-                        </listitem>
-                    </varlistentry>
-                    <varlistentry>
-                        <term><filename>MyServlet.java</filename></term>
-                        <listitem>
-                            <para>
-                                The servlet class for the UI, defined using the
-                                <literal>@WebServlet</literal> annotation in Servlet API
-                                3.0. The generated servlet customizes TouchKit to define
-                                the <classname>MyUIProvider</classname>, which sets the
-                                fallback UI. See <xref linkend="mobile.project.servlet"/>
-                                for more details about defining a custom servlet to
-                                customize TouchKit.
-                            </para>
-                        </listitem>
-                    </varlistentry>
-                    <varlistentry>
-                        <term><filename>MyUIProvider.java</filename></term>
-                        <listitem>
-                            <para>
-                                Creates either the <classname>MyTouchKitUI</classname> for
-                                supported mobile browsers or
-                                <classname>MyFallBackUI</classname> for unsupported
-                                browsers. See <xref linkend="mobile.features.fallback"/>
-                                for more information about fallback UIs.
-                            </para>
-                        </listitem>
-                    </varlistentry>
-                    <varlistentry>
-                        <term><filename>gwt/AppWidgetSet.gwt.xml</filename></term>
-                        <listitem>
-                            <para>
-                                Widget set descriptor for the project.
-                            </para>
-                        </listitem>
-                    </varlistentry>
-                </variablelist>
+            <variablelist>
+                <varlistentry>
+                    <term><filename>MyTouchKitUI.java</filename></term>
+                    <listitem>
+                        <para>
+                            The mobile UI for the TouchKit application. See <xref
+                            linkend="mobile.project.ui"/> for the basics of a TouchKit UI.
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><filename>MyFallbackUI.java</filename></term>
+                    <listitem>
+                        <para>
+                            A fallback UI for browsers unsupported by TouchKit, such as
+                            regular desktop browsers. See <xref
+                            linkend="mobile.features.fallback"/> for more information
+                            about fallback UIs.
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><filename>MyServlet.java</filename></term>
+                    <listitem>
+                        <para>
+                            The servlet class for the UI, defined using the
+                            <literal>@WebServlet</literal> annotation in Servlet API
+                            3.0. The generated servlet customizes TouchKit to define the
+                            <classname>MyUIProvider</classname>, which sets the fallback
+                            UI. See <xref linkend="mobile.project.servlet"/> for more
+                            details about defining a custom servlet to customize TouchKit.
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><filename>MyUIProvider.java</filename></term>
+                    <listitem>
+                        <para>
+                            Creates either the <classname>MyTouchKitUI</classname> for
+                            supported mobile browsers or
+                            <classname>MyFallBackUI</classname> for unsupported
+                            browsers. See <xref linkend="mobile.features.fallback"/> for
+                            more information about fallback UIs.
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><filename>gwt/AppWidgetSet.gwt.xml</filename></term>
+                    <listitem>
+                        <para>
+                            Widget set descriptor for the project.
+                        </para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
 
-                <para>
-                    To compile the project and launch it in a Jetty web server (port
-                    8080), do:
-                </para>
+            <para>
+                To compile the project and launch it in a Jetty web server (port 8080),
+                do:
+            </para>
 
-                <screen><prompt>$</prompt> <command>mvn</command> package
+            <screen><prompt>$</prompt> <command>mvn</command> package
 <prompt>$</prompt> <command>mvn</command> jetty:run</screen>
 
-                <para>
-                    Note that a project generated by the archetype defines the servlet
-                    with the <literal>@WebServlet</literal> annotation defined in Servlet
-                    API 3.0. The application server must support Servlet 3.0. For example,
-                    if you use Tomcat, you need at least Tomcat 7.
-                </para>
-            </simplesect>
-        </section>
-
-        <section xml:id="mobile.installation.vornitologist">
-            <title>Importing the Vornitologist Demo</title>
-
             <para>
-                The Vornitologist demo, illustrated in <xref
-                linkend="figure.mobile.overview.touchkit"/> in the overview, showcases
-                most of the functionality in Vaadin TouchKit. You can try the demo on-line
-                with a TouchKit-compatible browser at <link
-                xlink:href="http://demo.vaadin.com/vornitologist/">http://demo.vaadin.com/vornitologist/</link>.
+                Note that a project generated by the archetype defines the servlet with
+                the <literal>@WebServlet</literal> annotation defined in Servlet API
+                3.0. The application server must support Servlet 3.0. For example, if you
+                use Tomcat, you need at least Tomcat 7.
             </para>
+        </simplesect>
+    </section>
 
-            <para>
-                You can browse the sources on-line or, more conveniently, import the
-                project in Eclipse (or other IDE). As the project is Maven-based, eclipse
-                users need to install the m2e (or m2eclipse for older versions) plugin to
-                be able to import Maven projects, as well as Subclipse for making SVN
-                access easier. Once they are installed, you should be able to import
-                Vornitologist as follows.
-            </para>
+    <section xml:id="mobile.installation.vornitologist">
+        <title>Importing the Vornitologist Demo</title>
 
-            <orderedlist>
-                <listitem>Select <menuchoice><guimenu>File</guimenu><guimenuitem>Import</guimenuitem></menuchoice></listitem>
-                <listitem>Select <menuchoice><guimenu>Maven</guimenu><guimenuitem>Check out Maven Project from SCM</guimenuitem></menuchoice>, and click <guibutton>Next</guibutton>.</listitem>
+        <para>
+            The Vornitologist demo, illustrated in <xref
+            linkend="figure.mobile.overview.touchkit"/> in the overview, showcases most of
+            the functionality in Vaadin TouchKit. You can try the demo on-line with a
+            TouchKit-compatible browser at <link
+            xlink:href="http://demo.vaadin.com/vornitologist/">http://demo.vaadin.com/vornitologist/</link>.
+        </para>
 
-                <listitem>
-                    In <guilabel>SCM URL</guilabel>, select <guilabel>svn</guilabel> and
-                    enter URL for the repository. You can find the current repository URL
-                    from the TouchKit add-on page at <link
-                    xlink:href="http://dev.vaadin.com/svn/addons/TouchKit">http://dev.vaadin.com/svn/addons/TouchKit</link>.
-                </listitem>
+        <para>
+            You can browse the sources on-line or, more conveniently, import the project
+            in Eclipse (or other IDE). As the project is Maven-based, eclipse users need
+            to install the m2e (or m2eclipse for older versions) plugin to be able to
+            import Maven projects, as well as Subclipse for making SVN access easier. Once
+            they are installed, you should be able to import Vornitologist as follows.
+        </para>
 
-                <listitem>Click <guibutton>Finish</guibutton>.</listitem>
-            </orderedlist>
+        <orderedlist>
+            <listitem>Select <menuchoice><guimenu>File</guimenu><guimenuitem>Import</guimenuitem></menuchoice></listitem>
+            <listitem>Select <menuchoice><guimenu>Maven</guimenu><guimenuitem>Check out Maven Project from SCM</guimenuitem></menuchoice>, and click <guibutton>Next</guibutton>.</listitem>
 
-            <para>
-                Instead of using Subclipse, you can check out the project with another
-                Subversion tool and then import it in Eclipse as a Maven project.
-            </para>
-        </section>
+            <listitem>
+                In <guilabel>SCM URL</guilabel>, select <guilabel>svn</guilabel> and enter
+                URL for the repository. You can find the current repository URL from the
+                TouchKit add-on page at <link
+                xlink:href="http://dev.vaadin.com/svn/addons/TouchKit">http://dev.vaadin.com/svn/addons/TouchKit</link>.
+            </listitem>
+
+            <listitem>Click <guibutton>Finish</guibutton>.</listitem>
+        </orderedlist>
+
+        <para>
+            Instead of using Subclipse, you can check out the project with another
+            Subversion tool and then import it in Eclipse as a Maven project.
+        </para>
     </section>
 
     <section xml:id="mobile.project">
@@ -798,20 +799,11 @@ public class SimplePhoneUI extends UI {
             </para>
 
             <para>
-                With certain TouhcKit tasks, such as when defining an optimized widget set
-                as described in <xref linkend="mobile.optimization"/>, you need to provide
-                a hand-modified widget set descriptor. In such case, you need to prevent
-                the automatic generation of the descriptor with the following line in it:
-            </para>
-
-            <programlisting>&lt;!-- WS Compiler: manually edited  --&gt;</programlisting>
-
-            <para>
-                Note that if you have a TouchKit UI in a same project as a non-TouchKit
+                Note that if you have a TouchKit UI in the same project as a non-TouchKit
                 UI, you probably do not want to compile the TouchKit widget set into its
                 widget set. As the automatic generation of the descriptor includes all the
-                widget sets that it finds from the class path, the result can be
-                unwanted. You can use a manually edited descriptor also in that case.
+                widget sets that it finds from the class path, the result can be unwanted,
+                and you need to edit the widget set descriptor manually.
             </para>
         </section>
     </section>
@@ -859,12 +851,12 @@ public class SimplePhoneUI extends UI {
                 <title>Navigation Bar</title>
 
                 <para>
-                    The navigation bar at the top of <classname>NavigationView</classname> is
-                    a <classname>NavigationBar</classname> component. It has two component
-                    slots, with one on the left and one on the right. The caption is displayed
-                    in the middle. The <classname>NavigationBar</classname> can be used elsewhere
-                    as well, such as for a view containing a form with save and cancel buttons
-                    in the upper right and left corners.
+                    The navigation bar at the top of <classname>NavigationView</classname>
+                    is a separate <classname>NavigationBar</classname> component. It has
+                    two component slots, with one on the left and one on the right. The
+                    caption is displayed in the middle. The
+                    <classname>NavigationBar</classname> component can be used
+                    independently as well.
                 </para>
 
                 <para>
@@ -1003,9 +995,48 @@ public class SimplePhoneUI extends UI {
             </para>
 
             <para>
-                Switching between the views is done programmatically according to user
-                interaction; swipe gestures are not supported at the moment.
+                You give the initial view as a parameter for the constructor. Typically,
+                you use a navigation manager as the UI content or inside a
+                <classname>TabBarView</classname>.
             </para>
+
+            <programlisting><![CDATA[public class MyUI extends UI {
+    @Override
+    protected void init(VaadinRequest request) {
+        NavigationManager manager =
+               new NavigationManager(new MainView());
+        setContent(manager);
+    }
+}]]></programlisting>
+
+            <section xml:id="mobile.components.navigationpanel.viewhandling">
+                <title>Changing Views</title>
+
+                <para>
+                    Switching between the views (components) is normally done with
+                    predefined navigation targets to enhance responsiveness. Clicking a
+                    <classname>NavigationButton</classname> or a button in a navigation
+                    bar starts navigation automatically without a server roundtrip. Swipe
+                    gestures are supported with the <classname>SwipeView</classname>
+                    component.
+                </para>
+
+                <para>
+                    Navigation can also be done programmatically with the
+                    <methodname>navigateTo()</methodname> method. If breadcrumbs are
+                    enabled, the current view is also pushed to the breadcrumb stack. To
+                    navigate back, you can call <methodname>navigateBack()</methodname>,
+                    which is also called implicitly if a <guibutton>Back</guibutton>
+                    button is clicked in a <classname>NavigationView</classname>. Also, if
+                    navigation is done to the "previous" component,
+                    <methodname>navigateBack()</methodname> is done implicitly.
+                </para>
+
+                <para>
+                    When navigation occurs, the current component is moved as the previous
+                    or next component, according to the direction of the navigation.
+                </para>
+            </section>
 
             <section xml:id="mobile.components.navigationpanel.viewhandling">
                 <title>Handling View Changes</title>
@@ -1024,6 +1055,29 @@ protected void onBecomingVisible() {
 
     ...
 }]]></programlisting>
+
+                <para>
+                    Otherwise, you can handle navigation changes in the manager with a
+                    <interfacename>NavigationListener</interfacename>. The
+                    <parameter>direction</parameter> property tells whether the navigation
+                    was done forward or backward in the breadcrumb stack, that is, whether
+                    navigation was done with <methodname>navigateTo()</methodname> or
+                    <methodname>navigateBack</methodname>.  The current component,
+                    accessible with <methodname>getCurrentComponent()</methodname>, refers
+                    to the navigation target component.
+                </para>
+
+                <programlisting><?pocket-size 65% ?><![CDATA[manager.addNavigationListener(new NavigationListener() {
+    @Override
+    public void navigate(NavigationEvent event) {
+        if (event.getDirection() ==
+                NavigationEvent.Direction.BACK) {
+            // Do something
+            Notification.show("You came back to " +
+                manager.getCurrentComponent().getCaption());
+        }
+    }
+});]]></programlisting>
             </section>
 
             <section xml:id="mobile.components.navigationpanel.breadcrump">
@@ -1093,28 +1147,36 @@ box.addComponent(new NavigationButton("Decorated Popover",
                    new DecoratedPopoverView()));]]></programlisting>
 
             <para>
-                If the navigation view is initialized after the button is clicked, it does
-                not have a caption during the animation. You can define a temporary
-                caption for it with <methodname>setTargetViewCaption()</methodname>. The
-                temporary caption is shown during the slide animation and until the
-                content for the view has been received from the server. Then, it is
-                replaced with the proper caption of the view. The temporary caption is
-                also used as the caption of button if it is not given explicitly.
+                If the target view is not created or initialized before the button is
+                clicked, it does not yet have a caption during the animation. The default
+                is to use the button caption as a temporary target view caption, but you
+                can set it explicitly with
+                <methodname>setTargetViewCaption()</methodname>. The temporary caption is
+                shown during the slide animation and until the content for the view has
+                been received from the server. It is then replaced with the proper caption
+                of the view, and you normally want to have it the same. The temporary
+                caption is also used as the caption of button if it is not given
+                explicitly.
             </para>
 
-            <programlisting><?pocket-size 80% ?><![CDATA[NavigationButton toView = new NavigationButton();
-toView.setTargetView(new MyView());
-toView.setTargetViewCaption("My View");
-group.addComponent(toView);
+            <programlisting><?pocket-size 65% ?><![CDATA[
+final NavigationButton navButton = new NavigationButton();
+navButton.setTargetViewCaption("Text Input Fields");
+navButton.addClickListener(
+    new NavigationButtonClickListener() {
 
-...
-class MyView extends NavigationView {
-    protected void onBecomingVisible() {
-        super.onBecomingVisible();
-        setCaption("My View");
-        ...
+    @Override
+    public void buttonClick(NavigationButtonClickEvent event) {
+        navButton.getNavigationManager()
+            .navigateTo(new FieldView());
     }
-}]]></programlisting>
+});
+box.addComponent(navButton);]]></programlisting>
+
+            <para>
+                Creating views dynamically this way is recommended to reduce the memory
+                footprint.
+            </para>
 
             <para>
                 Notice that the automatic navigation will only work if the button is
@@ -1741,44 +1803,59 @@ bar.removeTab(selectedTab);]]></programlisting>
                 multiple times.
             </para>
 
-            <section xml:id="mobile.features.geolocation.map">
+            <section xml:id="mobile.features.geolocation.map" condition="web">
                 <title>Displaying Position on a Map</title>
 
                 <para>
                     Geographical positions are often visualized with a map. There are
                     countless ways to do that, for example, in Vornitologist we use the
                     <link
-                    xlink:href="http://vaadin.com/directory#addon/openlayers-wrapper">OpenLayers
-                    Wrapper</link> add-on component.
+                    xlink:href="http://vaadin.com/directory#addon/v-leaflet">V-Leaflet</link>
+                    add-on component.
                 </para>
 
                 <para>
-                    The OpenLayers Wrapper add-on contains a custom widget set, which
-                    needs to be included in the project widget set. In addition, the
-                    OpenLayers JavaScript library needs to be referenced in the widget set
-                    descriptor. You need to edit it manually and include the following
-                    lines:
-                </para>
-
-
-                <programlisting>&lt;!-- WS Compiler: manually edited  --&gt;
-&lt;script src="OpenLayers.js"&gt;&lt;/script&gt;
-&lt;inherits name="org.vaadin.vol.VolWidgetset" /&gt;</programlisting>
-
-                <para>
-                    The <classname>MapView</classname> in Vornitologist populates a vector
-                    layer containing markers of the latest observations.
+                    The <classname>MapView</classname> in Vornitologist is a TouchKit
+                    navigation view that uses a custom
+                    <classname>VornitologistMap</classname> component extended from the
+                    V-Leaflet <classname>LMap</classname> component.
                 </para>
 
                 <programlisting><?pocket-size 75% ?><![CDATA[public class MapView extends NavigationView
-   implements PositionCallback, VectorSelectedListener {
-    public static StyleMap STYLEMAP_BIRD_MARKER;
-    
-    private OpenLayersMap openLayersMap;
+       implements PositionCallback, LeafletClickListener {
+    private VornitologistMap map;
     private double latestLongitude;
     private double latestLatitude;
-    private VectorLayer markerLayer = new VectorLayer();
-    ...]]]></programlisting>
+    private Point center;
+    private Bounds extent;
+    ...]]></programlisting>
+
+                <para>
+                    When TouchKit gets the position, we center the map as follows:
+                </para>
+
+                <programlisting><?pocket-size 65% ?><![CDATA[@Override
+public void onSuccess(Position position) {
+    // Store the new position in the map view
+    latestLatitude = position.getLatitude();
+    latestLongitude = position.getLongitude();
+
+    // Store the position also in the UI for other views
+    VornitologistUI touchKitUI = VornitologistUI.getCurrent();
+    touchKitUI.setCurrentLatitude(position.getLatitude());
+    touchKitUI.setCurrentLongitude(position.getLongitude());
+
+    setCenter();
+}
+
+private void setCenter() {
+    if (map != null) {
+        center = new Point(latestLatitude, latestLongitude);
+        extent = new Bounds(center);
+        map.setCenter(center);
+    }
+}]]></programlisting>
+
             </section>
         </section>
     </section>
@@ -2028,31 +2105,52 @@ offline.extend(this);]]></programlisting>
         <para>
             Testing places special challenges for mobile devices. The mobile browsers may not
             have much debugging features and you may not be able to install third-party
-            debugging add-ons, such as Firebug.
+            debugging add-ons, such as the Chrome Developer Tools.
         </para>
 
         <section xml:id="mobile.testing.debugging">
             <title>Debugging</title>
 
             <para>
-                The debug mode, as described in <xref linkend="advanced.debug-production-modes"/>,
-                works on mobile browsers as well, even if it is a bit harder to use.
+                The debug window, as described in <xref
+                linkend="advanced.debug-production-modes"/>, works on mobile browsers as
+                well, even if it is a bit harder to use.
             </para>
 
             <para>
-                The lack of FireBug and similar tools can be helped with simple client-side
-                coding. For example, you can dump the HTML content of the page with the
-                <parameter>innerHTML</parameter> property in the HTML DOM.
+                The lack of in-browser analysis tools can be helped with simple
+                client-side coding. For example, you can dump the HTML content of the page
+                with the <parameter>innerHTML</parameter> property in the HTML DOM. To do
+                so, you need to execute a JavaScript call from the server-side and handle
+                its response with a call-back method, as described in <xref
+                linkend="advanced.javascript.callback"/>.
             </para>
 
-            <para>
-                TouchKit supports especially WebKit-based browsers, which are used in iOS and
-                Android devices. You can therefore reach a good compatibility by using a
-                desktop browser based on WebKit. Features such as geolocation are also
-                supported by desktop browsers. If you make your phone/tablet-detection and
-                orientation detection using screen size, you can easily emulate the modes by
-                resizing the browser.
-            </para>
+            <section xml:id="mobile.testing.debugging.desktop">
+                <title>Desktop Debugging</title>
+
+                <para>
+                    TouchKit supports especially WebKit-based browsers, which are used in
+                    iOS and Android devices. You can therefore reach a decent
+                    compatibility by using a desktop browser based on WebKit, such as
+                    Google Chrome. Features such as geolocation are also supported by
+                    desktop browsers. If you make your phone/tablet-detection and
+                    orientation detection using screen size, you can easily emulate the
+                    modes by resizing the browser. Also, the browsers have special
+                    development settings to emulate some features in touch devices.
+                </para>
+            </section>
+
+            <section xml:id="mobile.testing.debugging.remote">
+                <title>Remote Debugging</title>
+
+                <para>
+                    Both Safari and <link
+                    xlink:href="https://developers.google.com/chrome-developer-tools/docs/remote-debugging">Chrome</link>
+                    support remote debugging, which allows you to debug the supported
+                    mobile browsers remotely from a desktop browser.
+                </para>
+            </section>
         </section>
 
         <!-- section xml:id="mobile.testing.testing">
