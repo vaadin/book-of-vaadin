@@ -27,7 +27,7 @@
 
   <xsl:attribute-set name="monospace.verbatim.properties">
     <xsl:attribute name="font-size">
-      <xsl:value-of select="$body.font.master * 0.80"/>
+      <xsl:value-of select="$body.font.master * 0.9"/>
       <xsl:text>pt</xsl:text>
     </xsl:attribute>  
     <xsl:attribute name="wrap-option">wrap</xsl:attribute>
@@ -62,6 +62,9 @@
     <xsl:attribute name="margin-left">1.7cm</xsl:attribute>
   </xsl:attribute-set>
 
+  <!-- Do not display URLs in brackets after the link text. -->
+  <xsl:param name="ulink.show" select="'0'"/>
+
   <!-- Turn off Part ToC. -->
   <xsl:template name="generate.part.toc">
   </xsl:template>
@@ -86,9 +89,9 @@
     <xsl:call-template name="inline.boldseq"/>
   </xsl:template>
 
-  <!-- Turn hyphenation off in monospace (parameter)-->
+  <!-- Turn hyphenation on in monospace (actually default) -->
   <xsl:attribute-set name="monospace.properties">
-    <xsl:attribute name="hyphenate">false</xsl:attribute>
+    <xsl:attribute name="hyphenate">true</xsl:attribute>
     <xsl:attribute name="font-weight">normal</xsl:attribute>
     <xsl:attribute name="font-style">normal</xsl:attribute>
   </xsl:attribute-set>
