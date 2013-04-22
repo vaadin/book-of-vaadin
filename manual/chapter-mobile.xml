@@ -835,7 +835,7 @@ public class SimplePhoneUI extends UI {
             </para>
 
             <programlisting><![CDATA[.stylishlabel {
-	color: red;
+    color: red;
     font-style: italic;
 }]]></programlisting>
 
@@ -843,6 +843,75 @@ public class SimplePhoneUI extends UI {
                 You need to set the theme with the <literal>@Theme</literal> annotation
                 for your UI class, as usual.
             </para>
+
+            <section xml:id="mobile.project.theme.gwt">
+                <title>Defining a Theme in a GWT Client Bundle</title>
+
+                <para>
+                    Using a GWT theme instead of a regular Vaadin theme offers several
+                    performance benefits on mobile devices by reducing the number of
+                    resources loaded separately. All the resources, such as images and
+                    stylesheets, can be loaded with the widget set. Images can be handled
+                    as sprites tiled in bundle images.
+                </para>
+
+                <para>
+                    The GWT CSS classes have their own special format, a bit similar to
+                    Sass themes. See <link
+                    xlink:href="https://developers.google.com/web-toolkit/doc/latest/DevGuideClientBundle">GWT
+                    Developer's Guide for detailed information about client bundles</link>
+                    and how to define image, CSS, and other resources.
+                </para>
+
+                <para>
+                    To use a GWT client bundle in a TouchKit application, you need to
+                    define a <emphasis>theme loader</emphasis> that extends the TouchKit
+                    <classname>ThemeLoader</classname> and implements the
+                    <methodname>load()</methodname> method to inject the bundle. The theme
+                    loader and the client bundle are a client-side classes that are
+                    compiled into the widget set, and must therefore be defined under the
+                    <filename>client</filename> directory.
+                </para>
+
+                <para>
+                    For example, in Vornitologist we have as follows:
+                </para>
+
+                <programlisting><?pocket-size 65% ?><![CDATA[public class VornitologistThemeLoader extends ThemeLoader {
+    @Override
+    public void load() {
+        // Load default TouchKit theme
+        super.load();
+
+        // Load Vornitologist specific additions from
+        // its client bundle
+        VornitologistBundle.INSTANCE.css().ensureInjected();
+    }
+}]]></programlisting>
+
+                <para>
+                    You can call <methodname>super.load()</methodname> to load the default
+                    TouchKit theme, but you can omit the call if you do not want to use
+                    it. In such case, your GWT theme should import the Vaadin base theme
+                    explicitly.
+                </para>
+
+                <para>
+                    The theme loader must be defined in the <filename>.gwt.xml</filename>
+                    widget set descriptor as follows:
+                </para>
+
+                <programlisting><?pocket-size 65% ?>&lt;replace-with
+    class="<emphasis role="bold">com.vornitologist.widgetset.client.theme.VornitologistThemeLoader</emphasis>"&gt;
+    &lt;when-type-is
+        class="com.vaadin.addon.touchkit.gwt.client.ThemeLoader" /&gt;
+&lt;/replace-with&gt;</programlisting>
+
+                <para>
+                    See the Vornitologist demo sources for a complete example of defining
+                    a GWT theme.
+                </para>
+            </section>
         </section>
     </section>
 
@@ -1170,17 +1239,23 @@ protected void onBecomingVisible() {
             </figure>
 
             <para>
-                A navigation button has a caption and can have an icon. If not given
-                explicitly, the caption is taken from the caption of the navigation view
-                if it is initialized before the button.
+                A navigation button has a caption and can have a description and an
+                icon. If not given explicitly, the caption is taken from the caption of
+                the navigation view if it is initialized before the button. The
+                <emphasis>description</emphasis> property of a button is aligned on the
+                right side of the button.
             </para>
 
             <para>
                 You can give the target view either in the constructor or with
-                <methodname>setTargetView()</methodname>.
+                <methodname>setTargetView()</methodname>, or create it later by handling
+                the button click.
             </para>
 
-            <programlisting><?pocket-size 70% ?><![CDATA[box.addComponent(new NavigationButton(new PopoverView()));
+            <programlisting><?pocket-size 70% ?><![CDATA[// Button caption comes from the view caption
+box.addComponent(new NavigationButton(new PopoverView()));
+
+// Give button caption explicitly
 box.addComponent(new NavigationButton("Decorated Popover",
                    new DecoratedPopoverView()));]]></programlisting>
 
