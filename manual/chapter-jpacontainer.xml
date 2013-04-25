@@ -149,6 +149,27 @@
                 and optimizations. The built-in providers are described in <xref
                 linkend="jpacontainer.entityprovider"/>.
             </para>
+
+            <para>
+                <classname>JPAContainer</classname> is by default
+                <emphasis>unbuffered</emphasis>, so that any entity property changes are
+                written immediately to the database when you call
+                <methodname>setValue()</methodname> for a property, or when a user edits a
+                bound field. A container can be set as <emphasis>buffered</emphasis>, so
+                that changes are written on calling
+                <methodname>commit()</methodname>. Buffering can be done both at item
+                level, such as when updating item property values, or at container level,
+                such as when adding or deleting items. Only <emphasis>batchable</emphasis>
+                containers, that is, containers with a batchable entity provider, can be
+                buffered. Note that buffering is recommended for situations where two
+                users could update the same entity simultaneously, and when this would be
+                a problem. In an unbuffered container, the entity is refreshed before
+                writing an update, so the last write wins and a conflicting simultaneous
+                update written before it is lost. A buffered container throws an
+                <classname>OptimisticLockException</classname> when two users edit the
+                same item (an unbuffered container never throws it), thereby allowing to
+                handle the situation with application logic.
+            </para>
         </simplesect>
 
         <simplesect xml:id="jpacontainer.overview.documentation">
@@ -213,15 +234,7 @@
                     </listitem>
                 </varlistentry>
                 <varlistentry>
-                    <term><filename>licensing.txt</filename></term>
-                    <listitem>
-                        <para>
-                            General information about licensing of JPAContainer.
-                        </para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term><filename>license-xxxx-y.y.txt</filename></term>
+                    <term><filename>LICENSE</filename></term>
                     <listitem>
                         <para>
                             The full license text for the library.
@@ -229,17 +242,16 @@
                     </listitem>
                 </varlistentry>
                 <varlistentry>
-                    <term><filename>vaadin-jpacontainer-xxxx-y.y-z.z.z.jar</filename></term>
+                    <term><filename>vaadin-jpacontainer-3.x.x.jar</filename></term>
                     <listitem>
                         <para>
-                            The actual Vaadin JPAContainer library. The xxxx is the
-                            license name and y.y its version number. The final z.z.z is
-                            the version number of the Vaadin JPAContainer.
+                            The actual Vaadin JPAContainer library.
                         </para>
                     </listitem>
                 </varlistentry>
+                <!-- Seems to be currently disabled, remove altogether?
                 <varlistentry>
-                    <term><filename>vaadin-jpacontainer-xxxx-y.y-z.z.z-javadoc.jar</filename></term>
+                    <term><filename>vaadin-jpacontainer-3.x.x-javadoc.jar</filename></term>
                     <listitem>
                         <para>
                             JavaDoc documentation JAR for the library. You can use it for
@@ -248,6 +260,18 @@
                         </para>
                     </listitem>
                 </varlistentry>
+                -->
+                <varlistentry>
+                    <term><filename>vaadin-jpacontainer-3.x.x-sources.jar</filename></term>
+                    <listitem>
+                        <para>
+                            Source JAR for the library. You can use it for example in
+                            Eclipse by associating the JavaDoc JAR with the JPAContainer
+                            JAR in the build path settings of your project.
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <!-- Seems to be currently disabled, remove altogether?
                 <varlistentry>
                     <term><filename>apidocs</filename></term>
                     <listitem>
@@ -257,6 +281,7 @@
                         </para>
                     </listitem>
                 </varlistentry>
+                -->
                 <varlistentry>
                     <term><filename>jpacontainer-tutorial.pdf</filename></term>
                     <listitem>
@@ -266,12 +291,10 @@
                     </listitem>
                 </varlistentry>
                 <varlistentry>
-                    <term><filename>jpacontainer-tutorial</filename></term>
+                    <term><filename>jpacontainer-tutorial-html</filename></term>
                     <listitem>
                         <para>
-                            The tutorial in HTML format. The online version of the
-                            tutorial is always available at <link
-                            xlink:href="http://vaadin.com/download/jpacontainer-tutorial/">vaadin.com/download/jpacontainer-tutorial/</link>.
+                            The tutorial in HTML format.
                         </para>
                     </listitem>
                 </varlistentry>
@@ -284,17 +307,7 @@
                             with "<command>mvn</command> <parameter>package</parameter>"
                             or launch it in the Jetty web browser with
                             "<command>mvn</command> <parameter>jetty:run</parameter>". You
-                            can also import the demo project in Eclipse as described in
-                            the tutorial.
-                        </para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term><filename>jpacontainer-demo-z.z.z.war</filename></term>
-                    <listitem>
-                        <para>
-                            The basic JPAContainer demo. It is somewhat more extensive
-                            than the AddressBook Demo.
+                            can also import the demo project in Eclipse.
                         </para>
                     </listitem>
                 </varlistentry>
@@ -313,7 +326,7 @@
 			<programlisting><?pocket-size 75% ?><![CDATA[<dependency>
    <groupId>com.vaadin.addon</groupId>
    <artifactId>jpacontainer-addon</artifactId>
-   <version>2.0.0</version>
+   <version>3.1.0</version>
 </dependency>]]></programlisting>
 
             <para>
@@ -1145,7 +1158,7 @@ persons.addEntity(new Person("Jeanne Calment", 122, france));]]></programlisting
                     <classname>EntityItem</classname> has changes that are not yet
                     committed to the entity instance. It is only relevant if the item
                     buffering is enabled with
-                    <methodname>setWriteThrough(false)</methodname> for the item.
+                    <methodname>setBuffered(true)</methodname> for the item.
                 </para>
 
                 <para>
@@ -1913,7 +1926,7 @@ final Form  countryForm  = new Form();
 countryForm.setCaption("Country Editor");
 countryForm.addStyleName("bordered"); // Custom style
 countryForm.setWidth("420px");
-countryForm.setWriteThrough(false); // Enable buffering
+countryForm.setBuffered(true);
 countryForm.setEnabled(false);
 
 // When an item is selected from the list...
@@ -1996,9 +2009,6 @@ countrySelect.setNullSelectionAllowed(false);]]></programlisting>
                 annotation.
             </para>
 
-			<programlisting><?pocket-size 65% ?><![CDATA[
-]]></programlisting>
-
             <!-- TODO: Removal of entities (actually relationships between entities depending on the cascade rule) -->
         </section>
 
@@ -2041,81 +2051,136 @@ countrySelect.setNullSelectionAllowed(false);]]></programlisting>
             </para>
         </section>
 
-        <section xml:id="jpacontainer.hibernate.em-per-request">
+        <section xml:id="jpacontainer.hibernate.em-per-request" condition="web">
             <title>The EntityManager-Per-Request pattern</title>
 
             <para>
-                One issue with Hibernate is that it is designed for short-lived
-                sessions. The lifetime of an entity manager is roughly that of a session.
-                However, if an error occurs in a session or entity manager, the manager
-                becomes unuseable. This causes big problems with long-lived sessions that
-                would work fine with EclipseLink.
+                One issue with Hibernate is that it is designed for short-lived sessions,
+                but the lifetime of an entity manager is normally roughly that of a user
+                session. The problem is that if an error occurs in a session or an entity
+                manager, the manager becomes unuseable. This causes big problems with
+                long-lived sessions that would work fine with EclipseLink.
             </para>
 
             <para>
-                The recommended solution is to the
+                The recommended solution is to use the
                 <emphasis>EntityManager-per-Request</emphasis> pattern. It is highly
                 recommended always when using Hibernate.
             </para>
 
             <para>
                 An entity manager can only be open during the request-response cycle of
-                the Vaadin application servlet, so that one is created at the beginning of
-                the request and closed at the end.
+                the Vaadin servlet, so that one is created at the beginning of the request
+                and closed at the end.
             </para>
 
-            <para>
-                You can use the <classname>EntityManagerPerRequestHelper</classname> as
-                follows:
-            </para>
+            <section xml:id="jpacontainer.hibernate.em-per-request.provider" condition="web">
+                <title>Storing an Entity Manager</title>
 
-            <orderedlist>
-                <listitem>
-                    <para>
-                        Create a new instance in the constructor or
-                        <methodname>init()</methodname> method of your Vaadin application
-                        class.
-                    </para>
-                </listitem>
+                <para>
+                    You first need to implement an
+                    <interfacename>EntityManagerProvider</interfacename> that returns a
+                    stored <interfacename>EntityManager</interfacename> with
+                    <methodname>getEntityManager()</methodname>. The entity manager must
+                    be stored in a <classname>ThreadLocal</classname> variable.
+                </para>
 
-                <listitem>
-                    <para>
-                        Override <methodname>onRequestStart()</methodname> in the
-                        application class and call <methodname>requestStart()</methodname>
-                        in the helper instance.
-                    </para>
-                </listitem>
+                <programlisting><?pocket-size 75% ?><![CDATA[public class LazyHibernateEntityManagerProvider
+       implements EntityManagerProvider {
+    private static ThreadLocal<EntityManager>
+        entityManagerThreadLocal =
+            new ThreadLocal<EntityManager>();
 
-                <listitem>
-                    <para>
-                        Override <methodname>onRequestEnd()</methodname> in the
-                        application class and call <methodname>requestEnd()</methodname>
-                        in the helper.
-                    </para>
-                </listitem>
+    @Override
+    public EntityManager getEntityManager() {
+        return entityManagerThreadLocal.get();
+    }
 
-                <listitem>
-                    <para>
-                        Whenever a new <classname>JPAContainer</classname> instance is
-                        created in the application, register it in the helper by calling
-                        <methodname>addContainer()</methodname> with the container.
-                    </para>
-                </listitem>
+    public static void setCurrentEntityManager(
+                               EntityManager em) {
+        entityManagerThreadLocal.set(em);
+    }
+}]]></programlisting>
 
-                <listitem>
-                    <para>
-                        If you use the JPAContainer <classname>FieldFactory</classname>,
-                        as described in <xref linkend="jpacontainer.fieldfactory"/>, you
-                        need to set the helper for the factory either by passing it in the
-                        constructor (<literal>new FieldFactory(myEMPRH)</literal>) or with
-                        <methodname>setEntityManagerPerRequestHelper()</methodname>. The
-                        <classname>FieldFactory</classname> creates
-                        <classname>JPAContainer</classname>s internally and these
-                        instances need to be updated with the entity manager instances
-                        when they change between requests.
-                    </para>
-                </listitem>
-            </orderedlist>
+                <para>
+                    You need to create and store the per-request instance at the beginning
+                    of each request with
+                    <methodname>setCurrentEntityManager()</methodname> and clear it at the
+                    end by setting it as <literal>null</literal>.
+                </para>
+            </section>
+
+            <section xml:id="jpacontainer.hibernate.em-per-request.provider" condition="web">
+                <title>Creating Entity Managers in a Servlet Filter</title>
+
+                <para>
+                    You can create the entity managers for each request either by
+                    extending <classname>VaadinServlet</classname> and overriding the
+                    <methodname>service()</methodname> method or by implementing a servlet
+                    filter. In the following, we describe how to implement a servlet
+                    filter to do the task, but overriding the servlet could be even
+                    easier.
+                </para>
+
+                <programlisting><?pocket-size 75% ?><![CDATA[public class LazyHibernateServletFilter
+       implements Filter {
+
+    private EntityManagerFactory entityManagerFactory;
+
+    @Override
+    public void init(FilterConfig filterConfig)
+            throws ServletException {
+        entityManagerFactory = Persistence
+            .createEntityManagerFactory("lazyhibernate");
+    }
+
+    @Override
+    public void doFilter(ServletRequest servletRequest,
+                         ServletResponse servletResponse,
+                         FilterChain filterChain)
+            throws IOException, ServletException {
+        try {
+            // Create and set the entity manager
+            LazyHibernateEntityManagerProvider
+                .setCurrentEntityManager(
+                    entityManagerFactory
+                        .createEntityManager());
+
+            // Handle the request
+            filterChain.doFilter(servletRequest,
+                                 servletResponse);
+        } finally {
+            // Reset the entity manager
+            LazyHibernateEntityManagerProvider
+                    .setCurrentEntityManager(null);
+        }
+    }
+
+    @Override
+    public void destroy() {
+        entityManagerFactory = null;
+    }
+}]]></programlisting>
+
+                <para>
+                    You need to define the servlet filter in the
+                    <filename>web.xml</filename> deployment descriptor as follows:
+                </para>
+
+                <programlisting><?pocket-size 65% ?>&lt;filter&gt;
+    &lt;filter-name&gt;<emphasis role="bold">LazyHibernateServletFilter</emphasis>&lt;/filter-name&gt;
+    &lt;filter-class&gt;<emphasis role="bold">com.example.LazyHibernateServletFilter</emphasis>&lt;/filter-class&gt;
+&lt;/filter&gt;
+&lt;filter-mapping&gt;
+    &lt;filter-name&gt;<emphasis role="bold">LazyHibernateServletFilter</emphasis>&lt;/filter-name&gt;
+    &lt;url-pattern&gt;<emphasis role="bold">/*</emphasis>&lt;/url-pattern&gt;
+&lt;/filter-mapping&gt;</programlisting>
+
+                <para>
+                    The <literal>url-pattern</literal> must match the pattern for your
+                    Vaadin servlet.
+                </para>
+            </section>
         </section>
 
         <section xml:id="jpacontainer.hibernate.joins">
