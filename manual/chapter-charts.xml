@@ -1468,11 +1468,11 @@ axis.setMax(360);]]></programlisting>
                     of a polar chart with a polygonal shape rather than a circle. The data
                     and the X axis should be categorical to make the polygonal
                     interpolation meaningful. The sector is assumed to be full circle, so
-                    no angles for the pane need to be specified. Note the style settings
-                    done in the axis in the example below:
+                    no angles for the pane need to be specified. <phrase condition="web">Note the style settings
+                    done in the axis in the example below:</phrase>
                 </para>
 
-                <programlisting><?pocket-size 75% ?><![CDATA[Chart chart = new Chart(ChartType.LINE);
+                <programlisting condition="web"><?pocket-size 75% ?><![CDATA[Chart chart = new Chart(ChartType.LINE);
 ...
 
 // Modify the default configuration a bit
@@ -1504,6 +1504,101 @@ yaxis.setTickInterval(10);
 yaxis.getLabels().setStep(1);
 conf.addyAxis(yaxis);]]></programlisting>
 
+            </section>
+        </section>
+
+        <section xml:id="charts.charttypes.funnel">
+            <title>Funnel Charts</title>
+
+            <para>
+                Funnel charts are typically used to visualize stages in a sales processes,
+                and for other purposes to visualize subsets of diminishing size. A funnel
+                chart has layers much like a stacked column, but has a funnel shape. The
+                top of the funnel has width of the drawing area of the chart, and
+                dinimishes in size down to a neck, and then continues as a column to the
+                bottom.
+            </para>
+
+            <figure xml:id="figure.charts.charttypes.funnel">
+                <title>Funnel Charts</title>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata scale="80" smallscale="75%" align="center" fileref="img/charts/charts-funnel.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+
+            <para>
+                Funnel charts have chart type <parameter>FUNNEL</parameter>.
+            </para>
+
+            <para>
+                The labels of the funnel blocks are by default placed on the right side of
+                the blocks, together with a connector. You can configure their style in
+                the plot options<phrase condition="web">, as is done in the following example</phrase>.
+            </para>
+
+            <programlisting condition="web"><?pocket-size 75% ?><![CDATA[Chart chart = new Chart(ChartType.FUNNEL);
+chart.setWidth("500px");
+chart.setHeight("350px");
+        
+// Modify the default configuration a bit
+Configuration conf = chart.getConfiguration();
+conf.setTitle("Monster Utilization");
+conf.getLegend().setEnabled(false);
+        
+// Give more room for the labels
+conf.getChart().setSpacingRight(120);
+
+// Configure the funnel neck shape 
+PlotOptionsFunnel options = new PlotOptionsFunnel();
+options.setNeckHeightPercentage(20);
+options.setNeckWidthPercentage(20);
+
+// Style the data labels
+Labels dataLabels = new Labels();
+dataLabels.setFormat("<b>{point.name}</b> ({point.y:,.0f})");
+dataLabels.setSoftConnector(false);
+dataLabels.setColor(SolidColor.BLACK);
+options.setDataLabels(dataLabels);
+      
+conf.setPlotOptions(options);
+
+// Create the range series
+DataSeries series = new DataSeries();
+series.add(new DataSeriesItem("Monsters Met", 340));
+series.add(new DataSeriesItem("Engaged", 235));
+series.add(new DataSeriesItem("Killed", 187));
+series.add(new DataSeriesItem("Tinned", 70));
+series.add(new DataSeriesItem("Eaten", 55));
+conf.addSeries(series);]]></programlisting>
+
+            <section xml:id="charts.charttypes.funnel.plotoptions" condition="web">
+                <title>Plot Options</title>
+
+                <para>
+                    The chart-specific options of a funnel chart are configured with a
+                    <classname>PlotOptionsFunnel</classname>. It extends the generic
+                    <classname>AbstractLinePlotOptions</classname> and has the following
+                    chart type specific properties:
+                </para>
+
+                <variablelist>
+                    <varlistentry>
+                        <term><parameter>neckHeight</parameter> or <parameter>neckHeightPercentage</parameter></term>
+                        <listitem>
+                            Height of the neck part of the funnel either as pixels or as
+                            percentage of the entire funnel height.
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><parameter>neckWidth</parameter> or <parameter>neckWidthPercentage</parameter></term>
+                        <listitem>
+                            Width of the neck part of the funnel either as pixels or as
+                            percentage of the top of the funnel.
+                        </listitem>
+                    </varlistentry>
+                </variablelist>
             </section>
         </section>
     </section>
