@@ -612,6 +612,218 @@ conf.addSeries(series2);]]></programlisting>
             </para>
         </section>
 
+        <section xml:id="charts.charttypes.errorbar">
+            <title>Error Bars</title>
+
+            <para>
+                An error bars visualize errors, or high and low values, in statistical
+                data. They typically represent high and low values in data or a multitude
+                of standard deviation, a percentile, or a quantile. The high and low
+                values are represented as horizontal lines, or "whiskers", connected by a
+                vertical stem.
+            </para>
+
+            <para>
+                While error bars technically are a chart type
+                (<literal>ChartType.ERRORBAR</literal>), you normally use them together
+                with some primary chart type, such as a scatter or column chart.
+            </para>
+
+            <figure xml:id="figure.charts.charttypes.errorbar">
+                <title>Error Bars in a Scatter Chart</title>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata scale="60" smallscale="80%" align="center" fileref="img/charts/charts-errorbar.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+
+            <para>
+                To display the error bars for data points, you need to have a separate
+                data series for the low and high values. The data series needs to use the
+                <classname>PlotOptionsErrorBar</classname> plot options type.
+            </para>
+
+            <programlisting><?pocket-size 70% ?><![CDATA[// Create a chart of some primary type
+Chart chart = new Chart(ChartType.SCATTER);
+chart.setWidth("600px");
+chart.setHeight("400px");
+
+// Modify the default configuration a bit
+Configuration conf = chart.getConfiguration();
+conf.setTitle("Average Temperatures in Turku");
+conf.getLegend().setEnabled(false);
+
+// The primary data series
+ListSeries averages = new ListSeries(
+    -6, -6.5, -4, 3, 9, 14, 17, 16, 11, 6, 2, -2.5);
+
+// Error bar data series with low and high values
+DataSeries errors = new DataSeries();
+errors.add(new DataSeriesItem(0,  -9, -3));
+errors.add(new DataSeriesItem(1, -10, -3));
+errors.add(new DataSeriesItem(2,  -8,  1));
+...
+
+// Configure the stem and whiskers in error bars 
+PlotOptionsErrorBar barOptions = new PlotOptionsErrorBar();
+barOptions.setStemColor(SolidColor.GREY);
+barOptions.setStemWidth(2);
+barOptions.setStemDashStyle(DashStyle.DASH);
+barOptions.setWhiskerColor(SolidColor.BROWN);
+barOptions.setWhiskerLength(80); // 80% of category width
+barOptions.setWhiskerWidth(2); // Pixels
+errors.setPlotOptions(barOptions);
+
+// The errors should be drawn lower
+conf.addSeries(errors);
+conf.addSeries(averages);]]></programlisting>
+
+            <para>
+                Note that you should add the error bar series first, to have it rendered
+                lower in the chart.
+            </para>
+
+            <section xml:id="charts.charttypes.errorbar.plotoptions">
+                <title>Plot Options</title>
+
+                <para>
+                    Plot options for error bar charts have type
+                    <classname>PlotOptionsErrorBar</classname>. It has the following
+                    chart-specific plot option properties:
+                </para>
+
+                <variablelist>
+                    <varlistentry>
+                        <term><parameter>whiskerColor</parameter>, <parameter>whiskerWidth</parameter>, and <parameter>whiskerLength</parameter></term>
+                        <listitem>
+                            <para>
+                                The color, width (vertical thickness), and length of the
+                                horizontal "whiskers" that indicate high and low values.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><parameter>stemColor</parameter>, <parameter>stemWidth</parameter>, and <parameter>stemDashStyle</parameter></term>
+                        <listitem>
+                            <para>
+                                The color, width (thickness), and line style of the
+                                vertical "stems" that connect the whiskers. In box plot
+                                charts, which also have stems, they extend from the
+                                quadrintile box.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                </variablelist>
+            </section>
+        </section>
+
+        <section xml:id="charts.charttypes.boxplot">
+            <title>Box Plot Charts</title>
+
+            <para>
+                Box plot charts display the distribution of statistical variables. A data
+                point has a median, represented with a horizontal line, upper and lower
+                quartiles, represented by a box, and a low and high value, represented
+                with T-shaped "whiskers". The exact semantics of the box symbols are up to
+                you.
+            </para>
+
+            <para>
+                Box plot chart is closely related to the error bar chart described in
+                <xref linkend="charts.charttypes.errorbar"/>, sharing the box and whisker
+                elements.
+            </para>
+
+            <figure xml:id="figure.charts.charttypes.boxplot">
+                <title>Box Plot Chart</title>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata scale="60" smallscale="80%" align="center" fileref="img/charts/charts-boxplot.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+
+            <para>
+                The chart type for box plot charts is
+                <literal>ChartType.BOXPLOT</literal>. You normally have just one data
+                series, so it is meaningful to disable the legend.
+            </para>
+
+            <programlisting><?pocket-size 70% ?><![CDATA[Chart chart = new Chart(ChartType.BOXPLOT);
+chart.setWidth("400px");
+chart.setHeight("300px");
+
+// Modify the default configuration a bit
+Configuration conf = chart.getConfiguration();
+conf.setTitle("Orienteering Split Times");
+conf.getLegend().setEnabled(false);]]></programlisting>
+
+            <section xml:id="charts.charttypes.boxplot.plotoptions">
+                <title>Plot Options</title>
+
+                <para>
+                    The plot options for box plots have type
+                    <classname>PlotOptionsBoxPlot</classname>, which extends the slightly
+                    more generic <classname>PlotOptionsErrorBar</classname>. They have the
+                    following plot option properties:
+                </para>
+
+                <variablelist>
+                    <varlistentry>
+                        <term><parameter>medianColor</parameter>, <parameter>medianWidth</parameter></term>
+                        <listitem>
+                            <para>
+                                Color and width (vertical thickness) of the horizontal
+                                median indicator line.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                </variablelist>
+
+                <para>
+                    For example:
+                </para>
+
+                <programlisting><?pocket-size 70% ?><![CDATA[// Set median line color and thickness
+PlotOptionsBoxPlot plotOptions = new PlotOptionsBoxPlot();
+plotOptions.setMedianColor(SolidColor.BLUE);
+plotOptions.setMedianWidth(3);
+conf.setPlotOptions(plotOptions);]]></programlisting>
+            </section>
+
+            <section xml:id="charts.charttypes.boxplot.datamodel">
+                <title>Data Model</title>
+
+                <para>
+                    As the data points in box plots have five different values instead of
+                    the usual one, they require using a special
+                    <classname>BoxPlotItem</classname>. You can give the different values
+                    with the setters, or all at once in the constructor.
+                </para>
+
+                <programlisting><?pocket-size 70% ?><![CDATA[// Orienteering control point times for runners
+double data[][] = orienteeringdata(); 
+
+DataSeries series = new DataSeries();
+for (double cpointtimes[]: data) {
+    StatAnalysis analysis = new StatAnalysis(cpointtimes);
+    series.add(new BoxPlotItem(analysis.low(),
+                               analysis.firstQuartile(),
+                               analysis.median(),
+                               analysis.thirdQuartile(),
+                               analysis.high()));
+}
+conf.setSeries(series);]]></programlisting>
+
+                <para>
+                    If the "low" and "high" attributes represent an even smaller quantile,
+                    or a larger multiple of standard deviation, you can have outliers. You
+                    can plot them with a separate data series, with 
+                </para>
+            </section>
+        </section>
+
         <section xml:id="charts.charttypes.scatter">
             <title>Scatter Charts</title>
 
@@ -767,6 +979,115 @@ marker.setSymbol(new MarkerSymbolUrl(url));]]></programlisting>
                     symbols.
                 </para>
             </section>
+        </section>
+
+        <section xml:id="charts.charttypes.bubble">
+            <title>Bubble Charts</title>
+
+            <para>
+                Bubble charts are a special type of scatter charts for representing
+                three-dimensional data points with different point sizes. We demonstrated
+                the same possibility with scatter charts in <xref
+                linkend="charts.charttypes.scatter"/>, but the bubble charts make it
+                easier to define the size of a point by its third (Z) dimension, instead
+                of the radius property. The bubble size is scaled automatically, just like
+                for other dimensions. The default point style is also more bubbly.
+            </para>
+
+            <figure xml:id="figure.charts.charttypes.bubble">
+                <title>Bubble Chart</title>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata scale="60" smallscale="85%" align="center" fileref="img/charts/charts-bubble.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+
+            <para>
+                The chart type of a bubble chart is
+                <parameter>ChartType.BUBBLE</parameter>. Its options can be configured in
+                a <classname>PlotOptionsBubble</classname> object, which has a single
+                chart-specific property, <parameter>displayNegative</parameter>, which
+                controls whether bubbles with negative values are displayed at all. More
+                typically, you want to configure the bubble
+                <parameter>marker</parameter>. The bubble tooltip is configured in the
+                basic configuration. The Z coordinate value is available in the formatter
+                JavaScript with <literal>this.point.z</literal> reference.
+            </para>
+
+            <para>
+                The bubble radius is scaled linearly between a minimum and maximum
+                radius. If you would rather scale by the area of the bubble, you can
+                approximate that by taking square root of the Z values.
+            </para>
+
+            <para condition="web">
+                In the following example, we overlay a bubble chart over a world map
+                background. We customize the bubbles to be more round with spherical color
+                gradient. Note that square root is taken of the Z coordinate to 
+            </para>
+
+            <programlisting condition="web"><?pocket-size 65% ?><![CDATA[// Create a bubble chart 
+Chart chart = new Chart(ChartType.BUBBLE);
+chart.setWidth("640px"); chart.setHeight("350px");
+        
+// Modify the default configuration a bit
+Configuration conf = chart.getConfiguration();
+conf.setTitle("Champagne Consumption by Country");
+conf.getLegend().setEnabled(false); // Disable legend
+conf.getTooltip().setFormatter("this.point.name + ': ' + " +
+  "Math.round(100*(this.point.z * this.point.z))/100.0 + " +
+  "' M bottles'");
+        
+// World map as background
+String url = VaadinServlet.getCurrent().getServletContext()
+    .getContextPath() + "/VAADIN/themes/mytheme/img/map.png";
+conf.getChart().setPlotBackgroundImage(url);
+
+// Show more bubbly bubbles with spherical color gradient
+PlotOptionsBubble plotOptions = new PlotOptionsBubble();
+Marker marker = new Marker();
+GradientColor color = GradientColor.createRadial(0.4, 0.3, 0.7);
+color.addColorStop(0.0, new SolidColor(255, 255, 255, 0.5));
+color.addColorStop(1.0, new SolidColor(170, 70, 67, 0.5));
+marker.setFillColor(color);
+plotOptions.setMarker(marker);
+conf.setPlotOptions(plotOptions);
+        
+// Source: CIVC - Les expeditions de vins de Champagne en 2011
+DataSeries series = new DataSeries("Countries");
+Object data[][] = {
+        {"France",         181.6},
+        {"United Kingdom",  34.53},
+        {"United States",   19.37},
+        ...
+};
+for (Object[] country: data) {
+    String name = (String) country[0];
+    double amount = (Double) country[1];
+    Coordinate pos = getCountryCoordinates(name); 
+
+    DataSeriesItem3d item = new DataSeriesItem3d();
+    item.setX(pos.longitude * Math.cos(pos.latitude/2.0 *
+                                       (Math.PI/160)));
+    item.setY(pos.latitude * 1.2);
+    item.setZ(Math.sqrt(amount));
+    item.setName(name);
+    series.add(item);
+}
+conf.addSeries(series);
+        
+// Set the category labels on the axis correspondingly
+XAxis xaxis = new XAxis();
+xaxis.setExtremes(-180, 180);
+...
+conf.addxAxis(xaxis);
+
+// Set the Y axis title
+YAxis yaxis = new YAxis();
+yaxis.setExtremes(-90, 90);
+...
+conf.addyAxis(yaxis);]]></programlisting>
         </section>
 
         <section xml:id="charts.charttypes.pie">
