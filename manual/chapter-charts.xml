@@ -1601,6 +1601,142 @@ conf.addSeries(series);]]></programlisting>
                 </variablelist>
             </section>
         </section>
+
+        <section xml:id="charts.charttypes.waterfall">
+            <title>Waterfall Charts</title>
+
+            <para>
+                Waterfall charts are used for visualizing level changes from an initial
+                level to a final level through a number of changes in the level. The
+                changes are given as delta values, and you can have a number of
+                intermediate totals, which are calculated automatically.
+            </para>
+
+            <figure xml:id="figure.charts.charttypes.waterfall">
+                <title>Waterfall Charts</title>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata scale="80" smallscale="80%" align="center" fileref="img/charts/charts-waterfall.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+
+            <para>
+                Waterfall charts have chart type <literal>WATERFALL</literal>. <phrase condition="web">For
+                example:</phrase>
+            </para>
+
+            <programlisting condition="web"><?pocket-size 75% ?><![CDATA[Chart chart = new Chart(ChartType.WATERFALL);
+chart.setWidth("500px");
+chart.setHeight("350px");
+
+// Modify the default configuration a bit
+Configuration conf = chart.getConfiguration();
+conf.setTitle("Changes in Reindeer Population in 2011");
+conf.getLegend().setEnabled(false);
+
+// Configure X axis
+XAxis xaxis = new XAxis();
+xaxis.setCategories("Start", "Predators", "Slaughter",
+    "Reproduction", "End");
+conf.addxAxis(xaxis);
+
+// Configure Y axis
+YAxis yaxis = new YAxis();
+yaxis.setTitle("Population (thousands)");
+conf.addyAxis(yaxis);
+...]]></programlisting>
+
+            <para condition="web">
+                The example continues in the following subsections.
+            </para>
+
+            <section xml:id="charts.charttypes.waterfall.plotoptions" condition="web">
+                <title>Plot Options</title>
+
+                <para>
+                    Waterfall charts have plot options type
+                    <classname>PlotOptionsWaterfall</classname>, which extends the more
+                    general options defined in
+                    <classname>PlotOptionsColumn</classname>. It has the following chart
+                    type specific properties:
+                </para>
+
+                <variablelist>
+                    <varlistentry>
+                        <term><parameter>upColor</parameter></term>
+                        <listitem>
+                            Color for the positive values. For negative values, the
+                            <literal>negativeColor</literal> defined in
+                            <classname>PlotOptionsColumn</classname> is used.
+                        </listitem>
+                    </varlistentry>
+                </variablelist>
+
+                <para>
+                    In the following, we define the colors, as well as the style and
+                    placement of the labels for the columns:
+                </para>
+
+                <programlisting condition="web"><?pocket-size 75% ?><![CDATA[// Define the colors
+final Color balanceColor = SolidColor.BLACK;
+final Color positiveColor = SolidColor.BLUE;
+final Color negativeColor = SolidColor.RED;
+
+// Configure the colors 
+PlotOptionsWaterfall options = new PlotOptionsWaterfall();
+options.setUpColor(positiveColor);
+options.setNegativeColor(negativeColor);
+
+// Configure the labels
+Labels labels = new Labels(true);
+labels.setVerticalAlign(VerticalAlign.TOP);
+labels.setY(-20);
+labels.setFormatter("Math.floor(this.y/1000) + 'k'");
+Style style = new Style();
+style.setColor(SolidColor.BLACK);
+style.setFontWeight(FontWeight.BOLD);
+labels.setStyle(style);
+options.setDataLabels(labels);
+options.setPointPadding(0);
+conf.setPlotOptions(options);]]></programlisting>
+            </section>
+
+            <section xml:id="charts.charttypes.waterfall.datamodel" condition="web">
+                <title>Data Series</title>
+
+                <para>
+                    The data series for waterfall charts consists of changes (deltas)
+                    starting from an initial value and one or more cumulative sums. There
+                    should be at least a final sum, and optionally intermediate sums. The
+                    sums are represented as <classname>WaterFallSum</classname> data
+                    items, and no value is needed for them as they are calculated
+                    automatically. For intermediate sums, you should set the
+                    <parameter>intermediate</parameter> property to
+                    <literal>true</literal>.
+                </para>
+
+                <programlisting condition="web"><?pocket-size 75% ?><![CDATA[// The data
+DataSeries series = new DataSeries();
+
+// The beginning balance
+DataSeriesItem start = new DataSeriesItem("Start", 306503);
+start.setColor(balanceColor);
+series.add(start);
+
+// Deltas
+series.add(new DataSeriesItem("Predators", -3330));
+series.add(new DataSeriesItem("Slaughter", -103332));
+series.add(new DataSeriesItem("Reproduction", +104052));
+
+WaterFallSum end = new WaterFallSum("End");
+end.setColor(balanceColor);
+end.setIntermediate(false); // Not intermediate (default)
+series.add(end);
+
+conf.addSeries(series);]]></programlisting>
+            </section>
+        </section>
     </section>
 
     <section xml:id="charts.configuration">
