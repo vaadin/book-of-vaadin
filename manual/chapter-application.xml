@@ -2087,8 +2087,9 @@ main.addListener(new Window.CloseListener(){
 						<para>
 							This is the standard web application descriptor that defines
 							how the application is organized. You can refer to any Java
-							book about the contents of this file. It is not needed with
-							Servlet API 3.0.
+							book about the contents of this file. It is not needed if you
+							define the servlet with <literal>@WebServlet</literal>
+							annotation in Servlet API 3.0.
 						</para>
 					</listitem>
 				</varlistentry>
@@ -2206,6 +2207,26 @@ main.addListener(new Window.CloseListener(){
                 some purposes, you may need to use a custom servlet class. The class name
                 must include the full package path.
             </para>
+
+			<section xml:id="application.environment.web-xml.servlet">
+				<title>Servlet API Version</title>
+
+                <para>
+                    The descriptor example given above was for Servlet 2.4. For a later
+                    version, such as Servlet 3.0, you should use:
+                </para>
+
+                <programlisting><?pocket-size 75% ?>&lt;web-app
+  id="WebApp_ID" version="<emphasis role="bold">3.0</emphasis>"
+  xmlns="http://java.sun.com/xml/ns/j2ee" 
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+  xsi:schemaLocation="<emphasis role="bold">http://java.sun.com/xml/ns/javaee
+      http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd</emphasis>"&gt;</programlisting>
+
+                <para>
+                    You may find Servlet 3.0 support useful for at least server push.
+                </para>
+            </section>
 
 			<section xml:id="application.environment.web-xml.widgetset">
 				<title>Widget Set</title>
@@ -2438,6 +2459,30 @@ main.addListener(new Window.CloseListener(){
 
 			</section>
 
+            <section xml:id="application.environment.parameters.push">
+                <title>Push Mode</title>
+
+                <para>
+                    To enable server push, as described in <xref
+                    linkend="advanced.push"/>, you need to define the push mode in the
+                    descriptor. The <literal>automatic</literal> mode pushes changes to
+                    the browser automatically after <emphasis>access()</emphasis>
+                    finishes. With <literal>manual</literal> mode, you need to do the push
+                    explicitly with <methodname>push()</methodname>. If you use a Servlet
+                    3.0 compatible server, you also want to enable asynchronous processing
+                    with the <literal>async-supported</literal> parameter.
+                </para>
+
+                <programlisting>&lt;servlet&gt;
+  ...
+  &lt;init-param&gt;
+    &lt;param-name&gt;pushmode&lt;/param-name&gt;
+    &lt;param-value&gt;<emphasis role="bold">automatic</emphasis>&lt;/param-value&gt;
+  &lt;/init-param&gt;
+  &lt;async-supported&gt;<emphasis role="bold">true</emphasis>&lt;/async-supported&gt;</programlisting>
+
+            </section>
+
             <section xml:id="application.environment.parameters.xsrf">
                 <title>Cross-Site Request Forgery Prevention</title>
 
@@ -2459,6 +2504,7 @@ main.addListener(new Window.CloseListener(){
 </context-param>]]></programlisting>
 
             </section>
+
 		</section>
 
         <section xml:id="application.environment.configuration">

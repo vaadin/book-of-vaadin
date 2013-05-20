@@ -4123,6 +4123,161 @@ public class ThreadLocalApplication extends Application {
             <indexterm startref="term.advanced.global.threadlocal" class="endofrange"/>
         </section>
     </section>
+
+    <section xml:id="advanced.push">
+        <title>Server Push</title>
+
+        <para>
+            When you get updates to data shown in an UI from another thread in the server,
+            you often want to update the UI immediately, not when the client happens to
+            make the next server request. For this purpose, you can use <emphasis>server
+            push</emphasis> that sends the data to the client, the browser, immediately.
+        </para>
+
+        <para>
+            The server-client communication is done by default with a WebSocket connection
+            if the browser and the server support it. If not, Vaadin will fall back to a
+            method supported by the browser.
+        </para>
+
+        <section xml:id="advanced.push.servlet">
+            <title>Servlet Configuration</title>
+
+            <para>
+                To enable server push, you need to define the push mode in the deployment
+                descriptor. The <literal>automatic</literal> mode pushes changes to the
+                browser automatically after <emphasis>access()</emphasis> finishes. With
+                <literal>manual</literal> mode, you need to do the push explicitly with
+                <methodname>push()</methodname>. If you use a Servlet 3.0 compatible
+                server, you also want to enable asynchronous processing with the
+                <literal>async-supported</literal> parameter.
+            </para>
+
+            <programlisting><?pocket-size 70% ?>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;web-app
+  id="WebApp_ID" version="<emphasis role="bold">3.0</emphasis>"
+  xmlns="http://java.sun.com/xml/ns/j2ee" 
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+  xsi:schemaLocation="<emphasis role="bold">http://java.sun.com/xml/ns/javaee
+      http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd</emphasis>"&gt;
+  &lt;servlet&gt;
+    &lt;servlet-name&gt;Pushy UI&lt;/servlet-name&gt;
+    &lt;servlet-class&gt;com.vaadin.server.VaadinServlet&lt;/servlet-class&gt;
+
+    &lt;init-param&gt;
+        &lt;param-name&gt;UI&lt;/param-name&gt;
+        &lt;param-value&gt;com.example.my.PushyUI&lt;/param-value&gt;
+    &lt;/init-param&gt;
+
+    &lt;!-- Enable server push --&gt;
+    &lt;init-param&gt;
+      &lt;param-name&gt;pushmode&lt;/param-name&gt;
+      &lt;param-value&gt;<emphasis role="bold">automatic</emphasis>&lt;/param-value&gt;
+    &lt;/init-param&gt;
+    &lt;async-supported&gt;<emphasis role="bold">true</emphasis>&lt;/async-supported&gt;
+  &lt;/servlet&gt;
+&lt;/web-app&gt;</programlisting>
+        </section>
+
+        <section xml:id="advanced.push.running">
+            <title>Accessing UI from Another Thread</title>
+
+            <para>
+                Making changes to a <classname>UI</classname> object from another thread
+                and pushing them to the browser requires locking the user session when
+                accessing the UI. Otherwise, the UI update done from another thread could
+                conflict with a regular event-driven update and cause either data
+                corruption or deadlocks. Because of this, you may only access an UI using
+                the <methodname>access()</methodname> method, which locks the session to
+                prevent conflicts. It takes a <interfacename>Runnable</interfacename>
+                which it executes as its parameter.
+            </para>
+
+            <para>
+                For example:
+            </para>
+
+            <programlisting><![CDATA[ui.access(new Runnable() {
+    @Override
+    public void run() {
+        series.add(new DataSeriesItem(x, y));
+    }
+});]]></programlisting>
+
+            <para>
+                If the push mode is <literal>manual</literal>, you need to push the
+                pending UI changes to the browser explicitly with the
+                <methodname>push()</methodname> method.
+            </para>
+
+            <programlisting><![CDATA[ui.access(new Runnable() {
+    @Override
+    public void run() {
+        series.add(new DataSeriesItem(x, y));
+        ui.push();
+    }
+});]]></programlisting>
+
+
+            <para>
+                Below is a complete example of a case where we make UI changes from
+                another thread.
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[public class PushyUI extends UI {
+    Chart chart = new Chart(ChartType.AREASPLINE);
+    DataSeries series = new DataSeries();
+    
+    @Override
+    protected void init(VaadinRequest request) {
+        chart.setSizeFull();
+        setContent(chart);
+        
+        // Prepare the data display
+        Configuration conf = chart.getConfiguration();
+        conf.setTitle("Hot New Data");
+        conf.setSeries(series);
+        
+        // Start the data feed thread
+        new FeederThread().start();
+    }
+    
+    class FeederThread extends Thread {
+        int count = 0;
+        
+        @Override
+        public void run() {
+            try {
+                // Update the data for a while
+                while (count < 100) {
+                    Thread.sleep(1000);
+                
+                    access(new Runnable() {
+                        @Override
+                        public void run() {
+                            double y = Math.random();
+                            series.add(
+                                new DataSeriesItem(count++, y),
+                                true, count > 10);
+                        }
+                    });
+                }
+
+                // Inform that we have stopped running
+                access(new Runnable() {
+                    @Override
+                    public void run() {
+                        setContent(new Label("Done!"));
+                    }
+                });
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+}]]></programlisting>
+        </section>
+    </section>
 </chapter>
 
 <!-- Keep this comment at the end of the file
