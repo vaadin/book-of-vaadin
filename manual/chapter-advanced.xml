@@ -4140,18 +4140,89 @@ public class ThreadLocalApplication extends Application {
             method supported by the browser.
         </para>
 
-        <section xml:id="advanced.push.servlet">
-            <title>Servlet Configuration</title>
+        <section xml:id="advanced.push.installation">
+            <title>Installing the Push Support</title>
 
             <para>
-                To enable server push, you need to define the push mode in the deployment
-                descriptor. The <literal>automatic</literal> mode pushes changes to the
-                browser automatically after <emphasis>access()</emphasis> finishes. With
-                <literal>manual</literal> mode, you need to do the push explicitly with
-                <methodname>push()</methodname>. If you use a Servlet 3.0 compatible
-                server, you also want to enable asynchronous processing with the
-                <literal>async-supported</literal> parameter.
+                The server push support in Vaadin requires the separate Vaadin Push
+                library. It is included in the installation package as
+                <filename>vaadin-push.jar</filename>.
             </para>
+
+            <para>
+                With Ivy, you can get it with the following declaration in the
+                <filename>ivy.xml</filename>:
+            </para>
+
+            <programlisting><?pocket-size 70% ?><![CDATA[<dependency org="com.vaadin" name="vaadin-push"
+            rev="&vaadin.version;" conf="default->default"/>]]></programlisting>
+
+            <para>
+                In Maven, with the following dependency in the POM:
+            </para>
+
+            <programlisting><![CDATA[<dependency>
+    <groupId>com.vaadin</groupId>
+    <artifactId>vaadin-push</artifactId>
+    <version>${vaadin.version}</version>
+</dependency>]]></programlisting>
+        </section>
+
+        <section xml:id="advanced.push.enabling">
+            <title>Enabling Push for a UI</title>
+
+            <para>
+                To enable server push, you need to define the push mode either in the
+                deployment descriptor or with the <classname>@Push</classname> annotation
+                for the UI.
+            </para>
+
+            <section xml:id="advanced.push.enabling.pushmode">
+                <title>Push Modes</title>
+
+                <para>
+                    You can use server push in two modes: <literal>automatic</literal> and
+                    <literal>manual</literal>. The automatic mode pushes changes to the
+                    browser automatically after access() finishes. With the manual mode,
+                    you can do the push explicitly with <methodname>push()</methodname>,
+                    which allows more flexibility.
+                </para>
+            </section>
+
+            <section xml:id="advanced.push.enabling.pushmode">
+                <title>The <classname>@Push</classname> annotation</title>
+
+                <para>
+                    You can enable server push for a UI with the
+                    <classname>@Push</classname> annotation as follows. It defaults to
+                    automatic mode (<parameter>PushMode.AUTOMATIC</parameter>).
+                </para>
+
+                <programlisting><![CDATA[@Push
+public class PushyUI extends UI {]]></programlisting>
+
+                <para>
+                    To enable manual mode, you need to give the
+                    <parameter>PushMode.MANUAL</parameter> parameter as follows:
+                </para>
+
+                <programlisting><![CDATA[@Push(PushMode.MANUAL)
+public class PushyUI extends UI {]]></programlisting>
+            </section>
+
+            <section xml:id="advanced.push.enabling.servlet">
+                <title>Servlet Configuration</title>
+
+                <para>
+                    You can enable the server push and define the push mode also in the
+                    servlet configuration with the <parameter>pushmode</parameter>
+                    parameter for the servlet in the <filename>web.xml</filename>
+                    deployment descriptor. If you use a Servlet 3.0 compatible server, you
+                    also want to enable asynchronous processing with the
+                    <literal>async-supported</literal> parameter. Note the use of Servlet
+                    3.0 schema in the deployment descriptor.
+                </para>
+            </section>
 
             <programlisting><?pocket-size 70% ?>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;web-app
@@ -4162,11 +4233,12 @@ public class ThreadLocalApplication extends Application {
       http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd</emphasis>"&gt;
   &lt;servlet&gt;
     &lt;servlet-name&gt;Pushy UI&lt;/servlet-name&gt;
-    &lt;servlet-class&gt;com.vaadin.server.VaadinServlet&lt;/servlet-class&gt;
+    &lt;servlet-class&gt;
+        com.vaadin.server.VaadinServlet&lt;/servlet-class&gt;
 
     &lt;init-param&gt;
         &lt;param-name&gt;UI&lt;/param-name&gt;
-        &lt;param-value&gt;com.example.my.PushyUI&lt;/param-value&gt;
+        &lt;param-value&gt;<emphasis role="bold">com.example.my.PushyUI</emphasis>&lt;/param-value&gt;
     &lt;/init-param&gt;
 
     &lt;!-- Enable server push --&gt;
@@ -4224,6 +4296,7 @@ public class ThreadLocalApplication extends Application {
                 another thread.
             </para>
 
+            <book-example id="advanced.push.simple" style="float: right"></book-example>
             <programlisting><?pocket-size 65% ?><![CDATA[public class PushyUI extends UI {
     Chart chart = new Chart(ChartType.AREASPLINE);
     DataSeries series = new DataSeries();
@@ -4276,6 +4349,144 @@ public class ThreadLocalApplication extends Application {
         }
     }
 }]]></programlisting>
+
+            <para>
+                When sharing data between UIs or user sessions, you need to consider the
+                message-passing mechanism more carefully, as explained next.
+            </para>
+        </section>
+
+        <section xml:id="advanced.push.pusharound">
+            <title>Broadcasting to Other Users</title>
+
+            <para>
+                Broadcasting messages to be pushed to UIs in other user sessions requires
+                having some sort of message-passing mechanism that sends the messages to
+                all UIs that register as recipients. As processing server requests for
+                different UIs is done concurrently in different threads of the application
+                server, locking the threads properly is very important to avoid deadlock
+                situations.
+            </para>
+
+            <section xml:id="advanced.push.pusharound.broadcaster">
+                <title>The Broadcaster</title>
+
+                <para>
+                    The standard pattern for sending messages to other users is to use a
+                    <emphasis>broadcaster</emphasis> singleton that registers the UIs and
+                    broadcasts messages to them safely. To avoid deadlocks, it is
+                    recommended that the messages should be sent through a message queue
+                    in a separate thread. Using a Java
+                    <classname>ExecutorService</classname> running in a single thread is
+                    usually the easiest and safest way.
+                </para>
+
+                <book-example id="advanced.push.pusharound" style="float: right"></book-example>
+                <programlisting><?pocket-size 65% ?><![CDATA[public class Broadcaster implements Serializable {
+    static ExecutorService executorService =
+        Executors.newSingleThreadExecutor();
+
+    public interface BroadcastListener {
+        void receiveBroadcast(String message);
+    }
+    
+    private static LinkedList<BroadcastListener> listeners =
+        new LinkedList<BroadcastListener>();
+    
+    public static synchronized void register(
+            BroadcastListener listener) {
+        listeners.add(listener);
+    }
+    
+    public static synchronized void unregister(
+            BroadcastListener listener) {
+        listeners.remove(listener);
+    }
+    
+    public static synchronized void broadcast(
+            final String message) {
+        for (final BroadcastListener listener: listeners)
+            executorService.execute(new Runnable() {
+                @Override
+                public void run() {
+                    listener.receiveBroadcast(message);
+                }
+            });
+    }
+}]]></programlisting>
+            </section>
+
+            <section xml:id="advanced.push.pusharound.receiving">
+                <title>Receiving Broadcasts</title>
+
+                <para>
+                    The receivers need to implement the receiver interface and register to
+                    the broadcaster to receive the broadcasts. A listener should be
+                    unregistered when the UI expires. When updating the UI in a receiver,
+                    it should be done safely as described earlier, by executing the update
+                    through the <methodname>access()</methodname> method of the UI.
+                </para>
+
+                <book-example id="advanced.push.pusharound" style="float: right"></book-example>
+                <programlisting><?pocket-size 70% ?><![CDATA[@Push
+public class PushAroundUI extends UI
+       implements Broadcaster.BroadcastListener {
+    
+    VerticalLayout messages = new VerticalLayout();
+
+    @Override
+    protected void init(VaadinRequest request) {
+        ... build the UI ...
+        
+        // Register to receive broadcasts
+        Broadcaster.register(this);
+    }
+
+    // Must also unregister when the UI expires    
+    @Override
+    public void detach() {
+        Broadcaster.unregister(this);
+        super.detach();
+    }
+
+    @Override
+    public void receiveBroadcast(final String message) {
+        // Must lock the session to execute logic safely
+        access(new Runnable() {
+            @Override
+            public void run() {
+                // Show it somehow
+                messages.addComponent(new Label(message));
+            }
+        });
+    }
+}]]></programlisting>
+            </section>
+
+            <section xml:id="advanced.push.pusharound.sending">
+                <title>Sending Broadcasts</title>
+
+                <para>
+                    To send broadcasts with a broadcaster singleton, such as the one
+                    described above, you would only need to call the
+                    <methodname>broadcast()</methodname> method as follows.
+                </para>
+
+                <book-example id="advanced.push.pusharound" style="float: right"></book-example>
+                <programlisting><?pocket-size 75% ?><![CDATA[final TextField input = new TextField();
+sendBar.addComponent(input);
+
+Button send = new Button("Send");
+send.addClickListener(new ClickListener() {
+    @Override
+    public void buttonClick(ClickEvent event) {
+        // Broadcast the message
+        Broadcaster.broadcast(input.getValue());
+        
+        input.setValue("");
+    }
+});]]></programlisting>
+            </section>
         </section>
     </section>
 </chapter>
