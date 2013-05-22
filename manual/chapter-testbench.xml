@@ -3075,6 +3075,66 @@ public void testRemoteWebDriver() throws MalformedURLException {
             to be difficult to use or need modification to work.
         </para>
 
+        <section xml:id="testbench.known-issues.loginform">
+            <title>Testing the LoginForm</title>
+
+            <para>
+                Please note that, as of Vaadin 7, <classname>LoginForm</classname> has
+                been deprecated and should no longer be used. This section is here to
+                inform those still using Vaadin 6.x and testing with Vaadin TestBench.
+            </para>
+
+            <para>
+                Replaying interactions in the <classname>LoginForm</classname> component
+                is somewhat tricky because the identifier of the <literal>iframe</literal>
+                element changes every time the application is restarted, so it can not be
+                used for selecting it. The use of an iframe element means that recordings
+                have to select the target frame before fields can be correctly identified.
+            </para>
+
+            <section xml:id="testbench.known-issues.loginform.recorder">
+                <title>Selecting a Frame in the Recorder</title>
+
+                <para>
+                    Selecting the correct frame in the recorder can be done by modifying
+                    the <parameter>target</parameter> of the recorded
+                    <command>selectFrame</command> command. One way to select the correct
+                    frame is to specify its 0-based index in the selector, such as
+                    "<literal>index=2</literal>".
+                </para>
+
+                <para>
+                    Another way is to specify an XPath selector for the
+                    <literal>iframe</literal>. In this case it helps if you can specify a
+                    debug ID for the <classname>LoginForm</classname> component. In the
+                    following XPath selector example, the debug of of the
+                    <classname>LoginForm</classname> debug ID is "login":
+                </para>
+
+                <programlisting><![CDATA[xpath=//id("login")//iframe]]></programlisting>
+            </section>
+
+            <section xml:id="testbench.known-issues.loginform.junit">
+                <title>Selecting a Frame in JUnit Code</title>
+
+                <para>
+                    Selecting the correct frame in JUnit code by index number can be done
+                    as follows:
+                </para>
+
+                <programlisting><![CDATA[// Select frame by its 0-based index
+getDriver().switchTo().frame(2);]]></programlisting>
+
+                <para>
+                    Or by the XPath with:
+                </para>
+
+                <programlisting><![CDATA[WebElement frame = getDriver().
+    findElement(By.xpath("//id('login')//iframe"));
+getDriver().switchTo().frame(frame);]]></programlisting>
+            </section>
+        </section>
+
         <section xml:id="testbench.known-issues.asserttextpresent">
             <title>Using <methodname>assertTextPresent</methodname> and <methodname>assertTextNotPresent</methodname></title>
 
