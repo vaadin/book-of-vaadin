@@ -2673,7 +2673,7 @@ tooltip_firefox_12.0_2.png</screen>
     </section>
 
     <section xml:id="testbench.grid">
-        <title>Running Tests in an Distributed Environment</title>
+        <title>Running Tests in a Distributed Environment</title>
 
         <para>
             A distributed test environment consists of a grid hub and a number of test
@@ -3064,6 +3064,99 @@ public void testRemoteWebDriver() throws MalformedURLException {
                 and the <link
                 xlink:href="http://code.google.com/p/selenium/wiki/AndroidDriver">AndroidDriver</link>.
              </para>
+        </section>
+    </section>
+
+    <section xml:id="testbench.headless">
+        <title>Headless Testing</title>
+        
+        <para>
+            TestBench (3.1 and later) supports fully-featured headless testing with
+            PhantomJS (<link
+            xlink:href="http://phantomjs.org">http://phantomjs.org</link>), a headless
+            browser based on WebKit. It has fast native support for various web standards:
+            JavaScript, DOM handling, CSS selector, JSON, Canvas, and SVG.
+        </para>
+
+        <para>
+            Headless testing using PhantomJS allows for around 15% faster test execution
+            without having to start a graphical web browser, even when performing
+            screenshot-based testing! This also makes it possible to run full-scale
+            functional tests on the front-end directly on a build server, without the need
+            to install any web browsers.
+        </para>
+
+        <para>
+            It is usually best to use a graphical browser to develop the test cases, as it
+            is possible to see interactively what happens while the tests are being
+            executed.  Once the tests are working correctly in a graphical browser, you
+            can migrate them to run on the PhantomJS headless browser.
+        </para>
+            
+        <section xml:id="testbench.headless.running">
+            <title>Basic Setup for Running Headless Tests</title>
+            
+            <para>
+                The only set up required is to install the PhantomJS binary. Follow the
+                instructions for your operating system at <link
+                xlink:href="http://phantomjs.org/download.html">PhantomJS download
+                page</link>, and place the binary in the system path.
+            </para>
+                
+            <para>
+                The PhantomJSDriver dependency is already included in Vaadin TestBench.
+            </para>
+
+            <section xml:id="testbench.headless.running.createwebdriver">
+                <title>Creating a Headless WebDriver Instance</title>
+                
+                <para>
+                    Creating an instance of the <classname>PhantomJSDriver</classname> is just
+                    as easy as creating an instance of <classname>FirefoxDriver</classname>.
+                </para>
+                
+                <programlisting><?pocket-size 65% ?><![CDATA[setDriver(TestBench.createDriver(
+    new PhantomJSDriver(DesiredCapabilities.phantomjs())));]]></programlisting>
+
+                <para>
+                    Some tests may fail because of the small default window size in
+                    PhantomJS. Such tests are, for example, tests containing elements that
+                    pop up and might go off-screen when the window is small. To make them
+                    work better, specify a size for the window:
+                </para>
+
+                <programlisting><?pocket-size 75% ?><![CDATA[getDriver().manage().window().setSize(
+        new Dimension(1024, 768));]]></programlisting>
+        	
+                <para>
+                    Nothing else is needed to run tests headlessly.
+                </para>
+            </section>
+        </section>
+
+        <section xml:id="testbench.headless.grid">
+            <title>Running Headless Tests in a Distributed Environment</title>
+            
+            <para>
+                Running PhantomJS in a distributed grid is equally easy. First, install
+                PhantomJS in the nodes by following the instructions in <xref
+                linkend="testbench.headless.running"/>. Then, start PhantomJS using the
+                following command:
+            </para>
+            
+            <programlisting><?pocket-size 65% ?><![CDATA[phantomjs --webdriver=8080 \
+          --webdriver-selenium-grid-hub=http://127.0.0.1:4444]]></programlisting>
+        	
+            <para>
+                The above will start PhantomJS in the WebDriver mode and register it with
+                a grid hub running at <literal>127.0.0.1:4444</literal>. After this,
+                running tests in the grid is as easy as passing
+                <methodname>DesiredCapabilities.phantomjs()</methodname> to the
+                <literal>RemoteWebDriver</literal> constructor.
+            </para>
+
+            <programlisting><?pocket-size 75% ?><![CDATA[setDriver(new RemoteWebDriver(
+        DesiredCapabilities.phantomjs()));]]></programlisting>
         </section>
     </section>
 
