@@ -112,8 +112,8 @@ layout.addComponent(chart);]]></programlisting>
             <para>
                 Vaadin Charts is a commercial product licensed under the CVAL License
                 (Commercial Vaadin Add-On License). A license needs to be purchased for
-                all use, including web deployments as well as intranet use. The Vaadin
-                Charts license includes the license for Highcharts JS.
+                all use, including web deployments as well as intranet use. Using Vaadin
+                Charts does not require purchasing a separate Highcharts JS license.
             </para>
 
             <para>
@@ -128,9 +128,10 @@ layout.addComponent(chart);]]></programlisting>
         <title>Installing Vaadin Charts</title>
 
         <para>
-            Vaadin Charts can be installed either from an installation package, which you
-            can download from the Vaadin Directory, or as a Maven dependency. For detailed
-            instructions, please see <xref linkend="addons"/>.
+            Vaadin Charts is available for both Vaadin 7 and Vaadin 6. It can be installed
+            from an installation package, which you can download from the Vaadin
+            Directory, or as a Maven or Ivy dependency. For detailed instructions, please
+            see <xref linkend="addons"/>.
         </para>
 
         <para>
@@ -371,13 +372,29 @@ conf.addSeries(series2);]]></programlisting>
 
             <para>
                 The visual style and essentially any other chart configuration can be
-                defined in a <emphasis>theme</emphasis>. The theme is global in the
-                <classname>UI</classname> and can be set with the
-                <methodname>setTheme()</methodname> in the thread-local
-                <classname>ChartTheme</classname> singleton.
+                defined in a <emphasis>theme</emphasis>. All charts shown in a UI may have
+                only one theme, which can be set with <methodname>setTheme()</methodname>
+                in the <classname>ChartOptions</classname>.
             </para>
 
-            <programlisting><![CDATA[ChartTheme.get().setTheme(new SkiesTheme());]]></programlisting>
+            <para>
+                In Vaadin 7, the <classname>ChartOptions</classname> is a
+                <classname>UI</classname> extension that is created and referenced by
+                calling the <methodname>get()</methodname> as follows:
+            </para>
+
+            <programlisting><![CDATA[// Set Charts theme for the current UI
+ChartOptions.get().setTheme(new SkiesTheme());]]></programlisting>
+
+            <para>
+                In Vaadin 6, it is an invisible component that you need to create and add
+                to the window. There may be only one such component in the window and it
+                must be before any <classname>Chart</classname> component.
+            </para>
+
+            <programlisting><![CDATA[ChartOptions options = new ChartOptions();
+options.setTheme(new SkiesTheme());
+mainWindow.addComponent(options);]]></programlisting>
 
             <para>
                 The <classname>VaadinTheme</classname> is the default chart theme in
