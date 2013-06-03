@@ -4128,16 +4128,21 @@ public class ThreadLocalApplication extends Application {
         <title>Server Push</title>
 
         <para>
-            When you get updates to data shown in an UI from another thread in the server,
-            you often want to update the UI immediately, not when the client happens to
-            make the next server request. For this purpose, you can use <emphasis>server
-            push</emphasis> that sends the data to the client, the browser, immediately.
+            When you need to update a UI from another UI, possibly of another user, or
+            from a background thread running in the server, you usually want to have the
+            update show immediately, not when the browser happens to make the next server
+            request. For this purpose, you can use <emphasis>server push</emphasis> that
+            sends the data to the browser immediately. Push is based on a client-server
+            connection, usually a WebSocket connection, that the client establishes and
+            the server can then use to send updates to the client.
         </para>
 
         <para>
             The server-client communication is done by default with a WebSocket connection
             if the browser and the server support it. If not, Vaadin will fall back to a
-            method supported by the browser.
+            method supported by the browser. Vaadin Push uses the <link
+            xlink:href="https://github.com/Atmosphere/atmosphere">Atmosphere
+            library</link> for client-server communication.
         </para>
 
         <section xml:id="advanced.push.installation">
@@ -4149,23 +4154,48 @@ public class ThreadLocalApplication extends Application {
                 <filename>vaadin-push.jar</filename>.
             </para>
 
-            <para>
-                With Ivy, you can get it with the following declaration in the
-                <filename>ivy.xml</filename>:
-            </para>
+            <section xml:id="advanced.push.installation.ivy">
+                <title>Retrieving with Ivy</title>
 
-            <programlisting><?pocket-size 70% ?><![CDATA[<dependency org="com.vaadin" name="vaadin-push"
+                <para>
+                    With Ivy, you can get it with the following declaration in the
+                    <filename>ivy.xml</filename>:
+                </para>
+
+                <programlisting><?pocket-size 70% ?><![CDATA[<dependency org="com.vaadin" name="vaadin-push"
             rev="&vaadin.version;" conf="default->default"/>]]></programlisting>
 
-            <para>
-                In Maven, with the following dependency in the POM:
-            </para>
+                <para>
+                    In some servers, you may need to exlude a <literal>sl4j</literal>
+                    dependency as follows:
+                </para>
 
-            <programlisting><![CDATA[<dependency>
+                <programlisting><?pocket-size 70% ?><![CDATA[<dependency org="com.vaadin" name="vaadin-push"
+            rev="&vaadin.version;" conf="default->default">
+    <exclude org="org.slf4j" name="slf4j-api"/>
+</dependency>]]></programlisting>
+
+                <para>
+                    Pay note that the Atmosphere library is a bundle, so if you retrieve
+                    the libraries with Ant, for example, you need to retrieve
+                    <literal>type="jar,bundle"</literal>.
+                </para>
+            </section>
+
+            <section xml:id="advanced.push.installation.maven">
+                <title>Retrieving with Maven</title>
+
+                <para>
+                    In Maven, you can get the push library with the following dependency
+                    in the POM:
+                </para>
+
+                <programlisting><![CDATA[<dependency>
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-push</artifactId>
     <version>${vaadin.version}</version>
 </dependency>]]></programlisting>
+            </section>
         </section>
 
         <section xml:id="advanced.push.enabling">
