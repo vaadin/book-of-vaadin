@@ -568,12 +568,14 @@
                         </para>
 
                         <para>
-                            The included reference images were taken with Firefox on Mac
-                            OS X, so if you use another platform, they will fail. You will
-                            need to copy the error images to the reference screenshot
-                            folder and mask out the areas with the alpha channel as
-                            described in <xref
-                            linkend="testbench.screenshot.comparison"/>.
+                            The example is ignored by default with an
+                            <literal>@Ignore</literal> annotation, because the included
+                            images were taken with a specific browser on a specific
+                            platform, so if you use another environment, they will
+                            fail. If you enable the test, you will need to run the tests,
+                            copy the error images to the reference screenshot folder, and
+                            mask out the areas with the alpha channel, as described in
+                            <xref linkend="testbench.screenshot.comparison"/>.
                         </para>
                     </listitem>
                 </varlistentry>
@@ -605,7 +607,7 @@
                         <para>
                             Demonstrates how to test tooltips (<xref
                             linkend="testbench.development.tooltip"/>) and context
-                            menus. Uses debug IDs, XPath expressions, as well as CSS
+                            menus. Uses component IDs, XPath expressions, as well as CSS
                             selectors to find the elements to check.
                         </para>
                     </listitem>
@@ -845,34 +847,49 @@
         <title>Preparing an Application for Testing</title>
 
         <para>
-            Vaadin TestBench can usually test Vaadin applications as they are, especially
-            if just taking screenshots. However, assertions on HTML elements require a DOM
-            path to the element and this path is vulnerable to even small changes in the
-            DOM structure. They might change because of your layout or UI logic, or if a
-            new Vaadin version has some small changes. To make such problems less common,
-            you can use <emphasis>debug IDs</emphasis> to refer to components.
+            TestBench can usually be used for testing Vaadin applications as they are,
+            especially if just taking screenshots.
         </para>
 
-        <programlisting><?pocket-size 65% ?><![CDATA[public class ApplicationToBeTested extends Application {
-    public void init() { 
-        final Window main = new Window("Test window");
-        setMainWindow(main);
+        <para>
+            Depending on the selector type that you use later to select HTML elements,
+            they can be vulnerable to logically irrelevant changes in the HTML DOM or
+            component structure. The structure may change because of your layout or UI
+            logic, or if a new Vaadin version has significant changes.
+        </para>
+
+        <para>
+            To make UIs more robust for testing, you can set a unique <emphasis>component
+            ID</emphasis> for specific components with
+            <methodname>setId()</methodname>. You can then use it in Vaadin, XPath, or ID
+            selectors, as explained later in <xref
+            linkend="testbench.recorder.selectors"/>.
+        </para>
+
+        <programlisting><?pocket-size 65% ?><![CDATA[public class UIToBeTested extends UI {
+    @Override
+    protected void init(VaadinRequest request) {
+        final VerticalLayout content = new VerticalLayout();
+        setContent(content);
         
         // Create a button
         Button button = new Button("Push Me!");
         
-        // Optional: give the button a unique debug ID
-        button.setDebugId("main.button");
+        // Optional: give the button a unique ID
+        button.setId("main.button");
         
+        // Set the tooltip
+        button.setDescription("This is a tip");
+
         // Do something when the button is clicked
-        button.addListener(new ClickListener() {
+        button.addClickListener(new ClickListener() {
             @Override
             public void buttonClick(ClickEvent event) {
-                // This label will not have a set debug ID
-                main.addComponent(new Label("Thanks!"));
+                // This label will not have a set ID
+                content.addComponent(new Label("Thanks!"));
             }
         });
-        main.addComponent(button);
+        content.addComponent(button);
     }
 }]]></programlisting>
 
@@ -897,12 +914,18 @@
         <para>
             The button would be rendered as a HTML element: <literal>&lt;div
             id="main.button" ...&gt;...&lt;/div&gt;</literal>. The DOM element would then
-            be accessible from the HTML page with:
+            be accessible from the HTML page with a WebDriver call such as:
             <literal>driver.findElement(By.id="main.button")</literal>. For the label,
-            which doesn't have a debug ID, the path would be from the page root. A
-            recorded test case stub for the above application is given in <xref
+            which does not have an ID, the path would be from the page root. A recorded
+            test case stub for the above application is given in <xref
             linkend="testbench.development.stub"/>, which is further refined in this
             chapter.
+        </para>
+
+        <para>
+            As a similar method, you can add a unique CSS class name for a component to
+            enable using the CSS selector to select it. You can use the CSS class names
+            and IDs also in XPath selectors.
         </para>
 
         <!-- TODO: A description of different selectors would be needed (XPath, CSS, ...) -->
@@ -919,11 +942,12 @@
         <para>
             The most important role for using the Recorder is to identify all user
             interface elements that you want to test - you can do all other test logic by
-            coding. The elements are identified by a <emphasis>selector</emphasis>, which
-            usually use an HTML document path that selects the element. By default, the
-            Recorder records the paths using a Vaadin selector, where the root of the path
-            is the application element. The path can also be an XPath expression or a CSS
-            selector. It can use a debug ID that you can set in the application code.
+            coding. The elements are identified by a <emphasis>selector</emphasis> (or
+            locator), which selects an element on which tests are made. By default, the
+            Recorder records the paths using a <emphasis>Vaadin selector</emphasis>, where
+            the root of the path is the UI element and the path consists of widgets. The
+            path can also be an XPath or a CSS selector. It can use an ID that you set for
+            a component in the application code.
         </para>
 
         <para>
@@ -1050,8 +1074,10 @@
             </itemizedlist>
 
             <para>
-                While recording, you can insert various commands such as assertions or
-                take a screenshot by selecting the command from the Command list.
+                While recording, you can insert various commands, such as assertions, by
+                selecting the command from the Command list. You can also right-click on
+                an element in your UI and select an assertion command. Doing so will
+                automatically fill the asserted value in Recorder.
             </para>
 
             <para>
@@ -1065,15 +1091,15 @@
             <title>Selectors</title>
 
             <para>
-                The Recorder supports various <emphasis>selectors</emphasis>
-                that allow finding the HTML elements that are interacted upon and
-                asserted. By default, Recorder uses the <emphasis>Vaadin
-                selector</emphasis>, which finds the elements by an application
-                identifier, a possible debug ID, and a component hierarchy path.
+                The Recorder supports various <emphasis>selectors</emphasis> (or locators)
+                to find the HTML elements that are interacted upon and asserted. By
+                default, Recorder uses the <emphasis>Vaadin selector</emphasis>, which
+                finds the elements by a UI identifier, a possible component ID, and a
+                widget hierarchy path.
             </para>
 
             <para>
-                You can find elements by a plain XPath expression from the page root, an
+                You can find elements also by a plain XPath expression, an
                 element ID, CSS style class, etc. The selectors are exported with the
                 JUnit test cases as corresponding Vaadin or Selenium selector methods,
                 described in <xref linkend="testbench.development.selectors"/>.
@@ -1087,8 +1113,39 @@
                 <menuchoice><guimenu>Options</guimenu><guisubmenu>Options</guisubmenu><guimenuitem>Locator
                 Builders</guimenuitem></menuchoice> and dragging the selectors (or
                 locators) to a preferred order. Normally, the Vaadin selector should be at
-                top.
+                top of the list.
             </para>
+
+            <section xml:id="testbench.recorder.selectors.robustness">
+                <title>Selector Robustness</title>
+
+                <para>
+                    As mentioned in <xref linkend="testbench.preparing"/>, the selectors
+                    have differences in their robustness, which is important to avoid
+                    failed tests if there are irrelevant changes in the HTML DOM tree.
+                </para>
+
+                <para>
+                    The Vaadin selector (<literal>vaadin</literal> in Recorder and
+                    <methodname>By.vaadin()</methodname> in WebDriver) uses the logical
+                    widget hierarchy to find the HTML element to test, instead of the
+                    exact DOM structure. This makes it rather robust, though still
+                    vulnerable to irrelevant changes in the exact component hierarchy.
+                </para>
+
+                <para>
+                    The XPath selector can be highly vulnerable to changes in the DOM path
+                    if the path is given exactly from the body element of the page. It is,
+                    however, very flexible, and can be used in robust ways, for example,
+                    by selecting by HTML element and a CSS class name or an attribute
+                    value.
+                </para>
+
+                <para>
+                    You can likewise use a CSS selector to select specific components by
+                    CSS class in a robust way.
+                </para>
+            </section>
         </section>
 
         <section xml:id="testbench.recorder.playback">
@@ -1188,14 +1245,15 @@
             <title>Exporting Tests</title>
 
             <para>
-                Once you have are satisfied with a test case, you need to export it as a
+                Once you are satisfied with a test case, you need to export it as a
                 JUnit test case stub.
             </para>
 
             <para>
                 You can save a test by selecting
-                <menuchoice><guimenu>File</guimenu><guisubmenu>Export</guisubmenu><guimenuitem>JUnit
-                Test</guimenuitem></menuchoice>.
+                <menuchoice><guimenu>File</guimenu><guisubmenu>Export Test Case
+                As...</guisubmenu><guimenuitem>JUnit 4 (Vaadin
+                TestBench)</guimenuitem></menuchoice>.
             </para>
 
             <figure xml:id="figure.testbench.recorder.exporting">
@@ -1245,7 +1303,7 @@
             purpose of the recorder is to help identify the HTML DOM paths of the user
             interface elements that you want to interact with and use for assertions. Once
             you get the hang of coding tests, you should be able to do it without using
-            the Recorder. Working with debug IDs and using a browser debugger, such as
+            the Recorder. Working with component IDs and using a browser debugger, such as
             Firebug, is usually the easiest way to find out the DOM paths. You can also
             use the Recorder just to find the paths, and copy and paste them directly to
             your source code without going through the export hassle.
@@ -1278,6 +1336,7 @@
             <itemizedlist>
                 <listitem>Rename the package</listitem>
                 <listitem>Rename the class</listitem>
+                <listitem>Organize imports</listitem>
                 <listitem>Check the base URL</listitem>
                 <listitem>Clean up unnecessary code</listitem>
             </itemizedlist>
@@ -1288,22 +1347,17 @@
 
             <programlisting><?pocket-size 65% ?><![CDATA[package com.example.tests;
 
-import java.util.regex.Pattern;
-import java.util.concurrent.TimeUnit;
 import org.junit.*;
 import static org.junit.Assert.*;
-import static org.hamcrest.CoreMatchers.*;
-import org.openqa.selenium.*;
-import org.openqa.selenium.firefox.FirefoxDriver;
-import org.openqa.selenium.support.ui.Select;
+...
 import com.vaadin.testbench.By;
 import com.vaadin.testbench.TestBench;
 import com.vaadin.testbench.TestBenchTestCase;
+import com.vaadin.testbench.ScreenshotOnFailureRule;
 
-public class Testcase1 extends TestBenchTestCase {
-    private WebDriver driver;
-    private String baseUrl;
-    private StringBuffer verificationErrors = new StringBuffer();
+public class Testcase extends TestBenchTestCase {
+	private String baseUrl;
+	private StringBuffer verificationErrors = new StringBuffer();
     ...]]></programlisting>
 
             <para>
@@ -1327,7 +1381,7 @@ public class Testcase1 extends TestBenchTestCase {
 
                 <programlisting><?pocket-size 65% ?><![CDATA[    @Before
     public void setUp() throws Exception {
-        driver = TestBench.createDriver(new FirefoxDriver());
+        setDriver(TestBench.createDriver(new FirefoxDriver()));
         baseUrl = "http://localhost:8080/myapp";
     }]]></programlisting>
 
@@ -1353,18 +1407,24 @@ public class Testcase1 extends TestBenchTestCase {
                     hold of an HTML element to work with. The button has the
                     <literal>main.button</literal> ID, as we set that ID for the
                     <classname>Button</classname> object with the
-                    <methodname>setDebugId()</methodname> method in the application. The
+                    <methodname>setId()</methodname> method in the application. The
                     HTML element is represented as a <classname>WebElement</classname>
                     object.
                 </para>
 
                 <programlisting><?pocket-size 65% ?><![CDATA[@Test
-public void testCase1() throws Exception {
+public void testCase() throws Exception {
     driver.get(concatUrl(baseUrl, "/myapp"));
+
+    // Check the button caption
     assertEquals("Push Me!", driver.findElement(By.vaadin(
         "bookexamplestobetested::PID_Smain.button")).getText());
+
+    // Click the button
     driver.findElement(By.vaadin(
         "bookexamplestobetested::PID_Smain.button")).click();
+
+    // Check the result
     assertEquals("Thanks!", driver.findElement(By.vaadin(
         "bookexamplestobetested::/VVerticalLayout[0]/"+
         "ChildComponentContainer[1]/VLabel[0]")).getText());
@@ -1412,7 +1472,7 @@ public void testCase1() throws Exception {
                 The Selenium WebDriver API provides a number of different
                 <emphasis>selectors</emphasis> for finding HTML DOM elements. The
                 available selectors are defined as static methods in the
-                <classname>org.openqa.selenium.By</classname> class. They create and
+                <classname>com.vaadin.testbench.By</classname> class. They create and
                 return a <classname>By</classname> instance, which you can use for the
                 <methodname>findElement()</methodname> method in
                 <classname>WebDriver</classname>.
@@ -1431,8 +1491,8 @@ public void testCase1() throws Exception {
                 <para>
                     Selecting elements by their HTML element <literal>id</literal>
                     attribute is usually the easiest way to select elements. It requires
-                    that you use debug IDs, as described in <xref
-                    linkend="testbench.preparing"/>. The debug ID is used as is for the
+                    that you use component IDs, as described in <xref
+                    linkend="testbench.preparing"/>. The ID is used as is for the
                     <literal>id</literal> attribute of the top element of the
                     component. Selecting is done by the <methodname>By.id()</methodname>
                     selector.
@@ -1440,7 +1500,7 @@ public void testCase1() throws Exception {
 
                 <para>
                     For example, in the <filename>SimpleCalculatorITCase.java</filename>
-                    example we use the debug ID as follows to click on the calculator
+                    example, we use the component ID as follows to click on the calculator
                     buttons:
                 </para>
 
@@ -1458,7 +1518,6 @@ public void testOnePlusTwo() throws Exception {
     assertEquals("3.0", getDriver().findElement(
             By.id("display")).getText());
 }]]></programlisting>
-
 
                 <para>
                     The ID selectors are used extensively in the TestBench examples.
@@ -1507,16 +1566,18 @@ public void testOnePlusTwo() throws Exception {
                 </para>
 
                 <para>
-                    A reference to a debug ID is given with a <literal>PID_S</literal>
-                    suffix to the debug ID.
+                    A reference to a component ID is given with a <literal>PID_S</literal>
+                    suffix to the ID.
                 </para>
 
                 <para>
-                    For example:
+                    For example, if the ID is <literal>main.button</literal>, as it was
+                    set in the application example earlier, you could find and test it as
+                    follows:
                 </para>
 
         <programlisting><?pocket-size 75% ?><![CDATA[// Get the button's element.
-// Use the debug ID given with setDebugId().
+// Use the ID set with setId().
 WebElement button = driver.findElement(By.vaadin(
     "bookexamplestobetested::PID_Smain.button"));
 
@@ -1945,7 +2006,7 @@ public void testCase1() throws Exception {
     
     // Get the button's element.
     // (Actually the caption element inside the button.)
-    // Use the debug ID given with setDebugId().
+    // Use the component ID assigned with setId().
     WebElement button = driver.findElement(By.xpath(
         "//div[@id='main.button']/span/span"));
     
@@ -2043,9 +2104,9 @@ public void testCase1() throws Exception {
                 Let us assume that you have set the tooltip as follows:
             </para>
 
-            <programlisting><![CDATA[// Create a button with a debug ID
+            <programlisting><![CDATA[// Create a button with a component ID
 Button button = new Button("Push Me!");
-button.setDebugId("main.button");
+button.setId("main.button");
 
 // Set the tooltip        
 button.setDescription("This is a tip");]]></programlisting>
@@ -2064,7 +2125,7 @@ public void testTooltip() throws Exception {
     driver.get(appUrl);
     
     // Get the button's element.
-    // Use the debug ID given with setDebugId().
+    // Use the component ID given with setId().
     WebElement button = driver.findElement(By.xpath(
         "//div[@id='main.button']/span/span"));
     
@@ -3199,9 +3260,9 @@ public void testRemoteWebDriver() throws MalformedURLException {
                 <para>
                     Another way is to specify an XPath selector for the
                     <literal>iframe</literal>. In this case it helps if you can specify a
-                    debug ID for the <classname>LoginForm</classname> component. In the
-                    following XPath selector example, the debug of of the
-                    <classname>LoginForm</classname> debug ID is "login":
+                    component ID for the <classname>LoginForm</classname> component. In
+                    the following XPath selector example, the component ID of the
+                    <classname>LoginForm</classname> is "login":
                 </para>
 
                 <programlisting><![CDATA[xpath=//id("login")//iframe]]></programlisting>
