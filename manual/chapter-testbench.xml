@@ -1530,8 +1530,8 @@ public void testOnePlusTwo() throws Exception {
                 <para>
                     In addition to the Selenium selectors, Vaadin TestBench provides a
                     <emphasis>Vaadin selector</emphasis>, which allows pointing to a
-                    Vaadin component by its layout path.  The JUnit test cases saved from
-                    the Recorder use Vaadin selectors by default.
+                    Vaadin component by its layout widget path.  The Recorder uses Vaadin
+                    selectors by default.
                 </para>
 
                 <para>
@@ -1543,15 +1543,8 @@ public void testOnePlusTwo() throws Exception {
                 </para>
 
                 <para>
-                    The other way is to use the
-                    <methodname>findElementByVaadinSelector()</methodname> method in the
-                    <interfacename>TestBenchCommands</interfacename> interface. It returns
-                    the <classname>WebElement</classname> object.
-                </para>
-
-                <para>
-                    A Vaadin selector begins with an application identifier. It is the
-                    path to application without any slashes or other special
+                    A Vaadin selector begins with a UI identifier. It is the
+                    URL path of the UI, but without any slashes or other special
                     characters. For example, <literal>/book-examples/tobetested</literal>
                     would be <literal>bookexamplestobetested</literal>. After the
                     identifier, comes two colons "<literal>::</literal>", followed by a
@@ -1632,12 +1625,40 @@ String tooltipText = driver.findElement(
 
             <orderedlist>
                 <listitem>
-                    Add the TestBench JAR to a library folder in the project, such as
-                    <filename>lib</filename>. You should not put the library in
-                    <filename>WEB-INF/lib</filename> as it is not used by the Vaadin web
-                    application. Refresh the project by selecting it and pressing
-                    <keycap>F5</keycap>.
+                    <para>
+                        Install the TestBench standalone JAR.
+                    </para>
+
+                    <orderedlist>
+                        <listitem>
+                            <para>
+                                If using a project created with the Vaadin Plugin for
+                                Eclipse, add the TestBench standalone library dependency
+                                in <filename>ivy.xml</filename>. It should be as follows:
+                            </para>
+
+                            <programlisting><?pocket-size 75% ?><![CDATA[<dependency org="com.vaadin"
+            name="vaadin-testbench"
+            rev="&version.testbench;"/>]]></programlisting>
+
+                            <para>
+                                See <xref linkend="addons.eclipse"/> for more details.
+                            </para>
+                        </listitem>
+
+                        <listitem>
+                            <para>
+                                Otherwise, add the TestBench standalone JAR from the
+                                installation package to a library folder in the project,
+                                such as <filename>lib</filename>. You should not put the
+                                library in <filename>WEB-INF/lib</filename> as it is not
+                                used by the Vaadin web application. Refresh the project by
+                                selecting it and pressing <keycap>F5</keycap>.
+                            </para>
+                        </listitem>
+                    </orderedlist>
                 </listitem>
+
                 <listitem>
                     Right-click the project in Project Explorer and select
                     <guilabel>Properties</guilabel>, and open the <guilabel>Java Build
@@ -1645,6 +1666,7 @@ String tooltipText = driver.findElement(
                     <guibutton>Add JARs</guibutton>, navigate to the library folder,
                     select the library, and click <guibutton>OK</guibutton>.
                 </listitem>
+
                 <listitem>
                     Switch to the <guilabel>Order and Export</guilabel> tab in the project
                     properties. Make sure that the TestBench JAR is above the
@@ -1653,9 +1675,11 @@ String tooltipText = driver.findElement(
                     it with the <guibutton>Up</guibutton> and <guibutton>Down</guibutton>
                     buttons.
                 </listitem>
+
                 <listitem>
                     Click <guibutton>OK</guibutton> to exit the project properties.
                 </listitem>
+
                 <listitem>
                     Right-click a test source file and select <menuchoice><guimenu>Run
                     As</guimenu><guimenuitem>JUnit Test</guimenuitem></menuchoice>.
@@ -1751,10 +1775,8 @@ String tooltipText = driver.findElement(
             <title>Executing Tests with Maven</title>
 
             <para>
-                Executing JUnit tests with Vaadin TestBench under Maven requires
-                installing the TestBench library in the local Maven repository and
-                defining it as a dependency in any POM that needs to execute TestBench
-                tests.
+                Executing JUnit tests with Vaadin TestBench under Maven requires defining
+                it as a dependency in any POM that needs to execute TestBench tests.
             </para>
 
             <para>
@@ -1764,41 +1786,19 @@ String tooltipText = driver.findElement(
                 further instructions.
             </para>
 
-            <section xml:id="testbench.development.maven.install">
-                <title>Installing TestBench in Local Repository</title>
-
-                <para>
-                    You can install TestBench in the local Maven repository with the following
-                    commands:
-                </para>
-
-                <screen><prompt>$</prompt> <command>cd</command> <parameter>maven</parameter>
-<prompt>$</prompt> <command>mvn</command> install:install-file \
-   -Dfile=<parameter>vaadin-testbench-&version.testbench;-SNAPSHOT.jar</parameter> \
-   -DpomFile=<parameter>pom.xml</parameter></screen>
-
-                <para>
-                    The <filename>maven</filename> folder also includes an
-                    <filename>INSTALL</filename> file, which contains instructions for
-                    installing TestBench in Maven.
-                </para>
-
-            </section>
-
             <section xml:id="testbench.development.maven.dependency">
                 <title>Defining TestBench as a Dependency</title>
 
                 <para>
-                    Once TestBench is installed in the local repository as instructed in
-                    the previous section, you can define it as a dependency in the Maven
+                    You need to define the TestBench library as a dependency in the Maven
                     POM of your project as follows:
                 </para>
 
-                <programlisting><?pocket-size 65% ?><![CDATA[    &lt;dependency&gt;
+                <programlisting>    &lt;dependency&gt;
       &lt;groupId&gt;com.vaadin&lt;/groupId&gt;
       &lt;artifactId&gt;vaadin-testbench&lt;/artifactId&gt;
-      &lt;version&gt;&version.testbench;-SNAPSHOT&lt;/version&gt;
-    &lt;/dependency&gt;]]></programlisting>
+      &lt;version&gt;&version.testbench;&lt;/version&gt;
+    &lt;/dependency&gt;</programlisting>
 
                 <para>
                     For instructions on how to create a new Vaadin project with Maven,
@@ -1820,22 +1820,27 @@ String tooltipText = driver.findElement(
  T E S T S
 -----------------------------------------------------
 Running TestBenchExample
-Tests run: 6, Failures: 2, Errors: 0, Skipped: 1, Time elapsed: 36.736 sec &lt;&lt;&lt; FAILURE!
+Tests run: 6, Failures: 1, Errors: 0, Skipped: 1, Time elapsed: 36.736 sec &lt;&lt;&lt; FAILURE!
 
 Results :
 
 Failed tests: 
   testDemo(TestBenchExample):
       expected:&lt;[5/17/]12&gt; but was:&lt;[17.6.20]12&gt;
-  testScreenshot(TestBenchExample): Screenshots differ
 
-Tests run: 6, Failures: 2, Errors: 0, Skipped: 1
+Tests run: 6, Failures: 1, Errors: 0, Skipped: 1
 ...</screen>
 
                 <para>
                     The example configuration starts Jetty to run the application that is
-                    tested. Error screenshots from screenshot comparison are written to
-                    the <filename>target/testbench/errors</filename> folder. To enable
+                    tested.
+                </para>
+
+                <para>
+                    If you have screenshot tests enabled, as mentioned in <xref
+                    linkend="testbench.installation.examples"/>, you will get failures
+                    from screenshot comparison. The failed screenshots are written to the
+                    <filename>target/testbench/errors</filename> folder. To enable
                     comparing them to "expected" screenshots, you need to copy the
                     screenshots to the
                     <filename>src/test/resources/screenshots/reference/</filename>
@@ -1887,7 +1892,8 @@ Tests run: 6, Failures: 2, Errors: 0, Skipped: 1
                 <classname>TestBench</classname> class. It takes the driver as the
                 parameter and returns it after registering it. The test cases must extend
                 the <classname>TestBenchTestCase</classname> class, which manages the
-                TestBench-specific features.
+                TestBench-specific features. You need to store the driver in the test case
+                with <methodname>setDriver()</methodname>.
             </para>
 
             <para>
@@ -1897,12 +1903,10 @@ Tests run: 6, Failures: 2, Errors: 0, Skipped: 1
             </para>
 
             <programlisting><?pocket-size 65% ?><![CDATA[public class AdvancedTest extends TestBenchTestCase {
-    private WebDriver driver;
-
     @Before
     public void setUp() throws Exception {
         ...
-        driver = TestBench.createDriver(new FirefoxDriver());
+        setDriver(TestBench.createDriver(new FirefoxDriver()));
     }
     ...
     @After
@@ -1914,7 +1918,7 @@ Tests run: 6, Failures: 2, Errors: 0, Skipped: 1
             <para>
                 This creates the driver for each test you have in the test class, causing
                 a new browser instance to be opened and closed. If you want to keep the
-                browser open between the test, you can use <literal>@BeforeClass</literal>
+                browser open between the tests, you can use <literal>@BeforeClass</literal>
                 and <literal>@AfterClass</literal> methods to create and quit the
                 driver. In that case, the methods as well as the driver instance have to
                 be static.
@@ -1947,15 +1951,21 @@ Tests run: 6, Failures: 2, Errors: 0, Skipped: 1
                     Both the Internet Explorer and Chrome require a special driver, as was
                     noted in <xref linkend="testbench.installation.browserdrivers"/>. The
                     driver executable must be included in the operating system
-                    <literal>PATH</literal> or be given with a driver-specific system
-                    property in Java with: <methodname>System.setProperty(prop,
-                    key))</methodname>.
+                    <literal>PATH</literal>, be given with a driver-specific system
+                    Java property:
                 </para>
 
                 <itemizedlist>
                     <listitem>Chrome: <parameter>webdriver.chrome.driver</parameter></listitem>
                     <listitem>IE: <parameter>webdriver.ie.driver</parameter></listitem>
                 </itemizedlist>
+
+                <para>
+                    You can set the property in Java with
+                    <methodname>System.setProperty(prop, key))</methodname> or pass it as
+                    a command-line parameter to the Java executable with
+                    <parameter>-Dwebdriver.chrome.driver=/path/to/driver</parameter>.
+                </para>
 
                 <para>
                     If you use an ESR version of Firefox, which is recommended for test
@@ -2374,6 +2384,172 @@ public void verifyServerExecutionTime() throws Exception {
                         By.id("display")).getText());
 }]]></programlisting>
 
+        </section>
+
+        <section xml:id="testbench.development.maintainable">
+            <title>Creating Maintainable Tests</title>
+
+            <para>
+                The first important rule in developing tests is to keep them readable and
+                maintainable. Otherwise, when the test fail, such as after refactoring the
+                application code, the developers get impatient in trying to understand
+                them to fix them, and easily disable them. Readability and maintainability
+                can be improved with the Page Object Pattern described below.
+            </para>
+
+            <para>
+                The second rule is to run the tests often. It is best to use a continuous
+                integration server to run them at least once a day, or preferably on every
+                commit.
+            </para>
+
+            <section xml:id="testbench.development.maintainable.pageobject">
+                <title>The Page Object Pattern</title>
+
+                <para>
+                    The Page Object Pattern aims to simplify and modularize testing
+                    application views. The pattern follows the design principle of <link
+                    xlink:href="http://en.wikipedia.org/wiki/Separation_of_concerns">separation
+                    of concerns</link>, to handle different concerns in separate modules,
+                    while hiding information irrelevant to other tests by encapsulation.
+                </para>
+
+                <para>
+                    A <emphasis>page object</emphasis> has methods to interact with a view
+                    or a sub-view, and to retrieve values in the view. You also need a
+                    method to open the page and navigate to the proper view. 
+                </para>
+
+                <para>
+                    For example:
+                </para>
+
+                <programlisting><?pocket-size 70% ?><![CDATA[public class CalculatorPageObject
+       extends TestBenchTestCase {
+    @FindBy(id = "button_=")
+    private WebElement equals;
+    ...
+
+    /**
+     * Opens the URL where the calculator resides.
+     */
+    public void open() {
+        getDriver().get(
+            "http://localhost:8080/?restartApplication");
+    }
+
+    /**
+     * Pushes buttons on the calculator
+     *
+     * @param buttons the buttons to push: "123+2", etc.
+     * @return The same instance for method chaining.
+     */
+    public CalculatorPageObject enter(String buttons) {
+        for (char numberChar : buttons.toCharArray()) {
+            pushButton(numberChar);
+        }
+        return this;
+    }
+
+    /**
+     * Pushes the specified button.
+     *
+     * @param button The character of the button to push.
+     */
+    private void pushButton(char button) {
+        getDriver().findElement(
+            By.id("button_" + button)).click();
+    }
+
+    /**
+     * Pushes the equals button and returns the contents
+     * of the calculator "display".
+     *
+     * @return The string (number) shown in the "display"
+     */
+    public String getResult() {
+        equals.click();
+        return display.getText();
+    }
+
+    ...
+}]]></programlisting>
+
+                <para>
+                    If you have <classname>WebElement</classname> members annotated with
+                    <classname>@FindBy</classname>, they can be automatically filled with
+                    the HTML element matching the given component ID, as if done with
+                    <literal>driver.findElement(By.id(fieldname))</literal>. To do so, you
+                    need to create the page object with <classname>PageFactory</classname>
+                    as is done in the following test setup:
+                </para>
+
+                <programlisting><?pocket-size 65% ?><![CDATA[
+public class PageObjectExampleITCase {
+    private CalculatorPageObject calculator;
+
+    @Before
+    public void setUp() throws Exception {
+        driver = TestBench.createDriver(new FirefoxDriver());
+
+        // Use PageFactory to automatically initialize fields
+        calculator = PageFactory.initElements(driver,
+                         CalculatorPageObject.class);
+    }
+    ...]]></programlisting>
+
+                <para>
+                    Test cases can use these methods at business logic level, without
+                    knowing about the exact structure of the views.
+                </para>
+
+                <para>
+                    For example:
+                </para>
+
+                <programlisting><?pocket-size 75% ?><![CDATA[@Test
+public void testAddCommentRowToLog() throws Exception {
+    calculator.open();
+
+    // Just do some math first
+    calculator.enter("1+2");
+
+    // Verify the result of the calculation
+    assertEquals("3.0", calculator.getResult());
+
+    ...
+}]]></programlisting>
+
+                <para>
+                    You can find the complete example of the Page Object Pattern in the
+                    <filename>example/src/test/java/com/vaadin/testbenchexample/pageobjectexample/</filename>
+                    folder in the TestBench installation package. The
+                    <filename>PageObjectExampleITCase.java</filename> runs tests on the
+                    Calc UI (also included in the example sources), using the page objects
+                    to interact with the different parts of the UI and to check the
+                    results.
+                </para>
+
+                <para>
+                    The page objects included in the <filename>pageobjects</filename>
+                    subfolder are as follows:
+                </para>
+
+                <itemizedlist>
+                    <listitem><para>The <classname>CalculatorPageObject</classname> (as
+                    outlined in the example code above) has methods to click the buttons
+                    in the calculator and the retrieve the result shown in the
+                    "display".</para></listitem>
+
+                    <listitem><para>The <classname>LogPageObject</classname> can retrieve
+                    the content of the log entries in the log table, and right-click them
+                    to open the comment sub-window.</para></listitem>
+
+                    <listitem><para>The <classname>AddComment</classname> can enter a
+                    comment string in the comment editor sub-window and submit it (click
+                    the <guilabel>Add</guilabel> button).</para></listitem>
+                </itemizedlist>
+            </section>
         </section>
     </section>
 
