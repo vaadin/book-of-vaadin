@@ -562,7 +562,7 @@
                     <listitem>
                         <para>
                             Shows how to compare screenshots, as described in <xref
-                            linkend="testbench.screenshots"/>. Some of the test cases
+                            linkend="testbench.screenshot.comparison"/>. Some of the test cases
                             include random input, so they require masked screenshot
                             comparison to mask the random areas out.
                         </para>
@@ -574,8 +574,10 @@
                             platform, so if you use another environment, they will
                             fail. If you enable the test, you will need to run the tests,
                             copy the error images to the reference screenshot folder, and
-                            mask out the areas with the alpha channel, as described in
-                            <xref linkend="testbench.screenshot.comparison"/>.
+                            mask out the areas with the alpha channel. Please see the
+                            <filename>example/Screenshot_Comparison_Tests.pdf</filename>
+                            for details about how to enable the example and how to create
+                            the masked reference images.
                         </para>
                     </listitem>
                 </varlistentry>
@@ -609,6 +611,36 @@
                             linkend="testbench.development.tooltip"/>) and context
                             menus. Uses component IDs, XPath expressions, as well as CSS
                             selectors to find the elements to check.
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><filename>pageobjectexample/PageObjectExampleITCase.java</filename></term>
+                    <listitem>
+                        <para>
+                            Shows how to create maintanable tests using the <emphasis>Page
+                            Object Pattern</emphasis> that separates the low-level page
+                            structure from the business logic, as described in <xref
+                            linkend="testbench.development.maintainable"/>. The page
+                            object classes that handle low-level interaction with the
+                            application views are in the <filename>pageobjects</filename>
+                            subpackage.
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><filename>bdd/SimpleCalculation.java</filename></term>
+                    <listitem>
+                        <para>
+                            Shows how to develop tests following the
+                            <emphasis>behavior-driven development</emphasis> (BDD) model,
+                            by using the <link xlink:href="http://jbehave.org">JBehave
+                            framework</link>. <filename>SimpleCalculation.java</filename>
+                            defines a JUnit-based user story with one scenario, which is
+                            defined in <filename>CalculatorSteps.java</filename>. The
+                            scenario reuses the page objects defined in the page object
+                            example (see above) for low-level application view access and
+                            control.
                         </para>
                     </listitem>
                 </varlistentry>
@@ -2012,25 +2044,24 @@ driver = TestBench.createDriver(
 
             <programlisting><?pocket-size 65% ?><![CDATA[@Test
 public void testCase1() throws Exception {
-    driver.get(baseUrl + "/book-examples/tobetested");
+    driver.get(baseUrl + "/mycontext/myui");
     
     // Get the button's element.
     // (Actually the caption element inside the button.)
     // Use the component ID assigned with setId().
     WebElement button = driver.findElement(By.xpath(
-        "//div[@id='main.button']/span/span"));
+        "id('main.button'])/span/span"));
     
     // Get the caption text
     assertEquals("Push Me!", button.getText());
     
     // And click it. It's OK to click the caption element.
     button.click();
-    
-    // Get the Label's element.
-    // Use the automatically generated ID.
-    WebElement label = driver.findElement(By.xpath(
-        "//div[@id='myapp-949693921']" +
-        "/div/div[2]/div/div[2]/div/div"));
+
+    // Get the Label's element by its widget path.
+    WebElement label = driver.findElement(By.vaadin(
+        "mycontextmyui::"+
+        "/VVerticalLayout[0]/Slot[1]/VLabel[0]"));
 
     // Make the assertion
     assertEquals("Thanks!", label.getText());
@@ -2065,22 +2096,38 @@ public void testCase1() throws Exception {
                 object that you can use by calling <literal>testBench(driver)</literal> in
                 a test case.
             </para>
+
+            <para>
+                While you can develop tests simply with test cases as described above, for
+                the sake of maintainability it is often best to modularize the test code
+                further, such as to separate testing at the levels of business logic and
+                the page layout. See <xref linkend="testbench.development.maintainable"/>
+                for information about using page objects for this purpose.
+            </para>
         </section>
 
         <section xml:id="testbench.development.waitforvaadin">
             <title>Waiting for Vaadin</title>
 
             <para>
-                Selenium is intended for regular web applications that load a page that is
-                immediately rendered by the browser. Vaadin, on the other hand, is an Ajax
-                framework where page is loaded just once and rendering is done in
-                JavaScript. This takes more time so that the rendering might not be
-                finished when the WebDriver continues executing the test. Vaadin TestBench
-                allows waiting until the rendering is finished.
+                Selenium, on which Vaadin TestBench is based, is originally intended for
+                regular web applications that load a page that is immediately rendered by
+                the browser. In such applications, you can test the page elements
+                immediately after the page is loaded. In Vaadin and other AJAX
+                applications, rendering is done by JavaScript code asynchronously, so you
+                need to wait until the server has given its response to an AJAX request
+                and the JavaScript code finishes rendering the UI. Selenium supports AJAX
+                applications by having special wait methods to poll the UI until the
+                rendering is finished. In pure Selenium, you need to use the wait methods
+                explicitly, and know what to use and when. Vaadin TestBench works together
+                with the client-side engine of Vaadin framework to immediately detect when
+                the rendering is finished. Waiting is implicit, so you do not normally
+                need to insert any wait commands yourself.
             </para>
 
             <para>
-                The waiting is automatically enabled. You can disable waiting by calling
+                Waiting is automatically enabled, but it may be necessary to disable it in
+                some cases. You can do that by calling
                 <methodname>disableWaitForVaadin()</methodname> in the
                 <interfacename>TestBenchCommands</interfacename> interface. You can call
                 it in a test case as follows:
@@ -2141,9 +2188,6 @@ public void testTooltip() throws Exception {
     
     // Show the tooltip
     testBenchElement(button).showTooltip();
-    
-    // Wait a little to make sure it's up
-    Thread.sleep(1000);
     
     // Check that the tooltip text matches
     assertEquals("This is a tip", driver.findElement(
@@ -2585,12 +2629,6 @@ public void testAddCommentRowToLog() throws Exception {
                     </listitem>
                 </varlistentry>
                 <varlistentry>
-                    <term><parameter>captureScreenshotOnFailure</parameter> (default: <literal>true</literal>)</term>
-                    <listitem>
-                        Defines whether screenshots are taken whenever an assertion fails.
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
                     <term><parameter>screenshotComparisonTolerance</parameter> (default: <literal>0.01</literal>)</term>
                     <listitem>
                         Screen comparison is usually not done with exact pixel values,
@@ -2653,23 +2691,28 @@ public void setUp() throws Exception {
             <!-- TODO: What is wrong with this? -->
 
             <para>
-                Vaadin TestBench takes screenshots automatically when a test fails, if the
-                <parameter>captureScreenShotOnFailure</parameter> is enabled in TestBench
-                parameters. The screenshots are written to the error directory defined
-                with the <parameter>screenshotErrorDirectory</parameter> parameter.
+                Vaadin TestBench can take screenshots automatically when a test fails. To
+                enable the feature, you need to include the
+                <classname>ScreenshotOnFailureRule</classname> JUnit rule with a member
+                variable annotated with <classname>@Rule</classname> in the test case as
+                follows:
             </para>
 
+            <programlisting><?pocket-size 75% ?><![CDATA[@Rule
+public ScreenshotOnFailureRule screenshotOnFailureRule =
+    new ScreenshotOnFailureRule(this, true);]]></programlisting>
+
             <para>
-                You need to have the following in the setup method:
+                The screenshots are written to the error directory defined with the
+                <parameter>screenshotErrorDirectory</parameter> parameter. You can
+                configure it in the test case setup as follows:
             </para>
 
             <programlisting><?pocket-size 65% ?><![CDATA[@Before
 public void setUp() throws Exception {
     Parameters.setScreenshotErrorDirectory("screenshots/errors");
-    Parameters.setCaptureScreenshotOnFailure(true);
     ...
 }]]></programlisting>
-
         </section>
 
         <section xml:id="testbench.screenshot.comparison">
@@ -2755,11 +2798,13 @@ public void setUp() throws Exception {
                     Screenshots cover the visible page area in the browser. The size of
                     the browser is therefore relevant for screenshot comparison. The
                     browser is normally sized with a predefined default size. You can set
-                    the size of the browser window with, for example,
+                    the size of the browser window in a couple of ways. You can set the
+                    size of the browser window with, for example,
                     <literal>driver.manage().window().setSize(new Dimension(1024,
                     768));</literal> in the <literal>@Before</literal> method. The size
                     includes any browser chrome, so the actual screenshot size will be
-                    smaller.
+                    smaller. To set the actual view area, you can use
+                    <literal>TestBenchCommands.resizeViewPortTo(1024, 768)</literal>.
                 </para>
             </section>
 
@@ -2815,8 +2860,17 @@ tooltip_firefox_12.0_2.png</screen>
                 <para>
                     You can make masked screenshot comparison with reference images that
                     have non-opaque regions. Non-opaque pixels in the reference image,
-                    that is, ones with less than 1.0 value, are ignored in the screenshot
-                    comparison.
+                    that is, ones with less than 1.0 value in the alpha channel, are
+                    ignored in the screenshot comparison.
+                </para>
+
+                <para>
+                    Please see the <filename>ScreenshotITCase.java</filename> example in
+                    the installation package for an example of using masked
+                    screenshots. The
+                    <filename>example/Screenshot_Comparison_Tests.pdf</filename> document
+                    describes how to enable the example and how to create the screenshot
+                    masks in an image editor.
                 </para>
             </section>
 
@@ -2838,18 +2892,18 @@ tooltip_firefox_12.0_2.png</screen>
                     difference area as it appears in the reference image. Clicking the
                     image switches the entire view to the reference image and back. Text
                     "<guilabel>Image for this run</guilabel>" is displayed in the top-left
-                    corner to identify the currently displayed screenshot.
+                    corner of the screenshot to distinguish it from the reference image.
                 </para>
 
                 <para>
                     <xref
                     linkend="figure.testbench.screenshot.comparison.visualization.highlighting"/>
-                    shows a difference report with three differences. Date fields are a
-                    typical cause of differences in screenshots.
+                    shows a difference report with one difference between the visualized
+                    screenshot (bottom) and the reference image (top).
                 </para>
 
                 <figure xml:id="figure.testbench.screenshot.comparison.visualization.highlighting">
-                    <title>The reference image and a highlighed error image</title>
+                    <title>The reference image and a highlighted error image</title>
                     <mediaobject>
                         <imageobject role="html">
                             <imagedata align="center" fileref="img/testbench/screenshots/tt-screenshot-comparison-1.png"/>
@@ -3087,8 +3141,9 @@ public void testRemoteWebDriver() throws MalformedURLException {
                     <varlistentry>
                         <term><parameter>platform</parameter></term>
                         <listitem>
-                            The operating system platform of the test node. Can be
-                            <literal>WINDOWS</literal>, <literal>LINUX</literal>, or
+                            The operating system platform of the test node:
+                            <literal>WINDOWS</literal>, <literal>XP</literal>,
+                            <literal>VISTA</literal>, <literal>LINUX</literal>, or
                             <literal>MAC</literal>.
                         </listitem>
                     </varlistentry>
@@ -3097,8 +3152,10 @@ public void testRemoteWebDriver() throws MalformedURLException {
                         <listitem>
                             A browser identifier, any of: <literal>android</literal>,
                             <literal>chrome</literal>, <literal>firefox</literal>,
-                            <literal>htmlunit</literal>, <literal>internet explorer</literal>,
-                            <literal>iphone</literal>, <literal>opera</literal>.
+                            <literal>htmlunit</literal>, <literal>internet
+                            explorer</literal>, <literal>iphone</literal>,
+                            <literal>opera</literal>, or <literal>phantomjs</literal> (as
+                            of TestBench 3.1).
                     </listitem>
                     </varlistentry>
                     <varlistentry>
@@ -3117,8 +3174,7 @@ public void testRemoteWebDriver() throws MalformedURLException {
                     <varlistentry>
                         <term><parameter>seleniumProtocol</parameter></term>
                         <listitem>
-                            This should be <literal>WebDriver</literal> for WebDriver use, or
-                            <literal>Selenium</literal> for tests in the HTML format.
+                            This should be <literal>WebDriver</literal> for WebDriver use.
                         </listitem>
                     </varlistentry>
                     <varlistentry>
@@ -3215,9 +3271,7 @@ public void testRemoteWebDriver() throws MalformedURLException {
 
             <para>
                 You can run one grid node in the same host as the hub, as is done in the
-                example above with the localhost address. In such case notice that, at
-                least in OS X, you may need to duplicate the JAR to a separate copy to use
-                it to run a grid node service.
+                example above with the localhost address.
             </para>
 
             <section xml:id="testbench.grid.node.browser-capabilities">
@@ -3469,17 +3523,24 @@ getDriver().switchTo().frame(frame);]]></programlisting>
             <title>Using <methodname>assertTextPresent</methodname> and <methodname>assertTextNotPresent</methodname></title>
 
             <para>
-                The <methodname>assertTextNotPresent</methodname> and <methodname>assertTextNotPresent</methodname>
-                methods in TestBench Recorder are problematic in that they do not respect CSS rules that hide
-                elements (e.g. <literal>display: none;</literal>). This means that you might have trouble
-                confirming that text is or is not present.
+                The <methodname>assertTextPresent</methodname> and
+                <methodname>assertTextNotPresent</methodname> methods in TestBench
+                Recorder are problematic in that they do not respect CSS rules that hide
+                elements, such as <literal>display: none</literal>. Because of this, you
+                may have trouble confirming that text is or is not present.
             </para>
+
             <para>
-                This will be fixed in a future release, but until then a better, albeit more complex, strategy
-                for testing whether a string is present on screen is to use the
-                <methodname>assertElementPresent</methodname> method with an XPath selector as follows:
-                <programlisting><![CDATA[xpath=//div[contains(@style, "display: none")]//div[contains(text(),"HIDDEN TEXT")]]]></programlisting>
+                This issue will be fixed in a future release, but until then, you can use
+                a better, although more complex, strategy for testing whether a string is
+                present on the screen or not. You can specify a condition for the style
+                attribute that makes the text hidden with the
+                <methodname>assertElementPresent</methodname> method and an XPath
+                selector. For example (as it would be specified in Recorder):
             </para>
+
+            <programlisting><![CDATA[xpath=//div[contains(@style, "display: none")]
+//div[contains(text(),"HIDDEN TEXT")]]]></programlisting>
         </section>
 
         <section xml:id="testbench.known-issues.upload">
