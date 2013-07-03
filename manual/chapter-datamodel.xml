@@ -127,42 +127,48 @@
 		<title>Properties</title>
 
 		<para>
-			The <classname>Property</classname> interface is the base of the Vaadin Data
-			Model. It provides a standardized API for a single data object that can be
-			read (get) and written (set). A property is always typed, but can optionally
-			support data type conversions. The type of a property can be any Java
-			class. Optionally, properties can provide value change events for following
-			their changes.
+			The <interfacename>Property</interfacename> interface is the base of the
+			Vaadin Data Model. It provides a standardized API for a single data value
+			object that can be read (get) and written (set). A property is always typed,
+			but can optionally support data type conversions. The type of a property can
+			be any Java class. Optionally, properties can provide value change events for
+			following their changes.
 		</para>
 
         <para>
-            The value of a property is written with <methodname>setValue()</methodname>
-            and read with <methodname>getValue()</methodname>. The return value is a
-            generic <classname>Object</classname> reference, so you need to cast it to the
-            proper type. The type can be acquired with <methodname>getType()</methodname>.
+            You can set the value of a property with <methodname>setValue()</methodname>
+            and read with <methodname>getValue()</methodname>.
         </para>
 
+        <para>
+            In the following, we set and read the property value from a
+            <classname>TextField</classname> component, which implements the
+            <interfacename>Property</interfacename> interface to allow accessing the field
+            value.
+        </para>
+
+        <book-example id="datamodel.properties.basic"></book-example>
         <programlisting><?pocket-size 65% ?><![CDATA[final TextField tf = new TextField("Name");
         
 // Set the value
 tf.setValue("The text field value");
         
 // When the field value is edited by the user
-tf.addListener(new Property.ValueChangeListener() {
+tf.addValueChangeListener(
+    new Property.ValueChangeListener() {
     public void valueChange(ValueChangeEvent event) {
-        // Get the value and cast it to proper type
-        String value = (String) tf.getValue();
-        
-        // Do something with it
-        layout.addComponent(new Label(value));
+        // Do something with the new value
+        layout.addComponent(new Label(tf.getValue()));
     }
 });]]></programlisting>
 
         <para>
-            Changes in the property value usually emit a
+            Changes in the property value usually fire a
             <classname>ValueChangeEvent</classname>, which can be handled with a
             <classname>ValueChangeListener</classname>. The event object provides
-            reference to the property with <methodname>getProperty()</methodname>.
+            reference to the property with <methodname>getProperty()</methodname>. Note
+            that its <methodname>getValue()</methodname> method returns the value with
+            <classname>Object</classname> type, so you need to cast it to the proper type.
         </para>
 
 		<!-- TODO this might not be the best place to explain this - maybe split the paragraph? -->
