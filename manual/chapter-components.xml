@@ -6233,26 +6233,31 @@ layout.addComponent(object);]]></programlisting>
 			selection button, and an upload submit button. The user can either
 			write the filename in the text area or click the <guibutton>Browse</guibutton> button to
 			select a file. After the file is selected, the user sends the file by
-			pressing the upload submit button.
+			clicking the upload submit button.
 		</para>
 
-		<programlisting><?pocket-size 65% ?><![CDATA[// Create the Upload component.
-Upload upload = new Upload("Upload the file here", this);]]></programlisting>
+		<para>
+            Uploading requires a receiver that implements
+            <interfacename>Upload.Receiver</interfacename> to provide an output stream to
+            which the upload is written by the server.
+        </para>
+
+		<programlisting><?pocket-size 75% ?><![CDATA[Upload upload = new Upload("Upload it here", receiver);]]></programlisting>
 
 		<figure xml:id="figure.ui.upload">
 			<title>Upload Component</title>
 			<mediaobject>
 				<imageobject>
-					<imagedata smallscale="130" align="center" fileref="img/components/upload.png"/>
+					<imagedata smallscale="80%" align="center" fileref="img/components/upload.png"/>
 				</imageobject>
 			</mediaobject>
 		</figure>
 
 		<para>
 			You can set the text of the upload button with
-			<methodname>setButtonCaption()</methodname>, as in the example above, but it
-			is difficult to change the look of the <guibutton>Browse</guibutton>
-			button. This is a security feature of web browsers. The language of the
+			<methodname>setButtonCaption()</methodname>. Note that it is difficult to
+			change the caption or look of the <guibutton>Browse</guibutton> button. This
+			is a security feature of web browsers. The language of the
 			<guibutton>Browse</guibutton> button is determined by the browser, so if you
 			wish to have the language of the <classname>Upload</classname> component
 			consistent, you will have to use the same language in your application.
@@ -6261,58 +6266,59 @@ Upload upload = new Upload("Upload the file here", this);]]></programlisting>
 		<programlisting><![CDATA[upload.setButtonCaption("Upload Now");]]></programlisting>
 
 		<para>
-			The uploaded files are typically stored as files in a file system, in
-			a database, or as temporary objects in memory. The upload component
-			writes the received data to an
-			<classname>java.io.OutputStream</classname> so you have plenty of
-			freedom in how you can process the upload content.
-		</para>
+            You can also hide the upload button with
+
+            <literal>.v-upload .v-button {display: none}</literal> in theme,
+
+            have custom logic for starting the upload, and call
+            <methodname>startUpload()</methodname> to start it. If the upload component
+            has <methodname>setImmediate(true)</methodname> enabled, uploading starts
+            immediately after choosing the file.
+        </para>
+
+        <simplesect xml:id="components.upload.receiving">
+            <title>Receiving Upload Data</title>
+
+            <para>
+                The uploaded files are typically stored as files in a file system, in
+                a database, or as temporary objects in memory. The upload component
+                writes the received data to an
+                <classname>java.io.OutputStream</classname> so you have plenty of
+                freedom in how you can process the upload content.
+            </para>
 		
-		<para>
-			To use the <classname>Upload</classname> component, you need to
-			define a class that implements the
-			<classname>Upload.Receiver</classname> interface. The
-			<methodname>receiveUpload()</methodname> method is called when the
-			user clicks the submit button. The method must return an
-			<classname>OutputStream</classname>. To do this, it typically creates
-			a <classname>File</classname> or a memory buffer where the stream is
-			written. The method gets the file name and MIME type of the file, as
-			reported by the browser.
-		</para>
+            <para>
+                To use the <classname>Upload</classname> component, you need to implement the
+                <classname>Upload.Receiver</classname> interface. The
+                <methodname>receiveUpload()</methodname> method of the receiver is called when
+                the user clicks the submit button. The method must return an
+                <classname>OutputStream</classname>. To do this, it typically creates a file
+                or a memory buffer to which the stream is written. The method gets the file
+                name and MIME type of the file, as reported by the browser.
+            </para>
 
-		<para>
-			When an upload is finished, successfully or unsuccessfully, the
-			<classname>Upload</classname> component will emit the
-			<classname>Upload.FinishedEvent</classname> event. To receive it, you
-			need to implement the <classname>Upload.FinishedListener</classname>
-			interface, and register the listening object in the
-			<classname>Upload</classname> component. The event object will also
-			include the file name, MIME type, and length of the file. Notice that
-			the more specific <classname>Upload.FailedEvent</classname> and
-			<classname>Upload.SucceededEvent</classname> events will be called in
-			the cases where the upload failed or succeeded, respectively.
-		</para>
+            <para>
+                When an upload is finished, successfully or unsuccessfully, the
+                <classname>Upload</classname> component will emit the
+                <classname>Upload.FinishedEvent</classname> event, which you can handle with
+                an <classname>Upload.FinishedListener</classname> added to the upload
+                component. The event object will include the file name, MIME type, and final
+                length of the file. More specific <classname>Upload.FailedEvent</classname>
+                and <classname>Upload.SucceededEvent</classname> events will be called in the
+                cases where the upload failed or succeeded, respectively.
+            </para>
 
-		<para>
-			The following example allows uploading images to
-			<filename>/tmp/uploads</filename> directory in (UNIX) filesystem (the
-			directory must exist or the upload fails). The component displays the last
-			uploaded image in an <classname>Image</classname> component.
-		</para>
+            <para>
+                The following example uploads images to <filename>/tmp/uploads</filename>
+                directory in (UNIX) filesystem (the directory must exist or the upload
+                fails). The component displays the uploaded image in an
+                <classname>Image</classname> component.
+            </para>
 
-        <book-example id="component.upload.basic" style="float: right"/>
-		<programlisting><?pocket-size 65% ?><![CDATA[// Create the upload with a caption and set receiver later
-Upload upload = new Upload("Upload Image Here", null);
-upload.setButtonCaption("Start Upload");
-        
-// Put the upload component in a panel
-Panel panel = new Panel("Cool Image Storage");
-panel.addComponent(upload);
-        
-// Show uploaded file in this placeholder
-final Image image = new Image("Uploaded Image");
+            <book-example id="component.upload.basic" style="float: right"/>
+            <programlisting><?pocket-size 65% ?><![CDATA[// Show uploaded file in this placeholder
+final Embedded image = new Embedded("Uploaded Image");
 image.setVisible(false);
-panel.addComponent(image);
 
 // Implement both receiver that saves upload in a file and
 // listener for successful upload
@@ -6328,9 +6334,10 @@ class ImageUploader implements Receiver, SucceededListener {
             file = new File("/tmp/uploads/" + filename);
             fos = new FileOutputStream(file);
         } catch (final java.io.FileNotFoundException e) {
-            Notification.show(
-                    "Could not open file<br/>", e.getMessage(),
-                    Notification.TYPE_ERROR_MESSAGE);
+            new Notification("Could not open file<br/>",
+                             e.getMessage(),
+                             Notification.Type.ERROR_MESSAGE)
+                .show(Page.getCurrent());
             return null;
         }
         return fos; // Return the output stream to write to
@@ -6342,26 +6349,52 @@ class ImageUploader implements Receiver, SucceededListener {
         image.setSource(new FileResource(file));
     }
 };
-final ImageUploader uploader = new ImageUploader(); 
-upload.setReceiver(uploader);
-upload.addListener(uploader);]]></programlisting>
+ImageUploader receiver = new ImageUploader(); 
 
-		<para>
-			The example does not check the type of the uploaded files in any way, which
-			will cause an error if the content is anything else but an image. The program
-			also assumes that the MIME type of the file is resolved correctly based on the
-			file name extension. After uploading an image, the component will look as show
-			in <xref linkend="figure.ui.upload.example"/> below.
-		</para>
+// Create the upload with a caption and set receiver later
+Upload upload = new Upload("Upload Image Here", receiver);
+upload.setButtonCaption("Start Upload");
+upload.addSucceededListener(receiver);
+        
+// Put the components in a panel
+Panel panel = new Panel("Cool Image Storage");
+Layout panelContent = new VerticalLayout();
+panelContent.addComponents(upload, image);
+panel.setContent(panelContent);]]></programlisting>
 
-		<figure xml:id="figure.ui.upload.example">
-			<title>Image Upload Example</title>
-			<mediaobject>
-				<imageobject>
-					<imagedata smallscale="100%" align="center" fileref="img/components/upload-example.png"/>
-				</imageobject>
-			</mediaobject>
-		</figure>
+            <para>
+                Note that the example does not check the type of the uploaded files in any
+                way, which will cause an error if the content is anything else but an
+                image. The program also assumes that the MIME type of the file is resolved
+                correctly based on the file name extension. After uploading an image, the
+                component will look as shown in <xref linkend="figure.ui.upload.example"/>.
+            </para>
+
+            <figure xml:id="figure.ui.upload.example">
+                <title>Image Upload Example</title>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata smallscale="100%" align="center" fileref="img/components/upload-example.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+        </simplesect>
+
+		<simplesect xml:id="components.upload.css">
+			<title>CSS Style Rules</title>
+
+			<programlisting><![CDATA[.v-upload { }
+  .gwt-FileUpload { }
+  .v-button { }
+    .v-button-wrap { }
+      .v-button-caption { }]]></programlisting>
+
+			<para>
+                The <classname>Upload</classname> component has an overall
+                <literal>v-upload</literal> style. The upload button has the same
+                structure and style as a regular <classname>Button</classname> component.
+            </para>
+        </simplesect>
 	</section>
 
 	<section xml:id="components.progressindicator">
