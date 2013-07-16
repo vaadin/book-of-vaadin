@@ -12,7 +12,7 @@ JAVAPARS = -Xms256M -Xmx512M
 # Document language; this is the default, translations can override this.
 DBLANGUAGE = en
 
-PROFILE = #profile.condition=print 
+PROFILE = profile.condition=print 
 
 DBEXTRAPARS = l10n.gentext.language=$(DBLANGUAGE)
 
