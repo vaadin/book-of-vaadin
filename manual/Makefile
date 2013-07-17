@@ -62,10 +62,10 @@ IMAGES =	intro/architecture intro/architecture-vaadin7 intro/toolchain \
 # List of source XML files
 XMLFILES = book-info.xml book-preface.xml book-vol1.xml book-vol2.xml \
 	chapter-addons.xml	chapter-datamodel.xml	chapter-layout.xml	chapter-themes.xml \
-	chapter-advanced.xml	chapter-eclipse.xml	chapter-timeline.xml \
+	chapter-advanced.xml	chapter-eclipse.xml	\
 	chapter-application.xml	chapter-getting-started.xml	chapter-mobile.xml \
 	chapter-architecture.xml	chapter-gwt.xml	chapter-vaadin.xml \
-	chapter-calendar.xml	chapter-introduction.xml	chapter-sqlcontainer.xml \
+	chapter-introduction.xml	chapter-sqlcontainer.xml \
 	chapter-components.xml	chapter-jpacontainer.xml \
 	chapter-testbench.xml chapter-portal.xml
 
@@ -144,7 +144,7 @@ book.fo: book.xml $(XMLFILES) images
 # ../build/lib/xalan.jar ... org.apache.xalan.xslt.Process
 
 # Use book-pocket.xml for two-volume version
-book-pocket.fo: book-print.xml $(XMLFILES) images
+book-pocket.fo: book-print.xml images
 	@echo $(VERSION)
 	@echo "Highlighter configuration: $(HIGHLIGHTER_CONFIG)"
 	java $(JAVAPARS) -classpath $(JAVACLASSPATH) $(HIGHLIGHTER_CONFIG) com.icl.saxon.StyleSheet -o book-pocket.fo \
