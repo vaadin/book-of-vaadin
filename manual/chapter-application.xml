@@ -70,15 +70,13 @@ public class HelloWorld extends UI {
             page can actually have multiple such &ui;s within it. Such situation is
             typical especially with portlets in a portal. An application can run in
             multiple browser windows, each having a distinct <classname>UI</classname>
-            instance. The UIs can be the same UI class or different.
+            instance. The UIs of an application can be the same UI class or different.
         </para>
 
 		<para>
-            The &ui; API may seem similar to Java Servlet API, but that is only
-            superficial. Vaadin framework handles servlet requests internally and
-            associates the requests with user sessions and a UI state. Because of this,
-            you can develop Vaadin applications much like you would develop desktop
-            applications.
+            Vaadin framework handles servlet requests internally and associates the
+            requests with user sessions and a UI state. Because of this, you can develop
+            Vaadin applications much like you would develop desktop applications.
 		</para>
 		
 		<para>
@@ -1525,11 +1523,13 @@ notif.show(Page.getCurrent());]]></programlisting>
             <para>
                 Before a Vaadin application can be used, it has to be deployed to a Java
                 web server, as described in <xref
-                linkend="application.environment"/>. Deploying reads the
-                <filename>web.xml</filename> deployment descriptor in the application to
-                register servlets for specific URL paths and loads the classes.
-                Deployment does not yet normally run any code in the application,
-                although static blocks in classes are executed when they are loaded.
+                linkend="application.environment"/>. Deploying reads the servlet classes
+                annotated with the <literal>@WebServlet</literal> annotation (Servlet 3.0)
+                or the <filename>web.xml</filename> deployment descriptor (Servlet 2.4) in
+                the application to register servlets for specific URL paths and loads the
+                classes.  Deployment does not yet normally run any code in the
+                application, although static blocks in classes are executed when they are
+                loaded.
             </para>
 
             <section xml:id="application.lifecycle.deployment.redeployment">
@@ -1605,12 +1605,14 @@ notif.show(Page.getCurrent());]]></programlisting>
                 primary low-level customization layer for processing requests.
             </para>
 
-            <section xml:id="application.lifecycle.servlet-service.servletcustomization" condition="web">
+            <section xml:id="application.lifecycle.servlet-service.servletcustomization">
                 <title>Customizing Vaadin Servlet</title>
 
                 <para>
-                    Many common configuration tasks require providing a custom servlet
-                    class. Normally, you handle most customization by overriding the
+                    Many common configuration tasks need to be done in the servlet class,
+                    which you already have if you are using the
+                    <literal>@WebServlet</literal> annotation for Servlet 3.0 to deploy
+                    the application. You can handle most customization by overriding the
                     <methodname>servletInitialized()</methodname> method, where the
                     <classname>VaadinService</classname> object is available with
                     <methodname>getService()</methodname> (it would not be available in a
@@ -1618,7 +1620,7 @@ notif.show(Page.getCurrent());]]></programlisting>
                     <methodname>super.servletInitialized()</methodname> in the beginning.
                 </para>
 
-                <programlisting><?pocket-size 75% ?><![CDATA[public class MyCustomServlet extends VaadinServlet {
+                <programlisting><?pocket-size 75% ?><![CDATA[public class MyServlet extends VaadinServlet {
     @Override
     protected void servletInitialized()
             throws ServletException {
@@ -1634,10 +1636,10 @@ notif.show(Page.getCurrent());]]></programlisting>
                 </para>
 
                 <para>
-                    To use the custom servlet class, you need to define it in the
-                    <filename>web.xml</filename> deployment descriptor instead of the
-                    regular <classname>VaadinServlet</classname> class, as described in
-                    <xref linkend="application.environment.web-xml"/>.
+                    To use the custom servlet class in a Servlet 2.4 project, you need to
+                    define it in the <filename>web.xml</filename> deployment descriptor
+                    instead of the regular <classname>VaadinServlet</classname> class, as
+                    described in <xref linkend="application.environment.web-xml"/>.
                 </para>
             </section>
 
@@ -1706,7 +1708,7 @@ notif.show(Page.getCurrent());]]></programlisting>
                     <xref linkend="application.lifecycle.servlet-service"/>.
                 </para>
 
-                <programlisting><?pocket-size 65% ?><![CDATA[public class MyCustomServlet extends VaadinServlet
+                <programlisting><?pocket-size 65% ?><![CDATA[public class MyServlet extends VaadinServlet
     implements SessionInitListener, SessionDestroyListener {
 
     @Override
@@ -1729,8 +1731,8 @@ notif.show(Page.getCurrent());]]></programlisting>
 }]]></programlisting>
 
                 <para>
-                    You need to configure the custom servlet class in the
-                    <parameter>servlet-class</parameter> parameter in the
+                    If using Servlet 2.4, you need to configure the custom servlet class
+                    in the <parameter>servlet-class</parameter> parameter in the
                     <filename>web.xml</filename> descriptor instead of the
                     <classname>VaadinServlet</classname>, as described in <xref
                     linkend="application.environment.web-xml"/>.
@@ -1867,8 +1869,10 @@ public class MyUI extends UI {]]></programlisting>
             <para>
                 The heartbeats occur at an interval of 5 minutes, which can be changed
                 with the <parameter>heartbeatInterval</parameter> parameter of the
-                servlet. You can configure the parameter in <filename>web.xml</filename>
-                as described in <xref linkend="application.environment.parameters"/>.
+                servlet. You can configure the parameter in
+                <classname>@VaadinServletConfiguration</classname> or in
+                <filename>web.xml</filename> as described in <xref
+                linkend="application.environment.parameters"/>.
             </para>
 
             <para>
@@ -2079,19 +2083,20 @@ main.addListener(new Window.CloseListener(){
 			</para>
 
 			<variablelist>
-				<title>Web application organization</title>
+				<title>Web Application Organization</title>
 
 				<varlistentry>
 					<term>
-						<filename>WEB-INF/web.xml</filename>
+						<filename>WEB-INF/web.xml</filename> (optional with Servlet 3.0)
 					</term>
 					<listitem>
 						<para>
-							This is the standard web application descriptor that defines
-							how the application is organized. You can refer to any Java
-							book about the contents of this file. It is not needed if you
-							define the servlet with <literal>@WebServlet</literal>
-							annotation in Servlet API 3.0.
+							This is the web application descriptor that defines how the
+							application is organized, that is, what servlets and such it
+							has. You can refer to any Java book about the contents of this
+							file. It is not needed if you define the Vaadin servlet with
+							the <literal>@WebServlet</literal> annotation in Servlet API
+							3.0.
 						</para>
 					</listitem>
 				</varlistentry>
@@ -2149,21 +2154,66 @@ main.addListener(new Window.CloseListener(){
 			</variablelist>
 		</section>
 
+		<section xml:id="application.environment.webservlet">
+			<title>Web Servlet Class</title>
+
+            <para>
+                When using the Servlet 3.0 API, you normally declare the Vaadin servlet
+                classes with the <literal>@WebServlet</literal> annotation. The Vaadin UI
+                associated with the servlet and other Vaadin-specific parameters are
+                declared with a separate <literal>@VaadinServletConfiguration</literal>
+                annotation.
+            </para>
+
+            <programlisting><?pocket-size 75% ?>@WebServlet(value = "<emphasis role="bold">/*</emphasis>",
+            asyncSupported = true)
+@VaadinServletConfiguration(
+        productionMode = <emphasis role="bold">false</emphasis>,
+        ui = <emphasis role="bold">MyProjectUI</emphasis>.class)
+public class <emphasis role="bold">MyProjectServlet</emphasis> extends VaadinServlet {
+}</programlisting>
+
+            <para>
+                The Vaadin Plugin for Eclipse creates the servlet class as a static inner
+                class of the UI class. Normally, you may want to have it as a separate
+                regular class.
+            </para>
+
+            <para>
+                The <parameter>value</parameter> parameter is the URL pattern for mapping
+                request URLs to the servlet, as described in <xref
+                linkend="application.environment.servlet-mapping"/>. The
+                <parameter>ui</parameter> parameter is the UI class. Production mode is
+                disabled by default, which enabled on-the-fly theme compilation, debug
+                window, and other such development features. See the subsequent sections
+                for details on the different servlet and Vaadin configuration parameters.
+            </para>
+
+            <para>
+                You can also use a <filename>web.xml</filename> deployment descriptor in
+                Servlet 3.0 projects.
+            </para>
+        </section>
+
 		<section xml:id="application.environment.web-xml">
-			<title>Deployment Descriptor <filename>web.xml</filename></title>
+			<title>Using a Deployment Descriptor <filename>web.xml</filename></title>
 
 			<para>
-				The deployment descriptor is an XML file with the name
-				<filename>web.xml</filename> in the <filename>WEB-INF</filename> directory
-				of a web application. It is a standard component in Java EE describing how
-				a web application should be deployed. The descriptor is not needed with
-				Servlet API 3.0, where you can define servlets also as web fragments, with
-				the <classname>@WebServlet</classname> annotation, or programmatically.
+				A deployment descriptor is an XML file with the name
+				<filename>web.xml</filename> in the <filename>WEB-INF</filename>
+				sub-directory of a web application. It is a standard component in Java EE
+				describing how a web application should be deployed. The descriptor is not
+				required with Servlet API 3.0, where you can also define servlets with the
+				<classname>@WebServlet</classname> annotation as decribed earlier, as web
+				fragments, or programmatically. You can use both a
+				<filename>web.xml</filename> and WebServlet in the same
+				application. Settings in the <filename>web.xml</filename> override the
+				ones given in annotations.
             </para>
 
 			<para>
-                The following example illustrates the structure of a deployment
-                descriptor. You simply specify the UI class with the
+                The following example shows the basic contents of a deployment descriptor
+                for a Servlet 2.4 application. You simply specify the UI class with the
                 <parameter>UI</parameter> parameter for the
                 <classname>com.vaadin.server.VaadinServlet</classname>. The servlet is
                 then mapped to a URL path in a standard way for Java Servlets.
@@ -2206,8 +2256,9 @@ main.addListener(new Window.CloseListener(){
                 <filename>myservlet</filename>. The servlet class,
                 <classname>com.vaadin.server.VaadinServlet</classname>, is provided by
                 Vaadin framework and is normally the same for all Vaadin projects. For
-                some purposes, you may need to use a custom servlet class. The class name
-                must include the full package path.
+                some purposes, you may need to use a custom servlet class that extends the
+                <classname>VaadinServlet</classname>. The class name must include the full
+                package path.
             </para>
 
 			<section xml:id="application.environment.web-xml.servlet">
@@ -2226,29 +2277,24 @@ main.addListener(new Window.CloseListener(){
       http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd</emphasis>"&gt;</programlisting>
 
                 <para>
-                    You may find Servlet 3.0 support useful for at least server push.
+                    Servlet 3.0 support is useful for at least server push.
                 </para>
             </section>
 
-			<section xml:id="application.environment.web-xml.widgetset">
-				<title>Widget Set</title>
+            <section xml:id="application.environment.web-xml.widgetset">
+                <title>Widget Set</title>
 
                 <para>
                     If the UI uses add-on components or custom widgets, it needs a custom
-                    widget set, which is specified with the
-                    <parameter>widgetset</parameter> parameter for the servlet. The
+                    widget set, which can be specified with the
+                    <parameter>widgetset</parameter> parameter for the
+                    servlet. Alternatively, you can defined it with the
+                    <classname>@WidgetSet</classname> annotation for the UI class. The
                     parameter is a class name with the same path but without the
                     <filename>.gwt.xml</filename> extension as the widget set definition
                     file. If the parameter is not given, the
                     <classname>com.vaadin.DefaultWidgetSet</classname> is used, which
                     contains all the widgets for the built-in Vaadin components.
-                </para>
-
-                <para>
-                    If you use the Vaadin Plugin for Eclipse for creating the project and
-                    compiling the widget set, it automatically generates the project
-                    widget set definition file, which includes all other widget sets it
-                    finds from the class path, and sets the parameter.
                 </para>
 
                 <para>
@@ -2259,29 +2305,52 @@ main.addListener(new Window.CloseListener(){
                     application.
                 </para>
             </section>
+        </section>
 
-			<section xml:id="application.environment.web-xml.mapping">
-				<title>Servlet Mapping with URL Patterns</title>
+        <section xml:id="application.environment.servlet-mapping">
+            <title>Servlet Mapping with URL Patterns</title>
+
+            <para>
+                The servlet needs to be mapped to an URL path, which requests it is to
+                handle.
+            </para>
+            
+            <para>
+                With <classname>@WebServlet</classname> annotation for the servlet class:
+            </para>
+
+            <programlisting><?pocket-size 75% ?>@WebServlet(value = "<emphasis role="bold">/*</emphasis>", asyncSupported = true)</programlisting>
+
+            <para>
+                In a <filename>web.xml</filename>:
+            </para>
+
+            <programlisting><?pocket-size 75% ?>  &lt;servlet-mapping&gt;
+    &lt;servlet-name&gt;<emphasis role="strong">myservlet</emphasis>&lt;/servlet-name&gt;
+    &lt;url-pattern&gt;/*&lt;/url-pattern&gt;
+  &lt;/servlet-mapping&gt;</programlisting>
+
+            <para>
+                The URL pattern is defined in the above examples as
+                <literal>/*</literal>. This matches any URL under the project context. We
+                defined above the project context as <literal>myproject</literal> so the
+                URL for the page of the &ui; will be
+                <uri>http://localhost:8080/myproject/</uri>. If the project were to have
+                multiple &ui;s or servlets, they would have to be given different names to
+                distinguish them.  For example, <literal>/my&ui;/*</literal> would match a
+                URL such as <uri>http://localhost:8080/myproject/my&ui;/</uri>. Notice
+                that the slash and the asterisk <emphasis>must</emphasis> be included at
+                the end of the pattern.
+            </para>
+
+            <section xml:id="application.environment.servlet-mapping.sub-paths">
+                <title>Mapping Sub-Paths</title>
 
                 <para>
-                    The <literal>url-pattern</literal> is defined above as
-                    <literal>/*</literal>. This matches any URL under the project
-                    context. We defined above the project context as
-                    <literal>myproject</literal> so the URL for the page of the &ui; will be
-                    <uri>http://localhost:8080/myproject/</uri>. If the project were to have
-                    multiple &ui;s or servlets, they would have to be given different names
-                    to distinguish them.  For example, <literal>url-pattern</literal>
-                    <literal>/my&ui;/*</literal> would match a URL such as
-                    <uri>http://localhost:8080/myproject/my&ui;/</uri>. Notice that the slash
-                    and the asterisk <emphasis>must</emphasis> be included at the end of the
-                    pattern.
-                </para>
-
-                <para>
-                    Notice also that if the URL pattern is other than
-                    <literal>/*</literal> (such as <literal>/my&ui;/*</literal>), you will also
-                    need to make a servlet mapping to <literal>/VAADIN/*</literal> (unless you
-                    are serving it statically as noted below). For example:
+                    If the URL pattern is other than <literal>/*</literal> (such as
+                    <literal>/my&ui;/*</literal>), you will also need to make a servlet
+                    mapping to <literal>/VAADIN/*</literal> (unless you are serving it
+                    statically as noted below). For example:
                 </para>
 
                 <programlisting>    ...
@@ -2316,19 +2385,20 @@ main.addListener(new Window.CloseListener(){
         </section>
 
         <section xml:id="application.environment.parameters">
-            <title>Other Deployment Parameters</title>
+            <title>Other Servlet Configuration Parameters</title>
 
             <para>
-                A deployment descriptor can have many parameters and options that control
-                the execution of a servlet. You can find complete documentation of the
-                deployment descriptor in the appropriate <link
+                The servlet class or deployment descriptor can have many parameters and
+                options that control the execution of a servlet. You can find complete
+                documentation of the basic servlet parameters in the appropriate <link
                 xlink:href="http://wiki.apache.org/tomcat/Specifications">Java Servlet
-                Specification</link>.
-                <!-- JCP or Oracle don't seem to have a proper index URL. -->
+                Specification</link>.  <!-- JCP or Oracle don't seem to have a proper
+                index URL. --> <classname>@VaadinServletConfiguration</classname> accepts
+                a number of special parameters, as described below.
             </para>
 
             <para>
-                You can set most parameters either as a
+                In a <filename>web.xml</filename>, you can set most parameters either as a
                 <literal>&lt;context-param&gt;</literal> for the entire web application,
                 in which case they apply to all Vaadin servlets, or as an
                 <literal>&lt;init-param&gt;</literal> for an individual servlet. If both
@@ -2342,7 +2412,9 @@ main.addListener(new Window.CloseListener(){
                     By default, Vaadin applications run in <emphasis>debug mode</emphasis>
                     (or <emphasis>development mode</emphasis>), which should be used
                     during development. This enables various debugging features. For
-                    production use, you should have the following setting in your
+                    production use, you should have the
+                    <literal>productionMode=true</literal> setting in the
+                    <classname>@VaadinServletConfiguration</classname>, or in
                     <filename>web.xml</filename>:
                 </para>
 
@@ -2353,7 +2425,7 @@ main.addListener(new Window.CloseListener(){
 </context-param>]]></programlisting>
 				
                 <para>
-                    The parameter and the debug and production modes are described in
+                    The parameter and the debug and production modes are described in more
                     detail in <xref linkend="advanced.debug-production-modes"/>.
                 </para>
             </section>
@@ -2367,6 +2439,10 @@ main.addListener(new Window.CloseListener(){
                     a custom UI provider, you can define its class with the
                     <parameter>UIProvider</parameter> parameter. The provider is
                     registered in the <classname>VaadinSession</classname>.
+                </para>
+
+                <para>
+                    In a <filename>web.xml</filename>:
                 </para>
 
 				<programlisting>  &lt;servlet&gt;
@@ -2402,6 +2478,10 @@ main.addListener(new Window.CloseListener(){
                     (5 minutes).
                 </para>
 
+                <para>
+                    In a <filename>web.xml</filename>:
+                </para>
+
                 <programlisting><![CDATA[<context-param>
   <param-name>heartbeatInterval</param-name>
   <param-value>300</param-value>
@@ -2418,6 +2498,10 @@ main.addListener(new Window.CloseListener(){
                     request. Different servlet containers use varying defaults for
                     timeouts, such as 30 minutes for Apache Tomcat. You can set the
                     timeout under <literal>&lt;web-app&gt;</literal> with:
+                </para>
+
+                <para>
+                    In a <filename>web.xml</filename>:
                 </para>
 
                 <indexterm><primary>session-timeout</primary></indexterm>
@@ -2448,8 +2532,7 @@ main.addListener(new Window.CloseListener(){
                 </para>
 
                 <para>
-                    The <parameter>closeIdleSessions</parameter> parameter can be given to
-                    a servlet (not the web application) as follows:
+                    In a <filename>web.xml</filename>:
                 </para>
 
 				<programlisting>  &lt;servlet&gt;
@@ -2466,13 +2549,20 @@ main.addListener(new Window.CloseListener(){
 
                 <para>
                     You can enable server push, as described in <xref
-                    linkend="advanced.push"/>, for a UI in the descriptor. The
+                    linkend="advanced.push"/>, for a UI either with a
+                    <classname>@Push</classname> annotation for the UI or in the
+                    descriptor. The push mode is defined with a
+                    <parameter>pushmode</parameter> parameter. The
                     <literal>automatic</literal> mode pushes changes to the browser
                     automatically after <emphasis>access()</emphasis> finishes. With
                     <literal>manual</literal> mode, you need to do the push explicitly
                     with <methodname>push()</methodname>. If you use a Servlet 3.0
                     compatible server, you also want to enable asynchronous processing
                     with the <literal>async-supported</literal> parameter.
+                </para>
+
+                <para>
+                    In a <filename>web.xml</filename>:
                 </para>
 
                 <programlisting>&lt;servlet&gt;
@@ -2500,13 +2590,15 @@ main.addListener(new Window.CloseListener(){
                     <literal>true</literal>.
                 </para>
 
+                <para>
+                    In a <filename>web.xml</filename>:
+                </para>
+
                 <programlisting><![CDATA[<context-param>
   <param-name>disable-xsrf-protection</param-name>
   <param-value>true</param-value>
 </context-param>]]></programlisting>
-
             </section>
-
 		</section>
 
         <section xml:id="application.environment.configuration">
