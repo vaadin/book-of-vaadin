@@ -12,92 +12,45 @@
 
     <indexterm xml:id="term.portal" class="startofrange"><primary>portal integration</primary></indexterm>
 
-    <para>
-        Vaadin supports running applications as portlets, as defined in the JSR-286 (Java
-        Portlet API 2.0) standard. While providing generic support for all portals
-        implementing the standard, Vaadin especially supports the Liferay portal and the
-        needed portal-specific configuration is given in this chapter for Liferay.
-    </para>
-
-    <para>
-        <emphasis>Because of pressing release schedules to get this edition to your hands,
-        we were unable to completely update this chapter. The content is up-to-date with
-        Vaadin 7 to some extent, but some topics still require revision. Please consult
-        the web version once it is updated, or the next print edition.</emphasis>
-    </para>
-
-    <section xml:id="portal.deploying">
-        <title>Deploying to a Portal</title>
+    <section xml:id="portal.overview">
+        <title>Overview</title>
 
         <para>
-            Deploying a Vaadin application as a portlet is essentially just as easy as
-            deploying a regular application to an application server. You do not need to
-            make any changes to the application itself, but only the following:
-        </para>
-
-        <itemizedlist spacing="compact">
-            <listitem><para>Application packaged as a WAR</para>
-                <itemizedlist spacing="compact" mark="disc">
-                    <listitem><para><filename>WEB-INF/portlet.xml</filename> descriptor</para></listitem>
-                    <listitem><para><filename>WEB-INF/web.xml</filename> descriptor for Portlet 1.0 portlets</para></listitem>
-                    <listitem><para><filename>WEB-INF/liferay-portlet.xml</filename> descriptor for Liferay</para></listitem>
-                    <listitem><para><filename>WEB-INF/liferay-display.xml</filename> descriptor for Liferay</para></listitem>
-                    <listitem><para><filename>WEB-INF/liferay-plugin-package.properties</filename> for Liferay</para></listitem>
-                </itemizedlist>
-            </listitem>
-            
-            <listitem>Widget set installed to portal (optional)</listitem>
-            <listitem>Themes installed to portal (optional)</listitem>
-            <listitem>Vaadin library installed to portal (optional)</listitem>
-            <listitem>Portal configuration settings (optional)</listitem>
-        </itemizedlist>
-
-        <para>
-            Installing the widget set and themes to the portal is required for running two
-            or more Vaadin portlets simultaneously in a single portal page. As this
-            situation occurs quite easily, we recommend installing them in any case.
+            Vaadin supports running UIs as portlets in a portal, as defined in the JSR-286
+            (Java Portlet API 2.0) standard. The portlet UI is defined just as a regular
+            UI, but deploying to a portal is somewhat different from deployment of regular
+            web applications, requiring special portlet descriptors, etc. Creating the
+            portlet project with the Vaadin Plugin for Eclipse, as described in <xref
+            linkend="portal.eclipse"/>, automatically generates the necessary descriptors.
         </para>
 
         <para>
-            In addition to the Vaadin library, you will need to have the
-            <filename>portlet.jar</filename> in your project classpath. However, notice that you must
-            <emphasis>not</emphasis> put the <filename>portlet.jar</filename> in the same
-            <filename>WEB-INF/lib</filename> directory as the Vaadin JAR or
-            otherwise include it in the WAR to be deployed, because it would create a
-            conflict with the internal portlet library of the portal. The conflict would
-            cause errors such as "<literal>ClassCastException: ...VaadinPortlet
-            cannot be cast to javax.portlet.Portlet</literal>".
+            In addition to providing user interface through the Vaadin UI, portlets can
+            integrate with the portal to switch between portlet modes and process special
+            portal requests, such as actions and events.
         </para>
 
         <para>
-            How you actually deploy a WAR package depends on the portal. In Liferay, you
-            simply drop it to the <filename>deploy</filename> subdirectory under the
-            Liferay installation directory. The deployment depends on the application
-            server under which Liferay runs; for example, if you use Liferay bundled with
-            Tomcat, you will find the extracted package in the
-            <filename>webapps</filename> directory under the Tomcat installation directory
-            included in Liferay.
+            While providing generic support for all portals implementing the standard,
+            Vaadin especially supports the Liferay portal and the needed portal-specific
+            configuration in this chapter is given for Liferay. Vaadin also has a special
+            Liferay IPC add-on to enable communication between portlets.
         </para>
     </section>
 
     <section xml:id="portal.eclipse">
-        <title>Creating a Portal Application Project in Eclipse</title>
+        <title>Creating a Portlet Project in Eclipse</title>
 
         <para>
-            <emphasis>This section is not yet updated for Vaadin 7.</emphasis>
+            The Vaadin Plugin for Eclipse has a wizard for easy creation of portlet
+            projects. It essentially creates all the necessary descriptor files so that
+            you do not need to create them manually, as described later.
         </para>
 
         <para>
-            While you can create the needed deployment descriptors manually for any
-            existing Vaadin application, as described in subsequent sections, the Vaadin
-            Plugin for Eclipse provides a wizard for easy creation of portal application
-            projects.
-        </para>
-
-        <para>
-            Creation of a portlet application project is almost identical to the creation
-            of a regular Vaadin servlet application project. For a full treatment of the
-            New Project Wizard and the possible options, please see <xref
+            Creating a portlet project is almost identical to the creation of a regular
+            Vaadin servlet application project. For a full treatment of the New Project
+            Wizard and the possible options, please see <xref
             linkend="getting-started.first-project.creation"/>.
         </para>
 
@@ -125,7 +78,6 @@
                     should be good for the other settings.
                 </para>
 
-                <!-- TODO Vaadin 7 update screenshot -->
                 <screenshot>
                     <mediaobject>
                         <imageobject role="html">
@@ -193,7 +145,7 @@
                         <listitem>
                             <para>
                                 The application name is used in the title of the
-                                application window, which is usually invisible in
+                                browser window, which is usually invisible in
                                 portlets, and as an identifier, either as is or with a
                                 suffix, in various deployment descriptors.
                             </para>
@@ -211,8 +163,16 @@
                         <term><guilabel>Application class name</guilabel></term>
                         <listitem>
                             <para>
-                                Name of the application class. The default is derived from
+                                Name of the UI class. The default is derived from
                                 the project name.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><guilabel>Theme name</guilabel></term>
+                        <listitem>
+                            <para>
+                                Name of the custom portlet theme to use.
                             </para>
                         </listitem>
                     </varlistentry>
@@ -263,27 +223,146 @@
         </orderedlist>
     </section>
 
-    <section xml:id="portal.deployment-descriptor">
-        <title>Portlet Deployment Descriptors</title>
+    <section xml:id="portal.ui">
+        <title>Portlet UI</title>
 
         <para>
-            <emphasis>This section is not yet updated for Vaadin 7.</emphasis>
+            A portlet UI is just like in a regular Vaadin application, a class that
+            extends <classname>com.vaadin.ui.UI</classname>.
+        </para>
+
+        <programlisting><?pocket-size 70% ?><![CDATA[@Theme("liferay")
+public class MyportletUI extends UI {
+    @Override
+    protected void init(VaadinRequest request) {
+        final VerticalLayout layout = new VerticalLayout();
+        layout.setMargin(true);
+        setContent(layout);
+
+        ...
+    }
+}]]></programlisting>
+
+        <para>
+            You need to define the portlet theme with the <classname>@Theme</classname>
+            annotation as usual. The theme for the UI must match a theme installed in the
+            portal. You can use any of the built-in themes in Vaadin. For Liferay theme
+            compatibility, there is a special <literal>liferay</literal> theme. If you use
+            a custom theme, you need to compile it to CSS with the theme compiler and
+            install it in the portal under the <filename>VAADIN/themes</filename> context
+            to be served statically.
         </para>
 
         <para>
-            To deploy a portlet WAR in a portal, you need to provide the basic
+            If you want to develop the UI also in a regular application server as a
+            servlet, you can provide a servlet class annotated with
+            <classname>@WebServlet</classname> (Servlet 3.0) or a deployment descriptor
+            (Servlet 2.4) to deploy it as a servlet. The project wizard generates the
+            servlet automatically as a static inner class, as described in <xref
+            linkend="getting-started.first-project.exploring"/>.
+        </para>
+
+        <para>
+            In addition to the UI class, you need the portlet descriptor files, Vaadin
+            libraries, and other files as described later. <xref
+            linkend="figure.portal.helloworld.project"/> shows the complete project
+            structure under Eclipse.
+        </para>
+
+        <figure xml:id="figure.portal.helloworld.project" float="center" floatstyle="before">
+            <title>Portlet Project Structure in Eclipse</title>
+            <mediaobject>
+                <imageobject role="html">
+                    <imagedata align="center" fileref="img/advanced/liferay-project.png"/>
+                </imageobject>
+                <imageobject role="fo">
+                    <imagedata scale="80" smallscale="100%" align="center" fileref="img/advanced/liferay-project.png"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
+
+        <para>
+            Installed as a portlet in Liferay from the <guilabel>Add
+            Application</guilabel> menu, the application will show as illustrated in <xref
+            linkend="figure.portal.helloworld"/>.
+        </para>
+
+        <figure xml:id="figure.portal.helloworld">
+            <title>Hello World Portlet</title>
+            <mediaobject>
+                <imageobject role="html">
+                    <imagedata align="center" fileref="img/advanced/liferay-helloworld.png"/>
+                </imageobject>
+                <imageobject role="fo">
+                    <imagedata scale="100" smallscale="100%" align="center" fileref="img/advanced/liferay-helloworld.png"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
+    </section>
+
+    <section xml:id="portal.deployment">
+        <title>Deploying to a Portal</title>
+
+        <para>
+            To deploy a portlet WAR in a portal, you need to provide a
             <filename>portlet.xml</filename> descriptor specified in the Java Portlet API
             2.0 standard (JSR-286). In addition, you may need to include possible portal
             vendor specific deployment descriptors. The ones required by Liferay are
             described below.
         </para>
 
-        <simplesect xml:id="portal.deployment-descriptor.portlet-2.0">
+        <para>
+            Deploying a Vaadin UI as a portlet is essentially just as easy as deploying a
+            regular application to an application server. You do not need to make any
+            changes to the UI itself, but only the following:
+        </para>
+
+        <itemizedlist spacing="compact">
+            <listitem><para>Application packaged as a WAR</para>
+                <itemizedlist spacing="compact" mark="disc">
+                    <listitem><para><filename>WEB-INF/portlet.xml</filename> descriptor</para></listitem>
+                    <listitem><para><filename>WEB-INF/liferay-portlet.xml</filename> descriptor for Liferay</para></listitem>
+                    <listitem><para><filename>WEB-INF/liferay-display.xml</filename> descriptor for Liferay</para></listitem>
+                    <listitem><para><filename>WEB-INF/liferay-plugin-package.properties</filename> for Liferay</para></listitem>
+                </itemizedlist>
+            </listitem>
+            
+            <listitem>Widget set installed to portal (optional)</listitem>
+            <listitem>Themes installed to portal (optional)</listitem>
+            <listitem>Vaadin libraries installed to portal (optional)</listitem>
+            <listitem>Portal configuration settings (optional)</listitem>
+        </itemizedlist>
+
+        <para>
+            The Vaadin Plugin for Eclipse creates these files for you, when you create a
+            portlet project as described in <xref linkend="portal.eclipse"/>.
+        </para>
+
+        <para>
+            Installing the widget set and themes to the portal is required for running two
+            or more Vaadin portlets simultaneously in a single portal page. As this
+            situation occurs quite easily, we recommend installing them in any
+            case. Instructions for Liferay are given in <xref linkend="portal.liferay"/>
+            and the procedure is similar for other portals.
+        </para>
+
+        <para>
+            In addition to the Vaadin libraries, you will need to have the
+            <filename>portlet.jar</filename> in your project classpath. However, notice
+            that you must <emphasis>not</emphasis> put the
+            <filename>portlet.jar</filename> in the same <filename>WEB-INF/lib</filename>
+            directory as the Vaadin JAR or otherwise include it in the WAR to be deployed,
+            because it would create a conflict with the internal portlet library of the
+            portal. The conflict would cause errors such as "<literal>ClassCastException:
+            ...VaadinPortlet cannot be cast to javax.portlet.Portlet</literal>".
+        </para>
+
+        <section xml:id="portal.deployment.descriptor">
             <title>Portlet 2.0 Deployment Descriptor</title>
 
             <para>
                 The portlet WAR must include a portlet descriptor located at
-                <filename>WebContent/WEB-INF/portlet.xml</filename>. A portlet definition
+                <filename>WEB-INF/portlet.xml</filename>. A portlet definition
                 includes the portlet name, mapping to a servlet in
                 <filename>web.xml</filename>, modes supported by the portlet, and other
                 configuration. Below is an example of a simple portlet definition in
@@ -335,146 +414,9 @@
                 enables the corresponding portlet controls in the portal user interface
                 that allow changing the mode, as described later.
             </para>
-        </simplesect>
+        </section>
 
-        <simplesect xml:id="portal.deployment-descriptor.portlet-1.0">
-            <title>Portlet 1.0 Deployment Descriptor</title>
-
-            <para>
-                The portlet deployment descriptor for Portlet 1.0 API is largely the same
-                as for Portlet 2.0. The main differences are:
-            </para>
-
-            <orderedlist>
-                <listitem><para>XML namespace and schema names</para></listitem>
-
-
-                <listitem><para>The <literal>ui</literal> parameter is a name of
-                the servlet (defined in <filename>web.xml</filename> in Portlet 1.0, but
-                name of the UI class in Portlet 2.0. There is no longer a
-                separate <filename>web.xml</filename> file in Servlet
-                2.0.</para></listitem>
-
-                <listitem><para>The <literal>portlet-name</literal> must not be same as
-                the servlet name in Portlet 1.0; in Portlet 2.0 this does not
-                matter.</para></listitem>
-            </orderedlist>
-
-            <para>
-                Below is an example of a complete deployment descriptor for Portlet 1.0:
-            </para>
-
-            <programlisting><?pocket-size 65% ?>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
-&lt;portlet-app
-  version="1.0"
-  xmlns="http://java.sun.com/xml/ns/portlet/portlet-app_1_0.xsd"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation=
-       "http://java.sun.com/xml/ns/portlet/portlet-app_1_0.xsd
-        http://java.sun.com/xml/ns/portlet/portlet-app_1_0.xsd"&gt;
-
-  &lt;portlet&gt;
-    &lt;!-- Must not be the same as servlet name. --&gt;
-    &lt;portlet-name&gt;<emphasis role="bold">Portlet Example portlet</emphasis>&lt;/portlet-name&gt;
-    &lt;display-name&gt;<emphasis role="bold">Vaadin Portlet Example</emphasis>&lt;/display-name&gt;
-
-    &lt;!-- Map portlet to a servlet. --&gt;
-    &lt;portlet-class&gt;
-      com.vaadin.server.VaadinPortlet
-    &lt;/portlet-class&gt;
-    &lt;init-param&gt;
-      &lt;name&gt;ui&lt;/name&gt;
-
-      &lt;!-- Must match the servlet URL mapping in web.xml. --&gt;
-      &lt;value&gt;<emphasis role="bold">portletexample</emphasis>&lt;/value&gt;
-    &lt;/init-param&gt;
-
-    &lt;!-- Supported portlet modes and content types. --&gt;
-    &lt;supports&gt;
-      &lt;mime-type&gt;text/html&lt;/mime-type&gt;
-      &lt;portlet-mode&gt;view&lt;/portlet-mode&gt;
-      &lt;portlet-mode&gt;edit&lt;/portlet-mode&gt;
-      &lt;portlet-mode&gt;help&lt;/portlet-mode&gt;
-    &lt;/supports&gt;
-
-    &lt;!-- Not always required but Liferay requires these. --&gt;
-    &lt;portlet-info&gt;
-      &lt;title&gt;<emphasis role="bold">Vaadin Portlet Example</emphasis>&lt;/title&gt;
-      &lt;short-title&gt;<emphasis role="bold">Portlet Example</emphasis>&lt;/short-title&gt;
-    &lt;/portlet-info&gt;
-  &lt;/portlet&gt;
-&lt;/portlet-app&gt;</programlisting>
-
-            <para>
-                The value of the application parameter must match the context in the
-                <literal>&lt;url-pattern&gt;</literal> element in the
-                <literal>&lt;servlet-mapping&gt;</literal> in the
-                <filename>web.xml</filename> deployment descriptor, without the path
-                qualifiers in the pattern. The above example would match the following
-                servlet mapping in <filename>web.xml</filename>:
-            </para>
-
-            <programlisting><?pocket-size 65% ?>  &lt;servlet-mapping&gt;
-      &lt;servlet-name&gt;Portlet Example&lt;/servlet-name&gt;
-      &lt;url-pattern&gt;/<emphasis role="bold">portletexample</emphasis>/&#x2a;&lt;/url-pattern&gt;
-  &lt;/servlet-mapping&gt;</programlisting>
-
-            <para>
-                In fact, it would also match the <literal>/&#x2a;</literal> mapping.
-            </para>
-        </simplesect>
-
-        <simplesect>
-            <title>Using a Single Widget Set</title>
-
-            <para>
-                If you have just one Vaadin application that you ever need to run in your
-                portal, you can just deploy the WAR as described above and that's
-                it. However, if you have multiple applications, especially ones that use
-                different custom widget sets, you run into problems, because a portal
-                window can load only a single Vaadin widget set at a time. You can solve
-                this problem by combining all the different widget sets in your different
-                applications into a single widget set using inheritance or composition.
-            </para>
-
-            <para>
-                For example, if using the default widget set for portlets, you should have
-                the following for all portlets so that they will all use the same widget
-                set:
-            </para>
-
-            <programlisting><?pocket-size 65% ?><![CDATA[<portlet>
-  ...
-  <!-- Use the portal default widget set for all portal demos. -->
-  <init-param>
-    <name>widgetset</name>
-    <value>com.vaadin.portal.PortalDefaultWidgetSet</value>
-  </init-param>
-  ...]]></programlisting>
-
-            <para>
-                The <classname>PortalDefaultWidgetSet</classname> extends
-                <classname>SamplerWidgetSet</classname>, which extends the
-                <classname>DefaultWidgetSet</classname>. The
-                <classname>DefaultWidgetSet</classname> is therefore essentially a subset
-                of <classname>PortalDefaultWidgetSet</classname>, which contains also the
-                widgets required by the Sampler demo. Other applications that would
-                otherwise require only the regular
-                <classname>DefaultWidgetSet</classname>, and do not define their own
-                widgets, can just as well use the larger set, making them compatible with
-                the demos. The <classname>PortalDefaultWidgetSet</classname> will also be
-                the default Vaadin widgetset bundled in Liferay 5.3 and later.
-            </para>
-
-            <para>
-                If your portlets are contained in multiple WARs, which can happen quite
-                typically, you need to install the widget set and theme portal-wide so
-                that all the portlets can use them. See <xref linkend="portal.liferay"/>
-                on configuring the widget sets in the portal itself.
-            </para>
-        </simplesect>
-
-        <simplesect xml:id="portal.liferay.descriptor.liferay-portlet">
+        <section xml:id="portal.deployment.liferay">
             <title>Liferay Portlet Descriptor</title>
 
             <indexterm xml:id="term.portal.liferay.descriptor.liferay-portlet.liferay" class="startofrange">
@@ -515,10 +457,11 @@
             </para>
 
             <indexterm startref="term.portal.liferay.descriptor.liferay-portlet.liferay" class="endofrange"/>
-        </simplesect>
+        </section>
 
-        <simplesect xml:id="portal.liferay.descriptor.display">
+        <section xml:id="portal.deployment.liferay-display">
             <title>Liferay Display Descriptor</title>
+
             <indexterm xml:id="term.portal.liferay.descriptor.liferay-display" class="startofrange">
                 <primary><filename>liferay-display.xml</filename></primary>
             </indexterm>
@@ -571,9 +514,9 @@
 
             <indexterm startref="term.portal.liferay.descriptor.liferay-display" class="endofrange"/>
             <indexterm startref="term.portal.liferay.descriptor.liferay-display.liferay" class="endofrange"/>
-        </simplesect>
+        </section>
 
-        <simplesect>
+        <section xml:id="portal.deployment.liferay-plugin">
             <title>Liferay Plugin Package Properties</title>
             
             <indexterm xml:id="term.portal.liferay.descriptor.liferay-plugin" class="startofrange">
@@ -652,107 +595,105 @@ portal-dependency-jars=\
                 
             <indexterm startref="term.portal.liferay.descriptor.liferay-plugin" class="endofrange"/>
             <indexterm startref="term.portal.liferay.descriptor.liferay-plugin.liferay" class="endofrange"/>
-        </simplesect>
-    </section>
+        </section>
 
-    <section xml:id="portal.helloworld">
-        <title>Portlet Hello World</title>
+        <section xml:id="portal.deployment.widgetset">
+            <title>Using a Single Widget Set</title>
 
-        <para>
-            <emphasis>This section is not yet updated for Vaadin 7.</emphasis>
-        </para>
+            <para>
+                If you have just one Vaadin application that you ever need to run in your
+                portal, you can just deploy the WAR as described above and that's
+                it. However, if you have multiple applications, especially ones that use
+                different custom widget sets, you run into problems, because a portal
+                window can load only a single Vaadin widget set at a time. You can solve
+                this problem by combining all the different widget sets in your different
+                applications into a single widget set using inheritance or composition.
+            </para>
 
-        <para>
-            The Hello World program that runs as a portlet is no different from a regular
-            Vaadin application, as long as it doesn't need to handle portlet actions, mode
-            changes, and so on.
-        </para>
+            <para>
+                For example, if using the default widget set for portlets, you should have
+                the following for all portlets so that they will all use the same widget
+                set:
+            </para>
 
-        <programlisting><?pocket-size 70% ?><![CDATA[import com.vaadin.Application;
-import com.vaadin.ui.*;
+            <programlisting><?pocket-size 65% ?><![CDATA[<portlet>
+  ...
+  <!-- Use the portal default widget set for all portal demos. -->
+  <init-param>
+    <name>widgetset</name>
+    <value>com.vaadin.portal.PortalDefaultWidgetSet</value>
+  </init-param>
+  ...]]></programlisting>
 
-public class PortletExample extends Application {
-    @Override 
-    public void init() {
-        Window mainWindow = new Window("Portlet Example");
+            <para>
+                The <classname>PortalDefaultWidgetSet</classname> extends
+                <classname>SamplerWidgetSet</classname>, which extends the
+                <classname>DefaultWidgetSet</classname>. The
+                <classname>DefaultWidgetSet</classname> is therefore essentially a subset
+                of <classname>PortalDefaultWidgetSet</classname>, which contains also the
+                widgets required by the Sampler demo. Other applications that would
+                otherwise require only the regular
+                <classname>DefaultWidgetSet</classname>, and do not define their own
+                widgets, can just as well use the larger set, making them compatible with
+                the demos. The <classname>PortalDefaultWidgetSet</classname> will also be
+                the default Vaadin widgetset bundled in Liferay 5.3 and later.
+            </para>
 
-        Label label = new Label("Hello Vaadin user");
-        mainWindow.addComponent(label);
-        setMainWindow(mainWindow);
-    }
-}]]></programlisting>
+            <para>
+                If your portlets are contained in multiple WARs, which can happen quite
+                typically, you need to install the widget set and theme portal-wide so
+                that all the portlets can use them. See <xref linkend="portal.liferay"/>
+                on configuring the widget sets in the portal itself.
+            </para>
+        </section>
 
-        <para>
-            In addition to the application class, you need the descriptor files,
-            libraries, and other files as described earlier. <xref
-            linkend="figure.portal.helloworld.project"/> shows the complete project
-            structure under Eclipse.
-        </para>
+        <section xml:id="portal.deployment.war">
+            <title>Building the WAR Package</title>
 
-        <figure xml:id="figure.portal.helloworld.project" float="center" floatstyle="before">
-            <title>Portlet Project Structure in Eclipse</title>
-            <mediaobject>
-                <imageobject role="html">
-                    <imagedata align="center" fileref="img/advanced/liferay-project.png"/>
-                </imageobject>
-                <imageobject role="fo">
-                    <imagedata scale="80" smallscale="100%" align="center" fileref="img/advanced/liferay-project.png"/>
-                </imageobject>
-            </mediaobject>
-        </figure>
+            <para>
+                To deploy the portlet, you need to build a WAR package. For production
+                deployment, you probably want to either use Maven or an Ant script to
+                build the package. In Eclipse, you can right-click on the project and
+                select
+                <menuchoice><guimenu>Export</guimenu><guimenuitem>WAR</guimenuitem></menuchoice>. Choose
+                a name for the package and a target. If you have installed Vaadin in the
+                portal as described in <xref linkend="portal.liferay"/>, you should
+                exclude all the Vaadin libraries, as well as widget set and themes from
+                the WAR.
+            </para>
+        </section>
 
-        <para>
-            Installed as a portlet in Liferay from the <guilabel>Add
-				Application</guilabel> menu, the application will show as illustrated in
-            <xref linkend="figure.portal.helloworld"/>.
-        </para>
+        <section xml:id="portal.deployment.deploy">
+            <title>Deploying the WAR Package</title>
 
-        <figure xml:id="figure.portal.helloworld">
-            <title>Hello World Portlet</title>
-            <mediaobject>
-                <imageobject role="html">
-                    <imagedata align="center" fileref="img/advanced/liferay-helloworld.png"/>
-                </imageobject>
-                <imageobject role="fo">
-                    <imagedata scale="100" smallscale="100%" align="center" fileref="img/advanced/liferay-helloworld.png"/>
-                </imageobject>
-            </mediaobject>
-        </figure>
+            <para>
+                How you actually deploy a WAR package depends on the portal. In Liferay, you
+                simply drop it to the <filename>deploy</filename> subdirectory under the
+                Liferay installation directory. The deployment depends on the application
+                server under which Liferay runs; for example, if you use Liferay bundled with
+                Tomcat, you will find the extracted package in the
+                <filename>webapps</filename> directory under the Tomcat installation directory
+                included in Liferay.
+            </para>
+        </section>
     </section>
 
     <section xml:id="portal.liferay">
         <title>Installing Vaadin in Liferay</title>
 			
         <para>
-            <emphasis>This section is not yet updated for Vaadin 7.</emphasis>
-        </para>
-
-        <para>
             Loading widget sets, themes, and the Vaadin JAR from a portlet is possible as
             long as you have a single portlet, but causes a problem if you have multiple
             portlets. To solve this, Vaadin portlets need to use a globally installed
-            widget set, themes, and Vaadin JAR. They, and all the required configuration,
-            are bundled with Liferay 5.3 and later, but if you are using an earlier
-            version of Liferay or use a custom widget set, custom themes, or a later
-            version of Vaadin, you need to install them in Liferay.
+            widget set, theme, and Vaadin libraries.
         </para>
 
         <para>
-            <!-- TODO Vaadin 7 -->
-
-            <emphasis>Liferay 6.1, which is the latest Liferay version at the time of the
-            publication of this book, comes with an older Vaadin 6 version. If you want to
-            use Vaadin 7, you need to install it manually as described in this
-            chapter.</emphasis>
+            <emphasis>Liferay 6.1, which is the latest Liferay version at the time of
+            publication of this book, comes bundled with an older Vaadin 6 version. If you
+            want to use Vaadin 7, you need to remove the bundled version and install the
+            newer one manually as described in this chapter.</emphasis>
         </para>
-
-        <!--
-        <para>
-            The easiest way to install or upgrade Vaadin or compile the widget set in
-            Liferay is to use the Vaadin Control Panel for Liferay, as described in <xref
-            linkend="portal.control-panel"/>. If you need to make the installation or
-            compilation manually, read ahead.
-        </para> -->
 
         <para>
             In these instructions, we assume that you use Liferay bundled with Apache
@@ -795,11 +736,21 @@ public class PortletExample extends Application {
 
                 <listitem>Put the libraries in <filename>tomcat-x.x.x/webapps/ROOT/WEB-INF/lib/</filename></listitem>
 
-                <listitem>Extract the <filename>VAADIN</filename> folders from
-                <filename>vaadin-server.jar</filename>,
-                <filename>vaadin-themes.jar</filename>, and
-                <filename>vaadin-client-compiled.jar</filename> and copy their contents to
-                <filename>tomcat-x.x.x/webapps/ROOT/html/VAADIN</filename></listitem>
+                <listitem>
+                    <para>
+                        Extract the <filename>VAADIN</filename> folders from
+                        <filename>vaadin-server.jar</filename>,
+                        <filename>vaadin-themes.jar</filename>, and
+                        <filename>vaadin-client-compiled.jar</filename> and copy their
+                        contents to
+                        <filename>tomcat-x.x.x/webapps/ROOT/html/VAADIN</filename>.
+                    </para>
+
+                    <screen><prompt>$</prompt> <command>cd</command> tomcat-x.x.x/webapps/ROOT/html</screen>
+                    <screen><prompt>$</prompt> <command>unzip</command> path-to/vaadin-server-7.1.0.jar 'VAADIN/*'</screen>
+                    <screen><prompt>$</prompt> <command>unzip</command> path-to/vaadin-themes-7.1.0.jar 'VAADIN/*'</screen>
+                    <screen><prompt>$</prompt> <command>unzip</command> path-to/vaadin-client-compiled-7.1.0.jar 'VAADIN/*'</screen>
+</listitem>
             </orderedlist>
         </section>
 
@@ -823,7 +774,7 @@ public class PortletExample extends Application {
 vaadin.widgetset=com.vaadin.portal.gwt.PortalDefaultWidgetSet
 
 # Theme to use
-vaadin.theme=reindeer]]></programlisting>
+vaadin.theme=liferay]]></programlisting>
 
         <para>
             The allowed parameters are:
@@ -864,7 +815,7 @@ vaadin.theme=reindeer]]></programlisting>
         </para>
     </section>
 
-    <section xml:id="portal.requests">
+    <section xml:id="portal.requests" condition="web">
         <title>Handling Portlet Requests</title>
 
         <para>
@@ -884,22 +835,20 @@ vaadin.theme=reindeer]]></programlisting>
             The only way a portal can interact with a UI is to load it with a HTTP
             request; reloading does not reset the UI. The Portlet 2.0 API supports four
             types of requests: <emphasis>render</emphasis>, <emphasis>action</emphasis>,
-            <emphasis>resource</emphasis>, and <emphasis>event</emphasis> requests. The
-            old Portlet 1.0 API supports only the render and action requests. Requests can
-            be caused by user interaction with the portal controls or by clicking action
-            URLs displayed by the portlet. You can handle portlet requests by implementing
-            the <classname>PortletListener</classname> interface and the handler methods
-            for each of the request types. You can use the request object passed to the
-            handler to access certain portal data, such as user information, the portlet
-            mode, etc.
+            <emphasis>resource</emphasis>, and <emphasis>event</emphasis>
+            requests. Requests can be caused by user interaction with the portal controls
+            or by clicking action URLs displayed by the portlet. You can handle portlet
+            requests by implementing the <classname>PortletListener</classname> interface
+            and the handler methods for each of the request types. You can use the request
+            object passed to the handler to access certain portal data, such as user
+            information, the portlet mode, etc.
         </para>
 
         <para>
             The <classname>PortletListener</classname> interface is defined in the
-            <classname>PortletApplicationContext2</classname> for Portlet 2.0 API and
-            <classname>com.vaadin.terminal.gwt.server.PortletApplicationContext</classname>
-            class for the old Portlet 1.0 API. You can get the portlet application context
-            with <methodname>getContext()</methodname> method of the application class.
+            <classname>PortletApplicationContext2</classname> for Portlet 2.0 API. You can
+            get the portlet application context with <methodname>getContext()</methodname>
+            method of the application class.
         </para>
 
         <para>
@@ -909,7 +858,7 @@ vaadin.theme=reindeer]]></programlisting>
             conflict with the internal portlet library of the portal. You should put it in
             a directory that is not deployed with the portlet, for example, if you are
             using Eclipse, under the <filename>lib</filename> directory under the project
-            root, not under <filename>WebContent/WEB-INF/lib</filename>, for example.
+            root, and not under <filename>WebContent/WEB-INF/lib</filename>, for example.
         </para>
 
         <para>
@@ -949,7 +898,7 @@ if (getContext() instanceof PortletApplicationContext2) {
         </para>
     </section>
 
-    <section xml:id="portal.portlet-mode">
+    <section xml:id="portal.portlet-mode" condition="web">
         <title>Handling Portlet Mode Changes</title>
 
         <para>
@@ -1109,7 +1058,7 @@ public class PortletModeExample extends Application
         </figure>
     </section>
 
-    <section xml:id="portal.portlet-html-mode">
+    <section xml:id="portal.portlet-html-mode" condition="web">
         <title>Non-Vaadin Portlet Modes</title>
 
         <para>
@@ -1284,155 +1233,7 @@ public class HtmlModePortlet extends AbstractVaadinPortlet {
         </para>
    </section>
 
-    <!-- TODO Vaadin 7 - possibly remove altogether.
-    <section xml:id="portal.control-panel">
-        <title>Vaadin Control Panel for Liferay</title>
-
-        <para>
-            <emphasis>The Vaadin Control Panel for Liferay is not yet updated for Vaadin 7
-            at the time of publication of this edition of the book. The information given
-            here is for Vaadin 6. The basic functionality should be similar,
-            however.</emphasis>
-        </para>
-
-        <para>
-            Vaadin portlets, just as all Vaadin applications, use a <emphasis>widget
-            set</emphasis> to render the user interface in the browser and to handle the
-            Ajax communication with the server-side application. While regular Vaadin
-            applications use a widget set for each application, in portals the widget set
-            is shared by all Vaadin portlets running in the portal. Liferay actually comes
-            preinstalled with a precompiled version of the default portal widget
-            set. However, many add-on components come with their own widget set, which
-            needs to be compiled into the portal widget set. The Vaadin Control Panel for
-            Liferay automates this compilation. You can also use it to just install a new
-            version of the Vaadin library.
-        </para>
-
-        <section xml:id="portal.control-panel.installing">
-            <title>Installing</title>
-
-            <para>
-                Vaadin Control Panel for Liferay is available for download from Vaadin
-                Directory. It is a WAR package, which you need to simply drop into Liferay's
-                <filename>deploy</filename> folder. Once the deployment is done, the Vaadin
-                Control Panel should show up in the Liferay Control Panel.
-            </para>
-        </section>
-
-        <section xml:id="portal.control-panel.using">
-            <title>Using the Control Panel</title>
-
-            <para>
-                Open the <guilabel>Vaadin</guilabel> section in the Liferay Control Panel.
-                The initial state with is illustrated in <xref
-                linkend="figure.portal.control-panel.using.initial"/>.
-            </para>
-
-            <figure xml:id="figure.portal.control-panel.using.initial">
-                <title>Initial State of Vaadin Control Panel for Liferay</title>
-                <mediaobject>
-                    <imageobject>
-                        <imagedata smallscale="100%" align="center" fileref="img/portal/liferay-control-panel-1.png"/>
-                    </imageobject>
-                </mediaobject>
-            </figure>
-
-            <section xml:id="portal.control-panel.using.upgrade">
-                <title>Upgrading Vaadin</title>
-
-                <para>
-                    Liferay comes with Vaadin preinstalled. To upgrade the preinstalled
-                    version to a newer one, follow the following steps. Notice that the
-                    Vaadin library is upgraded for <emphasis>all</emphasis> Vaadin
-                    portlets, so they must all be compatible with the new version.
-                </para>
-
-                <orderedlist>
-                    <listitem>
-                        <para>
-                            Click <guibutton>Upgrade</guibutton> in the <guilabel>Vaadin
-                            Jar Version</guilabel>.
-                        </para>
-                    </listitem>
-                    <listitem>
-                        <para>
-                            In the warning dialog that appears, read the message and if
-                            you want to go on with the upgrade, click <guibutton>Change
-                            version</guibutton> to proceed.
-                        </para>
-                    </listitem>
-                    <listitem>
-                        <para>
-                            Recompile the widget set as instructed below.
-                        </para>
-                    </listitem>
-                    <listitem>
-                        <para>
-                            Redeploy all Vaadin portlets in Liferay, that is, copy the
-                            WARs to the <filename>deploy</filename> folder in Liferay.
-                        </para>
-                    </listitem>
-                </orderedlist>
-
-                <para>
-                    The Google Web Toolkit (GWT) libraries required for the widget set
-                    compilation are also upgraded automatically.
-                </para>
-            </section>
-
-            <section xml:id="portal.control-panel.using.compile">
-                <title>Compiling Widget Set</title>
-
-                <para>
-                    When you need to compile the widget set, follow the following steps:
-                </para>
-
-                <orderedlist>
-                    <listitem>
-                        <para>
-                            Place any add-on Jars containing widget sets, such as add-on
-                            Jars, in the <filename>WEB-INF/lib</filename> folder of
-                            Liferay. Its exact location depends on the used server; for
-                            example in Tomcat it is under the
-                            <filename>webapps/ROOT</filename> folder.
-                        </para>
-                    </listitem>                        
-                    <listitem>
-                        <para>
-                            Click <guibutton>re-scan</guibutton> in the <guilabel>Add-on
-                            Directory</guilabel> to detect any new add-on libraries.
-                        </para>
-                    </listitem>
-                    <listitem>
-                        <para>
-                            Select the add-ons which you wish to compile into the widget
-                            set.
-                        </para>
-                    </listitem>
-                    <listitem>
-                        <para>
-                            Click <guibutton>Manage Additional Dependencies</guibutton> if
-                            the libraries require any special libraries and add them.
-                        </para>
-                    </listitem>
-                    <listitem>
-                        <para>
-                            Click <guibutton>Compile Widget Set</guibutton> to compile the
-                            widget set. The compilation can take several minutes.
-                        </para>
-                    </listitem>
-                </orderedlist>
-
-                <para>
-                    The compiled widget set is copied automatically to the proper folder
-                    and taken into use.
-                </para>
-            </section>
-        </section>
-    </section>
-    -->
-
-    <section xml:id="portal.liferay-ipc">
+    <section xml:id="portal.liferay-ipc" condition="web">
         <title>Vaadin IPC for Liferay</title>
 
         <indexterm xml:id="term.portal.liferay-ipc" class="startofrange"><primary>IPC add-on</primary></indexterm>
