@@ -881,102 +881,79 @@ opener.extend(button);]]></programlisting>
 			Vaadin applications can be run in two modes: <emphasis>debug
 			mode</emphasis> and <emphasis>production mode</emphasis>. The debug mode,
 			which is on by default, enables a number of built-in debug features for the
-			developers. The features include:
+			developers:
 		</para>
 
 		<itemizedlist>
-			<listitem>Debug Window for accessing debug functionalities</listitem>
-			<listitem>Display debug information in the Debug Window and server console.</listitem>
+			<listitem>Debug Window</listitem>
+			<listitem>Display debug information in the Debug Window and server console</listitem>
 			<listitem><guibutton>Analyze layouting</guibutton> button that analyzes the layout for possible problems.</listitem>
+            <listitem>On-the-fly compilation of Sass themes</listitem>
 		</itemizedlist>
 
-		<para>
-			All applications are run in the debug mode by default (since IT Mill Toolkit
-			version 5.3.0). The production mode can be enabled, and debug mode thereby
-			disabled, by adding a <parameter>productionMode=true</parameter> parameter to
-			the servlet context in the <filename>web.xml</filename> deployment descriptor:
-		</para>
+		<section xml:id="advanced.debug-production-modes.enabling">
+			<title>Enabling the Production Mode</title>
 
-		<programlisting><?pocket-size 75% ?><![CDATA[<context-param>
-  <description>Vaadin production mode</description>
-  <param-name>productionMode</param-name>
-  <param-value>true</param-value>
-</context-param>]]></programlisting>
+            <para>
+                The production mode is disabled by default in UI templates created with
+                the Eclipse plugin or the Maven archetype. It can be enabled by giving a
+                <parameter>productionMode=true</parameter> parameter to the Vaadin servlet
+                configuration:
+            </para>
+
+            <programlisting><?pocket-size 75% ?>
+@VaadinServletConfiguration(
+            productionMode = <emphasis role="bold">true</emphasis>,
+            ui = <emphasis role="bold">MyprojectUI.class</emphasis>)</programlisting>
+
+            <para>
+                Or with a context parameter in the <filename>web.xml</filename> deployment
+                descriptor:
+            </para>
+
+            <programlisting><?pocket-size 75% ?>&lt;context-param&gt;
+  &lt;description&gt;Vaadin production mode&lt;/description&gt;
+  &lt;param-name&gt;productionMode&lt;/param-name&gt;
+  &lt;param-value&gt;<emphasis role="bold">true</emphasis>&lt;/param-value&gt;
+&lt;/context-param&gt;</programlisting>
 		
-		<para>
-			Enabling the production mode disables the debug features, thereby preventing
-			users from easily inspecting the inner workings of the application from the
-			browser.
-		</para>
+            <para>
+                Enabling the production mode disables the debug features, thereby
+                preventing users from easily inspecting the inner workings of the
+                application from the browser.
+            </para>
+        </section>
 		
-		<section xml:id="advanced.debug-production-modes.debug.mode">
-			<title>Debug Mode</title>
+		<section xml:id="advanced.debug-production-modes.debug">
+			<title>Opening the Debug Window</title>
 
             <para>
                 Running an application in the debug mode enables the client-side Debug
                 Window in the browser. You can open the Debug Window by adding
-                "<uri>?debug</uri>" to the application URL, for example,
+                "<uri>?debug</uri>" to the URL of the UI, for example,
                 <uri>http://localhost:8080/myapp/?debug</uri>. The Debug Window has
                 buttons for controlling the debugging features and a scrollable log of
                 debug messages.
             </para>
 
-            <para condition="print">
-                <emphasis>The debug window has many more features than documented here and
-                will be redesigned in Vaadin 7.1 after publication of this print
-                edition. Please refer to updated documentation published at a later
-                time.</emphasis>
+			<figure id="figure.debug.window">
+ 				<title>Debug Window</title>
+                <mediaobject>
+                    <imageobject role="html">
+                        <imagedata align="center" fileref="img/debug/debug-window-annotated-hi.png"/>
+ 					</imageobject>
+                    <imageobject role="fo">
+					 	<imagedata smallscale="100%" align="center" fileref="img/debug/debug-window-annotated-hi.png"/>
+ 					</imageobject>
+	 			</mediaobject>
+			</figure>
+
+            <para>
+                The functionalities are described in detail in the subsequent sections.
+                You can move the window by dragging it from the title bar and resize it
+                from the corners.
             </para>
 
-            <!-- TODO Update the image
-			<figure id="figure.debug.window">
-				<title>Debug Window</title>
-				<mediaobject>
-					<imageobject role="html">
-						<imagedata align="center" fileref="img/debug/debug-window.png"/>
-					</imageobject>
-					<imageobject role="fo">
-						<imagedata smallscale="100%" align="center" fileref="img/debug/debug-window.png"/>
-					</imageobject>
-				</mediaobject>
-			</figure>
-            -->
-
-            <!--
-			<variablelist>
-				<varlistentry>
-					<term><guibutton>Clear console</guibutton></term>
-					<listitem>
-						Clears the log in the Debug Window.
-					</listitem>
-				</varlistentry>
-				<varlistentry>
-					<term><guibutton>Restart app</guibutton></term>
-					<listitem>
-						Restarts the application.
-					</listitem>
-				</varlistentry>
-				<varlistentry>
-					<term><guibutton>Force layout</guibutton></term>
-					<listitem>
-						Causes all currently visible layouts to recalculate their
-						appearance. Layout components calculate the space required by all
-						child components, so the layout appearance must be recalculated
-						whenever the size of a child component is changed. In normal
-						applications, this is done automatically, but when you do themeing
-						or alter the CSS with Firebug, you may need to force all layouts
-						to recalculate themselves, taking into account the recently made
-						changes.
-					</listitem>
-				</varlistentry>
-				<varlistentry>
-					<term><guibutton>Analyze layouts</guibutton></term>
-					<listitem>
-						This is described in the following section.
-					</listitem>
-				</varlistentry>
-			</variablelist>
-            -->
 			<para>
 				If you use the Firebug plugin for Firefox or the Developer Tools console
 				in Chrome, the log messages will also be printed to the Firebug
@@ -987,106 +964,185 @@ opener.extend(button);]]></programlisting>
 			</para>
 		</section>
 
- 		<section xml:id="debug.mode.analyze">
-			<title>Analyzing Layouts</title>
-			<para>
-				The <guilabel>Analyze layouts</guilabel> button analyzes the currently
-				visible layouts and makes a report of possible layout related
-				problems. All detected layout problems are displayed in the log and also
-				printed to the console.
-			</para>
+		<section xml:id="advanced.debug-production-modes.log">
+			<title>Debug Message Log</title>
 
-			<para>
-				The most common layout problem is caused by placing a component that has a
-				relative size inside a container (layout) that has undefined size, for
-				example, adding a 100% wide <classname>Panel</classname> inside a
-				<classname>HorizontalLayout</classname> with no width specification. In
-				such a case, the error will look as shown below:
-			</para>
+            <para>
+                The debug message log displays client-side debug messages, with time
+                counter in milliseconds. The control buttons allow you to clear the log,
+                reset the timer, and lock scrolling.
+            </para>
 
-			<programlisting><?pocket-size 65% ?><![CDATA[Vaadin DEBUG
+			<figure id="figure.debug.window">
+ 				<title>Debug Message Log</title>
+                <mediaobject>
+                    <imageobject role="html">
+                        <imagedata align="center" fileref="img/debug/debug-log-hi.png"/>
+ 					</imageobject>
+                    <imageobject role="fo">
+					 	<imagedata smallscale="75%" align="center" fileref="img/debug/debug-log-hi.png"/>
+ 					</imageobject>
+	 			</mediaobject>
+			</figure>
+
+            <section xml:id="advanced.debug-production-modes.log.custom">
+                <title>Logging to Debug Window</title>
+
+                <para>
+                    You can take advantage of the debug mode when developing client-side
+                    components, by using the standard Java <classname>Logger</classname>
+                    to write messages to the log. The messages will be written to the
+                    debug window and Firebug console. No messages are written if the debug
+                    window is not open or if the application is running in production
+                    mode.
+                </para>
+
+            </section>
+        </section>
+
+		<section xml:id="advanced.debug-production-modes.info">
+			<title>General Information</title>
+
+            <para>
+                The <guilabel>General information about the application(s)</guilabel> tab
+                displays various information about the UI, such as version numbers of the
+                client and servlet engine, and the theme. If they do not match, you may
+                need to compile the widget set or theme.
+            </para>
+
+			<figure id="figure.advanced.debug-production-modes.info">
+ 				<title>General Information</title>
+                <mediaobject>
+                    <imageobject role="html">
+                        <imagedata align="center" fileref="img/debug/debug-info.png"/>
+ 					</imageobject>
+                    <imageobject role="fo">
+					 	<imagedata smallscale="75%" align="center" fileref="img/debug/debug-info.png"/>
+ 					</imageobject>
+	 			</mediaobject>
+			</figure>
+        </section>
+
+		<section xml:id="advanced.debug-production-modes.hierarchy">
+			<title>Inspecting Component Hierarchy</title>
+
+            <para>
+                The <guilabel>Component Hierarchy</guilabel> tab allows debugging the
+                component tree in various ways.
+            </para>
+
+            <section xml:id="advanced.debug-production-modes.hierarchy.tree">
+                <title>Connector Hierarchy Tree</title>
+
+                <para>
+                    The <guibutton>Show the connector hiearchy tree</guibutton> button
+                    displays the client-side connector hiearchy. As explained in <xref
+                    linkend="gwt"/>, client-side widgets are managed by connectors that
+                    handle communication with the server-side component counterparts. The
+                    connector hierarchy therefore corresponds with the server-side
+                    component tree, but the client-side widget tree and HTML DOM tree have
+                    more complexity.
+                </para>
+
+                <figure id="figure.advanced.debug-production-modes.hierarchy.tree">
+                    <title>Connector Hierarchy Tree</title>
+                    <mediaobject>
+                        <imageobject role="html">
+                            <imagedata align="center" fileref="img/debug/debug-hierarchy-tree.png"/>
+                        </imageobject>
+                        <imageobject role="fo">
+                            <imagedata smallscale="60%" align="center" fileref="img/debug/debug-hierarchy-tree.png"/>
+                        </imageobject>
+                    </mediaobject>
+                </figure>
+
+                <para>
+                    Clicking on a connector highlights the widget in the UI.
+                </para>
+            </section>
+
+            <section xml:id="advanced.debug-production-modes.hierarchy.analyze">
+                <title>Analyzing Layouts</title>
+
+                <para>
+                    The <guilabel>Check layouts for potential problems</guilabel> button
+                    analyzes the currently visible UI and makes a report of possible
+                    layout related problems. All detected layout problems are displayed in
+                    the log and also printed to the console.
+                </para>
+
+                <para>
+                    The most common layout problem is caused by placing a component that
+                    has a relative size inside a container (layout) that has undefined
+                    size in the particular direction (height or width). For example,
+                    adding a <classname>Label</classname> inside a
+                    <classname>HorizontalLayout</classname>, as the label has 100% default
+                    width, but the horizontal layout has undefined width. In such a case,
+                    the error would look as shown below:
+                </para>
+
+                <programlisting><?pocket-size 65% ?><![CDATA[Vaadin DEBUG
 - Window/1a8bd74 "My window" (width: MAIN WINDOW)
   - HorizontalLayout/1cf243b (width: UNDEFINED)
     - Panel/12e43f1 "My panel" (width: RELATIVE, 100.0 %)
 Layout problem detected: Component with relative width inside a HorizontalLayout with no width defined
-Relative sizes were replaced by undefined sizes, components may not render as expected.]]>
-			</programlisting>
+Relative sizes were replaced by undefined sizes, components may not render as expected.]]></programlisting>
 			
-			<para>
-				This particular error tells that the <classname>Panel</classname> "My
-				panel" is 100% wide while the width of the containing
-				<classname>HorizontalLayout</classname> is undefined. The components will
-				be rendered as if the the width of the contained
-				<classname>Panel</classname> was undefined, which might not be what the
-				developer wanted. There are two possible fixes for this case: if the
-				<classname>Panel</classname> should fill the main window horizontally, set
-				a width for the <classname>HorizontalLayout</classname> (for example 100%
-				wide), or set the width of the <classname>Panel</classname> to "undefined"
-				to render the it as it is currently rendered but avoiding the warning
-				message.
-			</para>
+                <para>
+                    This particular error tells that the <classname>Panel</classname> "My
+                    panel" is 100% wide while the width of the containing
+                    <classname>HorizontalLayout</classname> is undefined. The components
+                    will be rendered as if the the width of the contained
+                    <classname>Panel</classname> was undefined, which might not be what
+                    the developer wanted. There are two possible fixes for this case: if
+                    the <classname>Panel</classname> should fill the main window
+                    horizontally, set a width for the
+                    <classname>HorizontalLayout</classname> (for example 100% wide), or
+                    set the width of the <classname>Panel</classname> to "undefined" to
+                    render the it as it is currently rendered but avoiding the warning
+                    message.
+                </para>
 
-            <para>
-                The same error is shown in the Debug Window in a slightly different form
-                and with an additional feature (see <xref
-                linkend="figure.debug-window.analyze-layouts"/>). Checking the
-                <guilabel>Emphasize component in UI</guilabel> box will turn red the
-                background of the component that caused a warning, making it easy for the
-                developer to figure out which component each warning relates to. The
-                messages will also be displayed hierarchically, as a warning from a
-                containing component often causes more warnings from its child
-                components. A good rule of thumb is to work on the upper-level problems
-                first and only after that worry about the warnings from the children.
-            </para>
+                <para>
+                    The same error is shown in the Debug Window in a slightly different
+                    form and with an additional feature (see <xref
+                    linkend="figure.debug-window.analyze-layouts"/>). Checking the
+                    <guilabel>Emphasize component in UI</guilabel> box will turn red the
+                    background of the component that caused a warning, making it easy for
+                    the developer to figure out which component each warning relates
+                    to. The messages will also be displayed hierarchically, as a warning
+                    from a containing component often causes more warnings from its child
+                    components. A good rule of thumb is to work on the upper-level
+                    problems first and only after that worry about the warnings from the
+                    children.
+                </para>
 
-			<figure id="figure.debug-window.analyze-layouts">
-				<title>Debug Window Showing the Result of <guilabel>Analyze layouts</guilabel>.</title>
-				<mediaobject>
-					<imageobject role="html">
-						<imagedata align="center" fileref="img/debug/debug-window-analyze-layouts.png"/>
-					</imageobject>
-					<imageobject role="fo">
-						<imagedata smallscale="100%" align="center" fileref="img/debug/debug-window-analyze-layouts.png"/>
-					</imageobject>
-				</mediaobject>
-			</figure>
-						
+                <figure id="figure.debug-window.analyze-layouts">
+                    <title>Debug Window Showing the Result of <guilabel>Analyze layouts</guilabel>.</title>
+                    <mediaobject>
+                        <imageobject role="html">
+                            <imagedata align="center" fileref="img/debug/debug-window-analyze-layouts.png"/>
+                        </imageobject>
+                        <imageobject role="fo">
+                            <imagedata smallscale="100%" align="center" fileref="img/debug/debug-window-analyze-layouts.png"/>
+                        </imageobject>
+                    </mediaobject>
+                </figure>
+
+                <para>
+                    <classname>CustomLayout</classname> components can not be analyzed in
+                    the same way as other layouts. For custom layouts, the
+                    <guibutton>Analyze layouts</guibutton> button analyzes all contained
+                    relative-sized components and checks if any relative dimension is
+                    calculated to zero so that the component will be invisible. The error
+                    log will display a warning for each of these invisible components. It
+                    would not be meaningful to emphasize the component itself as it is not
+                    visible, so when you select such an error, the parent layout of the
+                    component is emphasized if possible.
+                </para>
+            </section>
 		</section>
 
-		<section>
-			<title>Custom Layouts</title>
-
-			<para>
-				<classname>CustomLayout</classname> components can not be analyzed in the
-				same way as other layouts. For custom layouts, the <guibutton>Analyze
-				layouts</guibutton> button analyzes all contained relative-sized
-				components and checks if any relative dimension is calculated to zero so
-				that the component will be invisible. The error log will display a warning
-				for each of these invisible components. It would not be meaningful to
-				emphasize the component itself as it is not visible, so when you select
-				such an error, the parent layout of the component is emphasized if
-				possible.
-			</para>
-
-		</section>
-
-		<section>
-			<title>Debug Functions for Component Developers</title>
-
-            <!-- TODO Check this functionality better -->
-			<para>
-				You can take advantage of the debug mode when developing client-side
-				components. The static function
-				<methodname>ApplicationConnection.getConsole()</methodname> will return a
-				reference to a <classname>VConsole</classname> object which contains
-				logging methods such as <methodname>log(String msg)</methodname> and
-				<methodname>error(String msg)</methodname>.  These functions will print
-				messages to the Debug Window and Firebug console in the same way as other
-				debugging functionalities of Vaadin do. No messages will be
-				printed if the Debug Window is not open or if the application is running
-				in production mode.
-			</para>
-		</section>
 	</section>
 
 	<section xml:id="advanced.requesthandler">

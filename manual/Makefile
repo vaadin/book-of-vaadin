@@ -43,6 +43,7 @@ IMAGES =	intro/architecture intro/architecture-vaadin7 intro/toolchain \
 			advanced/threadlocal-sequentiality advanced/threadlocal-concurrency \
 			themes/theme-contents themes/eclipse-theme-created-annotated \
 			clientsideapp/clientsideapp-architecture \
+			debug/debug-window-annotated debug/debug-log \
 			gwt/gwt-widgets gwt/gwt-widget-files gwt/gwt-hostedmode-project-annotated\
 			gwt/gwt-custom-architecture \
 			gwt/widget-integration gwt/simplified-integration \
