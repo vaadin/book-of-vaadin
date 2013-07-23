@@ -39,7 +39,6 @@ IMAGES =	intro/architecture intro/architecture-vaadin7 intro/toolchain \
 			components/textfield-diagram \
 			application/application-architecture application/resource_classdiagram \
 			application/mvp-pattern application/view-navigation \
-			advanced/liferay-display \
 			advanced/threadlocal-sequentiality advanced/threadlocal-concurrency \
 			themes/theme-contents themes/eclipse-theme-created-annotated \
 			clientsideapp/clientsideapp-architecture \
@@ -57,6 +56,7 @@ IMAGES =	intro/architecture intro/architecture-vaadin7 intro/toolchain \
 			testbench/recorder-export-testcase \
 			jpacontainer/detailed-architecture jpacontainer/three-layer-architecture jpacontainer/jpa-mapping-graphic \
 			jpacontainer/domain-model \
+			portal/liferay-display \
 			portal/liferay-ipc-architecture portal/liferay-ipc-demo-annotated \
 			portal/wsrp-architecture
 
