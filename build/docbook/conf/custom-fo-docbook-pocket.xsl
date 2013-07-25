@@ -28,6 +28,8 @@
   <!-- Indentation and spacing. -->
   <xsl:param name="body.start.indent" select="'0'"/>
 
+  <xsl:param name="toc.max.depth" select="'3'"/>
+
   <!-- List indentation. -->
   <xsl:attribute-set name="list.block.spacing">
     <xsl:attribute name="margin-left">0.5cm</xsl:attribute>
@@ -329,6 +331,7 @@
       </xsl:call-template>
     </xsl:variable>
 
+    <!-- ToC depth -->
     <xsl:variable name="depth" select="count(ancestor::section) + 1"/>
     <xsl:variable name="reldepth"
                   select="count(ancestor::*)-count($toc-context/ancestor::*)"/>
