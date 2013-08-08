@@ -283,189 +283,6 @@
 
             <indexterm startref="term.components.interfaces.abstractcomponent" class="endofrange"/>
         </section>
-
-        <section xml:id="components.interfaces.fields">
-            <title>Field Components (<classname>Field</classname> and <classname>AbstractField</classname>)</title>
-
-            <indexterm xml:id="term.components.fields" class="startofrange">
-                <primary><classname>Field</classname></primary>
-            </indexterm>
-
-            <para>
-				<emphasis>Fields</emphasis> are components that have a value that the user
-				can change through the user interface. <xref
-				linkend="figure.components.interfaces.fields"/> illustrates the inheritance
-				relationships and the important interfaces and base classes.
-			</para>
-
-			<figure xml:id="figure.components.interfaces.fields">
-				<title>Field Components</title>
-				<mediaobject>
-					<imageobject role="html">
-						<imagedata align="center" fileref="img/components/field-diagram-lo.png"/>
-					</imageobject>
-					<imageobject role="fo">
-						<imagedata scale="100" smallscale="100%" align="center" fileref="img/components/field-diagram-hi.png"/>
-					</imageobject>
-				</mediaobject>
-			</figure>
-
-			<para>
-				Field components are built upon the framework defined in the
-				<classname>Field</classname> interface and the
-				<classname>AbstractField</classname> base class.
-			</para>
-
-			<para>
-				The description of the field interfaces and base classes is broken down in
-				the following sections.
-			</para>
-
-			<section xml:id="components.interfaces.fields.field">
-				<title><classname>Field</classname> Interface</title>
-
-				<para>
-					The <classname>Field</classname> interface inherits the
-					<classname>Component</classname> superinterface and also the
-					<classname>Property</classname> interface to have a value for the
-					field. <classname>AbstractField</classname> is the only class
-					implementing the <classname>Field</classname> interface directly.  The
-					relationships are illustrated in <xref
-					linkend="figure.components.interfaces.fields.field"/>.
-				</para>
-
-				<figure xml:id="figure.components.interfaces.fields.field">
-					<title><classname>Field</classname> Interface Inheritance Diagram</title>
-					<mediaobject>
-						<imageobject role="html">
-							<imagedata align="center" fileref="img/components/field-interface-lo.png"/>
-						</imageobject>
-						<imageobject role="fo">
-							<imagedata scale="100" smallscale="100%" align="center" fileref="img/components/field-interface-hi.png"/>
-						</imageobject>
-					</mediaobject>
-				</figure>
-
-				<para>
-					You can set the field value with the <methodname>setValue()</methodname>
-					and read with the <methodname>getValue()</methodname> method defined in
-					the <classname>Property</classname> interface. The actual value type
-					depends on the component.
-				</para>
-
-				<para>
-					The <classname>Field</classname> interface defines a number of
-					attributes, which you can retrieve or manipulate with the
-					corresponding setters and getters.
-				</para>
-
-				<variablelist>
-					<varlistentry>
-						<term><methodname>description</methodname></term>
-						<listitem>
-							<para>
-								All fields have a description. Notice that while this
-								attribute is defined in the
-								<classname>Field</classname> component, it is
-								implemented in <classname>AbstractField</classname>,
-								which does not directly implement
-								<classname>Field</classname>, but only through the
-								<classname>AbstractField</classname> class.
-							</para>
-						</listitem>
-					</varlistentry>
-					<varlistentry>
-						<term><methodname>required</methodname></term>
-						<listitem>
-							<para>
-								When enabled, a required indicator (usually the asterisk *
-								character) is displayed on the left, above, or right the
-								field, depending on the containing layout and whether the
-								field has a caption. If such fields are validated but are
-								empty and the <methodname>requiredError</methodname>
-								property (see below) is set, an error indicator is shown
-								and the component error is set to the text defined with
-								the error property. Without validation, the required
-								indicator is merely a visual guide.
-							</para>
-						</listitem>
-					</varlistentry>
-					<varlistentry>
-						<term><methodname>requiredError</methodname></term>
-						<listitem>
-							<para>
-								Defines the error message to show when a value is
-								required, but none is entered. The error message is set as
-								the component error for the field and is usually displayed
-								in a tooltip when the mouse pointer hovers over the error
-								indicator.
-							</para>
-						</listitem>
-					</varlistentry>
-				</variablelist>
-			</section>
-
-			<section xml:id="components.interfaces.fields.databinding">
-				<title>Data Binding and Conversions</title>
-
-                <para>
-                    Fields are strongly coupled with the Vaadin data model. The field value is
-                    handled as a <classname>Property</classname> of the field component, as
-                    documented in <xref linkend="datamodel.properties"/>. Selection fields
-                    allow management of the selectable items through the
-                    <classname>Container</classname> interface.
-                </para>
-
-                <para>
-                    Fields edit some particular type. For example,
-                    <classname>TextField</classname> allows editing
-                    <classname>String</classname> values. When bound to a data source, the
-                    property type of the data model can be something different, say an
-                    <classname>Integer</classname>. <emphasis>Converters</emphasis> are used
-                    for converting the values between the representation and the model. They
-                    are described in <xref linkend="datamodel.properties.converter"/>.
-                </para>
-            </section>
-
-            <section xml:id="components.interfaces.fields.valuechanges">
-				<title>Handling Field Value Changes</title>
-				
-				<para>
-					<classname>Field</classname> inherits
-					<classname>Property.ValueChangeListener</classname> to allow listening
-					for field value changes and <classname>Property.Editor</classname> to
-					allow editing values.
-				</para>
-
-				<para>
-					When the value of a field changes, a
-					<classname>Property.ValueChangeEvent</classname> is triggered for
-					the field. You should not implement the
-					<methodname>valueChange()</methodname> method in a class
-					inheriting <classname>AbstractField</classname>, as it is already
-					implemented in <classname>AbstractField</classname>. You should
-					instead implement the method explicitly by adding the implementing
-					object as a listener.
-				</para>
-			</section>
-
-            <section xml:id="components.interfaces.fields.abstractfield">
-				<title><classname>AbstractField</classname> Base Class</title>
-
-				<para>
-					<classname>AbstractField</classname> is the base class for all field
-					components. In addition to the component features inherited from
-					<classname>AbstractComponent</classname>, it implements a number of
-					features defined in <classname>Property</classname>,
-					<classname>Buffered</classname>, <classname>Validatable</classname>,
-					and <classname>Component.Focusable</classname> interfaces.
-				</para>
-
-			</section>
-			
-        </section>
-
-        <indexterm startref="term.components.fields" class="endofrange"/>
     </section>
 
 	<section xml:id="components.features">
@@ -1532,17 +1349,473 @@ mycomponent.setHeight("400px");]]></programlisting>
         </section>
 	</section>
 
+    <section xml:id="components.fields">
+        <title>Field Components</title>
+
+        <indexterm xml:id="term.components.fields" class="startofrange">
+            <primary><classname>Field</classname></primary>
+        </indexterm>
+
+        <para>
+            <emphasis>Fields</emphasis> are components that have a value that the user can
+            change through the user interface. <xref
+            linkend="figure.components.fields"/> illustrates the inheritance
+            relationships and the important interfaces and base classes.
+        </para>
+
+        <figure xml:id="figure.components.fields">
+            <title>Field Components</title>
+            <mediaobject>
+                <imageobject role="html">
+                    <imagedata align="center" fileref="img/components/field-diagram-lo.png"/>
+                </imageobject>
+                <imageobject role="fo">
+                    <imagedata scale="100" smallscale="100%" align="center" fileref="img/components/field-diagram-hi.png"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
+
+        <para>
+            Field components are built upon the framework defined in the
+            <classname>Field</classname> interface and the
+            <classname>AbstractField</classname> base class.
+            <classname>AbstractField</classname> is the base class for all field
+            components. In addition to the component features inherited from
+            <classname>AbstractComponent</classname>, it implements a number of features
+            defined in <classname>Property</classname>, <classname>Buffered</classname>,
+            <classname>Validatable</classname>, and
+            <classname>Component.Focusable</classname> interfaces.
+        </para>
+
+        <para>
+            The description of the field interfaces and base classes is broken down in
+            the following sections.
+        </para>
+
+        <section xml:id="components.fields.field">
+            <title><classname>Field</classname> Interface</title>
+
+            <para>
+                The <classname>Field</classname> interface inherits the
+                <classname>Component</classname> superinterface and also the
+                <classname>Property</classname> interface to have a value for the
+                field. <classname>AbstractField</classname> is the only class implementing
+                the <classname>Field</classname> interface directly.  The relationships
+                are illustrated in <xref
+                linkend="figure.components.fields.field"/>.
+            </para>
+
+            <figure xml:id="figure.components.fields.field">
+                <title><classname>Field</classname> Interface Inheritance Diagram</title>
+                <mediaobject>
+                    <imageobject role="html">
+                        <imagedata align="center" fileref="img/components/field-interface-lo.png"/>
+                    </imageobject>
+                    <imageobject role="fo">
+                        <imagedata scale="100" smallscale="100%" align="center" fileref="img/components/field-interface-hi.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+
+            <para>
+                You can set the field value with the <methodname>setValue()</methodname>
+                and read with the <methodname>getValue()</methodname> method defined in
+                the <classname>Property</classname> interface. The actual value type
+                depends on the component.
+            </para>
+
+            <para>
+                The <classname>Field</classname> interface defines a number of
+                attributes, which you can retrieve or manipulate with the
+                corresponding setters and getters.
+            </para>
+
+            <variablelist>
+                <varlistentry>
+                    <term><methodname>description</methodname></term>
+                    <listitem>
+                        <para>
+                            All fields have a description. Notice that while this
+                            attribute is defined in the
+                            <classname>Field</classname> component, it is
+                            implemented in <classname>AbstractField</classname>,
+                            which does not directly implement
+                            <classname>Field</classname>, but only through the
+                            <classname>AbstractField</classname> class.
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><methodname>required</methodname></term>
+                    <listitem>
+                        <para>
+                            When enabled, a required indicator (usually the asterisk *
+                            character) is displayed on the left, above, or right the
+                            field, depending on the containing layout and whether the
+                            field has a caption. If such fields are validated but are
+                            empty and the <methodname>requiredError</methodname>
+                            property (see below) is set, an error indicator is shown
+                            and the component error is set to the text defined with
+                            the error property. Without validation, the required
+                            indicator is merely a visual guide.
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><methodname>requiredError</methodname></term>
+                    <listitem>
+                        <para>
+                            Defines the error message to show when a value is
+                            required, but none is entered. The error message is set as
+                            the component error for the field and is usually displayed
+                            in a tooltip when the mouse pointer hovers over the error
+                            indicator.
+                        </para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+
+        <section xml:id="components.fields.databinding">
+            <title>Data Binding and Conversions</title>
+
+            <para>
+                Fields are strongly coupled with the Vaadin data model. The field value is
+                handled as a <classname>Property</classname> of the field component, as
+                documented in <xref linkend="datamodel.properties"/>. Selection fields
+                allow management of the selectable items through the
+                <classname>Container</classname> interface.
+            </para>
+
+            <para>
+                Fields are <emphasis>editors</emphasis> for some particular type. For
+                example, <classname>TextField</classname> allows editing
+                <classname>String</classname> values. When bound to a data source, the
+                property type of the data model can be something different, say an
+                <classname>Integer</classname>. <emphasis>Converters</emphasis> are used
+                for converting the values between the representation and the model. They
+                are described in <xref linkend="datamodel.properties.converter"/>.
+            </para>
+        </section>
+
+        <section xml:id="components.fields.valuechanges">
+            <title>Handling Field Value Changes</title>
+				
+            <para>
+                <classname>Field</classname> inherits
+                <classname>Property.ValueChangeListener</classname> to allow listening
+                for field value changes and <classname>Property.Editor</classname> to
+                allow editing values.
+            </para>
+
+            <para>
+                When the value of a field changes, a
+                <classname>Property.ValueChangeEvent</classname> is triggered for the
+                field. You should not implement the <methodname>valueChange()</methodname>
+                method in a class inheriting <classname>AbstractField</classname>, as it
+                is already implemented in <classname>AbstractField</classname>. You should
+                instead implement the method explicitly by adding the implementing object
+                as a listener.
+            </para>
+        </section>
+
+        <section xml:id="components.fields.buffering">
+            <title>Buffering</title>
+
+            <para>
+                Field components implement the <interfacename>Buffered</interfacename> and
+                <interfacename>BufferedValidatable</interfacename> interfaces.  When
+                buffering is enabled for a field with
+                <methodname>setBuffered(true)</methodname>, the value is not written to
+                the property data source before the <methodname>commit()</methodname>
+                method is called for the field. Calling <methodname>commit()</methodname>
+                also runs validators added to the field, and if any fail (and the
+                <parameter>invalidCommitted</parameter> is disabled), the value is not
+                written.
+            </para>
+
+            <book-example id="component.field.buffering.basic" style="float: right"></book-example>
+            <programlisting><![CDATA[form.addComponent(new Button("Commit",
+    new Button.ClickListener() {
+    @Override
+    public void buttonClick(ClickEvent event) {
+        try {
+            editor.commit();
+        } catch (InvalidValueException e) {
+            Notification.show(e.getMessage());
+        }
+    }
+}));]]></programlisting>
+
+            <para>
+                Calling <methodname>discard()</methodname> reads the value from the
+                property date source to the current input.
+            </para>
+
+            <para>
+                If the fields are bound in a <classname>FieldGroup</classname> that has
+                buffering enabled, calling <methodname>commit()</methodname> for the group
+                runs validation on all fields in the group, and if successful, all the
+                field values are written to the item data source. See <xref
+                linkend="datamodel.itembinding.buffering"/>.
+            </para>
+        </section>
+
+        <section xml:id="components.fields.validation">
+            <title>Field Validation</title>
+
+            <para>
+                The input for a field component can be syntactically or semantically
+                invalid. Fields implement the <interfacename>Validatable</interfacename>
+                interface, which allows checking validity of the input with
+                <emphasis>validators</emphasis> that implement the
+                <interfacename>Validator</interfacename> interface. You can add validators
+                to fields with <methodname>addValidator()</methodname>.
+            </para>
+
+            <book-example id="component.field.validation.basic" style="float: right"></book-example>
+            <programlisting><![CDATA[TextField field = new TextField("Name");
+field.addValidator(new StringLengthValidator(
+    "The name must be 1-10 letters (was {0})",
+    1, 10, true));
+layout.addComponent(field);]]></programlisting>
+
+            <para>
+                Failed validation is indicated with the error indicator of the field,
+                described in <xref linkend="application.errors.error-indicator"/>, unless
+                disabled with
+                <methodname>setValidationVisible(false)</methodname>. Hovering mouse on
+                the field displays the error message given as a parameter for the
+                validator. If validated explicitly with
+                <methodname>validate()</methodname>, as described later, the
+                <classname>InvalidValueException</classname> is thrown if the validation
+                fails, also carrying the error message. The value <literal>{0}</literal>
+                in the error message string is replaced with the invalid input value.
+            </para>
+
+            <para>
+                Validators validate the property type of the field after a possible
+                conversion, not the presentation type. For example, an
+                <classname>IntegerRangeValidator</classname> requires that the value type
+                of the property data source is <classname>Integer</classname>.
+            </para>
+
+            <section xml:id="components.fields.validation.builtin">
+                <title>Built-in Validators</title>
+
+                <para>
+                    Vaadin includes the following built-in validators. The property value
+                    type is indicated.
+                </para>
+
+
+
+                <variablelist>
+                    <varlistentry>
+                        <term><classname>BeanValidator</classname></term>
+                        <listitem>
+                            <para>
+                                Validates a bean property according to annotations defined
+                                in the Bean Validation API 1.0 (JSR-303). This validator
+                                is usually not used explicitly, but they are created
+                                implicitly when binding fields in a
+                                <classname>BeanFieldGroup</classname>. Using bean
+                                validation requires an implementation library of the
+                                API. See <xref
+                                linkend="datamodel.itembinding.beanvalidation"/> for
+                                details.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><classname>CompositeValidator</classname></term>
+                        <listitem>
+                            <para>
+                                Combines validators using logical AND and OR operators.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><classname>DateRangeValidator</classname>: <classname>Date</classname></term>
+                        <listitem>
+                            <para>
+                                Checks that the date value is within the range at or
+                                between two given dates/times.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><classname>DoubleRangeValidator</classname>: <classname>Double</classname></term>
+                        <listitem>
+                            <para>
+                                Checks that the double value is at or between two given values.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><classname>EmailValidator</classname>: <classname>String</classname></term>
+                        <listitem>
+                            <para>
+                                Checks that the string value is a syntactically valid
+                                email address. The validated syntax is close to the RFC
+                                822 standard regarding email addresses.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><classname>IntegerRangeValidator</classname>: <classname>Integer</classname></term>
+                        <listitem>
+                            <para>
+                                Checks that the integer value is at or between two given values.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><classname>NullValidator</classname></term>
+                        <listitem>
+                            <para>
+                                Checks that the value is or is not a null value.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><classname>RegexpValidator</classname>: <classname>String</classname></term>
+                        <listitem>
+                            <para>
+                                Checks that the value matches with the given regular expression.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><classname>StringLengthValidator</classname>: <classname>String</classname></term>
+                        <listitem>
+                            <para>
+                                Checks that the length of the input string is at or
+                                between two given lengths.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                </variablelist>
+
+                <para>
+                    Please see the API documentation for more details.
+                </para>
+            </section>
+
+            <section xml:id="components.fields.validation.automatic">
+                <title>Automatic Validation</title>
+                
+                <para>
+                    The validators are normally, when <literal>validationVisible</literal>
+                    is true for the field, executed implicitly on the next server request
+                    if the input has changed. If the field is in immediate mode, it (and
+                    any other fields with changed value) are validated immediately when
+                    the focus leaves the field.
+                </para>
+
+                <book-example id="component.field.validation.basic" style="float: right"></book-example>
+                <programlisting><![CDATA[TextField field = new TextField("Name");
+field.addValidator(new StringLengthValidator(
+    "The name must be 1-10 letters (was {0})",
+    1, 10, true));
+field.setImmediate(true);
+layout.addComponent(field);]]></programlisting>
+            </section>
+
+            <section xml:id="components.fields.validation.explicit">
+                <title>Explicit Validation</title>
+
+                <para>
+                    The validators are executed when the
+                    <methodname>validate()</methodname> or
+                    <methodname>commit()</methodname> methods are called for the field.
+                </para>
+
+                <book-example id="component.field.validation.explicit" style="float: right"></book-example>
+                <programlisting><![CDATA[// A field with automatic validation disabled
+final TextField field = new TextField("Name");
+layout.addComponent(field);
+        
+// Define validation as usual
+field.addValidator(new StringLengthValidator(
+    "The name must be 1-10 letters (was {0})",
+    1, 10, true));
+        
+// Run validation explicitly
+Button validate = new Button("Validate");
+validate.addClickListener(new ClickListener() {
+    @Override
+    public void buttonClick(ClickEvent event) {
+        field.setValidationVisible(false);
+        try {
+            field.validate();
+        } catch (InvalidValueException e) {
+            Notification.show(e.getMessage());
+            field.setValidationVisible(true);
+        }
+    }
+});
+layout.addComponent(validate);]]></programlisting>
+
+            </section>
+
+            <section xml:id="components.fields.validation.custom">
+                <title>Implementing a Custom Validator</title>
+
+                <para>
+                    You can create custom validators by implementing the
+                    <interfacename>Validator</interfacename> interface and implementing
+                    its <methodname>validate()</methodname> method. If the validation
+                    fails, the method should throw either
+                    <classname>InvalidValueException</classname> or
+                    <classname>EmptyValueException</classname>.
+                </para>
+
+                <book-example id="component.field.validation.customvalidator" style="float: right"></book-example>
+                <programlisting><?pocket-size 65% ?><![CDATA[class MyValidator implements Validator {
+    @Override
+    public void validate(Object value)
+            throws InvalidValueException {
+        if (!(value instanceof String &&
+                ((String)value).equals("hello")))
+            throw new InvalidValueException("You're impolite");
+    }
+}
+
+final TextField field = new TextField("Say hello");
+field.addValidator(new MyValidator());
+field.setImmediate(true);
+layout.addComponent(field);]]></programlisting>
+
+            </section>
+
+            <section xml:id="components.fields.validation.fieldgroup">
+                <title>Validation in Field Groups</title>
+
+                <para>
+                    If the field is bound to a <classname>FieldGroup</classname>,
+                    described in <xref linkend="datamodel.itembinding"/>, calling
+                    <methodname>commit()</methodname> for the group runs the validation in
+                    all fields in the group.
+                </para>
+            </section>
+        </section>
+
+        <indexterm startref="term.components.fields" class="endofrange"/>
+    </section>
+
 	<section xml:id="components.extensions">
 		<title>Component Extensions</title>
 
         <para>
-            Components can have extensions which are attached to a component
-            dynamically. Especially many add-on features are extensions.
+            Components and UIs can have extensions which are attached to the component
+            dynamically. Especially, many add-ons are extensions.
         </para>
 
         <para>
-            To add an extension to a component, call the <methodname>extend()</methodname>
-            method in the extension.
+            How a component is extended depends on the extension. Typically, they have an
+            <methodname>extend()</methodname> method that takes the component to be
+            extended as the parameter.
         </para>
 
         <programlisting><![CDATA[TextField tf = new TextField("Hello");
@@ -1556,6 +1829,11 @@ CSValidator validator = new CSValidator();
 validator.setRegExp("[0-9]*");
 validator.setErrorMessage("Must be a number");
 validator.extend(tf);]]></programlisting>
+
+        <para>
+            Development of custom extensions is described in <xref
+            linkend="gwt.extension"/>.
+        </para>
     </section>
 
 	<section xml:id="components.label">
@@ -8133,7 +8411,7 @@ protected void createEvent(CalendarTargetDetails details,
             like with <classname>CustomComponent</classname>, except that it implements
             the <interfacename>Field</interfacename> interface and inherit
             <classname>AbstractField</classname>, described in <xref
-            linkend="components.interfaces.fields"/>. A field allows editing a property
+            linkend="components.fields"/>. A field allows editing a property
             value in the Vaadin data model, and can be bound to data with field groups, as
             described in <xref linkend="datamodel.itembinding"/>. The field values are
             buffered and can be validated with validators.
