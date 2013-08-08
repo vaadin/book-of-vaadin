@@ -2337,28 +2337,43 @@ public class <emphasis role="bold">MyProjectServlet</emphasis> extends VaadinSer
                 <literal>/*</literal>. This matches any URL under the project context. We
                 defined above the project context as <literal>myproject</literal> so the
                 URL for the page of the &ui; will be
-                <uri>http://localhost:8080/myproject/</uri>. If the project were to have
-                multiple &ui;s or servlets, they would have to be given different names to
-                distinguish them.  For example, <literal>/my&ui;/*</literal> would match a
-                URL such as <uri>http://localhost:8080/myproject/my&ui;/</uri>. Notice
-                that the slash and the asterisk <emphasis>must</emphasis> be included at
-                the end of the pattern.
+                <uri>http://localhost:8080/myproject/</uri>. 
             </para>
 
             <section xml:id="application.environment.servlet-mapping.sub-paths">
                 <title>Mapping Sub-Paths</title>
 
                 <para>
-                    If the URL pattern is other than <literal>/*</literal> (such as
-                    <literal>/my&ui;/*</literal>), you will also need to make a servlet
-                    mapping to <literal>/VAADIN/*</literal> (unless you are serving it
-                    statically as noted below). For example:
+                    If an application has multiple &ui;s or servlets, they have to be
+                    given different paths in the URL, matched by a different URL pattern.
+                    Also, you may need to have statically served content under some path.
+                    Having an URL pattern <literal>/myui/*</literal> would match a
+                    URL such as <uri>http://localhost:8080/myproject/myui/</uri>. Notice
+                    that the slash and the asterisk <emphasis>must</emphasis> be included
+                    at the end of the pattern.
+
+                    In such case, you also need to map URLs with
+                    <literal>/VAADIN/*</literal> to a servlet (unless you are serving it
+                    statically as noted below).
+                </para>
+
+                <para>
+                    With a <classname>@WebServlet</classname> annotation for a servlet
+                    class, you can define multiple mappings as a list enclosed in curly
+                    braces as follows:
+                </para>
+                
+                <programlisting>@WebServlet(value = {"<emphasis role="strong">/myui/*</emphasis>", "/VAADIN/*"},
+            asyncSupported = true)</programlisting>
+
+                <para>
+                     In a <filename>web.xml</filename>:
                 </para>
 
                 <programlisting>    ...
     &lt;servlet-mapping&gt;
         &lt;servlet-name&gt;<emphasis role="strong">myservlet</emphasis>&lt;/servlet-name&gt;
-        &lt;url-pattern&gt;/myurl/*&lt;/url-pattern&gt;
+        &lt;url-pattern&gt;<emphasis role="strong">/myui/*</emphasis>&lt;/url-pattern&gt;
     &lt;/servlet-mapping&gt;
 
     &lt;servlet-mapping&gt;
@@ -2373,15 +2388,15 @@ public class <emphasis role="bold">MyProjectServlet</emphasis> extends VaadinSer
                 </para>
 
                 <para>
-                    You do not have to provide the above <literal>/VAADIN/*</literal> mapping
-                    if you serve both the widget sets and (custom and default) themes
-                    statically in the <filename>WebContent/VAADIN/</filename> directory. The
-                    mapping simply allows serving them dynamically from the Vaadin
-                    JAR. Serving them statically is recommended for production environments as
-                    it is faster. If you serve the content from within the same web
-                    application, you may not have the root pattern <literal>/*</literal> for
-                    the Vaadin servlet, as then all the requests would be mapped to the
-                    servlet.
+                    You do not have to provide the above <literal>/VAADIN/*</literal>
+                    mapping if you serve both the widget sets and (custom and default)
+                    themes statically in the <filename>/VAADIN</filename> directory in the
+                    web application. The mapping simply allows serving them dynamically
+                    from the Vaadin JAR. Serving them statically is recommended for
+                    production environments as it is faster. If you serve the content from
+                    within the same web application, you may not have the root pattern
+                    <literal>/*</literal> for the Vaadin servlet, as then all the requests
+                    would be mapped to the servlet.
                 </para>
             </section>
         </section>
