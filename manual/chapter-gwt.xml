@@ -56,9 +56,10 @@
         </para>
 
         <para>
-            When painting the user interface, a client-side widget is created for each
-            server-side component. This mapping is defined in the connector class with a
-            <literal>@Connect</literal> annotation.
+            When rendering the user interface, a client-side connector and a widget are
+            created for each server-side component. The mapping from a component to a
+            connector is defined in the connector class with a <literal>@Connect</literal>
+            annotation, and the widget is created by the connector class.
 
             <indexterm><primary>@Connect</primary></indexterm>
         </para>
@@ -537,28 +538,17 @@ public class MyComponentConnector
 
         <para>
             A shared state object simply needs to extend the
-            <classname>ComponentState</classname>. It should contain setters and getters
-            for the properties that are to be synchronized.
+            <classname>ComponentState</classname>. The members should normally be declared
+            as public.
         </para>
 
         <programlisting><?pocket-size 75% ?><![CDATA[public class MyComponentState extends ComponentState {
-    private String text;
-
-    public String getText() {
-        return text;
-    }
-
-    public void setText(String text) {
-        this.text = text;
-    }
+    public String text;
 }]]></programlisting>
 
         <para>
-            <!-- The following is the recommended way. TODO change it. -->
-            You can also use public member variables and access them directly. However, if
-            you do have setters and getters, as in the above example, the corresponding
-            member variables may not be public or they will create a name conflict during
-            serialization.
+            If the members have private visibility for some reason, they need to have
+            public setters and getters.
         </para>
 
         <section xml:id="gwt.shared-state.component">
@@ -566,14 +556,9 @@ public class MyComponentConnector
 
             <para>
                 A server-side component can access the shared state with the
-                <methodname>getState()</methodname> method, which returns the
-                <classname>ComponentState</classname> object of the shared state type of
-                the component.
-            </para>
-
-            <para>
-                It is required that you override the base implementation with one that
-                returns the proper shared state type, as follows:
+                <methodname>getState()</methodname> method. It is required that you
+                override the base implementation with one that returns the shared state
+                object cast to the proper type, as follows:
             </para>
 
             <programlisting><![CDATA[@Override
@@ -634,33 +619,25 @@ public void onStateChanged(StateChangeEvent stateChangeEvent) {
                 referring to another component requires special handling because on the
                 server-side you can only refer to a server-side component, while on the
                 client-side you only have widgets. References to components can be made by
-                referring to their connectors, which are shared.
+                referring to their connectors (all server-side components implement the
+                <interfacename>Connector</interfacename> interface).
             </para>
 
-            <!-- TODO Update to use public member instead of getter and setter. -->
-            <programlisting><?pocket-size 65% ?><![CDATA[public class MyComponentState extends ComponentState {
-    private Connector otherComponent;
-
-    public Connector getOtherComponent() {
-        return otherComponent;
-    }
-
-    public void setOtherComponent(Connector otherComponent) {
-        this.otherComponent = otherComponent;
-    }
+            <programlisting><?pocket-size 75% ?><![CDATA[public class MyComponentState extends ComponentState {
+    public Connector otherComponent;
 }]]></programlisting>
 
             <para>
                 You could then access the component on the server-side as follows:
             </para>
 
-            <programlisting><?pocket-size 65% ?><![CDATA[public class MyComponent {
+            <programlisting><?pocket-size 75% ?><![CDATA[public class MyComponent {
     public void MyComponent(Component otherComponent) {
-        getState().setOtherComponent(otherComponent);
+        getState().otherComponent = otherComponent;
     }
 
     public Component getOtherComponent() {
-        return (Component)getState().getOtherComponent();
+        return (Component)getState().otherComponent;
     }
 
     // And the cast method
@@ -682,56 +659,63 @@ public void onStateChanged(StateChangeEvent stateChangeEvent) {
 
             <para>
                 Resources, which commonly are references to icons or other images, are
-                another case of objects that require special handling in sharing. A
+                another case of objects that require special handling. A
                 <interfacename>Resource</interfacename> object exists only on the
-                server-side and on the client-side you have an URL to the resource. The
-                shared state object needs to pass the reference as a
-                <classname>URLReference</classname> object.
+                server-side and on the client-side you have an URL to the resource. You
+                need to use the <methodname>setResource()</methodname> and
+                <methodname>getResource()</methodname> on the server-side to access a
+                resource, which is serialized to the client-side separately.
             </para>
-
-            <programlisting><![CDATA[public class MyState extends ComponentState {
-    private URLReference myIcon;
-
-    public URLReference getMyIcon() {
-        return icon;
-    }
-
-    public void setMyIcon(URLReference myIcon) {
-        this.myIcon = myIcon;
-    }
-}]]></programlisting>
 
             <para>
-                On the server-side, you can set the reference as a
-                <classname>ResourceReference</classname> object, which creates the URL for
-                the resource object given to the constructor as follows:
+                Let us begin with the server-side API:
             </para>
 
-            <programlisting><![CDATA[getState().setMyIcon(new ResourceReference(myResource));]]></programlisting>
-
-            <para>
-                It is normally meaningful only to set the resource on the server-side and
-                then access it on the client-side. If you for some reason need to access
-                it on the server-side, you need to cast the
-                <classname>URLReference</classname> to the
-                <classname>ResourceReference</classname> that exists on the server-side,
-                and get the <interfacename>Resource</interfacename> object with
-                <methodname>getResource()</methodname>.
-            </para>
-
-            <programlisting><?pocket-size 65% ?><![CDATA[ResourceReference ref =
-    ((ResourceReference) getState().getMyIcon());
-if (ref != null) {
-    Resource resource = ref.getResource();
+            <programlisting><![CDATA[public class MyComponent extends AbstractComponent {
     ...
+
+    public void setMyIcon(Resource myIcon) {
+        setResource("myIcon", myIcon);
+    }
+
+    public Resource getMyIcon() {
+        return getResource("myIcon");
+    }
 }]]></programlisting>
 
             <para>
-                The URL for the resource can be accessed on the client-side with the
-                <methodname>getURL()</methodname> method.
+                On the client-side, you can then get the URL of the resource with
+                <methodname>getResourceUrl()</methodname>.
             </para>
 
-            <programlisting><?pocket-size 75% ?><![CDATA[String url = getState().getMyIcon().getURL();]]></programlisting>
+            <programlisting><?pocket-size 65% ?><![CDATA[@Override
+public void onStateChanged(StateChangeEvent stateChangeEvent) {
+    super.onStateChanged(stateChangeEvent);
+    ...
+	
+    // Get the resource URL for the icon
+    getWidget().setMyIcon(getResourceUrl("myIcon"));
+}]]></programlisting>
+
+            <para>
+                The widget could then use the URL, for example, as follows:
+            </para>
+
+            <programlisting><?pocket-size 75% ?><![CDATA[public class MyWidget extends Label {
+    ...
+    
+    Element imgElement = null;
+    
+    public void setMyIcon(String url) {
+        if (imgElement == null) {
+            imgElement = DOM.createImg();
+            getElement().appendChild(imgElement);
+        }
+        
+        DOM.setElementAttribute(imgElement, "src", url);
+    }
+}]]></programlisting>
+
         </section>
     </section>
 
@@ -769,7 +753,7 @@ if (ref != null) {
             </para>
 
             <programlisting><?pocket-size 65% ?><![CDATA[public interface MyComponentServerRpc extends ServerRpc {
-    public void clicked(MouseEventDetails mouseDetails);
+    public void clicked(String buttonName);
 }]]></programlisting>
 
             <para>
@@ -806,9 +790,6 @@ if (ref != null) {
 public class MyComponentConnector
        extends AbstractComponentConnector {
 
-    MyComponentServerRpc rpc = RpcProxy
-            .create(MyComponentServerRpc.class, this);
-
     public MyComponentConnector() {
         getWidget().addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
@@ -817,9 +798,11 @@ public class MyComponentConnector
                          .buildMouseEventDetails(
                                  event.getNativeEvent(),
                                  getWidget().getElement());
+                MyComponentServerRpc rpc =
+                    getRpcProxy(MyComponentServerRpc.class);
 
                 // Make the call
-                rpc.clicked(mouseDetails);
+                rpc.clicked(mouseDetails.getButtonName());
             }
         });
     }
@@ -840,8 +823,8 @@ public class MyComponentConnector
     new MyComponentServerRpc() {
         private int clickCount = 0;
         
-        public void clicked(MouseEventDetails mouseDetails) {
-            Notification.show("Click from the client!");
+        public void clicked(String buttonName) {
+            Notification.show("Clicked " + buttonName);
         }
     };
 
@@ -892,21 +875,41 @@ public class MyComponentConnector
 
             <para>
                 For example, let us have a trivial example with an extension that takes no
-                special parameters:
+                special parameters, and illustrates the three alternative APIs:
             </para>
 
             <programlisting><?pocket-size 75% ?><![CDATA[public class CapsLockWarning extends AbstractExtension {
+    // You could pass it in the constructor
+    public CapsLockWarning(PasswordField field) {
+        super.extend(field);
+    }
+
+    // Or in an extend() method
     public void extend(PasswordField field) {
         super.extend(field);
+    }
+
+    // Or with a static helper
+    public static addTo(PasswordField field) {
+        new CapsLockWarning().extend(field);
     }
 }]]></programlisting>
 
             <para>
-                The extension can then be added to a component as follows:
+                The extension could then be added to a component as follows:
             </para>
 
             <programlisting><?pocket-size 75% ?><![CDATA[PasswordField password = new PasswordField("Give it");
+
+// Use the constructor
+new CapsLockWarning(password);
+
+// ... or with the extend() method
 new CapsLockWarning().extend(password);
+
+// ... or with the static helper
+CapsLockWarning.addTo(password);
+
 layout.addComponent(password);]]></programlisting>
 
             <para>
@@ -950,11 +953,12 @@ public class CapsLockWarningConnector
     @Override
     protected void extend(ServerConnector target) {
         // Get the extended widget
-        final Widget passwordWidget =
+        final Widget pw =
                 ((ComponentConnector) target).getWidget();
 
         // Preparations for the added feature
         final VOverlay warning = new VOverlay();
+        warning.setOwner(pw);
         warning.add(new HTML("Caps Lock is enabled!"));
 
         // Add an event handler
@@ -1179,10 +1183,9 @@ public class CapsLockWarningConnector
 
         <para>
             The exact contents depend on the add-on type. Component add-ons often include
-            a widget set, but also JavaScript components and pure server-side components
-            are possible, which do not have a widget set. You can also have data container
-            add-ons and theme add-ons, which do not have a widget set, as well as various
-            tools.
+            a widget set, but not always, such as JavaScript components or pure
+            server-side components. You can also have data container and theme add-ons, as
+            well as various tools.
         </para>
 
         <para>
@@ -1275,9 +1278,9 @@ public class CapsLockWarningConnector
             </para>
 
             <para>
-                In the following, we assume the Eclipse project structure. Let us put the
-                build script in the <filename>build</filename> folder under the project.
-                We begin the Ant script as follows:
+                In the following, we assume the same structure as in the Eclipse project
+                example. Let us put the build script in the <filename>build</filename>
+                folder under the project.  We begin the Ant script as follows:
             </para>
 
 			<programlisting>&lt;?xml version="1.0"?&gt;
@@ -1509,7 +1512,7 @@ public class CapsLockWarningConnector
         <indexterm startref="term.gwt.addons" class="endofrange"/>
     </section>
 
-    <section xml:id="gwt.vaadin-6-migration">
+    <section xml:id="gwt.vaadin-6-migration" condition="web">
         <title>Migrating from Vaadin 6</title>
 
         <indexterm xml:id="term.gwt.vaadin-6-migration" class="startofrange" significance="preferred">
@@ -1526,10 +1529,10 @@ public class CapsLockWarningConnector
         
         <para>
             In Vaadin 6, a server-side component serialized its state to the client-side
-            using the <interfacename>Paintable</interfacename> interface and deserialized
-            the state through the <interfacename>VariableOwner</interfacename>
-            interface. In Vaadin 7, these are done through the
-            <interfacename>ClientConnector</interfacename> interface.
+            using the <interfacename>Paintable</interfacename> interface in the
+            client-side and deserialized the state through the
+            <interfacename>VariableOwner</interfacename> interface. In Vaadin 7, these are
+            done through the <interfacename>ClientConnector</interfacename> interface.
         </para>
 
         <para>
@@ -1587,6 +1590,11 @@ public class CapsLockWarningConnector
                         Remove any calls to <literal>super.paintContent()</literal>
                     </para>
                 </listitem>
+                <listitem>
+                    <para>
+                        Update any imports on the client-side
+                    </para>
+                </listitem>
             </orderedlist>
         </section>
 
@@ -1626,39 +1634,38 @@ public class CapsLockWarningConnector
 var mylibrary = mylibrary || {};
 
 mylibrary.MyComponent = function (element) {
-    this.element = element;
-    this.element.innerHTML =
-        "<div class='caption'>Hello, world!</div>" +
-        "<div class='textinput'>Enter a value: " +
-        "<input type='text' name='value'/>" +
-        "<input type='button' value='Click'/>" +
-        "</div>";
+	element.innerHTML =
+		"<div class='caption'>Hello, world!</div>" +
+		"<div class='textinput'>Enter a value: " +
+		"<input type='text' name='value'/>" +
+		"<input type='button' value='Click'/>" +
+		"</div>";
 
-    // Style it
-    this.element.style.border = "thin solid red";
-    this.element.style.display = "inline-block";
+	// Style it
+	element.style.border = "thin solid red";
+	element.style.display = "inline-block";
 
-    // Getter and setter for the value property
-    this.getValue = function () {
-        return this.element.
-            getElementsByTagName("input")[0].value;
-    };
-    this.setValue = function (value) {
-        this.element.getElementsByTagName("input")[0].value =
-            value;
-    };
+	// Getter and setter for the value property
+	this.getValue = function () {
+		return element.
+		    getElementsByTagName("input")[0].value;
+	};
+	this.setValue = function (value) {
+		element.getElementsByTagName("input")[0].value =
+		    value;
+	};
 
-    // Default implementation of the click handler
-    this.click = function () {
-        alert("Error: Must implement click() method");
-    };
+	// Default implementation of the click handler
+	this.click = function () {
+		alert("Error: Must implement click() method");
+	};
 
-    // Set up button click
-    var button = this.element.getElementsByTagName("input")[1];
-    var component = this; // Can't use this inside the function
-    button.onclick = function () {
-        component.click();
-    };
+	// Set up button click
+	var button = element.getElementsByTagName("input")[1];
+	var self = this; // Can't use this inside the function
+	button.onclick = function () {
+		self.click();
+	};
 };]]></programlisting>
 
             <para>
@@ -1678,9 +1685,9 @@ mylibrary.MyComponent = function (element) {
     
 <!-- Create the component and bind it to the placeholder -->
 <script type="text/javascript">
-    foo = new mylibrary.MyComponent(
+    window.foo = new mylibrary.MyComponent(
             document.getElementById("foo"));
-    foo.click = function () {
+    window.foo.click = function () {
         alert("Value is " + this.getValue());
     }
 </script>]]></programlisting>
@@ -1752,11 +1759,11 @@ public class MyComponent extends AbstractJavaScriptComponent {
     }
     
     public void setValue(String value) {
-        getState().setValue(value);
+        getState().value = value;
     }
     
     public String getValue() {
-        return getState().getValue();
+        return getState().value;
     }
 
     @Override
@@ -1775,20 +1782,12 @@ public class MyComponent extends AbstractJavaScriptComponent {
                 </para>
 
                 <programlisting><?pocket-size 65% ?><![CDATA[public class MyComponentState extends JavaScriptComponentState {
-    private String value;
-    
-    public String getValue() {
-        return value;
-    }
-    
-    public void setValue(String value) {
-        this.value = value;
-    }
+    public String value;
 }]]></programlisting>
 
                 <para>
-                    You can also have just public member variables, but if you do have
-                    setters and getters, as above, the member variables may not be public.
+                    If the member variables are private, you need to have public setters
+                    and getters for them, which you can use in the component.
                 </para>
             </section>
         </section>
@@ -1803,10 +1802,10 @@ public class MyComponent extends AbstractJavaScriptComponent {
             </para>
 
             <para>
-                A connector is defined as a constructor function that is added to the
-                <literal>window</literal> object. The name of the function must match the
-                server-side class name, with the full package path. Instead of the Java
-                dot notation for the package name, underscores need to be used as
+                A connector is defined as a connector initializer function that is added
+                to the <literal>window</literal> object. The name of the function must
+                match the server-side class name, with the full package path. Instead of
+                the Java dot notation for the package name, underscores need to be used as
                 separators.
             </para>
 
@@ -1830,9 +1829,9 @@ function() {
     };
 
     // Pass user interaction to the server-side
-    var connector = this;
+    var self = this;
     mycomponent.click = function() {
-        connector.onClick(mycomponent.getValue());
+        self.onClick(mycomponent.getValue());
     };
 };]]></programlisting>
 
@@ -1895,6 +1894,13 @@ function() {
                     connector. In the constructor function of the JavaScript connector,
                     you could write as follows (the complete connector code was given earlier):
                 </para>
+
+                <!-- TODO
+                      Could also point out that the normal RPC mechanism can also be used, see
+                      https://vaadin.com/wiki/-/wiki/Main/Using%20RPC%20from%20JavaScript
+                      and
+                      https://vaadin.com/wiki/-/wiki/Main/Simplified%20RPC%20using%20JavaScript
+                -->
 
                 <programlisting><?pocket-size 75% ?><![CDATA[window.com_vaadin_book_examples_gwt_js_MyComponent =
     function() {
