@@ -1255,7 +1255,7 @@ layout.addComponent(open);]]></programlisting>
         </para>
 
         <section xml:id="advanced.shortcuts.defaultbutton">
-            <title>Click Shortcuts for Default Buttons</title>
+            <title>Shortcut Keys for Default Buttons</title>
 
             <para>
                 You can add or set a <emphasis>click shortcut</emphasis> to a button to
@@ -1272,12 +1272,12 @@ layout.addComponent(open);]]></programlisting>
             <programlisting><?pocket-size 65% ?><![CDATA[// Have an OK button and set it as the default button
 Button ok = new Button("OK");
 ok.setClickShortcut(KeyCode.ENTER);
-ok.addStyleName("primary");]]></programlisting>
+ok.addStyleName(Reindeer.BUTTON_DEFAULT);]]></programlisting>
 
             <para>
-                The <literal>primary</literal> style name highlights a button to show the
-                default button status; usually with a bolder font than usual, depending on
-                the theme. The result can be seen in <xref
+                The <literal>BUTTON_DEFAULT</literal> style name highlights a button to
+                show the default button status; usually with a bolder font than usual,
+                depending on the theme. The result can be seen in <xref
                 linkend="figure.advanced.shortcuts.defaultbutton"/>.
             </para>
 
@@ -1301,28 +1301,39 @@ ok.addStyleName("primary");]]></programlisting>
                 You can define a shortcut key that sets the focus to a field component
                 (any component that inherits <classname>AbstractField</classname>) by
                 adding a <classname>FocusShortcut</classname> as a shortcut listener to
-                the field.
+                the field. .
             </para>
-
-            <programlisting><?pocket-size 65% ?><![CDATA[// A field with Alt+N bound to it
-TextField name = new TextField("Name (Alt+N)");
-name.addShortcutListener(
-        new AbstractField.FocusShortcut(name, KeyCode.N,
-                                        ModifierKey.ALT));
-layout.addComponent(name);
-
-// A field with Alt+A bound to it
-TextField address = new TextField("Address (Alt+A)");
-address.addShortcutListener(
-        new AbstractField.FocusShortcut(address, KeyCode.A,
-                                        ModifierKey.ALT));
-layout.addComponent(address);]]></programlisting>
 
             <para>
                 The constructor of the <classname>FocusShortcut</classname> takes the
                 field component as its first parameter, followed by the key code, and an
                 optional list of modifier keys, as listed in <xref
                     linkend="advanced.shortcuts.keycodes"/>.
+            </para>
+
+            <book-example id="advanced.shortcut.focus" style="float: right"></book-example>
+            <programlisting><?pocket-size 65% ?><![CDATA[// A field with Alt+N bound to it
+TextField name = new TextField("Name (Alt+N)");
+name.addShortcutListener(
+        new AbstractField.FocusShortcut(name, KeyCode.N,
+                                        ModifierKey.ALT));
+layout.addComponent(name);]]></programlisting>
+
+            <para>
+                You can also specify the shortcut by a shorthand notation, where the
+                shortcut key is indicated with an ampersand
+                (<literal>&amp;</literal>).
+            </para>
+
+            <book-example id="advanced.shortcut.focus" style="float: right"></book-example>
+            <programlisting><?pocket-size 65% ?><![CDATA[// A field with Alt+A bound to it, using shorthand notation
+TextField address = new TextField("Address (Alt+A)");
+address.addShortcutListener(
+        new AbstractField.FocusShortcut(address, "&Address"));]]></programlisting>
+
+            <para>
+                This is especially useful for internationalization, so that you can
+                determine the shortcut key from the localized string.
             </para>
         </section>
 
@@ -1331,7 +1342,7 @@ layout.addComponent(address);]]></programlisting>
 
             <para>
                 Shortcut keys can be defined as <emphasis>actions</emphasis> using the
-                <classname>ShortcutAction</classname> class. ShortcutAction extends the
+                <classname>ShortcutAction</classname> class. It extends the
                 generic <classname>Action</classname> class that is used for example in
                 <classname>Tree</classname> and <classname>Table</classname> for context
                 menus.  Currently, the only classes that accept
@@ -1431,10 +1442,7 @@ public Action[] getActions(Object target, Object sender) {
         username.focus();
 
         // Set this object as the action handler
-        System.out.println("adding ah");
         panel.addActionHandler(this);
-
-        System.out.println("start done.");
     }
 
     /**
