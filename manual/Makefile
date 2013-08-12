@@ -168,6 +168,11 @@ book-pocket.pdf: book-pocket.fo
 viewbook: book.pdf FORCE
 	kpdf book.pdf
 
+# Grayscaled print edition
+book-pocket-grayscale.pdf: book-pocket.pdf
+	gs -sOutputFile=book-pocket-grayscale.pdf -sDEVICE=pdfwrite   -sColorConversionStrategy=Gray -dProcessColorModel=/DeviceGray -dCompatibilityLevel=1.4 book-pocket.pdf < /dev/null
+
+
 ################################################################################
 # Internationalization
 ################################################################################
