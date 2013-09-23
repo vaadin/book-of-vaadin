@@ -827,7 +827,7 @@ date.setResolution(DateField.Resolution.DAY);
 layout.addComponent(date);
         
 // Handle language selection
-select.addListener(new Property.ValueChangeListener() {
+select.addValueChangeListener(new Property.ValueChangeListener() {
     public void valueChange(ValueChangeEvent event) {
         Locale locale = (Locale) select.getValue();
         date.setLocale(locale);
@@ -2363,7 +2363,7 @@ tf.setValue("Stuff in the field");]]></programlisting>
         <book-example id="component.textfield.inputhandling" style="float: right"></book-example>
 
         <programlisting><?pocket-size 65% ?><![CDATA[// Handle changes in the value
-tf.addListener(new Property.ValueChangeListener() {
+tf.addValueChangeListener(new Property.ValueChangeListener() {
     public void valueChange(ValueChangeEvent event) {
         // Assuming that the value type is a String
         String value = (String) tf.getValue();
@@ -2596,7 +2596,7 @@ counter.setValue(tf.toString().length() +
                  " of " + tf.getMaxLength());
         
 // Display the current length interactively in the counter
-tf.addListener(new TextChangeListener() {
+tf.addValueChangeListener(new TextChangeListener() {
     public void textChange(TextChangeEvent event) {
         int len = event.getText().length();
         counter.setValue(len + " of " + tf.getMaxLength());
@@ -2863,7 +2863,6 @@ area2.setValue("Victor jagt zw&ouml;lf Boxk&auml;mpfer quer "+
         </para>
 
         <book-example id="component.passwordfield.basic" style="float: right"></book-example>
-
         <programlisting><?pocket-size 65% ?><![CDATA[PasswordField tf = new PasswordField("Keep it secret");]]></programlisting>
 
         <para>
@@ -3461,35 +3460,33 @@ date.setValue(new java.util.Date());]]></programlisting>
 		<title><classname>Button</classname></title>
 
 		<para>
-			The <classname>Button</classname> is a user interface component that is
-			normally used for finalizing input and initiating some action. When the user
-			clicks a button, a <classname>Button.ClickEvent</classname> is emitted. A
-			listener that inherits the <classname>Button.ClickListener</classname>
-			interface can handle clicks with the <methodname>buttonClick()</methodname>
-			method.
+			The <classname>Button</classname> component is normally used for initiating
+			some action, such as finalizing input in forms. When the user clicks a button,
+			a <classname>Button.ClickEvent</classname> is fired, which can be handled with
+			a <interfacename>Button.ClickListener</interfacename> in the
+			<methodname>buttonClick()</methodname> method.
 		</para>
 
-		<programlisting><?pocket-size 65% ?><![CDATA[public class TheButton extends CustomComponent
-                       implements Button.ClickListener {
-    Button thebutton;
+        <para>
+            You can handle button clicks with an anonymous class as follows:
+        </para>
 
-    public TheButton() {
-        // Create a Button with the given caption.
-        thebutton = new Button ("Do not push this button");
-        
-        // Listen for ClickEvents.
-        thebutton.addListener(this);
-
-        setCompositionRoot(thebutton);
+        <book-example id="component.button.basic" style="float: right"></book-example>
+		<programlisting><![CDATA[Button button = new Button("Click Me!");
+button.addClickListener(new Button.ClickListener() {
+    public void buttonClick(ClickEvent event) {
+        Notification.show("Thank You!");
     }
-    
-    /** Handle click events for the button. */
-    public void buttonClick (Button.ClickEvent event) {
-        thebutton.setCaption ("Do not push this button again");
-    }
-}]]></programlisting>
+});
 
-		<figure>
+layout.addComponent(button);]]></programlisting>
+
+        <para>
+            The result is shown in <xref linkend="figure.component.button.basic"/>. The
+            listener can also be given in the constructor, which is often perhaps simpler.
+        </para>
+
+		<figure xml:id="figure.component.button.basic">
 			<title>An Example of a Button</title>
 			<mediaobject>
 				<imageobject>
@@ -3499,35 +3496,33 @@ date.setValue(new java.util.Date());]]></programlisting>
 		</figure>
 
 		<para>
-			As a user interface often has several buttons, you can differentiate
-			between them either by comparing the <classname>Button</classname>
-			object reference returned by the <methodname>getButton()</methodname>
-			method of <classname>Button.ClickEvent</classname> to a kept
-			reference or by using a separate listener method for each button. The
-			listening object and method can be given to the constructor. For a
-			detailed description of these patterns together with some examples,
-			please see <xref linkend="architecture.events"/>.
+            If you handle several buttons in the same listener, you can differentiate
+            between them either by comparing the <classname>Button</classname> object
+            reference returned by the <methodname>getButton()</methodname> method of
+            <classname>Button.ClickEvent</classname> to a kept reference or by using a
+            separate listener method for each button. For a detailed description of these patterns
+            together with some examples, please see <xref linkend="architecture.events"/>.
 		</para>
 
 		<simplesect>
 			<title>CSS Style Rules</title>
 
-			<programlisting><![CDATA[.v-button { }]]></programlisting>
+			<programlisting><![CDATA[.v-button { }
+  .v-button-wrap { }
+    .v-button-caption { }]]></programlisting>
 
 			<para>
-				The exact CSS style name can be different if a <classname>Button</classname>
-				has the <parameter>switchMode</parameter> attribute enabled. See the
-				alternative CSS styles below.
+                A button has an overall <literal>v-button</literal> style. The caption has
+                <literal>v-button-caption</literal> style. There is also an intermediate
+                wrap element, which may help in styling in some cases.
 			</para>
 
             <para>
-                Adding the "<literal>small</literal>" style name enables a smaller style
-                for the <classname>Button</classname>. You can also use the
-                <parameter>BUTTON_SMALL</parameter> constant in
-                <classname>Runo</classname> and <classname>Reindeer</classname> theme
-                classes as well. The <classname>BaseTheme</classname> class also has a
-                <parameter>BUTTON_LINK</parameter> style, with "<literal>link</literal>"
-                style name, which makes the button look like a hyperlink.
+                Some built-in themes contain a small style, which you can enable by adding
+                <parameter>Reindeer.BUTTON_SMALL</parameter>, etc. The
+                <classname>BaseTheme</classname> also has a
+                <parameter>BUTTON_LINK</parameter> style, which makes the button look like
+                a hyperlink.
             </para>
 		</simplesect>
 	</section>
@@ -3567,13 +3562,13 @@ main.addComponent(checkbox2);
 // Make some application logic. We use anonymous listener
 // classes here. The above references were defined as final
 // to allow accessing them from inside anonymous classes.
-checkbox1.addListener(new ValueChangeListener() {
+checkbox1.addValueChangeListener(new ValueChangeListener() {
     public void valueChange(ValueChangeEvent event) {
         // Copy the value to the other checkbox.
         checkbox2.setValue(checkbox1.getValue());
     }
 });
-checkbox2.addListener(new ValueChangeListener() {
+checkbox2.addValueChangeListener(new ValueChangeListener() {
     public void valueChange(ValueChangeEvent event) {
         // Copy the value to the other checkbox.
         checkbox1.setValue(checkbox2.getValue());
@@ -4645,7 +4640,7 @@ select.setRows(planets.length);]]></programlisting>
         select.setImmediate(true);
         
         // Listen for changes in the selection.
-        select.addListener(this);
+        select.addValueChangeListener(this);
 
         layout.addComponent(status);
     }
@@ -4827,7 +4822,7 @@ table.setImmediate(true);
 final Label current = new Label("Selected: -");
 
 // Handle selection change.
-table.addListener(new Property.ValueChangeListener() {
+table.addValueChangeListener(new Property.ValueChangeListener() {
     public void valueChange(ValueChangeEvent event) {
         current.setValue("Selected: " + table.getValue());
     }
@@ -4942,7 +4937,7 @@ table.addListener(new Property.ValueChangeListener() {
 					immediately, which is typical.
                 </para>
 
-<programlisting><?pocket-size 65% ?><![CDATA[table.addListener(new Table.ColumnResizeListener() {
+<programlisting><?pocket-size 65% ?><![CDATA[table.addColumnResizeListener(new Table.ColumnResizeListener(){
     public void columnResize(ColumnResizeEvent event) {
         // Get the new width of the resized column
         int width = event.getCurrentWidth();
@@ -5106,7 +5101,7 @@ for (int i=0; i<100; i++) {
     // item ID as user-defined data.
     Button detailsField = new Button("show details");
     detailsField.setData(itemId);
-    detailsField.addListener(new Button.ClickListener() {
+    detailsField.addClickListener(new Button.ClickListener() {
         public void buttonClick(ClickEvent event) {
             // Get the item identifier from the user-defined data.
             Integer iid = (Integer)event.getButton().getData();
@@ -5228,7 +5223,8 @@ layout.addComponent(table);]]></programlisting>
             </para>
 
             <programlisting><?pocket-size 65% ?><![CDATA[final CheckBox switchEditable = new CheckBox("Editable");
-switchEditable.addListener(new Property.ValueChangeListener() {
+switchEditable.addValueChangeListener(
+        new Property.ValueChangeListener() {
     public void valueChange(ValueChangeEvent event) {
         table.setEditable(((Boolean)event.getProperty()
                              .getValue()).booleanValue());
@@ -5569,7 +5565,7 @@ table.setPageLength(table.size());]]></programlisting>
                 </para>
 
                 <programlisting><?pocket-size 65% ?><![CDATA[// Handle the header clicks
-table.addListener(new Table.HeaderClickListener() {
+table.addHeaderClickListener(new Table.HeaderClickListener() {
     public void headerClick(HeaderClickEvent event) {
         String column = (String) event.getPropertyId();
         Notification.show("Clicked " + column +
@@ -5752,7 +5748,7 @@ final CheckBox editable = new CheckBox(
     "Edit the input values - calculated columns are regenerated");
 
 editable.setImmediate(true);
-editable.addListener(new ClickListener() {
+editable.addClickListener(new ClickListener() {
     public void buttonClick(ClickEvent event) {
         table.setEditable(editable.booleanValue());
         
@@ -6794,7 +6790,7 @@ class WorkThread extends Thread {
 }
 
 // Clicking the button creates and runs a work thread
-button.addListener(new Button.ClickListener() {
+button.addClickListener(new Button.ClickListener() {
     public void buttonClick(ClickEvent event) {
         final WorkThread thread = new WorkThread();
         thread.start();
@@ -7463,7 +7459,8 @@ calendar.addEvent(event);]]></programlisting>
         fireEventChange();
     }
 
-    public void addListener(EventChangeListener listener) {
+    public void addEventChangeListener(
+            EventChangeListener listener) {
         ...
     }
     
@@ -7682,7 +7679,7 @@ calendar.addEvent(event);]]></programlisting>
             <title>Visible Hours and Days</title>
 
             <para>
-                As we saw in <xref linkend="calendar.using.daterange"/>, you can set the
+                As we saw in <xref linkend="components.calendar.daterange"/>, you can set the
                 range of dates that are shown by the Calendar. But what if you wanted to
                 show the entire month but hide the weekends? Or show only hours from 8 to
                 16 in the weekly view? The <methodname>setVisibleDays()</methodname> and
@@ -7979,7 +7976,7 @@ protected void createEvent(CalendarTargetDetails details,
                     Let us first create a new <classname>Calendar</classname>
                     instance. Here we use our own event provider, the
                     <classname>MyEventProvider</classname> described in <xref
-                    linkend="calendar.eventprovider.eventprovider"/>.
+                    linkend="components.calendar.eventprovider.eventprovider"/>.
                 </para>
 
                 <programlisting><![CDATA[Calendar cal = new Calendar(new MyEventProvider());]]></programlisting>
@@ -8133,7 +8130,7 @@ protected void createEvent(CalendarTargetDetails details,
                 shown in the following example.
             </para>
 
-            <programlisting><?pocket-size 65% ?><![CDATA[cal.addListener(new EventClickHandler() {
+            <programlisting><?pocket-size 65% ?><![CDATA[cal.setHandler(new EventClickHandler() {
     public void eventClick(EventClick event) {
         BasicEvent e = (BasicEvent) event.getCalendarEvent();
 
