@@ -1096,8 +1096,7 @@ layout.addComponent(invisible);]]></programlisting>
             <para>
                 If you need to make a component only cosmetically invisible, you should
                 use a custom theme to set it <literal>display: none</literal> style. This
-                is mainly useful for certain special components such as
-                <classname>ProgressIndicator</classname>, which have effects even when
+                is mainly useful for some special components that have effects even when
                 made invisible in CSS. If the hidden component has undefined size and is
                 enclosed in a layout that also has undefined size, the containing layout
                 will collapse when the component disappears. If you want to have the
@@ -6575,6 +6574,19 @@ layout.addComponent(object);]]></programlisting>
             </para>
 
             <para>
+                While uploading, the upload progress can be monitored with an
+                <interfacename>Upload.ProgressListener</interfacename>. The
+                <methodname>updateProgress()</methodname> method gets the number of read
+                bytes and the content length as parameters. The content length is reported
+                by the browser, is not reliable, and may be -1 if unknown. It is therefore
+                recommended to follow the upload progress and check the allowed size in a
+                progress listener. Upload can be terminated by calling
+                <methodname>interruptUpload()</methodname> on the upload component. You
+                may want to use a <classname>ProgressBar</classname> to visualize the
+                progress, and in indeterminate mode if the content length is not known.
+            </para>
+
+            <para>
                 When an upload is finished, successfully or unsuccessfully, the
                 <classname>Upload</classname> component will emit the
                 <classname>Upload.FinishedEvent</classname> event, which you can handle with
@@ -6674,118 +6686,164 @@ panel.setContent(panelContent);]]></programlisting>
         </simplesect>
 	</section>
 
-	<section xml:id="components.progressindicator">
-		<title><classname>ProgressIndicator</classname></title>
+	<section xml:id="components.progressbar">
+		<title><classname>ProgressBar</classname></title>
 
 		<para>
-			The <classname>ProgressIndicator</classname> component allows displaying the
-			progress of a task graphically. The progress is given as a floating-point
+			The <classname>ProgressBar</classname> component allows displaying the
+			progress of a task graphically. The progress is specified as a floating-point
 			value between 0.0 and 1.0.
 		</para>
 
-		<figure>
-			<title>The Progress Indicator Component</title>
+		<figure xml:id="figure.components.progressbar.basic">
+			<title>The Progress Bar Component</title>
 			<mediaobject>
 				<imageobject>
-					<imagedata smallscale="140" align="center" fileref="img/components/progressindicator-example1.png"/>
+					<imagedata smallscale="50%" align="center" fileref="img/components/progressbar-basic.png"/>
 				</imageobject>
 			</mediaobject>
 		</figure>
 
-		<para>
-			The progress indicator polls the server for updates for its value. If the
-			value has changed, the progress is updated. Notice that the user application
-			does not have to handle any polling event, but updating the component is done
-			automatically.
+        <para>
+            To display upload progress with the <classname>Upload</classname> component,
+            you can update the progress bar in a
+            <interfacename>ProgressListener</interfacename>.
 		</para>
 
 		<para>
-			Creating a progress indicator is just like with any other component. You
-			can give the initial progress value as a parameter for the constructor. The default
-			polling frequency is 1000 milliseconds (one second), but you can set some
-			other interval with the <methodname>setPollingInterval()</methodname> method.
-		</para>
+			When the position of a progress bar is done in a background thread, the change
+			is not shown in the browser immediately. You need to use either polling or
+			server push to update the browser. You can enable polling with
+			<methodname>setPollInterval()</methodname> in the current UI instance. See
+			<xref linkend="advanced.push"/> for instructions about using server
+			push. Whichever method you use to update the UI, it is important to lock the
+			user session by modifying the progress bar value inside
+			<methodname>access()</methodname> call, as illustrated in the following
+			example and described in <xref linkend="advanced.push.running"/>.
+        </para>
 
-		<programlisting><![CDATA[// Create the indicator
-final ProgressIndicator indicator =
-        new ProgressIndicator(new Float(0.0));
-main.addComponent(indicator);
+		<programlisting><![CDATA[final ProgressBar bar = new ProgressBar(0.0f);
+layout.addComponent(bar);
+        
+layout.addComponent(new Button("Increase",
+    new ClickListener() {
+    @Override
+    public void buttonClick(ClickEvent event) {
+        float current = bar.getValue();
+        if (current < 1.0f)
+            bar.setValue(current + 0.10f);
+    }
+}));]]></programlisting>
 
-// Set polling frequency to 0.5 seconds.
-indicator.setPollingInterval(500);]]></programlisting>
+		<simplesect xml:id="components.progressbar.indeterminate">
+			<title>Indeterminate Mode</title>
 
-		<simplesect>
-			<title>CSS Style Rules</title>
-				
-			<programlisting><![CDATA[/* Base element. */
-.v-progressindicator {}
+            <para>
+                In the indeterminate mode, a non-progressive indicator is displayed
+                continuously. The indeterminate indicator is a circular wheel in the
+                built-in themes. The progress value has no meaning in the indeterminate
+                mode.
+            </para>
 
-/* Progress indication element on top of the base. */
-.v-progressindicator div {}]]></programlisting>
+            <programlisting><![CDATA[ProgressBar bar = new ProgressBar();
+bar.setIndeterminate(true);]]></programlisting>
 
-			<para>
-				The default style for the progress indicator uses an animated GIF image
-				(<filename>img/base.gif</filename>) as the base background for the
-				component. The progress is a <literal>&lt;div&gt;</literal> element inside
-				the base. When the progress element grows, it covers more and more of the
-				base background. By default, the graphic of the progress element is
-				defined in <filename>img/progress.png</filename> under the default style
-				directory. See
-				<filename>com.vaadin.terminal.gwt/public/default/progressindicator/progressindicator.css</filename>.
-			</para>
-		</simplesect>
+            <figure xml:id="figure.components.progressbar.indeterminate">
+                <title>Indeterminate Progress Bar</title>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata smallscale="100" align="center" fileref="img/components/progressbar-indeterminate.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+        </simplesect>
 
-		<section>
+		<simplesect xml:id="components.progressbar.thread">
 			<title>Doing Heavy Computation</title>
 
 			<para>
 				The progress indicator is often used to display the progress of a heavy
-				server-side computation task. In the following example, we create a thread
-				in the server to do some "heavy work". All the thread needs to do is to
-				set the value of the progress indicator with
-				<methodname>setValue()</methodname> and the current progress is displayed
-				automatically when the browser polls the server.
+				server-side computation task, often running in a background thread. The
+				UI, including the progress bar, can be updated either with polling or by
+				using server push. When doing so, you must ensure thread-safety, most
+				easily by updating the UI inside a <methodname>UI.access()</methodname>
+				call in a <interfacename>Runnable</interfacename>, as described in <xref
+				linkend="advanced.push.running"/>.
+            </para>
+
+            <para>
+                In the following example, we create a thread in the server to do some
+                "heavy work" and use polling to update the UI. All the thread needs to do
+                is to set the value of the progress bar with
+                <methodname>setValue()</methodname> and the current progress is displayed
+                automatically when the browser polls the server.
 			</para>
 
-			<programlisting><?pocket-size 65% ?><![CDATA[// Create an indicator that makes you look busy
-final ProgressIndicator indicator =
-        new ProgressIndicator(new Float(0.0));
-main.addComponent(indicator);
+            <programlisting><?pocket-size 65% ?><![CDATA[HorizontalLayout barbar = new HorizontalLayout();
+layout.addComponent(barbar);
+        
+// Create the indicator, disabled until progress is started
+final ProgressBar progress = new ProgressBar(new Float(0.0));
+progress.setEnabled(false);
+barbar.addComponent(progress);
+        
+final Label status = new Label("not running");
+barbar.addComponent(status);
 
-// Set polling frequency to 0.5 seconds.
-indicator.setPollingInterval(500);
-
-// Add a button to start working
+// A button to start progress
 final Button button = new Button("Click to start");
-main.addComponent(button);
+layout.addComponent(button);
 
-// Another thread to do some work
+// A thread to do some work
 class WorkThread extends Thread {
-    public void run () {
-        double current = 0.0;
-        while (true) {
+    // Volatile because read in another thread in access()
+    volatile double current = 0.0;
+
+    @Override
+    public void run() {
+        // Count up until 1.0 is reached
+        while (current < 1.0) {
+            current += 0.01;
+
             // Do some "heavy work"
             try {
                 sleep(50); // Sleep for 50 milliseconds
-            } catch (InterruptedException) {}
-            
-            // Show that you have made some progress:
-            // grow the progress value until it reaches 1.0.
-            current += 0.01;
-            if (current>1.0)
-                indicator.setValue(new Float(1.0));
-            else 
-                indicator.setValue(new Float(current));
-            
-            // After all the "work" has been done for a while,
-            // take a break.
-            if (current > 1.2) {
-                // Restore the state to initial.
-                indicator.setValue(new Float(0.0));
-                button.setVisible(true);
-                break;
-            }
+            } catch (InterruptedException e) {}
+
+            // Update the UI thread-safely
+            UI.getCurrent().access(new Runnable() {
+                @Override
+                public void run() {
+                    progress.setValue(new Float(current));
+                    if (current < 1.0)
+                        status.setValue("" +
+                            ((int)(current*100)) + "% done");
+                    else
+                        status.setValue("all done");
+                }
+            });
         }
+        
+        // Show the "all done" for a while
+        try {
+            sleep(2000); // Sleep for 2 seconds
+        } catch (InterruptedException e) {}
+
+        // Update the UI thread-safely
+        UI.getCurrent().access(new Runnable() {
+            @Override
+            public void run() {
+                // Restore the state to initial
+                progress.setValue(new Float(0.0));
+                progress.setEnabled(false);
+                        
+                // Stop polling
+                UI.getCurrent().setPollInterval(-1);
+                
+                button.setEnabled(true);
+                status.setValue("not running");
+            }
+        });
     }
 }
 
@@ -6794,21 +6852,57 @@ button.addClickListener(new Button.ClickListener() {
     public void buttonClick(ClickEvent event) {
         final WorkThread thread = new WorkThread();
         thread.start();
-        
-        // The button hides until the work is done.
-        button.setVisible(false);
+
+        // Enable polling and set frequency to 0.5 seconds
+        UI.getCurrent().setPollInterval(500);
+
+        // Disable the button until the work is done
+        progress.setEnabled(true);
+        button.setEnabled(false);
+
+        status.setValue("running...");
     }
 });]]></programlisting>
 
-			<figure>
-				<title>Starting Heavy Work</title>
+            <para>
+                The example is illustrated in <xref
+                linkend="figure.components.progressbar.thread"/>.
+            </para>
+
+			<figure xml:id="figure.components.progressbar.thread">
+				<title>Doing Heavy Work</title>
 				<mediaobject>
 					<imageobject>
-						<imagedata smallscale="140" align="center" fileref="img/components/progressindicator-example2.png"/>
+						<imagedata smallscale="50%" align="center" fileref="img/components/progressbar-thread.png"/>
 					</imageobject>
 				</mediaobject>
 			</figure>
-		</section>
+        </simplesect>
+
+		<simplesect xml:id="components.progressbar.css">
+			<title>CSS Style Rules</title>
+				
+			<programlisting><![CDATA[.v-progressbar, v-progressbar-indeterminate {}
+  .v-progressbar-wrapper {}
+    .v-progressbar-indicator {}]]></programlisting>
+
+			<para>
+                The progress bar has a <literal>v-progressbar</literal> base style. The
+                animation is the background of the element with
+                <literal>v-progressbar-wrapper</literal> style, by default an animated GIF
+                image. The progress is an element with
+                <literal>v-progressbar-indicator</literal> style inside the wrapper, and
+                therefore displayed on top of it. When the progress element grows, it
+                covers more and more of the animated background.
+			</para>
+
+            <para>
+                In the indeterminate mode, the top element also has the
+                <literal>v-progressbar-indeterminate</literal> style. The built-in themes
+                simply display the animated GIF in the top element and have the inner
+                elements disabled.
+            </para>
+		</simplesect>
 	</section>
 
 	<section xml:id="components.slider">
