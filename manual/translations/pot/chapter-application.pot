@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: http://bugs.kde.org\n"
-"POT-Creation-Date: 2012-04-02 14:31+0000\n"
+"POT-Creation-Date: 2013-11-13 16:06+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <kde-i18n-doc@kde.org>\n"
@@ -15,808 +15,792 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 #. Tag: title
-#: chapter-application.xml:4
+#: chapter-application.xml:11
 #, no-c-format
-msgid "Writing a Web Application"
+msgid "Writing a Server-Side Web Application"
 msgstr ""
 
 #. Tag: para
-#: chapter-application.xml:8
+#: chapter-application.xml:13
 #, no-c-format
-msgid "This chapter provides the fundamentals of web application development with Vaadin, concentrating on the basic elements of an application from a practical point-of-view."
-msgstr ""
-
-#. Tag: para
-#: chapter-application.xml:14
-#, no-c-format
-msgid "If you are a newcomer to AJAX development, you may benefit from <xref linkend=\"advanced.application.pages\"/>. It explains the role of pages in AJAX web applications, and provides some basic design patterns for applications."
+msgid "This chapter provides the fundamentals of server-side web application development with Vaadin, concentrating on the basic elements of an application from a practical point-of-view."
 msgstr ""
 
 #. Tag: title
-#: chapter-application.xml:21
+#: chapter-application.xml:20
 #, no-c-format
 msgid "Overview"
 msgstr ""
 
 #. Tag: para
-#: chapter-application.xml:23
+#: chapter-application.xml:22
 #, no-c-format
-msgid "An application made with Vaadin runs as a Java Servlet in a Servlet container. The entry-point is the application class, which needs to create and manage all necessary user interface components, including windows. User interaction is handled with event listeners, simplified by binding user interface components directly to data. Visual appearance is defined in themes as CSS files. Icons, other images, and downloadable files are handled as <emphasis>resources</emphasis>, which can be external or served by the application server or the application itself."
+msgid "A server-side Vaadin application runs as a Java Servlet in a servlet container. The Java Servlet API is, however, hidden behind the framework. The user interface of the application is implemented as a <emphasis>&ui;</emphasis> class, which needs to create and manage the user interface components that make up the user interface. User input is handled with event listeners, although it is also possible to bind the user interface components directly to data. The visual style of the application is defined in themes as CSS and SCSS files. Icons, other images, and downloadable files are handled as <emphasis>resources</emphasis>, which can be external or served by the application server or the application itself."
 msgstr ""
 
 #. Tag: title
-#: chapter-application.xml:35
+#: chapter-application.xml:36
 #, no-c-format
-msgid "Application Architecture"
+msgid "Server-Side Application Architecture"
 msgstr ""
 
 #. Tag: para
-#: chapter-application.xml:46
+#: chapter-application.xml:47
 #, no-c-format
-msgid "above gives the basic architecture of an application made with the Vaadin framework, with all the major elements, which are introduced below and discussed in detail in this chapter."
+msgid "illustrates the basic architecture of an application made with the Vaadin Framework, with all the major elements, which are introduced below and discussed in detail in this chapter."
 msgstr ""
 
 #. Tag: para
-#: chapter-application.xml:53
+#: chapter-application.xml:54
 #, no-c-format
-msgid "First of all, an application that uses Vaadin must define an application class that inherits the abstract <classname>com.vaadin.Application</classname> class. The application class must implement the <methodname>init()</methodname> method."
+msgid "First of all, a Vaadin application must have one or more &ui; classes that extend the abstract <classname>com.vaadin.ui.&uiclass;</classname> class and implement the <methodname>init()</methodname> method. A custom theme can be defined as an annotation for the &ui;."
 msgstr ""
 
 #. Tag: programlisting
-#: chapter-application.xml:60
+#: chapter-application.xml:61
 #, no-c-format
 msgid ""
-"<![CDATA[public class MyApp extends com.vaadin.Application {\n"
-"\n"
-"    public void init() { \n"
+"<![CDATA[@Theme(\"hellotheme\")\n"
+"public class HelloWorld extends UI {\n"
+"    protected void init(VaadinRequest request) {\n"
 "        ... initialization code goes here ...\n"
 "    }\n"
 "}]]>"
 msgstr ""
 
 #. Tag: para
-#: chapter-application.xml:62
+#: chapter-application.xml:63
 #, no-c-format
-msgid "Besides acting as the entry-point in the servlet, the <classname>Application</classname> class provides facilities for window access, execution control, and theme selection. The application API may seem similar to Java Servlet API, but that is only superficial. Vaadin framework associates requests with sessions so that an application class instance is really a session object. Because of this, you can develop web applications much like you would develop desktop applications."
-msgstr ""
-
-#. Tag: title
-#: chapter-application.xml:73
-#, no-c-format
-msgid "Restarting Application Session"
+msgid "A &ui; is a viewport to a Vaadin application running in a web page. A web page can actually have multiple such &ui;s within it. Such situation is typical especially with portlets in a portal. An application can run in multiple browser windows, each having a distinct <classname>UI</classname> instance. The UIs of an application can be the same UI class or different."
 msgstr ""
 
 #. Tag: para
-#: chapter-application.xml:75
+#: chapter-application.xml:71
 #, no-c-format
-msgid "When you open the URL for the application, it creates a new user session. The session is preserved even if you reload the page. However, if you use Eclipse, it likes to do hot deployment to Tomcat and you may experience a problem that the application does not return to its initial state after you modify code. As Tomcat likes to persist sessions on server shutdown, the application state can remain even if you restart the server."
+msgid "Vaadin framework handles servlet requests internally and associates the requests with user sessions and a UI state. Because of this, you can develop Vaadin applications much like you would develop desktop applications."
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:77
+#, no-c-format
+msgid "The most important task in the initialization is the creation of the initial user interface. This, and the deployment of a UI as a Java Servlet in the Servlet container, as described in <xref linkend=\"application.environment\"/>, are the minimal requirements for an application."
 msgstr ""
 
 #. Tag: para
 #: chapter-application.xml:84
 #, no-c-format
-msgid "Adding the <uri>?restartApplication</uri> parameter in the URL tells the Vaadin servlet to create a new <classname>Application</classname> instance on loading the page. If you also include a URI fragment, the parameter should be given before the fragment."
-msgstr ""
-
-#. Tag: para
-#: chapter-application.xml:92
-#, no-c-format
-msgid "The most important thing in the initialization is the creation of the main window (see below), which any application has. This, and the deployment of the application as a Java Servlet in the Servlet container, as described in <xref linkend=\"application.environment\"/>, are the minimal requirements for an application."
-msgstr ""
-
-#. Tag: para
-#: chapter-application.xml:100
-#, no-c-format
-msgid "Below is a short overview of the basic elements of an application:"
+msgid "Below is a short overview of the other basic elements of an application besides &ui;:"
 msgstr ""
 
 #. Tag: term
-#: chapter-application.xml:106
+#: chapter-application.xml:91
 #, no-c-format
-msgid "Windows"
+msgid "&uiclass;"
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:93
+#, no-c-format
+msgid "A <emphasis>&ui;</emphasis> represents an HTML fragment in which a Vaadin application runs in a web page. It typically fills the entire page, but can also be just a part of a page. You normally develop a Vaadin application by extending the <classname>&uiclass;</classname> class and adding content to it. A &ui; is essentially a viewport connected to a user session of an application, and you can have many such views, especially in a multi-window application. Normally, when the user opens a new page with the URL of the Vaadin UI, a new <classname>UI</classname> (and the associated <classname>Page</classname> object) is automatically created for it. All of them share the same user session."
 msgstr ""
 
 #. Tag: para
 #: chapter-application.xml:108
 #, no-c-format
-msgid "An application always has a <emphasis>main window</emphasis>, as described in <xref linkend=\"application.main-window\"/>. An application can actually have a number of such application-level windows, all bound to the same application session, as described in <xref linkend=\"application.windows\"/>. Application-level windows can contain non-native sub-windows, which are essentially floating layout components handled inside the browser."
+msgid "The current &ui; object can be accessed globally with <methodname>UI.getCurrent()</methodname>. The static method returns the thread-local &ui; instance for the currently processed request<phrase condition=\"web\"> (see <xref linkend=\"advanced.global.threadlocal\"/>)</phrase>."
 msgstr ""
 
 #. Tag: term
+#: chapter-application.xml:119
+#, no-c-format
+msgid "Page"
+msgstr ""
+
+#. Tag: para
 #: chapter-application.xml:121
+#, no-c-format
+msgid "A <classname>&uiclass;</classname> is associated with a <classname>Page</classname> object that represents the web page as well as the browser window in which the &ui; runs."
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:127
+#, no-c-format
+msgid "The <classname>Page</classname> object for the currently processed request can be accessed globally from a Vaadin application with <methodname>Page.getCurrent()</methodname>. This is equivalent to calling <methodname>&uiclass;.getCurrent().getPage()</methodname>."
+msgstr ""
+
+#. Tag: term
+#: chapter-application.xml:138
+#, no-c-format
+msgid "Vaadin Session"
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:140
+#, no-c-format
+msgid "A <classname>VaadinSession</classname> object represents a user session with one or more UIs open in the application. A session starts when a user first opens a UI of a Vaadin application, and closes when the session expires in the server or when it is closed explicitly."
+msgstr ""
+
+#. Tag: term
+#: chapter-application.xml:151
 #, no-c-format
 msgid "User Interface Components"
 msgstr ""
 
 #. Tag: para
-#: chapter-application.xml:123
+#: chapter-application.xml:153
 #, no-c-format
-msgid "The user interface consists of UI components that are created and laid out by the application. User interaction with the components causes events (see below) related to the component, which the application must handle. Most components are bound to some data using the Data Model (see below). You can make your own UI components through either inheritance or composition. For a thorough reference of UI components, see <xref linkend=\"components\"/>, for layout components, see <xref linkend=\"layout\"/>, and for composing components, see <xref linkend=\"components.customcomponent\"/>."
+msgid "The user interface consists of components that are created by the application. They are laid out hierarchically using special <emphasis>layout components</emphasis>, with a content root layout at the top of the hierarchy. User interaction with the components causes <emphasis>events</emphasis> related to the component, which the application can handle. <emphasis>Field components</emphasis> are intended for inputting values and can be directly bound to data using the Vaadin Data Model. You can make your own user interface components through either inheritance or composition. For a thorough reference of user interface components, see <xref linkend=\"components\"/>, for layout components, see <xref linkend=\"layout\"/>, and for compositing components, see <xref linkend=\"components.customcomponent\"/>."
 msgstr ""
 
 #. Tag: term
-#: chapter-application.xml:139
+#: chapter-application.xml:172
 #, no-c-format
 msgid "Events and Listeners"
 msgstr ""
 
 #. Tag: para
-#: chapter-application.xml:141
+#: chapter-application.xml:174
 #, no-c-format
-msgid "Events, and listeners that handle events, are the basis of handling user interaction in an application. <xref linkend=\"architecture.events\"/> gave an introduction to events and listeners from an architectural point-of-view, while <xref linkend=\"application.events\"/> later in this chapter takes a more practical view."
+msgid "Vaadin follows an event-driven programming paradigm, in which events, and listeners that handle the events, are the basis of handling user interaction in an application (although also server push is possible as described in <xref linkend=\"advanced.push\"/>). <xref linkend=\"architecture.events\"/> gave an introduction to events and listeners from an architectural point-of-view, while <xref linkend=\"application.events\"/> later in this chapter takes a more practical view."
 msgstr ""
 
 #. Tag: term
-#: chapter-application.xml:153
+#: chapter-application.xml:188
 #, no-c-format
 msgid "Resources"
 msgstr ""
 
 #. Tag: para
-#: chapter-application.xml:155
+#: chapter-application.xml:190
 #, no-c-format
-msgid "A user interface can display images or have links to web pages or downloadable documents. These are <emphasis>resources</emphasis>, which can be external or provided by the web server or the application itself. <xref linkend=\"application.resources\"/> gives a practical overview of the different types of resources."
+msgid "A user interface can display images or have links to web pages or downloadable documents. These are handled as <emphasis>resources</emphasis>, which can be external or provided by the web server or the application itself. <xref linkend=\"application.resources\"/> gives a practical overview of the different types of resources."
 msgstr ""
 
 #. Tag: term
-#: chapter-application.xml:166
+#: chapter-application.xml:202
 #, no-c-format
 msgid "Themes"
 msgstr ""
 
 #. Tag: para
-#: chapter-application.xml:168
+#: chapter-application.xml:204
 #, no-c-format
-msgid "The presentation and logic of the user interface are separated. While the UI logic is handled as Java code, the presentation is defined in <emphasis>themes</emphasis> as CSS. Vaadin provides a default theme. User-defined themes can, in addition to style sheets, include HTML templates that define custom layouts and other theme resources, such as images. Themes are discussed in detail in <xref linkend=\"themes\"/>, custom layouts in <xref linkend=\"layout.customlayout\"/>, and theme resources in <xref linkend=\"application.resources.theme\"/>."
+msgid "The presentation and logic of the user interface are separated. While the UI logic is handled as Java code, the presentation is defined in <emphasis>themes</emphasis> as CSS or SCSS. Vaadin includes some built-in themes. User-defined themes can, in addition to style sheets, include HTML templates that define custom layouts and other theme resources, such as images. Themes are discussed in detail in <xref linkend=\"themes\"/>, custom layouts in <xref linkend=\"layout.customlayout\"/>, and theme resources in <xref linkend=\"application.resources.theme\"/>."
 msgstr ""
 
 #. Tag: term
-#: chapter-application.xml:183
+#: chapter-application.xml:220
 #, no-c-format
 msgid "Data Binding"
 msgstr ""
 
 #. Tag: para
-#: chapter-application.xml:185
+#: chapter-application.xml:222
 #, no-c-format
-msgid "Field components are essentially views to data, represented in a <emphasis>data model</emphasis>. Using the data model, the components can update the application data directly, without the need for any control code. A field component model is always bound to a <emphasis>property</emphasis>, an <emphasis>item</emphasis>, or a <emphasis>container</emphasis>, depending on the field type. While all the components have a default data model, they can be bound to a user-defined data source. For example, you can bind a table component to an SQL query response. For a complete overview of data binding in Vaadin, please refer to <xref linkend=\"datamodel\"/>."
+msgid "Field components are essentially views to data, represented in the <emphasis>Vaadin Data Model</emphasis>. Using the data model, the components can get their values from and update user input to the data model directly, without the need for any control code. A field component is always bound to a <emphasis>property</emphasis> and a group of fields to an <emphasis>item</emphasis> that holds the properties. Items can be collected in a <emphasis>container</emphasis>, which can act as a data source for some components such as tables or lists. While all the components have a default data model, they can be bound to a user-defined data source. For example, you can bind a <classname>Table</classname> component to an SQL query response. For a complete overview of data binding in Vaadin, please refer to <xref linkend=\"datamodel\"/>."
 msgstr ""
 
 #. Tag: title
-#: chapter-application.xml:204
+#: chapter-application.xml:244
 #, no-c-format
-msgid "Managing the Main Window"
+msgid "Building the UI"
 msgstr ""
 
 #. Tag: para
-#: chapter-application.xml:206
+#: chapter-application.xml:246
 #, no-c-format
-msgid "As explained in <xref linkend=\"advanced.application.pages\"/>, an AJAX web application usually runs in a single \"web page\" in a browser window. The page is generally not reloaded after it is opened initially, but it communicates user interaction with the server through AJAX communications. A window in an AJAX application is therefore more like a window in a desktop application and less like a web page."
-msgstr ""
-
-#. Tag: para
-#: chapter-application.xml:215
-#, no-c-format
-msgid "A <classname>Window</classname> is the top-level container of a user interface displayed in a browser window. As an AJAX application typically runs on a single \"page\" (URL), there is usually just one window -- the main window. The main window can be accessed using the URL of the application. You set the main window with the <methodname>setMainWindow()</methodname> method of the <classname>Application</classname> class."
+msgid "Vaadin user interfaces are built hierarchically from components, so that the leaf components are contained within layout components and other component containers. Building the hierarchy starts from the top (or bottom - whichever way you like to think about it), from the <classname>UI</classname> class of the application. You normally set a layout component as the content of the UI and fill it with other components."
 msgstr ""
 
 #. Tag: programlisting
-#: chapter-application.xml:224
+#: chapter-application.xml:255
 #, no-c-format
 msgid ""
-"<?pocket-size 75% ?>import com.vaadin.ui.*;\n"
+"<?pocket-size 75% ?><![CDATA[public class MyHierarchicalUI extends UI {\n"
+"    @Override\n"
+"    protected void init(VaadinRequest request) {\n"
+"        // The root of the component hierarchy\n"
+"        VerticalLayout content = new VerticalLayout();\n"
+"        content.setSizeFull(); // Use entire window\n"
+"        setContent(content);   // Attach to the UI\n"
+"        \n"
+"        // Add some component\n"
+"        content.addComponent(new Label(\"Hello!\"));\n"
+"        \n"
+"        // Layout inside layout\n"
+"        HorizontalLayout hor = new HorizontalLayout();\n"
+"        hor.setSizeFull(); // Use all available space\n"
 "\n"
-"public class HelloWorld extends com.vaadin.Application {\n"
-"    public void init() { \n"
-"        Window main = new Window(\"The Main Window\"); \n"
-"        setMainWindow(main);\n"
+"        // Couple of horizontally laid out components\n"
+"        Tree tree = new Tree(\"My Tree\",\n"
+"                TreeExample.createTreeContent());\n"
+"        hor.addComponent(tree);\n"
 "\n"
-"        <emphasis>... fill the main window with components ...</emphasis>\n"
+"        Table table = new Table(\"My Table\",\n"
+"                TableExample.generateContent());\n"
+"        table.setSizeFull();\n"
+"        hor.addComponent(table);\n"
+"        hor.setExpandRatio(table, 1); // Expand to fill\n"
+"\n"
+"        content.addComponent(hor);\n"
+"        content.setExpandRatio(hor, 1); // Expand to fill\n"
 "    }\n"
-"}"
+"}]]>"
 msgstr ""
 
 #. Tag: para
-#: chapter-application.xml:226
+#: chapter-application.xml:257
 #, no-c-format
-msgid "You can add components to the main window, or to any other window, with the <classname>addComponent()</classname> method, which actually adds the given component to the root layout component bound to the window. If you wish to use other than the default root layout, you can set it with <methodname>setContent()</methodname>, as explained in <xref linkend=\"layout.root-layout\"/>."
+msgid "The component hierarchy could be illustrated with a tree as follows:"
 msgstr ""
 
-#. Tag: para
-#: chapter-application.xml:235
+#. Tag: programlisting
+#: chapter-application.xml:261
 #, no-c-format
-msgid "Vaadin has two basic kinds of windows: <emphasis>application-level windows</emphasis>, such as the main window, and <emphasis>sub-windows</emphasis> inside the application-level windows. The sub-windows are explained in the next section, while application-level windows are covered in <xref linkend=\"application.windows\"/>."
-msgstr ""
-
-#. Tag: title
-#: chapter-application.xml:245
-#, no-c-format
-msgid "Sub-Windows"
-msgstr ""
-
-#. Tag: para
-#: chapter-application.xml:247
-#, no-c-format
-msgid "An application-level window can have a number of floating child or sub-windows. They are managed by the client-side JavaScript runtime of Vaadin using HTML features. Vaadin allows opening and closing sub-windows, refreshing one window from another, resizing windows, and scrolling the window content. Sub-windows are typically used for <firstterm>Dialog Windows</firstterm> and <firstterm>Multiple Document Interface</firstterm> applications. Sub-windows are by default not modal; you can set them modal as described in <xref linkend=\"application.child-windows.modal\"/>."
-msgstr ""
-
-#. Tag: para
-#: chapter-application.xml:258
-#, no-c-format
-msgid "As with all user interface components, the appearance of a window and its contents is defined with themes."
+msgid ""
+"<?pocket-size 75% ?><![CDATA[UI\n"
+" `-- VerticalLayout\n"
+"   |-- Label\n"
+"   `-- HorizontalLayout\n"
+"     |-- Tree\n"
+"     `-- Table]]>"
 msgstr ""
 
 #. Tag: para
 #: chapter-application.xml:263
 #, no-c-format
-msgid "User control of a sub-window is limited to moving, resizing, and closing the window. Maximizing or minimizing are not yet supported."
+msgid "The result is shown in <xref linkend=\"figure.application.architecture.example\"/>."
 msgstr ""
 
 #. Tag: title
-#: chapter-application.xml:269
+#: chapter-application.xml:268
 #, no-c-format
-msgid "Opening and Closing a Sub-Window"
+msgid "Simple Hierarchical UI"
 msgstr ""
 
 #. Tag: para
-#: chapter-application.xml:271
+#: chapter-application.xml:276
 #, no-c-format
-msgid "You can open a new window by creating a new <classname>Window</classname> object and adding it to the main window with <methodname>addWindow()</methodname> method of the <classname>Application</classname> class."
+msgid "The built-in components are described in <xref linkend=\"components\"/> and the layout components in <xref linkend=\"layout\"/>."
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:282
+#, no-c-format
+msgid "The example application described above just is, it does not do anything. User interaction is handled with event listeners, as described a bit later in <xref linkend=\"application.events\"/>."
+msgstr ""
+
+#. Tag: title
+#: chapter-application.xml:289
+#, no-c-format
+msgid "Application Architecture"
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:291
+#, no-c-format
+msgid "Once your application grows beyond a dozen or so lines, which is usually quite soon, you need to start considering the application architecture more closely. You are free to use any object-oriented techniques available in Java to organize your code in methods, classes, packages, and libraries. An architecture defines how these modules communicate together and what sort of dependencies they have between them. It also defines the scope of the application. The scope of this book, however, only gives a possibility to mention some of the most common architectural patterns in Vaadin applications."
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:303
+#, no-c-format
+msgid "The subsequent sections describe some basic application patterns. For more information about common architectures, see <xref linkend=\"advanced.architecture\"/>, which discusses layered architectures, the Model-View-Presenter (MVP) pattern, and so forth. <phrase condition=\"web\">The <xref linkend=\"advanced.global\"/> discusses the problem of passing essentially global references around, a common problem which is also visited in <xref linkend=\"application.architecture.accessing\"/>.</phrase>"
+msgstr ""
+
+#. Tag: title
+#: chapter-application.xml:316
+#, no-c-format
+msgid "Compositing Components"
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:318
+#, no-c-format
+msgid "User interfaces typically contain many user interface components in a layout hierarchy. Vaadin provides many layout components for laying contained components vertically, horizontally, in a grid, and in many other ways. You can extend layout components to create composite components."
 msgstr ""
 
 #. Tag: programlisting
-#: chapter-application.xml:278
-#, no-c-format
-msgid ""
-"<![CDATA[mywindow = new Window(\"My Window\");\n"
-"mainwindow.addWindow(mywindow);]]>"
-msgstr ""
-
-#. Tag: para
-#: chapter-application.xml:280
-#, no-c-format
-msgid "You close the window in a similar fashion, by calling the <methodname>removeWindow()</methodname> of the <classname>Application</classname> class:"
-msgstr ""
-
-#. Tag: programlisting
-#: chapter-application.xml:286
-#, no-c-format
-msgid "<![CDATA[myapplication.removeWindow (mywindow);]]>"
-msgstr ""
-
-#. Tag: para
-#: chapter-application.xml:288
-#, no-c-format
-msgid "The user can, by default, close a sub-window by clicking the close button in the upper-right corner of the window. You can disable the button by setting the window as <emphasis>read-only</emphasis> with <methodname>setReadOnly(true)</methodname>. Notice that you could disable the button also by making it invisible in CSS with a \"<parameter>display: none</parameter>\" formatting. The problem with such a cosmetic disabling is that a malicious user might re-enable the button and close the window, which might cause problems and possibly be a security hole. Setting the window as read-only not only disables the close button on the client side, but also prevents processing the close event on the server side."
-msgstr ""
-
-#. Tag: para
-#: chapter-application.xml:301
-#, no-c-format
-msgid "The following example demonstrates the use of a sub-window in an application. The example manages the window using a custom component that contains a button for opening and closing the window."
-msgstr ""
-
-#. Tag: programlisting
-#: chapter-application.xml:307
-#, no-c-format
-msgid ""
-"<?pocket-size 65% ?><![CDATA[/** Component contains a button that allows opening a window. */\n"
-"public class WindowOpener extends CustomComponent\n"
-"                          implements Window.CloseListener {\n"
-"    Window mainwindow;  // Reference to main window\n"
-"    Window mywindow;    // The window to be opened\n"
-"    Button openbutton;  // Button for opening the window\n"
-"    Button closebutton; // A button in the window\n"
-"    Label  explanation; // A descriptive text\n"
-"\n"
-"    public WindowOpener(String label, Window main) {\n"
-"        mainwindow = main;\n"
-"\n"
-"        // The component contains a button that opens the window.\n"
-"        final VerticalLayout layout = new VerticalLayout();\n"
-"        \n"
-"        openbutton = new Button(\"Open Window\", this,\n"
-"                                \"openButtonClick\");\n"
-"        explanation = new Label(\"Explanation\");\n"
-"        layout.addComponent(openbutton);\n"
-"        layout.addComponent(explanation);\n"
-"        \n"
-"        setCompositionRoot(layout);\n"
-"    }\n"
-"\n"
-"    /** Handle the clicks for the two buttons. */\n"
-"    public void openButtonClick(Button.ClickEvent event) {\n"
-"        /* Create a new window. */\n"
-"        mywindow = new Window(\"My Dialog\");\n"
-"        mywindow.setPositionX(200);\n"
-"        mywindow.setPositionY(100);\n"
-"\n"
-"        /* Add the window inside the main window. */\n"
-"        mainwindow.addWindow(mywindow);\n"
-"\n"
-"        /* Listen for close events for the window. */\n"
-"        mywindow.addListener(this);\n"
-"\n"
-"        /* Add components in the window. */\n"
-"        mywindow.addComponent(\n"
-"                new Label(\"A text label in the window.\"));\n"
-"        closebutton = new Button(\"Close\", this, \"closeButtonClick\");\n"
-"        mywindow.addComponent(closebutton);\n"
-"\n"
-"        /* Allow opening only one window at a time. */\n"
-"        openbutton.setEnabled(false);\n"
-"\n"
-"        explanation.setValue(\"Window opened\");\n"
-"    }\n"
-"\n"
-"    /** Handle Close button click and close the window. */\n"
-"    public void closeButtonClick(Button.ClickEvent event) {\n"
-"        /* Windows are managed by the application object. */\n"
-"        mainwindow.removeWindow(mywindow);\n"
-"\n"
-"        /* Return to initial state. */\n"
-"        openbutton.setEnabled(true);\n"
-"\n"
-"        explanation.setValue(\"Closed with button\");\n"
-"    }\n"
-"\n"
-"    /** In case the window is closed otherwise. */\n"
-"    public void windowClose(CloseEvent e) {\n"
-"        /* Return to initial state. */\n"
-"        openbutton.setEnabled(true);\n"
-"\n"
-"        explanation.setValue(\"Closed with window controls\");\n"
-"    }\n"
-"}]]>"
-msgstr ""
-
-#. Tag: para
-#: chapter-application.xml:309
-#, no-c-format
-msgid "The example implements a custom component that inherits the <classname>CustomComponent</classname> class. It consists of a <classname>Button</classname> that it uses to open a window and a <classname>Label</classname> to describe the state of the window. When the window is open, the button is disabled. When the window is closed, the button is enabled again."
-msgstr ""
-
-#. Tag: para
-#: chapter-application.xml:320
-#, no-c-format
-msgid "You can use the above custom component in the application class with:"
-msgstr ""
-
-#. Tag: programlisting
-#: chapter-application.xml:324
-#, no-c-format
-msgid ""
-"<?pocket-size 75% ?> public void init() { \n"
-"    Window main = new Window(\"The Main Window\"); \n"
-"    setMainWindow(main);\n"
-"\n"
-"    main.addComponent(new WindowOpener(\"Window Opener\", main));\n"
-"}"
-msgstr ""
-
-#. Tag: para
 #: chapter-application.xml:326
 #, no-c-format
-msgid "When added to an application, the screen will look as illustrated in the following screenshot:"
-msgstr ""
-
-#. Tag: title
-#: chapter-application.xml:332
-#, no-c-format
-msgid "Opening a Sub-Window"
-msgstr ""
-
-#. Tag: title
-#: chapter-application.xml:346
-#, no-c-format
-msgid "Window Positioning"
+msgid ""
+"<![CDATA[class MyView extends VerticalLayout {\n"
+"    TextField entry   = new TextField(\"Enter this\");\n"
+"    Label     display = new Label(\"See this\");\n"
+"    Button    click   = new Button(\"Click This\");\n"
+"\n"
+"    public MyView() {\n"
+"        addComponent(entry);\n"
+"        addComponent(display);\n"
+"        addComponent(click);\n"
+"        \n"
+"        // Configure it a bit\n"
+"        setSizeFull();\n"
+"        addStyleName(\"myview\");\n"
+"    }\n"
+"}\n"
+"\n"
+"// Use it\n"
+"Layout myview = new MyView();]]>"
 msgstr ""
 
 #. Tag: para
-#: chapter-application.xml:348
+#: chapter-application.xml:328
 #, no-c-format
-msgid "When created, a window will have a default size and position. You can specify the size of a window with <methodname>setHeight()</methodname> and <methodname>setWidth()</methodname> methods. You can set the position of the window with <methodname>setPositionX()</methodname> and <methodname>setPositionY()</methodname> methods."
+msgid "This composition pattern is especially supported for creating forms, as described in <xref linkend=\"datamodel.itembinding.formclass\"/>."
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:333
+#, no-c-format
+msgid "While extending layouts is an easy way to make component composition, it is a good practice to encapsulate implementation details, such as the exact layout component used. Otherwise, the users of such a composite could begin to rely on such implementation details, which would make changes harder. For this purpose, Vaadin has a special <classname>CustomComponent</classname> wrapper, which hides the content representation."
 msgstr ""
 
 #. Tag: programlisting
-#: chapter-application.xml:357
+#: chapter-application.xml:343
 #, no-c-format
 msgid ""
-"<![CDATA[/* Create a new window. */\n"
-"mywindow = new Window(\"My Dialog\");\n"
+"<![CDATA[class MyView extends CustomComponent {\n"
+"    TextField entry   = new TextField(\"Enter this\");\n"
+"    Label     display = new Label(\"See this\");\n"
+"    Button    click   = new Button(\"Click This\");\n"
 "\n"
-"/* Set window size. */\n"
-"mywindow.setHeight(\"200px\");\n"
-"mywindow.setWidth(\"400px\");\n"
+"    public MyView() {\n"
+"        Layout layout = new VerticalLayout();\n"
+"        \n"
+"        layout.addComponent(entry);\n"
+"        layout.addComponent(display);\n"
+"        layout.addComponent(click);\n"
+"        \n"
+"        setCompositionRoot(layout);\n"
+"        \n"
+"        setSizeFull();\n"
+"    }\n"
+"}\n"
 "\n"
-"/* Set window position. */\n"
-"mywindow.setPositionX(200);\n"
-"mywindow.setPositionY(50);]]>"
+"// Use it\n"
+"MyView myview = new MyView();]]>"
 msgstr ""
 
 #. Tag: para
-#: chapter-application.xml:359
+#: chapter-application.xml:345
 #, no-c-format
-msgid "Notice that the size of the main window is unknown and the <methodname>getHeight</methodname> and <methodname>getWidth</methodname> methods will return <returnvalue>-1</returnvalue>."
+msgid "For a more detailed description of the <classname>CustomComponent</classname>, see <xref linkend=\"components.customcomponent\"/>. The Vaadin Plugin for Eclipse also includes a visual editor for composite components, as described in <xref linkend=\"eclipse\"/>."
 msgstr ""
 
 #. Tag: title
-#: chapter-application.xml:369
+#: chapter-application.xml:355
 #, no-c-format
-msgid "Scrolling Sub-Window Content"
-msgstr ""
-
-#. Tag: primary
-#: chapter-application.xml:372
-#, no-c-format
-msgid "scroll bars"
+msgid "View Navigation"
 msgstr ""
 
 #. Tag: para
-#: chapter-application.xml:375
+#: chapter-application.xml:357
 #, no-c-format
-msgid "If a sub-window has a fixed or percentual size and its content becomes too big to fit in the content area, a scroll bar will appear for the particular direction. On the other hand, if the sub-window has undefined size in the direction, it will fit the size of the content and never get a scroll bar. Scroll bars in sub-windows are handled with regular HTML features, namely <literal>overflow: auto</literal> property in CSS."
+msgid "While the most simple applications have just a single <emphasis>view</emphasis> (or <emphasis>screen</emphasis>), perhaps most have many. Even in a single view, you often want to have sub-views, for example to display different content. <xref linkend=\"figure.application.architecture.navigation\"/> illustrates a typical navigation between different top-level views of an application, and a main view with sub-views."
 msgstr ""
 
-#. Tag: primary
-#: chapter-application.xml:382
+#. Tag: title
+#: chapter-application.xml:368
 #, no-c-format
-msgid "overflow"
+msgid "Navigation Between Views"
 msgstr ""
 
-#. Tag: interfacename
+#. Tag: para
+#: chapter-application.xml:379
+#, no-c-format
+msgid "The <classname>Navigator</classname> described in <xref linkend=\"advanced.navigator\"/> is a view manager that provides a flexible way to navigate between views and sub-views, while managing the URI fragment in the page URL to allow bookmarking, linking, and going back in browser history."
+msgstr ""
+
+#. Tag: para
 #: chapter-application.xml:387
 #, no-c-format
-msgid "Scrollable"
-msgstr ""
-
-#. Tag: para
-#: chapter-application.xml:387
-#, no-c-format
-msgid "As <classname>Window</classname> extends <classname>Panel</classname>, windows are also <interfacename>Scrollable</interfacename>. Note that the interface defines <emphasis>programmatic scrolling</emphasis>, not scrolling by the user. Please see <xref linkend=\"layout.components.panel\"/>."
+msgid "Often Vaadin application views are part of something bigger. In such cases, you may need to integrate the Vaadin applications with the other website. You can use the embedding techniques described in <xref linkend=\"advanced.embedding\"/>."
 msgstr ""
 
 #. Tag: title
-#: chapter-application.xml:465
+#: chapter-application.xml:396
 #, no-c-format
-msgid "Modal Windows"
+msgid "Accessing &uiclass;, Page, Session, and Service"
 msgstr ""
 
 #. Tag: para
-#: chapter-application.xml:467
+#: chapter-application.xml:398
 #, no-c-format
-msgid "A modal window is a child window that has to be closed by the user before the use of the parent window can continue. Dialog windows are typically modal. The advantage of modal windows is the simplification of user interaction, which may contribute to the clarity of the user interface. Modal windows are also easy to use from a development perspective, because as user interaction is isolated to them, changes in application state are more limited while the modal window is open. The disadvantage of modal windows is that they can restrict workflow too much."
+msgid "You can get the UI and the page to which a component is attached to with <methodname>getUI()</methodname> and <methodname>getPage()</methodname>."
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:403
+#, no-c-format
+msgid "However, the values are <literal>null</literal> until the component is attached to the UI, and typically, when you need it in constructors, it is not. It is therefore preferable to access the current &ui;, page, session, and service objects from anywhere in the application using the static <methodname>getCurrent()</methodname> methods in the respective <classname>&uiclass;</classname>, <classname>Page</classname>, <classname>VaadinSession</classname>, and <classname>VaadinService</classname> classes."
+msgstr ""
+
+#. Tag: programlisting
+#: chapter-application.xml:414
+#, no-c-format
+msgid ""
+"<?pocket-size 65% ?><![CDATA[// Set the default locale of the UI\n"
+"UI.getCurrent().setLocale(new Locale(\"en\"));\n"
+"\n"
+"// Set the page title (window or tab caption)\n"
+"Page.getCurrent().setTitle(\"My Page\");\n"
+"        \n"
+"// Set a session attribute\n"
+"VaadinSession.getCurrent().setAttribute(\"myattrib\", \"hello\");\n"
+"\n"
+"// Access the HTTP service parameters\n"
+"File baseDir = VaadinService.getCurrent().getBaseDirectory();]]>"
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:416
+#, no-c-format
+msgid "You can get the page and the session also from a <classname>UI</classname> with <methodname>getPage()</methodname> and <methodname>getSession()</methodname> and the service from <classname>VaadinSession</classname> with <methodname>getService()</methodname>."
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:424
+#, no-c-format
+msgid "The static methods use the built-in ThreadLocal support in the classes.<phrase condition=\"web\"> The pattern is described in <xref linkend=\"advanced.global.threadlocal\"/>.</phrase>"
 msgstr ""
 
 #. Tag: title
-#: chapter-application.xml:480
-#, no-c-format
-msgid "Screenshot of the Modal Window Demo Application"
-msgstr ""
-
-#. Tag: para
-#: chapter-application.xml:491
-#, no-c-format
-msgid "Depending on theme settings, the parent window may be grayed while the modal window is open."
-msgstr ""
-
-#. Tag: para
-#: chapter-application.xml:496
-#, no-c-format
-msgid "The demo application of Vaadin includes an example of using modal windows. <xref linkend=\"figure.window.modal\"/> above is from the demo application. The example includes the source code."
-msgstr ""
-
-#. Tag: title
-#: chapter-application.xml:504
-#, no-c-format
-msgid "Security Warning"
-msgstr ""
-
-#. Tag: para
-#: chapter-application.xml:505
-#, no-c-format
-msgid "Modality of child windows is purely a client-side feature and can be circumvented with client-side attack code. You should not trust in the modality of child windows in security-critical situations such as login windows."
-msgstr ""
-
-#. Tag: title
-#: chapter-application.xml:516
+#: chapter-application.xml:433
 #, no-c-format
 msgid "Handling Events with Listeners"
 msgstr ""
 
 #. Tag: para
-#: chapter-application.xml:518
+#: chapter-application.xml:435
 #, no-c-format
-msgid "Let us put into practice what we learned of event handling in <xref linkend=\"architecture.events\"/>. You can handle events in three basic ways, as shown below."
-msgstr ""
-
-#. Tag: para
-#: chapter-application.xml:524
-#, no-c-format
-msgid "The following example follows a typical pattern where you have a <classname>Button</classname> component and a listener that handles user interaction (clicks) communicated to the application as events. Here we define a class that listens click events."
-msgstr ""
-
-#. Tag: programlisting
-#: chapter-application.xml:531
-#, no-c-format
-msgid ""
-"<?pocket-size 65% ?><![CDATA[public class TheButton implements Button.ClickListener {\n"
-"    Button thebutton;\n"
-"\n"
-"    /** Creates button into given container. */\n"
-"    public TheButton(AbstractComponentContainer container) {\n"
-"        thebutton = new Button (\"Do not push this button\");\n"
-"        thebutton.addListener(this);\n"
-"        container.addComponent(thebutton);\n"
-"    }\n"
-"    \n"
-"    /** Handle button click events from the button. */\n"
-"    public void buttonClick (Button.ClickEvent event) {\n"
-"        thebutton.setCaption (\"Do not push this button again\");\n"
-"    }\n"
-"}]]>"
-msgstr ""
-
-#. Tag: para
-#: chapter-application.xml:533
-#, no-c-format
-msgid "As an application often receives events for several components of the same class, such as multiple buttons, it has to be able to distinguish between the individual components. There are several techniques to do this, but probably the easiest is to use the property of the received event, which is set to the object sending the event. This requires keeping at hand a reference to every object that emits events."
-msgstr ""
-
-#. Tag: programlisting
-#: chapter-application.xml:543
-#, no-c-format
-msgid ""
-"<?pocket-size 65% ?><![CDATA[public class TheButtons implements Button.ClickListener {\n"
-"    Button thebutton;\n"
-"    Button secondbutton;\n"
-"\n"
-"    /** Creates two buttons in given container. */\n"
-"    public TheButtons(AbstractComponentContainer container) {\n"
-"        thebutton = new Button (\"Do not push this button\");\n"
-"        thebutton.addListener(this);\n"
-"        container.addComponent(thebutton);\n"
-"        \n"
-"        secondbutton = new Button (\"I am a button too\");\n"
-"        secondbutton.addListener(this);\n"
-"        container.addComponent (secondbutton);\n"
-"    }\n"
-"    \n"
-"    /** Handle button click events from the two buttons. */\n"
-"    public void buttonClick (Button.ClickEvent event) {\n"
-"        if (event.getButton() == thebutton)\n"
-"            thebutton.setCaption(\"Do not push this button again\");\n"
-"        else if (event.getButton() == secondbutton)\n"
-"            secondbutton.setCaption(\"I am not a number\");\n"
-"    }\n"
-"}]]>"
-msgstr ""
-
-#. Tag: para
-#: chapter-application.xml:545
-#, no-c-format
-msgid "Another solution to handling multiple events of the same class involves attaching an event source to a listener method instead of the class. An event can be attached to a method using another version of the <methodname>addListener()</methodname> method, which takes the event handler method as a parameter. The method can be passed either by the name of the method or as a <classname>Method</classname> object. In the example below, we use the name of the method, as a string (which is not checked at compile time)."
-msgstr ""
-
-#. Tag: programlisting
-#: chapter-application.xml:556
-#, no-c-format
-msgid ""
-"<?pocket-size 65% ?><![CDATA[public class TheButtons2 {\n"
-"    Button thebutton;\n"
-"    Button secondbutton;\n"
-"\n"
-"    /** Creates two buttons in given container. */\n"
-"    public TheButtons2(AbstractComponentContainer container) {\n"
-"        thebutton = new Button (\"Do not push this button\");\n"
-"        thebutton.addListener(Button.ClickEvent.class, this,\n"
-"                              \"theButtonClick\");\n"
-"        container.addComponent(thebutton);\n"
-"        \n"
-"        secondbutton = new Button (\"I am a button too\");\n"
-"        secondbutton.addListener(Button.ClickEvent.class, this,\n"
-"                                 \"secondButtonClick\");\n"
-"        container.addComponent (secondbutton);\n"
-"    }\n"
-"    \n"
-"    public void theButtonClick (Button.ClickEvent event) {\n"
-"        thebutton.setCaption (\"Do not push this button again\");\n"
-"    }\n"
-"\n"
-"    public void secondButtonClick (Button.ClickEvent event) {\n"
-"        secondbutton.setCaption (\"I am not a number!\");\n"
-"    }\n"
-"}]]>"
-msgstr ""
-
-#. Tag: para
-#: chapter-application.xml:558
-#, no-c-format
-msgid "Adding a listener method with <methodname>addListener()</methodname> is really just a wrapper that creates a <classname>com.vaadin.event.ListenerMethod</classname> listener object, which is an adapter from a listener class to a method. It implements the <classname>java.util.EventListener</classname> interface and can therefore work for any event source using the interface. Notice that not all listener classes necessarily inherit the <classname>EventListener</classname> interface."
-msgstr ""
-
-#. Tag: para
-#: chapter-application.xml:570
-#, no-c-format
-msgid "The third way, which uses anonymous local class definitions, is often the easiest as it does not require cumbering the managing class with new interfaces or methods. The following example defines an anonymous class that inherits the <classname>Button.ClickListener</classname> interface and implements the <methodname>buttonClick()</methodname> method."
-msgstr ""
-
-#. Tag: programlisting
-#: chapter-application.xml:578
-#, no-c-format
-msgid ""
-"<?pocket-size 65% ?><![CDATA[public class TheButtons3 {\n"
-"    Button thebutton;\n"
-"    Button secondbutton;\n"
-"\n"
-"    /** Creates two buttons in given container. */\n"
-"    public TheButtons3(AbstractComponentContainer container) {\n"
-"        thebutton = new Button (\"Do not push this button\");\n"
-"\n"
-"        /* Define a listener in an anonymous class. */\n"
-"        thebutton.addListener(new Button.ClickListener() {\n"
-"            /* Handle the click. */\n"
-"            public void buttonClick(ClickEvent event) {\n"
-"                thebutton.setCaption (\n"
-"                        \"Do not push this button again\");\n"
-"            }\n"
-"        });\n"
-"        container.addComponent(thebutton);\n"
-"        \n"
-"        secondbutton = new Button (\"I am a button too\");\n"
-"        secondbutton.addListener(new Button.ClickListener() {\n"
-"            public void buttonClick(ClickEvent event) {\n"
-"                secondbutton.setCaption (\"I am not a number!\");            \n"
-"            }\n"
-"        });\n"
-"        container.addComponent (secondbutton);\n"
-"    }\n"
-"}]]>"
-msgstr ""
-
-#. Tag: para
-#: chapter-application.xml:580
-#, no-c-format
-msgid "Other techniques for separating between different sources also exist. They include using object properties, names, or captions to separate between them. Using captions or any other visible text is generally discouraged, as it may create problems for internationalization. Using other symbolic strings can also be dangerous, because the syntax of such strings is checked only runtime."
-msgstr ""
-
-#. Tag: para
-#: chapter-application.xml:590
-#, no-c-format
-msgid "Events are usually emitted by the framework, but applications may need to emit them too in some situations, such as when updating some part of the UI is required. Events can be emitted using the <methodname>fireEvent(Component.Event)</methodname> method of <classname>AbstractComponent</classname>. The event is then relayed to all the listeners of the particular event class for the object. Some components have a default event type, for example, a <classname>Button</classname> has a nested <classname>Button.ClickEvent</classname> class and a corresponding <classname>Button.ClickListener</classname> interface. These events can be triggered with <methodname>fireComponentEvent()</methodname>."
+msgid "Let us put into practice what we learned of event handling in <xref linkend=\"architecture.events\"/>. You can implement listener interfaces in a regular class, but it brings the problem with differentiating between different event sources. Using anonymous class for listeners is recommended in most cases."
 msgstr ""
 
 #. Tag: title
-#: chapter-application.xml:606
+#: chapter-application.xml:444
 #, no-c-format
-msgid "Referencing Resources"
+msgid "Implementing a Listener in a Regular Class"
 msgstr ""
 
 #. Tag: para
-#: chapter-application.xml:608
+#: chapter-application.xml:446
 #, no-c-format
-msgid "Web applications work over the web and have various resources, such as images or downloadable files, that the web browser has to get from the server. These resources are typically used in <classname>Embedded</classname> (images) or <classname>Link</classname> (downloadable files) user interface components. Various components, such as <classname>TabSheet</classname>, can also include icons, which are also handled as resources."
+msgid "The following example follows a typical pattern where you have a <classname>Button</classname> component and a listener that handles user interaction (clicks) communicated to the application as events. Here we define a class that listens to click events."
 msgstr ""
 
-#. Tag: para
-#: chapter-application.xml:619
+#. Tag: programlisting
+#: chapter-application.xml:454
 #, no-c-format
-msgid "A web server can handle many of such requests for static resources without having to ask them from the application, or the <classname>Application</classname> object can provide them. For dynamic resources, the user application must be able to create them dynamically. Vaadin provides resource request interfaces for applications so that they can return various kinds of resources, such as files or dynamically created resources. These include the <classname>StreamResource</classname> class and URI and parameter handlers described in <xref linkend=\"section.application.resources.uri\"/> and <xref linkend=\"section.application.resources.parameters\"/>, respectively."
-msgstr ""
-
-#. Tag: para
-#: chapter-application.xml:632
-#, no-c-format
-msgid "Vaadin provides also low-level facilities for retrieving the URI and other parameters of a HTTP request. We will first look into how applications can provide various kinds of resources and then look into low-level interfaces for handling URIs and parameters to provide resources and functionalities."
-msgstr ""
-
-#. Tag: para
-#: chapter-application.xml:640
-#, no-c-format
-msgid "Notice that using URI or parameter handlers to create \"pages\" is not meaningful in Vaadin or in AJAX applications generally. Please see <xref linkend=\"advanced.application.pages\"/> for a detailed explanation."
+msgid ""
+"<![CDATA[public class MyComposite extends CustomComponent\n"
+"             implements Button.ClickListener {\n"
+"    Button button; // Defined here for access\n"
+"\n"
+"    public MyComposite() {\n"
+"        Layout layout = new HorizontalLayout();\n"
+"        \n"
+"        // Just a single component in this composition\n"
+"        button = new Button(\"Do not push this\");\n"
+"        button.addClickListener(this);\n"
+"        layout.addComponent(button);\n"
+"        \n"
+"        setCompositionRoot(layout);\n"
+"    }\n"
+"    \n"
+"    // The listener method implementation\n"
+"    public void buttonClick(ClickEvent event) {\n"
+"        button.setCaption(\"Do not push this again\");\n"
+"    }\n"
+"}]]>"
 msgstr ""
 
 #. Tag: title
-#: chapter-application.xml:648
+#: chapter-application.xml:458
+#, no-c-format
+msgid "Differentiating Between Event Sources"
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:460
+#, no-c-format
+msgid "If an application receives events of the same type from multiple sources, such as multiple buttons, it has to be able to distinguish between the sources. If using a regular class listener, distinguishing between the components can be done by comparing the source of the event with each of the components. The method for identifying the source depends on the event type."
+msgstr ""
+
+#. Tag: programlisting
+#: chapter-application.xml:470
+#, no-c-format
+msgid ""
+"<![CDATA[public class TheButtons extends CustomComponent\n"
+"       implements Button.ClickListener {\n"
+"    Button onebutton;\n"
+"    Button toobutton;\n"
+"\n"
+"    public TheButtons() {\n"
+"        onebutton = new Button(\"Button One\", this);\n"
+"        toobutton = new Button(\"A Button Too\", this);\n"
+"\n"
+"        // Put them in some layout\n"
+"        Layout root = new HorizontalLayout(); \n"
+"        root.addComponent(onebutton);\n"
+"        root.addComponent(toobutton);\n"
+"        setCompositionRoot(root);\n"
+"    }\n"
+"    \n"
+"    @Override\n"
+"    public void buttonClick(ClickEvent event) {\n"
+"        // Differentiate targets by event source\n"
+"        if (event.getButton() == onebutton)\n"
+"            onebutton.setCaption (\"Pushed one\");\n"
+"        else if (event.getButton() == toobutton)\n"
+"            toobutton.setCaption (\"Pushed too\");\n"
+"    }\n"
+"}]]>"
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:472
+#, no-c-format
+msgid "Other techniques exist for separating between event sources, such as using object properties, names, or captions to separate between them. Using captions or any other visible text is generally discouraged, as it may create problems for internationalization. Using other symbolic strings can also be dangerous, because the syntax of such strings is checked only at runtime."
+msgstr ""
+
+#. Tag: title
+#: chapter-application.xml:483
+#, no-c-format
+msgid "The Easy Way: Using Anonymous Classes"
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:485
+#, no-c-format
+msgid "By far the easiest and the most common way to handle events is to use anonymous local classes. It encapsulates the handling of events to where the component is defined and does not require cumbering the managing class with interface implementations. The following example defines an anonymous class that inherits the <classname>Button.ClickListener</classname> interface."
+msgstr ""
+
+#. Tag: programlisting
+#: chapter-application.xml:495
+#, no-c-format
+msgid ""
+"<![CDATA[// Have a component that fires click events\n"
+"final Button button = new Button(\"Click Me!\");\n"
+"        \n"
+"// Handle the events with an anonymous class\n"
+"button.addClickListener(new Button.ClickListener() {\n"
+"    public void buttonClick(ClickEvent event) {\n"
+"        button.setCaption(\"You made me click!\");\n"
+"    }\n"
+"});]]>"
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:497
+#, no-c-format
+msgid "Local objects referenced from within an anonymous class, such as the <classname>Button</classname> object in the above example, must be declared <literal>final</literal>."
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:503
+#, no-c-format
+msgid "Most components allow passing a listener to the constructor, thereby losing a line or two. However, notice that if accessing the component that is constructed from an anonymous class, you must use a reference that is declared before the constructor is executed, for example as a member variable in the outer class. If it is declared in the same expression where the constructor is called, it doesn't yet exist. In such cases, you need to get a reference to the component from the event object."
+msgstr ""
+
+#. Tag: programlisting
+#: chapter-application.xml:515
+#, no-c-format
+msgid ""
+"<![CDATA[final Button button = new Button(\"Click It!\",\n"
+"  new Button.ClickListener() {\n"
+"    @Override\n"
+"    public void buttonClick(ClickEvent event) {\n"
+"        event.getButton().setCaption(\"Done!\");\n"
+"    }\n"
+"  });]]>"
+msgstr ""
+
+#. Tag: title
+#: chapter-application.xml:521
+#, no-c-format
+msgid "Images and Other Resources"
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:523
+#, no-c-format
+msgid "Web applications can display various <emphasis>resources</emphasis>, such as images, other embedded content, or downloadable files, that the browser has to load from the server. Image resources are typically displayed with the <classname>Image</classname> component or as component icons. Flash animations can be displayed with <classname>Flash</classname>, embedded browser frames with <classname>BrowserFrame</classname>, and other content with the <classname>Embedded</classname> component, as described in <xref linkend=\"components.embedded\"/>. Downloadable files are usually provided by clicking a <classname>Link</classname>."
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:535
+#, no-c-format
+msgid "There are several ways to how such resources can be provided by the web server. Static resources can be provided without having to ask for them from the application. For dynamic resources, the user application must be able to create them dynamically. The resource request interfaces in Vaadin allow applications to both refer to static resources as well as dynamically create them. The dynamic creation includes the <classname>StreamResource</classname> class and the <interfacename>RequestHandler</interfacename> described in <xref linkend=\"advanced.requesthandler\"/>."
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:546
+#, no-c-format
+msgid "Vaadin also provides low-level facilities for retrieving the URI and other parameters of a HTTP request. We will first look into how applications can provide various kinds of resources and then look into low-level interfaces for handling URIs and parameters to provide resources and functionalities."
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:554
+#, no-c-format
+msgid "Notice that using request handlers to create \"pages\" is not normally meaningful in Vaadin or in AJAX applications generally. Please see <xref linkend=\"architecture.technology.ajax\"/> for a detailed explanation."
+msgstr ""
+
+#. Tag: title
+#: chapter-application.xml:561
 #, no-c-format
 msgid "Resource Interfaces and Classes"
 msgstr ""
 
 #. Tag: para
-#: chapter-application.xml:650
+#: chapter-application.xml:563
 #, no-c-format
-msgid "Vaadin has two interfaces for resources: a generic <classname>Resource</classname> interface and a more specific <classname>ApplicationResource</classname> interface for resources provided by the application."
+msgid "The resource classes in Vaadin are grouped under two interfaces: a generic <classname>Resource</classname> interface and a more specific <classname>ConnectorResource</classname> interface for resources provided by the servlet."
 msgstr ""
 
 #. Tag: title
-#: chapter-application.xml:658
+#: chapter-application.xml:571
 #, no-c-format
 msgid "Resource Interface and Class Diagram"
 msgstr ""
 
-#. Tag: para
-#: chapter-application.xml:669
-#, no-c-format
-msgid "<classname>ApplicationResource</classname> resources are managed by the <classname>Application</classname> class. When you create such a resource, you give the application object to the constructor. The constructor registers the resource in the application using the <classname>addResource</classname> method."
-msgstr ""
-
-#. Tag: para
-#: chapter-application.xml:678
-#, no-c-format
-msgid "<classname>Application</classname> manages requests for the resources and allows accessing resources using a URI. The URI consists of the base name of the application and a relative name of the resource. The relative name is <literal>\"APP/\"+resourceid+\"/\"+filename</literal>, for example <literal>\"APP/1/myimage.png\"</literal>. The <varname>resourceid</varname> is a generated numeric identifier to make resources unique, and <varname>filename</varname> is the file name of the resource given in the constructor of its class. However, the application using a resource does not usually need to consider its URI. It only needs to give the resource to an appropriate <classname>Embedded</classname> or <classname>Link</classname> or some other user interface component, which manages the rendering of the URI."
-msgstr ""
-
 #. Tag: title
-#: chapter-application.xml:700
+#: chapter-application.xml:584
 #, no-c-format
 msgid "File Resources"
 msgstr ""
 
 #. Tag: para
-#: chapter-application.xml:702
+#: chapter-application.xml:586
 #, no-c-format
-msgid "File resources are files stored anywhere in the file system. The use of file resources generally falls into two main categories: downloadable files and embedded images."
+msgid "File resources are files stored anywhere in the file system. As such, they can not be retrieved by a regular URL from the server, but need to be requested through the Vaadin servlet. The use of file resources is typically necessary for persistent user data that is not packaged in the web application, which would not be persistent over redeployments."
 msgstr ""
 
 #. Tag: para
-#: chapter-application.xml:708
+#: chapter-application.xml:594
 #, no-c-format
-msgid "A file object that can be accessed as a file resource is defined with the standard <classname>java.io.File</classname> class. You can create the file either with an absolute or relative path, but the base path of the relative path depends on the installation of the web server. For example, in Apache Tomcat, the default current directory is the installation path of Tomcat."
+msgid "A file object that can be accessed as a file resource is defined with the standard <classname>java.io.File</classname> class. You can create the file either with an absolute or relative path, but the base path of the relative path depends on the installation of the web server. For example, with Apache Tomcat, the default current directory would be the installation path of Tomcat."
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:603
+#, no-c-format
+msgid "In the following example, we provide an image resource from a file stored in the web application. Notice that the image is stored under the <filename>WEB-INF</filename> folder, which is a special folder that is never accessible using an URL, unlike the other folders of a web application. This is a security solution - another would be to store the resource elsewhere in the file system."
+msgstr ""
+
+#. Tag: programlisting
+#: chapter-application.xml:613
+#, no-c-format
+msgid ""
+"<?pocket-size 65% ?><![CDATA[// Find the application directory\n"
+"String basepath = VaadinService.getCurrent()\n"
+"                  .getBaseDirectory().getAbsolutePath();\n"
+"\n"
+"// Image as a file resource\n"
+"FileResource resource = new FileResource(new File(basepath +\n"
+"                        \"/WEB-INF/images/image.png\"));\n"
+"\n"
+"// Show the image in the application\n"
+"Image image = new Image(\"Image from file\", resource);\n"
+"        \n"
+"// Let the user view the file in browser or download it\n"
+"Link link = new Link(\"Link to the image file\", resource);]]>"
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:615
+#, no-c-format
+msgid "The result, as well as the folder structure where the file is stored under a regular Eclipse Vaadin project, is shown in <xref linkend=\"figure.application.resources.file\"/>."
 msgstr ""
 
 #. Tag: title
-#: chapter-application.xml:721
+#: chapter-application.xml:622
+#, no-c-format
+msgid "File Resource"
+msgstr ""
+
+#. Tag: title
+#: chapter-application.xml:632
 #, no-c-format
 msgid "Class Loader Resources"
 msgstr ""
 
 #. Tag: para
-#: chapter-application.xml:723
+#: chapter-application.xml:634
 #, no-c-format
-msgid "The <classname>ClassResource</classname> allows resources to be loaded from the deployed package of the application using Java Class Loader. The one-line example below loads an image resource from the application package and displays it in an <classname>Embedded</classname> component."
+msgid "The <classname>ClassResource</classname> allows resources to be loaded from the class path using Java Class Loader. Normally, the relevant class path entry is the <filename>WEB-INF/classes</filename> folder under the web application, where the Java compilation should compile the Java classes and copy other files from the source tree."
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:642
+#, no-c-format
+msgid "The one-line example below loads an image resource from the application package and displays it in an <classname>Image</classname> component."
 msgstr ""
 
 #. Tag: programlisting
-#: chapter-application.xml:732
+#: chapter-application.xml:648
 #, no-c-format
 msgid ""
-"<?pocket-size 80% ?><![CDATA[mainwindow.addComponent(new Embedded (\"\",\n"
-"        new ClassResource(\"smiley.jpg\",\n"
-"                  mainwindow.getApplication())));]]>"
+"<?pocket-size 80% ?><![CDATA[layout.addComponent(new Image(null,\n"
+"        new ClassResource(\"smiley.jpg\")));]]>"
 msgstr ""
 
 #. Tag: title
-#: chapter-application.xml:736
+#: chapter-application.xml:652 chapter-application.xml:672
 #, no-c-format
 msgid "Theme Resources"
 msgstr ""
 
 #. Tag: para
-#: chapter-application.xml:739
+#: chapter-application.xml:654
 #, no-c-format
-msgid "Theme resources are files included in a theme, typically images. See <xref linkend=\"themes\"/> for more information on themes."
+msgid "Theme resources of <classname>ThemeResource</classname> class are files, typically images, included in a theme. A theme is located with the path <filename>VAADIN/themes/themename</filename> in a web application. The name of a theme resource is given as the parameter for the constructor, with a path relative to the theme folder."
+msgstr ""
+
+#. Tag: programlisting
+#: chapter-application.xml:663
+#, no-c-format
+msgid ""
+"<?pocket-size 65% ?><![CDATA[// A theme resource in the current theme (\"mytheme\")\n"
+"// Located in: VAADIN/themes/mytheme/img/themeimage.png\n"
+"ThemeResource resource = new ThemeResource(\"img/themeimage.png\");\n"
+"\n"
+"// Use the resource\n"
+"Image image = new Image(\"My Theme Image\", resource);]]>"
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:665
+#, no-c-format
+msgid "The result is shown in <xref linkend=\"figure.application.resources.theme\"/>, also illustrating the folder structure for the theme resource file in an Eclipse project."
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:680
+#, no-c-format
+msgid "To use theme resources, you must set the theme for the UI. See <xref linkend=\"themes\"/> for more information regarding themes."
 msgstr ""
 
 #. Tag: title
-#: chapter-application.xml:746
+#: chapter-application.xml:687
 #, no-c-format
 msgid "Stream Resources"
 msgstr ""
 
 #. Tag: para
-#: chapter-application.xml:748
+#: chapter-application.xml:689
 #, no-c-format
-msgid "Stream resources are application resources that allow creating dynamic resource content. Charts are typical examples of dynamic images. To define a stream resource, you need to implement the <classname>StreamResource.StreamSource</classname> interface and its <methodname>getStream</methodname> method. The method needs to return an <classname>InputStream</classname> from which the stream can be read."
+msgid "Stream resources allow creating dynamic resource content. Charts are typical examples of dynamic images. To define a stream resource, you need to implement the <classname>StreamResource.StreamSource</classname> interface and its <methodname>getStream()</methodname> method. The method needs to return an <classname>InputStream</classname> from which the stream can be read."
 msgstr ""
 
 #. Tag: para
-#: chapter-application.xml:758
+#: chapter-application.xml:698
 #, no-c-format
 msgid "The following example demonstrates the creation of a simple image in PNG image format."
 msgstr ""
 
 #. Tag: programlisting
-#: chapter-application.xml:763
+#: chapter-application.xml:703
 #, no-c-format
 msgid ""
 "<?pocket-size 65% ?><![CDATA[import java.awt.image.*;\n"
@@ -859,25 +843,19 @@ msgid ""
 msgstr ""
 
 #. Tag: para
-#: chapter-application.xml:765
+#: chapter-application.xml:705
 #, no-c-format
 msgid "The content of the generated image is dynamic, as it updates the reloads counter with every call. The <classname>ImageIO</classname>.<methodname>write()</methodname> method writes the image to an output stream, while we had to return an input stream, so we stored the image contents to a temporary buffer."
 msgstr ""
 
 #. Tag: para
-#: chapter-application.xml:774
+#: chapter-application.xml:714
 #, no-c-format
-msgid "You can use resources in various ways. Some user interface components, such as <classname>Link</classname> and <classname>Embedded</classname>, take their parameters as a resource."
-msgstr ""
-
-#. Tag: para
-#: chapter-application.xml:780
-#, no-c-format
-msgid "Below we display the image with the <classname>Embedded</classname> component. The <classname>StreamResource</classname> constructor gets a reference to the application and registers itself in the application's resources. Assume that <varname>main</varname> is a reference to the main window and <varname>this</varname> is the application object."
+msgid "Below we display the image with the <classname>Image</classname> component."
 msgstr ""
 
 #. Tag: programlisting
-#: chapter-application.xml:790
+#: chapter-application.xml:719
 #, no-c-format
 msgid ""
 "<?pocket-size 65% ?><![CDATA[// Create an instance of our stream source.\n"
@@ -886,773 +864,1114 @@ msgid ""
 "// Create a resource that uses the stream source and give it a name.\n"
 "// The constructor will automatically register the resource in\n"
 "// the application.\n"
-"StreamResource imageresource =\n"
-"        new StreamResource(imagesource, \"myimage.png\", this);\n"
+"StreamResource resource =\n"
+"        new StreamResource(imagesource, \"myimage.png\");\n"
 "        \n"
-"// Create an embedded component that gets its contents\n"
+"// Create an image component that gets its contents\n"
 "// from the resource.\n"
-"main.addComponent(new Embedded(\"Image title\", imageresource));]]>"
+"layout.addComponent(new Image(\"Image title\", resource));]]>"
 msgstr ""
 
 #. Tag: para
-#: chapter-application.xml:792
+#: chapter-application.xml:721
 #, no-c-format
-msgid "The image will look as follows:"
+msgid "The resulting image is shown in <xref linkend=\"figure.application.resource.stream\"/>."
 msgstr ""
 
 #. Tag: title
-#: chapter-application.xml:797
+#: chapter-application.xml:727
 #, no-c-format
-msgid "Screenshot of the stream resource example with an embedded image"
+msgid "A Stream Resource"
 msgstr ""
 
 #. Tag: para
-#: chapter-application.xml:808
+#: chapter-application.xml:738
 #, no-c-format
-msgid "We named the resource as <filename>myimage.png</filename>. The application adds a resource key to the file name of the resource to make it unique. The full URI will be like <uri>http://localhost:8080/testbench/APP/1/myimage.png</uri>. The end <uri>APP/1/myimage.png</uri> is the <emphasis>relative</emphasis> part of the URI. You can get the relative part of a resource's URI from the application with <methodname>Application.getRelativeLocation()</methodname>."
-msgstr ""
-
-#. Tag: para
-#: chapter-application.xml:819
-#, no-c-format
-msgid "Another solution for creating dynamic content is an URI handler, possibly together with a parameter handler. See <xref linkend=\"section.application.resources.uri\"/> and <xref linkend=\"section.application.resources.parameters\"/>."
+msgid "Another way to create dynamic content is a request handler, described in <xref linkend=\"advanced.requesthandler\"/>."
 msgstr ""
 
 #. Tag: title
-#: chapter-application.xml:837
-#, no-c-format
-msgid "Shutting Down an Application"
-msgstr ""
-
-#. Tag: para
-#: chapter-application.xml:839
-#, no-c-format
-msgid "A user can log out or close the web page or browser, so a session and the associated application instance can end. Ending an application can be initiated by the application logic. Otherwise, it will be ended automatically when the Servlet session times out."
-msgstr ""
-
-#. Tag: title
-#: chapter-application.xml:847
-#, no-c-format
-msgid "Closing an Application"
-msgstr ""
-
-#. Tag: para
-#: chapter-application.xml:849
-#, no-c-format
-msgid "If the user quits the application through the user interface, an event handler should call the <methodname>close()</methodname> method in the <classname>Application</classname> class to shutdown the session."
-msgstr ""
-
-#. Tag: para
-#: chapter-application.xml:855
-#, no-c-format
-msgid "In the following example, we have a <guibutton>Logout</guibutton> button, which ends the user session."
-msgstr ""
-
-#. Tag: programlisting
-#: chapter-application.xml:860
-#, no-c-format
-msgid ""
-"<![CDATA[Button closeButton = new Button(\"Logout\");\n"
-"\n"
-"closeButton.addListener(new Button.ClickListener() {\n"
-"    @Override\n"
-"    public void buttonClick(ClickEvent event) {\n"
-"        getMainWindow().getApplication().close();\n"
-"    } \n"
-"});\n"
-"\n"
-"main.addComponent(closeButton);]]>"
-msgstr ""
-
-#. Tag: para
-#: chapter-application.xml:862
-#, no-c-format
-msgid "You will soon notice that closing the application simply reloads the application with a new <classname>Application</classname> instance. You can set the window to redirect to a different URL (that does not reload the application) with <methodname>setLogoutURL</methodname>. In your application class, write:"
-msgstr ""
-
-#. Tag: programlisting
-#: chapter-application.xml:870
-#, no-c-format
-msgid "<![CDATA[setLogoutURL(\"/logout.html\");]]>"
-msgstr ""
-
-#. Tag: title
-#: chapter-application.xml:876
-#, no-c-format
-msgid "Handling the Closing of a Window"
-msgstr ""
-
-#. Tag: para
-#: chapter-application.xml:878
-#, no-c-format
-msgid "Closing the main window (or all application-level windows) does not close session and the application instance will be left hanging. You need to program such behaviour by handling the close events of the windows."
-msgstr ""
-
-#. Tag: para
-#: chapter-application.xml:884
-#, no-c-format
-msgid "If the user closes a browser window, such as the main window or any other application-level window, the window will send a final AJAX request to the server, which will fire a <classname>Window.CloseEvent</classname> for the closed window. You can handle the event with a <classname>Window.CloseListener</classname>. In case the user closes the browser, the event is fired for every open window."
-msgstr ""
-
-#. Tag: programlisting
-#: chapter-application.xml:893
-#, no-c-format
-msgid ""
-"<![CDATA[// Close the application if the main window is closed.\n"
-"main.addListener(new Window.CloseListener(){\n"
-"   @Override\n"
-"    public void windowClose(CloseEvent e) {\n"
-"       System.out.println(\"Closing the application\");\n"
-"       getMainWindow().getApplication().close();\n"
-"    } \n"
-"});]]>"
-msgstr ""
-
-#. Tag: para
-#: chapter-application.xml:895
-#, no-c-format
-msgid "Notice that <emphasis>refreshing a window means closing and reopening it</emphasis>. Therefore, if you have a close handler as above, the user loses the possibility to refresh the browser window."
-msgstr ""
-
-#. Tag: para
-#: chapter-application.xml:901
-#, no-c-format
-msgid "In the likely case that the browser crashes, no close event is communicated to the server. As the server has no way of knowing about the problem, and the session will be left hanging until the session timeout expires. During this time, the user can restart the browser, open the application URL, and the main window will be rendered where the user left off. This can be desired behaviour in many cases, but sometimes it is not and can create a security problem."
-msgstr ""
-
-#. Tag: title
-#: chapter-application.xml:913
+#: chapter-application.xml:746
 #, no-c-format
 msgid "Handling Errors"
 msgstr ""
 
 #. Tag: title
-#: chapter-application.xml:916
+#: chapter-application.xml:749
 #, no-c-format
-msgid "Error Indicator and message"
+msgid "Error Indicator and Message"
 msgstr ""
 
 #. Tag: para
-#: chapter-application.xml:918
+#: chapter-application.xml:751
 #, no-c-format
-msgid "All components have a built-in error indicator that can be set explicitly with <methodname>setComponentError()</methodname> or can be turned on implicitly if validating the component fails. As with component caption, the placement of the indicator is managed by the layout in which the component is contained. Usually, the error indicator is placed right of the caption text. Hovering the mouse pointer over the field displays the error message."
-msgstr ""
-
-#. Tag: para
-#: chapter-application.xml:928
-#, no-c-format
-msgid "The following example shows how you can set the component error explicitly. The example essentially validates field value without using an actual validator."
+msgid "All components have a built-in error indicator that is turned on if validating the component fails, and can be set explicitly with <methodname>setComponentError()</methodname>. Usually, the error indicator is placed right of the component caption. The error indicator is part of the component caption, so its placement is usually managed by the layout in which the component is contained, but some components handle it themselves. Hovering the mouse pointer over the field displays the error message."
 msgstr ""
 
 #. Tag: programlisting
-#: chapter-application.xml:934
+#: chapter-application.xml:762
 #, no-c-format
 msgid ""
-"<?pocket-size 65% ?><![CDATA[// Create a field.\n"
-"final TextField textfield = new TextField(\"Enter code\");\n"
-"main.addComponent(textfield);\n"
-"\n"
-"// Let the component error be initially clear.\n"
-"textfield.setComponentError(null); // (actually the default)\n"
-"\n"
-"// Have a button right of the field (and align it properly).\n"
-"final Button button = new Button(\"Ok!\");\n"
-"main.addComponent(button);\n"
-"((VerticalLayout)main.getLayout())\n"
-"        .setComponentAlignment(button, Alignment.BOTTOM_LEFT);\n"
-"\n"
-"// Handle button clicks\n"
-"button.addListener(new Button.ClickListener() {\n"
-"    public void buttonClick(ClickEvent event) {\n"
-"        // If the field value is bad, set its error.\n"
-"        // (Allow only alphanumeric characters.)\n"
-"        if (! ((String) textfield.getValue()).matches(\"^\\\\w*$\")) {\n"
-"            // Put the component in error state and\n"
-"            // set the error message.\n"
-"            textfield.setComponentError(\n"
-"                new UserError(\"Must be letters and numbers\"));\n"
-"        } else {\n"
-"            // Otherwise clear it.\n"
-"            textfield.setComponentError(null);\n"
-"        }\n"
-"    }\n"
-"});]]>"
+"<?pocket-size 65% ?><![CDATA[textfield.setComponentError(new UserError(\"Bad value\"));\n"
+"button.setComponentError(new UserError(\"Bad click\"));]]>"
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:764
+#, no-c-format
+msgid "The result is shown in <xref linkend=\"figure.application.errors.error-indicator\"/>."
 msgstr ""
 
 #. Tag: title
-#: chapter-application.xml:937
+#: chapter-application.xml:770
 #, no-c-format
-msgid "Error indicator active"
-msgstr ""
-
-#. Tag: para
-#: chapter-application.xml:948
-#, no-c-format
-msgid "The <classname>Form</classname> component handles and displays also the errors of its contained fields so that it displays both the error indicator and the message in a special error indicator area. See <xref linkend=\"components.form\"/> and <xref linkend=\"components.form.validation\"/> for details on the <classname>Form</classname> component and validation of form input."
+msgid "Error Indicator Active"
 msgstr ""
 
 #. Tag: title
-#: chapter-application.xml:959
-#, no-c-format
-msgid "Notifications"
-msgstr ""
-
-#. Tag: para
-#: chapter-application.xml:961
-#, no-c-format
-msgid "Notifications are error or information boxes that appear typically at the center of the screen. A notification box has a caption and optional description and icon. The box stays on the screen either for a defined time or until the user clicks it. The notification type defines the default appearance and behaviour of a notification."
-msgstr ""
-
-#. Tag: para
-#: chapter-application.xml:969
-#, no-c-format
-msgid "Notifications are always associated with a window object, which can be a child window (the positioning is always relative to the entire browser view). The <classname>Window</classname> class provides a <methodname>showNotification()</methodname> method for displaying notifications. The method takes the caption and an optional description and notification type as parameters. The method also accepts a notification object of type <classname>Window.Notification</classname>, as described further below."
-msgstr ""
-
-#. Tag: programlisting
-#: chapter-application.xml:980
-#, no-c-format
-msgid ""
-"<?pocket-size 80% ?><![CDATA[mainwindow.showNotification(\"This is the caption\",\n"
-"                            \"This is the description\");]]>"
-msgstr ""
-
-#. Tag: title
-#: chapter-application.xml:983
-#, no-c-format
-msgid "Notification"
-msgstr ""
-
-#. Tag: para
-#: chapter-application.xml:994
-#, no-c-format
-msgid "The caption and description are, by default, written on the same line. If you want to have a line break between them, use the XHTML line break markup \"<literal>&lt;br/&gt;</literal>\". You can use any XHTML markup in the caption and description of a notification. If it is possible to get the notification content from user input, you should sanitize the content carefully, as noted in <xref linkend=\"advanced.security.sanitizing\"/>."
-msgstr ""
-
-#. Tag: programlisting
-#: chapter-application.xml:1003
-#, no-c-format
-msgid ""
-"<![CDATA[main.showNotification(\"This is a warning\",\n"
-"            \"<br/>This is the <i>last</i> warning\",\n"
-"            Window.Notification.TYPE_WARNING_MESSAGE);]]>"
-msgstr ""
-
-#. Tag: title
-#: chapter-application.xml:1006
-#, no-c-format
-msgid "Notification with Formatting"
-msgstr ""
-
-#. Tag: para
-#: chapter-application.xml:1017
-#, no-c-format
-msgid "The notification type defines the overall default style and behaviour of a notification. If no notification type is given, the \"humanized\" type is used as the default. The notification types, listed below, are defined in the <classname>Window.Notification</classname> class."
-msgstr ""
-
-#. Tag: parameter
-#: chapter-application.xml:1027
-#, no-c-format
-msgid "TYPE_HUMANIZED_MESSAGE"
-msgstr ""
-
-#. Tag: para
-#: chapter-application.xml:1038
-#, no-c-format
-msgid "A user-friendly message that does not annoy too much: it does not require confirmation by clicking and disappears quickly. It is centered and has a neutral gray color."
-msgstr ""
-
-#. Tag: parameter
-#: chapter-application.xml:1047
-#, no-c-format
-msgid "TYPE_WARNING_MESSAGE"
-msgstr ""
-
-#. Tag: para
-#: chapter-application.xml:1058
-#, no-c-format
-msgid "Warnings are messages of medium importance. They are displayed with colors that are neither neutral nor too distractive. A warning is displayed for 1.5 seconds, but the user can click the message box to dismiss it. The user can continue to interact with the application while the warning is displayed."
-msgstr ""
-
-#. Tag: parameter
-#: chapter-application.xml:1069
-#, no-c-format
-msgid "TYPE_ERROR_MESSAGE"
-msgstr ""
-
-#. Tag: para
-#: chapter-application.xml:1080
-#, no-c-format
-msgid "Error messages are notifications that require the highest user attention, with alert colors and by requiring the user to click the message to dismiss it. The error message box does not itself include an instruction to click the message, although the close box in the upper right corner indicates it visually. Unlike with other notifications, the user can not interact with the application while the error message is displayed."
-msgstr ""
-
-#. Tag: parameter
-#: chapter-application.xml:1094
-#, no-c-format
-msgid "TYPE_TRAY_NOTIFICATION"
-msgstr ""
-
-#. Tag: para
-#: chapter-application.xml:1105
-#, no-c-format
-msgid "Tray notifications are displayed in the \"system tray\" area, that is, in the lower-right corner of the browser view. As they do not usually obsure any user interface, they are displayed longer than humanized or warning messages, 3 seconds by default. The user can continue to interact with the application normally while the tray notification is displayed."
-msgstr ""
-
-#. Tag: para
-#: chapter-application.xml:1117
-#, no-c-format
-msgid "All of the features of specific notification types can be controlled with the attributes of <classname>Window.Notification</classname>. You can pass an explicitly created notification object to the <methodname>showNotification()</methodname> method."
-msgstr ""
-
-#. Tag: programlisting
-#: chapter-application.xml:1124
-#, no-c-format
-msgid ""
-"<?pocket-size 65% ?><![CDATA[// Create a notification with default settings for a warning.\n"
-"Window.Notification notif = new Window.Notification(\n"
-"        \"Be warned!\",\n"
-"        \"This message lurks in the top-left corner!\",\n"
-"        Window.Notification.TYPE_WARNING_MESSAGE);\n"
-"\n"
-"// Set the position.\n"
-"notif.setPosition(Window.Notification.POSITION_TOP_LEFT);\n"
-"\n"
-"// Let it stay there until the user clicks it\n"
-"notif.setDelayMsec(-1);\n"
-"\n"
-"// Show it in the main window.\n"
-"main.showNotification(notif);]]>"
-msgstr ""
-
-#. Tag: para
-#: chapter-application.xml:1126
-#, no-c-format
-msgid "The <methodname>setPosition()</methodname> method allows setting the positioning of the notification. The method takes as its parameter any of the constants:"
-msgstr ""
-
-#. Tag: parameter
-#: chapter-application.xml:1135
-#, no-c-format
-msgid "Window.Notification.POSITION_CENTERED"
-msgstr ""
-
-#. Tag: parameter
-#: chapter-application.xml:1136
-#, no-c-format
-msgid "Window.Notification.POSITION_CENTERED_TOP"
-msgstr ""
-
-#. Tag: parameter
-#: chapter-application.xml:1137
-#, no-c-format
-msgid "Window.Notification.POSITION_CENTERED_BOTTOM"
-msgstr ""
-
-#. Tag: parameter
-#: chapter-application.xml:1138
-#, no-c-format
-msgid "Window.Notification.POSITION_TOP_LEFT"
-msgstr ""
-
-#. Tag: parameter
-#: chapter-application.xml:1139
-#, no-c-format
-msgid "Window.Notification.POSITION_TOP_RIGHT"
-msgstr ""
-
-#. Tag: parameter
-#: chapter-application.xml:1140
-#, no-c-format
-msgid "Window.Notification.POSITION_BOTTOM_LEFT"
-msgstr ""
-
-#. Tag: parameter
-#: chapter-application.xml:1141
-#, no-c-format
-msgid "Window.Notification.POSITION_BOTTOM_RIGHT"
-msgstr ""
-
-#. Tag: para
-#: chapter-application.xml:1146
-#, no-c-format
-msgid "The <methodname>setDelayMSec()</methodname> allows you to set the time in milliseconds for how long the notification is displayed. Parameter value <literal>-1</literal> means that the message is displayed until the user clicks the message box. It also prevents interaction with other parts of the application window, as is default behaviour for error messages. It does not, however, add a close box that the error notification has."
-msgstr ""
-
-#. Tag: title
-#: chapter-application.xml:1157
+#: chapter-application.xml:785
 #, no-c-format
 msgid "Customizing System Messages"
 msgstr ""
 
 #. Tag: para
-#: chapter-application.xml:1159
+#: chapter-application.xml:787
 #, no-c-format
 msgid "System messages are notifications that indicate a major invalid state in an application that usually requires restarting the application. Session timeout is perhaps the most typical such state."
 msgstr ""
 
 #. Tag: para
-#: chapter-application.xml:1165
+#: chapter-application.xml:793
 #, no-c-format
-msgid "System messages are strings managed in <classname>SystemMessages</classname> class."
+msgid "System messages are strings managed in the <classname>SystemMessages</classname> class."
 msgstr ""
 
 #. Tag: term
-#: chapter-application.xml:1172
+#: chapter-application.xml:800
 #, no-c-format
 msgid "sessionExpired"
 msgstr ""
 
 #. Tag: para
-#: chapter-application.xml:1174
+#: chapter-application.xml:802
 #, no-c-format
-msgid "Application servlet session expired. A session expires if no server requests are made during the session timeout period. The session timeout can be configured with the <parameter>session-timeout</parameter> parameter in <filename>web.xml</filename>, as described in <xref linkend=\"section.web.web-xml\"/>."
+msgid "Application servlet session expired. A session expires if no server requests are made during the session timeout period. The session timeout can be configured with the <parameter>session-timeout</parameter> parameter in <filename>web.xml</filename>, as described in <xref linkend=\"application.environment.web-xml\"/>."
 msgstr ""
 
 #. Tag: term
-#: chapter-application.xml:1185
+#: chapter-application.xml:813
 #, no-c-format
-msgid "communicationErrorURL"
+msgid "communicationError"
 msgstr ""
 
 #. Tag: para
-#: chapter-application.xml:1187
+#: chapter-application.xml:815
 #, no-c-format
 msgid "An unspecified communication problem between the Vaadin Client-Side Engine and the application server. The server may be unavailable or there is some other problem."
 msgstr ""
 
 #. Tag: term
-#: chapter-application.xml:1195
+#: chapter-application.xml:823
 #, no-c-format
 msgid "authenticationError"
 msgstr ""
 
 #. Tag: para
-#: chapter-application.xml:1197
+#: chapter-application.xml:825
 #, no-c-format
 msgid "This error occurs if 401 (Unauthorized) response to a request is received from the server."
 msgstr ""
 
 #. Tag: term
-#: chapter-application.xml:1204
+#: chapter-application.xml:832
 #, no-c-format
 msgid "internalError"
 msgstr ""
 
 #. Tag: para
-#: chapter-application.xml:1206
+#: chapter-application.xml:834
 #, no-c-format
 msgid "A serious internal problem, possibly indicating a bug in Vaadin Client-Side Engine or in some custom client-side code."
 msgstr ""
 
 #. Tag: term
-#: chapter-application.xml:1213
+#: chapter-application.xml:841
 #, no-c-format
 msgid "outOfSync"
 msgstr ""
 
 #. Tag: para
-#: chapter-application.xml:1215
+#: chapter-application.xml:843
 #, no-c-format
 msgid "The client-side state is invalid with respect to server-side state."
 msgstr ""
 
 #. Tag: term
-#: chapter-application.xml:1222
+#: chapter-application.xml:850
 #, no-c-format
 msgid "cookiesDisabled"
 msgstr ""
 
 #. Tag: para
-#: chapter-application.xml:1224
+#: chapter-application.xml:852
 #, no-c-format
 msgid "Informs the user that cookies are disabled in the browser and the application does not work without them."
 msgstr ""
 
 #. Tag: para
-#: chapter-application.xml:1232
+#: chapter-application.xml:860
 #, no-c-format
 msgid "Each message has four properties: a short caption, the actual message, a URL to which to redirect after displaying the message, and property indicating whether the notification is enabled."
 msgstr ""
 
 #. Tag: para
-#: chapter-application.xml:1238
+#: chapter-application.xml:866
 #, no-c-format
-msgid "Additional details may be written (in English) to the debug console window described in <xref linkend=\"advanced.debug-production-modes\"/>."
+msgid "Additional details may be written (in English) to the debug console window described in <xref linkend=\"advanced.debug\"/>."
 msgstr ""
 
 #. Tag: para
-#: chapter-application.xml:1243
+#: chapter-application.xml:871
 #, no-c-format
-msgid "You can override the default system messages by implementing the <methodname>getSystemMessages()</methodname> method in the application class. The method should return a <classname>Application.SystemMessages</classname> object. The easiest way to customize the messages is to use a <classname>CustomizedSystemMessages</classname> object as follows:"
+msgid "You can override the default system messages by setting the <interfacename>SystemMessagesProvider</interfacename> in the <classname>VaadinService</classname>. You need to implement the <methodname>getSystemMessages()</methodname> method, which should return a <classname>SystemMessages</classname> object. The easiest way to customize the messages is to use a <classname>CustomizedSystemMessages</classname> object."
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:881
+#, no-c-format
+msgid "You can set the system message provider in the <methodname>servletInitialized()</methodname> method of a custom servlet class, for example as follows:"
 msgstr ""
 
 #. Tag: programlisting
-#: chapter-application.xml:1252
+#: chapter-application.xml:887
 #, no-c-format
 msgid ""
-"<?pocket-size 65% ?><![CDATA[// Override the default implementation\n"
-"public static SystemMessages getSystemMessages() {\n"
-"    CustomizedSystemMessages messages =\n"
-"            new CustomizedSystemMessages();\n"
-"    messages.setSessionExpiredCaption(\"Ohno, session expired!\");\n"
-"    messages.setSessionExpiredMessage(\"Don't idle!\");\n"
-"    messages.setSessionExpiredNotificationEnabled(true);\n"
-"    messages.setSessionExpiredURL(\"http://vaadin.com/\");\n"
-"    return messages;\n"
-"}]]>"
-msgstr ""
-
-#. Tag: para
-#: chapter-application.xml:1254
-#, no-c-format
-msgid "Notice that the special <methodname>getSystemMessages()</methodname> method is not defined in an interface nor does it exist in the <classname>Application</classname> superclass."
-msgstr ""
-
-#. Tag: title
-#: chapter-application.xml:1262
-#, no-c-format
-msgid "Handling Uncaught Exceptions"
-msgstr ""
-
-#. Tag: para
-#: chapter-application.xml:1264
-#, no-c-format
-msgid "Application development with Vaadin follows the event-driven programming model. Mouse and keyboard events in the client cause (usually higher-level) events on the server-side, which can be handled with listeners, and that is how most of the application logic works. Handling the events can result in exceptions either in the application logic or in the framework itself, but some of them may not be caught properly."
-msgstr ""
-
-#. Tag: para
-#: chapter-application.xml:1273
-#, no-c-format
-msgid "For example, in the following code excerpt, we throw an error in an event listener but do not catch it, so it falls to the framework."
-msgstr ""
-
-#. Tag: programlisting
-#: chapter-application.xml:1278
-#, no-c-format
-msgid ""
-"<?pocket-size 70% ?><![CDATA[final Button button = new Button (\"Fail Me\");\n"
-"\n"
-"button.addListener(new Button.ClickListener() {\n"
-"    public void buttonClick(ClickEvent event) {\n"
-"        // Throw some exception.\n"
-"        throw new RuntimeException(\"You can't catch this.\");\n"
+"<?pocket-size 65% ?><![CDATA[getService().setSystemMessagesProvider(\n"
+"    new SystemMessagesProvider() {\n"
+"    @Override \n"
+"    public SystemMessages getSystemMessages(\n"
+"        SystemMessagesInfo systemMessagesInfo) {\n"
+"        CustomizedSystemMessages messages =\n"
+"                new CustomizedSystemMessages();\n"
+"        messages.setCommunicationErrorCaption(\"Comm Err\");\n"
+"        messages.setCommunicationErrorMessage(\"This is bad.\");\n"
+"        messages.setCommunicationErrorNotificationEnabled(true);\n"
+"        messages.setCommunicationErrorURL(\"http://vaadin.com/\");\n"
+"        return messages;\n"
 "    }\n"
 "});]]>"
 msgstr ""
 
 #. Tag: para
-#: chapter-application.xml:1280
+#: chapter-application.xml:889
 #, no-c-format
-msgid "Any such exceptions that occur in the call chain, but are not caught at any other level, are eventually caught by the terminal adapter in <classname>ApplicationServlet</classname>, the lowest-level component that receives client requests. The terminal adapter passes all such caught exceptions as events to the error listener of the <classname>Application</classname> instance through the <classname>Terminal.ErrorListener</classname> interface. The <classname>Application</classname> class does not, by default, throw such exceptions forward."
-msgstr ""
-
-#. Tag: para
-#: chapter-application.xml:1292
-#, no-c-format
-msgid "The reason for this error-handling logic lies in the logic that handles component state synchronization between the client and the server. We want to handle <emphasis>all</emphasis> the serialized variable changes in the client request, because otherwise the client-side and server-side component states would become unsynchronized very easily, which could put the entire application in an invalid state."
-msgstr ""
-
-#. Tag: para
-#: chapter-application.xml:1301
-#, no-c-format
-msgid "The default implementation of the <classname>Terminal.ErrorListener</classname> interface in the <classname>Application</classname> class simply prints the error to console. It also tries to find out a component related to the error. If the exception occurred in a listener attached to a component, that component is considered as the component related to the exception. If a related component is found, the error handler sets the <emphasis>component error</emphasis> for it, the same attribute which you can set with <methodname>setComponentError()</methodname>."
-msgstr ""
-
-#. Tag: para
-#: chapter-application.xml:1313
-#, no-c-format
-msgid "In UI, the component error is shown with a small red \"!\" -sign (in the default theme). If you hover the mouse pointer over it, you will see the entire backtrace of the exception in a large tooltip box, as illustrated in <xref linkend=\"figure.application.errors.unchecked-exceptions\"/> for the above code example."
+msgid "See <xref linkend=\"application.lifecycle.servlet-service\"/> for information about customizing Vaadin servlets."
 msgstr ""
 
 #. Tag: title
-#: chapter-application.xml:1322
+#: chapter-application.xml:896
+#, no-c-format
+msgid "Handling Uncaught Exceptions"
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:898
+#, no-c-format
+msgid "Handling events can result in exceptions either in the application logic or in the framework itself, but some of them may not be caught properly by the application. Any such exceptions are eventually caught by the framework. It delegates the exceptions to the <classname>DefaultErrorHandler</classname>, which displays the error as a component error, that is, with a small red \"!\" -sign (depending on the theme). If the user hovers the mouse pointer over it, the entire backtrace of the exception is shown in a large tooltip box, as illustrated in <xref linkend=\"figure.application.errors.unchecked-exceptions\"/>."
+msgstr ""
+
+#. Tag: title
+#: chapter-application.xml:911
 #, no-c-format
 msgid "Uncaught Exception in Component Error Indicator"
 msgstr ""
 
 #. Tag: para
-#: chapter-application.xml:1333
+#: chapter-application.xml:922
 #, no-c-format
-msgid "You can change the logic of handling the terminal errors easily by overriding the <methodname>terminalError()</methodname> method in your application class (the one that inherits <classname>Application</classname>) or by setting a custom error listener with the <methodname>setErrorHandler</methodname> method. You can safely discard the default handling or extend its usage with your custom error handling or logging system. In the example code below, the exceptions are also reported as notifications in the main window."
+msgid "You can customize the default error handling by implementing a custom <interfacename>ErrorHandler</interfacename> and enabling it with <methodname>setErrorHandler()</methodname> in any of the components in the component hierarchy, including the <classname>UI</classname>, or in the <classname>VaadinSession</classname> object. You can either implement the <interfacename>ErrorHandler</interfacename> or extend the <classname>DefaultErrorHandler</classname>. In the following example, we modify the behavior of the default handler."
 msgstr ""
 
 #. Tag: programlisting
-#: chapter-application.xml:1344
+#: chapter-application.xml:933
 #, no-c-format
 msgid ""
-"<?pocket-size 75% ?><![CDATA[@Override\n"
-"public void terminalError(Terminal.ErrorEvent event) {\n"
-"    // Call the default implementation.\n"
-"    super.terminalError(event);\n"
+"<?pocket-size 65% ?><![CDATA[// Here's some code that produces an uncaught exception \n"
+"final VerticalLayout layout = new VerticalLayout();\n"
+"final Button button = new Button(\"Click Me!\",\n"
+"    new Button.ClickListener() {\n"
+"    public void buttonClick(ClickEvent event) {\n"
+"        ((String)null).length(); // Null-pointer exception\n"
+"    }\n"
+"});\n"
+"layout.addComponent(button);\n"
 "\n"
-"    // Some custom behaviour.\n"
-"    if (getMainWindow() != null) {\n"
-"        getMainWindow().showNotification(\n"
-"                \"An unchecked exception occured!\",\n"
-"                event.getThrowable().toString(),\n"
-"                Notification.TYPE_ERROR_MESSAGE);\n"
+"// Configure the error handler for the UI\n"
+"UI.getCurrent().setErrorHandler(new DefaultErrorHandler() {\n"
+"    @Override\n"
+"    public void error(com.vaadin.server.ErrorEvent event) {\n"
+"        // Find the final cause\n"
+"        String cause = \"<b>The click failed because:</b><br/>\";\n"
+"        for (Throwable t = event.getThrowable(); t != null;\n"
+"             t = t.getCause())\n"
+"            if (t.getCause() == null) // We're at final cause\n"
+"                cause += t.getClass().getName() + \"<br/>\";\n"
+"        \n"
+"        // Display the error message in a custom fashion\n"
+"        layout.addComponent(new Label(cause, ContentMode.HTML));\n"
+"           \n"
+"        // Do the default error handling (optional)\n"
+"        doDefault(event);\n"
+"    } \n"
+"});]]>"
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:935
+#, no-c-format
+msgid "The above example also demonstrates how to dig up the final cause from the cause stack."
+msgstr ""
+
+#. Tag: title
+#: chapter-application.xml:943
+#, no-c-format
+msgid "Notifications"
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:945
+#, no-c-format
+msgid "Notifications are error or information boxes that appear briefly, typically at the center of the screen. A notification box has a caption and an optional description and icon. The box stays on the screen either for a preset time or until the user clicks it. The notification type defines the default appearance and behaviour of a notification."
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:953
+#, no-c-format
+msgid "There are two ways to create a notification. The easiest is to use a static shorthand <methodname>Notification.show()</methodname> method, which takes the caption of the notification as a parameter, and an optional description and notification type, and displays it in the current page."
+msgstr ""
+
+#. Tag: programlisting
+#: chapter-application.xml:960
+#, no-c-format
+msgid ""
+"<![CDATA[Notification.show(\"This is the caption\",\n"
+"                  \"This is the description\",\n"
+"                  Notification.Type.WARNING_MESSAGE);]]>"
+msgstr ""
+
+#. Tag: title
+#: chapter-application.xml:963
+#, no-c-format
+msgid "Notification"
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:974
+#, no-c-format
+msgid "For more control, you can create a <classname>Notification</classname> object. Different constructors exist for taking just the caption, and optionally the description, notification type, and whether HTML is allowed or not. Notifications are shown in a <classname>Page</classname>, typically the current page."
+msgstr ""
+
+#. Tag: programlisting
+#: chapter-application.xml:982
+#, no-c-format
+msgid ""
+"<![CDATA[new Notification(\"This is a warning\",\n"
+"    \"<br/>This is the <i>last</i> warning\",\n"
+"    Notification.TYPE_WARNING_MESSAGE, true)\n"
+"    .show(Page.getCurrent());]]>"
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:984
+#, no-c-format
+msgid "The caption and description are by default written on the same line. If you want to have a line break between them, use the XHTML line break markup \"<literal>&lt;br/&gt;</literal>\" if HTML is enabled, or \"<literal>\\n</literal>\" if not. HTML is disabled by default, but can be enabled with <methodname>setHtmlContentAllowed(true)</methodname>. When enabled, you can use any XHTML markup in the caption and description of a notification. If it is in any way possible to get the notification content from user input, you should either disallow HTML or sanitize the content carefully, as noted in <xref linkend=\"advanced.security.sanitizing\"/>."
+msgstr ""
+
+#. Tag: title
+#: chapter-application.xml:997
+#, no-c-format
+msgid "Notification with HTML Formatting"
+msgstr ""
+
+#. Tag: title
+#: chapter-application.xml:1009
+#, no-c-format
+msgid "Notification Type"
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:1011
+#, no-c-format
+msgid "The notification type defines the overall default style and behaviour of a notification. If no notification type is given, the \"humanized\" type is used as the default. The notification types, listed below, are defined in the <classname>Notification.Type</classname> class."
+msgstr ""
+
+#. Tag: parameter
+#: chapter-application.xml:1021
+#, no-c-format
+msgid "TYPE_HUMANIZED_MESSAGE"
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:1032
+#, no-c-format
+msgid "A user-friendly message that does not annoy too much: it does not require confirmation by clicking and disappears quickly. It is centered and has a neutral gray color."
+msgstr ""
+
+#. Tag: parameter
+#: chapter-application.xml:1041
+#, no-c-format
+msgid "TYPE_WARNING_MESSAGE"
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:1052
+#, no-c-format
+msgid "Warnings are messages of medium importance. They are displayed with colors that are neither neutral nor too distractive. A warning is displayed for 1.5 seconds, but the user can click the message box to dismiss it. The user can continue to interact with the application while the warning is displayed."
+msgstr ""
+
+#. Tag: parameter
+#: chapter-application.xml:1063
+#, no-c-format
+msgid "TYPE_ERROR_MESSAGE"
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:1074
+#, no-c-format
+msgid "Error messages are notifications that require the highest user attention, with alert colors, and they require the user to click the message to dismiss it. The error message box does not itself include an instruction to click the message, although the close box in the upper right corner indicates it visually. Unlike with other notifications, the user can not interact with the application while the error message is displayed."
+msgstr ""
+
+#. Tag: parameter
+#: chapter-application.xml:1088
+#, no-c-format
+msgid "TYPE_TRAY_NOTIFICATION"
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:1099
+#, no-c-format
+msgid "Tray notifications are displayed in the \"system tray\" area, that is, in the lower-right corner of the browser view. As they do not usually obscure any user interface, they are displayed longer than humanized or warning messages, 3 seconds by default. The user can continue to interact with the application normally while the tray notification is displayed."
+msgstr ""
+
+#. Tag: title
+#: chapter-application.xml:1113
+#, no-c-format
+msgid "Customizing Notifications"
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:1115
+#, no-c-format
+msgid "All of the features of specific notification types can be controlled with the <classname>Notification</classname> properties. Once configured, you need to show it in the current page."
+msgstr ""
+
+#. Tag: programlisting
+#: chapter-application.xml:1121
+#, no-c-format
+msgid ""
+"<![CDATA[// Notification with default settings for a warning\n"
+"Notification notif = new Notification(\n"
+"    \"Warning\",\n"
+"    \"<br/>Area of reindeer husbandry\",\n"
+"    Notification.TYPE_WARNING_MESSAGE);\n"
+"\n"
+"// Customize it\n"
+"notif.setDelayMsec(20000);\n"
+"notif.setPosition(Position.BOTTOM_RIGHT);\n"
+"notif.setStyleName(\"mystyle\");\n"
+"notif.setIcon(new ThemeResource(\"img/reindeer.png\"));\n"
+"                \n"
+"// Show it in the page\n"
+"notif.show(Page.getCurrent());]]>"
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:1123
+#, no-c-format
+msgid "The <methodname>setPosition()</methodname> method allows setting the positioning of the notification. The position can be specified by any of the constants defined in the <classname>Position</classname> enum."
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:1129
+#, no-c-format
+msgid "The <methodname>setDelayMSec()</methodname> allows setting the time for how long the notification is displayed in milliseconds. Parameter value <literal>-1</literal> means that the message is displayed until the user clicks the message box. It also prevents interaction with other parts of the application window, which is the default behaviour for error notifications. It does not, however, add a close box that the error notification has."
+msgstr ""
+
+#. Tag: title
+#: chapter-application.xml:1141
+#, no-c-format
+msgid "Styling with CSS"
+msgstr ""
+
+#. Tag: programlisting
+#: chapter-application.xml:1143
+#, no-c-format
+msgid ""
+"<![CDATA[.v-Notification {}\n"
+"  .popupContent {}\n"
+"    .gwt-HTML {}\n"
+"      h1 {}\n"
+"      p  {}]]>"
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:1145
+#, no-c-format
+msgid "The notification box is a floating <literal>div</literal> element under the <literal>body</literal> element of the page. It has an overall <literal>v-Notification</literal> style. The content is wrapped inside an element with <literal>popupContent</literal> style. The caption is enclosed within an <literal>h1</literal> element and the description in a <literal>p</literal> element."
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:1154
+#, no-c-format
+msgid "To customize it, add a style for the <classname>Notification</classname> object with <methodname>setStyleName(\"mystyle\")</methodname>, and make the settings in the theme, for example as follows:"
+msgstr ""
+
+#. Tag: programlisting
+#: chapter-application.xml:1160
+#, no-c-format
+msgid ""
+"<![CDATA[.v-Notification.mystyle {\n"
+"    background: #FFFF00;\n"
+"    border: 10px solid #C00000;\n"
+"    color: black;\n"
+"}]]>"
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:1162
+#, no-c-format
+msgid "The result is shown, with the icon set earlier in the customization example, in <xref linkend=\"figure.application.errors.notifications.css\"/>."
+msgstr ""
+
+#. Tag: title
+#: chapter-application.xml:1169
+#, no-c-format
+msgid "A Styled Notification"
+msgstr ""
+
+#. Tag: title
+#: chapter-application.xml:1183
+#, no-c-format
+msgid "Application Lifecycle"
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:1185
+#, no-c-format
+msgid "In this section, we look into more technical details of application deployment, user sessions, and UI instance lifecycle. These details are not generally needed for writing Vaadin applications, but may be useful for understanding how they actually work and, especially, in what circumstances their execution ends."
+msgstr ""
+
+#. Tag: title
+#: chapter-application.xml:1194
+#, no-c-format
+msgid "Deployment"
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:1196
+#, no-c-format
+msgid "Before a Vaadin application can be used, it has to be deployed to a Java web server, as described in <xref linkend=\"application.environment\"/>. Deploying reads the servlet classes annotated with the <literal>@WebServlet</literal> annotation (Servlet 3.0) or the <filename>web.xml</filename> deployment descriptor (Servlet 2.4) in the application to register servlets for specific URL paths and loads the classes. Deployment does not yet normally run any code in the application, although static blocks in classes are executed when they are loaded."
+msgstr ""
+
+#. Tag: title
+#: chapter-application.xml:1209
+#, no-c-format
+msgid "Undeploying and Redeploying"
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:1211
+#, no-c-format
+msgid "Applications are undeployed when the server shuts down, during redeployment, and when they are explicitly undeployed. Undeploying a server-side Vaadin application ends its execution, all application classes are unloaded, and the heap space allocated by the application is freed for garbage-collection."
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:1219
+#, no-c-format
+msgid "If any user sessions are open at this point, the client-side state of the UIs is left hanging and an Out of Sync error is displayed on the next server request."
+msgstr ""
+
+#. Tag: title
+#: chapter-application.xml:1227
+#, no-c-format
+msgid "Redeployment and Serialization"
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:1229
+#, no-c-format
+msgid "Some servers, such as Tomcat, support <emphasis>hot deployment</emphasis>, where the classes are reloaded while preserving the memory state of the application. This is done by serializing the application state and then deserializing it after the classes are reloaded. This is, in fact, done with the basic Eclipse setup with Tomcat and if a UI is marked as <classname>@PreserveOnRefresh</classname>, you may actually need to give the <literal>?restartApplication</literal> URL parameter to force it to restart when you reload the page. Tools such as JRebel go even further by reloading the code in place without need for serialization. The server can also serialize the application state when shutting down and restarting, thereby preserving sessions over restarts."
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:1245
+#, no-c-format
+msgid "Serialization requires that the applications are <emphasis>serializable</emphasis>, that is, all classes implement the <interfacename>Serializable</interfacename> interface. All Vaadin classes do. If you extend them or implement interfaces, you can provide an optional serialization key, which is automatically generated by Eclipse if you use it. Serialization is also used for clustering and cloud computing, such as with Google App Engine<phrase condition=\"web\">, as described in <xref linkend=\"advanced.gae\"/></phrase>."
+msgstr ""
+
+#. Tag: title
+#: chapter-application.xml:1260
+#, no-c-format
+msgid "Vaadin Servlet, Portlet, and Service"
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:1262
+#, no-c-format
+msgid "The <classname>VaadinServlet</classname>, or <classname>VaadinPortlet</classname> in a portal, receives all server requests mapped to it by its URL, as defined in the deployment configuration, and associates them with sessions. The sessions further associate the requests with particular UIs."
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:1270
+#, no-c-format
+msgid "When servicing requests, the Vaadin servlet or portlet handles all tasks common to both servlets and portlets in a <classname>VaadinService</classname>. It manages sessions, gives access to the deployment configuration information, handles system messages, and does various other tasks. Any further servlet or portlet specific tasks are handled in the corresponding <classname>VaadinServletService</classname> or <classname>VaadinPortletService</classname>. The service acts as the primary low-level customization layer for processing requests."
+msgstr ""
+
+#. Tag: title
+#: chapter-application.xml:1283
+#, no-c-format
+msgid "Customizing Vaadin Servlet"
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:1285
+#, no-c-format
+msgid "Many common configuration tasks need to be done in the servlet class, which you already have if you are using the <literal>@WebServlet</literal> annotation for Servlet 3.0 to deploy the application. You can handle most customization by overriding the <methodname>servletInitialized()</methodname> method, where the <classname>VaadinService</classname> object is available with <methodname>getService()</methodname> (it would not be available in a constructor). You should always call <methodname>super.servletInitialized()</methodname> in the beginning."
+msgstr ""
+
+#. Tag: programlisting
+#: chapter-application.xml:1297
+#, no-c-format
+msgid ""
+"<?pocket-size 75% ?><![CDATA[public class MyServlet extends VaadinServlet {\n"
+"    @Override\n"
+"    protected void servletInitialized()\n"
+"            throws ServletException {\n"
+"        super.servletInitialized();\n"
+"\n"
+"        ...\n"
 "    }\n"
 "}]]>"
 msgstr ""
 
 #. Tag: para
-#: chapter-application.xml:1347
+#: chapter-application.xml:1299
 #, no-c-format
-msgid "Handling other exceptions works in the usual way for Java Servlets. Uncaught exceptions are finally caught and handled by the application server."
+msgid "To add custom functionality around request handling, you can override the <methodname>service()</methodname> method."
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:1304
+#, no-c-format
+msgid "To use the custom servlet class in a Servlet 2.4 project, you need to define it in the <filename>web.xml</filename> deployment descriptor instead of the regular <classname>VaadinServlet</classname> class, as described in <xref linkend=\"application.environment.web-xml\"/>."
 msgstr ""
 
 #. Tag: title
-#: chapter-application.xml:1357
+#: chapter-application.xml:1313
 #, no-c-format
-msgid "Setting Up the Application Environment"
+msgid "Customizing Vaadin Portlet"
+msgstr ""
+
+#. Tag: emphasis
+#: chapter-application.xml:1316
+#, no-c-format
+msgid "To Be Done"
+msgstr ""
+
+#. Tag: title
+#: chapter-application.xml:1321
+#, no-c-format
+msgid "Customizing Vaadin Service"
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:1323
+#, no-c-format
+msgid "To customize <classname>VaadinService</classname>, you first need to extend the <classname>VaadinServlet</classname> or -<classname>Portlet</classname> class and override the <methodname>createServletService()</methodname> to create a custom service object."
+msgstr ""
+
+#. Tag: title
+#: chapter-application.xml:1334
+#, no-c-format
+msgid "User Session"
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:1336
+#, no-c-format
+msgid "A user session begins when a user first makes a request to a Vaadin servlet or portlet by opening the URL for a particular <classname>UI</classname>. All server requests belonging to a particular UI class are processed by the <classname>VaadinServlet</classname> or <classname>VaadinPortlet</classname> class. When a new client connects, it creates a new user session, represented by an instance of <classname>VaadinSession</classname>. Sessions are tracked using cookies stored in the browser."
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:1347
+#, no-c-format
+msgid "You can obtain the <classname>VaadinSession</classname> of a <classname>UI</classname> with <methodname>getSession()</methodname> or globally with <methodname>VaadinSession.getCurrent()</methodname>. It also provides access to the lower-level session objects, <interfacename>HttpSession</interfacename> and <interfacename>PortletSession</interfacename>, through a <classname>WrappedSession</classname>. You can also access the deployment configuration through <classname>VaadinSession</classname>, as described in <xref linkend=\"application.environment.configuration\"/>."
 msgstr ""
 
 #. Tag: para
 #: chapter-application.xml:1359
 #, no-c-format
-msgid "Vaadin applications are deployed as <emphasis>Java web applications</emphasis>. A Java \"web application\" can contain a number of servlets, each of which can be a Vaadin application or some other servlet, and static resources such as HTML files. Such a web application is normally packaged as WAR (Web application ARchive) file, which can be deployed to a Java application server (or a servlet container to be exact)."
+msgid "A session ends after the last <classname>UI</classname> instance expires or is closed, as described later."
+msgstr ""
+
+#. Tag: title
+#: chapter-application.xml:1365
+#, no-c-format
+msgid "Handling Session Initialization and Destruction"
 msgstr ""
 
 #. Tag: para
-#: chapter-application.xml:1368
+#: chapter-application.xml:1367
 #, no-c-format
-msgid "For a detailed tutorial on how web applications are packaged, please refer to any Java book that discusses Java Servlets. Sun has an excellent reference online at <link xlink:href=\"http://java.sun.com/j2ee/tutorial/1_3-fcs/doc/WCC3.html\"> http://java.sun.com/j2ee/tutorial/1_3-fcs/doc/WCC3.html </link>."
+msgid "You can handle session initialization and destruction by implementing a <interfacename>SessionInitListener</interfacename> or <interfacename>SessionDestroyListener</interfacename>, respectively, to the <classname>VaadinService</classname>. You can do that best by extending <classname>VaadinServlet</classname> and overriding the <methodname>servletInitialized()</methodname> method, as outlined in <xref linkend=\"application.lifecycle.servlet-service\"/>."
+msgstr ""
+
+#. Tag: programlisting
+#: chapter-application.xml:1377
+#, no-c-format
+msgid ""
+"<?pocket-size 65% ?><![CDATA[public class MyServlet extends VaadinServlet\n"
+"    implements SessionInitListener, SessionDestroyListener {\n"
+"\n"
+"    @Override\n"
+"    protected void servletInitialized() throws ServletException {\n"
+"        super.servletInitialized();\n"
+"        getService().addSessionInitListener(this);\n"
+"        getService().addSessionDestroyListener(this);\n"
+"    }\n"
+"\n"
+"    @Override\n"
+"    public void sessionInit(SessionInitEvent event)\n"
+"            throws ServiceException {\n"
+"        // Do session start stuff here\n"
+"    }\n"
+"\n"
+"    @Override\n"
+"    public void sessionDestroy(SessionDestroyEvent event) {\n"
+"        // Do session end stuff here\n"
+"    }\n"
+"}]]>"
 msgstr ""
 
 #. Tag: para
-#: chapter-application.xml:1378
+#: chapter-application.xml:1379
 #, no-c-format
-msgid "Remember that, in the Java Servlet parlance, \"web application\" means a collection of Java servlets or portlets, JSP and static HTML pages, and various other resources that form an application. Such a Java web application is typically packaged as a WAR package for deployment. Vaadin applications, on the other hand, run as servlets within such a Java web application. There exists also other kinds of web applications. To avoid confusion with the general meaning of \"web application\", we often refer to Java web application as \"WAR\" in this book."
+msgid "If using Servlet 2.4, you need to configure the custom servlet class in the <parameter>servlet-class</parameter> parameter in the <filename>web.xml</filename> descriptor instead of the <classname>VaadinServlet</classname>, as described in <xref linkend=\"application.environment.web-xml\"/>."
 msgstr ""
 
 #. Tag: title
 #: chapter-application.xml:1390
 #, no-c-format
-msgid "Creating Deployable WAR in Eclipse"
+msgid "Loading a UI"
 msgstr ""
 
 #. Tag: para
 #: chapter-application.xml:1392
 #, no-c-format
-msgid "To deploy an application to a web server, you need to create a WAR package. Here we give the instructions for Eclipse."
+msgid "When a browser first accesses a URL mapped to the servlet of a particular UI class, the Vaadin servlet generates a loader page. The page loads the client-side engine (widget set), which in turn loads the UI in a separate request to the Vaadin servlet."
+msgstr ""
+
+#. Tag: classname
+#: chapter-application.xml:1400
+#, no-c-format
+msgid "UIProvider"
+msgstr ""
+
+#. Tag: classname
+#: chapter-application.xml:1401
+#, no-c-format
+msgid "DefaultUIProvider"
+msgstr ""
+
+#. Tag: classname
+#: chapter-application.xml:1402
+#, no-c-format
+msgid "BrowserWindowOpener"
 msgstr ""
 
 #. Tag: para
-#: chapter-application.xml:1399
+#: chapter-application.xml:1402
 #, no-c-format
-msgid "Select <menuchoice><guimenu>File</guimenu><guimenuitem>Export</guimenuitem></menuchoice> and then <menuchoice><guimenu>Web</guimenu><guimenuitem>WAR File</guimenuitem></menuchoice>. Or, right-click the project in the Project Explorer and select <menuchoice><guimenu>Web</guimenu><guimenuitem>WAR File</guimenuitem></menuchoice>."
+msgid "A <classname>UI</classname> instance is created when the client-side engine makes its first request. The servlet creates the UIs using a <classname>UIProvider</classname> registered in the <classname>VaadinSession</classname> instance. A session has at least a <classname>DefaultUIProvider</classname> for managing UIs opened by the user. If the application lets the user open popup windows with a <classname>BrowserWindowOpener</classname>, each of them has a dedicated special UI provider."
 msgstr ""
 
-#. Tag: para
-#: chapter-application.xml:1410
+#. Tag: classname
+#: chapter-application.xml:1416
 #, no-c-format
-msgid "Select the <guilabel>Web project</guilabel> to export. Enter <guilabel>Destination</guilabel> file name (<filename>.war</filename>)."
+msgid "VaadinRequest"
+msgstr ""
+
+#. Tag: methodname
+#: chapter-application.xml:1417
+#, no-c-format
+msgid "init()"
 msgstr ""
 
 #. Tag: para
 #: chapter-application.xml:1417
 #, no-c-format
-msgid "Make any other settings in the dialog, and click <guibutton>Finish</guibutton>."
+msgid "Once a new UI is created, its <methodname>init()</methodname> method is called. The method gets the request as a <classname>VaadinRequest</classname>."
 msgstr ""
 
 #. Tag: title
-#: chapter-application.xml:1426
+#: chapter-application.xml:1425
 #, no-c-format
-msgid "Web Application Contents"
+msgid "Customizing the Loader Page"
 msgstr ""
 
 #. Tag: para
-#: chapter-application.xml:1428
+#: chapter-application.xml:1427
 #, no-c-format
-msgid "The following files are required in a web application in order to run it."
-msgstr ""
-
-#. Tag: title
-#: chapter-application.xml:1434
-#, no-c-format
-msgid "Web application organization"
-msgstr ""
-
-#. Tag: filename
-#: chapter-application.xml:1438
-#, no-c-format
-msgid "WEB-INF/web.xml"
+msgid "The HTML content of the loader page is generated as an HTML DOM object, which can be customized by implementing a <interfacename>BootstrapListener</interfacename> that modifies the DOM object. To do so, you need to extend the <classname>VaadinServlet</classname> and add a <interfacename>SessionInitListener</interfacename> to the service object, as outlined in <xref linkend=\"application.lifecycle.session\"/>. You can then add the bootstrap listener to a session with <methodname>addBootstrapListener()</methodname> when the session is initialized."
 msgstr ""
 
 #. Tag: para
 #: chapter-application.xml:1441
 #, no-c-format
-msgid "This is the standard web application descriptor that defines how the application is organized. You can refer to any Java book about the contents of this file. Also see an example in <xref linkend=\"ex.web.xml\"/>."
+msgid "Loading the widget set is handled in the loader page with functions defined in a separate <filename>vaadinBootstrap.js</filename> script."
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:1446
+#, no-c-format
+msgid "You can also use entirely custom loader code, such as in a static HTML page, as described in <xref linkend=\"advanced.embedding\"/>."
+msgstr ""
+
+#. Tag: title
+#: chapter-application.xml:1454
+#, no-c-format
+msgid "Custom UI Providers"
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:1456
+#, no-c-format
+msgid "You can create UI objects dynamically according to their request parameters, such as the URL path, by defining a custom <interfacename>UIProvider</interfacename>. You need to add custom UI providers to the session object which calls them. The providers are chained so that they are requested starting from the one added last, until one returns a UI (otherwise they return null). You can add a UI provider to a session most conveniently by implementing a custom servlet and adding the UI provider to sessions in a <interfacename>SessionInitListener</interfacename>."
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:1468
+#, no-c-format
+msgid "You can find an example of custom UI providers in <xref linkend=\"mobile.features.fallback\"/>."
+msgstr ""
+
+#. Tag: title
+#: chapter-application.xml:1475
+#, no-c-format
+msgid "Preserving UI on Refresh"
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:1477
+#, no-c-format
+msgid "Reloading a page in the browser normally spawns a new <classname>UI</classname> instance and the old UI is left hanging, until cleaned up after a while. This can be undesired as it resets the UI state for the user. To preserve the UI, you can use the <classname>@PreserveOnRefresh</classname> annotation for the UI class. You can also use a <classname>UIProvider</classname> with a custom implementation of <methodname>isUiPreserved()</methodname>."
+msgstr ""
+
+#. Tag: programlisting
+#: chapter-application.xml:1487
+#, no-c-format
+msgid ""
+"<![CDATA[@PreserveOnRefresh\n"
+"public class MyUI extends UI {]]>"
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:1489
+#, no-c-format
+msgid "Adding the <uri>?restartApplication</uri> parameter in the URL tells the Vaadin servlet to create a new <classname>UI</classname> instance when loading the page, thereby overriding the <classname>@PreserveOnRefresh</classname>. This is often necessary when developing such a UI in Eclipse, when you need to restart it after redeploying, because Eclipse likes to persist the application state between redeployments. If you also include a URI fragment, the parameter should be given before the fragment."
+msgstr ""
+
+#. Tag: title
+#: chapter-application.xml:1504
+#, no-c-format
+msgid "UI Expiration"
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:1506
+#, no-c-format
+msgid "<classname>UI</classname> instances are cleaned up if no communication is received from them after some time. If no other server requests are made, the client-side sends keep-alive heartbeat requests. A UI is kept alive for as long as requests or heartbeats are received from it. It expires if three consecutive heartbeats are missed."
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:1514
+#, no-c-format
+msgid "The heartbeats occur at an interval of 5 minutes, which can be changed with the <parameter>heartbeatInterval</parameter> parameter of the servlet. You can configure the parameter in <classname>@VaadinServletConfiguration</classname> or in <filename>web.xml</filename> as described in <xref linkend=\"application.environment.parameters\"/>."
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:1523
+#, no-c-format
+msgid "When the UI cleanup happens, a <classname>DetachEvent</classname> is sent to all <classname>DetachListener</classname>s added to the UI. When the <classname>UI</classname> is detached from the session, <methodname>detach()</methodname> is called for it."
+msgstr ""
+
+#. Tag: title
+#: chapter-application.xml:1532
+#, no-c-format
+msgid "Session Expiration"
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:1534
+#, no-c-format
+msgid "A session is kept alive by server requests caused by user interaction with the application as well as the heartbeat monitoring of the UIs. Once all UIs have expired, the session still remains. It is cleaned up from the server when the session timeout configured in the web application expires."
+msgstr ""
+
+#. Tag: primary
+#: chapter-application.xml:1542 chapter-application.xml:2097
+#, no-c-format
+msgid "closeIdleSessions"
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:1542
+#, no-c-format
+msgid "If there are active UIs in an application, their heartbeat keeps the session alive indefinitely. You may want to have the sessions timeout if the user is inactive long enough, which is the original purpose of the session timeout setting. If the <parameter>closeIdleSessions</parameter> parameter of the servlet is set to <literal>true</literal> in the <filename>web.xml</filename>, as described in <xref linkend=\"application.environment.web-xml\"/>, the session and all of its UIs are closed when the timeout specified by the <parameter>session-timeout</parameter> parameter of the servlet expires after the last non-heartbeat request. Once the session is gone, the browser will show an Out Of Sync error on the next server request. To avoid the ugly message, you may want to set a redirect URL for the UIs<phrase condition=\"web\">, as described in <xref linkend=\"application.errors.systemmessages\"/></phrase>."
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:1560
+#, no-c-format
+msgid "The related configuration parameters are described in <xref linkend=\"application.environment.parameters\"/>."
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:1565
+#, no-c-format
+msgid "You can handle session expiration on the server-side with a <interfacename>SessionDestroyListener</interfacename>, as described in <xref linkend=\"application.lifecycle.session\"/>."
+msgstr ""
+
+#. Tag: title
+#: chapter-application.xml:1573
+#, no-c-format
+msgid "Closing a Session"
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:1575
+#, no-c-format
+msgid "You can call the <methodname>close()</methodname> method in the <classname>VaadinSession</classname> to shut down the session and clean up any of the resources allocated for it. The session is closed immediately and any objects related to it are not available after calling the method. The UI that is still visible in the browser has no session to communicate with, but will still receive the response from the final request. You typically want to redirect the user to another URL at this point, using the <methodname>setLocation()</methodname> method in <classname>Page</classname>."
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:1587
+#, no-c-format
+msgid "In the following example, we display a logout button, which closes the user session."
+msgstr ""
+
+#. Tag: programlisting
+#: chapter-application.xml:1593
+#, no-c-format
+msgid ""
+"<![CDATA[Button logout = new Button(\"Logout\");\n"
+"logout.addClickListener(new Button.ClickListener() {\n"
+"    @Override\n"
+"    public void buttonClick(ClickEvent event) {\n"
+"        // Redirect from the page\n"
+"        getUI().getPage().setLocation(\n"
+"            \"/myapp/logoutpage.html\");\n"
+"        \n"
+"        // Close the VaadinSession\n"
+"        getSession().close();\n"
+"    }\n"
+"});]]>"
+msgstr ""
+
+#. Tag: title
+#: chapter-application.xml:1637
+#, no-c-format
+msgid "Deploying an Application"
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:1639
+#, no-c-format
+msgid "Vaadin applications are deployed as <emphasis>Java web applications</emphasis>, which can contain a number of servlets, each of which can be a Vaadin application or some other servlet, and static resources such as HTML files. Such a web application is normally packaged as a WAR (Web application ARchive) file, which can be deployed to a Java application server (or a servlet container to be exact). A WAR file, which has the <filename>.war</filename> extension, is a subtype of JAR (Java ARchive), and like a regular JAR, is a ZIP-compressed file with a special content structure."
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:1650
+#, no-c-format
+msgid "For a detailed tutorial on how web applications are packaged, please refer to any Java book that discusses Java Servlets."
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:1655
+#, no-c-format
+msgid "In the Java Servlet parlance, a \"web application\" means a collection of Java servlets or portlets, JSP and static HTML pages, and various other resources that form an application. Such a Java web application is typically packaged as a WAR package for deployment. Server-side Vaadin UIs run as servlets within such a Java web application. There exists also other kinds of web applications. To avoid confusion with the general meaning of \"web application\", we often refer to Java web applications with the slight misnomer \"WAR\" in this book."
+msgstr ""
+
+#. Tag: title
+#: chapter-application.xml:1669
+#, no-c-format
+msgid "Creating Deployable WAR in Eclipse"
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:1671
+#, no-c-format
+msgid "To deploy an application to a web server, you need to create a WAR package. Here we give the instructions for Eclipse."
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:1678
+#, no-c-format
+msgid "Select <menuchoice><guimenu>File</guimenu><guimenuitem>Export</guimenuitem></menuchoice> and then <menuchoice><guimenu>Web</guimenu><guimenuitem>WAR File</guimenuitem></menuchoice>. Or, right-click the project in the Project Explorer and select <menuchoice><guimenu>Web</guimenu><guimenuitem>WAR File</guimenuitem></menuchoice>."
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:1689
+#, no-c-format
+msgid "Select the <guilabel>Web project</guilabel> to export. Enter <guilabel>Destination</guilabel> file name (<filename>.war</filename>)."
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:1696
+#, no-c-format
+msgid "Make any other settings in the dialog, and click <guibutton>Finish</guibutton>."
+msgstr ""
+
+#. Tag: title
+#: chapter-application.xml:1705
+#, no-c-format
+msgid "Web Application Contents"
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:1707
+#, no-c-format
+msgid "The following files are required in a web application in order to run it."
+msgstr ""
+
+#. Tag: title
+#: chapter-application.xml:1713
+#, no-c-format
+msgid "Web Application Organization"
+msgstr ""
+
+#. Tag: term
+#: chapter-application.xml:1716
+#, no-c-format
+msgid "<filename>WEB-INF/web.xml</filename> (optional with Servlet 3.0)"
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:1720
+#, no-c-format
+msgid "This is the web application descriptor that defines how the application is organized, that is, what servlets and such it has. You can refer to any Java book about the contents of this file. It is not needed if you define the Vaadin servlet with the <literal>@WebServlet</literal> annotation in Servlet API 3.0."
 msgstr ""
 
 #. Tag: filename
-#: chapter-application.xml:1454
+#: chapter-application.xml:1733
 #, no-c-format
-msgid "WEB-INF/lib/vaadin-6.x.x.jar"
+msgid "WEB-INF/lib/*.jar"
 msgstr ""
 
 #. Tag: para
-#: chapter-application.xml:1459
+#: chapter-application.xml:1738
 #, no-c-format
-msgid "This is the Vaadin library. It is included in the product package in <filename>lib</filename> directory."
+msgid "These are the Vaadin libraries and their dependencies. They can be found in the installation package or as loaded by a dependency management system such as Maven or Ivy."
 msgstr ""
 
 #. Tag: term
-#: chapter-application.xml:1469
+#: chapter-application.xml:1747
 #, no-c-format
-msgid "Your application classes"
+msgid "Your UI classes"
 msgstr ""
 
 #. Tag: para
-#: chapter-application.xml:1471
+#: chapter-application.xml:1749
 #, no-c-format
-msgid "You must include your application classes either in a JAR file in <filename>WEB-INF/lib</filename> or as classes in <filename>WEB-INF/classes</filename>"
+msgid "You must include your UI classes either in a JAR file in <filename>WEB-INF/lib</filename> or as classes in <filename>WEB-INF/classes</filename>"
 msgstr ""
 
 #. Tag: term
-#: chapter-application.xml:1482
+#: chapter-application.xml:1760
 #, no-c-format
 msgid "Your own theme files (OPTIONAL)"
 msgstr ""
 
 #. Tag: para
-#: chapter-application.xml:1484
+#: chapter-application.xml:1762
 #, no-c-format
 msgid "If your application uses a special theme (look and feel), you must include it in <filename>VAADIN/themes/themename</filename> directory."
 msgstr ""
 
 #. Tag: term
-#: chapter-application.xml:1494
+#: chapter-application.xml:1772
 #, no-c-format
 msgid "Widget sets (OPTIONAL)"
 msgstr ""
 
 #. Tag: para
-#: chapter-application.xml:1496
+#: chapter-application.xml:1774
 #, no-c-format
 msgid "If your application uses a project-specific widget set, it must be compiled in the <filename>VAADIN/widgetset/</filename> directory."
 msgstr ""
 
 #. Tag: title
-#: chapter-application.xml:1507
+#: chapter-application.xml:1785
 #, no-c-format
-msgid "Deployment Descriptor <filename>web.xml</filename>"
+msgid "Web Servlet Class"
 msgstr ""
 
 #. Tag: para
-#: chapter-application.xml:1509
+#: chapter-application.xml:1787
 #, no-c-format
-msgid "The deployment descriptor is an XML file with the name <filename>web.xml</filename> in the <filename>WEB-INF</filename> directory of a web application. It is a standard component in Java EE describing how a web application should be deployed. The structure of the deployment descriptor is illustrated by the following example. You simply deploy applications as servlets implemented by the special <methodname>com.vaadin.terminal.gwt.server.ApplicationServlet</methodname> wrapper class. The class of the actual application is specified by giving the <parameter>application</parameter> parameter with the name of the specific application class to the servlet. The servlet is then connected to a URL in a standard way for Java Servlets."
-msgstr ""
-
-#. Tag: title
-#: chapter-application.xml:1524
-#, no-c-format
-msgid "web.xml"
+msgid "When using the Servlet 3.0 API, you normally declare the Vaadin servlet classes with the <literal>@WebServlet</literal> annotation. The Vaadin UI associated with the servlet and other Vaadin-specific parameters are declared with a separate <literal>@VaadinServletConfiguration</literal> annotation."
 msgstr ""
 
 #. Tag: programlisting
-#: chapter-application.xml:1525
+#: chapter-application.xml:1795
+#, no-c-format
+msgid ""
+"<?pocket-size 75% ?>@WebServlet(value = \"<emphasis role=\"bold\">/*</emphasis>\",\n"
+"            asyncSupported = true)\n"
+"@VaadinServletConfiguration(\n"
+"        productionMode = <emphasis role=\"bold\">false</emphasis>,\n"
+"        ui = <emphasis role=\"bold\">MyProjectUI</emphasis>.class)\n"
+"public class <emphasis role=\"bold\">MyProjectServlet</emphasis> extends VaadinServlet {\n"
+"}"
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:1797
+#, no-c-format
+msgid "The Vaadin Plugin for Eclipse creates the servlet class as a static inner class of the UI class. Normally, you may want to have it as a separate regular class."
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:1803
+#, no-c-format
+msgid "The <parameter>value</parameter> parameter is the URL pattern for mapping request URLs to the servlet, as described in <xref linkend=\"application.environment.servlet-mapping\"/>. The <parameter>ui</parameter> parameter is the UI class. Production mode is disabled by default, which enabled on-the-fly theme compilation, debug window, and other such development features. See the subsequent sections for details on the different servlet and Vaadin configuration parameters."
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:1813
+#, no-c-format
+msgid "You can also use a <filename>web.xml</filename> deployment descriptor in Servlet 3.0 projects."
+msgstr ""
+
+#. Tag: title
+#: chapter-application.xml:1820
+#, no-c-format
+msgid "Using a <filename>web.xml</filename> Deployment Descriptor"
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:1822
+#, no-c-format
+msgid "A deployment descriptor is an XML file with the name <filename>web.xml</filename> in the <filename>WEB-INF</filename> sub-directory of a web application. It is a standard component in Java EE describing how a web application should be deployed. The descriptor is not required with Servlet API 3.0, where you can also define servlets with the <classname>@WebServlet</classname> annotation as decribed earlier, as web fragments, or programmatically. You can use both a <filename>web.xml</filename> and WebServlet in the same application. Settings in the <filename>web.xml</filename> override the ones given in annotations."
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:1835
+#, no-c-format
+msgid "The following example shows the basic contents of a deployment descriptor for a Servlet 2.4 application. You simply specify the UI class with the <parameter>UI</parameter> parameter for the <classname>com.vaadin.server.VaadinServlet</classname>. The servlet is then mapped to a URL path in a standard way for Java Servlets."
+msgstr ""
+
+#. Tag: programlisting
+#: chapter-application.xml:1843
 #, no-c-format
 msgid ""
 "<?pocket-size 75% ?>&lt;?xml version=\"1.0\" encoding=\"UTF-8\"?&gt;\n"
@@ -1666,11 +1985,18 @@ msgid ""
 "  &lt;servlet&gt;\n"
 "    &lt;servlet-name&gt;<emphasis role=\"strong\">myservlet</emphasis>&lt;/servlet-name&gt;\n"
 "    &lt;servlet-class&gt;\n"
-"        com.vaadin.terminal.gwt.server.ApplicationServlet\n"
+"        com.vaadin.server.VaadinServlet\n"
 "    &lt;/servlet-class&gt;\n"
+"\n"
 "    &lt;init-param&gt;\n"
-"      &lt;param-name&gt;application&lt;/param-name&gt;\n"
-"      &lt;param-value&gt;<emphasis role=\"strong\">MyApplicationClass</emphasis>&lt;/param-value&gt;\n"
+"      &lt;param-name&gt;&ui;&lt;/param-name&gt;\n"
+"      &lt;param-value&gt;<emphasis role=\"strong\">com.ex.myprj.MyUI</emphasis>&lt;/param-value&gt;\n"
+"    &lt;/init-param&gt;\n"
+"\n"
+"    &lt;!-- If not using the default widget set--&gt;\n"
+"    &lt;init-param&gt;\n"
+"      &lt;param-name&gt;widgetset&lt;/param-name&gt;\n"
+"      &lt;param-value&gt;<emphasis role=\"strong\">com.ex.myprj.MyWidgetSet</emphasis>&lt;/param-value&gt;\n"
 "    &lt;/init-param&gt;\n"
 "  &lt;/servlet&gt;\n"
 "\n"
@@ -1682,31 +2008,142 @@ msgid ""
 msgstr ""
 
 #. Tag: para
-#: chapter-application.xml:1528
+#: chapter-application.xml:1845
 #, no-c-format
-msgid "The descriptor defines a servlet with name <filename>myservlet</filename>. The servlet class, <classname>com.vaadin.terminal.gwt.server.ApplicationServlet</classname>, is provided by Vaadin framework and it should be the same for all Vaadin projects. The servlet takes the class name <classname>Calc</classname> of the user application class as a parameter, including the full package path to the class. If the class is in the default package the package path is obviously not used."
+msgid "The descriptor defines a servlet with the name <filename>myservlet</filename>. The servlet class, <classname>com.vaadin.server.VaadinServlet</classname>, is provided by Vaadin framework and is normally the same for all Vaadin projects. For some purposes, you may need to use a custom servlet class that extends the <classname>VaadinServlet</classname>. The class name must include the full package path."
+msgstr ""
+
+#. Tag: title
+#: chapter-application.xml:1856
+#, no-c-format
+msgid "Servlet API Version"
 msgstr ""
 
 #. Tag: para
-#: chapter-application.xml:1539
+#: chapter-application.xml:1858
 #, no-c-format
-msgid "The <literal>url-pattern</literal> is defined above as <literal>/*</literal>. This matches to any URL under the project context. We defined above the project context as <literal>myproject</literal> so the application URL will be <uri>http://localhost:8080/myproject/</uri>. If the project were to have multiple applications or servlets, they would have to be given different names to distinguish them. For example, <literal>url-pattern</literal> <literal>/myapp/*</literal> would match a URL such as <uri>http://localhost:8080/myproject/myapp/</uri>. Notice that the slash and the asterisk <emphasis>must</emphasis> be included at the end of the pattern."
-msgstr ""
-
-#. Tag: para
-#: chapter-application.xml:1553
-#, no-c-format
-msgid "Notice also that if the URL pattern is other than root <literal>/*</literal> (such as <literal>/myapp/*</literal>), you will also need to make a servlet mapping to <literal>/VAADIN/*</literal> (unless you are serving it statically as noted below). For example:"
+msgid "The descriptor example given above was for Servlet 2.4. For a later version, such as Servlet 3.0, you should use:"
 msgstr ""
 
 #. Tag: programlisting
-#: chapter-application.xml:1560
+#: chapter-application.xml:1863
+#, no-c-format
+msgid ""
+"<?pocket-size 75% ?>&lt;web-app\n"
+"  id=\"WebApp_ID\" version=\"<emphasis role=\"bold\">3.0</emphasis>\"\n"
+"  xmlns=\"http://java.sun.com/xml/ns/j2ee\" \n"
+"  xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" \n"
+"  xsi:schemaLocation=\"<emphasis role=\"bold\">http://java.sun.com/xml/ns/javaee\n"
+"      http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd</emphasis>\"&gt;"
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:1865
+#, no-c-format
+msgid "Servlet 3.0 support is useful for at least server push."
+msgstr ""
+
+#. Tag: title
+#: chapter-application.xml:1871
+#, no-c-format
+msgid "Widget Set"
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:1873
+#, no-c-format
+msgid "If the UI uses add-on components or custom widgets, it needs a custom widget set, which can be specified with the <parameter>widgetset</parameter> parameter for the servlet. Alternatively, you can defined it with the <classname>@WidgetSet</classname> annotation for the UI class. The parameter is a class name with the same path but without the <filename>.gwt.xml</filename> extension as the widget set definition file. If the parameter is not given, the <classname>com.vaadin.DefaultWidgetSet</classname> is used, which contains all the widgets for the built-in Vaadin components."
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:1886
+#, no-c-format
+msgid "Unless using the default widget set (which is included in the <filename>vaadin-client-compiled</filename> JAR), the widget set must be compiled, as described in <xref linkend=\"addons\"/> or <xref linkend=\"clientside.compiling\"/>, and properly deployed with the application."
+msgstr ""
+
+#. Tag: title
+#: chapter-application.xml:1897
+#, no-c-format
+msgid "Servlet Mapping with URL Patterns"
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:1899
+#, no-c-format
+msgid "The servlet needs to be mapped to an URL path, which requests it is to handle."
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:1904
+#, no-c-format
+msgid "With <classname>@WebServlet</classname> annotation for the servlet class:"
+msgstr ""
+
+#. Tag: programlisting
+#: chapter-application.xml:1908
+#, no-c-format
+msgid "<?pocket-size 75% ?>@WebServlet(value = \"<emphasis role=\"bold\">/*</emphasis>\", asyncSupported = true)"
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:1910 chapter-application.xml:1949
+#: chapter-application.xml:2028 chapter-application.xml:2060
+#: chapter-application.xml:2079 chapter-application.xml:2108
+#: chapter-application.xml:2133 chapter-application.xml:2156
+#, no-c-format
+msgid "In a <filename>web.xml</filename>:"
+msgstr ""
+
+#. Tag: programlisting
+#: chapter-application.xml:1914
+#, no-c-format
+msgid ""
+"<?pocket-size 75% ?>  &lt;servlet-mapping&gt;\n"
+"    &lt;servlet-name&gt;<emphasis role=\"strong\">myservlet</emphasis>&lt;/servlet-name&gt;\n"
+"    &lt;url-pattern&gt;/*&lt;/url-pattern&gt;\n"
+"  &lt;/servlet-mapping&gt;"
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:1916
+#, no-c-format
+msgid "The URL pattern is defined in the above examples as <literal>/*</literal>. This matches any URL under the project context. We defined above the project context as <literal>myproject</literal> so the URL for the page of the &ui; will be <uri>http://localhost:8080/myproject/</uri>."
+msgstr ""
+
+#. Tag: title
+#: chapter-application.xml:1925
+#, no-c-format
+msgid "Mapping Sub-Paths"
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:1927
+#, no-c-format
+msgid "If an application has multiple &ui;s or servlets, they have to be given different paths in the URL, matched by a different URL pattern. Also, you may need to have statically served content under some path. Having an URL pattern <literal>/myui/*</literal> would match a URL such as <uri>http://localhost:8080/myproject/myui/</uri>. Notice that the slash and the asterisk <emphasis>must</emphasis> be included at the end of the pattern. In such case, you also need to map URLs with <literal>/VAADIN/*</literal> to a servlet (unless you are serving it statically as noted below)."
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:1941
+#, no-c-format
+msgid "With a <classname>@WebServlet</classname> annotation for a servlet class, you can define multiple mappings as a list enclosed in curly braces as follows:"
+msgstr ""
+
+#. Tag: programlisting
+#: chapter-application.xml:1947
+#, no-c-format
+msgid ""
+"@WebServlet(value = {\"<emphasis role=\"strong\">/myui/*</emphasis>\", \"/VAADIN/*\"},\n"
+"            asyncSupported = true)"
+msgstr ""
+
+#. Tag: programlisting
+#: chapter-application.xml:1953
 #, no-c-format
 msgid ""
 "...\n"
 "    &lt;servlet-mapping&gt;\n"
 "        &lt;servlet-name&gt;<emphasis role=\"strong\">myservlet</emphasis>&lt;/servlet-name&gt;\n"
-"        &lt;url-pattern&gt;/myurl/*&lt;/url-pattern&gt;\n"
+"        &lt;url-pattern&gt;<emphasis role=\"strong\">/myui/*</emphasis>&lt;/url-pattern&gt;\n"
 "    &lt;/servlet-mapping&gt;\n"
 "\n"
 "    &lt;servlet-mapping&gt;\n"
@@ -1716,37 +2153,49 @@ msgid ""
 msgstr ""
 
 #. Tag: para
-#: chapter-application.xml:1562
+#: chapter-application.xml:1955
 #, no-c-format
-msgid "If you have multiple servlets, you should specify only one <literal>/VAADIN/*</literal> mapping . It doesn't matter which servlet you map the pattern to, as long as it is a Vaadin servlet."
+msgid "If you have multiple servlets, you should specify only one <literal>/VAADIN/*</literal> mapping. It does not matter which servlet you map the pattern to, as long as it is a Vaadin servlet."
 msgstr ""
 
 #. Tag: para
-#: chapter-application.xml:1568
+#: chapter-application.xml:1961
 #, no-c-format
-msgid "You do not have to provide the above <literal>/VAADIN/*</literal> mapping if you serve both the widget sets and (custom and default) themes statically in the <filename>WebContent/VAADIN/</filename> directory. The mapping simply allows serving them dynamically from the Vaadin JAR. Serving them statically is recommended for production environments as it is faster. If you serve the content from within the same web application, you may not have the root pattern <literal>/*</literal> for the Vaadin servlet, as then all the requests would be mapped to the servlet."
+msgid "You do not have to provide the above <literal>/VAADIN/*</literal> mapping if you serve both the widget sets and (custom and default) themes statically in the <filename>/VAADIN</filename> directory in the web application. The mapping simply allows serving them dynamically from the Vaadin JAR. Serving them statically is recommended for production environments as it is faster. If you serve the content from within the same web application, you may not have the root pattern <literal>/*</literal> for the Vaadin servlet, as then all the requests would be mapped to the servlet."
 msgstr ""
 
 #. Tag: title
-#: chapter-application.xml:1581
+#: chapter-application.xml:1976
 #, no-c-format
-msgid "Deployment Descriptor Parameters"
+msgid "Other Servlet Configuration Parameters"
 msgstr ""
 
 #. Tag: para
-#: chapter-application.xml:1583
+#: chapter-application.xml:1978
 #, no-c-format
-msgid "Deployment descriptor can have many parameters and options that control the execution of a servlet. You can find a complete documentation of the deployment descriptor in Java Servlet Specification at <uri>http://java.sun.com/products/servlet/</uri>."
+msgid "The servlet class or deployment descriptor can have many parameters and options that control the execution of a servlet. You can find complete documentation of the basic servlet parameters in the appropriate <link xlink:href=\"http://wiki.apache.org/tomcat/Specifications\">Java Servlet Specification</link>. <classname>@VaadinServletConfiguration</classname> accepts a number of special parameters, as described below."
 msgstr ""
 
 #. Tag: para
-#: chapter-application.xml:1591
+#: chapter-application.xml:1988
 #, no-c-format
-msgid "By default, Vaadin applications run in <emphasis>debug mode</emphasis>, which should be used during development. This enables various debugging features. For production use, you should have put in your <filename>web.xml</filename> the following parameter:"
+msgid "In a <filename>web.xml</filename>, you can set most parameters either as a <literal>&lt;context-param&gt;</literal> for the entire web application, in which case they apply to all Vaadin servlets, or as an <literal>&lt;init-param&gt;</literal> for an individual servlet. If both are defined, servlet parameters override context parameters."
+msgstr ""
+
+#. Tag: title
+#: chapter-application.xml:1997
+#, no-c-format
+msgid "Production Mode"
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:1999
+#, no-c-format
+msgid "By default, Vaadin applications run in <emphasis>debug mode</emphasis> (or <emphasis>development mode</emphasis>), which should be used during development. This enables various debugging features. For production use, you should have the <literal>productionMode=true</literal> setting in the <classname>@VaadinServletConfiguration</classname>, or in <filename>web.xml</filename>:"
 msgstr ""
 
 #. Tag: programlisting
-#: chapter-application.xml:1598
+#: chapter-application.xml:2009
 #, no-c-format
 msgid ""
 "<![CDATA[<context-param>\n"
@@ -1757,19 +2206,89 @@ msgid ""
 msgstr ""
 
 #. Tag: para
-#: chapter-application.xml:1600
+#: chapter-application.xml:2011
 #, no-c-format
-msgid "The parameter and the debug and production modes are described in detail in <xref linkend=\"advanced.debug-production-modes\"/>."
+msgid "The parameter and the debug and production modes are described in more detail in <xref linkend=\"advanced.debug\"/>."
+msgstr ""
+
+#. Tag: title
+#: chapter-application.xml:2018
+#, no-c-format
+msgid "Custom UI Provider"
 msgstr ""
 
 #. Tag: para
-#: chapter-application.xml:1605
+#: chapter-application.xml:2020
 #, no-c-format
-msgid "One often needed option is the session timeout. Different servlet containers use varying defaults for timeouts, such as 30 minutes for Apache Tomcat. You can set the timeout with:"
+msgid "Vaadin normally uses the <classname>DefaultUIProvider</classname> for creating <classname>UI</classname> class instances. If you need to use a custom UI provider, you can define its class with the <parameter>UIProvider</parameter> parameter. The provider is registered in the <classname>VaadinSession</classname>."
 msgstr ""
 
 #. Tag: programlisting
-#: chapter-application.xml:1611
+#: chapter-application.xml:2032
+#, no-c-format
+msgid ""
+"&lt;servlet&gt;\n"
+"    ...\n"
+"    &lt;init-param&gt;\n"
+"      &lt;param-name&gt;UIProvider&lt;/param-name&gt;\n"
+"      &lt;param-value&gt;<emphasis role=\"bold\">com.ex.my.MyUIProvider</emphasis>&lt;/param-value&gt;\n"
+"    &lt;/init-param&gt;"
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:2034
+#, no-c-format
+msgid "The parameter is logically associated with a particular servlet, but can be defined in the context as well."
+msgstr ""
+
+#. Tag: title
+#: chapter-application.xml:2041
+#, no-c-format
+msgid "UI Heartbeat"
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:2043
+#, no-c-format
+msgid "Vaadin follows UIs using a heartbeat, as explained in <xref linkend=\"application.lifecycle.ui-expiration\"/>. If the user closes the browser window of a Vaadin application or navigates to another page, the Client-Side Engine running in the page stops sending heartbeat to the server, and the server eventually cleans up the <classname>UI</classname> instance."
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:2052
+#, no-c-format
+msgid "The interval of the heartbeat requests can be specified in seconds with the <parameter>heartbeatInterval</parameter> parameter either as a context parameter for the entire web application or an init parameter for the individual servlet. The default value is 300 seconds (5 minutes)."
+msgstr ""
+
+#. Tag: programlisting
+#: chapter-application.xml:2064
+#, no-c-format
+msgid ""
+"<![CDATA[<context-param>\n"
+"  <param-name>heartbeatInterval</param-name>\n"
+"  <param-value>300</param-value>\n"
+"</context-param>]]>"
+msgstr ""
+
+#. Tag: title
+#: chapter-application.xml:2068
+#, no-c-format
+msgid "Session Timeout After User Inactivity"
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:2070
+#, no-c-format
+msgid "In normal servlet operation, the session timeout defines the allowed time of inactivity after which the server should clean up the session. The inactivity is measured from the last server request. Different servlet containers use varying defaults for timeouts, such as 30 minutes for Apache Tomcat. You can set the timeout under <literal>&lt;web-app&gt;</literal> with:"
+msgstr ""
+
+#. Tag: primary
+#: chapter-application.xml:2083
+#, no-c-format
+msgid "session-timeout"
+msgstr ""
+
+#. Tag: programlisting
+#: chapter-application.xml:2085
 #, no-c-format
 msgid ""
 "<![CDATA[<session-config>\n"
@@ -1777,8 +2296,122 @@ msgid ""
 "</session-config>]]>"
 msgstr ""
 
-#. Tag: para
-#: chapter-application.xml:1613
+#. Tag: primary
+#: chapter-application.xml:2088
 #, no-c-format
-msgid "After the timeout expires, the <methodname>close()</methodname> method of the <classname>Application</classname> class will be called. You should implement it if you wish to handle timeout situations."
+msgid "Out of Sync"
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:2088
+#, no-c-format
+msgid "The session timeout should be longer than the heartbeat interval or otherwise sessions are closed before the heartbeat can keep them alive. As the session expiration leaves the UIs in a state where they assume that the session still exists, this would cause an Out Of Sync error notification in the browser."
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:2099
+#, no-c-format
+msgid "However, having a shorter heartbeat interval than the session timeout, which is the normal case, prevents the sessions from expiring. If the <parameter>closeIdleSessions</parameter> parameter for the servlet is enabled (disabled by default), Vaadin closes the UIs and the session after the time specified in the <parameter>session-timeout</parameter> parameter expires after the last non-heartbeat request."
+msgstr ""
+
+#. Tag: programlisting
+#: chapter-application.xml:2112
+#, no-c-format
+msgid ""
+"&lt;servlet&gt;\n"
+"    ...\n"
+"    &lt;init-param&gt;\n"
+"      &lt;param-name&gt;closeIdleSessions&lt;/param-name&gt;\n"
+"      &lt;param-value&gt;true&lt;/param-value&gt;\n"
+"    &lt;/init-param&gt;"
+msgstr ""
+
+#. Tag: title
+#: chapter-application.xml:2117
+#, no-c-format
+msgid "Push Mode"
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:2119
+#, no-c-format
+msgid "You can enable server push, as described in <xref linkend=\"advanced.push\"/>, for a UI either with a <classname>@Push</classname> annotation for the UI or in the descriptor. The push mode is defined with a <parameter>pushmode</parameter> parameter. The <literal>automatic</literal> mode pushes changes to the browser automatically after <emphasis>access()</emphasis> finishes. With <literal>manual</literal> mode, you need to do the push explicitly with <methodname>push()</methodname>. If you use a Servlet 3.0 compatible server, you also want to enable asynchronous processing with the <literal>async-supported</literal> parameter."
+msgstr ""
+
+#. Tag: programlisting
+#: chapter-application.xml:2137
+#, no-c-format
+msgid ""
+"&lt;servlet&gt;\n"
+"  ...\n"
+"  &lt;init-param&gt;\n"
+"    &lt;param-name&gt;pushmode&lt;/param-name&gt;\n"
+"    &lt;param-value&gt;<emphasis role=\"bold\">automatic</emphasis>&lt;/param-value&gt;\n"
+"  &lt;/init-param&gt;\n"
+"  &lt;async-supported&gt;<emphasis role=\"bold\">true</emphasis>&lt;/async-supported&gt;"
+msgstr ""
+
+#. Tag: title
+#: chapter-application.xml:2142
+#, no-c-format
+msgid "Cross-Site Request Forgery Prevention"
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:2144
+#, no-c-format
+msgid "Vaadin uses a protection mechanism to prevent malicious cross-site request forgery (XSRF or CSRF), also called one-click attacks or session riding, which is a security exploit for executing unauthorized commands in a web server. This protection is normally enabled. However, it prevents some forms of testing of Vaadin applications, such as with JMeter. In such cases, you can disable the protection by setting the <parameter>disable-xsrf-protection</parameter> parameter to <literal>true</literal>."
+msgstr ""
+
+#. Tag: programlisting
+#: chapter-application.xml:2160
+#, no-c-format
+msgid ""
+"<![CDATA[<context-param>\n"
+"  <param-name>disable-xsrf-protection</param-name>\n"
+"  <param-value>true</param-value>\n"
+"</context-param>]]>"
+msgstr ""
+
+#. Tag: title
+#: chapter-application.xml:2165
+#, no-c-format
+msgid "Deployment Configuration"
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:2167
+#, no-c-format
+msgid "The Vaadin-specific parameters defined in the deployment configuration are available from the <classname>DeploymentConfiguration</classname> object managed by the <classname>VaadinSession</classname>."
+msgstr ""
+
+#. Tag: programlisting
+#: chapter-application.xml:2173
+#, no-c-format
+msgid ""
+"<![CDATA[DeploymentConfiguration conf =\n"
+"        getSession().getConfiguration();\n"
+"\n"
+"// Heartbeat interval in seconds\n"
+"int heartbeatInterval = conf.getHeartbeatInterval();]]>"
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:2175
+#, no-c-format
+msgid "Parameters defined in the Java Servlet definition, such as the session timeout, are available from the low-level <classname>HttpSession</classname> or <classname>PortletSession</classname> object, which are wrapped in a <classname>WrappedSession</classname> in Vaadin. You can access the low-level session wrapper with <methodname>getSession()</methodname> of the <classname>VaadinSession</classname>."
+msgstr ""
+
+#. Tag: programlisting
+#: chapter-application.xml:2185
+#, no-c-format
+msgid ""
+"<![CDATA[WrappedSession session = getSession().getSession();\n"
+"int sessionTimeout = session.getMaxInactiveInterval();]]>"
+msgstr ""
+
+#. Tag: para
+#: chapter-application.xml:2187
+#, no-c-format
+msgid "You can also access other <classname>HttpSession</classname> and <classname>PortletSession</classname> session properties through the interface, such as set and read session attributes that are shared by all servlets belonging to a particular servlet or portlet session."
 msgstr ""
