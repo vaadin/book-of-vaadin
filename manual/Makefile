@@ -12,7 +12,7 @@ JAVAPARS = -Xms256M -Xmx512M
 # Document language; this is the default, translations can override this.
 DBLANGUAGE = en
 
-PROFILE = profile.condition=print 
+PROFILE = profile.condition=print
 
 DBEXTRAPARS = l10n.gentext.language=$(DBLANGUAGE)
 
@@ -61,14 +61,17 @@ IMAGES =	intro/architecture intro/architecture-vaadin7 intro/toolchain \
 			portal/wsrp-architecture
 
 # List of source XML files
-XMLFILES = book-info.xml book-preface.xml book-vol1.xml book-vol2.xml \
+XMLFILES = book.xml book-info.xml book-preface.xml book-vol1.xml book-vol2.xml \
 	chapter-addons.xml	chapter-datamodel.xml	chapter-layout.xml	chapter-themes.xml \
 	chapter-advanced.xml	chapter-eclipse.xml	\
-	chapter-application.xml	chapter-getting-started.xml	chapter-mobile.xml \
-	chapter-architecture.xml	chapter-gwt.xml	chapter-vaadin.xml \
+	chapter-application.xml	chapter-getting-started.xml	\
+	chapter-architecture.xml	\
 	chapter-introduction.xml	chapter-sqlcontainer.xml \
 	chapter-components.xml	chapter-jpacontainer.xml \
-	chapter-testbench.xml chapter-portal.xml
+	chapter-portal.xml \
+	chapter-clientside.xml chapter-clientsideapp.xml chapter-widgets.xml chapter-gwt.xml \
+	chapter-addons.xml chapter-charts.xml chapter-mobile.xml chapter-testbench.xml \
+	chapter-vaadin.xml 
 
 
 # List if icons in img/icons
@@ -184,6 +187,19 @@ POTEXPORTS := $(foreach file, $(XMLFILES), $(patsubst %.xml, %.po, translations/
 
 pot: $(POTFILES) init-pot-exports $(POTEXPORTS)
 
+# Note that we have to use a modified version of xmlpo (sub-package in kdesdk) to
+# make it process <book-example> tags correctly.
+# 
+# 1. As root, get the build-deps and sources for the kdesdk:
+#    # apt-get build-dep poxml
+#    # apt-get source poxml
+#    # cd kdesdk-x.x.x
+# 2. Modify the poxml/parser.cpp by adding the "book-examples" tag in the
+#    "cuttingtags" array.
+# 3. Build the custom package:
+#    # dpkg-buildpackage -us -uc -nc
+# 4. Install the custom package with:
+#    # dpkg -i ../poxml-x.x.x.deb
 translations/pot/%.pot: %.xml
 	xml2pot $< | msgcat - --no-wrap > $@
 
@@ -192,6 +208,11 @@ init-pot-exports:
 
 translations/pot-exports/%.po: translations/pot/%.pot
 	cp $< $@
+
+i18n-clean: FORCE
+	rm -f translations/pot/*
+	rm -f translations/pot-exports/*
+	rmdir translations/pot-exports
 
 ################################################################################
 # Compile localizations

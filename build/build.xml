@@ -380,6 +380,10 @@
             <!-- The translated PO files to be fed as srcfiles -->
 			<fileset dir="${translation.staging.dir}">
 				<include name="book.po"/>
+				<!-- Zero size: <include name="book-info.po"/> -->
+				<include name="book-vol1.po"/>
+				<include name="book-vol2.po"/>
+				<include name="book-preface.po"/>
 				<include name="chapter*.po"/>
 			</fileset>
 
@@ -468,6 +472,7 @@
 			<param name="manual.language.extension" value="-fi"/>
         </antcall>
 
+        <!--
         <antcall target="build-imported-locale" inheritAll="false">
             <param name="locale" value="de_DE"/>
 			<param name="manual.language.docbook" value="de"/>
@@ -496,7 +501,6 @@
 			<param name="manual.language.extension" value="-cn"/>
         </antcall>
 
-        <!--
         <antcall target="build-imported-locale" inheritAll="false">
             <param name="locale" value="es_419"/>
 			<param name="manual.language.docbook" value="es"/>
@@ -536,6 +540,23 @@
             <arg value="${manual.publish.address}"/>
             <arg value="${manual.publish.script}"/>
         </exec>
+    </target>
+
+    <target name="filter-localized-docs" depends="init">
+        <property name="manual.translations.importzip" value="${result-path}/book-of-vaadin-gl.zip"/>
+        <property name="manual.translations.importdir" value="${result-path}/import"/>
+
+        <!-- Download -->
+        <exec executable="curl">
+            <arg value="--user"/>
+            <arg value="${getlocalization.username}:${getlocalization.password}"/>
+            <arg value="${getlocalization.url}"/>
+            <arg value="-o"/>
+            <arg value="${manual.translations.importzip}"/>
+        </exec>
+
+        <unzip src="${manual.translations.importzip}" dest="${manual.translations.importdir}"/>
+        https://www.getlocalization.com/[projekti]/api/profile/[username]/json/
     </target>
 
     <!-- =================================================================== -->
