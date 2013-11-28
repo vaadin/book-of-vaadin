@@ -201,13 +201,15 @@ pot: $(POTFILES) init-pot-exports $(POTEXPORTS)
 # 4. Install the custom package with:
 #    # dpkg -i ../poxml-x.x.x.deb
 translations/pot/%.pot: %.xml
-	xml2pot $< | msgcat - --no-wrap > $@
+	xml2pot $< > $@
+#	xml2pot $< | msgcat - --no-wrap > $@
 
 init-pot-exports:
 	mkdir -p translations/pot-exports
 
 translations/pot-exports/%.po: translations/pot/%.pot
 	cp $< $@
+	curl --form file=@$@ --user magi:kankeakala https://api.getlocalization.com/bookofvaadin7test/api/update-master/
 
 i18n-clean: FORCE
 	rm -f translations/pot/*

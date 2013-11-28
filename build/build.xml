@@ -363,6 +363,10 @@
 		<copy todir="${manual.source.dir}">
 			<fileset dir="manual">
 				<include name="book.xml"/>
+				<include name="book-info.xml"/>
+				<include name="book-vol1.xml"/>
+				<include name="book-vol2.xml"/>
+				<include name="book-preface.xml"/>
 				<include name="chapter*.xml"/>
 				<include name="*.dtd"/>
 				<include name="img/**/*.png"/>
@@ -399,50 +403,10 @@
 
 	<!-- Compile localized documentation stored in repository. -->
 	<target name="localized-docs">
-		<antcall target="manual-html">
+		<antcall target="manual-pdf">
 			<param name="locale" value="fi_FI"/>
 			<param name="manual.language.docbook" value="fi"/>
 			<param name="manual.language.extension" value="-fi"/>
-		</antcall>
-	</target>
-
-	<!-- Compile imported localized documentation. -->
-	<target name="build-imported-locale" depends="init">
-        <property name="translation.import.dir" value="${result-path}/import/${manual.language.docbook}${import.language.extension}"/>
-        <property name="translation.staging.dir" value="${result-path}/translation-staging/${locale}"/>
-
-        <echo>Translation import dir:  ${translation.import.dir}</echo>
-        <echo>Translation staging dir: ${translation.staging.dir}</echo>
-
-        <!-- Copy PO files from repository to the staging directory -->
-        <mkdir dir="${translation.staging.dir}"/>
-        <copy todir="${translation.staging.dir}" overwrite="yes" failonerror="no">
-            <fileset dir="manual/translations/${locale}">
-                <include name="*.po"/>
-            </fileset>
-        </copy>
-
-        <!-- Copy imported translations over the existing PO files  -->
-        <!--  * Remove locale from the filenames                    -->
-        <!--  * Unify different filename extensions to .po          -->
-        <copy todir="${translation.staging.dir}" overwrite="yes" failonerror="no">
-            <fileset dir="${translation.import.dir}">
-                <include name="*.po"/>
-            </fileset>
-            <globmapper from="*_${manual.language.docbook}${import.language.extension}.po" to="*.po"/>
-        </copy>
-        <copy todir="${translation.staging.dir}" overwrite="yes" failonerror="no">
-            <fileset dir="${translation.import.dir}">
-                <include name="*.pot"/>
-            </fileset>
-            <globmapper from="*_${manual.language.docbook}${import.language.extension}.pot" to="*.po"/>
-        </copy>
-
-		<antcall target="manual-html" inheritAll="false">
-			<param name="locale" value="${locale}"/>
-			<param name="manual.language.docbook" value="${manual.language.docbook}"/>
-			<param name="manual.language.extension" value="${manual.language.extension}"/>
-			<param name="translation.staging.dir" value="${translation.staging.dir}"/>
 		</antcall>
 	</target>
 
@@ -463,12 +427,83 @@
         <unzip src="${manual.translations.importzip}" dest="${manual.translations.importdir}"/>
     </target>
 
+    <!-- Stage imported locale to be built -->
+	<target name="stage-imported-locale" depends="init">
+        <property name="translation.import.dir" value="${result-path}/import/${manual.language.docbook}${import.language.extension}"/>
+        <property name="translation.staging.dir" value="${result-path}/translation-staging/${locale}"/>
+
+        <echo>Translation import dir:  ${translation.import.dir}</echo>
+        <echo>Translation staging dir: ${translation.staging.dir}</echo>
+
+        <mkdir dir="${translation.staging.dir}"/>
+
+        <!-- Copy PO files from repository to the staging directory -->
+        <!-- ...not, because we are going to merge them
+        <copy todir="${translation.staging.dir}" overwrite="yes" failonerror="no">
+            <fileset dir="manual/translations/${locale}">
+                <include name="*.po"/>
+            </fileset>
+        </copy>
+        -->
+
+        <!-- Copy imported translations over the existing PO files  -->
+        <!--  * Remove locale from the filenames                    -->
+        <!--  * Unify different filename extensions to .po          -->
+        <copy todir="${translation.staging.dir}" overwrite="yes" failonerror="no">
+            <fileset dir="${translation.import.dir}">
+                <include name="*.po"/>
+            </fileset>
+            <globmapper from="*_${manual.language.docbook}${import.language.extension}.po" to="*.po"/>
+        </copy>
+
+        <copy todir="${translation.staging.dir}" overwrite="yes" failonerror="no">
+            <fileset dir="${translation.import.dir}">
+                <include name="*.pot"/>
+            </fileset>
+            <globmapper from="*_${manual.language.docbook}${import.language.extension}.pot" to="*.po"/>
+        </copy>
+    </target>
+
+	<!-- Merge new strings in templates to an existing translation. -->
+	<target name="merge-imported-locale" depends="init,stage-imported-locale">
+        <apply executable="msgmerge">
+            <arg value="--no-wrap"/>
+            <arg value="-U"/>
+            <targetfile/>
+            <srcfile/>
+            <fileset dir="manual/translations/pot">
+                <include name="*.pot"/>
+            </fileset>
+            <globmapper from="*.pot" to="../${translation.staging.dir}/*.po"/>
+        </apply>
+    </target>
+
+	<!-- Compile imported localized documentation. -->
+	<target name="build-imported-locale" depends="init,stage-imported-locale,merge-imported-locale">
+		<antcall target="manual-html" inheritAll="false">
+			<param name="locale" value="${locale}"/>
+			<param name="manual.language.docbook" value="${manual.language.docbook}"/>
+			<param name="manual.language.extension" value="${manual.language.extension}"/>
+			<param name="translation.staging.dir" value="${translation.staging.dir}"/>
+		</antcall>
+	</target>
+
+    <target name="merge-all-localized-docs">
+        <!-- Run the build for each language. -->
+        <antcall target="merge-imported-locale" inheritAll="false">
+            <param name="locale" value="fi_FI"/>
+			<param name="manual.language.docbook" value="fi"/>
+			<param name="import.language.extension" value=""/>
+			<param name="manual.language.extension" value="-fi"/>
+        </antcall>
+    </target>
+
     <target name="build-all-localized-docs">
         <!-- Run the build for each language. -->
         <antcall target="build-imported-locale" inheritAll="false">
             <param name="locale" value="fi_FI"/>
 			<param name="manual.language.docbook" value="fi"/>
-			<param name="import.language.extension" value="-fi"/>
+			<param name="import.language.extension" value=""/>
 			<param name="manual.language.extension" value="-fi"/>
         </antcall>
 
@@ -556,7 +591,7 @@
         </exec>
 
         <unzip src="${manual.translations.importzip}" dest="${manual.translations.importdir}"/>
-        https://www.getlocalization.com/[projekti]/api/profile/[username]/json/
+        <!-- https://www.getlocalization.com/[projekti]/api/profile/[username]/json/ -->
     </target>
 
     <!-- =================================================================== -->
