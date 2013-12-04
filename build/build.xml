@@ -210,7 +210,9 @@
             <classpath refid="docbook-xsl.classpath" />
         </java>
 
-        <echo>PDF Manual: converting fo to pdf</echo>
+        <echo>PDF Manual: converting FO to PDF</echo>
+        <echo>Input: ${result-path}/book${manual.language.extension}.fo</echo>
+
         <!-- Run XEP FO processor to convert FO to PDF -->
         <java classname="com.renderx.xep.XSLDriver" error="${result-path}/xep-error.log" failonerror="yes" fork="yes" maxmemory="512m" input="${result-path}/book${manual.language.extension}.fo" output="${output-dir}/WebContent/docs/book-of-vaadin${manual.language.extension}${manual.fo.style}.pdf">
             <arg value="-Dcom.renderx.xep.CONFIG=${xep.config}" />
@@ -479,8 +481,15 @@
     </target>
 
 	<!-- Compile imported localized documentation. -->
-	<target name="build-imported-locale" depends="init,stage-imported-locale,merge-imported-locale">
+	<target name="build-imported-locale" depends="init, stage-imported-locale">
 		<antcall target="manual-html" inheritAll="false">
+			<param name="locale" value="${locale}"/>
+			<param name="manual.language.docbook" value="${manual.language.docbook}"/>
+			<param name="manual.language.extension" value="${manual.language.extension}"/>
+			<param name="translation.staging.dir" value="${translation.staging.dir}"/>
+		</antcall>
+
+		<antcall target="manual-pdf" inheritAll="false">
 			<param name="locale" value="${locale}"/>
 			<param name="manual.language.docbook" value="${manual.language.docbook}"/>
 			<param name="manual.language.extension" value="${manual.language.extension}"/>
