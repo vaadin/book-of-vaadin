@@ -194,10 +194,17 @@ pot: $(POTFILES) init-pot-exports $(POTEXPORTS)
 #    # apt-get build-dep poxml
 #    # apt-get source poxml
 #    # cd kdesdk-x.x.x
-# 2. Modify the poxml/parser.cpp by adding the "book-examples" tag in the
-#    "cuttingtags" array.
+#
+# 2. Modify the poxml/parser.cpp by adding the following tags in the
+#    "cuttingtags" array:
+#        "book-example",
+#        "info", "titleimage", "websitenotice", "publisher", "productname",
+#        "edition", "printer", "biblioid", "copyright", "legalnotice", "pubdate",
+#        "holder", "orgname", "address",
+#
 # 3. Build the custom package:
 #    # dpkg-buildpackage -us -uc -nc
+#
 # 4. Install the custom package with:
 #    # dpkg -i ../poxml-x.x.x.deb
 translations/pot/%.pot: %.xml

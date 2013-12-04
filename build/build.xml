@@ -214,8 +214,14 @@
         <echo>PDF Manual: converting FO to PDF</echo>
         <echo>Input: ${result-path}/book${manual.language.extension}.fo</echo>
 
-        <!-- Run XEP FO processor to convert FO to PDF -->
-        <java classname="com.renderx.xep.XSLDriver" error="${result-path}/xep-error.log" failonerror="yes" fork="yes" maxmemory="512m" input="${result-path}/book${manual.language.extension}.fo" output="${output-dir}/WebContent/docs/book-of-vaadin${manual.language.extension}${manual.fo.style}.pdf">
+        <!-- Run XEP FO processor to convert FO to PDF                  -->
+        <!-- The processor fails in some cases if not run in Java 5 JRE -->
+        <java classname="com.renderx.xep.XSLDriver"
+            error="${result-path}/xep-error.log"
+            failonerror="yes" fork="yes" maxmemory="512m"
+            jvm="${java5-home}/bin/java"
+            input="${result-path}/book${manual.language.extension}.fo"
+            output="${output-dir}/WebContent/docs/book-of-vaadin${manual.language.extension}${manual.fo.style}.pdf">
             <arg value="-Dcom.renderx.xep.CONFIG=${xep.config}" />
             <classpath>
                 <pathelement location="build/lib/XEP/lib/tools.jar" />
@@ -387,7 +393,7 @@
             <!-- The translated PO files to be fed as srcfiles -->
 			<fileset dir="${translation.staging.dir}">
 				<include name="book.po"/>
-				<!-- Zero size: <include name="book-info.po"/> -->
+				<include name="book-info.po"/>
 				<include name="book-vol1.po"/>
 				<include name="book-vol2.po"/>
 				<include name="book-preface.po"/>
@@ -567,8 +573,10 @@
         
         <!-- Package all translations -->
         <zip zipfile="${manual.translations.zip}"
-             basedir="${result-path}/package/WebContent/docs/"
-             includes="book-??/**/*"/>
+             basedir="${result-path}/package/WebContent/docs/">
+           <include name="book-??/**/*"/>
+           <include name="book-*.pdf"/>
+        </zip>
 
         <!-- Publish to download site -->
         <!-- Copy the linux installation package and the JAR. -->
