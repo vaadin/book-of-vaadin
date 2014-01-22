@@ -704,9 +704,10 @@ layout.addComponent(ok);]]></programlisting>
 
             <para>
                 You can set the locale of a component (or the application) with
-                <methodname>setLocale()</methodname>.
+                <methodname>setLocale()</methodname> as follows:
             </para>
 
+            <book-example id="component.features.locale.simple"></book-example>
             <programlisting><?pocket-size 65% ?><![CDATA[// Component for which the locale is meaningful
 InlineDateField date = new InlineDateField("Datum");
         
@@ -714,7 +715,7 @@ InlineDateField date = new InlineDateField("Datum");
 // code and ISO 3166-1 alpha-2 country code. 
 date.setLocale(new Locale("de", "DE"));
         
-date.setResolution(DateField.Resolution.DAY);
+date.setResolution(Resolution.DAY);
 layout.addComponent(date);]]></programlisting>
 
             <para>
@@ -734,59 +735,70 @@ layout.addComponent(date);]]></programlisting>
 				</mediaobject>
 			</figure>
 
-            <para>
-                <indexterm><primary><methodname>getLocale()</methodname></primary></indexterm>
+            <simplesect xml:id="components.features.locale.get" condition="web">
+                <title>Getting the Locale</title>
 
-                You can get the locale of a component with
-                <methodname>getLocale()</methodname>. If the locale is undefined for a
-                component, that is, not explicitly set, the locale of the parent component
-                is used. If none of the parent components have a locale set, the locale of
-                the application is used, and if that is not set, the default system locale
-                is set, as given by <methodname>Locale.getDefault()</methodname>.
-            </para>
+                <para>
+                    <indexterm><primary><methodname>getLocale()</methodname></primary></indexterm>
 
-            <para>
-                Because of the requirement that the component must be attached to the
-                application, it is awkward to use <methodname>getLocale()</methodname> for
-                internationalization. You can not use it in the constructor, so you would
-                have to get the locale in <methodname>attach()</methodname> as shown in
-                the following example:
-            </para>
+                    You can get the locale of a component with
+                    <methodname>getLocale()</methodname>. If the locale is undefined for a
+                    component, that is, not explicitly set, the locale of the parent
+                    component is used. If none of the parent components have a locale set,
+                    the locale of the UI is used, and if that is not set, the default
+                    system locale is set, as given by
+                    <methodname>Locale.getDefault()</methodname>.
+                </para>
 
-            <programlisting><?pocket-size 65% ?><![CDATA[Button cancel = new Button() {
+                <para>
+                    The <methodname>getLocale()</methodname> returns null if the component
+                    is not yet attached to the UI, which is usually the case in most
+                    constructors, so it is a bit awkward to use it for
+                    internationalization. You can get the locale in
+                    <methodname>attach()</methodname>, as shown in the following example:
+                </para>
+
+                <book-example id="component.features.locale.get-attach"></book-example>
+                <programlisting><?pocket-size 65% ?><![CDATA[Button cancel = new Button() {
     @Override
     public void attach() {
+        super.attach();
         ResourceBundle bundle = ResourceBundle.getBundle(
-                MyAppCaptions.class.getName(), getLocale());
-        setCaption(bundle.getString("CancelKey"));
+            MyAppCaptions.class.getName(), getLocale());
+        setCaption(bundle.getString(MyAppCaptions.CancelKey));
     }
 };
 layout.addComponent(cancel);]]></programlisting>
 
-            <para>
-                It is normally a better practice to get the locale from an
-                application-global parameter and use it to get the localized resource
-                right when the component is created.
-            </para>
+                <para>
+                    However, it is normally a better practice to use the locale of the
+                    current UI to get the localized resource right when the component is
+                    created.
+                </para>
 
-            <programlisting><?pocket-size 65% ?><![CDATA[// Captions are stored in MyAppCaptions resource bundle
-// and the application object is known in this context.
+                <book-example id="component.features.locale.get-ui"></book-example>
+                <programlisting><?pocket-size 65% ?><![CDATA[// Captions are stored in MyAppCaptions resource bundle
+// and the UI object is known in this context.
 ResourceBundle bundle =
     ResourceBundle.getBundle(MyAppCaptions.class.getName(),
-                             getApplication().getLocale());
+        UI.getCurrent().getLocale());
         
 // Get a localized resource from the bundle
-Button cancel = new Button(bundle.getString("CancelKey"));
+Button cancel =
+    new Button(bundle.getString(MyAppCaptions.CancelKey));
 layout.addComponent(cancel);]]></programlisting>
+            </simplesect>
 
-            <simplesect condition="web">
+            <simplesect xml:id="component.features.locale.selecting" condition="web">
                 <title>Selecting a Locale</title>
 
                 <para>
                     A common task in many applications is selecting a locale. This is done
-                    in the following example with a <classname>Select</classname> component.
+                    in the following example with a <classname>ComboBox</classname>, which
+                    gets the available locales in Java.
                 </para>
 
+                <book-example id="component.features.locale.selection"></book-example>
                 <programlisting><?pocket-size 65% ?><![CDATA[// The locale in which we want to have the language
 // selection list
 Locale displayLocale = Locale.ENGLISH;
@@ -799,9 +811,10 @@ final Locale[] locales = Locale.getAvailableLocales();
 // language of the application can not be done before
 // this (and the selection) component are attached to
 // the application.
-final Select select = new Select("Select a language") {
+final ComboBox select = new ComboBox("Select a language") {
     @Override
     public void attach() {
+        super.attach();
         setValue(getLocale());
     }
 };
@@ -823,7 +836,7 @@ layout.addComponent(localeCode);
 // A date field which language the selection will change
 final InlineDateField date =
     new InlineDateField("Calendar in the selected language");
-date.setResolution(DateField.Resolution.DAY);
+date.setResolution(Resolution.DAY);
 layout.addComponent(date);
         
 // Handle language selection
@@ -998,15 +1011,15 @@ layout.addComponent(label);]]></programlisting>
 
             <para>
                 The style name will appear in the component's HTML element in two forms:
-                literally as given and prefixed with the component class specific style
+                literally as given and prefixed with the component-specific style
                 name. For example, if you add a style name <literal>mystyle</literal> to a
                 <classname>Button</classname>, the component would get both
                 <literal>mystyle</literal> and <literal>v-button-mystyle</literal>
                 styles. Neither form may conflict with built-in style names of Vaadin. For
                 example, <literal>focus</literal> style would conflict with a built-in
-                style of the same name, and an <literal>option</literal> style for a
-                <classname>Select</classname> component would conflict with the built-in
-                <literal>v-select-option</literal> style.
+                style of the same name, and an <literal>content</literal> style for a
+                <classname>Panel</classname> component would conflict with the built-in
+                <literal>v-panel-content</literal> style.
             </para>
 
             <para>
@@ -3622,19 +3635,10 @@ checkbox2.addValueChangeListener(new ValueChangeListener() {
 
         <variablelist>
             <varlistentry>
-                <term><classname>Select</classname></term>
-                <listitem>
-                    In single selection mode, a drop-down list with a text input area,
-                    which the user can use to filter the displayed items. In multiselect
-                    mode, a list box equivalent to <classname>ListSelect</classname>.
-                </listitem>
-            </varlistentry>
-            <varlistentry>
                 <term><classname>ComboBox</classname></term>
                 <listitem>
-                    A drop-down list for single selection. Otherwise as
-                    <classname>Select</classname>, but the user can also enter new
-                    items. The component also provides an input prompt.
+                    A drop-down list for single selection. The component also provides an
+                    input prompt and the user can enter new items.
                 </listitem>
             </varlistentry>
             <varlistentry>
@@ -3671,9 +3675,9 @@ checkbox2.addValueChangeListener(new ValueChangeListener() {
         </variablelist>
 
 		<para>
-			In addition, the <classname>Tree</classname> and <classname>Table</classname>
-			components allow special forms of selection. They also inherit the
-			<classname>AbstractSelect</classname>.
+			In addition, the <classname>Tree</classname>, <classname>Table</classname>,
+			and <classname>TreeTable</classname> components allow special forms of
+			selection. They also inherit the <classname>AbstractSelect</classname>.
 		</para>
 
         <section xml:id="components.selecting.databinding">
@@ -3708,9 +3712,9 @@ checkbox2.addValueChangeListener(new ValueChangeListener() {
                 </para>
 
                 <programlisting><![CDATA[// Create a selection component
-Select select = new Select ("Select something here");
+ComboBox select = new ComboBox("My ComboBox");
 
-// Add some items and give each an item ID
+// Add items with given item IDs
 select.addItem("Mercury");
 select.addItem("Venus");
 select.addItem("Earth");]]></programlisting>
@@ -3718,17 +3722,24 @@ select.addItem("Earth");]]></programlisting>
                 <para>
                     The <methodname>addItem()</methodname> method creates an empty
                     <classname>Item</classname>, which is identified by its <emphasis>item
-                    identifier</emphasis> (IID) object, given as the parameter. This item ID
-                    is by default used also as the caption of the item, as explained in
-                    the next section. The identifier is typically a
-                    <classname>String</classname>. The item is of a type specific to the
-                    container and has itself little relevance for most selection
-                    components, as the properties of an item may not be used in any way
-                    (except in <classname>Table</classname>), only the item ID.
+                    identifier</emphasis> (IID) object, given as the parameter. This item
+                    ID is by default used also as the caption of the item, as described in
+                    more detail later.
                 </para>
 
                 <para>
-                    The item identifier can be of any object type. We could as well have
+                    We emphasize that <methodname>addItem()</methodname> is a factory
+                    method that <emphasis>takes an item ID, not the actual item</emphasis>
+                    as the parameter - the item is returned by the method. The item is of
+                    a type that is specific to the container and has itself little
+                    relevance for most selection components, as the properties of an item
+                    may not be used in any way (except in <classname>Table</classname>),
+                    only the item ID.
+                </para>
+
+                <para>
+                    The item identifier is typically a string, in which case it can be
+                    used as the caption, but can be any object type. We could as well have
                     given integers for the item identifiers and set the captions
                     explicitly with <methodname>setItemCaption()</methodname>. You could
                     also add an item with the parameterless
@@ -3737,12 +3748,12 @@ select.addItem("Earth");]]></programlisting>
                 </para>
 
                 <programlisting><?pocket-size 65% ?><![CDATA[// Create a selection component
-Select select = new Select("My Select");
-        
+ComboBox select = new ComboBox("My Select");
+
 // Add an item with a generated ID
 Object itemId = select.addItem();
 select.setItemCaption(itemId, "The Sun");
-        
+
 // Select the item
 select.setValue(itemId);]]></programlisting>
 
@@ -3769,12 +3780,13 @@ select.setValue(itemId);]]></programlisting>
                 <para>
                     The displayed captions of items in a selection component can be set
                     explicitly with <methodname>setItemCaption()</methodname> or
-                    determined from the item IDs or item properties. This behaviour is
-                    defined with the <emphasis>caption mode</emphasis>, which you can set
-                    with <methodname>setItemCaptionMode()</methodname>. The default mode
-                    is <parameter>ITEM_CAPTION_MODE_EXPLICIT_DEFAULTS_ID</parameter>,
-                    which uses the item identifiers for the captions, unless given
-                    explicitly.
+                    determined from the item IDs or item properties. The caption
+                    determination is defined with the <emphasis>caption mode</emphasis>,
+                    any of the modes in the
+                    <classname>AbstractSelect.ItemCaptionMode</classname> enum, which you
+                    can set with <methodname>setItemCaptionMode()</methodname>. The
+                    default mode is <parameter>EXPLICIT_DEFAULTS_ID</parameter>, which
+                    uses the item identifiers for the captions, unless given explicitly.
                 </para>
 
                 <para>
@@ -3799,11 +3811,13 @@ select.setValue(itemId);]]></programlisting>
                                 the item identifier.
                             </para>
 
-                            <programlisting><?pocket-size 65% ?><![CDATA[Select select = new Select("Moons of Mars");
-        
+                            <programlisting><?pocket-size 65% ?><![CDATA[// Create a selection component
+ComboBox select = new ComboBox("Moons of Mars");
+select.setItemCaptionMode(ItemCaptionMode.EXPLICIT_DEFAULTS_ID);
+
 // Use the item ID also as the caption of this item
 select.addItem(new Integer(1));
-        
+
 // Set item caption for this item explicitly
 select.addItem(2); // same as "new Integer(2)"
 select.setItemCaption(2, "Deimos");]]></programlisting>
@@ -3817,9 +3831,9 @@ select.setItemCaption(2, "Deimos");]]></programlisting>
                                 Captions must be explicitly specified with
                                 <methodname>setItemCaption()</methodname>. If they are
                                 not, the caption will be empty. Such items with empty
-                                captions will nevertheless be displayed in the
-                                <classname>Select</classname> component as empty items. If
-                                they have an icon, they will be visible.
+                                captions will nevertheless be displayed in the selection
+                                component as empty items. If they have an icon, they will
+                                be visible.
                             </para>
                         </listitem>
                     </varlistentry>
@@ -3841,11 +3855,13 @@ select.setItemCaption(2, "Deimos");]]></programlisting>
                                 that has a string representation. For example:
                             </para>
                             
-                            <programlisting><?pocket-size 70% ?><![CDATA[Select select = new Select("Inner Planets");
-select.setItemCaptionMode(Select.ITEM_CAPTION_MODE_ID);
-        
+                            <programlisting><?pocket-size 70% ?><![CDATA[ComboBox select = new ComboBox("Inner Planets");
+select.setItemCaptionMode(ItemCaptionMode.ID);
+
 // A class that implements toString()
 class PlanetId extends Object implements Serializable {
+    private static final long serialVersionUID = -7452707902301121901L;
+
     String planetName;
     PlanetId (String name) {
         planetName = name;
@@ -3870,7 +3886,7 @@ for (int i=0; i<planets.length; i++)
                                 <classname>Container.Indexed</classname> interface. If the
                                 interface is not available, the component will throw a
                                 <classname>ClassCastException</classname>. The
-                                <classname>Select</classname> component itself does not implement
+                                <classname>AbstractSelect</classname> itself does not implement
                                 this interface, so the mode is not usable without a separate data
                                 source. An <classname>IndexedContainer</classname>, for example,
                                 would work.
@@ -3886,7 +3902,7 @@ for (int i=0; i<planets.length; i++)
                                 caption. This is applicable mainly when using a custom
                                 <classname>Item</classname> class, which also requires using a
                                 custom <classname>Container</classname> that is used as a data
-                                source for the <classname>Select</classname> component.
+                                source for the selection component.
                             </para>
                         </listitem>
                     </varlistentry>
@@ -3898,7 +3914,7 @@ for (int i=0; i<planets.length; i++)
                                 representation of the property with the identifier specified with
                                 <methodname>setItemCaptionPropertyId()</methodname>. This is
                                 useful, for example, when you have a container that you use as the
-                                data source for a <classname>Select</classname>, and you want to
+                                data source for the selection component, and you want to
                                 use a specific property for caption.
                             </para>
                             
@@ -3924,37 +3940,32 @@ public class Planet implements Serializable {
     }
 }
 
-void propertyModeExample() {
-    VerticalLayout layout = new VerticalLayout();
-
+void propertyModeExample(VerticalLayout layout) {
     // Have a bean container to put the beans in
     BeanItemContainer<Planet> container =
         new BeanItemContainer<Planet>(Planet.class);
 
     // Put some example data in it
-    container.addItem(new Planet("Mercury"));
-    container.addItem(new Planet("Venus"));
-    container.addItem(new Planet("Earth"));
-    container.addItem(new Planet("Mars"));
+    container.addItem(new Planet(1, "Mercury"));
+    container.addItem(new Planet(2, "Venus"));
+    container.addItem(new Planet(3, "Earth"));
+    container.addItem(new Planet(4, "Mars"));
 
     // Create a selection component bound to the container
-    Select select = new Select("Planets", container);
+    ComboBox select = new ComboBox("Planets", container);
 
     // Set the caption mode to read the caption directly
     // from the 'name' property of the bean
-    select.setItemCaptionMode(
-            Select.ITEM_CAPTION_MODE_PROPERTY);
+    select.setItemCaptionMode(ItemCaptionMode.PROPERTY);
     select.setItemCaptionPropertyId("name");
 
-    layout.addComponent(select);]]></programlisting>
-
+    ...]]></programlisting>
                         </listitem>
                     </varlistentry>
                 </variablelist>
             </section>
 
-
-            <section>
+            <section xml:id="components.selecting.databinding.getset">
                 <title>Getting and Setting Selection</title>
 
                 <para>
@@ -3974,8 +3985,8 @@ void propertyModeExample() {
                 </para>
 
                 <para>
-                    The <classname>Select</classname> and <classname>NativeSelect</classname>
-                    components will show "-" selection when no actual item is selected. This is
+                    The <classname>ComboBox</classname> and <classname>NativeSelect</classname>
+                    will show empty selection when no actual item is selected. This is
                     the <emphasis>null selection item identifier</emphasis>. You can set an
                     alternative ID with <methodname>setNullSelectionItemId()</methodname>. Setting
                     the alternative null ID is merely a visual text; the
@@ -3986,13 +3997,13 @@ void propertyModeExample() {
 
                 <para>
                     The item identifier of the currently selected item will be set as the
-                    property of the <classname>Select</classname> object. You can
-                    access it with the <methodname>getValue()</methodname> method of the
-                    <classname>Property</classname> interface of the component. Also,
-                    when handling changes in a <classname>Select</classname> component
-                    with the <classname>Property.ValueChangeListener</classname>
-                    interface, the <classname>Property.ValueChangeEvent</classname> will
-                    have the selected item as the property of the event, accessible with the
+                    property of the selection component. You can access it with the
+                    <methodname>getValue()</methodname> method of the
+                    <classname>Property</classname> interface of the component. Also, when
+                    handling selection changes with a
+                    <classname>Property.ValueChangeListener</classname>, the
+                    <classname>ValueChangeEvent</classname> will have the selected item as
+                    the property of the event, accessible with the
                     <methodname>getProperty()</methodname> method.
                 </para>
 
@@ -4015,24 +4026,18 @@ void propertyModeExample() {
 		"Show text only", "Show icons only", and "Show both icons and text".
 		</para>-->
 
-        <!-- TODO Select is no more, replace with ComboBox. -->
-		<section xml:id="components.selecting.select">
-			<title>Basic <classname>Select</classname> Component</title>
+		<section xml:id="components.selecting.combobox">
+			<title><classname>ComboBox</classname></title>
 
 			<para>
-				The <classname>Select</classname> component allows, in single selection
-				mode, selecting an item from a drop-down list. The component also has a
-				text field area, which allows entering search text by which the items
-				shown in the drop-down list are filtered.
+				The <classname>ComboBox</classname> component allows selecting an item
+				from a drop-down list. The component also has a text field area, which
+				allows entering search text by which the items shown in the drop-down list
+				are filtered.
 			</para>
 
-            <para>
-                In multiple selection mode, the component shows the items in a vertical
-                list box, identical to <classname>ListSelect</classname>.
-            </para>
-
 			<figure>
-				<title>The Select Component</title>
+				<title>The <classname>ComboBox</classname> Component</title>
 				<mediaobject>
 					<imageobject>
 						<imagedata smallscale="130" align="center" fileref="img/components/select-select.png"/>
@@ -4040,56 +4045,79 @@ void propertyModeExample() {
 				</mediaobject>
 			</figure>
 
-			<section>
+			<section xml:id="components.selecting.combobox.filtering">
 				<title>Filtered Selection</title>
 				
 				<para>
-					The <classname>Select</classname> component allows filtering the items
-					available for selection. The component shows as an input box for
-					entering text. The text entered in the input box is used for filtering
-					the available items shown in a drop-down list. Pressing
-					<keycap>Enter</keycap> will complete the item in the input
-					box. Pressing <keycap>Up</keycap>- and <keycap>Down</keycap>-arrows
-					can be used for selecting an item from the drop-down list. The
-					drop-down list is paged and clicking on the scroll buttons will change
-					to the next or previous page. The list selection can also be done with
-					the arrow keys on the keyboard. The shown items are loaded from the
-					server as needed, so the number of items held in the component can be
-					quite large.
+					<classname>ComboBox</classname> allows filtering the items available
+					for selection in the drop-down list by the text entered in the input
+					box. Pressing <keycap>Enter</keycap> will complete the item in the
+					input box. Pressing <keycap>Up</keycap>- and
+					<keycap>Down</keycap>-arrows can be used for selecting an item from
+					the drop-down list. The drop-down list is paged and clicking on the
+					scroll buttons will change to the next or previous page. The list
+					selection can also be done with the arrow keys on the keyboard. The
+					shown items are loaded from the server as needed, so the number of
+					items held in the component can be quite large.
 				</para>
 			
 				<para>
-					Vaadin provides two filtering modes:
-					<parameter>FILTERINGMODE_CONTAINS</parameter> matches any item that
-					contains the string given in the text field part of the component and
-					<parameter>FILTERINGMODE_STARTSWITH</parameter> matches only items
-					that begin with the given string. The filtering mode is set with
-					<methodname>setFilteringMode()</methodname>. Setting the filtering
-					mode to the default value <parameter>FILTERINGMODE_OFF</parameter>
-					disables filtering.
-				</para>
+					The filtering is done according to the the <emphasis>filtering
+					mode</emphasis> defined in the <classname>FilteringMode</classname>
+					enum. They are as follows:
+                </para>
 
-                <programlisting><?pocket-size 65% ?><![CDATA[Select select = new Select("Enter containing substring");
+                <variablelist>
+                    <varlistentry>
+                        <term><parameter>CONTAINS</parameter></term>
+                        <listitem>
+                            <para>
+                                Matches any item that contains the string given in the
+                                text field part of the component.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><parameter>STARTSWITH</parameter></term>
+                        <listitem>
+                            <para>
+                                Matches only items that begin with the given string.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><parameter>OFF</parameter> (default)</term>
+                        <listitem>
+                            <para>
+                                Filtering is by default off.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                </variablelist>
 
-select.setFilteringMode(AbstractSelect.Filtering.FILTERINGMODE_CONTAINS);
+                <book-example id="component.select.combobox.filtering"></book-example>
+                <programlisting><?pocket-size 65% ?><![CDATA[ComboBox combobox = new ComboBox("Enter containing substring");
 
-/* Fill the component with some items. */
+// Set the filtering mode
+combobox.setFilteringMode(FilteringMode.CONTAINS);
+
+// Fill the component with some items
 final String[] planets = new String[] {
         "Mercury", "Venus", "Earth", "Mars",
         "Jupiter", "Saturn", "Uranus", "Neptune" };
-
 for (int i = 0; i < planets.length; i++)
     for (int j = 0; j < planets.length; j++) {
-        select.addItem(planets[j] + " to " + planets[i]);]]></programlisting>
+        combobox.addItem(planets[j] + " to " + planets[i]);]]></programlisting>
 
 				<para>
 					The above example uses the containment filter that matches to all
 					items containing the input string. As shown in <xref
-					linkend="figure.select.filter"/> below, when we type some text in the
-					input area, the drop-down list will show all the matching items.
+					linkend="figure.components.selecting.combobox.filter"/> below, when we
+					type some text in the input area, the drop-down list will show all the
+					matching items.
 				</para>
 
-				<figure xml:id="figure.select.filter">
+				<figure xml:id="figure.components.selecting.combobox.filter">
 					<title>Filtered Selection</title>
 					<mediaobject>
 						<imageobject>
@@ -4099,7 +4127,7 @@ for (int i = 0; i < planets.length; i++)
 				</figure>
             </section>
 					
-            <simplesect>
+            <simplesect xml:id="components.selecting.combobox.css">
                 <title>CSS Style Rules</title>
                 
                 <programlisting><![CDATA[.v-filterselect { }
@@ -4114,11 +4142,12 @@ for (int i = 0; i < planets.length; i++)
 					
                 <para>
                     In its default state, only the input field of the
-                    <classname>Select</classname> component is visible. The entire
-                    component is enclosed in <literal>v-filterselect</literal> style, the
-                    input field has <literal>v-filterselect-input</literal> style and the
-                    button in the right end that opens and closes the drop-down result
-                    list has <literal>v-filterselect-button</literal> style.
+                    <classname>ComboBox</classname> component is visible. The entire
+                    component is enclosed in <literal>v-filterselect</literal> style (a
+                    legacy remnant), the input field has
+                    <literal>v-filterselect-input</literal> style and the button in the
+                    right end that opens and closes the drop-down result list has
+                    <literal>v-filterselect-button</literal> style.
                 </para>
 
                 <para>
@@ -4130,13 +4159,6 @@ for (int i = 0; i < planets.length; i++)
                     suggestions is padded with an area with
                     <literal>v-filterselect-prefpage-off</literal> style above and below
                     the list.
-                </para>
-
-                <para>
-                    In multiselect-mode, the styles of the component aere identical to
-                    <classname>ListSelect</classname> component, with
-                    <literal>v-select</literal> overall style and
-                    <literal>v-select-select</literal> for the native selection element.
                 </para>
             </simplesect>
         </section>
@@ -4186,10 +4208,11 @@ select.setRows(5);]]></programlisting>
 				<title>CSS Style Rules</title>
 				
 				<programlisting><![CDATA[.v-select {}
-.v-select-select {}]]></programlisting>
+  .v-select-select {}
+    option {}]]></programlisting>
 
 				<para>
-					The component has a <literal>v-select</literal> overall style. The
+					The component has an overall <literal>v-select</literal> style. The
 					native <literal>select</literal> element has
 					<literal>v-select-select</literal> style.
 				</para>
@@ -4200,9 +4223,9 @@ select.setRows(5);]]></programlisting>
 			<title>Native Selection Component <classname>NativeSelect</classname></title>
 			
 			<para>
-				<classname>NativeSelect</classname> offers the native selection component
-				of web browsers, using the HTML <literal>&lt;select&gt;</literal>
-				element. The component is shown as a drop-down list.
+				<classname>NativeSelect</classname> is a drop-down selection component
+				implemented with the native selection input of web browsers, using the
+				HTML <literal>&lt;select&gt;</literal> element.
 			</para>
 
             <programlisting><?pocket-size 65% ?><![CDATA[// Create the selection component
@@ -4243,7 +4266,7 @@ select.setNullSelectionAllowed(false);]]></programlisting>
 				<title>CSS Style Rules</title>
 				
 				<programlisting><![CDATA[.v-select {}
-.v-select-select {}]]></programlisting>
+  .v-select-select {}]]></programlisting>
 
 				<para>
 					The component has a <literal>v-select</literal> overall style. The
@@ -4514,19 +4537,17 @@ select.setRows(planets.length);]]></programlisting>
 
             <para>
                 The user interface for adding new items depends on the selection component
-                and the selection mode. The regular <classname>Select</classname>
-                component in single selection mode, which appears as a combo box, allows
-                you to simply type the new item in the combo box and hit
-                <keycap>Enter</keycap> to add it. In most other selection components, as
-                well as in the multiple selection mode of the regular
-                <classname>Select</classname> component, a text field that allows entering
-                new items is shown below the selection list, and clicking the
-                <guibutton>+</guibutton> button will add the item in the list, as
-                illustrated in <xref linkend="figure.components.selecting.newitems"/>.
+                and the selection mode. The regular <classname>ComboBox</classname>
+                component allows you to simply type the new item in the combo box and hit
+                <keycap>Enter</keycap> to add it. In most other selection components, a
+                text field that allows entering new items is shown below the selection
+                list, and clicking the <guibutton>+</guibutton> button will add the item
+                in the list, as illustrated in <xref
+                linkend="figure.components.selecting.newitems"/>.
             </para>
 
 			<figure xml:id="figure.components.selecting.newitems">
-				<title>Select Component with Adding New Items Allowed</title>
+				<title>ComboBox with Adding New Items Allowed</title>
 				<mediaobject>
 					<imageobject>
 						<imagedata smallscale="120" align="center" fileref="img/components/select-addnewitems.png"/>
@@ -4542,64 +4563,32 @@ select.setRows(planets.length);]]></programlisting>
 			</para>
 
 			<para>
-				Adding new items is possible in both single and multiple
-				selection modes and in all styles. Adding new items may not be
-				possible if the <classname>Select</classname> is bound to an
-				external <classname>Container</classname> that does not allow
-				adding new items.
+				Adding new items may not be possible if the
+				<classname>ComboBox</classname> is bound to an external
+				<classname>Container</classname> that does not allow adding new items.
 			</para>
 		</section>
 
 		<section xml:id="components.selecting.multiple">
-			<title>Multiple Selection Mode</title>
+			<title>Multiple Selection</title>
 
 			<!-- UNFINISHED: Check if outdated. -->
 			
 			<para>
-				Setting the <classname>Select</classname>,
-				<classname>NativeSelect</classname>, or <classname>OptionGroup</classname>
-				components to multiple selection mode with the
-				<methodname>setMultiSelect()</methodname> method changes their appearance
-				to allow selecting multiple items.
+                Some selection components, such as <classname>OptionGroup</classname> and
+                <classname>ListSelect</classname> support a multiple selection mode, which
+                you can enable with <methodname>setMultiSelect()</methodname>. For
+                <classname>TwinColSelect</classname>, which is especially intended for
+                multiple selection, it is enabled by default.
 			</para>
-
-            <variablelist>
-                <varlistentry>
-                    <term><classname>Select</classname> and <classname>NativeSelect</classname></term>
-                    <listitem>
-                        <para>
-                            These components appear as a native HTML selection list, as
-                            shown in <xref
-                            linkend="figure.components.selecting.newitems"/>. By holding
-                            the <keycap>Ctrl</keycap> or <keycap>Shift</keycap> key
-                            pressed, the user can select multiple items.
-                        </para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term><classname>OptionGroup</classname></term>
-                    <listitem>
-                        The option group, which is a radio button group in single
-                        selection mode, will show as a check box group in multiple
-                        selection mode. See <xref
-                        linkend="components.selecting.optiongroup"/>.
-                    </listitem>
-                </varlistentry>
-            </variablelist>
-
-			<para>
-                The <classname>TwinColSelect</classname>, described in <xref
-                linkend="components.selecting.twincolselect"/>, is a special multiple
-                selection mode that is not meaningful for single selection.
-            </para>
 
 			<programlisting><![CDATA[myselect.setMultiSelect(true);]]></programlisting>
 
 			<para>
-				As in single selection mode, the selected items are set as the property of
-				the <classname>Select</classname> object. In multiple selection mode, the
-				property is a <classname>Collection</classname> of currently selected
-				items. You can get and set the property with the
+				As in single selection mode, the property value of the component indicates
+				the selection. In multiple selection mode, however, the property value is
+				a <classname>Collection</classname> of the item IDs of the currently
+				selected items. You can get and set the property with the
 				<methodname>getValue()</methodname> and
 				<methodname>setValue()</methodname> methods as usual.
 			</para>
@@ -4613,45 +4602,27 @@ select.setRows(planets.length);]]></programlisting>
                 shows how to handle selection changes with a listener.
 			</para>
 
-            <programlisting><?pocket-size 65% ?><![CDATA[public class SelectExample
-           extends CustomComponent
-           implements Property.ValueChangeListener {
-    // Create a Select object with a caption.
-    Select select = new Select("This is a Select component");
+            <!-- TODO Check this example -->
+            <programlisting><?pocket-size 65% ?><![CDATA[// A selection component with some items
+ListSelect select = new ListSelect("My Selection");
+for (String planet: new String[]{"Mercury", "Venus",
+        "Earth", "Mars", "Jupiter", "Saturn", "Uranus",
+        "Neptune"})
+    select.addItem(planet);
 
-    VerticalLayout layout = new VerticalLayout();
-    Label status = new Label("-");
-    
-    SelectExample () {
-        setCompositionRoot (layout);
-        layout.addComponent(select);
+// Multiple selection mode
+select.setMultiSelect(true);
 
-        // Fill the component with some items.
-        final String[] planets = new String[] {
-            "Mercury", "Venus", "Earth", "Mars",
-            "Jupiter", "Saturn", "Uranus", "Neptune"};
-        for (int i=0; i<planets.length; i++)
-            select.addItem(planets[i]);
-
-        // By default, the change event is not triggered
-        // immediately when the selection changes.
-        // This enables the immediate events.
-        select.setImmediate(true);
-        
-        // Listen for changes in the selection.
-        select.addValueChangeListener(this);
-
-        layout.addComponent(status);
+// Feedback on value changes
+select.addValueChangeListener(
+    new Property.ValueChangeListener() {
+    public void valueChange(ValueChangeEvent event) {
+        // Some feedback
+        layout.addComponent(new Label("Selected: " +
+            event.getProperty().getValue().toString()));
     }
-
-    /* Respond to change in the selection. */
-    public void valueChange(Property.ValueChangeEvent event) {
-        // The event.getProperty() returns the Item ID (IID) 
-        // of the currently selected item in the component.
-        status.setValue("Currently selected item ID: " +
-                        event.getProperty());
-    }
-}]]></programlisting>
+});
+select.setImmediate(true);]]></programlisting>
 
         </section>
 
@@ -4874,7 +4845,7 @@ table.addValueChangeListener(new Property.ValueChangeListener() {
                 <para>
                     The multiselect mode is enabled with the
                     <methodname>setMultiSelect()</methodname> method of the
-                    <classname>Select</classname> interface of
+                    <classname>AbstractSelect</classname> superclass of
                     <classname>Table</classname>. Setting table in multiselect mode does
                     not implicitly set it as <emphasis>selectable</emphasis>, so it must
                     be set separately.
