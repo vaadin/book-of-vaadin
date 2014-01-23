@@ -2376,15 +2376,17 @@ tf.setValue("Stuff in the field");]]></programlisting>
 
         <programlisting><?pocket-size 65% ?><![CDATA[// Handle changes in the value
 tf.addValueChangeListener(new Property.ValueChangeListener() {
+    private static final long serialVersionUID = -6549081726526133772L;
+
     public void valueChange(ValueChangeEvent event) {
         // Assuming that the value type is a String
-        String value = (String) tf.getValue();
+        String value = (String) event.getProperty().getValue();
 
         // Do something with the value
-        Notification.show("Value is:", value);
+        Notification.show("Value is: " + value);
     }
 });
-        
+
 // Fire value changes immediately when the field loses focus
 tf.setImmediate(true);]]></programlisting>
 
@@ -2591,12 +2593,14 @@ value.setCaption("Current Value:");]]></programlisting>
             </para>
 
             <para>
+                <indexterm><classname>TextChangeListener</classname></indexterm>
+
                 Text change events are received with a
                 <classname>TextChangeListener</classname>, as is done in the following
                 example that demonstrates how to create a text length counter:
             </para>
 
-            <book-example id="component.textfield.textchangeevents" style="float: right"></book-example>
+            <book-example id="component.textfield.textchangeevents.counter" style="float: right"></book-example>
             <programlisting><?pocket-size 65% ?><![CDATA[// Text field with maximum length
 final TextField tf = new TextField("My Eventful Field");
 tf.setValue("Initial content");
@@ -2604,18 +2608,18 @@ tf.setMaxLength(20);
 
 // Counter for input length
 final Label counter = new Label();
-counter.setValue(tf.toString().length() +
+counter.setValue(tf.getValue().length() +
                  " of " + tf.getMaxLength());
-        
+
 // Display the current length interactively in the counter
-tf.addValueChangeListener(new TextChangeListener() {
+tf.addTextChangeListener(new TextChangeListener() {
     public void textChange(TextChangeEvent event) {
         int len = event.getText().length();
         counter.setValue(len + " of " + tf.getMaxLength());
     }
 });
 
-// This is actually the default
+// The lazy mode is actually the default
 tf.setTextChangeEventMode(TextChangeEventMode.LAZY);]]></programlisting>
 
             <para>
@@ -2642,11 +2646,13 @@ tf.setTextChangeEventMode(TextChangeEventMode.LAZY);]]></programlisting>
             </para>
 
             <para>
+                <indexterm><classname>TextChangeEventMode</classname></indexterm>
+
                 You can set the text change event mode of a
                 <classname>TextField</classname> with
                 <methodname>setTextChangeEventMode()</methodname>. The allowed modes are
-                defined in <classname>TextChangeEventMode</classname> class and are the
-                following:
+                defined in <classname>TextChangeEventMode</classname> enum and are as
+                follows:
             </para>
 
             <variablelist>
@@ -2714,7 +2720,7 @@ tf.setTextChangeEventMode(TextChangeEventMode.LAZY);]]></programlisting>
 
             <para>
                 The HTML structure of <classname>TextField</classname> is extremely simple,
-                consisting only of an element with <literal>v-textfield</literal> style.
+                consisting only of an element with the <literal>v-textfield</literal> style.
             </para>
 
             <para>
