@@ -1125,7 +1125,7 @@ public class HelloWorld extends UI {
 
             <para>
                 If you use Vaadin add-ons that contain themes, Vaadin Plugin for Eclipse
-                and Maven automatically add them to the <filenames>addons.scss</filenames>
+                and Maven automatically add them to the <filename>addons.scss</filename>
                 file.
             </para>
 
@@ -1528,6 +1528,280 @@ public class MyUI extends UI {
 		<para></para>
 	</section>
 -->
+
+	<section xml:id="themes.responsive">
+		<title>Responsive Themes</title>
+
+        <indexterm xml:id="term.themes.responsive" class="startofrange">
+            <primary>Responsive add-on</primary>
+        </indexterm>
+
+        <para>
+            The Responsive add-on enables size range conditions in CSS selectors, allowing
+            conditional CSS rules that respond to size changes in browser window on the
+            client-side. <phrase condition="web">See the <link
+            xlink:href="https://vaadin.com/blog/-/blogs/3126636">Vaadin Blog article on
+            Responsive design</link> for additional information.</phrase>
+        </para>
+
+        <para>
+            <indexterm><primary>extension</primary></indexterm>
+
+            <classname>Responsive</classname> is a component extension, which you can use
+            to extend either a component or the entire UI, which you pass in the
+            constructor.
+        </para>
+
+        <book-example id="themes.responsive.basic" style="float: right"></book-example>
+        <programlisting><?pocket-size 75% ?><![CDATA[// Have some component with an appropriate style name
+Label c = new Label("Here be text");
+c.addStyleName("myresponsive");
+content.addComponent(c);
+        
+// Enable Responsive CSS selectors for the component
+new Responsive(c);]]></programlisting>
+
+        <para>
+            You can now use <literal>width-range</literal> and
+            <literal>height-range</literal> conditions in CSS selectors as follows:
+        </para>
+
+        <book-example id="themes.responsive.basic" style="float: right"></book-example>
+        <programlisting><?pocket-size 75% ?><![CDATA[/* Basic settings for all sizes */
+.myresponsive {
+    padding: 5px;
+    line-height: 36pt;
+}
+    
+/* Small size */
+.myresponsive[width-range~="0-300px"] {
+    background: orange;
+    font-size: 16pt;
+}
+
+/* Medium size */
+.myresponsive[width-range~="301px-600px"] {
+    background: azure;
+    font-size: 24pt;
+}
+
+/* Anything bigger */
+.myresponsive[width-range~="601px-"] {
+    background: palegreen;
+    font-size: 36pt;
+}]]></programlisting>
+
+        <para>
+            You can have overlapping size ranges, in which case all the selectors matching
+            the current size are enabled.
+        </para>
+
+        <simplesect xml:id="themes.responsive.wrap" condition="web">
+            <title>Flexible Wrapping</title>
+
+            <para>
+                You can use the <classname>CssLayout</classname> to have automatic
+                wrap-around when the components in the layout would go off right side of
+                the layout. Components that wrap must, however, have either undefined or
+                fixed width, and thereby can not utilize the full area of the
+                screen. Using the Responsive add-on, you can have more flexible
+                wrap-around that gives the component tiles maximum width.
+            </para>
+
+            <para>
+                In the following, we have a text and image box, which are laid out
+                horizontally with 50-50 sizing if the screen is wide enough, but wrap to a
+                vertical layout if the screen is narrow.
+            </para>
+
+            <book-example id="themes.responsive.flexwrap" style="float: right"></book-example>
+            <programlisting><?pocket-size 75% ?><![CDATA[CssLayout layout = new CssLayout();
+layout.setWidth("100%");
+layout.addStyleName("flexwrap");
+content.addComponent(layout);
+        
+// Enable Responsive CSS selectors for the layout
+new Responsive(layout);
+
+Label title = new Label("Space is big, really big");
+title.addStyleName("title");
+layout.addComponent(title);
+
+Label description = new Label("This is a " +
+    "long description of the image shown " +
+    "on the right or below, depending on the " +
+    "screen width. The text here could continue long.");
+description.addStyleName("itembox");
+description.setSizeUndefined();
+layout.addComponent(description);
+        
+Image image = new Image(null, new ThemeResource("img/planets/Earth.jpg"));
+image.addStyleName("itembox");
+layout.addComponent(image);]]></programlisting>
+
+            <para>
+                The SCSS could be as follows:
+            </para>
+
+            <book-example id="themes.responsive.flexwrap" style="float: right"></book-example>
+            <programlisting><?pocket-size 75% ?><![CDATA[/* Various general settings */
+.flexwrap {
+    background: black;
+    color: white;
+
+    .title {
+        font-weight: bold;
+        font-size: 20px;
+        line-height: 30px;
+        padding: 5px;
+    }
+    
+    .itembox {
+        white-space: normal;
+        vertical-align: top;
+    }
+    
+    .itembox.v-label {padding: 5px}
+}
+    
+.flexwrap[width-range~="0-499px"] {
+    .itembox {width: 100%}
+}
+    
+.flexwrap[width-range~="500px-"] {
+    .itembox {width: 50%}
+}]]></programlisting>
+            
+            <para>
+                The layout in the wide mode is shown in <xref
+                linkend="figure.theme.responsive.flexwrap"/>.
+            </para>
+
+            <figure xml:id="figure.theme.responsive.flexwrap">
+                <title>Flexible Wrapping</title>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata smallscale="100%" align="center" fileref="img/themes/addon-responsive-flexwrap.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+
+            <para>
+                You could also play with the <literal>display: block</literal> vs
+                <literal>display: inline-block</literal> properties.
+            </para>
+
+            <para>
+                Notice that while the Responsive add-on makes it possible to do various
+                CSS trickery with component sizes, the normal rules for component and
+                layout sizes apply, as described in <xref linkend="layout.settings.size"/>
+                and elsewhere, and you should always check the size behaviour of the
+                components. In the above example, we set the label to have undefined
+                width, which disables word wrap, so we had to re-enable it.
+            </para>
+        </simplesect>
+
+        <simplesect xml:id="themes.responsive.display" condition="web">
+            <title>Toggling the Display Property</title>
+
+            <para>
+                <indexterm><primary>display (CSS property)</primary></indexterm>
+
+                The <literal>display</literal> property allows especially powerful ways to
+                offer radically different UIs for different screen sizes by enabling and
+                disabling UI elements as needed. For example, you could disable some parts of
+                the UI when the space gets too small, but bring forth navigation buttons that,
+                when clicked, add component styles to switch to the hidden parts.
+            </para>
+
+            <para>
+                In the following, we simply show alternative components based on screen
+                width:
+            </para>
+
+            <book-example id="themes.responsive.display" style="float: right"></book-example>
+            <programlisting><?pocket-size 75% ?><![CDATA[CssLayout layout = new CssLayout();
+layout.setWidth("100%");
+layout.addStyleName("toggledisplay");
+content.addComponent(layout);
+        
+// Enable Responsive CSS selectors for the layout
+new Responsive(layout);
+
+Label enoughspace =
+    new Label("This space is big, mindbogglingly big");
+enoughspace.addStyleName("enoughspace");
+layout.addComponent(enoughspace);
+        
+Label notenoughspace = new Label("Quite small space");
+notenoughspace.addStyleName("notenoughspace");
+layout.addComponent(notenoughspace);]]></programlisting>
+
+            <para>
+                The SCSS could be as follows:
+            </para>
+
+            <book-example id="themes.responsive.display" style="float: right"></book-example>
+            <programlisting><?pocket-size 75% ?><![CDATA[* Common settings */
+.toggledisplay {
+    .enoughspace, .notenoughspace {
+        color: white;
+        padding: 5px;
+    }
+    
+    .notenoughspace { /* Really small */
+        background: red;
+        font-weight: normal;
+        font-size: 10px;
+        line-height: 15px;
+    }
+
+    .enoughspace { /* Really big */
+        background: darkgreen;
+        font-weight: bold;
+        font-size: 20px;
+        line-height: 30px;
+    }
+}
+    
+/* Quite little space */
+.toggledisplay[width-range~="0-499px"] {
+    .enoughspace    {display: none}
+}
+    
+/* Plenty of space */
+.toggledisplay[width-range~="500px-"] {
+    .notenoughspace {display: none}
+}]]></programlisting>
+        </simplesect>
+
+        <simplesect xml:id="themes.responsive.installation">
+            <title>Installing the Responsive Add-on</title>
+
+            <para>
+                The add-on is currently available from Vaadin Directory at <link
+                xlink:href="https://vaadin.com/addon/vaadin-responsive">https://vaadin.com/addon/vaadin-responsive</link>,
+                using either download or as Maven/Ivy dependency. Addon installation is
+                described in <xref linkend="addons"/>.
+            </para>
+        </simplesect>
+
+        <simplesect xml:id="themes.responsive.demos">
+            <title>Responsive Demos</title>
+
+            <para>
+                <indexterm><primary>Parking demo</primary></indexterm>
+                <indexterm><primary>TouchKit</primary><secondary>Parking demo</secondary></indexterm>
+
+                The add-on page includes a link to a demo. In addition, the Parking demo
+                for TouchKit, mentioned in <xref linkend="mobile"/>, uses a responsive
+                theme to adapt to mobile devices with different screen sizes and when the
+                screen orientation changes.
+            </para>
+        </simplesect>
+
+        <indexterm startref="term.themes.responsive" class="endofrange"/>
+    </section>
 
     <indexterm startref="term.themes" class="endofrange"/>
     <indexterm startref="term.themes-css" class="endofrange"/>
