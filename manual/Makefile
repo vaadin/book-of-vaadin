@@ -12,7 +12,7 @@ JAVAPARS = -Xms256M -Xmx512M
 # Document language; this is the default, translations can override this.
 DBLANGUAGE = en
 
-PROFILE = profile.condition=print
+PROFILE = profile.condition=web
 
 DBEXTRAPARS = l10n.gentext.language=$(DBLANGUAGE)
 
@@ -49,7 +49,7 @@ IMAGES =	intro/architecture intro/architecture-vaadin7 intro/toolchain \
 			vaadin-logo book-example \
 			eclipse/editor-design-2-crop eclipse/widgetset-compiling-toolbar \
 			datamodel/datamodel-interfaces datamodel/beanitem-doublebinding \
-			mobile/navigationview mobile/navigationpanel \
+			mobile/mobile-overview mobile/parking-tabs mobile/navigationview mobile/navigationpanel \
 			testbench/webdriver-use \
 			testbench/tt-workflow testbench/tt-architecture-simple testbench/tt-recorder-workflow \
 			testbench/tt-junit-workflow \
