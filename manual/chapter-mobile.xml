@@ -122,7 +122,7 @@ public class SimplePhoneUI extends UI {
             discuss testing briefly.
         </para>
 
-        <simplesect xml:id="mobile.overview.examples">
+        <simplesect xml:id="mobile.overview.demos">
             <title>TouchKit Demos</title>
 
             <para>
@@ -955,28 +955,97 @@ public class SimplePhoneUI extends UI {
             <title>Mobile Theme</title>
 
             <para>
-                You can use both Sass and CSS themes, but CSS themes are probably easier,
-                and using Sass would not yield all the same benefits as in a regular Vaadin
-                application. TouchKit includes a theme in the widget set, and imports the
-                Vaadin base theme internally. Therefore, you do not need to import
-                anything explicitly in a custom theme.
+                You can use both Sass and CSS themes for TouchKit applications, although
+                they are defined a bit differently from regular Vaadin themes. To optimize
+                how a theme is loaded, you can build it into a GWT client bundle.
             </para>
 
-            <para>
-                So, for a theme with name <filename>mymobiletheme</filename>, the
-                <filename>VAADIN/themes/mymobiletheme/styles.css</filename> could be
-                simply as follows:
-            </para>
+            <section xml:id="mobile.elements.theme.css">
+                <title>Defining a Regular Theme</title>
 
-            <programlisting><![CDATA[.stylishlabel {
+                <para>
+                    Using plain CSS is often the easiest way to define a simple theme for
+                    a mobile application, as using Sass would not yield all the same
+                    benefits as in a regular Vaadin application. TouchKit includes its own
+                    base theme in its widget set, so you do not need to
+                    <literal>@import</literal> it explicitly.
+                </para>
+
+                <para>
+                    A CSS theme is defined in a file located at
+                    <filename>VAADIN/themes/mymobiletheme/styles.css</filename>. As
+                    importing the base does not need to (and should not) be done, it could
+                    simply be as follows:
+                </para>
+
+                <programlisting><![CDATA[.stylishlabel {
     color: red;
     font-style: italic;
 }]]></programlisting>
 
-            <para>
-                You need to set the theme with the <literal>@Theme</literal> annotation
-                for your UI class, as usual.
-            </para>
+                <para>
+                    You need to set the theme with the
+                    <literal>@Theme("mymobiletheme")</literal> annotation for your UI
+                    class, as usual.
+                </para>
+
+                <para>
+                    You can also use Sass by creating a <filename>styles.scss</filename>
+                    and then compiling it to CSS with the Vaadin theme compiler. However,
+                    as above, you should not include a base theme. The rules do not need
+                    to be wrapped in a selector with the theme name, as is recommended for
+                    regular Vaadin themes.
+                </para>
+            </section>
+
+            <section xml:id="mobile.elements.theme.responsive">
+                <title>Responsive Mobile Themes</title>
+
+                <para>
+                    The Responsive add-on is especially useful for mobile themes, as it
+                    makes it easy to adapt a layout for phones and tablets and for
+                    changing the screen orientation. With the add-on, changing the UI
+                    layout according to screen orientation is handled entirely on the
+                    client-side by the add-on, using special CSS selectors in the
+                    theme. See <xref linkend="themes.responsive"/> for details about the
+                    add-on.
+                </para>
+
+                <para>
+                    The Parking demo uses the add-on. From its source code, which is
+                    available at Github, you can learn how the conditional selectors are
+                    used in the <link
+                    xlink:href="https://github.com/vaadin/parking-demo/tree/master/src/main/resources/com/vaadin/demo/parking/widgetset/client/theme">CSS
+                    defined in a GWT client bundle</link>.
+                </para>
+
+                <para>
+                    For example, the CSS for the <guilabel>Stats</guilabel> tab in the
+                    demo defines a responsive selector as follows, to allow fitting two
+                    charts side-by-side if there is enough room horizontally:
+                </para>
+
+                <programlisting><?pocket-size 75% ?><![CDATA[.stats .statschart {
+    margin-bottom: 30px;
+    float: left;
+    width: 100%;
+}
+
+.v-ui[width-range~="801px-"] .stats .statschart {
+    width: 48% !important;
+    margin: 0 1%;
+}]]></programlisting>
+
+                <para>
+                    Normally, if there's 800 pixels or less space horizontally, each chart
+                    takes 100% of the screen width, causing the second one to wrap to the
+                    next line in the containing <classname>CssLayout</classname>. If there
+                    is more space, the two charts are shown in 48% width, so that both can
+                    fit in the same line. <phrase condition="web">This follows the
+                    flexible wrapping pattern described in <xref
+                    linkend="themes.responsive.wrap"/>.</phrase>
+                </para>
+            </section>
 
             <section xml:id="mobile.elements.theme.gwt">
                 <title>Defining a Theme in a GWT Client Bundle</title>
@@ -2386,10 +2455,10 @@ layout.addComponent(group);]]></programlisting>
             </para>
 
             <figure xml:id="figure.mobile.features.upload">
-                <title>Mobile Upload (Image Copyright Marko Gr&ouml;nroos 2001)</title>
+                <title>Mobile Upload</title>
                 <mediaobject>
                     <imageobject>
-                        <imagedata smallscale="70%" scale="70" align="center" fileref="img/mobile/upload.png"/>
+                        <imagedata srccredit="Marko Gr&ouml;, 2001" smallscale="70%" scale="70" align="center" fileref="img/mobile/upload.png"/>
                     </imageobject>
                 </mediaobject>
                 <!-- Image Copyright Marko Gronroos 2001.
