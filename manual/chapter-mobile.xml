@@ -2373,24 +2373,38 @@ layout.addComponent(store);]]></programlisting>
 
             <para>
                 Uploading content from a mobile device works just like with regular Vaadin
-                applications using the <classname>Upload</classname> component described
-                in <xref linkend="components.upload"/>. When choosing a file, the device
-                will ask to select the file from files, gallery, camera, or other possible
-                sources, depending on the device. The only difference to normal use is
-                that the upload component must be in <emphasis>immediate</emphasis> mode.
+                applications using the <classname>Upload</classname> component.
             </para>
 
             <para>
-                Uploading is supported by most mobile operating systems, such as iOS,
-                Android, and Windows RT devices, but not in some, such as WP8.
+                In an offline UI or client-side code in general, you need to handle
+                uploading differently, using a special upload widget or handler.
             </para>
 
-            <para>
-                The following example shows how to implement simple upload to an in-memory
-                storage.
-            </para>
+            <section xml:id="mobile.features.upload.server-side" condition="web">
+                <title>Server-Side <classname>Upload</classname> Component</title>
 
-            <programlisting><?pocket-size 65% ?><![CDATA[// Display the image - only a placeholder first
+                <para>
+                    In a server-side UI, you can use the regular
+                    <classname>Upload</classname> component described in <xref
+                    linkend="components.upload"/>. When choosing a file, the device will
+                    ask to select the file from files, gallery, camera, or other possible
+                    sources, depending on the device. The only difference to normal use is
+                    that the upload component must be in <emphasis>immediate</emphasis>
+                    mode.
+                </para>
+
+                <para>
+                    Uploading is supported by most mobile operating systems, such as iOS,
+                    Android, and Windows RT devices, but not in some, such as WP8.
+                </para>
+
+                <para>
+                    The following example shows how to implement simple upload to an in-memory
+                    storage.
+                </para>
+
+                <programlisting><?pocket-size 65% ?><![CDATA[// Display the image - only a placeholder first
 final Image image = new Image();
 image.setWidth("100%");
 image.setVisible(false);
@@ -2450,22 +2464,107 @@ HorizontalButtonGroup group = new HorizontalButtonGroup();
 group.addComponent(upload);
 layout.addComponent(group);]]></programlisting>
 
-            <para>
-                The result is shown in <xref linkend="figure.mobile.features.upload"/>
-                (&copy;2001 Marko Gr&ouml;nroos).
-            </para>
+                <para>
+                    The result is shown in <xref linkend="figure.mobile.features.upload"/>
+                    (&copy;2001 Marko Gr&ouml;nroos).
+                </para>
 
-            <figure xml:id="figure.mobile.features.upload">
-                <title>Mobile Upload</title>
-                <mediaobject>
-                    <imageobject>
-                        <imagedata srccredit="Marko Gr&ouml;, 2001" smallscale="70%" scale="70" align="center" fileref="img/mobile/upload.png"/>
-                    </imageobject>
-                </mediaobject>
-                <!-- Image Copyright Marko Gronroos 2001.
-                     Licensed under Creative Commons Attribution-NoDerivs 4.0 license.
-                     https://creativecommons.org/licenses/by-nd/4.0/legalcode -->
-            </figure>
+                <figure xml:id="figure.mobile.features.upload">
+                    <title>Mobile Upload</title>
+                    <mediaobject>
+                        <imageobject>
+                            <imagedata srccredit="Marko Gr&ouml;, 2001" smallscale="70%" scale="70" align="center" fileref="img/mobile/upload.png"/>
+                        </imageobject>
+                    </mediaobject>
+                    <!-- Image Copyright Marko Gronroos 2001.
+                         Licensed under Creative Commons Attribution-NoDerivs 4.0 license.
+                         https://creativecommons.org/licenses/by-nd/4.0/legalcode -->
+                </figure>
+            </section>
+
+            <section xml:id="mobile.features.upload.client-side" condition="web">
+                <title>Upload on the Client-Side</title>
+
+                <para>
+                    When making a client-side widget that handles file upload, such as for
+                    offline mode, you can use the GWT <link
+                    xlink:href="http://www.gwtproject.org/javadoc/latest/com/google/gwt/user/client/ui/FileUpload.html"><classname>FileUpload</classname>
+                    component</link>. In such case, you need to communicate the image data
+                    to the server with an RPC call.
+                </para>
+
+                <para>
+                    On a mobile device, the perhaps most common upload task is to capture
+                    images with the integrated camera. To display them in the client-side
+                    UI correctly, you want make sure that they have reasonable size and
+                    correct orientation, without making a server round-trip to do the
+                    corrections. To send them to the server, you want to avoid using too
+                    much bandwidth. The <classname>ImageUpload</classname> widget included
+                    in the <literal>lib-gwt-imageupload</literal> add-on, <link
+                    xlink:href="https://vaadin.com/directory#addon/lib-gwt-imageupload">available
+                    from Vaadin Directory</link>, allows launching the camera application
+                    in the device and capturing an image. It further allows defining an
+                    image manipulation pipeline with transformations to reduce the image
+                    size if necessary, correct the orientation according to EXIF data, and
+                    so forth. The corrected image is loaded to a memory buffer, which
+                    you can display in another widget, send to the server, or store in the
+                    local store.
+                </para>
+
+                <para>
+                    In the following, we allow capturing an image with the camera,
+                    normalize the image and reduce its size, and reduce the size further
+                    for displaying it in a thumbnail. Notice that the image data is
+                    encoded as a URL, which can be used as such in CSS, for example.
+                </para>
+
+                <programlisting><?pocket-size 65% ?><![CDATA[final ImageUpload fileUpload = new ImageUpload();
+
+// Have a separate button to initiate the upload
+final VButton takePhotoButton = new VButton();
+takePhotoButton.addClickHandler(new ClickHandler() {
+    @Override
+    public void onClick(ClickEvent event) {
+        fileUpload.click();
+    }
+});
+
+// Capture images from the camera, instead of allowing to
+// choose from gallery or other sources.
+fileUpload.setCapture(true);
+
+// Normalize the orientation and make size suitable for
+// sending to server
+EXIFOrientationNormalizer normalizer =
+        new EXIFOrientationNormalizer();
+normalizer.setMaxWidth(1024);
+normalizer.setMaxHeight(1024);
+fileUpload.addImageManipulator(normalizer);
+fileUpload.addImageLoadedHandler(new ImageLoadedHandler() {
+    @Override
+    public void onImageLoaded(ImageLoadedEvent event) {
+        // Store the image data as encoded URL
+        setImage(event.getImageData().getDataURL());
+    }
+});
+
+// Reduce the size further for displaying a thumbnail
+ImageTransformer thumbGenerator = new ImageTransformer();
+thumbGenerator.setImageDataSource(fileUpload);
+thumbGenerator.setMaxWidth(75);
+thumbGenerator.setMaxHeigth(75);
+thumbGenerator.addImageLoadedHandler(new ImageLoadedHandler() {
+   @Override
+   public void onImageLoaded(ImageLoadedEvent event) {
+       // Store the thumbnail image data as encoded URL
+       setThumbnail(event.getImageData().getDataURL());
+   }
+});]]></programlisting>
+
+                <para>
+                    See the Parking Demo for more details about the usage of the add-on.
+                </para>
+            </section>
         </section>
     </section>
 
@@ -2567,8 +2666,10 @@ offline.extend(this);]]></programlisting>
             </para>
 
             <para>
-                Please see the Parking source code for an example implementation of
-                an offline mode user interface.
+                The Parking demo provides an example implementation of an offline mode
+                user interface. The Ticket view is implemented as a fat client-side
+                widget, where the server-side view only communicates the state to the
+                widget.
             </para>
         </section>
 
