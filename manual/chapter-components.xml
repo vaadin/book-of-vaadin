@@ -3626,16 +3626,11 @@ checkbox2.addValueChangeListener(new ValueChangeListener() {
 	</section>
 
 	<section xml:id="components.selecting">
-		<title>Selecting Items</title>
+		<title>Selection Components</title>
 
 		<para>
-			Vaadin gives many alternatives for selecting one or more items from a list,
-			using drop-down and regular lists, radio button and check box groups, tables,
-			trees, and so on.
-		</para>
-
-		<para>
-			The core library includes the following selection components, all based on the
+			Vaadin offers many alternative ways for selecting one or more items. The core
+			library includes the following selection components, all based on the
 			<classname>AbstractSelect</classname> class:
 		</para>
 
@@ -3643,8 +3638,9 @@ checkbox2.addValueChangeListener(new ValueChangeListener() {
             <varlistentry>
                 <term><classname>ComboBox</classname></term>
                 <listitem>
-                    A drop-down list for single selection. The component also provides an
-                    input prompt and the user can enter new items.
+                    A drop-down list with a text box, where the user can type text to find
+                    matching items. The component also provides an input prompt and the
+                    user can enter new items.
                 </listitem>
             </varlistentry>
             <varlistentry>
@@ -4263,9 +4259,7 @@ select.setNullSelectionAllowed(false);]]></programlisting>
 
             <para>
                 Multiple selection mode is not allowed; you should use the
-                <classname>ListSelect</classname> component instead. Also adding new
-                items, which would be enabled with
-                <methodname>setNewItemsAllowed()</methodname>, is not allowed.
+                <classname>ListSelect</classname> component instead.
             </para>
 
 			<simplesect>
@@ -4529,51 +4523,93 @@ select.setRows(planets.length);]]></programlisting>
 		</section>
 
 
-		<section xml:id="components.selecting.newitems">
+		<section xml:id="components.selecting.newitems" condition="web">
 			<title>Allowing Adding New Items</title>
 
 			<para>
-				The selection components allow the user to add new items, with a user
-				interface similar to combo boxes in desktop user interfaces. You need to
-				enable the <parameter>newItemsAllowed</parameter> mode with the
-				<methodname>setNewItemsAllowed()</methodname> method.
+				Selection components can allow the user to add new items. Currently, only
+				<classname>ComboBox</classname> allows it, when the user types in a value
+				and presses <keycap>Enter</keycap>. You need to enable the mode with
+				<methodname>setNewItemsAllowed(true)</methodname>. Setting the component
+				also in immediate mode may be necessary, as otherwise the item would not
+				be added immediately when the user interacts with the component, but after
+				some other component causes a server request.
+                <!-- TODO This could be a bug -->
 			</para>
 
-			<programlisting><![CDATA[myselect.setNewItemsAllowed(true);]]></programlisting>
+			<programlisting><![CDATA[myselect.setNewItemsAllowed(true);
+myselect.setImmediate(true);]]></programlisting>
 
             <para>
-                The user interface for adding new items depends on the selection component
-                and the selection mode. The regular <classname>ComboBox</classname>
-                component allows you to simply type the new item in the combo box and hit
-                <keycap>Enter</keycap> to add it. In most other selection components, a
-                text field that allows entering new items is shown below the selection
-                list, and clicking the <guibutton>+</guibutton> button will add the item
-                in the list, as illustrated in <xref
-                linkend="figure.components.selecting.newitems"/>.
+                The user interface for adding new items depends on the selection
+                component. The regular <classname>ComboBox</classname> component allows
+                you to simply type the new item in the combo box and hit
+                <keycap>Enter</keycap> to add it.
             </para>
 
-			<figure xml:id="figure.components.selecting.newitems">
-				<title>ComboBox with Adding New Items Allowed</title>
-				<mediaobject>
-					<imageobject>
-						<imagedata smallscale="120" align="center" fileref="img/components/select-addnewitems.png"/>
-					</imageobject>
-				</mediaobject>
-			</figure>
-
 			<para>
-				The identifier of an item added by the user will be a
-				<classname>String</classname> object identical to the caption of the
-				item. You should consider this if the item identifier of automatically
-				filled items is some other type or otherwise not identical to the caption.
+				Adding new items in not possible if the selection component is read-only
+				or is bound to a <classname>Container</classname> that does not allow
+				adding new items, and an attempt may result in an exception.
 			</para>
 
-			<para>
-				Adding new items may not be possible if the
-				<classname>ComboBox</classname> is bound to an external
-				<classname>Container</classname> that does not allow adding new items.
-			</para>
-		</section>
+            <section xml:id="components.selecting.newitems.handling">
+                <title>Handling New Items</title>
+
+                <para>
+                    Adding new items is handled by a
+                    <interfacename>NewItemHandler</interfacename>, which gets the item
+                    caption string as parameter for the
+                    <methodname>addNewItem()</methodname> method. The default
+                    implementation, <classname>DefaultNewItemHandler</classname>, checks
+                    for read-only state, adds the item using the entered caption as the
+                    item ID, and if the selection component gets the captions from a
+                    property, copies the caption to that property. It also selects the
+                    item. The default implementation may not be suitable for all container
+                    types, in which case you need to define a custom handler. For example,
+                    a <classname>BeanItemContainer</classname> expects the items to have
+                    the bean object itself as the ID, not a string.
+                </para>
+
+                <book-example id="component.select.combobox.newitemhandler" style="float: right"/>
+                <programlisting condition="web"><?pocket-size 65% ?><![CDATA[// Have a bean container to put the beans in
+final BeanItemContainer<Planet> container =
+    new BeanItemContainer<Planet>(Planet.class);
+
+// Put some example data in it
+container.addItem(new Planet(1, "Mercury"));
+container.addItem(new Planet(2, "Venus"));
+container.addItem(new Planet(3, "Earth"));
+container.addItem(new Planet(4, "Mars"));
+
+final ComboBox select =
+    new ComboBox("Select or Add a Planet", container);
+select.setNullSelectionAllowed(false);
+        
+// Use the name property for item captions
+select.setItemCaptionPropertyId("name");
+        
+// Allow adding new items
+select.setNewItemsAllowed(true);
+select.setImmediate(true);
+
+// Custom handling for new items
+select.setNewItemHandler(new NewItemHandler() {
+    @Override
+    public void addNewItem(String newItemCaption) {
+        // Create a new bean - can't set all properties
+        Planet newPlanet = new Planet(0, newItemCaption);
+        container.addBean(newPlanet);
+        
+        // Remember to set the selection to the new item
+        select.select(newPlanet);
+        
+        Notification.show("Added new planet called " +
+                          newItemCaption);
+    }
+});]]></programlisting>
+            </section>
+        </section>
 
 		<section xml:id="components.selecting.multiple">
 			<title>Multiple Selection</title>
