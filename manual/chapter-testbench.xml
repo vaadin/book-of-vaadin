@@ -450,7 +450,7 @@
                             The Maven folder contains version of the Vaadin TestBench
                             libraries that you can install in your local Maven
                             repository. Please follow the instructions in <xref
-                            linkend="testbench.development.maven"/>.
+                            linkend="testbench.execution.maven"/>.
                         </para>
                     </listitem>
                 </varlistentry>
@@ -557,7 +557,7 @@
                     <listitem>
                         <para>
                             Demonstrates how to test tooltips (<xref
-                            linkend="testbench.development.tooltip"/>) and context
+                            linkend="testbench.special.tooltip"/>) and context
                             menus. Uses component IDs, XPath expressions, as well as CSS
                             selectors to find the elements to check.
                         </para>
@@ -570,7 +570,7 @@
                             Shows how to create maintanable tests using the <emphasis>Page
                             Object Pattern</emphasis> that separates the low-level page
                             structure from the business logic, as described in <xref
-                            linkend="testbench.development.maintainable"/>. The page
+                            linkend="testbench.maintainable"/>. The page
                             object classes that handle low-level interaction with the
                             application views are in the <filename>pageobjects</filename>
                             subpackage.
@@ -597,7 +597,7 @@
 
             <para>
                 For information about running the examples with Maven, see <xref
-                linkend="testbench.development.maven"/>.
+                linkend="testbench.execution.maven"/>.
             </para>
         </section>
 
@@ -772,9 +772,8 @@
         <para>
             To make UIs more robust for testing, you can set a unique <emphasis>component
             ID</emphasis> for specific components with
-            <methodname>setId()</methodname>. You can then use it in Vaadin, XPath, or ID
-            selectors, as explained later in <xref
-            linkend="testbench.recorder.selectors"/>.
+            <methodname>setId()</methodname>. You can then use it in element queries or
+            selectors.
         </para>
 
         <programlisting><?pocket-size 65% ?><![CDATA[public class UIToBeTested extends UI {
@@ -1088,356 +1087,18 @@ public void testCase() throws Exception {
         </section>
     </section>
 
-    <section xml:id="testbench.selectors">
-        <title>Selecting HTML Elements</title>
 
-        <para>
-            The Selenium WebDriver API is based on a number of different
-            <emphasis>selectors</emphasis> for finding HTML elements that are interacted
-            upon and asserted. In addition, Vaadin TestBench provides its own API for
-            selecting Vaadin components.
-        </para>
+    <section xml:id="testbench.testcase">
+        <title>Creating a Test Case</title>
 
-        <para>
-            The available selectors are defined as static methods in the
-            <classname>com.vaadin.testbench.By</classname> class. They create and return a
-            <classname>By</classname> instance, which you can use for the
-            <methodname>findElement()</methodname> method in
-            <classname>WebDriver</classname>.
-        </para>
-
-        <para>
-            You can find elements also by a plain XPath expression, an element ID, CSS
-            style class, etc. The selectors are exported with the JUnit test cases as
-            corresponding Vaadin or Selenium selector methods, described in <xref
-            linkend="testbench.development.selectors"/>.
-        </para>
-
-        <para>
-            The ID, CSS class, and Vaadin selectors are described below. For others, we
-            refer to the <link
-            xlink:href="http://seleniumhq.org/docs/03_webdriver.html">Selenium WebDriver
-            API documentation</link>.
-        </para>
-
-        <para>
-            Some selectors are not applicable to all elements, for example if an element
-            does not have an ID or it is outside the Vaadin application. In such case,
-            another selector is used according to a preference order. You can change the
-            order of the preferred selectors by selecting
-            <menuchoice><guimenu>Options</guimenu><guisubmenu>Options</guisubmenu><guimenuitem>Locator
-            Builders</guimenuitem></menuchoice> and dragging the selectors (or locators)
-            to a preferred order. Normally, the Vaadin selector should be at top of the
-            list.
-        </para>
-
-        <section xml:id="testbench.selectors.robustness">
-            <title>Selector Robustness</title>
-
-            <para>
-                As mentioned in <xref linkend="testbench.preparing"/>, the selectors have
-                differences in their robustness, which is important to avoid failed tests
-                if there are irrelevant changes in the HTML DOM tree.
-            </para>
-
-            <para>
-                The Vaadin selector (<literal>vaadin</literal> in Recorder and
-                <methodname>By.vaadin()</methodname> in WebDriver) uses the logical widget
-                hierarchy to find the HTML element to test, instead of the exact DOM
-                structure. This makes it rather robust, though still vulnerable to
-                irrelevant changes in the exact component hierarchy.
-            </para>
-
-            <para>
-                The XPath selector can be highly vulnerable to changes in the DOM path if
-                the path is given exactly from the body element of the page. It is,
-                however, very flexible, and can be used in robust ways, for example, by
-                selecting by HTML element and a CSS class name or an attribute value.
-            </para>
-
-            <para>
-                You can likewise use a CSS selector to select specific components by CSS
-                class in a robust way.
-            </para>
-        </section>
-
-        <section xml:id="testbench.selectors.id">
-            <title>Finding by ID</title>
-
-            <para>
-                Selecting elements by their HTML element <literal>id</literal>
-                attribute is usually the easiest way to select elements. It requires
-                that you use component IDs, as described in <xref
-                    linkend="testbench.preparing"/>. The ID is used as is for the
-                <literal>id</literal> attribute of the top element of the
-                component. Selecting is done by the <methodname>By.id()</methodname>
-                selector.
-            </para>
-
-            <para>
-                For example, in the <filename>SimpleCalculatorITCase.java</filename>
-                example, we use the component ID as follows to click on the calculator
-                buttons:
-            </para>
-
-            <programlisting><?pocket-size 75% ?><![CDATA[@Test
-public void testOnePlusTwo() throws Exception {
-    openCalculator();
-
-    // Click the buttons in the user interface
-    getDriver().findElement(By.id("button_1")).click();
-    getDriver().findElement(By.id("button_+")).click();
-    getDriver().findElement(By.id("button_2")).click();
-    getDriver().findElement(By.id("button_=")).click();
-
-    // Get the result label value
-    assertEquals("3.0", getDriver().findElement(
-            By.id("display")).getText());
-}]]></programlisting>
-
-            <para>
-                The ID selectors are used extensively in the TestBench examples.
-            </para>
-        </section>
-
-        <section xml:id="testbench.selectors.vaadin">
-            <title>Finding by Vaadin Selector</title>
-
-            <para>
-                In addition to the Selenium selectors, Vaadin TestBench provides a
-                <emphasis>Vaadin selector</emphasis>, which allows pointing to a
-                Vaadin component by its layout widget path.  The Recorder uses Vaadin
-                selectors by default.
-            </para>
-
-            <para>
-                You can create a Vaadin selector with the
-                <methodname>By.vaadin()</methodname> method. You need to use the
-                Vaadin <classname>By</classname>, defined in the
-                <package>com.vaadin.testbench</package> package, which extends the
-                Selenium <classname>By</classname>.
-            </para>
-
-            <para>
-                A Vaadin selector begins with a UI identifier. It is the
-                URL path of the UI, but without any slashes or other special
-                characters. For example, <literal>/book-examples/tobetested</literal>
-                would be <literal>bookexamplestobetested</literal>. After the
-                identifier, comes two colons "<literal>::</literal>", followed by a
-                slash-delimited component path to the component to be selected. The
-                elements in the component path are client-side classes of the Vaadin
-                user interfacer components. For example, the server-side
-                <classname>VerticalLayout</classname> component has
-                <classname>VVerticalLayout</classname> client-side counterpart. All
-                path elements except the leaves are component containers, usually
-                layouts. The exact contained component is identified by its index in
-                brackets.
-            </para>
-
-            <para>
-                A reference to a component ID is given with a <literal>PID_S</literal>
-                suffix to the ID.
-            </para>
-
-            <para>
-                For example, if the ID is <literal>main.button</literal>, as it was
-                set in the application example earlier, you could find and test it as
-                follows:
-            </para>
-
-            <programlisting><?pocket-size 75% ?><![CDATA[// Get the button's element.
-// Use the ID set with setId().
-WebElement button = driver.findElement(By.vaadin(
-    "bookexamplestobetested::PID_Smain.button"));
-
-// Get the caption text
-assertEquals("Push Me!", button.getText());
-
-// And click it
-button.click();
-
-// Get the Label's element by full path
-WebElement label = driver.findElement(By.vaadin(
-    "bookexamplestobetested::/VVerticalLayout[0]/"+
-    "ChildComponentContainer[1]/VLabel[0]"));
-
-// Make the assertion
-assertEquals("Thanks!", label.getText());]]></programlisting>
-
-        </section>
-
-        <section xml:id="testbench.selectors.css">
-            <title>Finding by CSS Class</title>
-
-            <para>
-                An element with a particular CSS style class name can be selected with the
-                <methodname>By.className()</methodname> method. CSS selectors are useful
-                for elements which have no ID, nor can be found easily from the component
-                hierarchy, but do have a particular unique CSS style. Tooltips are one
-                example, as they are floating <literal>div</literal> elements under the
-                root element of the application. Their <literal>v-tooltip</literal> style
-                makes it possible to select them as follows:
-            </para>
-
-            <programlisting><?pocket-size 75% ?><![CDATA[// Verify that the tooltip contains the expected text
-String tooltipText = driver.findElement(
-    By.className("v-tooltip")).getText();]]></programlisting>
-
-            <para>
-                For a complete example, see the
-                <filename>AdvancedCommandsITCase.java</filename> file in the examples.
-            </para>
-        </section>
-
-        <section xml:id="testbench.development.ant">
-            <title>Executing Tests with Ant</title>
-
-            <para>
-                Apache Ant has built-in support for executing JUnit tests. To enable the
-                support, you need to have the JUnit library <filename>junit.jar</filename>
-                and its Ant integration library <filename>ant-junit.jar</filename> in the
-                Ant classpath, as described in the Ant documentation.
-            </para>
-
-            <para>
-                Once enabled, you can use the <literal>&lt;junit&gt;</literal> task in an
-                Ant script. The following example assumes that the source files are
-                located under a <filename>src</filename> directory under the current
-                directory and compiles them to the <filename>classes</filename>
-                directory. The the class path is defined with the
-                <literal>classpath</literal> reference ID and should include the TestBench
-                JAR and all relevant dependencies.
-            </para>
-
-            <programlisting><?pocket-size 65% ?><![CDATA[<project default="run-tests">
-    <path id="classpath">
-        <fileset dir="lib"
-                 includes="vaadin-testbench-standalone-*.jar" />
-    </path>
-
-    <!-- This target compiles the JUnit tests. -->
-    <target name="compile-tests">
-        <mkdir dir="classes" />
-        <javac srcdir="src" destdir="classes"
-               debug="on" encoding="utf-8">
-            <classpath>
-                <path refid="classpath" />
-            </classpath>
-        </javac>
-    </target>
-
-    <!-- This target calls JUnit -->
-    <target name="run-tests" depends="compile-tests">
-        <junit fork="yes">
-            <classpath>
-                <path refid="classpath" />
-                <pathelement path="classes" />
-            </classpath>
-
-            <formatter type="brief" usefile="false" />
-                                
-            <batchtest>
-                <fileset dir="src">
-                    <include name="**/**.java" />
-                </fileset>
-            </batchtest>
-        </junit>
-    </target>
-</project>]]></programlisting>
-
-            <para>
-                You also need to deploy the application to test, and possibly launch a
-                dedicated server for it.
-            </para>
-        </section>
-
-        <section xml:id="testbench.development.maven">
-            <title>Executing Tests with Maven</title>
-
-            <para>
-                Executing JUnit tests with Vaadin TestBench under Maven requires defining
-                it as a dependency in any POM that needs to execute TestBench tests.
-            </para>
-
-            <para>
-                A complete example of a Maven test setup is given in the
-                <filename>example/maven</filename> folder in the installation
-                package. Please see the <filename>README</filename> file in the folder for
-                further instructions.
-            </para>
-
-            <section xml:id="testbench.development.maven.dependency">
-                <title>Defining TestBench as a Dependency</title>
-
-                <para>
-                    You need to define the TestBench library as a dependency in the Maven
-                    POM of your project as follows:
-                </para>
-
-                <programlisting>    &lt;dependency&gt;
-      &lt;groupId&gt;com.vaadin&lt;/groupId&gt;
-      &lt;artifactId&gt;vaadin-testbench&lt;/artifactId&gt;
-      &lt;version&gt;&version.testbench;&lt;/version&gt;
-    &lt;/dependency&gt;</programlisting>
-
-                <para>
-                    For instructions on how to create a new Vaadin project with Maven,
-                    please see <xref linkend="getting-started.maven"/>.
-                </para>
-            </section>
-
-            <section xml:id="testbench.development.maven.running">
-                <title>Running the Tests</title>
-
-                <para>
-                    To compile and run the tests, simply execute the
-                    <literal>test</literal> lifecycle phase with Maven as follows:
-                </para>
-
-                <screen><prompt>$</prompt> <command>mvn</command> test
-...
------------------------------------------------------
- T E S T S
------------------------------------------------------
-Running TestBenchExample
-Tests run: 6, Failures: 1, Errors: 0, Skipped: 1, Time elapsed: 36.736 sec &lt;&lt;&lt; FAILURE!
-
-Results :
-
-Failed tests: 
-  testDemo(TestBenchExample):
-      expected:&lt;[5/17/]12&gt; but was:&lt;[17.6.20]12&gt;
-
-Tests run: 6, Failures: 1, Errors: 0, Skipped: 1
-...</screen>
-
-                <para>
-                    The example configuration starts Jetty to run the application that is
-                    tested.
-                </para>
-
-                <para>
-                    If you have screenshot tests enabled, as mentioned in <xref
-                    linkend="testbench.installation.examples"/>, you will get failures
-                    from screenshot comparison. The failed screenshots are written to the
-                    <filename>target/testbench/errors</filename> folder. To enable
-                    comparing them to "expected" screenshots, you need to copy the
-                    screenshots to the
-                    <filename>src/test/resources/screenshots/reference/</filename>
-                    folder. See <xref linkend="testbench.screenshots"/> for more
-                    information regarding screenshots.
-                </para>
-            </section>
-        </section>
-
-        <section xml:id="testbench.development.setup">
+        <!-- TODO This is redundant with the next section -->
+        <section xml:id="testbench.testcase.setup">
             <title>Test Setup</title>
 
             <para>
                 Test configuration is done in a method annotated with
                 <literal>@Before</literal>. The method is executed before each test
-                case. In a JUnit stub exported from Recorder, this is done in the
-                <methodname>setUp()</methodname> method.
+                case.
             </para>
 
             <para>
@@ -1462,7 +1123,102 @@ Tests run: 6, Failures: 1, Errors: 0, Skipped: 1
             </section>
         </section>
 
-        <section xml:id="testbench.development.webdriver">
+        <section xml:id="testbench.testcase.basic">
+            <title>Basic Test Case Structure</title>
+
+            <para>
+                A typical test case does the following:
+            </para>
+
+            <orderedlist>
+                <listitem>Open the URL</listitem>
+                <listitem>Navigate to desired state
+                    <orderedlist>
+                        <listitem>Find a HTML element (<classname>WebElement</classname>) for navigation</listitem>
+                        <listitem>Use <methodname>click()</methodname> and other commands to interact with the element</listitem>
+                        <listitem>Repeat with different elements until desired state is reached</listitem>
+                    </orderedlist>
+                </listitem>
+                <listitem>Find a HTML element (<classname>WebElement</classname>) to check</listitem>
+                <listitem>Get and assert the value of the HTML element</listitem>
+                <listitem>Get a screenshot</listitem>
+            </orderedlist>
+
+            <para>
+                The <classname>WebDriver</classname> allows finding HTML elements in a
+                page in various ways, for example, with XPath expressions. The access
+                methods are defined statically in the <classname>By</classname> class.
+            </para>
+
+            <para>
+                These tasks are realized in the following test code:
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[@Test
+public void testCase1() throws Exception {
+    driver.get(baseUrl + "/mycontext/myui");
+    
+    // Get the button's element.
+    // (Actually the caption element inside the button.)
+    // Use the component ID assigned with setId().
+    WebElement button = driver.findElement(By.xpath(
+        "id('main.button'])/span/span"));
+    
+    // Get the caption text
+    assertEquals("Push Me!", button.getText());
+    
+    // And click it. It's OK to click the caption element.
+    button.click();
+
+    // Get the Label's element by its widget path.
+    WebElement label = driver.findElement(By.vaadin(
+        "mycontextmyui::"+
+        "/VVerticalLayout[0]/Slot[1]/VLabel[0]"));
+
+    // Make the assertion
+    assertEquals("Thanks!", label.getText());
+}]]></programlisting>
+
+            <para>
+                You can also use URI fragments in the URL to open the application at a
+                specific state. <phrase condition="web">For information about URI fragments, see <xref
+                linkend="advanced.urifu"/>.</phrase>
+            </para>
+
+            <para>
+                You should use the JUnit assertion commands. They are static methods
+                defined in the <package>org.junit.Assert</package> class, which you can
+                import (for example) with:
+            </para>
+
+            <programlisting><![CDATA[import static org.junit.Assert.assertEquals;]]></programlisting>
+
+            <para>
+                Please see the <link
+                xlink:href="http://seleniumhq.org/docs/03_webdriver.html#selenium-webdriver-api-commands-and-operations">Selenium
+                API documentation</link> for a complete reference of the element search
+                methods in the <classname>WebDriver</classname> and
+                <classname>By</classname> classes and for the interaction commands in the
+                <classname>WebElement</classname> class.
+            </para>
+
+            <para>
+                TestBench has a collection of its own commands, defined in the
+                <interfacename>TestBenchCommands</interfacename> interface. You can get a command
+                object that you can use by calling <literal>testBench(driver)</literal> in
+                a test case.
+            </para>
+
+            <para>
+                While you can develop tests simply with test cases as described above, for
+                the sake of maintainability it is often best to modularize the test code
+                further, such as to separate testing at the levels of business logic and
+                the page layout. See <xref linkend="testbench.maintainable"/>
+                for information about using page objects for this purpose.
+            </para>
+        </section>
+
+        <section xml:id="testbench.testcase.webdriver">
             <title>Creating and Closing a Web Driver</title>
             
             <para>
@@ -1558,103 +1314,337 @@ driver = TestBench.createDriver(
     new FirefoxDriver(binary, new FirefoxProfile()));]]></programlisting>
             </section>
         </section>
+    </section>
 
-        <section xml:id="testbench.development.basic">
-            <title>Basic Test Case Structure</title>
+    <section xml:id="testbench.elementquery">
+        <title>Querying Elements</title>
 
-            <para>
-                A typical test case does the following:
-            </para>
+        <para>
+            The high-level ElementQuery API allows querying Vaadin components in the
+            browser according to their component class type, hierarchy, caption, and other
+            properties. Once one or more components are found, they can be interacted
+            upon. The query API could be considered an embedded domain-specific language
+            (EDSL), which can be used in the <classname>TestBenchTestcase</classname>
+            class.
+        </para>
 
-            <orderedlist>
-                <listitem>Open the URL</listitem>
-                <listitem>Navigate to desired state
-                    <orderedlist>
-                        <listitem>Find a HTML element (<classname>WebElement</classname>) for navigation</listitem>
-                        <listitem>Use <methodname>click()</methodname> and other commands to interact with the element</listitem>
-                        <listitem>Repeat with different elements until desired state is reached</listitem>
-                    </orderedlist>
-                </listitem>
-                <listitem>Find a HTML element (<classname>WebElement</classname>) to check</listitem>
-                <listitem>Get and assert the value of the HTML element</listitem>
-                <listitem>Get a screenshot</listitem>
-            </orderedlist>
+        <para>
+            The basic idea is that element queries yield queries, which can again be
+            queried upon, until terminated by a terminal query that returns one or more
+            elements.
+        </para>
 
-            <para>
-                The <classname>WebDriver</classname> allows finding HTML elements in a
-                page in various ways, for example, with XPath expressions. The access
-                methods are defined statically in the <classname>By</classname> class.
-            </para>
+        <para>
+            Consider the following query:
+        </para>
 
-            <para>
-                These tasks are realized in the following test code:
-            </para>
+        <programlisting><?pocket-size 75% ?><![CDATA[List<ButtonElement> buttons = $(ButtonElement.class).all();]]></programlisting>
 
-            <programlisting><?pocket-size 65% ?><![CDATA[@Test
-public void testCase1() throws Exception {
-    driver.get(baseUrl + "/mycontext/myui");
-    
-    // Get the button's element.
-    // (Actually the caption element inside the button.)
-    // Use the component ID assigned with setId().
-    WebElement button = driver.findElement(By.xpath(
-        "id('main.button'])/span/span"));
-    
-    // Get the caption text
-    assertEquals("Push Me!", button.getText());
-    
-    // And click it. It's OK to click the caption element.
-    button.click();
+        <para>
+            The query returns a list of HTML elements of all the
+            <classname>Button</classname> components in the UI. Every Vaadin component has
+            its corresponding element class, which has methods to interact with the
+            particular component type. We could control the buttons found by the query,
+            for example, by clicking them as follows:
+        </para>
 
-    // Get the Label's element by its widget path.
-    WebElement label = driver.findElement(By.vaadin(
-        "mycontextmyui::"+
-        "/VVerticalLayout[0]/Slot[1]/VLabel[0]"));
+        <!-- TODO ... -->
+        <programlisting><?pocket-size 75% ?><![CDATA[for (ButtonElement b: buttons)
+    b.click();]]></programlisting>
 
-    // Make the assertion
-    assertEquals("Thanks!", label.getText());
-}]]></programlisting>
+        <para>
+            In the following sub-sections, we look into the details of element queries.
+        </para>
+
+        <section xml:id="testbench.elementquery.create">
+            <title>Querying Elements (<methodname>$</methodname>)</title>
 
             <para>
-                You can also use URI fragments in the URL to open the application at a
-                specific state. <phrase condition="web">For information about URI fragments, see <xref
-                linkend="advanced.urifu"/>.</phrase>
-            </para>
-
-            <para>
-                You should use the JUnit assertion commands. They are static methods
-                defined in the <package>org.junit.Assert</package> class, which you can
-                import (for example) with:
-            </para>
-
-            <programlisting><![CDATA[import static org.junit.Assert.assertEquals;]]></programlisting>
-
-            <para>
-                Please see the <link
-                xlink:href="http://seleniumhq.org/docs/03_webdriver.html#selenium-webdriver-api-commands-and-operations">Selenium
-                API documentation</link> for a complete reference of the element search
-                methods in the <classname>WebDriver</classname> and
-                <classname>By</classname> classes and for the interaction commands in the
-                <classname>WebElement</classname> class.
-            </para>
-
-            <para>
-                TestBench has a collection of its own commands, defined in the
-                <interfacename>TestBenchCommands</interfacename> interface. You can get a command
-                object that you can use by calling <literal>testBench(driver)</literal> in
-                a test case.
-            </para>
-
-            <para>
-                While you can develop tests simply with test cases as described above, for
-                the sake of maintainability it is often best to modularize the test code
-                further, such as to separate testing at the levels of business logic and
-                the page layout. See <xref linkend="testbench.development.maintainable"/>
-                for information about using page objects for this purpose.
+                The <methodname>$</methodname> method in
+                <classname>TestBenchTestcase</classname> creates an
+                <classname>ElementQuery</classname> that looks for the given element
+                class. The search is done recursively in the context.
             </para>
         </section>
 
-        <section xml:id="testbench.development.waitforvaadin">
+        <section xml:id="testbench.elementquery.nonrecursive">
+            <title>Non-Recursive Queries (<methodname>$$</methodname>)</title>
+
+            <para>
+                The <methodname>$$</methodname> method...
+            </para>
+        </section>
+
+        <section xml:id="testbench.elementquery.terminators">
+            <title>Query Terminators</title>
+
+            <para>
+                A query is finalized by a sub-query that returns an element or a
+                collection of elements.
+            </para>
+
+            <variablelist>
+                <varlistentry>
+                    <term><methodname>first()</methodname></term>
+                    <listitem>
+                        <para>
+                            Returns the first found element.
+                        </para>
+                    </listitem>
+                </varlistentry>            
+                <varlistentry>
+                    <term><methodname>get()</methodname></term>
+                    <listitem>
+                        <para>
+                            Returns the element by index in the collection of matching
+                            elements.
+                        </para>
+                    </listitem>
+                </varlistentry>            
+                <varlistentry>
+                    <term><methodname>all()</methodname></term>
+                    <listitem>
+                        <para>
+                            Returns a <interfacename>List</interfacename> of elements of
+                            the query type.
+                        </para>
+                    </listitem>
+                </varlistentry>            
+                <varlistentry>
+                    <term><methodname>id()</methodname></term>
+                    <listitem>
+                        <para>
+                            Returns the unique element having the given ID. Element IDs
+                            must always be unique in the web page. It is therefore
+                            meaningless to make a complex query to match the ID, just
+                            matching the element class is enough.
+                        </para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+
+            <section xml:id="testbench.elementquery.elements">
+                <title>Component Elements</title>
+
+                <para>
+                    TBD
+                </para>
+            </section>
+        </section>
+    </section>
+
+    <section xml:id="testbench.selectors">
+        <title>Element Selectors</title>
+
+        <para>
+            In addition to the high-level ElementQuery API described in the previous
+            section, Vaadin TestBench includes the lower-level Selenium WebDriver API,
+            with Vaadin extensions. Like the ElementQuery API, it can be considered a
+            domain-specific language (DSL) that is embedded in the
+            <classname>TestBenchTestcase</classname> class.
+        </para>
+
+        <para>
+            The available selectors are defined as static methods in the
+            <classname>com.vaadin.testbench.By</classname> class. They create and return a
+            <classname>By</classname> instance, which you can use for the
+            <methodname>findElement()</methodname> method in
+            <classname>WebDriver</classname>.
+        </para>
+
+        <!-- TODO Something here. -->
+
+        <para>
+            You can find elements also by a plain XPath expression, an element ID, CSS
+            style class, etc. The selectors are exported with the JUnit test cases as
+            corresponding Vaadin or Selenium selector methods.
+        </para>
+
+        <para>
+            The ID, CSS class, and Vaadin selectors are described below. For others, we
+            refer to the <link
+            xlink:href="http://seleniumhq.org/docs/03_webdriver.html">Selenium WebDriver
+            API documentation</link>.
+        </para>
+
+        <para>
+            Some selectors are not applicable to all elements, for example if an element
+            does not have an ID or it is outside the Vaadin application. In such case,
+            another selector is used according to a preference order. You can change the
+            order of the preferred selectors by selecting
+            <menuchoice><guimenu>Options</guimenu><guisubmenu>Options</guisubmenu><guimenuitem>Locator
+            Builders</guimenuitem></menuchoice> and dragging the selectors (or locators)
+            to a preferred order. Normally, the Vaadin selector should be at top of the
+            list.
+        </para>
+
+        <section xml:id="testbench.selectors.robustness">
+            <title>Selector Robustness</title>
+
+            <para>
+                As mentioned in <xref linkend="testbench.preparing"/>, the selectors have
+                differences in their robustness, which is important to avoid failed tests
+                if there are irrelevant changes in the HTML DOM tree.
+            </para>
+
+            <para>
+                The Vaadin selector (<methodname>By.vaadin()</methodname> in WebDriver)
+                uses the logical widget hierarchy to find the HTML element to test,
+                instead of the exact DOM structure. This makes it rather robust, though
+                still vulnerable to irrelevant changes in the exact component hierarchy.
+            </para>
+
+            <para>
+                The XPath selector can be highly vulnerable to changes in the DOM path if
+                the path is given exactly from the body element of the page. It is,
+                however, very flexible, and can be used in robust ways, for example, by
+                selecting by HTML element and a CSS class name or an attribute value.
+            </para>
+
+            <para>
+                You can likewise use a CSS selector to select specific components by CSS
+                class in a robust way.
+            </para>
+        </section>
+
+        <section xml:id="testbench.selectors.id">
+            <title>Finding by ID</title>
+
+            <para>
+                Selecting elements by their HTML element <literal>id</literal>
+                attribute is usually the easiest way to select elements. It requires
+                that you use component IDs, as described in <xref
+                    linkend="testbench.preparing"/>. The ID is used as is for the
+                <literal>id</literal> attribute of the top element of the
+                component. Selecting is done by the <methodname>By.id()</methodname>
+                selector.
+            </para>
+
+            <para>
+                For example, in the <filename>SimpleCalculatorITCase.java</filename>
+                example, we use the component ID as follows to click on the calculator
+                buttons:
+            </para>
+
+            <programlisting><?pocket-size 75% ?><![CDATA[@Test
+public void testOnePlusTwo() throws Exception {
+    openCalculator();
+
+    // Click the buttons in the user interface
+    getDriver().findElement(By.id("button_1")).click();
+    getDriver().findElement(By.id("button_+")).click();
+    getDriver().findElement(By.id("button_2")).click();
+    getDriver().findElement(By.id("button_=")).click();
+
+    // Get the result label value
+    assertEquals("3.0", getDriver().findElement(
+            By.id("display")).getText());
+}]]></programlisting>
+
+            <para>
+                The ID selectors are used extensively in the TestBench examples.
+            </para>
+        </section>
+
+        <section xml:id="testbench.selectors.vaadin">
+            <title>Finding by Vaadin Selector</title>
+
+            <para>
+                In addition to the Selenium selectors, Vaadin TestBench provides a
+                <emphasis>Vaadin selector</emphasis>, which allows pointing to a
+                Vaadin component by its layout widget path. 
+            </para>
+
+            <para>
+                You can create a Vaadin selector with the
+                <methodname>By.vaadin()</methodname> method. You need to use the
+                Vaadin <classname>By</classname>, defined in the
+                <package>com.vaadin.testbench</package> package, which extends the
+                Selenium <classname>By</classname>.
+            </para>
+
+            <para>
+                A Vaadin selector begins with a UI identifier. It is the
+                URL path of the UI, but without any slashes or other special
+                characters. For example, <literal>/book-examples/tobetested</literal>
+                would be <literal>bookexamplestobetested</literal>. After the
+                identifier, comes two colons "<literal>::</literal>", followed by a
+                slash-delimited component path to the component to be selected. The
+                elements in the component path are client-side classes of the Vaadin
+                user interfacer components. For example, the server-side
+                <classname>VerticalLayout</classname> component has
+                <classname>VVerticalLayout</classname> client-side counterpart. All
+                path elements except the leaves are component containers, usually
+                layouts. The exact contained component is identified by its index in
+                brackets.
+            </para>
+
+            <para>
+                A reference to a component ID is given with a <literal>PID_S</literal>
+                suffix to the ID.
+            </para>
+
+            <para>
+                For example, if the ID is <literal>main.button</literal>, as it was
+                set in the application example earlier, you could find and test it as
+                follows:
+            </para>
+
+            <programlisting><?pocket-size 75% ?><![CDATA[// Get the button's element.
+// Use the ID set with setId().
+WebElement button = driver.findElement(By.vaadin(
+    "bookexamplestobetested::PID_Smain.button"));
+
+// Get the caption text
+assertEquals("Push Me!", button.getText());
+
+// And click it
+button.click();
+
+// Get the Label's element by full path
+WebElement label = driver.findElement(By.vaadin(
+    "bookexamplestobetested::/VVerticalLayout[0]/"+
+    "ChildComponentContainer[1]/VLabel[0]"));
+
+// Make the assertion
+assertEquals("Thanks!", label.getText());]]></programlisting>
+
+        </section>
+
+        <section xml:id="testbench.selectors.css">
+            <title>Finding by CSS Class</title>
+
+            <para>
+                An element with a particular CSS style class name can be selected with the
+                <methodname>By.className()</methodname> method. CSS selectors are useful
+                for elements which have no ID, nor can be found easily from the component
+                hierarchy, but do have a particular unique CSS style. Tooltips are one
+                example, as they are floating <literal>div</literal> elements under the
+                root element of the application. Their <literal>v-tooltip</literal> style
+                makes it possible to select them as follows:
+            </para>
+
+            <programlisting><?pocket-size 75% ?><![CDATA[// Verify that the tooltip contains the expected text
+String tooltipText = driver.findElement(
+    By.className("v-tooltip")).getText();]]></programlisting>
+
+            <para>
+                For a complete example, see the
+                <filename>AdvancedCommandsITCase.java</filename> file in the examples.
+            </para>
+        </section>
+    </section>
+
+    <section xml:id="testbench.special">
+        <title>Special Test Features</title>
+
+        <para>
+            In the following, we go through a number of TestBench features for handling
+            special cases, such as tooltips, scrolling, notifications, context menus, and
+            profiling responsiveness. Finally, we look into the Page Object pattern.
+        </para>
+
+        <section xml:id="testbench.special.waitforvaadin">
             <title>Waiting for Vaadin</title>
 
             <para>
@@ -1696,13 +1686,14 @@ public void testCase1() throws Exception {
             </para>
         </section>
 
-        <section xml:id="testbench.development.tooltip">
+        <section xml:id="testbench.special.tooltip">
             <title>Testing Tooltips</title>
 
             <para>
-                Component tooltips show when you hover the mouse over a component. Events
-                caused by hovering are not recorded by Recorder, so this interaction
-                requires special handling when testing.
+                Component tooltips show when you hover the mouse over a component. Showing
+                them require special command. Handling them is also special, as the
+                tooltips are floating overlay element, which are not part of the normal
+                component hierarchy.
             </para>
 
             <para>
@@ -1747,7 +1738,7 @@ public void testTooltip() throws Exception {
 
         </section>
 
-        <section xml:id="testbench.development.scrolling">
+        <section xml:id="testbench.special.scrolling">
             <title>Scrolling</title>
 
             <para>
@@ -1764,7 +1755,7 @@ public void testTooltip() throws Exception {
             </para>
         </section>
 
-        <section xml:id="testbench.development.notifications">
+        <section xml:id="testbench.special.notifications">
             <title>Testing Notifications</title>
 
             <para>
@@ -1778,7 +1769,7 @@ public void testTooltip() throws Exception {
             </para>
         </section>
 
-        <section xml:id="testbench.development.contextmenu">
+        <section xml:id="testbench.special.contextmenu">
             <title>Testing Context Menus</title>
 
             <para>
@@ -1811,7 +1802,7 @@ getDriver().findElement(
             </para>
         </section>
 
-        <section xml:id="testbench.development.timing">
+        <section xml:id="testbench.special.timing">
             <title>Profiling Test Execution Time</title>
 
             <para>
@@ -1977,46 +1968,47 @@ public void verifyServerExecutionTime() throws Exception {
 }]]></programlisting>
 
         </section>
+    </section>
 
-        <section xml:id="testbench.development.maintainable">
-            <title>Creating Maintainable Tests</title>
+    <section xml:id="testbench.maintainable">
+        <title>Creating Maintainable Tests</title>
+
+        <para>
+            The first important rule in developing tests is to keep them readable and
+            maintainable. Otherwise, when the test fail, such as after refactoring the
+            application code, the developers get impatient in trying to understand them to
+            fix them, and easily disable them. Readability and maintainability can be
+            improved with the Page Object Pattern described below.
+        </para>
+
+        <para>
+            The second rule is to run the tests often. It is best to use a continuous
+            integration server to run them at least once a day, or preferably on every
+            commit.
+        </para>
+
+        <section xml:id="testbench.maintainable.pageobject">
+            <title>The Page Object Pattern</title>
 
             <para>
-                The first important rule in developing tests is to keep them readable and
-                maintainable. Otherwise, when the test fail, such as after refactoring the
-                application code, the developers get impatient in trying to understand
-                them to fix them, and easily disable them. Readability and maintainability
-                can be improved with the Page Object Pattern described below.
+                The Page Object Pattern aims to simplify and modularize testing
+                application views. The pattern follows the design principle of <link
+                xlink:href="http://en.wikipedia.org/wiki/Separation_of_concerns">separation
+                of concerns</link>, to handle different concerns in separate modules,
+                while hiding information irrelevant to other tests by encapsulation.
             </para>
 
             <para>
-                The second rule is to run the tests often. It is best to use a continuous
-                integration server to run them at least once a day, or preferably on every
-                commit.
+                A <emphasis>page object</emphasis> has methods to interact with a view or
+                a sub-view, and to retrieve values in the view. You also need a method to
+                open the page and navigate to the proper view.
             </para>
 
-            <section xml:id="testbench.development.maintainable.pageobject">
-                <title>The Page Object Pattern</title>
+            <para>
+                For example:
+            </para>
 
-                <para>
-                    The Page Object Pattern aims to simplify and modularize testing
-                    application views. The pattern follows the design principle of <link
-                    xlink:href="http://en.wikipedia.org/wiki/Separation_of_concerns">separation
-                    of concerns</link>, to handle different concerns in separate modules,
-                    while hiding information irrelevant to other tests by encapsulation.
-                </para>
-
-                <para>
-                    A <emphasis>page object</emphasis> has methods to interact with a view
-                    or a sub-view, and to retrieve values in the view. You also need a
-                    method to open the page and navigate to the proper view. 
-                </para>
-
-                <para>
-                    For example:
-                </para>
-
-                <programlisting><?pocket-size 70% ?><![CDATA[public class CalculatorPageObject
+            <programlisting><?pocket-size 70% ?><![CDATA[public class CalculatorPageObject
        extends TestBenchTestCase {
     @FindBy(id = "button_=")
     private WebElement equals;
@@ -2067,16 +2059,16 @@ public void verifyServerExecutionTime() throws Exception {
     ...
 }]]></programlisting>
 
-                <para>
-                    If you have <classname>WebElement</classname> members annotated with
-                    <classname>@FindBy</classname>, they can be automatically filled with
-                    the HTML element matching the given component ID, as if done with
-                    <literal>driver.findElement(By.id(fieldname))</literal>. To do so, you
-                    need to create the page object with <classname>PageFactory</classname>
-                    as is done in the following test setup:
-                </para>
+            <para>
+                If you have <classname>WebElement</classname> members annotated with
+                <classname>@FindBy</classname>, they can be automatically filled with the
+                HTML element matching the given component ID, as if done with
+                <literal>driver.findElement(By.id(fieldname))</literal>. To do so, you
+                need to create the page object with <classname>PageFactory</classname> as
+                is done in the following test setup:
+            </para>
 
-                <programlisting><?pocket-size 65% ?><![CDATA[
+            <programlisting><?pocket-size 65% ?><![CDATA[
 public class PageObjectExampleITCase {
     private CalculatorPageObject calculator;
 
@@ -2090,16 +2082,16 @@ public class PageObjectExampleITCase {
     }
     ...]]></programlisting>
 
-                <para>
-                    Test cases can use these methods at business logic level, without
-                    knowing about the exact structure of the views.
-                </para>
+            <para>
+                Test cases can use these methods at business logic level, without knowing
+                about the exact structure of the views.
+            </para>
 
-                <para>
-                    For example:
-                </para>
-
-                <programlisting><?pocket-size 75% ?><![CDATA[@Test
+            <para>
+                For example:
+            </para>
+            
+            <programlisting><?pocket-size 75% ?><![CDATA[@Test
 public void testAddCommentRowToLog() throws Exception {
     calculator.open();
 
@@ -2112,36 +2104,34 @@ public void testAddCommentRowToLog() throws Exception {
     ...
 }]]></programlisting>
 
-                <para>
-                    You can find the complete example of the Page Object Pattern in the
-                    <filename>example/src/test/java/com/vaadin/testbenchexample/pageobjectexample/</filename>
-                    folder in the TestBench installation package. The
-                    <filename>PageObjectExampleITCase.java</filename> runs tests on the
-                    Calc UI (also included in the example sources), using the page objects
-                    to interact with the different parts of the UI and to check the
-                    results.
-                </para>
+            <para>
+                You can find the complete example of the Page Object Pattern in the
+                <filename>example/src/test/java/com/vaadin/testbenchexample/pageobjectexample/</filename>
+                folder in the TestBench installation package. The
+                <filename>PageObjectExampleITCase.java</filename> runs tests on the Calc
+                UI (also included in the example sources), using the page objects to
+                interact with the different parts of the UI and to check the results.
+            </para>
 
-                <para>
-                    The page objects included in the <filename>pageobjects</filename>
-                    subfolder are as follows:
-                </para>
+            <para>
+                The page objects included in the <filename>pageobjects</filename>
+                subfolder are as follows:
+            </para>
 
-                <itemizedlist>
-                    <listitem><para>The <classname>CalculatorPageObject</classname> (as
-                    outlined in the example code above) has methods to click the buttons
-                    in the calculator and the retrieve the result shown in the
-                    "display".</para></listitem>
+            <itemizedlist>
+                <listitem><para>The <classname>CalculatorPageObject</classname> (as
+                outlined in the example code above) has methods to click the buttons in
+                the calculator and the retrieve the result shown in the
+                "display".</para></listitem>
 
-                    <listitem><para>The <classname>LogPageObject</classname> can retrieve
-                    the content of the log entries in the log table, and right-click them
-                    to open the comment sub-window.</para></listitem>
+                <listitem><para>The <classname>LogPageObject</classname> can retrieve the
+                content of the log entries in the log table, and right-click them to open
+                the comment sub-window.</para></listitem>
 
-                    <listitem><para>The <classname>AddComment</classname> can enter a
-                    comment string in the comment editor sub-window and submit it (click
-                    the <guilabel>Add</guilabel> button).</para></listitem>
-                </itemizedlist>
-            </section>
+                <listitem><para>The <classname>AddComment</classname> can enter a comment
+                string in the comment editor sub-window and submit it (click the
+                <guilabel>Add</guilabel> button).</para></listitem>
+            </itemizedlist>
         </section>
     </section>
 
@@ -2509,6 +2499,158 @@ tooltip_firefox_12.0_2.png</screen>
                 </varlistentry>
             </variablelist>
         </section>            
+    </section>
+
+    <section xml:id="testbench.execution">
+        <title>Running Tests</title>
+
+        <para>
+            During test development, you usually run the tests from your IDE. After that,
+            you want to have them run by a build system, possibly under a continuous
+            integration system. In the following, we describe how to run tests by Ant and
+            Maven.
+        </para>
+
+        <section xml:id="testbench.execution.ant">
+            <title>Running Tests with Ant</title>
+
+            <para>
+                Apache Ant has built-in support for executing JUnit tests. To enable the
+                support, you need to have the JUnit library <filename>junit.jar</filename>
+                and its Ant integration library <filename>ant-junit.jar</filename> in the
+                Ant classpath, as described in the Ant documentation.
+            </para>
+
+            <para>
+                Once enabled, you can use the <literal>&lt;junit&gt;</literal> task in an
+                Ant script. The following example assumes that the source files are
+                located under a <filename>src</filename> directory under the current
+                directory and compiles them to the <filename>classes</filename>
+                directory. The the class path is defined with the
+                <literal>classpath</literal> reference ID and should include the TestBench
+                JAR and all relevant dependencies.
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[<project default="run-tests">
+    <path id="classpath">
+        <fileset dir="lib"
+                 includes="vaadin-testbench-standalone-*.jar" />
+    </path>
+
+    <!-- This target compiles the JUnit tests. -->
+    <target name="compile-tests">
+        <mkdir dir="classes" />
+        <javac srcdir="src" destdir="classes"
+               debug="on" encoding="utf-8">
+            <classpath>
+                <path refid="classpath" />
+            </classpath>
+        </javac>
+    </target>
+
+    <!-- This target calls JUnit -->
+    <target name="run-tests" depends="compile-tests">
+        <junit fork="yes">
+            <classpath>
+                <path refid="classpath" />
+                <pathelement path="classes" />
+            </classpath>
+
+            <formatter type="brief" usefile="false" />
+                                
+            <batchtest>
+                <fileset dir="src">
+                    <include name="**/**.java" />
+                </fileset>
+            </batchtest>
+        </junit>
+    </target>
+</project>]]></programlisting>
+
+            <para>
+                You also need to deploy the application to test, and possibly launch a
+                dedicated server for it.
+            </para>
+        </section>
+
+        <section xml:id="testbench.execution.maven">
+            <title>Running Tests with Maven</title>
+
+            <para>
+                Executing JUnit tests with Vaadin TestBench under Maven requires defining
+                it as a dependency in any POM that needs to execute TestBench tests.
+            </para>
+
+            <para>
+                A complete example of a Maven test setup is given in the
+                <filename>example/maven</filename> folder in the installation
+                package. Please see the <filename>README</filename> file in the folder for
+                further instructions.
+            </para>
+
+            <section xml:id="testbench.execution.maven.dependency">
+                <title>Defining TestBench as a Dependency</title>
+
+                <para>
+                    You need to define the TestBench library as a dependency in the Maven
+                    POM of your project as follows:
+                </para>
+
+                <programlisting>    &lt;dependency&gt;
+      &lt;groupId&gt;com.vaadin&lt;/groupId&gt;
+      &lt;artifactId&gt;vaadin-testbench&lt;/artifactId&gt;
+      &lt;version&gt;&version.testbench;&lt;/version&gt;
+    &lt;/dependency&gt;</programlisting>
+
+                <para>
+                    For instructions on how to create a new Vaadin project with Maven,
+                    please see <xref linkend="getting-started.maven"/>.
+                </para>
+            </section>
+
+            <section xml:id="testbench.execution.maven.running">
+                <title>Running the Tests</title>
+
+                <para>
+                    To compile and run the tests, simply execute the
+                    <literal>test</literal> lifecycle phase with Maven as follows:
+                </para>
+
+                <screen><prompt>$</prompt> <command>mvn</command> test
+...
+-----------------------------------------------------
+ T E S T S
+-----------------------------------------------------
+Running TestBenchExample
+Tests run: 6, Failures: 1, Errors: 0, Skipped: 1, Time elapsed: 36.736 sec &lt;&lt;&lt; FAILURE!
+
+Results :
+
+Failed tests: 
+  testDemo(TestBenchExample):
+      expected:&lt;[5/17/]12&gt; but was:&lt;[17.6.20]12&gt;
+
+Tests run: 6, Failures: 1, Errors: 0, Skipped: 1
+...</screen>
+
+                <para>
+                    The example configuration starts Jetty to run the application that is
+                    tested.
+                </para>
+
+                <para>
+                    If you have screenshot tests enabled, as mentioned in <xref
+                    linkend="testbench.installation.examples"/>, you will get failures
+                    from screenshot comparison. The failed screenshots are written to the
+                    <filename>target/testbench/errors</filename> folder. To enable
+                    comparing them to "expected" screenshots, you need to copy the
+                    screenshots to the
+                    <filename>src/test/resources/screenshots/reference/</filename>
+                    folder. See <xref linkend="testbench.screenshots"/> for more
+                    information regarding screenshots.
+                </para>
+            </section>
+        </section>
     </section>
 
     <section xml:id="testbench.grid">
