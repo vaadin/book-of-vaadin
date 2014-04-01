@@ -124,6 +124,7 @@
 
             <itemizedlist>
                 <listitem>Proper handling of Ajax-based communications of Vaadin</listitem>
+                <listitem>A high-level element query API for Vaadin components</listitem>
                 <listitem>Performance testing of Vaadin applications</listitem>
                 <listitem>Screen capture comparison</listitem>
                 <listitem>Finding HTML elements by a Vaadin selector</listitem>
@@ -1323,15 +1324,14 @@ driver = TestBench.createDriver(
             The high-level ElementQuery API allows querying Vaadin components in the
             browser according to their component class type, hierarchy, caption, and other
             properties. Once one or more components are found, they can be interacted
-            upon. The query API could be considered an embedded domain-specific language
-            (EDSL), which can be used in the <classname>TestBenchTestcase</classname>
-            class.
+            upon. The query API forms an domain-specific language (DSL), embedded in the
+            <classname>TestBenchTestcase</classname> class.
         </para>
 
         <para>
-            The basic idea is that element queries yield queries, which can again be
-            queried upon, until terminated by a terminal query that returns one or more
-            elements.
+            The basic idea of element queries match elements and return queries, which can
+            again be queried upon, until terminated by a terminal query that returns one
+            or more elements.
         </para>
 
         <para>
@@ -1356,22 +1356,135 @@ driver = TestBench.createDriver(
             In the following sub-sections, we look into the details of element queries.
         </para>
 
-        <section xml:id="testbench.elementquery.create">
-            <title>Querying Elements (<methodname>$</methodname>)</title>
+        <section xml:id="testbench.elementquery.debugwindow">
+            <title>Generating Queries with Debug Window</title>
 
             <para>
-                The <methodname>$</methodname> method in
-                <classname>TestBenchTestcase</classname> creates an
-                <classname>ElementQuery</classname> that looks for the given element
-                class. The search is done recursively in the context.
+                You can use the debug window to easily generate the element query code to
+                select a particular element in the UI. This should be especially useful
+                when starting to use TestBench, to get the idea what the queries should be
+                like.
+            </para>
+
+            <para>
+                First, enable the debug window with the <literal>&amp;debug</literal>
+                parameter for the application, as described in more detail in <xref
+                linkend="advanced.debug"/>. You can interact with the UI in any way you
+                like before generating the query code, but we recommend that you proceed
+                by following the sequence in which the user would use the UI in each use
+                case, making the queries at each step.
+            </para>
+
+            <para>
+                Switch to the TestBench tab in the debug window, and enable the pick mode
+                by clicking the small button. Now, when you hover the mouse pointer on
+                elements, it highlights them, and when you click one, it generates the
+                TestBench element query to find the element. Use of the debug window is
+                illustrated in <xref
+                linkend="figure.testbench.elementquery.debugwindow"/>.
+            </para>
+
+            <figure xml:id="figure.testbench.elementquery.debugwindow">
+                <title>Using Debug Window to Generate Element Queries</title>
+                <mediaobject>
+                    <imageobject role="html">
+                        <imagedata align="center" fileref="img/testbench/debugwindow-select-annotated-lo.png"/>
+                    </imageobject>
+                    <imageobject role="fo">
+                        <imagedata scale="70" smallscale="100%" align="center" fileref="img/testbench/debugwindow-select-annotated-hi.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+
+            <para>
+                You can select and copy and paste the code from the debug window to your
+                editor. To exit the pick mode, click the pick button again.
+            </para>
+
+            <para>
+                The debug window feature is available in Vaadin 7.2 and later.
             </para>
         </section>
 
-        <section xml:id="testbench.elementquery.nonrecursive">
-            <title>Non-Recursive Queries (<methodname>$$</methodname>)</title>
+        <section xml:id="testbench.elementquery.create">
+            <title>Querying Elements by Component Type (<methodname>$</methodname>)</title>
 
             <para>
-                The <methodname>$$</methodname> method...
+                The <methodname>$</methodname> method creates an
+                <classname>ElementQuery</classname> that looks for the given element
+                class. The method is available both in
+                <classname>TestBenchTestcase</classname> and
+                <classname>ElementQuery</classname>, which defines the context. The search
+                is done recursively in the context.
+            </para>
+
+            <programlisting><?pocket-size 75% ?><![CDATA[// Find the first OK button in the UI
+ButtonElement button = $(ButtonElement.class)
+    .caption("OK").first();
+
+// A nested query where the context of the latter 
+// component type query is the matching elements
+// - matches the first Label inside the "content" layout.
+LabelElement label = $(VerticalLayoutElement.class)
+    .id("content").$(LabelElement.class).first();]]></programlisting>
+
+        </section>
+
+        <section xml:id="testbench.elementquery.nonrecursive">
+            <title>Non-Recursive Component Queries (<methodname>$$</methodname>)</title>
+
+            <para>
+                The <methodname>$$</methodname> method creates a non-recursive
+                <classname>ElementQuery</classname>. It is a shorthand for first creating
+                a recursive query with <methodname>$</methodname> and then calling
+                <methodname>recursive(false)</methodname> for the query.
+            </para>
+        </section>
+
+        <section xml:id="testbench.elementquery.testbenchelement">
+            <title>Element Classes</title>
+
+            <indexterm zone="testbench.elementquery.testbenchelement">
+                <primary><classname>TestBenchElement</classname></primary>
+            </indexterm>
+
+            <para>
+                Each Vaadin component has a corresponding element class in TestBench,
+                which contains methods for interacting with the particular component. The
+                element classes extend <classname>TestBenchElement</classname>. It
+                implements Selenium <interfacename>WebElement</interfacename>, so the
+                Selenium element API can be used directly. The element classes are
+                distributed in a Vaadin library rather than with TestBench, as they must
+                correspond with the Vaadin version used in the application.
+            </para>
+
+            <para>
+                In addition to components, other Vaadin UI elements such as notifications
+                (see <xref linkend="testbench.special.notifications"/>) can have their
+                corresponding element class. Add-on libraries may also define their custom
+                element classes.
+            </para>
+
+            <para>
+                <classname>TestBenchElement</classname> is a TestBench command executor,
+                so you can always use an element to create query in the sub-tree of the
+                element. For example, in the following we first find a layout element by
+                its ID and then do a sub-query to find the first label in it:
+            </para>
+
+            <programlisting><?pocket-size 75% ?><![CDATA[VerticalLayoutElement layout =
+    $(VerticalLayoutElement.class).id("content");
+LabelElement label = layout.$(LabelElement.class).first();]]></programlisting>
+
+        </section>
+
+        <section xml:id="testbench.elementquery.elementquery">
+            <title><classname>ElementQuery</classname> Objects</title>
+
+            <para>
+                You can use an <classname>ElementQuery</classname> object to either make
+                sub-queries to refine the query, or use a query terminator to finalize the
+                query and get one or more matching elements.
             </para>
         </section>
 
@@ -1424,10 +1537,14 @@ driver = TestBench.createDriver(
             </variablelist>
 
             <section xml:id="testbench.elementquery.elements">
-                <title>Component Elements</title>
+                <title>Web Elements</title>
 
                 <para>
-                    TBD
+                    A query returns one or more elements extending Selenium
+                    <classname>WebElement</classname>. The particular element-specific
+                    class offers methods to manipulate the associated Vaadin component,
+                    while you can also use the lower-level general-purpose methods defined
+                    in <classname>WebElement</classname>.
                 </para>
             </section>
         </section>
@@ -1439,8 +1556,10 @@ driver = TestBench.createDriver(
         <para>
             In addition to the high-level ElementQuery API described in the previous
             section, Vaadin TestBench includes the lower-level Selenium WebDriver API,
-            with Vaadin extensions. Like the ElementQuery API, it can be considered a
-            domain-specific language (DSL) that is embedded in the
+            with Vaadin extensions. You can find elements also by a plain XPath
+            expression, an element ID, CSS style class, and so on. You can use such
+            selectors together with the element queries. Like the ElementQuery API, it can
+            be considered a domain-specific language (DSL) that is embedded in the
             <classname>TestBenchTestcase</classname> class.
         </para>
 
@@ -1453,12 +1572,6 @@ driver = TestBench.createDriver(
         </para>
 
         <!-- TODO Something here. -->
-
-        <para>
-            You can find elements also by a plain XPath expression, an element ID, CSS
-            style class, etc. The selectors are exported with the JUnit test cases as
-            corresponding Vaadin or Selenium selector methods.
-        </para>
 
         <para>
             The ID, CSS class, and Vaadin selectors are described below. For others, we
@@ -1482,16 +1595,17 @@ driver = TestBench.createDriver(
             <title>Selector Robustness</title>
 
             <para>
-                As mentioned in <xref linkend="testbench.preparing"/>, the selectors have
-                differences in their robustness, which is important to avoid failed tests
-                if there are irrelevant changes in the HTML DOM tree.
+                Before we proceed, it is important to note that selectors have differences
+                in their robustness. Robustness is important for avoiding failed tests
+                when there are irrelevant changes in the HTML DOM tree.
             </para>
 
             <para>
-                The Vaadin selector (<methodname>By.vaadin()</methodname> in WebDriver)
-                uses the logical widget hierarchy to find the HTML element to test,
-                instead of the exact DOM structure. This makes it rather robust, though
-                still vulnerable to irrelevant changes in the exact component hierarchy.
+                The ElementQuery API and the Vaadin selector
+                (<methodname>By.vaadin()</methodname>) use the logical widget hierarchy to
+                find the HTML element to test, instead of the exact DOM structure. This
+                makes them rather robust, though still vulnerable to irrelevant changes in
+                the exact component hierarchy.
             </para>
 
             <para>
@@ -1741,6 +1855,10 @@ public void testTooltip() throws Exception {
         <section xml:id="testbench.special.scrolling">
             <title>Scrolling</title>
 
+            <indexterm zone="testbench.special.scrolling">
+                <primary>scrolling</primary>
+            </indexterm>
+
             <para>
                 Some Vaadin components, such as <classname>Table</classname> and
                 <classname>Panel</classname> have a scrollbar. To get hold of the
@@ -1758,19 +1876,54 @@ public void testTooltip() throws Exception {
         <section xml:id="testbench.special.notifications">
             <title>Testing Notifications</title>
 
+            <indexterm zone="testbench.special.notifications">
+                <primary><classname>Notification</classname></primary>
+                <secondary>testing</secondary>
+            </indexterm>
+
             <para>
-                When testing notifications, you will need to close the notification box.
-                You need to get hold of the
-                <interfacename>TestBenchElementCommands</interfacename> interface from the
-                <classname>WebElement</classname> of the notification element with
-                <methodname>testBenchElement(WebElement)</methodname>. The
-                <methodname>closeNotification()</methodname> method in the interface
-                closes the notification.
+                You can find notification elements by the
+                <classname>NotificationElement</classname> class in the element query API.
+            </para>
+
+            <para>
+                Let us assume that you pop the notifcation up as follows:
+            </para>
+
+            <programlisting><?pocket-size 75% ?><![CDATA[Button button = new Button("Click Me!");
+button.addClickListener(new Button.ClickListener() {
+    public void buttonClick(ClickEvent event) {
+        Notification.show("Thank You!");
+    }
+});]]></programlisting>
+
+            <para>
+                You could then check for the notification as follows:
+            </para>
+
+            <programlisting><?pocket-size 70% ?><![CDATA[// Click the button to open the notification
+ButtonElement button =
+    $(ButtonElement.class).caption("Click Me!").first();
+button.click();
+
+// Verify the notification
+NotificationElement notification =
+        $(NotificationElement.class).first();
+assertEquals("Thank You!", notification.getText());
+notification.closeNotification();]]></programlisting>
+
+            <para>
+                You need to close the notification box with
+                <methodname>closeNotification()</methodname> to move forward.
             </para>
         </section>
 
         <section xml:id="testbench.special.contextmenu">
             <title>Testing Context Menus</title>
+
+            <indexterm zone="testbench.special.contextmenu">
+                <primary>context menus</primary>
+            </indexterm>
 
             <para>
                 Opening context menus require special handling. You need to create a
