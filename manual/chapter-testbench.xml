@@ -39,7 +39,7 @@
         </para>
 
 		<figure xml:id="figure.testbench.webdriver">
-			<title>Controlling the Browser with WebDriver</title>
+			<title>Controlling the Browser with Testbench</title>
 			<mediaobject>
 				<imageobject role="html">
 					<imagedata align="center" fileref="img/testbench/webdriver-use-lo.png"/>
@@ -80,10 +80,10 @@
 
         <itemizedlist>
             <listitem>
-                <para>Develop tests in Java with the WebDriver</para>
+                <para>Control a web application from Java</para>
             </listitem>
             <listitem>
-                <para>Create component selectors in debug window</para>
+                <para>Generate component selectors in debug window</para>
             </listitem>
             <listitem>
                 <para>Validate UI state by assertions and screen capture comparison</para>
@@ -113,8 +113,8 @@
             <title>Based on Selenium</title>
 
             <para>
-                Vaadin TestBench is based on the Selenium web browser automation
-                library. With the Selenium WebDriver API, you can control browsers
+                Vaadin TestBench is based on the Selenium web browser automation library,
+                especially Selenium WebDriver, which allows you to control browsers
                 straight from Java code.
             </para>
 
@@ -251,39 +251,72 @@
         <title>Installing Vaadin TestBench</title>
 
         <para>
-            Installation of Vaadin TestBench covers the following tasks:
+            As with most Vaadin add-ons, you can install Vaadin TestBench as a Maven or
+            Ivy dependency in your project, or from an installation package. The
+            installation package contains some extra material, such as demo code and
+            documentation.
         </para>
-
-        <itemizedlist>
-            <listitem>
-                <para>Download and unpack the Vaadin TestBench installation package</para>
-            </listitem>
-            <listitem>
-                <para>Install Vaadin TestBench Library</para>
-            </listitem>
-        </itemizedlist>
 
         <para>
-            Which modules you need to install depends on whether you are developing tests
-            or running existing tests. Two basic installation types are covered in these
-            instructions:
+            The component element classes are Vaadin-specific. At the time of the writing,
+            they are packaged with TestBench, but this will probably change in future.
+            <!-- TODO Update when needed -->
         </para>
 
-        <itemizedlist>
-            <listitem>
-                <para>Test development installation on a workstation</para>
-            </listitem>
-            <listitem>
-                <para>Distributed grid installation</para>
-            </listitem>
-        </itemizedlist>
+        <para>
+            Additionally, you may need to install drivers for the browsers you are using.
+        </para>
 
         <section xml:id="testbench.installation.development">
-            <title>Test Development Installation</title>
+            <title>Test Development Setup</title>
 
             <para>
-                In a typical test development setup, you install Vaadin TestBench on a
-                workstation.
+                In a typical test development setup, you develop tests in a Java project
+                and run them on the development workstation. You can run the same tests in
+                a dedicated test server, such as a continuous integration system.
+            </para>
+
+            <para>
+                The Maven dependency would be as follows:
+            </para>
+
+            <programlisting><?pocket-size 75% ?>&lt;dependency&gt;
+    &lt;groupId&gt;com.vaadin&lt;/groupId&gt;
+    &lt;artifactId&gt;vaadin-testbench&lt;/artifactId&gt;
+    &lt;version&gt;<emphasis role="bold">4.x.x</emphasis>&lt;/version&gt;
+    &lt;scope&gt;test&lt;/scope&gt;
+&lt;/dependency&gt;</programlisting>
+
+            <para>
+                The Ivy dependency would be as follows:
+            </para>
+
+            <programlisting><?pocket-size 75% ?>&lt;dependency org="com.vaadin" name="vaadin-testbench"
+   rev="<emphasis role="bold">4.x.x</emphasis>" conf="test-&lt;default"/&gt;</programlisting>
+
+            <para>
+                The optional <literal>test-&lt;default</literal> configuration mapping
+                requires a <literal>test</literal> configuration in the Ivy module. It is
+                useful especially when building and testing the application in an Ant
+                script, where you can use the configuration to define libraries for the
+                web application and testing separately. When developing tests in Eclipse,
+                it is meaningless, and you can use <literal>default-&lt;default</literal>.
+            </para>
+
+            <para>
+                We generally recommend developing tests in a project or module separate
+                from the web application to be tested to avoid library problems. If the
+                tests are part of the same project, you may at least want to arrange the
+                source code and dependencies so that the test classes, the TestBench
+                library, and their dependencies would not be deployed unnecessarily with
+                the web application.
+            </para>
+
+            <para>
+                In a test development setup, you do not need a grid hub or nodes. However,
+                if you develop tests for a grid, you can run the tests, the grid hub, and
+                one node all in your development workstation. A distributed setup is
+                described in the following section.
             </para>
 
             <para>
@@ -291,15 +324,8 @@
                 as Eclipse. The special support for running JUnit test cases in Eclipse is
                 described in <xref linkend="testbench.development.eclipse"/>.
             </para>
-
-            <para>
-                In such a test development setup, you do not need a grid hub or
-                nodes. However, if you develop tests for a grid, you can run the tests,
-                the grid hub, and one node all in your development workstation. A
-                distributed setup is described in the following section.
-            </para>
         </section>
-
+            
         <section xml:id="testbench.installation.distributed">
             <title>A Distributed Testing Environment</title>
 
@@ -355,64 +381,6 @@
                 WebDriver.  Grid development and use of the hub and nodes is described in
                 <xref linkend="testbench.grid"/>.
             </para>
-        </section>
-
-        <section xml:id="testbench.installation.downloading">
-            <title>Downloading and Unpacking the Installation Package</title>
-
-            <para>
-                First, download the installation package
-                <filename>vaadin-testbench-&version.testbench;.zip</filename> and extract
-                the installation package where you can find it.
-            </para>
-
-            <simplesect>
-                <title>Windows</title>
-
-                <para>
-                    In Windows, use the default ZIP decompression feature to extract the
-                    package into your chosen directory, for example,
-                    <filename>C:\dev</filename>.
-                </para>
-
-                <warning>
-                    <title>Windows Zip Decompression Problem</title>
-
-                    <para>
-                        The default decompression program in Windows XP and Vista as well
-                        as some versions of WinRAR cannot unpack the installation package
-                        properly in certain cases. Decompression can result in an error
-                        such as: "The system cannot find the file specified." This can
-                        happen because the default decompression program is unable to
-                        handle long file paths where the total length exceeds 256
-                        characters. This can occur, for example, if you try to unpack the
-                        package under Desktop. You should unpack the package directly into
-                        <filename>C:\dev</filename> or some other short path or use
-                        another decompression program.
-                    </para>
-                </warning>
-            </simplesect>
-
-            <simplesect>
-                <title>Linux, MacOS X, and other UNIX</title>
-
-                <para>
-                    In Linux, Mac OS X, and other UNIX-like systems, you can use Info-ZIP
-                    or other ZIP software with the command:
-                </para>
-
-                <screen><prompt>$</prompt> <command>unzip</command> <parameter>vaadin-testbench-&version.testbench;.zip</parameter></screen>
-
-                <para>
-                    The contents of the installation package will be extracted under the
-                    current directory.
-                </para>
-
-                <para>
-                    In Mac OS X, you can also double-click the package to extract it under
-                    the current folder in a folder with the same name as the package.
-                </para>
-            </simplesect>
         </section>
 
         <section xml:id="testbench.installation.contents">
@@ -852,145 +820,187 @@
         </para>
 
         <para>
-            A JUnit test case is defined with annotations for methods in a test case
-            class. TestBench requires that the test case class extend the
-            <classname>TestBenchTestcase</classname> class, which provides an API for
-            running tests with the WebDriver.
+            You may want to keep your test classes in a separate source tree in your
+            application project, or in an altogether separate project, so that you do not
+            have to include them in the web application WAR. Having them in the same
+            project may be nicer for version control purposes.
         </para>
 
-        <section xml:id="testbench.development.stub">
-            <title>Starting From a Stub</title>
+        <section xml:id="testbench.development.basic">
+            <title>Basic Test Case Structure</title>
 
             <para>
-                <!-- TODO some intro text -->
-                You may want to keep your test classes in a separate source tree in your
-                application project, or in an altogether separate project, so that you do
-                not have to include them in the web application WAR. Having them in the
-                same project may be nicer for version control purposes.
+                A JUnit test case is defined with annotations for methods in a test case
+                class. With TestBench, the test case class should extend the
+                <classname>TestBenchTestcase</classname> class, which provides the
+                WebDriver and ElementQuery APIs.
             </para>
+
+            <programlisting><?pocket-size 75% ?><![CDATA[public class Testcase extends TestBenchTestCase {]]></programlisting>
 
             <para>
-                A JUnit stub will look somewhat as follows:
+                The available annotations are:
             </para>
 
-            <programlisting><?pocket-size 65% ?><![CDATA[package com.example.tests;
+            <variablelist>
+                <varlistentry>
+                    <term><literal>@Before</literal></term>
+                    <listitem>
+                        <para>
+                            The annotated method is executed before each test (annotated
+                            with <literal>@Test</literal>). Normally, you create and set
+                            the driver here.
+                        </para>
 
-import org.junit.*;
-import static org.junit.Assert.*;
-...
-import com.vaadin.testbench.By;
-import com.vaadin.testbench.TestBench;
-import com.vaadin.testbench.TestBenchTestCase;
-import com.vaadin.testbench.ScreenshotOnFailureRule;
-
-public class Testcase extends TestBenchTestCase {
-	private String baseUrl;
-	private StringBuffer verificationErrors = new StringBuffer();
-    ...]]></programlisting>
-
-            <para>
-                The <parameter>verificationErrors</parameter> is used to collect some
-                errors in some recorded commands, but can be removed if such commands are
-                not used. You can also use it to collect non-fatal errors, for example
-                screenshot comparison errors, and only fail on logic errors.
-            </para>
-
-            <simplesect xml:id="testbench.development.stub.setup">
-                <title>Test Setup</title>
-
-                <para>
-                    The set-up method, annotated with <literal>@Before</literal>, makes
-                    the basic configuration for a single test in the test case. Most
-                    importantly, it creates the <classname>WebDriver</classname> instance,
-                    which is for Firefox by default. Drivers for different browsers extend
-                    the <classname>RemoteWebDriver</classname> class - see the API type
-                    hierarchy for the complete list.
-                </para>
-
-                <programlisting><?pocket-size 65% ?><![CDATA[    @Before
-    public void setUp() throws Exception {
-        setDriver(TestBench.createDriver(new FirefoxDriver()));
-        baseUrl = "http://localhost:8080/myapp";
-    }]]></programlisting>
-
-                <para>
-                    Check that the <parameter>baseUrl</parameter> is the correct URL for
-                    the application. It might not be.
-                </para>
-            </simplesect>
-
-            <simplesect xml:id="testbench.development.stub.testcase">
-                <title>Test Case Stub</title>
-                
-                <para>
-                    The test case methods are marked with <literal>@Test</literal>
-                    annotation. They normally start by calling the
-                    <methodname>get()</methodname> method in the driver. This loads the
-                    URL in the browser.
-                </para>
-
-                <para>
-                    Actual test commands usually call the
-                    <methodname>findElement()</methodname> method in the driver to get
-                    hold of an HTML element to work with. The button has the
-                    <literal>main.button</literal> ID, as we set that ID for the
-                    <classname>Button</classname> object with the
-                    <methodname>setId()</methodname> method in the application. The
-                    HTML element is represented as a <classname>WebElement</classname>
-                    object.
-                </para>
-
-                <programlisting><?pocket-size 65% ?><![CDATA[@Test
-public void testCase() throws Exception {
-    driver.get(concatUrl(baseUrl, "/myapp"));
-
-    // Check the button caption
-    assertEquals("Push Me!", driver.findElement(By.vaadin(
-        "bookexamplestobetested::PID_Smain.button")).getText());
-
-    // Click the button
-    driver.findElement(By.vaadin(
-        "bookexamplestobetested::PID_Smain.button")).click();
-
-    // Check the result
-    assertEquals("Thanks!", driver.findElement(By.vaadin(
-        "bookexamplestobetested::/VVerticalLayout[0]/"+
-        "ChildComponentContainer[1]/VLabel[0]")).getText());
+                        <programlisting><?pocket-size 65% ?><![CDATA[@Before
+public void setUp() throws Exception {
+    setDriver(TestBench.createDriver(new FirefoxDriver()));
 }]]></programlisting>
 
-                <para>
-                    The <methodname>get()</methodname> call appends the application path
-                    to the base URL. If it is already included in the base URL, you can
-                    remove it.
-                </para>
-            </simplesect>
+                        <para>
+                            The driver class should be one of
+                            <classname>FirefoxDriver</classname>,
+                            <classname>ChromeDriver</classname>,
+                            <classname>InternetExplorerDriver</classname>,
+                            <classname>SafariDriver</classname>, or
+                            <classname>PhantomJSDriver</classname>. Please check
+                            <classname>RemoteWebDriver</classname> from API documentation
+                            for the current list of implementations. Notice that some of
+                            the drivers require installing a browser driver, as described
+                            in <xref linkend="testbench.installation.browserdrivers"/>.
+                        </para>
 
-            <simplesect xml:id="testbench.development.stub.other">
-                <title>After Testing</title>
+                        <para>
+                            The driver instance is stored in the <literal>driver</literal>
+                            property in the test case. While you can access the property
+                            directly by the member variable, you should set it only with
+                            the setter.
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><literal>@Test</literal></term>
+                    <listitem>
+                        <para>
+                            Annotates a test method. You normally first open the page and
+                            then execute commands and make assertions on the content.
+                        </para>
 
-                <para>
-                    Finally after running all the test cases, the method annotated with
-                    <literal>@After</literal> is called. Calling
-                    <methodname>quit()</methodname> for the driver closes the browser
-                    window.
-                </para>
+                        <programlisting><?pocket-size 70% ?><![CDATA[@Test
+public void basic() throws Exception {
+    driver.get("http://localhost:8080/tobetested");
+    
+    // Click the button
+    ButtonElement button =
+        $(ButtonElement.class).id("content.button");
+    button.click();
 
-                <para>
-                    The stub includes code for collecting verification errors. If you do
-                    not collect those, as is often the case, you can remove the code.
-                </para>
+    // Check that the label text is correct
+    LabelElement label = $(LabelElement.class).first();
+    assertEquals("Thanks!", label.getText());
+}]]></programlisting>
 
-                <programlisting><?pocket-size 65% ?><![CDATA[    @After
-    public void tearDown() throws Exception {
-        driver.quit();
+                        <para>
+                            Normally, you would define the URL with a variable that is
+                            common for all tests, and possibly concatenate it with a URI
+                            fragment to get to an application state.
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><literal>@After</literal></term>
+                    <listitem>
+                        <para>
+                            After each test is finished, you normally need to quit the
+                            driver to close the browser.
+                        </para>
 
-        String verificationErrorString =
-            verificationErrors.toString();
-        if (!"".equals(verificationErrorString)) {
-            fail(verificationErrorString);
-        }
-    }]]></programlisting>
-            </simplesect>
+                        <programlisting><?pocket-size 75% ?><![CDATA[@After
+public void tearDown() throws Exception {
+    driver.quit();
+}]]></programlisting>
+
+                        <para>
+                            However, if you enable grabbing screenshots on failure with
+                            the <classname>ScreenshotOnFailureRule</classname>, as
+                            described in <xref linkend="testbench.screenshots.failure"/>,
+                            the rules are executed after <literal>@After</literal>, but
+                            the driver needs to be open when the rule to take the
+                            screenshot is executed. Therefore, you should not quit the
+                            driver in that case. The rule quits the driver implicitly.
+                        </para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+
+            <para>
+                You can use any other JUnit features. Notice, however, that using
+                TestBench requires that the driver has been created and is still open.
+            </para>
+
+            <para>
+                A complete test case could be as follows:
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[import static org.junit.Assert.assertEquals;
+
+import java.util.List;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.openqa.selenium.firefox.FirefoxDriver;
+
+import com.vaadin.testbench.ScreenshotOnFailureRule;
+import com.vaadin.testbench.TestBench;
+import com.vaadin.testbench.TestBenchTestCase;
+import com.vaadin.testbench.elements.ButtonElement;
+import com.vaadin.testbench.elements.LabelElement;
+import com.vaadin.testbench.elements.VerticalLayoutElement;
+
+public class Testcase extends TestBenchTestCase {
+	@Before
+	public void setUp() throws Exception {
+		setDriver(TestBench.createDriver(new FirefoxDriver()));
+	}
+
+    @Test
+    public void basic() throws Exception {
+        driver.get("http://localhost:8080/tobetested");
+        
+        // Click the button
+        ButtonElement button =
+            $(ButtonElement.class).id("content.button");
+        button.click();
+
+        // Check that the label text is correct
+        LabelElement label = $(LabelElement.class).first();
+        assertEquals("Thanks!", label.getText());
+    }
+    
+    @Test
+    public void advanced() throws Exception {
+        driver.get("http://localhost:8080/tobetested");
+        
+        // Click all the buttons in the UI
+        List<ButtonElement> buttons = $(ButtonElement.class).all();
+        for (ButtonElement b: buttons)
+            b.click();
+
+        // Check that the label text is correct
+        LabelElement label =
+            $(VerticalLayoutElement.class).id("content")
+            .$(LabelElement.class).first();
+        assertEquals("Thanks!", label.getText());
+    }
+
+	@After
+	public void tearDown() throws Exception {
+	    driver.quit();
+	}
+}]]></programlisting>
+
         </section>
 
         <section xml:id="testbench.development.eclipse">
@@ -1665,8 +1675,9 @@ public void testOnePlusTwo() throws Exception {
 
             <para>
                 In addition to the Selenium selectors, Vaadin TestBench provides a
-                <emphasis>Vaadin selector</emphasis>, which allows pointing to a
-                Vaadin component by its layout widget path. 
+                <emphasis>Vaadin selector</emphasis>, which allows pointing to a Vaadin
+                component by its layout widget path. The element query API is in fact an
+                API to create Vaadin selectors.
             </para>
 
             <para>
@@ -1834,20 +1845,13 @@ button.setDescription("This is a tip");]]></programlisting>
 public void testTooltip() throws Exception {
     driver.get(appUrl);
     
-    // Get the button's element.
-    // Use the component ID given with setId().
-    WebElement button = driver.findElement(By.xpath(
-        "//div[@id='main.button']/span/span"));
-    
-    // Show the tooltip
-    testBenchElement(button).showTooltip();
-    
-    // Check that the tooltip text matches
-    assertEquals("This is a tip", driver.findElement(
-        By.xpath("//div[@class='v-tooltip']")).getText());
-    
-    // Compare a screenshot just to be sure
-    assertTrue(testBench(driver).compareScreen("tooltip"));
+    ButtonElement button =
+        $(ButtonElement.class).id("main.button");
+
+    button.showTooltip();
+
+    WebElement ttip = findElement(By.className("v-tooltip"));
+    assertEquals(ttip.getText(), "This is a tip");
 }]]></programlisting>
 
         </section>
@@ -2392,6 +2396,12 @@ public void setUp() throws Exception {
             <programlisting><?pocket-size 75% ?><![CDATA[@Rule
 public ScreenshotOnFailureRule screenshotOnFailureRule =
     new ScreenshotOnFailureRule(this, true);]]></programlisting>
+
+            <para>
+                Notice that you must not call <methodname>quit()</methodname> for the
+                driver in the <literal>@After</literal> method, as that would close the
+                driver before the rule takes the screenshot.
+            </para>
 
             <para>
                 The screenshots are written to the error directory defined with the
