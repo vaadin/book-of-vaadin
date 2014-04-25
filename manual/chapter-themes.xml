@@ -1249,15 +1249,16 @@ public class HelloWorld extends UI {
             </para>
 
             <itemizedlist>
+                <listitem><literal>valo</literal>, the primary theme in Vaadin 7.3 (<emphasis>upcoming</emphasis>)</listitem>
                 <listitem><literal>reindeer</literal>, the primary theme in Vaadin 6 and 7</listitem>
-                <listitem><literal>chameleon</literal>, an easily customizable alternative theme</listitem>
+                <listitem><literal>chameleon</literal>, an easily customizable theme</listitem>
                 <listitem><literal>runo</literal>, the default theme in IT Mill Toolkit 5</listitem>
                 <listitem><literal>liferay</literal>, for Liferay portlets</listitem>
             </itemizedlist>
 
             <para>
                 In addition, there is the <literal>base</literal> theme, which should not
-                be used directly, but is extended by the other built-in themes.
+                be used directly, but is extended by the other built-in themes, except valo.
             </para>
 
 			<para>
@@ -1507,7 +1508,513 @@ public class MyUI extends UI {
 			annotation. You need to change such references to theme names in the calls
 			manually.
 		</para>
-	</section>
+    </section>
+
+    <section xml:id="themes.valo">
+        <title>Valo Theme</title>
+
+        <para condition="web">
+            <emphasis>Valo is the new built-in theme in Vaadin 7.3. It is included in
+            <link xlink:href="https://vaadin.com/releases">prerelease versions</link>. At
+            least 7.3.0.alpha1 still requires using the standard Sass compiler (version
+            3.2) on command-line, instead of the Vaadin Sass compiler.</emphasis>
+        </para>
+
+        <para>
+            Valo is the word for light in Finnish. For mere geographical reasons, Finland
+            is obsessed with light, with long winters without much sunlight but plenty of
+            whiteness and long summer days bathed in light. Light is one of the
+            cornerstones of visual arts, perhaps the most important one. A visual design
+            begins from the use of light in an array of shades together with a color
+            theory, to create a unique color scheme that illustrates a unique idea. Valo
+            incorporates the use of light in its theoretical logic. It creates lines,
+            borders, highlights, and shadows adaptively according to a background color,
+            always with contrasts pleasant to human visual perception. A color theory is
+            used to determine auxiliary colors that blend gently with the background. The
+            static art is complemented with responsive animations.
+        </para>
+
+        <section xml:id="themes.valo.use">
+            <title>Basic Use</title>
+
+            <para>
+                Valo is used just like other themes. Its optional parameters must be given
+                before the <literal>@import</literal> statement.
+            </para>
+
+            <programlisting><?pocket-size 75% ?><![CDATA[// Modify the base color of the theme
+$v-app-background-color: hsl(200, 50%, 50%);
+
+// Import valo after setting the parameters
+@import "../valo/valo";
+
+.mythemename {
+  @include valo;
+
+  // Your theme's rules go here
+}]]></programlisting>
+
+            <para>
+                If you need to override mixins or function definitions in the valo theme,
+                you must do that after the import statement, but before including the valo
+                mixin.
+            </para>
+        </section>
+
+        <section xml:id="themes.valo.variables" condition="web">
+            <title>Common Settings</title>
+
+            <para>
+                In the following, we describe the optional parameters that control the
+                visual appearance of the Valo theme. In addition to the ones given here,
+                component styles have their own parameters, listed in the sections
+                describing the components in the other chapters.
+            </para>
+
+            <section xml:id="themes.valo.variables.general">
+                <title>General Settings</title>
+
+                <variablelist>
+                    <varlistentry>
+                        <term><varname>$v-app-loading-text</varname> (default: <literal>""</literal>)</term>
+                        <listitem>
+                            <para>
+                                A static text that is shown while the client-side engine is being
+                                loaded and started.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><varname>$v-line-height</varname> (default: <literal>1.55</literal>)</term>
+                        <listitem>
+                            <para>
+                                Base line height for all widgets.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <!-- TODO This will most likely change to $v-background-color -->
+                        <term><varname>$v-app-background-color</varname> (default: <literal>hsl(210, 0%, 98%)</literal>)</term>
+                        <listitem>
+                            <para>
+                                The background color in any way allowed in CSS:
+                                hexadesimal color code, RGB/A value, HSL/A value, or a
+                                color name. If the color is dark (has low luminance), a
+                                light foreground (text) color that gives high contrast
+                                with the background is automatically used.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                </variablelist>
+            </section>
+
+            <section xml:id="themes.valo.variables.fonts">
+                <title>Font Settings</title>
+
+                <variablelist>
+                    <varlistentry>
+                        <term><varname>$v-font-size</varname> (default: <literal>16px</literal>)</term>
+                        <listitem>
+                            <para>
+                                Base font size. It should be specified in pixels.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><varname>$v-font-weight</varname> (default: <literal>300</literal>)</term>
+                        <listitem>
+                            <para>
+                                Font weight for normal fonts. It should be defined with a
+                                numeric value instead of symbolic.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><varname>$v-font-color</varname> (default: computed)</term>
+                        <listitem>
+                            <para>
+                                Foreground text color. The default is computed from the
+                                background color so that it gives a high contrast with the
+                                background.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><varname>$v-font-family</varname> (default: <literal>"Open Sans", sans-serif</literal>)</term>
+                        <listitem>
+                            <para>
+                                Font family and fallback fonts. The default font Open Sans
+                                is a web font included in the Valo theme. Other used Valo
+                                fonts must be specified in the list to enable them. See
+                                <xref linkend="themes.valo.fonts"/>.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><varname>$v-caption-font-size</varname> (default: <literal>round($v-font-size * 0.9)</literal>)</term>
+                        <listitem>
+                            <para>
+                                Font size for component captions. The value should be a pixel
+                                value.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><varname>$v-caption-font-weight</varname> (default: <literal>max(400, $v-font-weight)</literal>)</term>
+                        <listitem>
+                            <para>
+                                Font weight for captions. It should be defined with a numeric
+                                value instead of symbolic.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                </variablelist>
+            </section>
+
+            <section xml:id="themes.valo.variables.layout">
+                <title>Layout Settings</title>
+
+                <variablelist>
+                    <varlistentry>
+                        <term><varname>$v-unit-size</varname> (default: <literal>round(2.3 * $v-font-size)</literal>)</term>
+                        <listitem>
+                            <para>
+                                Unit size for various measures. The value must be specified in
+                                pixels, with a suitable range of 18-50.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><varname>$v-layout-margin-top</varname></term>
+                        <term><varname>$v-layout-margin-right</varname></term>
+                        <term><varname>$v-layout-margin-bottom</varname></term>
+                        <term><varname>$v-layout-margin-left</varname> (default: <literal>$v-unit-size</literal>)</term>
+                        <listitem>
+                            <para>
+                                Layout margin sizes when the margin is enabled with
+                                <methodname>setMargin()</methodname>, as described in <xref
+                                    linkend="layout.settings.margins"/>.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><varname>$v-layout-spacing-vertical</varname> and
+                            <varname>$v-layout-spacing-horizontal</varname> (default:
+                            <literal>round($v-unit-size/3)</literal>)</term>
+                        <listitem>
+                            <para>
+                                Amount of vertical or horizontal space when spacing is enabled
+                                for a layout with <methodname>setSpacing()</methodname>, as
+                                described in <xref linkend="layout.settings.spacing"/>.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                </variablelist>
+            </section>
+
+            <section xml:id="themes.valo.variables.component">
+                <title>Component Features</title>
+
+                <para>
+                    The following settings apply to various graphical features of some
+                    components.
+                </para>
+
+                <variablelist>
+                    <varlistentry>
+                        <term><varname>$v-border-width</varname> (default: <literal>1px</literal>)</term>
+                        <listitem>
+                            <para>
+                                Border thickness for components that have one. The measure
+                                must be specified in pixels.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><varname>$v-border-radius</varname> (default: <literal>4px</literal>)</term>
+                        <listitem>
+                            <para>
+                                Corner radius for components that have a border. The measure
+                                must be specified in pixels.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><varname>$v-gradient-style</varname> (default: <literal>v-linear</literal>)</term>
+                        <listitem>
+                            <para>
+                                Name of the color gradient style for components that have a
+                                gradient.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><varname>$v-gradient-depth</varname> (default: <literal>8%</literal>)</term>
+                        <listitem>
+                            <para>
+                                Gradient depth.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><varname>$v-bevel-style</varname> (default: <literal>inset 0 1px 0 v-hilite, inset 0 -1px 0 v-shade</literal>)</term>
+                        <listitem>
+                            <para>
+                                CSS shadow style to create bevels in some components. The
+                                value is a list of a highlight and shade insets.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><varname>$v-bevel-depth</varname> (default: <literal>25%</literal>)</term>
+                        <listitem>
+                            <para>
+                                The "depth" of a bevel shadow in a component. The actual
+                                amount of highlight and shade is computed from the depth.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><varname>$v-focus-style</varname> (default: <literal>0 0 0 2px v-focus-color</literal>)</term>
+                        <listitem>
+                            <para>
+                                Shadow specification for the field focus indicator:
+                                horizontal shadow position in pixels, vertical shadow
+                                position in pixels, blur distance in pixels, spread
+                                distance in pixels, and the color. The value
+                                <literal>v-focus-color</literal> is substituted with the
+                                value of <literal>$v-focus-color</literal>.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><varname>$v-focus-color</varname> (default: <literal>null</literal>)</term>
+                        <listitem>
+                            <para>
+                                Color for the field focus
+                                indicator. <literal>null</literal> value defaults to a
+                                high-contrast color computed from the background color.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><varname>$v-animations-enabled</varname> (default: <literal>true</literal>)</term>
+                        <listitem>
+                            <para>
+                                Specifies whether various CSS animations are used.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><varname>$v-hover-styles-enabled</varname> (default: <literal>true</literal>)</term>
+                        <listitem>
+                            <para>
+                                Specifies whether various <literal>:hover</literal> styles
+                                are used.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><varname>$v-disabled-opacity</varname> (default: <literal>0.7</literal>)</term>
+                        <listitem>
+                            <para>
+                                Opacity of disabled components, which are described in
+                                <xref linkend="components.features.enabled"/>.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><varname>$v-selection-color</varname> (default: <literal>null</literal>)</term>
+                        <listitem>
+                            <para>
+                                Color of selection indicator in selection and various
+                                other components. The <literal>null</literal> value
+                                defaults to a high-contrast color computed from the
+                                background and foreground colors.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><varname>$v-default-field-width</varname> (default: <literal>$v-unit-size * 5</literal>)</term>
+                        <listitem>
+                            <para>
+                                Default width of certain field components, unless
+                                overridden with <methodname>setWidth()</methodname>.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><varname>$v-error-indicator-color</varname> (default: <literal>#ed473b</literal>)</term>
+                        <listitem>
+                            <para>
+                                Color of the component error indicator.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                </variablelist>
+            </section>
+
+            <section xml:id="themes.valo.variables.optimization">
+                <title>Theme Compilation and Optimization</title>
+
+                <variablelist>
+                    <varlistentry>
+                        <!-- TODO Set to true when Vaadin compiler supports the theme. -->
+                        <term><varname>$v-relative-paths</varname> (default: <literal>false</literal>)</term>
+                        <listitem>
+                            <para>
+                                This flags specifies whether relative URL paths are
+                                relative to the currently parsed SCSS file or to the
+                                compilation root file, so that paths are correct for
+                                different resources.  Vaadin theme compiler parses URL
+                                paths differently from the regular Sass compiler (Vaadin
+                                modifies relative URL paths). Use <literal>false</literal>
+                                for Ruby compiler and <literal>true</literal> for Vaadin
+                                compiler.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                        <term><varname>$v-included-components</varname> (default: component list)</term>
+                        <listitem>
+                            <para>
+                                Theme optimization parameter to specify the included
+                                component themes, as described in <xref
+                                linkend="themes.valo.optimization"/>.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                        <term><varname>$v-valo-include-common-stylenames</varname> (default: <literal>true</literal>)</term>
+                        <listitem>
+                            <para>
+                                Theme optimization parameter that specifies whether the
+                                common component stylenames, described in <xref
+                                linkend="themes.valo.component"/>, should be included in
+                                the theme.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                </variablelist>
+            </section>
+        </section>
+
+        <section xml:id="themes.valo.fonts">
+            <title>Valo Fonts</title>
+
+            <para>
+                Valo includes the following custom fonts:
+            </para>
+
+            <itemizedlist>
+                <listitem>Open Sans</listitem>
+                <listitem>Source Sans Pro</listitem>
+                <listitem>Roboto</listitem>
+                <listitem>Lato</listitem>
+                <listitem>Lora</listitem>
+            </itemizedlist>
+
+            <para>
+                The used fonts must be specified with the
+                <varname>$v-font-family</varname> parameter for Valo, in a fallback
+                order. A font family is used in decreasing order of preference, in case a
+                font with higher preference is not available in the browser. You can
+                specify any font families and generic families that browsers may
+                support. In addition to the primary font family, you can use also others
+                in your application. To enable using the fonts included in Valo, you need
+                to list them in the variable.
+            </para>
+
+            <programlisting><?pocket-size 70% ?><![CDATA[$v-font-family: 'Open Sans', sans-serif, 'Source Sans Pro';]]></programlisting>
+
+            <para>
+                Above, we specify Open Sans as the preferred primary font, with any
+                sans-serif font that the browser supports as a fallback. In addition, we
+                include the Source Sans Pro as an auxiliary font that we can use in custom
+                rules as follows:
+            </para>
+
+            <programlisting><?pocket-size 75% ?><![CDATA[.v-label pre {
+  font-family: 'Source Sans Pro', monospace;
+}]]></programlisting>
+
+            <para>
+                This would specify using the font in any <classname>Label</classname>
+                component with the <literal>PREFORMATTED</literal> content mode.
+            </para>
+        </section>
+
+        <section xml:id="themes.valo.component">
+            <title>Component Styles</title>
+
+            <para>
+                Many components have component-specific styles, such as
+                "<literal>small</literal>", "<literal>large</literal>",
+                "<literal>light</literal>", etc. You can specify the component styles with
+                <methodname>addStyleName()</methodname>. The styles are documented in the
+                component sections elsewhere in the book.
+            </para>
+
+            <para>
+                Component styles are optional, but enabled by default. They can be disabled
+                with the <varname>$v-valo-include-common-stylenames</varname> parameter,
+                as described in <xref linkend="themes.valo.variables"/>.
+            </para>
+
+            <para>
+                The following variables control some common component styles:
+            </para>
+
+            <variablelist>
+                <varlistentry>
+                    <term><varname>$v-scaling-factor--small</varname> (default: <literal>0.8</literal>)</term>
+                    <listitem>
+                        <para>
+                            A scaling multiplier for "<literal>small</literal>" component
+                            styles.
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><varname>$v-scaling-factor--large</varname> (default: <literal>1.2</literal>)</term>
+                    <listitem>
+                        <para>
+                            A scaling multiplier for "<literal>large</literal>" component
+                            styles.
+                        </para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+
+        <section xml:id="themes.valo.optimization">
+            <title>Theme Optimization</title>
+
+            <para>
+                Valo theme allows optimizing the size of the compiled theme CSS by
+                including the rules for only the components actually used in the
+                application.  The included component styles can be specified in the
+                <literal>$v-included-components</literal> variable, which by default
+                includes all components. The variable should include a comma-separated
+                list of component names in lower-case letters.
+            </para>
+
+            <para>
+                For example, if your UI contains just
+                <classname>VerticalLayout</classname>, <classname>TextField</classname>,
+                and <classname>Button</classname> components, you could define the
+                variable as follows:
+            </para>
+
+            <programlisting><?pocket-size 75% ?><![CDATA[$v-included-components:
+    verticallayout,
+    textfield,
+    button;]]></programlisting>
+
+        </section>
+    </section>
 
 	<section xml:id="themes.responsive">
 		<title>Responsive Themes</title>
