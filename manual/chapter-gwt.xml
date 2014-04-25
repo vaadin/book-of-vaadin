@@ -513,8 +513,12 @@ public class MyComponentConnector
 
             <para>
                 Server-to-client communication is normally done using a <emphasis>shared
-                state</emphasis>, as described in <xref linkend="gwt.shared-state"/>. The
-                serialization of the state data is handled completely transparently.
+                state</emphasis>, as described in <xref linkend="gwt.shared-state"/>, as
+                well as RPC calls. The serialization of the state data is handled
+                completely transparently. <phrase condition="web">Once the client-side
+                engine receives the changes from the server, it reacts to them by creating
+                and notifying connectors that in turn manage widgets. This is described in
+                <xref linkend="gwt.advanced.phases"/> in more detail.</phrase>
             </para>
 
             <para>
@@ -609,6 +613,11 @@ public void onStateChanged(StateChangeEvent stateChangeEvent) {
     final String text = getState().getText();
     getWidget().setText(text);
 }]]></programlisting>
+
+            <para condition="web">
+                The processing phases of state changes are described in more detail in
+                <xref linkend="gwt.advanced.phases"/>.
+            </para>
         </section>
 
         <section xml:id="gwt.shared-state.referring">
@@ -1145,6 +1154,125 @@ public class CapsLockWarningConnector
             </section>
         </section>
         -->
+    </section>
+
+    <section xml:id="gwt.advanced" condition="web">
+        <title>Advanced Client-Side Topics</title>
+
+        <para>
+            In the following, we mention some topics that you may encounter when
+            integrating widgets.
+        </para>
+
+        <section xml:id="gwt.advanced.phases">
+            <title>Client-Side Processing Phases</title>
+
+            <para>
+                Vaadin's client-side engine reacts to changes from the server in a number
+                of phases, the order of which can be relevant for a connector. The
+                processing occurs in the <methodname>handleUIDLMessage()</methodname>
+                method in <classname>ApplicationConnection</classname>, but the logic can
+                be quite overwhelming, so we describe the phases in the following summary.
+            </para>
+
+            <orderedlist>
+                <listitem>
+                    <para>
+                        Any dependencies defined by using
+                        <classname>@JavaScript</classname> or
+                        <classname>@StyleSheet</classname> on the server-side class are
+                        loaded. Processing does not continue until the browser confirms
+                        that they have been loaded.
+                    </para>
+                </listitem>
+
+                <listitem>
+                    <para>
+                        New connectors are instantiated and
+                        <methodname>init()</methodname> is run for each
+                        <interfacename>Connector</interfacename>.
+                    </para>
+                </listitem>
+
+                <listitem>
+                    <para>
+                        State objects are updated, but no state change event is fired yet.
+                    </para>
+                </listitem>
+
+                <listitem>
+                    <para>
+                        The connector hierarchy is updated, but no hierarchy change event
+                        is fired yet. <methodname>setParent()</methodname> and
+                        <methodname>setChildren()</methodname> are run in this phase.
+                    </para>
+                </listitem>
+
+                <listitem>
+                    <para>
+                        Hierarchy change events are fired. This means that all state
+                        objects and the entire hierarchy are already up to date when this
+                        happens. The DOM hierarchy should in theory be up to date after
+                        all hierarchy events have been handled, although there are some
+                        built-in components that for various reasons do not always live up
+                        to this promise.
+                    </para>
+                </listitem>
+
+                <listitem>
+                    <para>
+                        Captions are updated, causing
+                        <methodname>updateCaption()</methodname> to be invoked on layouts
+                        as needed.
+                    </para>
+                </listitem>
+
+                <listitem>
+                    <para>
+                        <classname>@DelegateToWidget</classname> is handled for all
+                        changed state objects using the annotation.
+                    </para>
+                </listitem>
+
+                <listitem>
+                    <para>
+                        State change events are fired for all changed state objects.
+                    </para>
+                </listitem>
+
+                <listitem>
+                    <para>
+                        <methodname>updateFromUIDL()</methodname> is called for legacy
+                        connectors.
+                    </para>
+                </listitem>
+
+                <listitem>
+                    <para>
+                        All RPC methods received from the server are invoked.
+                    </para>
+                </listitem>
+
+                <listitem>
+                    <para>
+                        Connectors that are no longer included in the hierarchy are
+                        unregistered. This calls <methodname>onUnregister()</methodname>
+                        on the <interfacename>Connector</interfacename>.
+                    </para>
+                </listitem>
+
+                <listitem>
+                    <para>
+                        The layout phase starts, first checking the sizes and positions of
+                        all elements, and then notifying any
+                        <interfacename>ElementResizeListener</interfacename>s, as well as
+                        calling the appropriate layout method for the connectors that
+                        implement either <classname>SimpleManagedLayout</classname> or
+                        <classname>DirectionalManagedLayout</classname> interface.
+                    </para>
+                </listitem>
+            </orderedlist>
+        </section>
     </section>
 
     <section xml:id="gwt.addons">
