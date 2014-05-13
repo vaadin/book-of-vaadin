@@ -11,7 +11,14 @@
 	<title>Vaadin TestBench</title>
 
     <para>
-        This chapter describes the installation and use of the Vaadin TestBench.
+        This chapter describes the installation and use of Vaadin TestBench.
+    </para>
+
+    <para>
+        <emphasis>This edition covers TestBench 4 in its alpha release state. Some changes
+        may be done before the final release. The ElementQuery API is new in TestBench
+        4. Recorder is no longer included in TestBench 4 and we also advice against using
+        it with TestBench 3, as its development model is obsolete.</emphasis>
     </para>
 
     <section xml:id="testbench.overview">
@@ -258,9 +265,9 @@
         </para>
 
         <para>
-            The component element classes are Vaadin-specific. At the time of the writing,
-            they are packaged with TestBench, but this will probably change in future.
-            <!-- TODO Update when needed -->
+            The component element classes are specific to the Vaadin version. At the time
+            of writing, they are packaged with TestBench, but this will probably change in
+            future.  <!-- TODO Update when needed -->
         </para>
 
         <para>
@@ -1328,7 +1335,7 @@ driver = TestBench.createDriver(
     </section>
 
     <section xml:id="testbench.elementquery">
-        <title>Querying Elements</title>
+        <title>Element Queries</title>
 
         <para>
             The high-level ElementQuery API allows querying Vaadin components in the
@@ -1371,13 +1378,13 @@ driver = TestBench.createDriver(
 
             <para>
                 You can use the debug window to easily generate the element query code to
-                select a particular element in the UI. This should be especially useful
-                when starting to use TestBench, to get the idea what the queries should be
-                like.
+                select a particular component element in the UI. This should be especially
+                useful when starting to use TestBench, to get the idea what the queries
+                should be like.
             </para>
 
             <para>
-                First, enable the debug window with the <literal>&amp;debug</literal>
+                First, enable the debug window with the <literal>?debug</literal>
                 parameter for the application, as described in more detail in <xref
                 linkend="advanced.debug"/>. You can interact with the UI in any way you
                 like before generating the query code, but we recommend that you proceed
@@ -1552,10 +1559,24 @@ LabelElement label = layout.$(LabelElement.class).first();]]></programlisting>
                 <para>
                     A query returns one or more elements extending Selenium
                     <classname>WebElement</classname>. The particular element-specific
-                    class offers methods to manipulate the associated Vaadin component,
-                    while you can also use the lower-level general-purpose methods defined
-                    in <classname>WebElement</classname>.
+                    class may offer special methods for manipulating the associated Vaadin
+                    component, while you can also use the lower-level general-purpose
+                    methods defined in <classname>WebElement</classname>.
                 </para>
+
+                <para>
+                    Typically, you first find a Vaadin component by an element query, and
+                    then dig into the HTML tree of the component by using
+                    <methodname>findElement()</methodname> on the element, as described in
+                    <xref linkend="testbench.selectors"/>.
+                </para>
+
+                <programlisting><?pocket-size 70% ?><![CDATA[// Locate a day element in the Calendar component
+CalendarElement cal = $(CalendarElement.class).first();
+WebElement day = cal.findElements(
+                 By.className("v-calendar-day-times")).
+                 get(2); // Wednesday]]></programlisting>
+
             </section>
         </section>
     </section>
@@ -1566,10 +1587,10 @@ LabelElement label = layout.$(LabelElement.class).first();]]></programlisting>
         <para>
             In addition to the high-level ElementQuery API described in the previous
             section, Vaadin TestBench includes the lower-level Selenium WebDriver API,
-            with Vaadin extensions. You can find elements also by a plain XPath
+            with some Vaadin extensions. You can find elements also by a plain XPath
             expression, an element ID, CSS style class, and so on. You can use such
-            selectors together with the element queries. Like the ElementQuery API, it can
-            be considered a domain-specific language (DSL) that is embedded in the
+            selectors together with the element queries. Like the ElementQuery API, you
+            can considered it a domain-specific language (DSL) that is embedded in the
             <classname>TestBenchTestcase</classname> class.
         </para>
 
@@ -1655,18 +1676,41 @@ public void testOnePlusTwo() throws Exception {
     openCalculator();
 
     // Click the buttons in the user interface
-    getDriver().findElement(By.id("button_1")).click();
-    getDriver().findElement(By.id("button_+")).click();
-    getDriver().findElement(By.id("button_2")).click();
-    getDriver().findElement(By.id("button_=")).click();
+    findElement(By.id("button_1")).click();
+    findElement(By.id("button_+")).click();
+    findElement(By.id("button_2")).click();
+    findElement(By.id("button_=")).click();
 
     // Get the result label value
-    assertEquals("3.0", getDriver().findElement(
+    assertEquals("3.0", findElement(
             By.id("display")).getText());
 }]]></programlisting>
 
             <para>
                 The ID selectors are used extensively in the TestBench examples.
+            </para>
+        </section>
+
+        <section xml:id="testbench.selectors.css">
+            <title>Finding by CSS Class</title>
+
+            <para>
+                An element with a particular CSS style class name can be selected with the
+                <methodname>By.className()</methodname> method. CSS selectors are useful
+                for elements which have no ID, nor can be found easily from the component
+                hierarchy, but do have a particular unique CSS style. Tooltips are one
+                example, as they are floating <literal>div</literal> elements under the
+                root element of the application. Their <literal>v-tooltip</literal> style
+                makes it possible to select them as follows:
+            </para>
+
+            <programlisting><?pocket-size 75% ?><![CDATA[// Verify that the tooltip contains the expected text
+String tooltipText = driver.findElement(
+    By.className("v-tooltip")).getText();]]></programlisting>
+
+            <para>
+                For a complete example, see the
+                <filename>AdvancedCommandsITCase.java</filename> file in the examples.
             </para>
         </section>
 
@@ -1735,29 +1779,6 @@ WebElement label = driver.findElement(By.vaadin(
 assertEquals("Thanks!", label.getText());]]></programlisting>
 
         </section>
-
-        <section xml:id="testbench.selectors.css">
-            <title>Finding by CSS Class</title>
-
-            <para>
-                An element with a particular CSS style class name can be selected with the
-                <methodname>By.className()</methodname> method. CSS selectors are useful
-                for elements which have no ID, nor can be found easily from the component
-                hierarchy, but do have a particular unique CSS style. Tooltips are one
-                example, as they are floating <literal>div</literal> elements under the
-                root element of the application. Their <literal>v-tooltip</literal> style
-                makes it possible to select them as follows:
-            </para>
-
-            <programlisting><?pocket-size 75% ?><![CDATA[// Verify that the tooltip contains the expected text
-String tooltipText = driver.findElement(
-    By.className("v-tooltip")).getText();]]></programlisting>
-
-            <para>
-                For a complete example, see the
-                <filename>AdvancedCommandsITCase.java</filename> file in the examples.
-            </para>
-        </section>
     </section>
 
     <section xml:id="testbench.special">
@@ -1773,7 +1794,7 @@ String tooltipText = driver.findElement(
             <title>Waiting for Vaadin</title>
 
             <para>
-                Selenium, on which Vaadin TestBench is based, is originally intended for
+                Selenium, on which Vaadin TestBench is based, was originally intended for
                 regular web applications that load a page that is immediately rendered by
                 the browser. In such applications, you can test the page elements
                 immediately after the page is loaded. In Vaadin and other AJAX
@@ -1922,17 +1943,67 @@ notification.closeNotification();]]></programlisting>
             </para>
         </section>
 
+        <section xml:id="testbench.special.events">
+            <title>Creating Mouse and Keyboard Events</title>
+
+            <indexterm zone="testbench.special.events">
+                <primary>mouse events</primary>
+            </indexterm>
+            <indexterm zone="testbench.special.events">
+                <primary>keyboard events</primary>
+            </indexterm>
+
+            <para>
+                The <classname>WebElement</classname> class and component element classes
+                only support clicking on an element or at given coordinates. For more
+                complex mouse or touch interaction, you can use the Selenium
+                <classname>Actions</classname> class to construct the interaction as a
+                sequence of actions. To perform the actions, you need to build them into a
+                composite <classname>Action</classname> and call
+                <methodname>perform()</methodname>.
+            </para>
+
+            <para>
+                For example, in the following we create a calendar event by dragging from
+                one element to another:
+            </para>
+
+            <programlisting><?pocket-size 70% ?><![CDATA[// Locate a day element in the Calendar
+CalendarElement cal = $(CalendarElement.class).first();
+WebElement day = cal.findElements(
+                 By.className("v-calendar-day-times")).
+                 get(2); // Wednesday
+
+// Drag a range from one time slot to another
+Actions actions = new Actions(getDriver());
+actions.clickAndHold(day.findElement(By.xpath("div[5]")));
+actions.release(day.findElement(By.xpath("div[8]")));
+actions.build().perform();]]></programlisting>
+
+            <para>
+                See <link
+                xlink:href="http://selenium.googlecode.com/git/docs/api/java/org/openqa/selenium/interactions/Actions.html">Selenium
+                API documentation on the Action class</link> for detailed description of
+                the API, including the available mouse and keyboard actions. The class
+                provides a number of convenience methods to make creating actions easier.
+            </para>
+        </section>
+
         <section xml:id="testbench.special.contextmenu">
             <title>Testing Context Menus</title>
 
             <indexterm zone="testbench.special.contextmenu">
-                <primary>context menus</primary>
+                <primary>context menu</primary>
             </indexterm>
 
             <para>
                 Opening context menus require special handling. You need to create a
                 Selenium <classname>Actions</classname> object to perform a context click
-                on a <classname>WebElement</classname>.
+                on a <classname>WebElement</classname>, as described previously. It is
+                necessary to note that the context menu opens as a floating overlay
+                element, which is not under the component element, but elsewhere in the
+                HTML tree. You can best find it by the <literal>v-contextmenu</literal>
+                CSS style class.
             </para>
 
             <para>
@@ -1941,26 +2012,38 @@ notification.closeNotification();]]></programlisting>
                 and click it.
             </para>
 
-            <programlisting><?pocket-size 70% ?><![CDATA[// Select the table body element
-WebElement e = getDriver().findElement(
-        By.className("v-table-body"));
+            <book-example id="component.table.contextmenu"></book-example>
+            <programlisting><?pocket-size 70% ?><![CDATA[// Get an element in a table row
+TableElement table = inExample(TableElement.class).first();
+WebElement cell = table.getCell(3, 0); // A cell in the row
 
-// Perform context click action to open the context menu
-new Actions(getDriver()).moveToElement(e)
-        .contextClick(e).perform();
+// Open the context menu at the row
+new Actions(getDriver()).contextClick(cell).perform();
 
-// Select "Add Comment" from the opened menu
-getDriver().findElement(
-        By.xpath("//*[text() = 'Add Comment']")).click();]]></programlisting>
+// Select an item in the context menu
+WebElement menu = findElement(By.className("v-contextmenu"));
+WebElement menuitem = menu.findElement(
+    By.xpath("//*[text() = 'Delete Item']"));
+menuitem.click();]]></programlisting>
 
             <para>
-                The complete example is given in the
+                You could also find the menu item by index or some other way with an XPath
+                query. Note that, as always, the exact HTML structure of the menu depends
+                on the current widget implementation.
+            </para>
+
+            <para>
+                A complete example is given in the
                 <filename>AdvancedCommandsITCase.java</filename> example source file.
             </para>
         </section>
 
         <section xml:id="testbench.special.timing">
             <title>Profiling Test Execution Time</title>
+
+            <indexterm zone="testbench.special.timing">
+                <primary>profiling</primary>
+            </indexterm>
 
             <para>
                 It is not just that it works, but also how long it takes. Profiling test
@@ -2147,6 +2230,10 @@ public void verifyServerExecutionTime() throws Exception {
         <section xml:id="testbench.maintainable.pageobject">
             <title>The Page Object Pattern</title>
 
+            <indexterm zone="testbench.maintainable.pageobject">
+                <primary>Page Object Pattern</primary>
+            </indexterm>
+
             <para>
                 The Page Object Pattern aims to simplify and modularize testing
                 application views. The pattern follows the design principle of <link
@@ -2294,6 +2381,10 @@ public void testAddCommentRowToLog() throws Exception {
 
     <section xml:id="testbench.screenshots">
         <title>Taking and Comparing Screenshots</title>
+
+        <indexterm zone="testbench.screenshots">
+            <primary>screenshots</primary>
+        </indexterm>
 
         <para>
             You can take and compare screenshots with reference screenshots taken
@@ -2818,6 +2909,10 @@ Tests run: 6, Failures: 1, Errors: 0, Skipped: 1
 
     <section xml:id="testbench.grid">
         <title>Running Tests in a Distributed Environment</title>
+
+        <indexterm zone="testbench.grid">
+            <primary>grid testing</primary>
+        </indexterm>
 
         <para>
             A distributed test environment consists of a grid hub and a number of test
