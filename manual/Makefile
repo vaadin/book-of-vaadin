@@ -51,7 +51,8 @@ IMAGES =	intro/architecture intro/architecture-vaadin7 intro/toolchain \
 			datamodel/datamodel-interfaces datamodel/beanitem-doublebinding \
 			mobile/mobile-overview mobile/parking-tabs mobile/navigationview mobile/navigationpanel \
 			testbench/webdriver-use \
-			testbench/tt-workflow testbench/tt-architecture-simple testbench/tt-recorder-workflow \
+			testbench/debugwindow-select-annotated \
+			testbench/tt-workflow testbench/tt-architecture-simple \
 			testbench/tt-junit-workflow \
 			testbench/recorder-export-testcase \
 			jpacontainer/detailed-architecture jpacontainer/three-layer-architecture jpacontainer/jpa-mapping-graphic \
