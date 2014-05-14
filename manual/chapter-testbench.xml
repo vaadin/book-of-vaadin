@@ -10,16 +10,28 @@
 <chapter xml:id="testbench">
 	<title>Vaadin TestBench</title>
 
+    <indexterm zone="testbench">
+        <primary>TestBench</primary>
+    </indexterm>
+    <indexterm zone="testbench">
+        <primary>Vaadin TestBench</primary>
+    </indexterm>
+
     <para>
         This chapter describes the installation and use of Vaadin TestBench.
     </para>
 
-    <para>
-        <emphasis>This edition covers TestBench 4 in its alpha release state. Some changes
-        may be done before the final release. The ElementQuery API is new in TestBench
-        4. Recorder is no longer included in TestBench 4 and we also advice against using
-        it with TestBench 3, as its development model is obsolete.</emphasis>
-    </para>
+    <note>
+        <title>Edition Notice</title>
+
+        <para>
+            <emphasis>This edition covers TestBench 4 in its prerelease state. Some
+            changes may be done before the final release. The ElementQuery API is new in
+            TestBench 4. Recorder is no longer included in TestBench 4 and we also advice
+            against using it with TestBench 3, as its development model is
+            obsolete.</emphasis>
+        </para>
+    </note>
 
     <section xml:id="testbench.overview">
         <title>Overview</title>
@@ -61,14 +73,14 @@
             Vaadin TestBench utilizes Selenium WebDriver to control the browser from
             Java code, as illustrated in <xref linkend="figure.testbench.webdriver"/>. It
             can open a new browser window to start the application, interact with the
-            components for example by clicking them, and then get the HTML element values.
+            components for example by clicking them, and then read the HTML element values.
         </para>
 
         <para>
-            You can develop such unit tests along with your application code, for example
-            with JUnit, which is a widely used Java unit testing framework. You can run
-            the tests as many times as you want in your workstation or in a distributed
-            grid setup.
+            After preparing your application code for testing by defining components IDs
+            and style classes, you can develop unit tests for example with JUnit, a widely
+            used Java unit testing framework. You can run the tests as many times as you
+            want in your development workstation or in a distributed grid setup.
         </para>
 
 		<figure xml:id="figure.testbench.workflow">
@@ -78,7 +90,7 @@
 					<imagedata align="center" fileref="img/testbench/tt-workflow-lo.png"/>
 				</imageobject>
 				<imageobject role="fo">
-					<imagedata scale="130" smallscale="90%" align="center" fileref="img/testbench/tt-workflow-hi.png"/>
+					<imagedata scale="130" smallscale="100%" align="center" fileref="img/testbench/tt-workflow-hi.png"/>
 				</imageobject>
 			</mediaobject>
 		</figure>
@@ -87,7 +99,7 @@
 
         <itemizedlist>
             <listitem>
-                <para>Control a web application from Java</para>
+                <para>Control a browser from Java</para>
             </listitem>
             <listitem>
                 <para>Generate component selectors in debug window</para>
@@ -142,16 +154,17 @@
             <title>TestBench Components</title>
 
             <para>
-                The TestBench library includes WebDriver, which provides API to control a
-                browser like a user would. This API can be used to build tests, for
-                example, with JUnit.  It also includes the grid hub and node servers,
-                which you can use to run tests in a grid configuration.
+                The TestBench library includes the Selenium WebDriver, which provides API
+                to control a browser like a user would. This API can be used to build
+                tests, for example, with JUnit.  It also includes the grid hub and node
+                services, which you can use to run tests in a grid configuration.
             </para>
 
             <para>
                 Vaadin TestBench Library provides the central control logic for:
             </para>
 
+            <!-- TODO This is rather redundant -->
             <itemizedlist>
                 <listitem>
                     <para>
@@ -299,15 +312,15 @@
             </para>
 
             <programlisting><?pocket-size 75% ?>&lt;dependency org="com.vaadin" name="vaadin-testbench"
-   rev="<emphasis role="bold">4.x.x</emphasis>" conf="test-&lt;default"/&gt;</programlisting>
+   rev="<emphasis role="bold">4.x.x</emphasis>" conf="test-&gt;default"/&gt;</programlisting>
 
             <para>
-                The optional <literal>test-&lt;default</literal> configuration mapping
+                The optional <literal>test-&gt;default</literal> configuration mapping
                 requires a <literal>test</literal> configuration in the Ivy module. It is
                 useful especially when building and testing the application in an Ant
                 script, where you can use the configuration to define libraries for the
                 web application and testing separately. When developing tests in Eclipse,
-                it is meaningless, and you can use <literal>default-&lt;default</literal>.
+                it is meaningless, and you can use <literal>default-&gt;default</literal>.
             </para>
 
             <para>
@@ -792,17 +805,17 @@
                     <imagedata align="center" fileref="img/testbench/screenshots/application-to-be-tested.png"/>
                 </imageobject>
                 <imageobject role="fo">
-                    <imagedata scale="120" smallscale="100%" align="center" fileref="img/testbench/screenshots/application-to-be-tested.png"/>
+                    <imagedata scale="120" smallscale="35%" align="center" fileref="img/testbench/screenshots/application-to-be-tested.png"/>
                 </imageobject>
             </mediaobject>
         </figure>
 
         <para>
             The button would be rendered as a HTML element: <literal>&lt;div
-            id="main.button" ...&gt;...&lt;/div&gt;</literal>. The DOM element would then
-            be accessible from the HTML page with a WebDriver call such as:
-            <literal>driver.findElement(By.id="main.button")</literal>. For the label,
-            which does not have an ID, the path would be from the page root.
+            id="main.button" ...&gt;...&lt;/div&gt;</literal>. The HTML element would then
+            be accessible from the page with a WebDriver call such as:
+            <literal>$(ButtonElement).id("main.button")</literal>. For the label, which
+            does not have an ID, the path would be from the page root.
         </para>
 
         <para>
@@ -874,7 +887,11 @@ public void setUp() throws Exception {
                             <classname>RemoteWebDriver</classname> from API documentation
                             for the current list of implementations. Notice that some of
                             the drivers require installing a browser driver, as described
-                            in <xref linkend="testbench.installation.browserdrivers"/>.
+                            in <xref
+                            linkend="testbench.installation.browserdrivers"/>. The
+                            <classname>RemoteWebDriver</classname> is used for remote/grid
+                            execution, as described in <xref
+                            linkend="testbench.grid.remote"/>.
                         </para>
 
                         <para>
@@ -967,10 +984,10 @@ import com.vaadin.testbench.elements.LabelElement;
 import com.vaadin.testbench.elements.VerticalLayoutElement;
 
 public class Testcase extends TestBenchTestCase {
-	@Before
-	public void setUp() throws Exception {
-		setDriver(TestBench.createDriver(new FirefoxDriver()));
-	}
+    @Before
+    public void setUp() throws Exception {
+        setDriver(TestBench.createDriver(new FirefoxDriver()));
+    }
 
     @Test
     public void basic() throws Exception {
@@ -1002,10 +1019,10 @@ public class Testcase extends TestBenchTestCase {
         assertEquals("Thanks!", label.getText());
     }
 
-	@After
-	public void tearDown() throws Exception {
-	    driver.quit();
-	}
+    @After
+    public void tearDown() throws Exception {
+        driver.quit();
+    }
 }]]></programlisting>
 
         </section>
@@ -1585,24 +1602,24 @@ WebElement day = cal.findElements(
         <title>Element Selectors</title>
 
         <para>
-            In addition to the high-level ElementQuery API described in the previous
-            section, Vaadin TestBench includes the lower-level Selenium WebDriver API,
-            with some Vaadin extensions. You can find elements also by a plain XPath
-            expression, an element ID, CSS style class, and so on. You can use such
-            selectors together with the element queries. Like the ElementQuery API, you
-            can considered it a domain-specific language (DSL) that is embedded in the
-            <classname>TestBenchTestcase</classname> class.
+            In addition to the ElementQuery API described in the previous section for
+            selecting Vaadin components, Vaadin TestBench includes the lower-level
+            Selenium WebDriver selector API, with some Vaadin extensions. They allow you
+            to refine queries further to sub-component elements. You can find elements
+            also by an element ID, CSS style class, and XPath expressions. Like the
+            ElementQuery API, you can consider the selector API a domain-specific language
+            (DSL) that is embedded in the <classname>TestBenchTestcase</classname> class.
         </para>
 
         <para>
             The available selectors are defined as static methods in the
-            <classname>com.vaadin.testbench.By</classname> class. They create and return a
-            <classname>By</classname> instance, which you can use for the
-            <methodname>findElement()</methodname> method in
+            <classname>com.vaadin.testbench.By</classname> class and its Selenium
+            superclasses. They create and return a <classname>By</classname> instance,
+            which you can use for the <methodname>findElement()</methodname> method in
             <classname>WebDriver</classname>.
         </para>
 
-        <!-- TODO Something here. -->
+        <programlisting><?pocket-size 75% ?><![CDATA[WebElement elem = findElement(By.id("mycomponent"));]]></programlisting>
 
         <para>
             The ID, CSS class, and Vaadin selectors are described below. For others, we
@@ -1720,8 +1737,8 @@ String tooltipText = driver.findElement(
             <para>
                 In addition to the Selenium selectors, Vaadin TestBench provides a
                 <emphasis>Vaadin selector</emphasis>, which allows pointing to a Vaadin
-                component by its layout widget path. The element query API is in fact an
-                API to create Vaadin selectors.
+                component by its widget path. In fact, the element query API creates
+                Vaadin selectors.
             </para>
 
             <para>
@@ -1733,19 +1750,18 @@ String tooltipText = driver.findElement(
             </para>
 
             <para>
-                A Vaadin selector begins with a UI identifier. It is the
-                URL path of the UI, but without any slashes or other special
-                characters. For example, <literal>/book-examples/tobetested</literal>
-                would be <literal>bookexamplestobetested</literal>. After the
-                identifier, comes two colons "<literal>::</literal>", followed by a
-                slash-delimited component path to the component to be selected. The
-                elements in the component path are client-side classes of the Vaadin
-                user interfacer components. For example, the server-side
+                A Vaadin selector begins with a UI identifier. It is the URL path of the
+                UI, but without any slashes or other special characters. For example,
+                <literal>/book-examples/tobetested</literal> would be
+                <literal>bookexamplestobetested</literal>. After the identifier, comes two
+                colons "<literal>::</literal>", followed by a slash-delimited component
+                path to the component to be selected. The elements in the component path
+                are for the client-side widgets of the Vaadin user interfacer
+                components. For example, the server-side
                 <classname>VerticalLayout</classname> component has
-                <classname>VVerticalLayout</classname> client-side counterpart. All
-                path elements except the leaves are component containers, usually
-                layouts. The exact contained component is identified by its index in
-                brackets.
+                <classname>VVerticalLayout</classname> widget counterpart. All path
+                elements except the leaves are component containers, usually layouts. The
+                exact contained component is identified by its index in brackets.
             </para>
 
             <para>
@@ -1793,6 +1809,13 @@ assertEquals("Thanks!", label.getText());]]></programlisting>
         <section xml:id="testbench.special.waitforvaadin">
             <title>Waiting for Vaadin</title>
 
+            <indexterm zone="testbench.special.waitforvaadin">
+                <primary><methodname>waitForVaadin()</methodname></primary>
+            </indexterm>
+            <indexterm zone="testbench.special.waitforvaadin">
+                <primary><methodname>disableWaitForVaadin()</methodname></primary>
+            </indexterm>
+
             <para>
                 Selenium, on which Vaadin TestBench is based, was originally intended for
                 regular web applications that load a page that is immediately rendered by
@@ -1834,6 +1857,11 @@ assertEquals("Thanks!", label.getText());]]></programlisting>
 
         <section xml:id="testbench.special.tooltip">
             <title>Testing Tooltips</title>
+
+            <indexterm zone="testbench.special.tooltip">
+                <primary>tooltips</primary>
+                <secondary>testing</secondary>
+            </indexterm>
 
             <para>
                 Component tooltips show when you hover the mouse over a component. Showing
@@ -1886,7 +1914,7 @@ public void testTooltip() throws Exception {
 
             <para>
                 Some Vaadin components, such as <classname>Table</classname> and
-                <classname>Panel</classname> have a scrollbar. To get hold of the
+                <classname>Panel</classname>, have a scrollbar. To get hold of the
                 scrollbar, you must first find the component element. Then, you need to
                 get hold of the <interfacename>TestBenchElementCommands</interfacename>
                 interface from the <classname>WebElement</classname> with
