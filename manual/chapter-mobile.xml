@@ -102,7 +102,8 @@ public class SimplePhoneUI extends UI {
 
         <para>
             TouchKit supports many special mobile browser features, such as geolocation,
-            home screen launching, splash screen, and web app mode, especially in iOS.
+            context-specific input fields, and home screen launching. On iOS, special
+            features such as splash screen and web app mode are supported.
         </para>
 
         <para>
@@ -121,7 +122,7 @@ public class SimplePhoneUI extends UI {
             discuss testing briefly.
         </para>
 
-        <simplesect xml:id="mobile.overview.examples">
+        <simplesect xml:id="mobile.overview.demos">
             <title>TouchKit Demos</title>
 
             <para>
@@ -152,7 +153,7 @@ public class SimplePhoneUI extends UI {
                 The Vornitologist is a yet another demo application that showcases most of
                 the features in TouchKit. You can try it out at <link
                 xlink:href="http://demo.vaadin.com/vornitologist">http://demo.vaadin.com/vornitologist</link>
-                with your iOS or Android device. You can read the sources on-line or check
+                with your TouchKit-compatible device. You can read the sources on-line or check
                 them out from the repository and import them in Eclipse as described in
                 <xref linkend="mobile.installation.vornitologist"/>.
             </para>
@@ -276,7 +277,14 @@ public class SimplePhoneUI extends UI {
                 leading mobile browser core. In addition to Apple's products, also the
                 default browser in Android uses WebKit as the layout engine. Yet they have
                 differences, as the Android's JavaScript engine, which is highly relevant
-                for Vaadin, is the Google Chrome's V8 engine.
+                for Vaadin, is the Google Chrome's V8 engine. In addition to WebKit-based
+                browsers, also Internet Explorer in Windows Phone is supported.
+            </para>
+
+            <para>
+                For the list of devices supported by the latest TouchKit version, see the
+                <link xlink:href="https://vaadin.com/add-ons/touchkit">TouchKit product
+                page</link> at the Vaadin site.
             </para>
 
             <para>
@@ -947,28 +955,97 @@ public class SimplePhoneUI extends UI {
             <title>Mobile Theme</title>
 
             <para>
-                You can use both Sass and CSS themes, but CSS themes are probably easier,
-                and using Sass would not yield all the same benefits as in a regular Vaadin
-                application. TouchKit includes a theme in the widget set, and imports the
-                Vaadin base theme internally. Therefore, you do not need to import
-                anything explicitly in a custom theme.
+                You can use both Sass and CSS themes for TouchKit applications, although
+                they are defined a bit differently from regular Vaadin themes. To optimize
+                how a theme is loaded, you can build it into a GWT client bundle.
             </para>
 
-            <para>
-                So, for a theme with name <filename>mymobiletheme</filename>, the
-                <filename>VAADIN/themes/mymobiletheme/styles.css</filename> could be
-                simply as follows:
-            </para>
+            <section xml:id="mobile.elements.theme.css">
+                <title>Defining a Regular Theme</title>
 
-            <programlisting><![CDATA[.stylishlabel {
+                <para>
+                    Using plain CSS is often the easiest way to define a simple theme for
+                    a mobile application, as using Sass would not yield all the same
+                    benefits as in a regular Vaadin application. TouchKit includes its own
+                    base theme in its widget set, so you do not need to
+                    <literal>@import</literal> it explicitly.
+                </para>
+
+                <para>
+                    A CSS theme is defined in a file located at
+                    <filename>VAADIN/themes/mymobiletheme/styles.css</filename>. As
+                    importing the base does not need to (and should not) be done, it could
+                    simply be as follows:
+                </para>
+
+                <programlisting><![CDATA[.stylishlabel {
     color: red;
     font-style: italic;
 }]]></programlisting>
 
-            <para>
-                You need to set the theme with the <literal>@Theme</literal> annotation
-                for your UI class, as usual.
-            </para>
+                <para>
+                    You need to set the theme with the
+                    <literal>@Theme("mymobiletheme")</literal> annotation for your UI
+                    class, as usual.
+                </para>
+
+                <para>
+                    You can also use Sass by creating a <filename>styles.scss</filename>
+                    and then compiling it to CSS with the Vaadin theme compiler. However,
+                    as above, you should not include a base theme. The rules do not need
+                    to be wrapped in a selector with the theme name, as is recommended for
+                    regular Vaadin themes.
+                </para>
+            </section>
+
+            <section xml:id="mobile.elements.theme.responsive">
+                <title>Responsive Mobile Themes</title>
+
+                <para>
+                    The Responsive add-on is especially useful for mobile themes, as it
+                    makes it easy to adapt a layout for phones and tablets and for
+                    changing the screen orientation. With the add-on, changing the UI
+                    layout according to screen orientation is handled entirely on the
+                    client-side by the add-on, using special CSS selectors in the
+                    theme. See <xref linkend="themes.responsive"/> for details about the
+                    add-on.
+                </para>
+
+                <para>
+                    The Parking demo uses the add-on. From its source code, which is
+                    available at Github, you can learn how the conditional selectors are
+                    used in the <link
+                    xlink:href="https://github.com/vaadin/parking-demo/tree/master/src/main/resources/com/vaadin/demo/parking/widgetset/client/theme">CSS
+                    defined in a GWT client bundle</link>.
+                </para>
+
+                <para>
+                    For example, the CSS for the <guilabel>Stats</guilabel> tab in the
+                    demo defines a responsive selector as follows, to allow fitting two
+                    charts side-by-side if there is enough room horizontally:
+                </para>
+
+                <programlisting><?pocket-size 75% ?><![CDATA[.stats .statschart {
+    margin-bottom: 30px;
+    float: left;
+    width: 100%;
+}
+
+.v-ui[width-range~="801px-"] .stats .statschart {
+    width: 48% !important;
+    margin: 0 1%;
+}]]></programlisting>
+
+                <para>
+                    Normally, if there's 800 pixels or less space horizontally, each chart
+                    takes 100% of the screen width, causing the second one to wrap to the
+                    next line in the containing <classname>CssLayout</classname>. If there
+                    is more space, the two charts are shown in 48% width, so that both can
+                    fit in the same line. <phrase condition="web">This follows the
+                    flexible wrapping pattern described in <xref
+                    linkend="themes.responsive.wrap"/>.</phrase>
+                </para>
+            </section>
 
             <section xml:id="mobile.elements.theme.gwt">
                 <title>Defining a Theme in a GWT Client Bundle</title>
@@ -1048,6 +1125,116 @@ public class SimplePhoneUI extends UI {
             TouchKit introduces a number of components special to mobile user interfaces
             to give better user interaction and to utilize the special features in mobile
             devices.
+        </para>
+
+		<variablelist>
+			<varlistentry>
+				<term><classname>NavigationView</classname></term>
+				<listitem>
+					<para>
+                        A view with a navigation bar (<classname>NavigationBar</classname>
+                        for navigating back and forth in a
+                        <classname>NavigationManager</classname>.
+                    </para>
+                </listitem>
+            </varlistentry>
+			<varlistentry>
+				<term><classname>Toolbar</classname></term>
+				<listitem>
+					<para>
+                        A horizontal layout especially for buttons. A sub-component of
+                        <classname>TabBarView</classname> or
+                        <classname>NavigationView</classname>.
+                    </para>
+                </listitem>
+            </varlistentry>
+			<varlistentry>
+				<term><classname>NavigationManager</classname></term>
+				<listitem>
+					<para>
+                        A component container that enables slide animations between the
+                        components while the server request is being made for the purpose
+                        of latency compensation. The components are typically
+                        <classname>NavigationView</classname>s or
+                        <classname>SwipeView</classname>s.
+                    </para>
+                </listitem>
+            </varlistentry>
+			<varlistentry>
+				<term><classname>NavigationButton</classname></term>
+				<listitem>
+					<para>
+                        A special button for initiating view change in a
+                        <classname>NavigationManager</classname> on the client-side, for
+                        the purpose of latency compensation.
+                    </para>
+                </listitem>
+            </varlistentry>
+			<varlistentry>
+				<term><classname>Popover</classname></term>
+				<listitem>
+					<para>
+                        A floating pop-up frame that can be positioned relative to a component.
+                    </para>
+                </listitem>
+            </varlistentry>
+			<varlistentry>
+				<term><classname>SwipeView</classname></term>
+				<listitem>
+					<para>
+                        A view for navigating back and forth in a
+                        <classname>NavigationManager</classname> using horizontal swipe
+                        gestures.
+                    </para>
+                </listitem>
+            </varlistentry>
+			<varlistentry>
+				<term><classname>Switch</classname></term>
+				<listitem>
+					<para>
+                        A sliding on/off toggle for boolean values.
+                    </para>
+                </listitem>
+            </varlistentry>
+			<varlistentry>
+				<term><classname>VerticalComponentGroup</classname></term>
+				<listitem>
+					<para>
+                        A vertical layout for grouping components.
+                    </para>
+                </listitem>
+            </varlistentry>
+			<varlistentry>
+				<term><classname>HorizontalButtonGroup</classname></term>
+				<listitem>
+					<para>
+                        A horizontal layout for grouping especially buttons.
+                    </para>
+                </listitem>
+            </varlistentry>
+			<varlistentry>
+				<term><classname>TabBarView</classname></term>
+				<listitem>
+					<para>
+                        A tabbed view with a content area on the top and a
+                        <classname>Toolbar</classname> for navigating between sub-views on
+                        the bottom.
+                    </para>
+                </listitem>
+            </varlistentry>
+			<varlistentry>
+				<term><classname>EmailField</classname>, <classname>NumberField</classname>, and <classname>UrlField</classname></term>
+				<listitem>
+					<para>
+                        Text fields for inputting specifically email addresses, numbers,
+                        and URLs, respectively, with a specific virtual keyboard.
+                    </para>
+                </listitem>
+            </varlistentry>
+        </variablelist>
+
+        <para>
+            The components are detailed in the following subsections.
         </para>
 
         <section xml:id="mobile.components.navigationview">
@@ -1155,13 +1342,13 @@ public class SimplePhoneUI extends UI {
             <title><classname>Toolbar</classname></title>
 
             <para>
-                The <classname>Toolbar</classname> is a layout component that extends
-                <classname>CssLayout</classname>, usually containing
-                <classname>Button</classname> components. The toolbar has by default 100%
-                horizontal width and a fixed height. The components are spread evenly
-                in the horizontal direction. <classname>Toolbar</classname> is typically used
-                in a <classname>NavigationView</classname>, as described in <xref
-                    linkend="mobile.components.navigationview" xrefstyle="select:label"/>.
+                The <classname>Toolbar</classname> is a horizontal layout component
+                intended for containing <classname>Button</classname> components. The
+                toolbar has by default 100% horizontal width and a fixed height. The
+                components are spread evenly in the horizontal
+                direction. <classname>Toolbar</classname> is used in a
+                <classname>TabBarView</classname>, as described in <xref
+                linkend="mobile.components.tabbarview" xrefstyle="select:label"/>.
             </para>
 
             <para>
@@ -1175,10 +1362,8 @@ public class SimplePhoneUI extends UI {
                 <programlisting><![CDATA[.v-touchkit-toolbar { }]]></programlisting>
                 
                 <para>
-                    The component has an overall <literal>v-touchkit-toolbar</literal> style in
-                    addition to the <literal>v-csslayout</literal> style of the
-                    superclass. Other style names are as for 
-                    <classname>CssLayout</classname>.
+                    The component has an overall <literal>v-touchkit-toolbar</literal>
+                    style.
                 </para>
             </section>
         </section>
@@ -2296,24 +2481,38 @@ layout.addComponent(store);]]></programlisting>
 
             <para>
                 Uploading content from a mobile device works just like with regular Vaadin
-                applications using the <classname>Upload</classname> component described
-                in <xref linkend="components.upload"/>. When choosing a file, the device
-                will ask to select the file from files, gallery, camera, or other possible
-                sources, depending on the device. The only difference to normal use is
-                that the upload component must be in <emphasis>immediate</emphasis> mode.
+                applications using the <classname>Upload</classname> component.
             </para>
 
             <para>
-                Uploading is supported by most mobile operating systems, such as iOS,
-                Android, and Windows RT devices, but not in some, such as WP8.
+                In an offline UI or client-side code in general, you need to handle
+                uploading differently, using a special upload widget or handler.
             </para>
 
-            <para>
-                The following example shows how to implement simple upload to an in-memory
-                storage.
-            </para>
+            <section xml:id="mobile.features.upload.server-side" condition="web">
+                <title>Server-Side <classname>Upload</classname> Component</title>
 
-            <programlisting><?pocket-size 65% ?><![CDATA[// Display the image - only a placeholder first
+                <para>
+                    In a server-side UI, you can use the regular
+                    <classname>Upload</classname> component described in <xref
+                    linkend="components.upload"/>. When choosing a file, the device will
+                    ask to select the file from files, gallery, camera, or other possible
+                    sources, depending on the device. The only difference to normal use is
+                    that the upload component must be in <emphasis>immediate</emphasis>
+                    mode.
+                </para>
+
+                <para>
+                    Uploading is supported by most mobile operating systems, such as iOS,
+                    Android, and Windows RT devices, but not in some, such as WP8.
+                </para>
+
+                <para>
+                    The following example shows how to implement simple upload to an in-memory
+                    storage.
+                </para>
+
+                <programlisting><?pocket-size 65% ?><![CDATA[// Display the image - only a placeholder first
 final Image image = new Image();
 image.setWidth("100%");
 image.setVisible(false);
@@ -2373,18 +2572,107 @@ HorizontalButtonGroup group = new HorizontalButtonGroup();
 group.addComponent(upload);
 layout.addComponent(group);]]></programlisting>
 
-            <para>
-                The result is shown in <xref linkend="figure.mobile.features.upload"/>.
-            </para>
+                <para>
+                    The result is shown in <xref linkend="figure.mobile.features.upload"/>
+                    (&copy;2001 Marko Gr&ouml;nroos).
+                </para>
 
-            <figure xml:id="figure.mobile.features.upload">
-                <title>Mobile Upload</title>
-                <mediaobject>
-                    <imageobject>
-                        <imagedata smallscale="70%" scale="70" align="center" fileref="img/mobile/upload.png"/>
-                    </imageobject>
-                </mediaobject>
-            </figure>
+                <figure xml:id="figure.mobile.features.upload">
+                    <title>Mobile Upload</title>
+                    <mediaobject>
+                        <imageobject>
+                            <imagedata srccredit="Marko Gr&ouml;, 2001" smallscale="70%" scale="70" align="center" fileref="img/mobile/upload.png"/>
+                        </imageobject>
+                    </mediaobject>
+                    <!-- Image Copyright Marko Gronroos 2001.
+                         Licensed under Creative Commons Attribution-NoDerivs 4.0 license.
+                         https://creativecommons.org/licenses/by-nd/4.0/legalcode -->
+                </figure>
+            </section>
+
+            <section xml:id="mobile.features.upload.client-side" condition="web">
+                <title>Upload on the Client-Side</title>
+
+                <para>
+                    When making a client-side widget that handles file upload, such as for
+                    offline mode, you can use the GWT <link
+                    xlink:href="http://www.gwtproject.org/javadoc/latest/com/google/gwt/user/client/ui/FileUpload.html"><classname>FileUpload</classname>
+                    component</link>. In such case, you need to communicate the image data
+                    to the server with an RPC call.
+                </para>
+
+                <para>
+                    On a mobile device, the perhaps most common upload task is to capture
+                    images with the integrated camera. To display them in the client-side
+                    UI correctly, you want make sure that they have reasonable size and
+                    correct orientation, without making a server round-trip to do the
+                    corrections. To send them to the server, you want to avoid using too
+                    much bandwidth. The <classname>ImageUpload</classname> widget included
+                    in the <literal>lib-gwt-imageupload</literal> add-on, <link
+                    xlink:href="https://vaadin.com/directory#addon/lib-gwt-imageupload">available
+                    from Vaadin Directory</link>, allows launching the camera application
+                    in the device and capturing an image. It further allows defining an
+                    image manipulation pipeline with transformations to reduce the image
+                    size if necessary, correct the orientation according to EXIF data, and
+                    so forth. The corrected image is loaded to a memory buffer, which
+                    you can display in another widget, send to the server, or store in the
+                    local store.
+                </para>
+
+                <para>
+                    In the following, we allow capturing an image with the camera,
+                    normalize the image and reduce its size, and reduce the size further
+                    for displaying it in a thumbnail. Notice that the image data is
+                    encoded as a URL, which can be used as such in CSS, for example.
+                </para>
+
+                <programlisting><?pocket-size 65% ?><![CDATA[final ImageUpload fileUpload = new ImageUpload();
+
+// Have a separate button to initiate the upload
+final VButton takePhotoButton = new VButton();
+takePhotoButton.addClickHandler(new ClickHandler() {
+    @Override
+    public void onClick(ClickEvent event) {
+        fileUpload.click();
+    }
+});
+
+// Capture images from the camera, instead of allowing to
+// choose from gallery or other sources.
+fileUpload.setCapture(true);
+
+// Normalize the orientation and make size suitable for
+// sending to server
+EXIFOrientationNormalizer normalizer =
+        new EXIFOrientationNormalizer();
+normalizer.setMaxWidth(1024);
+normalizer.setMaxHeight(1024);
+fileUpload.addImageManipulator(normalizer);
+fileUpload.addImageLoadedHandler(new ImageLoadedHandler() {
+    @Override
+    public void onImageLoaded(ImageLoadedEvent event) {
+        // Store the image data as encoded URL
+        setImage(event.getImageData().getDataURL());
+    }
+});
+
+// Reduce the size further for displaying a thumbnail
+ImageTransformer thumbGenerator = new ImageTransformer();
+thumbGenerator.setImageDataSource(fileUpload);
+thumbGenerator.setMaxWidth(75);
+thumbGenerator.setMaxHeigth(75);
+thumbGenerator.addImageLoadedHandler(new ImageLoadedHandler() {
+   @Override
+   public void onImageLoaded(ImageLoadedEvent event) {
+       // Store the thumbnail image data as encoded URL
+       setThumbnail(event.getImageData().getDataURL());
+   }
+});]]></programlisting>
+
+                <para>
+                    See the Parking Demo for more details about the usage of the add-on.
+                </para>
+            </section>
         </section>
     </section>
 
@@ -2486,8 +2774,10 @@ offline.extend(this);]]></programlisting>
             </para>
 
             <para>
-                Please see the Parking source code for an example implementation of
-                an offline mode user interface.
+                The Parking demo provides an example implementation of an offline mode
+                user interface. The Ticket view is implemented as a fat client-side
+                widget, where the server-side view only communicates the state to the
+                widget.
             </para>
         </section>
 
