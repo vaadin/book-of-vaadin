@@ -4957,6 +4957,263 @@ send.addClickListener(new ClickListener() {
             </section>
         </section>
     </section>
+
+    <section xml:id="advanced.fonticon">
+        <title>Font Icons</title>
+        
+        <para>
+            Font icons are icons included in a font. Fonts have many advantages over
+            bitmap images. Browsers are usually faster in rendering fonts than loading
+            image files. Fonts are usually vector graphics, so they are scalable. As font
+            icons are text characters, you can define their color in CSS by the regular
+            foreground color property.
+        </para>
+
+        <section xml:id="advanced.fonticon.enabling">
+            <title>Loading a Font</title>
+
+            <para>
+                Vaadin currently includes one custom font with icons:
+                <literal>FontAwesome</literal>. It is automatically enabled in the Valo
+                theme. For other themes, you need to include it with the following line in
+                your project theme, after importing the base theme:
+            </para>
+
+            <programlisting><?pocket-size 75% ?><![CDATA[@include fonticons;]]></programlisting>
+
+            <para>
+                If you use other icon fonts, such as a custom ones, <phrase
+                condition="web">as described in <xref
+                linkend="advanced.fonticon.custom"/>, </phrase> and the font is not
+                included in the base theme or provided by the browser, you need to load it
+                with the <literal>font</literal> mixin:
+            </para>
+
+            <programlisting><?pocket-size 75% ?><![CDATA[@include font(TheCustomFont, thecustomfontfile)]]></programlisting>
+
+            <para>
+                The first parameter is the name of the font family, and the second
+                parameter its file name.
+            </para>
+        </section>
+
+        <section xml:id="advanced.fonticon.using">
+            <title>Basic Use</title>
+
+            <para>
+                Font icons are resources of type <classname>FontIcon</classname>, which
+                implements the <interfacename>Resource</interfacename> interface. You can
+                therefore use them anywhere where you can use resources, and also in any
+                text.
+            </para>
+
+            <para>
+                Each icon has a Unicode codepoint, by which you can use it. Vaadin
+                includes an awesome icon font, <literal>FontAwesome</literal>, which comes
+                with an enumeration of all the icons included in the font.
+            </para>
+
+            <para>
+                Most typically, you set a component icon as follows:
+            </para>
+
+            <programlisting><?pocket-size 75% ?><![CDATA[TextField name = new TextField("Name");
+name.setIcon(FontAwesome.USER);
+layout.addComponent(name);
+
+// Button allows specifying icon resource in constructor
+Button ok = new Button("OK", FontAwesome.CHECK);
+layout.addComponent(ok);]]></programlisting>
+
+            <para>
+                The result is illustrated in <xref
+                linkend="figure.advanced.fonticon.using"/>, with the color styling
+                described next.
+            </para>
+
+            <figure xml:id="figure.advanced.fonticon.using">
+                <title>Basic Use of Font Icons</title>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata smallscale="40%" align="center" fileref="img/advanced/fonticons-basic.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+
+            <section xml:id="advanced.fonticon.using.css">
+                <title>Styling the Icons</title>
+
+                <para>
+                    As font icons are regular text, you can specify their color with the
+                    <literal>color</literal> attribute in CSS to specify the foreground
+                    text color. All HTML elements that display icons in Vaadin have the
+                    <literal>v-icon</literal> style name.
+                </para>
+
+                <programlisting><?pocket-size 75% ?><![CDATA[.v-icon {
+    color: blue;
+}]]></programlisting>
+
+                <para>
+                    If you use the font icon resources in other ways, such as in an
+                    <classname>Image</classname> component, the style name will be
+                    different.
+                </para>
+            </section>
+        </section>
+
+        <section xml:id="advanced.fonticon.html">
+            <title>Using Font icons in HTML</title>
+
+            <para>
+                You can use font icons in HTML code, such as in a
+                <classname>Label</classname>, by generating the HTML to display the
+                icon with the <methodname>getHtml()</methodname> method.
+            </para>
+
+            <programlisting><?pocket-size 75% ?><![CDATA[Label label = new Label("I " +
+    FontAwesome.HEART.getHtml() + " Vaadin",
+    ContentMode.HTML);
+label.addStyleName("redicon");
+layout.addComponent(label);]]></programlisting>
+
+            <para>
+                The HTML code has the <literal>v-icon</literal> style, which you can
+                modify in CSS:
+            </para>
+
+            <programlisting><?pocket-size 75% ?><![CDATA[.redicon .v-icon {
+    color: red;
+}]]></programlisting>
+
+            <para>
+                The result is illustrated in <xref
+                linkend="figure.advanced.fonticon.html"/>, with the color styling
+                described next.
+            </para>
+
+            <figure xml:id="figure.advanced.fonticon.html">
+                <title>Using Font Icons in Label</title>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata smallscale="30%" align="center" fileref="img/advanced/fonticons-html.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+
+            <para>
+                You could have set the font color in the label's HTML code as well, or for
+                all icons in the UI.
+            </para>
+
+            <para>
+                You can easily use font icons in HTML code in other ways as well. You
+                just need to use the correct font family and then use the hex-formatted
+                Unicode codepoint for the icon. See for example the implementation of the
+                <methodname>getHtml()</methodname> method in
+                <classname>FontAwesome</classname>:
+            </para>
+
+            <programlisting><?pocket-size 70% ?><![CDATA[@Override
+public String getHtml() {
+    return "<span class=\"v-icon\" style=\"font-family: " +
+           getFontFamily() + ";\">&#x" +
+           Integer.toHexString(codepoint) + ";</span>";
+}]]></programlisting>
+        </section>
+        
+        <section xml:id="advanced.fonticon.anywhere" condition="web">
+            <title>Using Font Icons in Other Text</title>
+
+            <para>
+                You can include a font icon in any text by its Unicode codepoint, which
+                you can get with the <methodname>getCodePoint()</methodname> method. In
+                such case, however, you need to use the same font for other text in the
+                same string as well. The FontAwesome provided in Vaadin includes a basic
+                character set.
+            </para>
+
+            <programlisting><?pocket-size 75% ?><![CDATA[TextField amount = new TextField("Amount (in " +
+   new String(Character.toChars(
+           FontAwesome.BTC.getCodepoint())) +
+   ")");
+amount.addStyleName("awesomecaption");
+layout.addComponent(amount);]]></programlisting>
+
+            <para>
+                You need to set the font family in CSS.
+            </para>
+
+            <programlisting><?pocket-size 75% ?><![CDATA[.v-caption-awesomecaption .v-captiontext {
+    font-family: FontAwesome;
+}]]></programlisting>
+        </section>
+
+        <section xml:id="advanced.fonticon.custom" condition="web">
+            <title>Custom Font Icons</title>
+
+            <para>
+                You can define a font icon for any font available in the browser by
+                implementing the <interfacename>FontIcon</interfacename> interface. The
+                normal pattern for implementing it is to implement an enumeration for all
+                the symbols available in the font. See the implementation of
+                <classname>FontAwesome</classname> for more details.
+            </para>
+
+            <para>
+                You need a server-side API for the font icons. In the following, we define
+                a font icon using a normal sans-serif font built-in in the browser.
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[// Font icon definition with a single symbol
+public enum MyFontIcon implements FontIcon {
+    EURO(0x20AC);
+    
+    private int codepoint;
+    
+    MyFontIcon(int codepoint) {
+        this.codepoint = codepoint;
+    }
+    
+    @Override
+    public String getMIMEType() {
+        throw new UnsupportedOperationException(
+            FontIcon.class.getSimpleName()
+            + " should not be used where a MIME type is needed.");
+    }
+    
+    @Override
+    public String getFontFamily() {
+        return "sans-serif";
+    }
+    
+    @Override
+    public int getCodepoint() {
+        return codepoint;
+    }
+    
+    @Override
+    public String getHtml() {
+        return "<span class=\"v-icon\" style=\"font-family: " +
+                getFontFamily() + ";\">&#x" +
+                Integer.toHexString(codepoint) + ";</span>";
+    }
+}]]></programlisting>
+
+            <para>
+                Then you can use it as usual:
+            </para>
+
+            <programlisting><?pocket-size 75% ?><![CDATA[TextField name = new TextField("Amount");
+name.setIcon(MyFontIcon.EURO);
+layout.addComponent(name);]]></programlisting>
+
+            <para>
+                You could make the implementation a class as well, instead of an
+                enumeration, to allow other ways to specify the icons.
+            </para>
+        </section>
+    </section>
 </chapter>
 
 <!-- Keep this comment at the end of the file
