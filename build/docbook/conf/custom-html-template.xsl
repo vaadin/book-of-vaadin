@@ -200,7 +200,7 @@
           <td>
             <xsl:element name="a">
               <xsl:attribute name="href">
-                <xsl:value-of select="concat($book.examples.url, '#', @id)"/>
+                <xsl:value-of select="concat($book.examples.url, '#', @eid)"/>
               </xsl:attribute>
 
               <!-- Open in new window -->
