@@ -4964,36 +4964,28 @@ send.addClickListener(new ClickListener() {
         <para>
             Font icons are icons included in a font. Fonts have many advantages over
             bitmap images. Browsers are usually faster in rendering fonts than loading
-            image files. Fonts are usually vector graphics, so they are scalable. As font
+            image files. Web fonts are vector graphics, so they are scalable. As font
             icons are text characters, you can define their color in CSS by the regular
             foreground color property.
         </para>
 
         <section xml:id="advanced.fonticon.enabling">
-            <title>Loading a Font</title>
+            <title>Loading Icon Fonts</title>
 
             <para>
-                Vaadin currently includes one custom font with icons:
-                <literal>FontAwesome</literal>. It is automatically enabled in the Valo
-                theme. For other themes, you need to include it with the following line in
-                your project theme, after importing the base theme:
+                Vaadin currently comes with one custom icon font: FontAwesome. It is
+                automatically enabled in the Valo theme. For other themes, you need to
+                include it with the following line in your project theme, after importing
+                the base theme:
             </para>
 
             <programlisting><?pocket-size 75% ?><![CDATA[@include fonticons;]]></programlisting>
 
             <para>
-                If you use other icon fonts, such as a custom ones, <phrase
-                condition="web">as described in <xref
-                linkend="advanced.fonticon.custom"/>, </phrase> and the font is not
-                included in the base theme or provided by the browser, you need to load it
-                with the <literal>font</literal> mixin:
-            </para>
-
-            <programlisting><?pocket-size 75% ?><![CDATA[@include font(TheCustomFont, thecustomfontfile)]]></programlisting>
-
-            <para>
-                The first parameter is the name of the font family, and the second
-                parameter its file name.
+                If you use other icon fonts, <phrase condition="web">as described in <xref
+                linkend="advanced.fonticon.custom"/>, </phrase> and the font is not loaded
+                by a base theme, you need to load it with a <literal>font</literal> mixin
+                in Sass, as described in <xref linkend="themes.fonts.loading"/>.
             </para>
         </section>
 
@@ -5003,8 +4995,8 @@ send.addClickListener(new ClickListener() {
             <para>
                 Font icons are resources of type <classname>FontIcon</classname>, which
                 implements the <interfacename>Resource</interfacename> interface. You can
-                therefore use them anywhere where you can use resources, and also in any
-                text.
+                use these special resources for component icons and such, but not as
+                embedded images, for example.
             </para>
 
             <para>
@@ -5017,6 +5009,7 @@ send.addClickListener(new ClickListener() {
                 Most typically, you set a component icon as follows:
             </para>
 
+            <book-example eid="advanced.fonticon.basic"></book-example>
             <programlisting><?pocket-size 75% ?><![CDATA[TextField name = new TextField("Name");
 name.setIcon(FontAwesome.USER);
 layout.addComponent(name);
@@ -5071,6 +5064,7 @@ layout.addComponent(ok);]]></programlisting>
                 icon with the <methodname>getHtml()</methodname> method.
             </para>
 
+            <book-example eid="advanced.fonticon.html"></book-example>
             <programlisting><?pocket-size 75% ?><![CDATA[Label label = new Label("I " +
     FontAwesome.HEART.getHtml() + " Vaadin",
     ContentMode.HTML);
@@ -5133,6 +5127,7 @@ public String getHtml() {
                 character set.
             </para>
 
+            <book-example eid="advanced.fonticon.intext"></book-example>
             <programlisting><?pocket-size 75% ?><![CDATA[TextField amount = new TextField("Amount (in " +
    new String(Character.toChars(
            FontAwesome.BTC.getCodepoint())) +
@@ -5153,19 +5148,59 @@ layout.addComponent(amount);]]></programlisting>
             <title>Custom Font Icons</title>
 
             <para>
-                You can define a font icon for any font available in the browser by
-                implementing the <interfacename>FontIcon</interfacename> interface. The
-                normal pattern for implementing it is to implement an enumeration for all
-                the symbols available in the font. See the implementation of
-                <classname>FontAwesome</classname> for more details.
+                You can easily use glyphs in existing fonts as icons, or create your own.
             </para>
 
-            <para>
-                You need a server-side API for the font icons. In the following, we define
-                a font icon using a normal sans-serif font built-in in the browser.
-            </para>
+            <section xml:id="advanced.fonticon.custom.creating" condition="web">
+                <title>Creating New Icon Fonts With IcoMoon</title>
 
-            <programlisting><?pocket-size 65% ?><![CDATA[// Font icon definition with a single symbol
+                <para>
+                    You are free to use any of the many ways to create icons and embed
+                    them into fonts. Here, we give basic instructions for using the <link
+                    xlink:href="http://icomoon.io/app/">IcoMoon</link> service, where you
+                    can pick icons from a large library of well-designed icons.
+                </para>
+
+                <para>
+                    Font Awesome is included in IcoMoon's selection of icon
+                    libraries. Note that the codepoints of the icons are not fixed, so the
+                    <classname>FontAwesome</classname> enum is not compatible with such
+                    custom icon fonts.
+                </para>
+
+                <para>
+                    After you have selected the icons that you want in your font, you can
+                    download them in a ZIP package. The package contains the icons in
+                    multiple formats, including WOFF, TTF, EOT, and SVG. Not all browsers
+                    support any one of them, so all are needed to support all the common
+                    browsers. Extract the <filename>fonts</filename> folder from the
+                    package to under your theme.
+                </para>
+
+                <para>
+                    See <xref linkend="themes.fonts.loading"/> for instructions for
+                    loading a custom font.
+                </para>
+            </section>
+
+            <section xml:id="advanced.fonticon.custom.implementing" condition="web">
+                <title>Implementing FontIcon</title>
+
+                <para>
+                    You can define a font icon for any font available in the browser by
+                    implementing the <interfacename>FontIcon</interfacename>
+                    interface. The normal pattern for implementing it is to implement an
+                    enumeration for all the symbols available in the font. See the
+                    implementation of <classname>FontAwesome</classname> for more details.
+                </para>
+
+                <para>
+                    You need a FontIcon API for the icons. In the following, we define a
+                    font icon using a normal sans-serif font built-in in the browser.
+                </para>
+
+                <book-example eid="advanced.fonticon.custom"></book-example>
+                <programlisting><?pocket-size 65% ?><![CDATA[// Font icon definition with a single symbol
 public enum MyFontIcon implements FontIcon {
     EURO(0x20AC);
     
@@ -5200,18 +5235,19 @@ public enum MyFontIcon implements FontIcon {
     }
 }]]></programlisting>
 
-            <para>
-                Then you can use it as usual:
-            </para>
+                <para>
+                    Then you can use it as usual:
+                </para>
 
-            <programlisting><?pocket-size 75% ?><![CDATA[TextField name = new TextField("Amount");
+                <programlisting><?pocket-size 75% ?><![CDATA[TextField name = new TextField("Amount");
 name.setIcon(MyFontIcon.EURO);
 layout.addComponent(name);]]></programlisting>
 
-            <para>
-                You could make the implementation a class as well, instead of an
-                enumeration, to allow other ways to specify the icons.
-            </para>
+                <para>
+                    You could make the implementation a class as well, instead of an
+                    enumeration, to allow other ways to specify the icons.
+                </para>
+            </section>
         </section>
     </section>
 </chapter>
