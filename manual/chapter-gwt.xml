@@ -466,6 +466,12 @@
             communicates changes to the widget state and events to the server-side.
         </para>
 
+        <para>
+            A connector normally gets the state of the server-side component by the
+            <emphasis>shared state</emphasis>, described later in <xref
+            linkend="gwt.shared-state"/>.
+        </para>
+
         <section xml:id="gwt.connector.basic">
             <title>A Basic Connector</title>
 
@@ -496,10 +502,20 @@ public class MyComponentConnector
         super.onStateChanged(stateChangeEvent);
         
         // Do something useful
-        final String text = getState().getText();
+        final String text = getState().text;
         getWidget().setText(text);
     }
 }]]></programlisting>
+
+            <para>
+                Here, we handled state change with the crude
+                <methodname>onStateChanged()</methodname> method that is called when any
+                of the state properties is changed. A finer and simpler handling is
+                achieved by using the <classname>@OnStateChange</classname> annotation on
+                a handler method for each property, or by
+                <classname>@DelegateToWidget</classname> on a shared state property, as
+                described later in <xref linkend="gwt.shared-state"/>.
+            </para>
         </section>
 
         <section xml:id="gwt.connector.communication">
@@ -542,8 +558,8 @@ public class MyComponentConnector
 
         <para>
             A shared state object simply needs to extend the
-            <classname>ComponentState</classname>. The members should normally be declared
-            as public.
+            <classname>ComponentState</classname>. The member variables should normally be
+            declared as public.
         </para>
 
         <programlisting><?pocket-size 75% ?><![CDATA[public class MyComponentState extends ComponentState {
@@ -551,8 +567,9 @@ public class MyComponentConnector
 }]]></programlisting>
 
         <para>
-            If the members have private visibility for some reason, they need to have
-            public setters and getters.
+            A shared state should never contain any logic. If the members have private
+            visibility for some reason, you can also use public setters and getters, in
+            which case the property must not be public.
         </para>
 
         <section xml:id="gwt.shared-state.component">
@@ -592,7 +609,7 @@ public MyComponentState getState() {
                 one that returns the proper shared state type, as follows:
             </para>
 
-            <programlisting><?pocket-size 65% ?><![CDATA[@Override
+            <programlisting><![CDATA[@Override
 public MyComponentState getState() {
     return (MyComponentState) super.getState();
 }]]></programlisting>
@@ -609,15 +626,94 @@ public MyComponentState getState() {
 public void onStateChanged(StateChangeEvent stateChangeEvent) {
     super.onStateChanged(stateChangeEvent);
 		
-    // Do something useful with the data
+    // Copy the state properties to the widget properties
     final String text = getState().getText();
     getWidget().setText(text);
 }]]></programlisting>
+
+            <para>
+                The crude <methodname>onStateChanged()</methodname> method is called when
+                any of the state properties is changed, allowing you to have even complex
+                logic in how you manipulate the widget according to the state changes. In
+                most cases, however, you can handle the property changes more easily and
+                also more efficiently by using instead the
+                <classname>@OnStateChange</classname> annotation on the handler methods
+                for each property, as described next in <xref
+                linkend="gwt.shared-state.onstatechange"/>, or by delegating the property
+                value directly to the widget, as described in <xref
+                linkend="gwt.shared-state.delegatetowidget"/>.
+            </para>
 
             <para condition="web">
                 The processing phases of state changes are described in more detail in
                 <xref linkend="gwt.advanced.phases"/>.
             </para>
+        </section>
+
+        <section xml:id="gwt.shared-state.onstatechange">
+            <title>Handling Property State Changes with <classname>@OnStateChange</classname></title>
+
+            <para>
+                The <classname>@OnStateChange</classname> annotation can be used to mark a
+                connector method that handles state change on a particular property, given
+                as parameter for the annotation. In addition to higher clarity, this
+                avoids handling all property changes if a state change occurs in only one
+                or some of them. However, if a state change can occur in multiple
+                properties, you can only use this technique if the properties do not have
+                interaction that prevents handling them separately in arbitrary order.
+            </para>
+
+            <para>
+                We can replace the <methodname>onStateChange()</methodname> method in the
+                earlier connector example with the following:
+            </para>
+
+            <programlisting><![CDATA[@OnStateChange("text")
+void updateText() {
+    getWidget().setText(getState().text);
+}]]></programlisting>
+
+            <para>
+                If the shared state property and the widget property have same name and do
+                not require any type conversion, as is the case in the above example, you
+                could simplify this even further by using the
+                <classname>@DelegateToWidget</classname> annotation for the shared state
+                property, as described in <xref
+                linkend="gwt.shared-state.delegatetowidget"/>.
+            </para>
+        </section>
+
+        <section xml:id="gwt.shared-state.delegatetowidget">
+            <title>Delegating State Properties to Widget</title>
+
+            <para>
+                The <classname>@DelegateToWidget</classname> annotation for a shared state
+                property defines automatic delegation of the property value to the
+                corresponding widget property of the same name and type, by calling the
+                respective setter for the property in the widget.
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[public class MyComponentState extends AbstractComponentState {
+    @DelegateToWidget
+    public String text;
+}]]></programlisting>
+
+            <para>
+                This is equivalent to handling the state change in the connector, as done
+                in the example in <xref linkend="gwt.shared-state.onstatechange"/>.
+            </para>
+
+            <para>
+                If you want to delegate a shared state property to a widget property of
+                another name, you can give the property name as a string parameter for the
+                annotation.
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[public class MyComponentState extends AbstractComponentState {
+    @DelegateToWidget("description")
+    public String text;
+}]]></programlisting>
+
         </section>
 
         <section xml:id="gwt.shared-state.referring">
