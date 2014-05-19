@@ -14,6 +14,12 @@
         This chapter describes the installation and use of the Vaadin TestBench.
     </para>
 
+    <para>
+        <emphasis>This book edition mostly covers TestBench 4, but is based on a
+        prerelease version available at the time of writing. The final release may have
+        changes that differ from the documentation given here.</emphasis>
+    </para>
+
     <section xml:id="testbench.overview">
         <title>Overview</title>
 
@@ -80,7 +86,7 @@
 
         <itemizedlist>
             <listitem>
-                <para>Control a web application from Java</para>
+                <para>Control a browser from Java</para>
             </listitem>
             <listitem>
                 <para>Generate component selectors in debug window</para>
@@ -3329,28 +3335,6 @@ public void testRemoteWebDriver() throws MalformedURLException {
                 have to select the target frame before fields can be correctly identified.
             </para>
 
-            <section xml:id="testbench.known-issues.loginform.recorder">
-                <title>Selecting a Frame in the Recorder</title>
-
-                <para>
-                    Selecting the correct frame in the recorder can be done by modifying
-                    the <parameter>target</parameter> of the recorded
-                    <command>selectFrame</command> command. One way to select the correct
-                    frame is to specify its 0-based index in the selector, such as
-                    "<literal>index=2</literal>".
-                </para>
-
-                <para>
-                    Another way is to specify an XPath selector for the
-                    <literal>iframe</literal>. In this case it helps if you can specify a
-                    component ID for the <classname>LoginForm</classname> component. In
-                    the following XPath selector example, the component ID of the
-                    <classname>LoginForm</classname> is "login":
-                </para>
-
-                <programlisting><![CDATA[xpath=//id("login")//iframe]]></programlisting>
-            </section>
-
             <section xml:id="testbench.known-issues.loginform.junit">
                 <title>Selecting a Frame in JUnit Code</title>
 
@@ -3370,43 +3354,6 @@ getDriver().switchTo().frame(2);]]></programlisting>
     findElement(By.xpath("//id('login')//iframe"));
 getDriver().switchTo().frame(frame);]]></programlisting>
             </section>
-        </section>
-
-        <section xml:id="testbench.known-issues.asserttextpresent">
-            <title>Using <methodname>assertTextPresent</methodname> and <methodname>assertTextNotPresent</methodname></title>
-
-            <para>
-                The <methodname>assertTextPresent</methodname> and
-                <methodname>assertTextNotPresent</methodname> methods in TestBench
-                Recorder are problematic in that they do not respect CSS rules that hide
-                elements, such as <literal>display: none</literal>. Because of this, you
-                may have trouble confirming that text is or is not present.
-            </para>
-
-            <para>
-                This issue will be fixed in a future release, but until then, you can use
-                a better, although more complex, strategy for testing whether a string is
-                present on the screen or not. You can specify a condition for the style
-                attribute that makes the text hidden with the
-                <methodname>assertElementPresent</methodname> method and an XPath
-                selector. For example (as it would be specified in Recorder):
-            </para>
-
-            <programlisting><![CDATA[xpath=//div[contains(@style, "display: none")]
-//div[contains(text(),"HIDDEN TEXT")]]]></programlisting>
-        </section>
-
-        <section xml:id="testbench.known-issues.upload">
-            <title>Exporting Recordings of the <classname>Upload</classname> Component</title>
-
-            <para>
-                Exporting recordings of the <classname>Upload</classname> component exports one piece of
-                unnecessary code that makes replay fail. Whenever you record a file upload, remember to 
-                remove the call to <methodname>clear()</methodname> as upload fields are special fields
-                that cannot be cleared. Also make sure that the replay window is wide enough for the upload
-                button to be visible (see <methodname>driver.resizeViewPortTo()</methodname>), otherwise you
-                will get an exception when running the test.
-            </para>
         </section>
 
         <section xml:id="testbench.known-issues.firefox-mac">
