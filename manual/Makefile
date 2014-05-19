@@ -165,8 +165,8 @@ book.pdf: book.fo
 
 book-pocket.pdf: book-pocket.fo
 	cd $(DOCROOT) ; /opt/RenderX/XEP/xep $(XEPPARS) <manual/book-pocket.fo >manual/book-pocket.pdf
-	cp book-pocket.pdf /var/www/book-pocket.pdf
 	rm book-pocket.fo
+#	cp book-pocket.pdf /var/www/book-pocket.pdf
 
 # View the result
 viewbook: book.pdf FORCE
