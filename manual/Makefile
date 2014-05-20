@@ -208,16 +208,16 @@ pot: $(POTFILES) init-pot-exports $(POTEXPORTS)
 #
 # 4. Install the custom package with:
 #    # dpkg -i ../poxml-x.x.x.deb
-translations/pot/%.pot: %.xml
+translations/pot/%.pot: %.xml FORCE
 	xml2pot $< > $@
 #	xml2pot $< | msgcat - --no-wrap > $@
 
 init-pot-exports:
 	mkdir -p translations/pot-exports
 
-translations/pot-exports/%.po: translations/pot/%.pot
+translations/pot-exports/%.po: translations/pot/%.pot FORCE
 	cp $< $@
-	curl --form file=@$@ --user magi:kankeakala https://api.getlocalization.com/bookofvaadin7test/api/update-master/
+#	curl --form file=@$@ --user $(GLUSER):$(GLPASSWORD) https://api.getlocalization.com/bookofvaadin7/api/update-master/
 
 i18n-clean: FORCE
 	rm -f translations/pot/*
