@@ -304,6 +304,21 @@
         </copy>
     </target>
 
+    <!-- This handles extra stuff for translation builds -->
+    <target name="translated-html-build" depends="manual-html-build" if="locale">
+        <property name="translation.local.dir" value="manual/translations/${locale}"/>
+
+        <!-- Copy translated images to output directory. -->
+        <echo>Copying translated images ${translation.local.dir}/img to HTML output in ${manual.html.output.dir}/img</echo>
+        <copy todir="${manual.html.output.dir}/img" failonerror="false">
+            <fileset dir="${translation.local.dir}/img">
+                <include name="**/*.jpg"/>
+                <include name="**/*.png"/>
+                <exclude name="**/.svn" />
+            </fileset>
+        </copy>
+    </target>
+
     <!-- Configuration for building the HTML manual. -->
     <target name="init-manual-html" depends="init, init-manual">
         <property name="manual.html.xsl" value="build/docbook/conf/manual-html.xsl"/>
@@ -314,7 +329,7 @@
         <echo>Published: ${manual.pubdate}</echo>
 	</target>
 
-    <target name="manual-html" depends="init, init-manual, init-manual-html, init-manual-html-common, manual-html-build">
+    <target name="manual-html" depends="init, init-manual, init-manual-html, init-manual-html-common, manual-html-build, translated-html-build">
     </target>
 
     <!-- ant contrib required for flow control (for loop, if, property override) -->
@@ -406,6 +421,16 @@
 				<outputmapper id="out" type="glob" from="*.po" to="${manual.source.dir}/*.xml"/>
 			</redirector>
 		</apply>
+
+		<!-- Copy translated images on top.                                 -->
+        <!-- These are only used by the PDF build, for HTML build separate  -->
+        <!-- copying is needed.                                             -->
+		<copy todir="${manual.source.dir}">
+			<fileset dir="${translation.staging.dir}">
+				<include name="img/**/*.png"/>
+				<include name="img/**/*.jpg"/>
+			</fileset>
+		</copy>
 	</target>
 
 	<!-- Compile localized documentation stored in repository. -->
@@ -438,20 +463,21 @@
 	<target name="stage-imported-locale" depends="init">
         <property name="translation.import.dir" value="${result-path}/import/${manual.language.docbook}${import.language.extension}"/>
         <property name="translation.staging.dir" value="${result-path}/translation-staging/${locale}"/>
+        <property name="translation.local.dir" value="manual/translations/${locale}"/>
 
         <echo>Translation import dir:  ${translation.import.dir}</echo>
         <echo>Translation staging dir: ${translation.staging.dir}</echo>
 
         <mkdir dir="${translation.staging.dir}"/>
 
-        <!-- Copy PO files from repository to the staging directory -->
-        <!-- ...not, because we are going to merge them
+        <!-- Copy files from repository to the staging directory -->
         <copy todir="${translation.staging.dir}" overwrite="yes" failonerror="no">
             <fileset dir="manual/translations/${locale}">
-                <include name="*.po"/>
+                <!-- <include name="*.po"/> -->
+                <include name="img/**/*.jpg"/>
+                <include name="img/**/*.png"/>
             </fileset>
         </copy>
-        -->
 
         <!-- Copy imported translations over the existing PO files  -->
         <!--  * Remove locale from the filenames                    -->
