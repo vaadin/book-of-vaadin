@@ -1,5 +1,6 @@
 LANGUAGE =	fi
 POFILES  =	book.po chapter-introduction.po
+IMAGES =	intro/architecture-vaadin7
 XMLFILES =  book.xml \
 			chapter-advanced.xml chapter-architecture.xml chapter-datamodel.xml \
 			chapter-getting-started.xml chapter-introduction.xml chapter-themes.xml \
@@ -10,13 +11,31 @@ all:
 	@echo "Targets: 'make merge' or 'make compile'"
 
 ################################################################################
+# Image conversions
+################################################################################
+
+# SVG source images
+SRCIMAGES := $(foreach file, $(IMAGES), original-drawings/$(file).svg)
+
+# Two size of target images
+TRGIMAGES_HI := $(foreach file, $(IMAGES), img/$(file)-hi.png)
+TRGIMAGES_LO := $(foreach file, $(IMAGES), img/$(file)-lo.png)
+
+images: $(TRGIMAGES_HI) $(TRGIMAGES_LO) FORCE
+
+$(TRGIMAGES_HI): img/%-hi.png: original-drawings/%.svg
+	inkscape --export-png $@ --export-dpi=300 --export-area-drawing $<
+
+$(TRGIMAGES_LO): img/%-lo.png: original-drawings/%.svg
+	inkscape --export-png $@ --export-dpi=90 --export-area-drawing $<
+
+################################################################################
 # Merge
 ################################################################################
 merge: $(POFILES)
 
 %.po: ../pot/%.pot
 	msgmerge --no-wrap -U $@ $<
-
 
 ################################################################################
 # Compile
