@@ -525,6 +525,104 @@ File baseDir = VaadinService.getCurrent().getBaseDirectory();]]></programlisting
             most cases.
         </para>
 
+        <section xml:id="application.events.anonymous">
+            <title>Using Anonymous Classes</title>
+
+            <para>
+                By far the easiest and the most common way to handle events in Java 6 and
+                7 is to use anonymous local classes. It encapsulates the handling of
+                events to where the component is defined and does not require cumbering
+                the managing class with interface implementations. The following example
+                defines an anonymous class that inherits the
+                <classname>Button.ClickListener</classname> interface.
+            </para>
+
+            <book-example eid="application.eventlistener.anonymous"></book-example>
+            <programlisting><![CDATA[// Have a component that fires click events
+final Button button = new Button("Click Me!");
+        
+// Handle the events with an anonymous class
+button.addClickListener(new Button.ClickListener() {
+    public void buttonClick(ClickEvent event) {
+        button.setCaption("You made me click!");
+    }
+});]]></programlisting>
+
+            <para>
+                Local objects referenced from within an anonymous class, such as the
+                <classname>Button</classname> object in the above example, must be
+                declared <literal>final</literal>.
+            </para>
+
+            <para>
+                Most components allow passing a listener to the constructor, thereby
+                losing a line or two. However, notice that if accessing the component
+                that is constructed from an anonymous class, you must use a reference that
+                is declared before the constructor is executed, for example as a member
+                variable in the outer class. If it is declared in the same expression
+                where the constructor is called, it doesn't yet exist. In such cases, you
+                need to get a reference to the component from the event
+                object.
+            </para>
+
+            <book-example eid="application.eventlistener.constructor"></book-example>
+            <programlisting><![CDATA[final Button button = new Button("Click It!",
+  new Button.ClickListener() {
+    @Override
+    public void buttonClick(ClickEvent event) {
+        event.getButton().setCaption("Done!");
+    }
+  });]]></programlisting>
+
+        </section>
+
+        <section xml:id="application.events.java8">
+            <title>Handling Events in Java 8</title>
+
+            <para>
+                Java 8 introduced lambda expressions, which offer a replacement for
+                listeners. You can directly use lambda expressions in place of listeners
+                that have only one method to implement.
+            </para>
+
+            <para>
+                For example, in the following, we use a lambda expression to handle button
+                click events in the constructor:
+            </para>
+
+            <book-example eid="application.eventlistener.java8"></book-example>
+            <programlisting><?pocket-size 75% ?><![CDATA[layout.addComponent(new Button("Click Me!",
+    event -> event.getButton().setCaption("You made click!")));]]></programlisting>
+
+            <para>
+                Java 8 is the future that is already here, and as Vaadin API uses event
+                listeners extensively, using lambda expressions makes UI code much more
+                readable.
+            </para>
+
+            <para>
+                Directing events to handler methods is easy with method references:
+            </para>
+
+            <book-example eid="application.eventlistener.java8differentiation"></book-example>
+            <programlisting><?pocket-size 65% ?><![CDATA[public class Java8Buttons extends CustomComponent {
+    public Java8Buttons() {
+        setCompositionRoot(new HorizontalLayout( 
+            new Button("OK", this::ok),
+            new Button("Cancel", this::cancel)));
+    }
+    
+    public void ok(ClickEvent event) {
+        event.getButton().setCaption ("OK!");
+    }
+
+    public void cancel(ClickEvent event) {
+        event.getButton().setCaption ("Not OK!");
+    }
+}]]></programlisting>
+
+        </section>
+
         <section xml:id="application.events.classlistener">
             <title>Implementing a Listener in a Regular Class</title>
 
@@ -607,56 +705,6 @@ File baseDir = VaadinService.getCurrent().getBaseDirectory();]]></programlisting
             </para>
         </section>
 
-        <section xml:id="application.events.anonymous">
-            <title>The Easy Way: Using Anonymous Classes</title>
-
-            <para>
-                By far the easiest and the most common way to handle events is to use
-                anonymous local classes. It encapsulates the handling of events to where
-                the component is defined and does not require cumbering the managing class
-                with interface implementations. The following example defines an anonymous
-                class that inherits the <classname>Button.ClickListener</classname>
-                interface.
-            </para>
-
-            <book-example eid="application.eventlistener.anonymous"></book-example>
-            <programlisting><![CDATA[// Have a component that fires click events
-final Button button = new Button("Click Me!");
-        
-// Handle the events with an anonymous class
-button.addClickListener(new Button.ClickListener() {
-    public void buttonClick(ClickEvent event) {
-        button.setCaption("You made me click!");
-    }
-});]]></programlisting>
-
-            <para>
-                Local objects referenced from within an anonymous class, such as the
-                <classname>Button</classname> object in the above example, must be
-                declared <literal>final</literal>.
-            </para>
-
-            <para>
-                Most components allow passing a listener to the constructor, thereby
-                losing a line or two. However, notice that if accessing the component
-                that is constructed from an anonymous class, you must use a reference that
-                is declared before the constructor is executed, for example as a member
-                variable in the outer class. If it is declared in the same expression
-                where the constructor is called, it doesn't yet exist. In such cases, you
-                need to get a reference to the component from the event
-                object.
-            </para>
-
-            <book-example eid="application.eventlistener.constructor"></book-example>
-            <programlisting><![CDATA[final Button button = new Button("Click It!",
-  new Button.ClickListener() {
-    @Override
-    public void buttonClick(ClickEvent event) {
-        event.getButton().setCaption("Done!");
-    }
-  });]]></programlisting>
-
-        </section>
     </section>
 
 	<section xml:id="application.resources">
