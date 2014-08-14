@@ -9,12 +9,14 @@ MANUALPATH = manual
 
 JAVAPARS = -Xms256M -Xmx512M
 
+
 # Document language; this is the default, translations can override this.
 DBLANGUAGE = en
+DBEXTRAPARS = l10n.gentext.language=$(DBLANGUAGE)
 
 PROFILE = profile.condition=print
 
-DBEXTRAPARS = l10n.gentext.language=$(DBLANGUAGE)
+POCKETBOOK_ROOT = book-pocket.xml
 
 # Command-line parameters for Docbook
 DBPARS =	section.autolabel=1 \
@@ -62,7 +64,7 @@ IMAGES =	intro/architecture intro/architecture-vaadin7 intro/toolchain \
 			portal/wsrp-architecture
 
 # List of source XML files
-XMLFILES = book.xml book-info.xml book-preface.xml book-vol1.xml book-vol2.xml \
+XMLFILES = $(POCKETBOOK_ROOT) book-info.xml book-preface.xml book-vol1.xml book-vol2.xml \
 	chapter-addons.xml	chapter-datamodel.xml	chapter-layout.xml	chapter-themes.xml \
 	chapter-advanced.xml	chapter-eclipse.xml	\
 	chapter-application.xml	chapter-getting-started.xml	\
@@ -136,9 +138,9 @@ DOCBOOK_POCKET = $(DOCROOT)/build/docbook/conf/custom-fo-docbook-pocket.xsl
 HIGHLIGHTER_CONFIG = -Dxslthl.config="file://$(PWD)/../build/docbook/xsl/highlighting/xslthl-config.xml"
 
 # Create profiled print book with a profiling pass
-book-print.xml: book.xml $(XMLFILES) images
+book-print.xml: $(POCKETBOOK_ROOT) $(XMLFILES) images
 	java $(JAVAPARS) -classpath $(JAVACLASSPATH) com.icl.saxon.StyleSheet -o book-print.xml \
-		 book.xml $(DBROOT)/xsl/profiling/profile.xsl $(PROFILE)
+		 $(POCKETBOOK_ROOT) $(DBROOT)/xsl/profiling/profile.xsl $(PROFILE)
 
 # Process Docbook to FO
 book.fo: book.xml $(XMLFILES) images

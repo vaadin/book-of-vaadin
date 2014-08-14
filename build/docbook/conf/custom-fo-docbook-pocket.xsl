@@ -123,10 +123,10 @@
   <!-- Table of Contents                                                    -->
   <!-- ==================================================================== -->
 
-  <!-- Smaller indentation than usual. -->
+  <!-- Smaller indentation than usual -->
   <xsl:param name="toc.indent.width" select="'5'"/>
 
-  <!-- Have chapter titles in bold. (from autotoc.xsl)-->
+  <!-- Have chapter titles in bold (from autotoc.xsl) -->
   <xsl:template name="toc.line">
     <xsl:param name="toc-context" select="NOTANODE"/>
     
@@ -238,8 +238,8 @@
     set       nop
   </xsl:param>
 
-  <!-- From fo/division.xsl:                                           -->
-  <!-- Generate TOC only in the first book                             -->
+  <!-- From fo/division.xsl:                         -->
+  <!-- Generate TOC only in the first book           -->
   <xsl:template name="make.book.tocs">
     <xsl:variable name="lot-master-reference">
       <xsl:call-template name="select.pagemaster">
@@ -254,7 +254,7 @@
     </xsl:variable>
 
     <!-- This additional condition makes the ToC only in the first book. -->
-    <xsl:if test="@booktoc = '1'">
+    <xsl:if test="@booktoc = 'set'">
       <xsl:if test="contains($toc.params, 'toc')">
         <xsl:call-template name="page.sequence">
           <xsl:with-param name="master-reference"
@@ -264,6 +264,26 @@
           <xsl:with-param name="content">
             <!-- Configure which sort of ToC to create.                    -->
             <!-- 'division' for single-volume ToC, 'set' for multi-volume. -->
+            <xsl:call-template name="set.toc">
+              <xsl:with-param name="toc.title.p" 
+                select="contains($toc.params, 'title')"/>
+            </xsl:call-template>
+          </xsl:with-param>
+        </xsl:call-template>
+      </xsl:if>
+    </xsl:if>
+
+    <!-- This allows making single-volume ToC. -->
+    <xsl:if test="@booktoc = 'volume'">
+      <xsl:if test="contains($toc.params, 'toc')">
+        <xsl:call-template name="page.sequence">
+          <xsl:with-param name="master-reference"
+            select="$lot-master-reference"/>
+          <xsl:with-param name="element" select="'toc'"/>
+          <xsl:with-param name="gentext-key" select="'TableofContents'"/>
+          <xsl:with-param name="content">
+            <!-- Configure which sort of ToC to create                    -->
+            <!-- 'division' for single-volume ToC, 'set' for multi-volume -->
             <xsl:call-template name="division.toc">
               <xsl:with-param name="toc.title.p" 
                 select="contains($toc.params, 'title')"/>
@@ -890,11 +910,13 @@
     </xsl:variable>
 
     <!-- ... Much unnecessary stuff (preamble, toc) removed from here ... -->
-
     <xsl:apply-templates select="$content"/>
   </xsl:template>
 
   <xsl:include href="custom-fo-titlepage-pocket.xsl"/>
+
+  <xsl:template match="info/title" mode="book.titlepage.verso.auto.mode">
+  </xsl:template>
 
   <xsl:template match="pubdate" mode="book.titlepage.recto.mode">
     <fo:block>

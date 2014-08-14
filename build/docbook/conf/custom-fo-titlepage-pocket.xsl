@@ -16,6 +16,8 @@
     </xsl:when>
   </xsl:choose>
 
+  <xsl:apply-templates mode="book.titlepage.recto.auto.mode" select="bookinfo/volume"/>
+  <xsl:apply-templates mode="book.titlepage.recto.auto.mode" select="info/volume"/>
   <xsl:choose>
     <xsl:when test="bookinfo/subtitle">
       <xsl:apply-templates mode="book.titlepage.recto.auto.mode" select="bookinfo/subtitle"/>
@@ -141,6 +143,12 @@
 <xsl:call-template name="division.title">
 <xsl:with-param name="node" select="ancestor-or-self::book[1]"/>
 </xsl:call-template>
+</fo:block>
+</xsl:template>
+
+<xsl:template match="volume" mode="book.titlepage.recto.auto.mode">
+<fo:block xmlns:fo="http://www.w3.org/1999/XSL/Format" xsl:use-attribute-sets="book.titlepage.recto.style" text-align="center" font-size="14.4pt" space-before="0.5cm" font-family="{$title.fontset}">
+<xsl:apply-templates select="." mode="book.titlepage.recto.mode"/>
 </fo:block>
 </xsl:template>
 
