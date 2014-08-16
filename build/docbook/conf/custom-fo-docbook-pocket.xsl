@@ -915,6 +915,18 @@
 
   <xsl:include href="custom-fo-titlepage-pocket.xsl"/>
 
+  <!-- The volume title (custom element). -->
+  <xsl:template match="volume" mode="book.titlepage.recto.mode">
+    <fo:block>
+      <xsl:text>Volume </xsl:text>
+      <xsl:value-of select="volumenum"/>
+      <xsl:text>: </xsl:text>
+    </fo:block>
+    <fo:block>
+      <xsl:value-of select="voltitle"/>
+    </fo:block>
+  </xsl:template>
+
   <xsl:template match="info/title" mode="book.titlepage.verso.auto.mode">
   </xsl:template>
 
