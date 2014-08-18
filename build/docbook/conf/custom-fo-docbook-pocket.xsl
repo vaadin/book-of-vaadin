@@ -162,6 +162,14 @@
       <fo:inline keep-with-next.within-line="always">
         <fo:basic-link internal-destination="{$id}">
           <!-- Have Part title in the ToC -->
+          <xsl:if test="self::book">
+            <xsl:text>Volume </xsl:text>
+            <xsl:value-of select="bookinfo/volume/volumenum"/>
+            <xsl:text>: </xsl:text>
+            <xsl:value-of select="bookinfo/volume/title"/>
+          </xsl:if>
+
+          <!-- Have Part title in the ToC -->
           <xsl:if test="self::part">
             <xsl:text>Part </xsl:text>
           </xsl:if>
@@ -412,7 +420,10 @@
       <xsl:choose>
         <xsl:when test="self::book">
           <!-- Vaadin: Use the abbreviated title as the volume title (TODO: better) -->
-          <xsl:apply-templates select="." mode="object.titleabbrev.markup"/>
+          <xsl:text>Volume </xsl:text>
+          <xsl:value-of select="bookinfo/volume/volumenum"/>
+          <xsl:text>: </xsl:text>
+          <xsl:value-of select="bookinfo/volume/title"/>
         </xsl:when>
         <xsl:otherwise>
           <xsl:apply-templates select="." mode="object.title.markup"/>
@@ -923,7 +934,7 @@
       <xsl:text>: </xsl:text>
     </fo:block>
     <fo:block>
-      <xsl:value-of select="voltitle"/>
+      <xsl:value-of select="title"/>
     </fo:block>
   </xsl:template>
 
@@ -950,6 +961,16 @@
   <xsl:attribute-set name="book.titlepage.verso.style">
     <xsl:attribute name="font-size">9pt</xsl:attribute>
   </xsl:attribute-set>
+
+  <!-- Do not include subtitle at the top of verso titlepage -->
+  <!-- Overrides fo/titlepage.xsl -->
+  <xsl:template name="book.verso.title">
+    <fo:block>
+      <xsl:apply-templates mode="titlepage.mode"/>
+
+      <!-- The subtitle would normally follow the title, separated by ": ". -->
+    </fo:block>
+  </xsl:template>
 
   <!-- Nicer formatting for publisher.                         -->
   <!-- The address is normally intended and with large margins. -->
