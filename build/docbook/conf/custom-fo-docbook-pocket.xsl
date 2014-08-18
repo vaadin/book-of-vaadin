@@ -161,41 +161,47 @@
 
       <fo:inline keep-with-next.within-line="always">
         <fo:basic-link internal-destination="{$id}">
-          <!-- Have Part title in the ToC -->
-          <xsl:if test="self::book">
-            <xsl:text>Volume </xsl:text>
-            <xsl:value-of select="bookinfo/volume/volumenum"/>
-            <xsl:text>: </xsl:text>
-            <xsl:value-of select="bookinfo/volume/title"/>
-          </xsl:if>
+          <xsl:choose>
+            <!-- Have Part title in the ToC -->
+            <xsl:when test="self::book">
+              <xsl:text>Volume </xsl:text>
+              <xsl:value-of select="bookinfo/volume/volumenum"/>
+              <xsl:if test="bookinfo/volume/title != ''">
+                <xsl:text>: </xsl:text>
+                <xsl:value-of select="bookinfo/volume/title"/>
+              </xsl:if>
+            </xsl:when>
 
-          <!-- Have Part title in the ToC -->
-          <xsl:if test="self::part">
-            <xsl:text>Part </xsl:text>
-          </xsl:if>
+            <xsl:otherwise>
+              <!-- Have Part title in the ToC -->
+              <xsl:if test="self::part">
+                <xsl:text>Part </xsl:text>
+              </xsl:if>
 
-          <!-- Have Chapter titles in part ToC-->
-          <xsl:if test="self::chapter and name($toc-context) != 'part'">
-            <xsl:text>Chapter </xsl:text>
-          </xsl:if>
+              <!-- Have Chapter titles in part ToC-->
+              <xsl:if test="self::chapter and name($toc-context) != 'part'">
+                <xsl:text>Chapter </xsl:text>
+              </xsl:if>
 
-          <!-- Number + separator -->
-          <xsl:if test="$label != ''">
-            <xsl:copy-of select="$label"/>
+              <!-- Number + separator -->
+              <xsl:if test="$label != ''">
+                <xsl:copy-of select="$label"/>
 
-            <!-- No separator dot in part ToC, just space -->
-            <xsl:choose>
-              <xsl:when test="self::chapter and name($toc-context) = 'part'">
-                <xsl:text> </xsl:text>
-              </xsl:when>
-              <xsl:otherwise>
-                <xsl:value-of select="$autotoc.label.separator"/>
-              </xsl:otherwise>
-            </xsl:choose>
-          </xsl:if>
+                <!-- No separator dot in part ToC, just space -->
+                <xsl:choose>
+                  <xsl:when test="self::chapter and name($toc-context) = 'part'">
+                    <xsl:text> </xsl:text>
+                  </xsl:when>
+                  <xsl:otherwise>
+                    <xsl:value-of select="$autotoc.label.separator"/>
+                  </xsl:otherwise>
+                </xsl:choose>
+              </xsl:if>
 
-          <!-- The title -->
-          <xsl:apply-templates select="." mode="titleabbrev.markup"/>
+              <!-- The title -->
+              <xsl:apply-templates select="." mode="titleabbrev.markup"/>
+            </xsl:otherwise>
+          </xsl:choose>
         </fo:basic-link>
       </fo:inline>
 
@@ -237,7 +243,7 @@
     article   toc
     book      toc
     chapter   toc
-    part      toc
+    part      nop
     preface   nop
     qandadiv  nop
     qandaset  nop
@@ -419,11 +425,13 @@
       <!-- Vaadin: Use more distinctive title for volume titles -->
       <xsl:choose>
         <xsl:when test="self::book">
-          <!-- Vaadin: Use the abbreviated title as the volume title (TODO: better) -->
+          <!-- Volume number, with optional title -->
           <xsl:text>Volume </xsl:text>
           <xsl:value-of select="bookinfo/volume/volumenum"/>
-          <xsl:text>: </xsl:text>
-          <xsl:value-of select="bookinfo/volume/title"/>
+          <xsl:if test="bookinfo/volume/title != ''">
+            <xsl:text>: </xsl:text>
+            <xsl:value-of select="bookinfo/volume/title"/>
+          </xsl:if>
         </xsl:when>
         <xsl:otherwise>
           <xsl:apply-templates select="." mode="object.title.markup"/>
@@ -481,6 +489,9 @@
   <!-- Page numbering                                                       -->
   <!-- ==================================================================== -->
 
+  <xsl:param name="page.number.prefixes" select="1"/>
+  <xsl:param name="page.number.prefix.separator" select="'-'"/>
+
   <!-- From fo/pagesetup.xsl. -->
   <xsl:template name="initial.page.number">
     <xsl:param name="element" select="local-name(.)"/>
@@ -506,7 +517,7 @@
         <xsl:choose>
           <!-- Vaadin: Start ToC numbering from 'i'. -->
           <xsl:when test="$element = 'toc'">1</xsl:when>
-          <xsl:when test="$element = 'book'">1</xsl:when> <!-- For single-volume numbering -->
+          <xsl:when test="$element = 'book'">1</xsl:when><!-- For single-volume numbering -->
           <xsl:when test="$element = 'preface'">auto-odd</xsl:when>
           <xsl:when test="generate-id($first.book.content) =
                           generate-id(.)">1</xsl:when>
@@ -516,6 +527,85 @@
 
       <!-- The pocket book never has single-sided output. -->
     </xsl:choose>
+  </xsl:template>
+
+  <!-- Hook for page number set prefix -->
+  <!-- From fo/pagesetup.xsl           -->
+  <xsl:template match="*" mode="running.head.mode">
+    <xsl:param name="master-reference" select="'unknown'"/>
+    <xsl:param name="gentext-key" select="local-name(.)"/>
+
+    <xsl:if test="$axf.extensions != 0">
+      <xsl:attribute name="axf:page-number-prefix">
+        <xsl:apply-templates select="." mode="page-number-prefix"/>
+      </xsl:attribute>
+    </xsl:if>
+
+    <!-- remove -draft from reference -->
+    <xsl:variable name="pageclass">
+      <xsl:choose>
+        <xsl:when test="contains($master-reference, '-draft')">
+          <xsl:value-of select="substring-before($master-reference, '-draft')"/>
+        </xsl:when>
+        <xsl:otherwise>
+          <xsl:value-of select="$master-reference"/>
+        </xsl:otherwise>
+      </xsl:choose>
+    </xsl:variable>
+
+    <fo:static-content flow-name="xsl-region-before-first">
+      <fo:block xsl:use-attribute-sets="header.content.properties">
+        <xsl:call-template name="header.table">
+          <xsl:with-param name="pageclass" select="$pageclass"/>
+          <xsl:with-param name="sequence" select="'first'"/>
+          <xsl:with-param name="gentext-key" select="$gentext-key"/>
+        </xsl:call-template>
+      </fo:block>
+    </fo:static-content>
+
+    <fo:static-content flow-name="xsl-region-before-odd">
+      <fo:block xsl:use-attribute-sets="header.content.properties">
+        <xsl:call-template name="header.table">
+          <xsl:with-param name="pageclass" select="$pageclass"/>
+          <xsl:with-param name="sequence" select="'odd'"/>
+          <xsl:with-param name="gentext-key" select="$gentext-key"/>
+        </xsl:call-template>
+      </fo:block>
+    </fo:static-content>
+
+    <fo:static-content flow-name="xsl-region-before-even">
+      <fo:block xsl:use-attribute-sets="header.content.properties">
+        <xsl:call-template name="header.table">
+          <xsl:with-param name="pageclass" select="$pageclass"/>
+          <xsl:with-param name="sequence" select="'even'"/>
+          <xsl:with-param name="gentext-key" select="$gentext-key"/>
+        </xsl:call-template>
+      </fo:block>
+    </fo:static-content>
+
+    <fo:static-content flow-name="xsl-region-before-blank">
+      <fo:block xsl:use-attribute-sets="header.content.properties">
+        <xsl:call-template name="header.table">
+          <xsl:with-param name="pageclass" select="$pageclass"/>
+          <xsl:with-param name="sequence" select="'blank'"/>
+          <xsl:with-param name="gentext-key" select="$gentext-key"/>
+        </xsl:call-template>
+      </fo:block>
+    </fo:static-content>
+
+    <xsl:call-template name="footnote-separator"/>
+
+    <xsl:if test="$fop.extensions = 0 and $fop1.extensions = 0">
+      <xsl:call-template name="blank.page.content"/>
+    </xsl:if>
+  </xsl:template>
+
+  <!-- Also match on elements inside a book for index and xref targets -->
+  <xsl:template match="book|book//*" mode="page-number-prefix">
+    <xsl:if test="$page.number.prefixes != 0">
+      <xsl:number count="book" from="set" level="any"/>
+      <xsl:value-of select="$page.number.prefix.separator"/>
+    </xsl:if>
   </xsl:template>
 
   <!-- Number chapters over the set instead of the book. -->
@@ -931,10 +1021,6 @@
     <fo:block>
       <xsl:text>Volume </xsl:text>
       <xsl:value-of select="volumenum"/>
-      <xsl:text>: </xsl:text>
-    </fo:block>
-    <fo:block>
-      <xsl:value-of select="title"/>
     </fo:block>
   </xsl:template>
 
