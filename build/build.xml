@@ -132,7 +132,8 @@
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
     <!-- Build PDF manual from sources or just copy it. -->
-    <target name="manual-pdf" depends="init, xep-license-copy, init-manual, init-manual-pdf, build-manual-pdf, copy-manual-pdf">
+    <!-- TODO disabled copy-manual-pdf -->
+    <target name="manual-pdf" depends="init, xep-license-copy, init-manual, init-manual-pdf, build-manual-pdf">
     </target>
 
     <target name="init-manual-pdf" depends="">
@@ -150,13 +151,16 @@
     </target>
 
     <!-- Just copy a prebuilt PDF manual. -->
+    <!--
     <target name="copy-manual-pdf" unless="xep.license.available">
         <echo>PDF Manual: No XEP license available, just copy a prebuilt PDF.</echo>
         <copy file="manual/book${manual.fo.style}.pdf" tofile="${output-dir}/WebContent/docs/book-of-vaadin.pdf" />
     </target>
+    -->
 
-    <!-- Build PDF manual with XEP FO processor. -->
-    <target name="build-manual-pdf" depends="modify-xep-config" if="xep.license.available">
+    <!-- Build PDF manual with XEP FO processor.  -->
+    <!-- TODO disabled if="xep.license.available" -->
+    <target name="build-manual-pdf" depends="modify-xep-config">
         <echo>PDF Manual: processing images (TBD)</echo>
         <!-- TBD -->
         <echo>PDF Manual: converting xml to fo</echo>
@@ -521,19 +525,26 @@
 			<param name="manual.language.extension" value="-fi"/>
         </antcall>
 
+        <antcall target="build-imported-locale" inheritAll="false">
+            <param name="locale" value="fr_FR"/>
+			<param name="manual.language.docbook" value="fr"/>
+			<param name="import.language.extension" value=""/>
+			<param name="manual.language.extension" value="-fr"/>
+        </antcall>
+
+        <antcall target="build-imported-locale" inheritAll="false">
+            <param name="locale" value="es_419"/>
+			<param name="manual.language.docbook" value="es"/>
+			<param name="import.language.extension" value="-419"/>
+			<param name="manual.language.extension" value="-es"/>
+        </antcall>
+
         <!--
         <antcall target="build-imported-locale" inheritAll="false">
             <param name="locale" value="de_DE"/>
 			<param name="manual.language.docbook" value="de"/>
 			<param name="import.language.extension" value=""/>
 			<param name="manual.language.extension" value="-de"/>
-        </antcall>
-
-        <antcall target="build-imported-locale" inheritAll="false">
-            <param name="locale" value="fr_FR"/>
-			<param name="manual.language.docbook" value="fr"/>
-			<param name="import.language.extension" value=""/>
-			<param name="manual.language.extension" value="-fr"/>
         </antcall>
 
         <antcall target="build-imported-locale" inheritAll="false">
@@ -548,13 +559,6 @@
 			<param name="manual.language.docbook" value="zh"/>
 			<param name="import.language.extension" value="-CN"/>
 			<param name="manual.language.extension" value="-cn"/>
-        </antcall>
-
-        <antcall target="build-imported-locale" inheritAll="false">
-            <param name="locale" value="es_419"/>
-			<param name="manual.language.docbook" value="es"/>
-			<param name="import.language.extension" value="-419"/>
-			<param name="manual.language.extension" value="-es"/>
         </antcall>
 
         <antcall target="build-imported-locale" inheritAll="false">

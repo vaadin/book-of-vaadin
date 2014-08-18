@@ -123,10 +123,10 @@
   <!-- Table of Contents                                                    -->
   <!-- ==================================================================== -->
 
-  <!-- Smaller indentation than usual. -->
+  <!-- Smaller indentation than usual -->
   <xsl:param name="toc.indent.width" select="'5'"/>
 
-  <!-- Have chapter titles in bold. (from autotoc.xsl)-->
+  <!-- Have chapter titles in bold (from autotoc.xsl) -->
   <xsl:template name="toc.line">
     <xsl:param name="toc-context" select="NOTANODE"/>
     
@@ -161,6 +161,14 @@
 
       <fo:inline keep-with-next.within-line="always">
         <fo:basic-link internal-destination="{$id}">
+          <!-- Have Part title in the ToC -->
+          <xsl:if test="self::book">
+            <xsl:text>Volume </xsl:text>
+            <xsl:value-of select="bookinfo/volume/volumenum"/>
+            <xsl:text>: </xsl:text>
+            <xsl:value-of select="bookinfo/volume/title"/>
+          </xsl:if>
+
           <!-- Have Part title in the ToC -->
           <xsl:if test="self::part">
             <xsl:text>Part </xsl:text>
@@ -238,8 +246,8 @@
     set       nop
   </xsl:param>
 
-  <!-- From fo/division.xsl:                                           -->
-  <!-- Generate TOC only in the first book                             -->
+  <!-- From fo/division.xsl:                         -->
+  <!-- Generate TOC only in the first book           -->
   <xsl:template name="make.book.tocs">
     <xsl:variable name="lot-master-reference">
       <xsl:call-template name="select.pagemaster">
@@ -254,7 +262,7 @@
     </xsl:variable>
 
     <!-- This additional condition makes the ToC only in the first book. -->
-    <xsl:if test="@booktoc = '1'">
+    <xsl:if test="@booktoc = 'set'">
       <xsl:if test="contains($toc.params, 'toc')">
         <xsl:call-template name="page.sequence">
           <xsl:with-param name="master-reference"
@@ -264,6 +272,26 @@
           <xsl:with-param name="content">
             <!-- Configure which sort of ToC to create.                    -->
             <!-- 'division' for single-volume ToC, 'set' for multi-volume. -->
+            <xsl:call-template name="set.toc">
+              <xsl:with-param name="toc.title.p" 
+                select="contains($toc.params, 'title')"/>
+            </xsl:call-template>
+          </xsl:with-param>
+        </xsl:call-template>
+      </xsl:if>
+    </xsl:if>
+
+    <!-- This allows making single-volume ToC. -->
+    <xsl:if test="@booktoc = 'volume'">
+      <xsl:if test="contains($toc.params, 'toc')">
+        <xsl:call-template name="page.sequence">
+          <xsl:with-param name="master-reference"
+            select="$lot-master-reference"/>
+          <xsl:with-param name="element" select="'toc'"/>
+          <xsl:with-param name="gentext-key" select="'TableofContents'"/>
+          <xsl:with-param name="content">
+            <!-- Configure which sort of ToC to create                    -->
+            <!-- 'division' for single-volume ToC, 'set' for multi-volume -->
             <xsl:call-template name="division.toc">
               <xsl:with-param name="toc.title.p" 
                 select="contains($toc.params, 'title')"/>
@@ -392,7 +420,10 @@
       <xsl:choose>
         <xsl:when test="self::book">
           <!-- Vaadin: Use the abbreviated title as the volume title (TODO: better) -->
-          <xsl:apply-templates select="." mode="object.titleabbrev.markup"/>
+          <xsl:text>Volume </xsl:text>
+          <xsl:value-of select="bookinfo/volume/volumenum"/>
+          <xsl:text>: </xsl:text>
+          <xsl:value-of select="bookinfo/volume/title"/>
         </xsl:when>
         <xsl:otherwise>
           <xsl:apply-templates select="." mode="object.title.markup"/>
@@ -890,11 +921,25 @@
     </xsl:variable>
 
     <!-- ... Much unnecessary stuff (preamble, toc) removed from here ... -->
-
     <xsl:apply-templates select="$content"/>
   </xsl:template>
 
   <xsl:include href="custom-fo-titlepage-pocket.xsl"/>
+
+  <!-- The volume title (custom element). -->
+  <xsl:template match="volume" mode="book.titlepage.recto.mode">
+    <fo:block>
+      <xsl:text>Volume </xsl:text>
+      <xsl:value-of select="volumenum"/>
+      <xsl:text>: </xsl:text>
+    </fo:block>
+    <fo:block>
+      <xsl:value-of select="title"/>
+    </fo:block>
+  </xsl:template>
+
+  <xsl:template match="info/title" mode="book.titlepage.verso.auto.mode">
+  </xsl:template>
 
   <xsl:template match="pubdate" mode="book.titlepage.recto.mode">
     <fo:block>
@@ -916,6 +961,16 @@
   <xsl:attribute-set name="book.titlepage.verso.style">
     <xsl:attribute name="font-size">9pt</xsl:attribute>
   </xsl:attribute-set>
+
+  <!-- Do not include subtitle at the top of verso titlepage -->
+  <!-- Overrides fo/titlepage.xsl -->
+  <xsl:template name="book.verso.title">
+    <fo:block>
+      <xsl:apply-templates mode="titlepage.mode"/>
+
+      <!-- The subtitle would normally follow the title, separated by ": ". -->
+    </fo:block>
+  </xsl:template>
 
   <!-- Nicer formatting for publisher.                         -->
   <!-- The address is normally intended and with large margins. -->
