@@ -1833,6 +1833,593 @@ layout.addComponent(field);]]></programlisting>
         <indexterm startref="term.components.fields" class="endofrange"/>
     </section>
 
+	<section xml:id="components.selection">
+		<title>Selection Components</title>
+
+		<para>
+			Vaadin offers many alternative ways for selecting one or more items. The core
+			library includes the following selection components, all based on the
+			<classname>AbstractSelect</classname> class:
+		</para>
+
+        <variablelist>
+            <varlistentry>
+                <term><classname>ComboBox</classname></term>
+                <listitem>
+                    A drop-down list with a text box, where the user can type text to find
+                    matching items. The component also provides an input prompt and the
+                    user can enter new items.
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term><classname>ListSelect</classname></term>
+                <listitem>
+                    A vertical list box for selecting items in either single or multiple
+                    selection mode.
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term><classname>NativeSelect</classname>
+                      (<xref linkend="components.nativeselect" xrefstyle="select:labelnumber"/>)</term>
+                <listitem>
+                    Provides selection using the native selection component of the
+                    browser, typically a drop-down list for single selection and a
+                    multi-line list in multiselect mode. This uses the
+                    <literal>&lt;select&gt;</literal> element in HTML.
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term><classname>OptionGroup</classname></term>
+                <listitem>
+                    Shows the items as a vertically arranged group of radio buttons in the
+                    single selection mode and of check boxes in multiple selection mode.
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term><classname>TwinColSelect</classname></term>
+                <listitem>
+                    Shows two list boxes side by side where the user can select items from
+                    a list of available items and move them to a list of selected items
+                    using control buttons.
+                </listitem>
+            </varlistentry>
+        </variablelist>
+
+		<para>
+			In addition, the <classname>Tree</classname>, <classname>Table</classname>,
+			and <classname>TreeTable</classname> components allow special forms of
+			selection. They also inherit the <classname>AbstractSelect</classname>.
+		</para>
+
+        <section xml:id="components.selection.databinding">
+            <title>Binding Selection Components to Data</title>
+
+            <para>
+                The selection components are strongly coupled with the Vaadin Data Model,
+                described in <xref linkend="datamodel"/>. The selectable items in all
+                selection components are objects that implement the
+                <classname>Item</classname> interface. The items are contained in a
+                <classname>Container</classname>.
+            </para>
+
+            <para>
+                All selection components are containers themselves and simply forward all
+                container operations to the underlying container data source. You can give
+                the container in the constructor or set it set
+                <methodname>setContainerDataSource()</methodname>. This is further
+                described in <xref linkend="datamodel.container.intro"/>.
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[// Have a container data source of some kind
+IndexedContainer container = new IndexedContainer();
+container.addContainerProperty("name", String.class, null);
+...
+
+// Create a selection component bound to the container
+OptionGroup group = new OptionGroup("My Select", container);]]></programlisting>
+
+            <para>
+                If you do not bind a selection component to a container data source, a
+                default container is used. It is usually either an
+                <classname>IndexedContainer</classname> or a
+                <classname>HierarchicalContainer</classname>.
+            </para>
+
+            <para>
+                The current selection of a selection component is bound to the
+                <classname>Property</classname> interface, so you can get the current
+                selection as the value of the selection component. Also selection changes
+                are handled as value change events, as is described later.
+            </para>
+        </section>
+
+        <section xml:id="components.selection.adding">
+            <title>Adding New Items</title>
+            
+            <para>
+                New items are added with the <methodname>addItem()</methodname> method
+                defined in the <classname>Container</classname> interface, described in
+                <xref linkend="datamodel.container.intro"/>.
+            </para>
+
+            <programlisting><![CDATA[// Create a selection component
+ComboBox select = new ComboBox("My ComboBox");
+
+// Add items with given item IDs
+select.addItem("Mercury");
+select.addItem("Venus");
+select.addItem("Earth");]]></programlisting>
+
+            <para>
+                The <methodname>addItem()</methodname> method creates an empty
+                <classname>Item</classname>, which is identified by its <emphasis>item
+                identifier</emphasis> (IID) object, given as the parameter. This item ID
+                is by default used also as the caption of the item, as described in more
+                detail later.
+            </para>
+
+            <para>
+                We emphasize that <methodname>addItem()</methodname> is a factory method
+                that <emphasis>takes an item ID, not the actual item</emphasis> as the
+                parameter - the item is returned by the method. The item is of a type that
+                is specific to the container and has itself little relevance for most
+                selection components, as the properties of an item may not be used in any
+                way (except in <classname>Table</classname>), only the item ID.
+            </para>
+
+            <para>
+                The item identifier is typically a string, in which case it can be used as
+                the caption, but can be any object type. We could as well have given
+                integers for the item identifiers and set the captions explicitly with
+                <methodname>setItemCaption()</methodname>. You could also add an item with
+                the parameterless <methodname>addItem()</methodname>, which returns an
+                automatically generated item ID.
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[// Create a selection component
+ComboBox select = new ComboBox("My Select");
+
+// Add an item with a generated ID
+Object itemId = select.addItem();
+select.setItemCaption(itemId, "The Sun");
+
+// Select the item
+select.setValue(itemId);]]></programlisting>
+
+            <para>
+                Some container types may support passing the actual data object to the add
+                method. For example, you can add items to a
+                <classname>BeanItemContainer</classname> with
+                <methodname>addBean()</methodname>. Such implementations can use a
+                separate item ID object, or the data object itself as the item ID, as is
+                done in <methodname>addBean()</methodname>. In the latter case you can not
+                depend on the default way of acquiring the item caption; see the
+                description of the different caption modes later.
+            </para>
+
+            <para>
+                The next section describes the different options for determining the item
+                captions.
+            </para>
+        </section>
+
+        <section xml:id="components.selection.captions">
+            <title>Item Captions</title>
+
+            <para>
+                The displayed captions of items in a selection component can be set
+                explicitly with <methodname>setItemCaption()</methodname> or determined
+                from the item IDs or item properties. The caption determination is defined
+                with the <emphasis>caption mode</emphasis>, any of the modes in the
+                <classname>AbstractSelect.ItemCaptionMode</classname> enum, which you can
+                set with <methodname>setItemCaptionMode()</methodname>. The default mode
+                is <parameter>EXPLICIT_DEFAULTS_ID</parameter>, which uses the item
+                identifiers for the captions, unless given explicitly.
+            </para>
+
+            <para>
+                In addition to a caption, an item can have an icon. The icon is set with
+                <methodname>setItemIcon()</methodname>.
+            </para>
+
+            <variablelist>
+                <title>Caption Modes for Selection Components</title>
+                <varlistentry>
+                    <term><constant>ITEM_CAPTION_MODE_EXPLICIT_DEFAULTS_ID</constant></term>
+                    <listitem>
+                        <para>
+                            This is the default caption mode and its flexibility allows
+                            using it in most cases. By default, the item identifier will
+                            be used as the caption. The identifier object does not
+                            necessarily have to be a string; the caption is retrieved with
+                            <methodname>toString()</methodname> method. If the caption is
+                            specified explicitly with
+                            <methodname>setItemCaption()</methodname>, it overrides the
+                            item identifier.
+                        </para>
+
+                        <programlisting><?pocket-size 65% ?><![CDATA[// Create a selection component
+ComboBox select = new ComboBox("Moons of Mars");
+select.setItemCaptionMode(ItemCaptionMode.EXPLICIT_DEFAULTS_ID);
+
+// Use the item ID also as the caption of this item
+select.addItem(new Integer(1));
+
+// Set item caption for this item explicitly
+select.addItem(2); // same as "new Integer(2)"
+select.setItemCaption(2, "Deimos");]]></programlisting>
+
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><constant>ITEM_CAPTION_MODE_EXPLICIT</constant></term>
+                    <listitem>
+                        <para>
+                            Captions must be explicitly specified with
+                            <methodname>setItemCaption()</methodname>. If they are not,
+                            the caption will be empty. Such items with empty captions will
+                            nevertheless be displayed in the selection component as empty
+                            items. If they have an icon, they will be visible.
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><constant>ITEM_CAPTION_MODE_ICON_ONLY</constant></term>
+                    <listitem>
+                        <para>
+                            Only icons are shown, captions are hidden.
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><constant>ITEM_CAPTION_MODE_ID</constant></term>
+                    <listitem>
+                        <para>
+                            String representation of the item identifier object is used as
+                            caption. This is useful when the identifier is a string, and
+                            also when the identifier is an complex object that has a
+                            string representation. For example:
+                        </para>
+                            
+                        <programlisting><?pocket-size 70% ?><![CDATA[ComboBox select = new ComboBox("Inner Planets");
+select.setItemCaptionMode(ItemCaptionMode.ID);
+
+// A class that implements toString()
+class PlanetId extends Object implements Serializable {
+    private static final long serialVersionUID = -7452707902301121901L;
+
+    String planetName;
+    PlanetId (String name) {
+        planetName = name;
+    }
+    public String toString () {
+        return "The Planet " + planetName;
+    }
+}
+
+// Use such objects as item identifiers
+String planets[] = {"Mercury", "Venus", "Earth", "Mars"};
+for (int i=0; i<planets.length; i++)
+    select.addItem(new PlanetId(planets[i]));]]></programlisting>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><constant>ITEM_CAPTION_MODE_INDEX</constant></term>
+                    <listitem>
+                        <para>
+                            Index number of item is used as caption. This caption mode is
+                            applicable only to data sources that implement the
+                            <classname>Container.Indexed</classname> interface. If the
+                            interface is not available, the component will throw a
+                            <classname>ClassCastException</classname>. The
+                            <classname>AbstractSelect</classname> itself does not
+                            implement this interface, so the mode is not usable without a
+                            separate data source. An
+                            <classname>IndexedContainer</classname>, for example, would
+                            work.
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><constant>ITEM_CAPTION_MODE_ITEM</constant></term>
+                    <listitem>
+                        <para>
+                            <classname>String</classname> representation of item, acquired
+                            with <methodname>toString()</methodname>, is used as the
+                            caption. This is applicable mainly when using a custom
+                            <classname>Item</classname> class, which also requires using a
+                            custom <classname>Container</classname> that is used as a data
+                            source for the selection component.
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><constant>ITEM_CAPTION_MODE_PROPERTY</constant></term>
+                    <listitem>
+                        <para>
+                            Item captions are read from the <classname>String</classname>
+                            representation of the property with the identifier specified
+                            with <methodname>setItemCaptionPropertyId()</methodname>. This
+                            is useful, for example, when you have a container that you use
+                            as the data source for the selection component, and you want
+                            to use a specific property for caption.
+                        </para>
+                            
+                        <para>
+                            In the example below, we bind a selection component to a bean
+                            container and use a property of the bean as the caption.
+                        </para>
+                            
+                        <programlisting><?pocket-size 65% ?><![CDATA[/* A bean with a "name" property. */
+public class Planet implements Serializable {
+    String name;
+
+    public Planet(String name) {
+        this.name = name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
+    }
+}
+
+void propertyModeExample(VerticalLayout layout) {
+    // Have a bean container to put the beans in
+    BeanItemContainer<Planet> container =
+        new BeanItemContainer<Planet>(Planet.class);
+
+    // Put some example data in it
+    container.addItem(new Planet(1, "Mercury"));
+    container.addItem(new Planet(2, "Venus"));
+    container.addItem(new Planet(3, "Earth"));
+    container.addItem(new Planet(4, "Mars"));
+
+    // Create a selection component bound to the container
+    ComboBox select = new ComboBox("Planets", container);
+
+    // Set the caption mode to read the caption directly
+    // from the 'name' property of the bean
+    select.setItemCaptionMode(ItemCaptionMode.PROPERTY);
+    select.setItemCaptionPropertyId("name");
+
+    ...]]></programlisting>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+
+        <section xml:id="components.selection.getset">
+            <title>Getting and Setting Selection</title>
+
+            <para>
+                A selection component provides the current selection as the property of
+                the component (with the <classname>Property</classname> interface). The
+                property value is an item identifier object that identifies the selected
+                item. You can get the identifier with <methodname>getValue()</methodname>
+                of the <classname>Property</classname> interface.
+            </para>
+
+            <para>
+                You can select an item with the corresponding
+                <methodname>setValue()</methodname> method. In multiselect mode, the
+                property will be an unmodifiable set of item identifiers. If no item is
+                selected, the property will be <parameter>null</parameter> in single
+                selection mode or an empty collection in multiselect mode.
+            </para>
+
+            <para>
+                The <classname>ComboBox</classname> and
+                <classname>NativeSelect</classname> will show empty selection when no
+                actual item is selected. This is the <emphasis>null selection item
+                identifier</emphasis>. You can set an alternative ID with
+                <methodname>setNullSelectionItemId()</methodname>. Setting the alternative
+                null ID is merely a visual text; the <methodname>getValue()</methodname>
+                will still return <parameter>null</parameter> value if no item is
+                selected, or an empty set in multiselect mode.
+            </para>
+
+            <para>
+                The item identifier of the currently selected item will be set as the
+                property of the selection component. You can access it with the
+                <methodname>getValue()</methodname> method of the
+                <classname>Property</classname> interface of the component. Also, when
+                handling selection changes with a
+                <classname>Property.ValueChangeListener</classname>, the
+                <classname>ValueChangeEvent</classname> will have the selected item as the
+                property of the event, accessible with the
+                <methodname>getProperty()</methodname> method.
+            </para>
+
+            <figure>
+                <title>Selected Item</title>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata smallscale="150" align="center" fileref="img/components/select-selected1.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+        </section>
+
+		<!-- <para>
+		While the default caption mode is flexible enough for most
+		cases where the appearance of a <classname>Select</classname>
+		component is fixed, the other modes may be useful for cases where the
+		user can configure what type of information is shown in the
+		component. Typical situation is allowing the user to choose between
+		"Show text only", "Show icons only", and "Show both icons and text".
+		</para>-->
+
+        <section xml:id="components.selection.newitems" condition="web">
+            <title>Allowing Adding New Items</title>
+
+			<para>
+				Some selection components can allow the user to add new items. Currently,
+				only <classname>ComboBox</classname> allows it, when the user types in a
+				value and presses <keycap>Enter</keycap>. You need to enable the mode with
+				<methodname>setNewItemsAllowed(true)</methodname>. Setting the component
+				also in immediate mode may be necessary, as otherwise the item would not
+				be added immediately when the user interacts with the component, but after
+				some other component causes a server request.  <!-- TODO This could be a
+				bug -->
+			</para>
+
+			<programlisting><![CDATA[myselect.setNewItemsAllowed(true);
+myselect.setImmediate(true);]]></programlisting>
+
+            <para>
+                The user interface for adding new items depends on the selection
+                component. The regular <classname>ComboBox</classname> component allows
+                you to simply type the new item in the combo box and hit
+                <keycap>Enter</keycap> to add it.
+            </para>
+
+			<para>
+				Adding new items in not possible if the selection component is read-only
+				or is bound to a <classname>Container</classname> that does not allow
+				adding new items, and an attempt may result in an exception.
+			</para>
+
+            <section xml:id="components.selection.newitems.handling">
+                <title>Handling New Items</title>
+
+                <para>
+                    Adding new items is handled by a
+                    <interfacename>NewItemHandler</interfacename>, which gets the item
+                    caption string as parameter for the
+                    <methodname>addNewItem()</methodname> method. The default
+                    implementation, <classname>DefaultNewItemHandler</classname>, checks
+                    for read-only state, adds the item using the entered caption as the
+                    item ID, and if the selection component gets the captions from a
+                    property, copies the caption to that property. It also selects the
+                    item. The default implementation may not be suitable for all container
+                    types, in which case you need to define a custom handler. For example,
+                    a <classname>BeanItemContainer</classname> expects the items to have
+                    the bean object itself as the ID, not a string.
+                </para>
+
+                <book-example eid="component.select.combobox.newitemhandler" style="float: right"/>
+                <programlisting condition="web"><?pocket-size 65% ?><![CDATA[// Have a bean container to put the beans in
+final BeanItemContainer<Planet> container =
+    new BeanItemContainer<Planet>(Planet.class);
+
+// Put some example data in it
+container.addItem(new Planet(1, "Mercury"));
+container.addItem(new Planet(2, "Venus"));
+container.addItem(new Planet(3, "Earth"));
+container.addItem(new Planet(4, "Mars"));
+
+final ComboBox select =
+    new ComboBox("Select or Add a Planet", container);
+select.setNullSelectionAllowed(false);
+        
+// Use the name property for item captions
+select.setItemCaptionPropertyId("name");
+        
+// Allow adding new items
+select.setNewItemsAllowed(true);
+select.setImmediate(true);
+
+// Custom handling for new items
+select.setNewItemHandler(new NewItemHandler() {
+    @Override
+    public void addNewItem(String newItemCaption) {
+        // Create a new bean - can't set all properties
+        Planet newPlanet = new Planet(0, newItemCaption);
+        container.addBean(newPlanet);
+        
+        // Remember to set the selection to the new item
+        select.select(newPlanet);
+        
+        Notification.show("Added new planet called " +
+                          newItemCaption);
+    }
+});]]></programlisting>
+            </section>
+        </section>
+
+		<section xml:id="components.selection.multiple">
+			<title>Multiple Selection</title>
+
+			<!-- UNFINISHED: Check if outdated. -->
+			
+			<para>
+                Some selection components, such as <classname>OptionGroup</classname> and
+                <classname>ListSelect</classname> support a multiple selection mode, which
+                you can enable with <methodname>setMultiSelect()</methodname>. For
+                <classname>TwinColSelect</classname>, which is especially intended for
+                multiple selection, it is enabled by default.
+			</para>
+
+			<programlisting><![CDATA[myselect.setMultiSelect(true);]]></programlisting>
+
+			<para>
+				As in single selection mode, the property value of the component indicates
+				the selection. In multiple selection mode, however, the property value is
+				a <classname>Collection</classname> of the item IDs of the currently
+				selected items. You can get and set the property with the
+				<methodname>getValue()</methodname> and
+				<methodname>setValue()</methodname> methods as usual.
+			</para>
+
+			<para>
+                A change in the selection will trigger a
+                <classname>ValueChangeEvent</classname>, which you can handle with a
+                <classname>Propery.ValueChangeListener</classname>. As usual, you should
+                use <methodname>setImmediate(true)</methodname> to trigger the event
+                immediately when the user changes the selection. The following example
+                shows how to handle selection changes with a listener.
+			</para>
+
+            <!-- TODO Check this example -->
+            <programlisting><?pocket-size 65% ?><![CDATA[// A selection component with some items
+ListSelect select = new ListSelect("My Selection");
+for (String planet: new String[]{"Mercury", "Venus",
+        "Earth", "Mars", "Jupiter", "Saturn", "Uranus",
+        "Neptune"})
+    select.addItem(planet);
+
+// Multiple selection mode
+select.setMultiSelect(true);
+
+// Feedback on value changes
+select.addValueChangeListener(
+    new Property.ValueChangeListener() {
+    public void valueChange(ValueChangeEvent event) {
+        // Some feedback
+        layout.addComponent(new Label("Selected: " +
+            event.getProperty().getValue().toString()));
+    }
+});
+select.setImmediate(true);]]></programlisting>
+
+        </section>
+
+		<section xml:id="components.selection.features">
+            <title>Other Common Features</title>
+
+            <section>
+                <title>Item Icons</title>
+
+                <para>
+                    You can set an icon for each item with
+                    <methodname>setItemIcon()</methodname>, or define an item property
+                    that provides the icon resource with
+                    <methodname>setItemIconPropertyId()</methodname>, in a fashion similar
+                    to captions. Notice, however, that icons are not supported in
+                    <classname>NativeSelect</classname>,
+                    <classname>TwinColSelect</classname>, and some other selection
+                    components and modes. This is because HTML does not support images
+                    inside the native <literal>select</literal> elements. Icons are also
+                    not really visually applicable.
+                </para>
+            </section>
+        </section>
+    </section>
+
 	<section xml:id="components.extensions">
 		<title>Component Extensions</title>
 
@@ -3568,7 +4155,7 @@ button.addClickListener(new Button.ClickListener() {
 			individual check boxes with the <classname>CheckBox</classname> component
 			described in this section and check box groups with the
 			<classname>OptionGroup</classname> component in multiple selection mode, as
-			described in <xref linkend="components.selecting.optiongroup"/>.
+			described in <xref linkend="components.optiongroup"/>.
 		</para>
 
 		<para>
@@ -3638,480 +4225,86 @@ checkbox2.addValueChangeListener(new ValueChangeListener() {
 		</simplesect>
 	</section>
 
-	<section xml:id="components.selecting">
-		<title>Selection Components</title>
+    <section xml:id="components.combobox">
+        <title><classname>ComboBox</classname></title>
 
-		<para>
-			Vaadin offers many alternative ways for selecting one or more items. The core
-			library includes the following selection components, all based on the
-			<classname>AbstractSelect</classname> class:
-		</para>
+        <para>
+            <classname>ComboBox</classname> is a selection component allows selecting an
+            item from a drop-down list. The component also has a text field area, which
+            allows entering search text by which the items shown in the drop-down list are
+            filtered. Common selection component features are described in <xref
+            linkend="components.selection"/>.
+        </para>
 
-        <variablelist>
-            <varlistentry>
-                <term><classname>ComboBox</classname></term>
-                <listitem>
-                    A drop-down list with a text box, where the user can type text to find
-                    matching items. The component also provides an input prompt and the
-                    user can enter new items.
-                </listitem>
-            </varlistentry>
-            <varlistentry>
-                <term><classname>ListSelect</classname></term>
-                <listitem>
-                    A vertical list box for selecting items in either single or multiple
-                    selection mode.
-                </listitem>
-            </varlistentry>
-            <varlistentry>
-                <term><classname>NativeSelect</classname></term>
-                <listitem>
-                    Provides selection using the native selection component of the
-                    browser, typically a drop-down list for single selection and a
-                    multi-line list in multiselect mode. This uses the
-                    <literal>&lt;select&gt;</literal> element in HTML.
-                </listitem>
-            </varlistentry>
-            <varlistentry>
-                <term><classname>OptionGroup</classname></term>
-                <listitem>
-                    Shows the items as a vertically arranged group of radio buttons in the
-                    single selection mode and of check boxes in multiple selection mode.
-                </listitem>
-            </varlistentry>
-            <varlistentry>
-                <term><classname>TwinColSelect</classname></term>
-                <listitem>
-                    Shows two list boxes side by side where the user can select items from
-                    a list of available items and move them to a list of selected items
-                    using control buttons.
-                </listitem>
-            </varlistentry>
-        </variablelist>
+        <figure>
+            <title>The <classname>ComboBox</classname> Component</title>
+            <mediaobject>
+                <imageobject>
+                    <imagedata smallscale="130" align="center" fileref="img/components/select-select.png"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
 
-		<para>
-			In addition, the <classname>Tree</classname>, <classname>Table</classname>,
-			and <classname>TreeTable</classname> components allow special forms of
-			selection. They also inherit the <classname>AbstractSelect</classname>.
-		</para>
+        <para>
+            Common selection component features are described in <xref
+            linkend="components.selection"/>. <classname>ComboBox</classname> supports
+            adding new items when the user presses <keycap>Enter</keycap><phrase
+            condition="web">, as described in <xref
+            linkend="components.selection.newitems"/>.</phrase>
+        </para>
 
-        <section xml:id="components.selecting.databinding">
-            <title>Binding Selection Components to Data</title>
-
-            <para>
-                The selection components are strongly coupled with the Vaadin Data
-                Model. The selectable items in all selection components are objects that
-                implement the <classname>Item</classname> interface and are contained in a
-                <classname>Container</classname>. The current selection is bound to the
-                <classname>Property</classname> interface.
-            </para>
-
-            <para>
-                Even though the data model is used, the selection components allow simple
-                use in the most common cases. Each selection component is bound to a
-                default container type, which supports management of items without need to
-                implement a container.
-            </para>
-
-            <para>
-                See <xref linkend="datamodel"/> for a detailed description of the data
-                model, its interfaces, and built-in implementations.
-            </para>
-
-            <section xml:id="components.selecting.databinding.adding">
-                <title>Adding New Items</title>
-            
-                <para>
-                    New items are added with the <methodname>addItem()</methodname> method
-                    defined in the <classname>Container</classname> interface.
-                </para>
-
-                <programlisting><![CDATA[// Create a selection component
-ComboBox select = new ComboBox("My ComboBox");
-
-// Add items with given item IDs
-select.addItem("Mercury");
-select.addItem("Venus");
-select.addItem("Earth");]]></programlisting>
-
-                <para>
-                    The <methodname>addItem()</methodname> method creates an empty
-                    <classname>Item</classname>, which is identified by its <emphasis>item
-                    identifier</emphasis> (IID) object, given as the parameter. This item
-                    ID is by default used also as the caption of the item, as described in
-                    more detail later.
-                </para>
-
-                <para>
-                    We emphasize that <methodname>addItem()</methodname> is a factory
-                    method that <emphasis>takes an item ID, not the actual item</emphasis>
-                    as the parameter - the item is returned by the method. The item is of
-                    a type that is specific to the container and has itself little
-                    relevance for most selection components, as the properties of an item
-                    may not be used in any way (except in <classname>Table</classname>),
-                    only the item ID.
-                </para>
-
-                <para>
-                    The item identifier is typically a string, in which case it can be
-                    used as the caption, but can be any object type. We could as well have
-                    given integers for the item identifiers and set the captions
-                    explicitly with <methodname>setItemCaption()</methodname>. You could
-                    also add an item with the parameterless
-                    <methodname>addItem()</methodname>, which returns an automatically
-                    generated item ID.
-                </para>
-
-                <programlisting><?pocket-size 65% ?><![CDATA[// Create a selection component
-ComboBox select = new ComboBox("My Select");
-
-// Add an item with a generated ID
-Object itemId = select.addItem();
-select.setItemCaption(itemId, "The Sun");
-
-// Select the item
-select.setValue(itemId);]]></programlisting>
-
-                <para>
-                    Some container types may support passing the actual data object to the
-                    add method. For example, you can add items to a
-                    <classname>BeanItemContainer</classname> with
-                    <methodname>addBean()</methodname>. Such implementations can use a
-                    separate item ID object, or the data object itself as the item ID, as
-                    is done in <methodname>addBean()</methodname>. In the latter case you
-                    can not depend on the default way of acquiring the item caption; see
-                    the description of the different caption modes later.
-                </para>
-
-                <para>
-                    The following section describes the different options for determining
-                    the item captions.
-                </para>
-            </section>
-
-            <section xml:id="components.selecting.databinding.captions">
-                <title>Item Captions</title>
-
-                <para>
-                    The displayed captions of items in a selection component can be set
-                    explicitly with <methodname>setItemCaption()</methodname> or
-                    determined from the item IDs or item properties. The caption
-                    determination is defined with the <emphasis>caption mode</emphasis>,
-                    any of the modes in the
-                    <classname>AbstractSelect.ItemCaptionMode</classname> enum, which you
-                    can set with <methodname>setItemCaptionMode()</methodname>. The
-                    default mode is <parameter>EXPLICIT_DEFAULTS_ID</parameter>, which
-                    uses the item identifiers for the captions, unless given explicitly.
-                </para>
-
-                <para>
-                    In addition to a caption, an item can have an icon. The icon is set
-                    with <methodname>setItemIcon()</methodname>.
-                </para>
-
-                <variablelist>
-                    <title>Caption Modes for Selection Components</title>
-                    <varlistentry>
-                        <term><constant>ITEM_CAPTION_MODE_EXPLICIT_DEFAULTS_ID</constant></term>
-                        <listitem>
-                            <para>
-                                This is the default caption mode and its flexibility
-                                allows using it in most cases. By default, the item
-                                identifier will be used as the caption. The identifier
-                                object does not necessarily have to be a string; the
-                                caption is retrieved with
-                                <methodname>toString()</methodname> method. If the caption
-                                is specified explicitly with
-                                <methodname>setItemCaption()</methodname>, it overrides
-                                the item identifier.
-                            </para>
-
-                            <programlisting><?pocket-size 65% ?><![CDATA[// Create a selection component
-ComboBox select = new ComboBox("Moons of Mars");
-select.setItemCaptionMode(ItemCaptionMode.EXPLICIT_DEFAULTS_ID);
-
-// Use the item ID also as the caption of this item
-select.addItem(new Integer(1));
-
-// Set item caption for this item explicitly
-select.addItem(2); // same as "new Integer(2)"
-select.setItemCaption(2, "Deimos");]]></programlisting>
-
-                        </listitem>
-                    </varlistentry>
-                    <varlistentry>
-                        <term><constant>ITEM_CAPTION_MODE_EXPLICIT</constant></term>
-                        <listitem>
-                            <para>
-                                Captions must be explicitly specified with
-                                <methodname>setItemCaption()</methodname>. If they are
-                                not, the caption will be empty. Such items with empty
-                                captions will nevertheless be displayed in the selection
-                                component as empty items. If they have an icon, they will
-                                be visible.
-                            </para>
-                        </listitem>
-                    </varlistentry>
-                    <varlistentry>
-                        <term><constant>ITEM_CAPTION_MODE_ICON_ONLY</constant></term>
-                        <listitem>
-                            <para>
-                                Only icons are shown, captions are hidden.
-                            </para>
-                        </listitem>
-                    </varlistentry>
-                    <varlistentry>
-                        <term><constant>ITEM_CAPTION_MODE_ID</constant></term>
-                        <listitem>
-                            <para>
-                                String representation of the item identifier object is
-                                used as caption. This is useful when the identifier is a
-                                string, and also when the identifier is an complex object
-                                that has a string representation. For example:
-                            </para>
-                            
-                            <programlisting><?pocket-size 70% ?><![CDATA[ComboBox select = new ComboBox("Inner Planets");
-select.setItemCaptionMode(ItemCaptionMode.ID);
-
-// A class that implements toString()
-class PlanetId extends Object implements Serializable {
-    private static final long serialVersionUID = -7452707902301121901L;
-
-    String planetName;
-    PlanetId (String name) {
-        planetName = name;
-    }
-    public String toString () {
-        return "The Planet " + planetName;
-    }
-}
-
-// Use such objects as item identifiers
-String planets[] = {"Mercury", "Venus", "Earth", "Mars"};
-for (int i=0; i<planets.length; i++)
-    select.addItem(new PlanetId(planets[i]));]]></programlisting>
-                        </listitem>
-                    </varlistentry>
-                    <varlistentry>
-                        <term><constant>ITEM_CAPTION_MODE_INDEX</constant></term>
-                        <listitem>
-                            <para>
-                                Index number of item is used as caption. This caption mode is
-                                applicable only to data sources that implement the
-                                <classname>Container.Indexed</classname> interface. If the
-                                interface is not available, the component will throw a
-                                <classname>ClassCastException</classname>. The
-                                <classname>AbstractSelect</classname> itself does not implement
-                                this interface, so the mode is not usable without a separate data
-                                source. An <classname>IndexedContainer</classname>, for example,
-                                would work.
-                            </para>
-                        </listitem>
-                    </varlistentry>
-                    <varlistentry>
-                        <term><constant>ITEM_CAPTION_MODE_ITEM</constant></term>
-                        <listitem>
-                            <para>
-                                <classname>String</classname> representation of item, acquired
-                                with <methodname>toString()</methodname>, is used as the
-                                caption. This is applicable mainly when using a custom
-                                <classname>Item</classname> class, which also requires using a
-                                custom <classname>Container</classname> that is used as a data
-                                source for the selection component.
-                            </para>
-                        </listitem>
-                    </varlistentry>
-                    <varlistentry>
-                        <term><constant>ITEM_CAPTION_MODE_PROPERTY</constant></term>
-                        <listitem>
-                            <para>
-                                Item captions are read from the <classname>String</classname>
-                                representation of the property with the identifier specified with
-                                <methodname>setItemCaptionPropertyId()</methodname>. This is
-                                useful, for example, when you have a container that you use as the
-                                data source for the selection component, and you want to
-                                use a specific property for caption.
-                            </para>
-                            
-                            <para>
-                                In the example below, we bind a selection component to a bean
-                                container and use a property of the bean as the caption.
-                            </para>
-                            
-                            <programlisting><?pocket-size 65% ?><![CDATA[/* A bean with a "name" property. */
-public class Planet implements Serializable {
-    String name;
-
-    public Planet(String name) {
-        this.name = name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getName() {
-        return name;
-    }
-}
-
-void propertyModeExample(VerticalLayout layout) {
-    // Have a bean container to put the beans in
-    BeanItemContainer<Planet> container =
-        new BeanItemContainer<Planet>(Planet.class);
-
-    // Put some example data in it
-    container.addItem(new Planet(1, "Mercury"));
-    container.addItem(new Planet(2, "Venus"));
-    container.addItem(new Planet(3, "Earth"));
-    container.addItem(new Planet(4, "Mars"));
-
-    // Create a selection component bound to the container
-    ComboBox select = new ComboBox("Planets", container);
-
-    // Set the caption mode to read the caption directly
-    // from the 'name' property of the bean
-    select.setItemCaptionMode(ItemCaptionMode.PROPERTY);
-    select.setItemCaptionPropertyId("name");
-
-    ...]]></programlisting>
-                        </listitem>
-                    </varlistentry>
-                </variablelist>
-            </section>
-
-            <section xml:id="components.selecting.databinding.getset">
-                <title>Getting and Setting Selection</title>
-
-                <para>
-                    A selection component provides the current selection as the property of
-                    the component (with the <classname>Property</classname> interface). The
-                    property value is an item identifier object that identifies the selected
-                    item. You can get the identifier with <methodname>getValue()</methodname>
-                    of the <classname>Property</classname> interface.
-                </para>
-
-                <para>
-                    You can select an item with the corresponding
-                    <methodname>setValue()</methodname> method. In multiselect mode, the
-                    property will be an unmodifiable set of item identifiers. If no item
-                    is selected, the property will be <parameter>null</parameter> in
-                    single selection mode or an empty collection in multiselect mode.
-                </para>
-
-                <para>
-                    The <classname>ComboBox</classname> and <classname>NativeSelect</classname>
-                    will show empty selection when no actual item is selected. This is
-                    the <emphasis>null selection item identifier</emphasis>. You can set an
-                    alternative ID with <methodname>setNullSelectionItemId()</methodname>. Setting
-                    the alternative null ID is merely a visual text; the
-                    <methodname>getValue()</methodname> will still return
-                    <parameter>null</parameter> value if no item is selected, or an empty set in
-                    multiselect mode.
-                </para>
-
-                <para>
-                    The item identifier of the currently selected item will be set as the
-                    property of the selection component. You can access it with the
-                    <methodname>getValue()</methodname> method of the
-                    <classname>Property</classname> interface of the component. Also, when
-                    handling selection changes with a
-                    <classname>Property.ValueChangeListener</classname>, the
-                    <classname>ValueChangeEvent</classname> will have the selected item as
-                    the property of the event, accessible with the
-                    <methodname>getProperty()</methodname> method.
-                </para>
-
-                <figure>
-                    <title>Selected Item</title>
-                    <mediaobject>
-                        <imageobject>
-                            <imagedata smallscale="150" align="center" fileref="img/components/select-selected1.png"/>
-                        </imageobject>
-                    </mediaobject>
-                </figure>
-            </section>
-        </section>
-		<!-- <para>
-		While the default caption mode is flexible enough for most
-		cases where the appearance of a <classname>Select</classname>
-		component is fixed, the other modes may be useful for cases where the
-		user can configure what type of information is shown in the
-		component. Typical situation is allowing the user to choose between
-		"Show text only", "Show icons only", and "Show both icons and text".
-		</para>-->
-
-		<section xml:id="components.selecting.combobox">
-			<title><classname>ComboBox</classname></title>
-
-			<para>
-				The <classname>ComboBox</classname> component allows selecting an item
-				from a drop-down list. The component also has a text field area, which
-				allows entering search text by which the items shown in the drop-down list
-				are filtered.
-			</para>
-
-			<figure>
-				<title>The <classname>ComboBox</classname> Component</title>
-				<mediaobject>
-					<imageobject>
-						<imagedata smallscale="130" align="center" fileref="img/components/select-select.png"/>
-					</imageobject>
-				</mediaobject>
-			</figure>
-
-			<section xml:id="components.selecting.combobox.filtering">
-				<title>Filtered Selection</title>
+        <section xml:id="components.combobox.filtering">
+            <title>Filtered Selection</title>
 				
-				<para>
-					<classname>ComboBox</classname> allows filtering the items available
-					for selection in the drop-down list by the text entered in the input
-					box. Pressing <keycap>Enter</keycap> will complete the item in the
-					input box. Pressing <keycap>Up</keycap>- and
-					<keycap>Down</keycap>-arrows can be used for selecting an item from
-					the drop-down list. The drop-down list is paged and clicking on the
-					scroll buttons will change to the next or previous page. The list
-					selection can also be done with the arrow keys on the keyboard. The
-					shown items are loaded from the server as needed, so the number of
-					items held in the component can be quite large.
-				</para>
+            <para>
+                <classname>ComboBox</classname> allows filtering the items available
+                for selection in the drop-down list by the text entered in the input
+                box. Pressing <keycap>Enter</keycap> will complete the item in the
+                input box. Pressing <keycap>Up</keycap>- and
+                <keycap>Down</keycap>-arrows can be used for selecting an item from
+                the drop-down list. The drop-down list is paged and clicking on the
+                scroll buttons will change to the next or previous page. The list
+                selection can also be done with the arrow keys on the keyboard. The
+                shown items are loaded from the server as needed, so the number of
+                items held in the component can be quite large.
+            </para>
 			
-				<para>
-					The filtering is done according to the the <emphasis>filtering
+            <para>
+                The filtering is done according to the the <emphasis>filtering
 					mode</emphasis> defined in the <classname>FilteringMode</classname>
-					enum. They are as follows:
-                </para>
+                enum. They are as follows:
+            </para>
 
-                <variablelist>
-                    <varlistentry>
-                        <term><parameter>CONTAINS</parameter></term>
-                        <listitem>
-                            <para>
-                                Matches any item that contains the string given in the
-                                text field part of the component.
+            <variablelist>
+                <varlistentry>
+                    <term><parameter>CONTAINS</parameter></term>
+                    <listitem>
+                        <para>
+                            Matches any item that contains the string given in the
+                            text field part of the component.
                             </para>
-                        </listitem>
-                    </varlistentry>
-                    <varlistentry>
-                        <term><parameter>STARTSWITH</parameter></term>
-                        <listitem>
-                            <para>
-                                Matches only items that begin with the given string.
-                            </para>
-                        </listitem>
-                    </varlistentry>
-                    <varlistentry>
-                        <term><parameter>OFF</parameter> (default)</term>
-                        <listitem>
-                            <para>
-                                Filtering is by default off.
-                            </para>
-                        </listitem>
-                    </varlistentry>
-                </variablelist>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>STARTSWITH</parameter></term>
+                    <listitem>
+                        <para>
+                            Matches only items that begin with the given string.
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>OFF</parameter> (default)</term>
+                    <listitem>
+                        <para>
+                            Filtering is by default off.
+                        </para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
 
-                <book-example eid="component.select.combobox.filtering"></book-example>
-                <programlisting><?pocket-size 65% ?><![CDATA[ComboBox combobox = new ComboBox("Enter containing substring");
+            <book-example eid="component.combobox.filtering"></book-example>
+            <programlisting><?pocket-size 65% ?><![CDATA[ComboBox combobox = new ComboBox("Enter containing substring");
 
 // Set the filtering mode
 combobox.setFilteringMode(FilteringMode.CONTAINS);
@@ -4124,28 +4317,28 @@ for (int i = 0; i < planets.length; i++)
     for (int j = 0; j < planets.length; j++) {
         combobox.addItem(planets[j] + " to " + planets[i]);]]></programlisting>
 
-				<para>
-					The above example uses the containment filter that matches to all
-					items containing the input string. As shown in <xref
-					linkend="figure.components.selecting.combobox.filter"/> below, when we
-					type some text in the input area, the drop-down list will show all the
-					matching items.
-				</para>
+            <para>
+                The above example uses the containment filter that matches to all items
+                containing the input string. As shown in <xref
+                linkend="figure.components.combobox.filter"/> below, when we
+                type some text in the input area, the drop-down list will show all the
+                matching items.
+            </para>
 
-				<figure xml:id="figure.components.selecting.combobox.filter">
-					<title>Filtered Selection</title>
-					<mediaobject>
-						<imageobject>
-							<imagedata smallscale="100%" align="center" fileref="img/components/select-filter3.png"/>
-						</imageobject>
-					</mediaobject>
-				</figure>
-            </section>
+            <figure xml:id="figure.components.combobox.filter">
+                <title>Filtered Selection</title>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata smallscale="100%" align="center" fileref="img/components/select-filter3.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+        </section>
 					
-            <simplesect xml:id="components.selecting.combobox.css">
-                <title>CSS Style Rules</title>
+        <simplesect xml:id="components.combobox.css">
+            <title>CSS Style Rules</title>
                 
-                <programlisting><![CDATA[.v-filterselect { }
+            <programlisting><![CDATA[.v-filterselect { }
 .v-filterselect-input { }
 .v-filterselect-button { }
 .v-filterselect-suggestpopup { }
@@ -4155,42 +4348,42 @@ for (int i = 0; i < planets.length; i++)
 .v-select { }
 .v-select-select { }]]></programlisting>
 					
-                <para>
-                    In its default state, only the input field of the
-                    <classname>ComboBox</classname> component is visible. The entire
-                    component is enclosed in <literal>v-filterselect</literal> style (a
-                    legacy remnant), the input field has
-                    <literal>v-filterselect-input</literal> style and the button in the
-                    right end that opens and closes the drop-down result list has
-                    <literal>v-filterselect-button</literal> style.
-                </para>
-
-                <para>
-                    The drop-down result list has an overall
-                    <literal>v-filterselect-suggestpopup</literal> style. It contains the
-                    list of suggestions with <literal>v-filterselect-suggestmenu</literal>
-                    style and a status bar in the bottom with
-                    <literal>v-filterselect-status</literal> style. The list of
-                    suggestions is padded with an area with
-                    <literal>v-filterselect-prefpage-off</literal> style above and below
-                    the list.
-                </para>
-            </simplesect>
-        </section>
-
-		<section xml:id="components.selecting.listselect">
-            <title><classname>ListSelect</classname></title>
-
             <para>
-                The <classname>ListSelect</classname> component is list box that shows the
-                selectable items in a vertical list. If the number of items exceeds the
-                height of the component, a scrollbar is shown. The component allows both
-                single and multiple selection modes, which you can set with
-                <methodname>setMultiSelect()</methodname>. It is visually identical in
-                both modes.
+                In its default state, only the input field of the
+                <classname>ComboBox</classname> component is visible. The entire
+                component is enclosed in <literal>v-filterselect</literal> style (a
+                legacy remnant), the input field has
+                <literal>v-filterselect-input</literal> style and the button in the
+                right end that opens and closes the drop-down result list has
+                <literal>v-filterselect-button</literal> style.
             </para>
 
-            <programlisting><?pocket-size 65% ?><![CDATA[// Create the selection component
+            <para>
+                The drop-down result list has an overall
+                <literal>v-filterselect-suggestpopup</literal> style. It contains the
+                list of suggestions with <literal>v-filterselect-suggestmenu</literal>
+                style and a status bar in the bottom with
+                <literal>v-filterselect-status</literal> style. The list of
+                suggestions is padded with an area with
+                <literal>v-filterselect-prefpage-off</literal> style above and below
+                the list.
+            </para>
+        </simplesect>
+    </section>
+
+    <section xml:id="components.listselect">
+        <title><classname>ListSelect</classname></title>
+
+        <para>
+            The <classname>ListSelect</classname> component is list box that shows the
+            selectable items in a vertical list. If the number of items exceeds the height
+            of the component, a scrollbar is shown. The component allows both single and
+            multiple selection modes, which you can set with
+            <methodname>setMultiSelect()</methodname>. It is visually identical in both
+            modes.
+        </para>
+
+        <programlisting><?pocket-size 65% ?><![CDATA[// Create the selection component
 ListSelect select = new ListSelect("My Selection");
         
 // Add some items
@@ -4204,46 +4397,50 @@ select.setNullSelectionAllowed(false);
 // Show 5 items and a scrollbar if there are more
 select.setRows(5);]]></programlisting>
 
-            <para>
-                The number of visible items is set with
-                <methodname>setRows()</methodname>.
-            </para>
+        <para>
+            The number of visible items is set with
+            <methodname>setRows()</methodname>.
+        </para>
 
-            <figure xml:id="figure.selecting.listselect.basic">
-                <title>The <classname>ListSelect</classname> Component</title>
-                <mediaobject>
-                    <imageobject>
-                        <imagedata smallscale="80%" align="center" fileref="img/components/listselect-basic.png"/>
-                    </imageobject>
-                </mediaobject>
-            </figure>
+        <figure xml:id="figure.components.listselect.basic">
+            <title>The <classname>ListSelect</classname> Component</title>
+            <mediaobject>
+                <imageobject>
+                    <imagedata smallscale="80%" align="center" fileref="img/components/listselect-basic.png"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
 
-
-			<simplesect>
-				<title>CSS Style Rules</title>
-				
-				<programlisting><![CDATA[.v-select {}
+        <para>
+            Common selection component features are described in <xref
+            linkend="components.selection"/>.
+        </para>
+        
+        <simplesect>
+            <title>CSS Style Rules</title>
+            
+            <programlisting><![CDATA[.v-select {}
   .v-select-select {}
     option {}]]></programlisting>
 
-				<para>
-					The component has an overall <literal>v-select</literal> style. The
-					native <literal>select</literal> element has
-					<literal>v-select-select</literal> style.
-				</para>
-			</simplesect>
-        </section>
+            <para>
+                The component has an overall <literal>v-select</literal> style. The
+                native <literal>select</literal> element has
+                <literal>v-select-select</literal> style.
+            </para>
+        </simplesect>
+    </section>
 
-		<section xml:id="components.selecting.nativeselect">
-			<title>Native Selection Component <classname>NativeSelect</classname></title>
+    <section xml:id="components.nativeselect">
+        <title><classname>NativeSelect</classname></title>
 			
-			<para>
-				<classname>NativeSelect</classname> is a drop-down selection component
-				implemented with the native selection input of web browsers, using the
-				HTML <literal>&lt;select&gt;</literal> element.
-			</para>
+        <para>
+            <classname>NativeSelect</classname> is a drop-down selection component
+            implemented with the native selection input of web browsers, using the HTML
+            <literal>&lt;select&gt;</literal> element.
+        </para>
 
-            <programlisting><?pocket-size 65% ?><![CDATA[// Create the selection component
+        <programlisting><?pocket-size 65% ?><![CDATA[// Create the selection component
 final NativeSelect select = new NativeSelect("Native Selection");
         
 // Add some items
@@ -4256,96 +4453,97 @@ select.setColumns(10);
         
 select.setNullSelectionAllowed(false);]]></programlisting>
 
-            <para>
-                The <methodname>setColumns()</methodname> allows setting the width of the
-                list as "columns", which is a measure that depends on the browser.
-            </para>
+        <para>
+            The <methodname>setColumns()</methodname> allows setting the width of the list
+            as "columns", which is a measure that depends on the browser.
+        </para>
 
-            <figure xml:id="figure.selecting.nativeselect.basic">
-                <title>The <classname>NativeSelect</classname> Component</title>
-                <mediaobject>
-                    <imageobject>
-                        <imagedata smallscale="80%" align="center" fileref="img/components/nativeselect-basic.png"/>
-                    </imageobject>
-                </mediaobject>
-            </figure>
+        <figure xml:id="figure.components.nativeselect.basic">
+            <title>The <classname>NativeSelect</classname> Component</title>
+            <mediaobject>
+                <imageobject>
+                    <imagedata smallscale="80%" align="center" fileref="img/components/nativeselect-basic.png"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
 
-            <para>
-                Multiple selection mode is not allowed; you should use the
-                <classname>ListSelect</classname> component instead.
-            </para>
-
-			<simplesect>
-				<title>CSS Style Rules</title>
+        <para>
+            Common selection component features are described in <xref
+            linkend="components.selection"/>.
+        </para>
+        
+        <simplesect>
+            <title>CSS Style Rules</title>
 				
-				<programlisting><![CDATA[.v-select {}
+            <programlisting><![CDATA[.v-select {}
   .v-select-select {}]]></programlisting>
 
-				<para>
-					The component has a <literal>v-select</literal> overall style. The
-					native <literal>select</literal> element has
-					<literal>v-select-select</literal> style.
-				</para>
-			</simplesect>
-		</section>
+            <para>
+                The component has a <literal>v-select</literal> overall style. The
+                native <literal>select</literal> element has
+                <literal>v-select-select</literal> style.
+            </para>
+        </simplesect>
+    </section>
 
-		<section xml:id="components.selecting.optiongroup">
-			<title>Radio Button and Check Box Groups with <classname>OptionGroup</classname></title>
-			<para>
-				The <classname>OptionGroup</classname> class provides selection from
-				alternatives using a group of radio buttons in single selection mode. In
-				multiple selection mode, the items show up as check boxes.
-			</para>
+    <section xml:id="components.optiongroup">
+        <title><classname>OptionGroup</classname></title>
 
-			<programlisting><?pocket-size 70% ?><![CDATA[OptionGroup optiongroup = new OptionGroup("My Option Group");
+        <para>
+            <classname>OptionGroup</classname> is a selection component that allows
+            selection from a group of radio buttons in single selection mode. In multiple
+            selection mode, the items show up as check boxes. The common selection
+            component features are described in <xref linkend="components.selection"/>.
+        </para>
+
+        <programlisting><?pocket-size 70% ?><![CDATA[OptionGroup optiongroup = new OptionGroup("My Option Group");
 
 // Use the multiple selection mode.
 myselect.setMultiSelect(true);]]></programlisting>
 
+        <para>
+            <xref linkend="figure.components.optiongroup"/> shows the
+            <classname>OptionGroup</classname> in both single and multiple selection mode.
+        </para>
+
+        <figure xml:id="figure.components.optiongroup">
+            <title>Option Button Group in Single and Multiple Selection Mode</title>
+            <mediaobject>
+                <imageobject>
+                    <imagedata smallscale="130" align="center" fileref="img/components/select-optiongroup.png"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
+
+        <para>
+            You can create check boxes individually using the
+            <classname>CheckBox</classname> class, as described in <xref
+            linkend="components.checkbox"/>. The advantages of the
+            <classname>OptionGroup</classname> component are that as it maintains the
+            individual check box objects, you can get an array of the currently selected
+            items easily, and that you can easily change the appearance of a single
+            component.
+        </para>
+
+        <section>
+            <title>Disabling Items</title>
+
             <para>
-                <xref linkend="figure.components.selecting.optiongroup"/> shows the
-                <classname>OptionGroup</classname> in both single and multiple selection mode.
+                You can disable individual items in an <classname>OptionGroup</classname>
+                with <methodname>setItemEnabled()</methodname>. The user can not select or
+                deselect disabled items in multi-select mode, but in single-select mode
+                the use can change the selection from a disabled to an enabled item. The
+                selections can be changed programmatically regardless of whether an item
+                is enabled or disabled. You can find out whether an item is enabled with
+                <methodname>isItemEnabled()</methodname>.
             </para>
 
-			<figure xml:id="figure.components.selecting.optiongroup">
-				<title>Option Button Group in Single and Multiple Selection Mode</title>
-				<mediaobject>
-					<imageobject>
-						<imagedata smallscale="130" align="center" fileref="img/components/select-optiongroup.png"/>
-					</imageobject>
-				</mediaobject>
-			</figure>
+            <para>
+                The <methodname>setItemEnabled()</methodname> identifies the item to
+                be disabled by its item ID.
+            </para>
 
-			<para>
-				You can create check boxes individually using the
-				<classname>CheckBox</classname> class, as described in <xref
-				linkend="components.checkbox"/>. The advantages of the
-				<classname>OptionGroup</classname> component are that as it maintains the
-				individual check box objects, you can get an array of the currently
-				selected items easily, and that you can easily change the appearance of a
-				single component.
-			</para>
-
-            <section>
-                <title>Disabling Items</title>
-
-                <para>
-                    You can disable individual items in an
-                    <classname>OptionGroup</classname> with
-                    <methodname>setItemEnabled()</methodname>. The user can not select or
-                    deselect disabled items in multi-select mode, but in single-select
-                    mode the use can change the selection from a disabled to an enabled
-                    item. The selections can be changed programmatically regardless of
-                    whether an item is enabled or disabled. You can find out whether an
-                    item is enabled with <methodname>isItemEnabled()</methodname>.
-                </para>
-
-                <para>
-                    The <methodname>setItemEnabled()</methodname> identifies the item to
-                    be disabled by its item ID.
-                </para>
-
-                <programlisting><?pocket-size 65% ?><![CDATA[// Have an option group
+            <programlisting><?pocket-size 65% ?><![CDATA[// Have an option group
 OptionGroup group = new OptionGroup("My Disabled Group");
 group.addItem("One");
 group.addItem("Two");
@@ -4354,54 +4552,54 @@ group.addItem("Three");
 // Disable one item
 group.setItemEnabled("Two", false);]]></programlisting>
 
-                <para>
-                    The item IDs are also used for the captions in this example. The
-                    result is shown in <xref
-                    linkend="figure.components.selecting.optiongroup.disabling"/>.
-                </para>
+            <para>
+                The item IDs are also used for the captions in this example. The
+                result is shown in <xref
+                    linkend="figure.components.optiongroup.disabling"/>.
+            </para>
 
-                <figure xml:id="figure.components.selecting.optiongroup.disabling">
-                    <title><classname>OptionGroup</classname> with a Disabled Item</title>
-                    <mediaobject>
-                        <imageobject>
-                            <imagedata smallscale="70%" align="center" fileref="img/components/optiongroup-disabling.png"/>
+            <figure xml:id="figure.components.optiongroup.disabling">
+                <title><classname>OptionGroup</classname> with a Disabled Item</title>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata smallscale="70%" align="center" fileref="img/components/optiongroup-disabling.png"/>
                         </imageobject>
-                    </mediaobject>
-                </figure>
+                </mediaobject>
+            </figure>
 
-                <para>
-                    Setting an item as disabled turns on the <literal>v-disabled</literal>
-                    style for it.
-                </para>
-            </section>
+            <para>
+                Setting an item as disabled turns on the <literal>v-disabled</literal>
+                style for it.
+            </para>
+        </section>
 
-			<simplesect>
-				<title>CSS Style Rules</title>
+        <simplesect>
+            <title>CSS Style Rules</title>
 				
-				<programlisting><![CDATA[.v-select-optiongroup {}
+            <programlisting><![CDATA[.v-select-optiongroup {}
 .v-select-option.v-checkbox {}
 .v-select-option.v-radiobutton {}]]></programlisting>
 
-				<para>
-					The <literal>v-select-optiongroup</literal> is the overall style for
-					the component. Each check box will have the
-					<literal>v-checkbox</literal> style, borrowed from the
-					<classname>CheckBox</classname> component, and each radio button the
-					<literal>v-radiobutton</literal> style. Both the radio buttons and
-					check boxes will also have the <literal>v-select-option</literal>
-					style that allows styling regardless of the option type. Disabled
-					items have additionally the <literal>v-disabled</literal> style.
-				</para>
+            <para>
+                The <literal>v-select-optiongroup</literal> is the overall style for
+                the component. Each check box will have the
+                <literal>v-checkbox</literal> style, borrowed from the
+                <classname>CheckBox</classname> component, and each radio button the
+                <literal>v-radiobutton</literal> style. Both the radio buttons and
+                check boxes will also have the <literal>v-select-option</literal>
+                style that allows styling regardless of the option type. Disabled
+                items have additionally the <literal>v-disabled</literal> style.
+            </para>
 
-                <para>
-                    The options are normally laid out vertically. You can use horizontal
-                    layout by setting <literal>display: inline-block</literal> for the
-                    options. The <literal>nowrap</literal> setting for the overall element
-                    prevents wrapping if there is not enough horizontal space in the
-                    layout, or if the horizontal width is undefined.
-                </para>
+            <para>
+                The options are normally laid out vertically. You can use horizontal
+                layout by setting <literal>display: inline-block</literal> for the
+                options. The <literal>nowrap</literal> setting for the overall element
+                prevents wrapping if there is not enough horizontal space in the
+                layout, or if the horizontal width is undefined.
+            </para>
 
-                <programlisting><?pocket-size 65% ?><![CDATA[/* Lay the options horizontally */
+            <programlisting><?pocket-size 65% ?><![CDATA[/* Lay the options horizontally */
 .v-select-optiongroup-horizontal .v-select-option {
     display: inline-block;
 }
@@ -4417,54 +4615,52 @@ group.setItemEnabled("Two", false);]]></programlisting>
     padding-right: 10px;
 }]]></programlisting>
 
-                <para>
-                    Use of the above rules requires setting a custom
-                    <literal>horizontal</literal> style name for the component. The result
-                    is shown in <xref
-                    linkend="figure.components.selecting.optiongroup.horizontal"/>.
-                </para>
-
-                <figure xml:id="figure.components.selecting.optiongroup.horizontal">
-                    <title>Horizontal <classname>OptionGroup</classname></title>
-                    <mediaobject>
-                        <imageobject>
-                            <imagedata smallscale="70%" align="center" fileref="img/components/optiongroup-horizontal.png"/>
-                        </imageobject>
-                    </mediaobject>
-                </figure>
-
-			</simplesect>
-		</section>
-
-		<section xml:id="components.selecting.twincolselect">
-			<title>Twin Column Selection with <classname>TwinColSelect</classname></title>
-			<para>
-				The <classname>TwinColSelect</classname> field provides a multiple
-				selection component that shows two lists side by side, with the left
-				column containing unselected items and the right column the selected
-				items. The user can select items from the list on the left and click on
-				the "&gt;&gt;" button to move them to the list on the right. Items can be
-				deselected by selecting them in the right list and clicking on the
-				"&lt;&lt;" button.
-			</para>
-
-			<para>
-                <classname>TwinColSelect</classname> is always in multi-select mode, so
-                its property value is always a collection of the item IDs of the selected
-                items, that is, the items in the right column.
-            </para>
-
             <para>
-                The selection columns can have their own captions, separate from the
-                overall component caption, which is managed by the containing layout. You
-                can set the column captions with
-                <methodname>setLeftColumnCaption()</methodname> and
-                <methodname>setRightColumnCaption()</methodname>.
+                Use of the above rules requires setting a custom
+                <literal>horizontal</literal> style name for the component. The result
+                is shown in <xref
+                    linkend="figure.components.optiongroup.horizontal"/>.
             </para>
 
-            <book-example eid="component.select.twincolselect.captions" style="float: right"></book-example>
+            <figure xml:id="figure.components.optiongroup.horizontal">
+                <title>Horizontal <classname>OptionGroup</classname></title>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata smallscale="70%" align="center" fileref="img/components/optiongroup-horizontal.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+        </simplesect>
+    </section>
 
-            <programlisting><?pocket-size 65% ?><![CDATA[final TwinColSelect select =
+    <section xml:id="components.twincolselect">
+        <title><classname>TwinColSelect</classname></title>
+
+        <para>
+            The <classname>TwinColSelect</classname> field provides a multiple selection
+            component that shows two lists side by side, with the left column containing
+            unselected items and the right column the selected items. The user can select
+            items from the list on the left and click on the "&gt;&gt;" button to move
+            them to the list on the right. Items can be deselected by selecting them in
+            the right list and clicking on the "&lt;&lt;" button.
+        </para>
+
+        <para>
+            <classname>TwinColSelect</classname> is always in multi-select mode, so its
+            property value is always a collection of the item IDs of the selected items,
+            that is, the items in the right column.
+        </para>
+
+        <para>
+            The selection columns can have their own captions, separate from the overall
+            component caption, which is managed by the containing layout. You can set the
+            column captions with <methodname>setLeftColumnCaption()</methodname> and
+            <methodname>setRightColumnCaption()</methodname>.
+        </para>
+
+        <book-example eid="component.select.twincolselect.captions" style="float: right"></book-example>
+
+        <programlisting><?pocket-size 65% ?><![CDATA[final TwinColSelect select =
     new TwinColSelect("Select Targets to Destroy");
 
 // Set the column captions (optional)
@@ -4480,31 +4676,36 @@ for (int pl=0; pl<planets.length; pl++)
 // Set the number of visible items
 select.setRows(planets.length);]]></programlisting>
 
-            <para>
-                The resulting component is shown in <xref
-                linkend="figure.components.selecting.twincolselect.captions"/>.
-            </para>
+        <para>
+            The resulting component is shown in <xref
+            linkend="figure.components.twincolselect.captions"/>.
+        </para>
 
-			<figure xml:id="figure.components.selecting.twincolselect.captions">
-				<title>Twin Column Selection</title>
-				<mediaobject>
-					<imageobject>
-						<imagedata smallscale="100%" align="center" fileref="img/components/select-twincol.png"/>
-					</imageobject>
-				</mediaobject>
-			</figure>
+        <figure xml:id="figure.components.twincolselect.captions">
+            <title>Twin Column Selection</title>
+            <mediaobject>
+                <imageobject>
+                    <imagedata smallscale="100%" align="center" fileref="img/components/select-twincol.png"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
 
-            <para>
-                The <methodname>setRows()</methodname> method sets the height of the
-                component by the number of visible items in the selection boxes. Setting
-                the height with <methodname>setHeight()</methodname> to a defined value
-                overrides the rows setting.
-            </para>
-            
-			<simplesect>
-				<title>CSS Style Rules</title>
+        <para>
+            The <methodname>setRows()</methodname> method sets the height of the component
+            by the number of visible items in the selection boxes. Setting the height with
+            <methodname>setHeight()</methodname> to a defined value overrides the rows
+            setting.
+        </para>
+
+        <para>
+            Common selection component features are described in <xref
+            linkend="components.selection"/>.
+        </para>
+        
+        <simplesect>
+            <title>CSS Style Rules</title>
 				
-				<programlisting><![CDATA[.v-select-twincol {}
+            <programlisting><![CDATA[.v-select-twincol {}
   .v-select-twincol-options-caption {}
   .v-select-twincol-selections-caption {}
   .v-select-twincol-options {}
@@ -4515,194 +4716,24 @@ select.setRows(planets.length);]]></programlisting>
     .v-select-twincol-deco {}
   .v-select-twincol-selections {}]]></programlisting>
 
-                <para>
-                    The <classname>TwinColSelect</classname> component has an overall
-                    <literal>v-select-twincol</literal> style. If set, the left and right
-                    column captions have
-                    <literal>v-select-twincol-options-caption</literal> and
-                    <literal>v-select-twincol-options-caption</literal> style names,
-                    respectively. The left box, which displays the unselected items, has
-                    <literal>v-select-twincol-options-caption</literal> style and the
-                    right box, which displays the selected items, has
-                    <literal>v-select-twincol-options-selections</literal> style. Between
-                    them is the button area, which has overall
-                    <literal>v-select-twincol-buttons</literal> style; the actual buttons
-                    reuse the styles for the <classname>Button</classname>
-                    component. Between the buttons is a divider element with
-                    <literal>v-select-twincol-deco</literal> style.
-                </para>
-
-			</simplesect>
-		</section>
-
-
-		<section xml:id="components.selecting.newitems" condition="web">
-			<title>Allowing Adding New Items</title>
-
-			<para>
-				Selection components can allow the user to add new items. Currently, only
-				<classname>ComboBox</classname> allows it, when the user types in a value
-				and presses <keycap>Enter</keycap>. You need to enable the mode with
-				<methodname>setNewItemsAllowed(true)</methodname>. Setting the component
-				also in immediate mode may be necessary, as otherwise the item would not
-				be added immediately when the user interacts with the component, but after
-				some other component causes a server request.
-                <!-- TODO This could be a bug -->
-			</para>
-
-			<programlisting><![CDATA[myselect.setNewItemsAllowed(true);
-myselect.setImmediate(true);]]></programlisting>
-
             <para>
-                The user interface for adding new items depends on the selection
-                component. The regular <classname>ComboBox</classname> component allows
-                you to simply type the new item in the combo box and hit
-                <keycap>Enter</keycap> to add it.
+                The <classname>TwinColSelect</classname> component has an overall
+                <literal>v-select-twincol</literal> style. If set, the left and right
+                column captions have <literal>v-select-twincol-options-caption</literal>
+                and <literal>v-select-twincol-options-caption</literal> style names,
+                respectively. The left box, which displays the unselected items, has
+                <literal>v-select-twincol-options-caption</literal> style and the right
+                box, which displays the selected items, has
+                <literal>v-select-twincol-options-selections</literal> style. Between them
+                is the button area, which has overall
+                <literal>v-select-twincol-buttons</literal> style; the actual buttons
+                reuse the styles for the <classname>Button</classname> component. Between
+                the buttons is a divider element with
+                <literal>v-select-twincol-deco</literal> style.
             </para>
 
-			<para>
-				Adding new items in not possible if the selection component is read-only
-				or is bound to a <classname>Container</classname> that does not allow
-				adding new items, and an attempt may result in an exception.
-			</para>
-
-            <section xml:id="components.selecting.newitems.handling">
-                <title>Handling New Items</title>
-
-                <para>
-                    Adding new items is handled by a
-                    <interfacename>NewItemHandler</interfacename>, which gets the item
-                    caption string as parameter for the
-                    <methodname>addNewItem()</methodname> method. The default
-                    implementation, <classname>DefaultNewItemHandler</classname>, checks
-                    for read-only state, adds the item using the entered caption as the
-                    item ID, and if the selection component gets the captions from a
-                    property, copies the caption to that property. It also selects the
-                    item. The default implementation may not be suitable for all container
-                    types, in which case you need to define a custom handler. For example,
-                    a <classname>BeanItemContainer</classname> expects the items to have
-                    the bean object itself as the ID, not a string.
-                </para>
-
-                <book-example eid="component.select.combobox.newitemhandler" style="float: right"/>
-                <programlisting condition="web"><?pocket-size 65% ?><![CDATA[// Have a bean container to put the beans in
-final BeanItemContainer<Planet> container =
-    new BeanItemContainer<Planet>(Planet.class);
-
-// Put some example data in it
-container.addItem(new Planet(1, "Mercury"));
-container.addItem(new Planet(2, "Venus"));
-container.addItem(new Planet(3, "Earth"));
-container.addItem(new Planet(4, "Mars"));
-
-final ComboBox select =
-    new ComboBox("Select or Add a Planet", container);
-select.setNullSelectionAllowed(false);
-        
-// Use the name property for item captions
-select.setItemCaptionPropertyId("name");
-        
-// Allow adding new items
-select.setNewItemsAllowed(true);
-select.setImmediate(true);
-
-// Custom handling for new items
-select.setNewItemHandler(new NewItemHandler() {
-    @Override
-    public void addNewItem(String newItemCaption) {
-        // Create a new bean - can't set all properties
-        Planet newPlanet = new Planet(0, newItemCaption);
-        container.addBean(newPlanet);
-        
-        // Remember to set the selection to the new item
-        select.select(newPlanet);
-        
-        Notification.show("Added new planet called " +
-                          newItemCaption);
-    }
-});]]></programlisting>
-            </section>
-        </section>
-
-		<section xml:id="components.selecting.multiple">
-			<title>Multiple Selection</title>
-
-			<!-- UNFINISHED: Check if outdated. -->
-			
-			<para>
-                Some selection components, such as <classname>OptionGroup</classname> and
-                <classname>ListSelect</classname> support a multiple selection mode, which
-                you can enable with <methodname>setMultiSelect()</methodname>. For
-                <classname>TwinColSelect</classname>, which is especially intended for
-                multiple selection, it is enabled by default.
-			</para>
-
-			<programlisting><![CDATA[myselect.setMultiSelect(true);]]></programlisting>
-
-			<para>
-				As in single selection mode, the property value of the component indicates
-				the selection. In multiple selection mode, however, the property value is
-				a <classname>Collection</classname> of the item IDs of the currently
-				selected items. You can get and set the property with the
-				<methodname>getValue()</methodname> and
-				<methodname>setValue()</methodname> methods as usual.
-			</para>
-
-			<para>
-                A change in the selection will trigger a
-                <classname>ValueChangeEvent</classname>, which you can handle with a
-                <classname>Propery.ValueChangeListener</classname>. As usual, you should
-                use <methodname>setImmediate(true)</methodname> to trigger the event
-                immediately when the user changes the selection. The following example
-                shows how to handle selection changes with a listener.
-			</para>
-
-            <!-- TODO Check this example -->
-            <programlisting><?pocket-size 65% ?><![CDATA[// A selection component with some items
-ListSelect select = new ListSelect("My Selection");
-for (String planet: new String[]{"Mercury", "Venus",
-        "Earth", "Mars", "Jupiter", "Saturn", "Uranus",
-        "Neptune"})
-    select.addItem(planet);
-
-// Multiple selection mode
-select.setMultiSelect(true);
-
-// Feedback on value changes
-select.addValueChangeListener(
-    new Property.ValueChangeListener() {
-    public void valueChange(ValueChangeEvent event) {
-        // Some feedback
-        layout.addComponent(new Label("Selected: " +
-            event.getProperty().getValue().toString()));
-    }
-});
-select.setImmediate(true);]]></programlisting>
-
-        </section>
-
-		<section xml:id="components.selecting.features">
-            <title>Other Common Features</title>
-
-            <section>
-                <title>Item Icons</title>
-
-                <para>
-                    You can set an icon for each item with
-                    <methodname>setItemIcon()</methodname>, or define an item property
-                    that provides the icon resource with
-                    <methodname>setItemIconPropertyId()</methodname>, in a fashion similar
-                    to captions. Notice, however, that icons are not supported in
-                    <classname>NativeSelect</classname>,
-                    <classname>TwinColSelect</classname>, and some other selection
-                    components and modes. This is because HTML does not support images
-                    inside the native <literal>select</literal> elements. Icons are also
-                    not really visually applicable.
-                </para>
-            </section>
-        </section>
-
-	</section>
+        </simplesect>
+    </section>
 
     <!-- ================================================================== -->
     <!-- Table                                                              -->
@@ -4814,6 +4845,11 @@ table.addItem(new Object[] {
 			height of rows.
 		</para>
 
+        <para>
+            Common selection component features are described in <xref
+            linkend="components.selection"/>.
+        </para>
+        
 		<section xml:id="components.table.selecting">
 			<title>Selecting Items in a Table</title>
 
@@ -6436,219 +6472,6 @@ barmenu.addItem("Services", null, mycommand);]]></programlisting>
 }]]></programlisting>
             </simplesect>
 		</simplesect>
-	</section>
-
-	<section xml:id="components.embedded">
-		<title>Embedded Resources</title>
-
-		<para>
-            You can embed images in Vaadin UIs with the <classname>Image</classname>
-            component, Adobe Flash graphics with <classname>Flash</classname>, and other
-            web content with <classname>BrowserFrame</classname>. There is also a generic
-            <classname>Embedded</classname> component for embedding other object
-            types. The embedded content is referenced as <emphasis>resources</emphasis>,
-            as described in <xref linkend="application.resources"/>.
-		</para>
-
-		<para>
-			The following example displays an image as a class resource loaded with the
-			class loader:
-		</para>
-
-		<programlisting><![CDATA[Image image = new Image("Yes, logo:",
-    new ClassResource("vaadin-logo.png"));
-main.addComponent(image);]]></programlisting>
-
-        <para>
-            The caption can be given as null to disable it. An empty string displays an
-            empty caption which takes a bit space. The caption is managed by the
-            containing layout.
-        </para>
-
-        <para>
-            You can set an altenative text for an embedded resource with
-            <methodname>setAlternateText()</methodname>, which can be shown if images are
-            disabled in the browser for some reason. The text can be used for
-            accessibility purposes, such as for text-to-speech generation.
-        </para>
-
-		<section xml:id="components.embedded.image">
-			<title>Embedded <classname>Image</classname></title>
-
-            <para>
-                The <classname>Image</classname> component allows embedding an image
-                resource in a Vaadin UI.
-            </para>
-
-		<programlisting><![CDATA[// Serve the image from the theme
-Resource res = new ThemeResource("img/myimage.png");
-
-// Display the image without caption
-Image image = new Image(null, res);
-layout.addComponent(image);]]></programlisting>
-
-
-            <para>
-                The <classname>Image</classname> component has by default undefined size
-                in both directions, so it will automatically fit the size of the embedded
-                image.
-
-                <indexterm><primary>scroll bars</primary></indexterm>
-
-                If you want scrolling with scroll bars, you can put the image inside a
-                <classname>Panel</classname> that has a defined size to enable scrolling,
-                as described in <xref linkend="layout.panel.scrolling"/>. You can also put
-                it inside some other component container and set the <literal>overflow:
-                auto</literal> CSS property for the container element in a theme to enable
-                automatic scrollbars.  <indexterm>overflow CSS property</indexterm>
-            </para>
-
-            <book-example eid="component.embedded.scrolling-css"></book-example>
-
-            <section xml:id="components.embedded.image.generated">
-                <title>Generating and Reloading Images</title>
-
-                <para>
-                    You can also generate the image content dynamically using a
-                    <classname>StreamResource</classname>, as described in <xref
-                    linkend="application.resources.stream"/>, or with a
-                    <classname>RequestHandler</classname>.
-                </para>
-
-                <para>
-                    If the image changes, the browser needs to reload it. Simply updating
-                    the stream resource is not enough. Because of how caching is handled
-                    in some browsers, you can cause a reload easiest by renaming the
-                    filename of the resource with a unique name, such as one including a
-                    timestamp. You should set cache time to zero with
-                    <methodname>setCacheTime()</methodname> for the resource object when
-                    you create it.
-
-                    <!-- BUG #2470. -->
-                </para>
-
-                <programlisting><?pocket-size 65% ?><![CDATA[// Create the stream resource with some initial filename
-StreamResource imageResource =
-    new StreamResource(imageSource, "initial-filename.png");
-
-// Instruct browser not to cache the image
-imageResource.setCacheTime(0);
-
-// Display the image
-Image image = new Image(null, imageResource);]]></programlisting>
-
-                <para>
-                    When refreshing, you also need to call
-                    <methodname>markAsDirty()</methodname> for the
-                    <classname>Image</classname> object.
-                </para>
-
-                <programlisting><?pocket-size 65% ?><![CDATA[// This needs to be done, but is not sufficient
-image.markAsDirty();
-
-// Generate a filename with a timestamp
-SimpleDateFormat df = new SimpleDateFormat("yyyyMMddHHmmssSSS");
-String filename = "myfilename-" + df.format(new Date()) + ".png";
-
-// Replace the filename in the resource
-imageResource.setFilename(makeImageFilename());]]></programlisting>
-            </section>
-        </section>
-		
-		<section xml:id="components.embedded.flash">
-			<title>Adobe <classname>Flash</classname> Graphics</title>
-
-			<para>
-                The <classname>Flash</classname> component allows embedding Adobe Flash
-                animations in Vaadin UIs.
-			</para>
-
-			<programlisting><![CDATA[Flash flash = new Flash(null,
-    new ThemeResource("img/vaadin_spin.swf"));
-layout.addComponent(flash);]]></programlisting>
-
-			<para>
-				You can set Flash parameters with <methodname>setParameter()</methodname>,
-				which takes a parameter's name and value as strings. You can also set the
-				<parameter>codeBase</parameter>, <parameter>archive</parameter>, and
-				<parameter>standBy</parameter> attributes for the Flash object element in
-				HTML.
-			</para>
-		</section>
-		
-		<section xml:id="components.embedded.browserframe">
-			<title><classname>BrowserFrame</classname></title>
-
-			<para>
-				The <classname>BrowserFrame</classname> allows embedding web content
-				inside an HTML <tag>&lt;iframe&gt;</tag> element. You can refer to an
-				external URL with <classname>ExternalResource</classname>.
-			</para>
-
-            <para>
-                As the <classname>BrowserFrame</classname> has undefined size by default,
-                it is critical that you define a meaningful size for it, either fixed or
-                relative.
-            </para>
-
-			<programlisting><?pocket-size 65% ?><![CDATA[BrowserFrame browser = new BrowserFrame("Browser",
-    new ExternalResource("http://demo.vaadin.com/sampler/"));
-browser.setWidth("600px");
-browser.setHeight("400px");
-layout.addComponent(browser);]]></programlisting>
-
-            <para>
-                Notice that web pages can prevent embedding them in an <tag>&lt;iframe&gt;</tag>.
-            </para>
-		</section>
-
-		<section xml:id="components.embedded.embedded">
-			<title>Generic <classname>Embedded</classname> Objects</title>
-
-            <para>
-                The generic <classname>Embedded</classname> component allows embedding all
-                sorts of objects, such as SVG graphics, Java applets, and PDF documents,
-                in addition to the images, Flash graphics, and browser frames which you
-                can embed with the specialized components.
-            </para>
-
-            <para>
-                For example, to display a Flash animation:
-            </para>
-
-			<programlisting><![CDATA[// A resource reference to some object
-Resource res = new ThemeResource("img/vaadin_spin.swf");
-
-// Display the object
-Embedded object = new Embedded("My Object", res);
-layout.addComponent(object);]]></programlisting>
-
-            <para>
-                Or an SVG image:
-            </para>
-
-			<programlisting><![CDATA[// A resource reference to some object
-Resource res = new ThemeResource("img/reindeer.svg");
-
-// Display the object
-Embedded object = new Embedded("My SVG", res);
-object.setMimeType("image/svg+xml"); // Unnecessary
-layout.addComponent(object);]]></programlisting>
-
-            <para>
-                The MIME type of the objects is usually detected automatically from the
-                filename extension with the <classname>FileTypeResolver</classname>
-                utility in Vaadin. If not, you can set it explicitly with
-                <methodname>setMimeType()</methodname>, as was done in the example above
-                (where it was actually unnecessary).
-            </para>
-
-            <para>
-                Some embeddable object types may require special support in the
-                browser. You should make sure that there is a proper fallback mechanism if
-                the browser does not support the embedded type.
-            </para>
-        </section>
 	</section>
 
 	<section xml:id="components.upload">
@@ -8692,6 +8515,219 @@ protected void createEvent(CalendarTargetDetails details,
             <methodname>setInternalValue()</methodname> should call the superclass method.
         </para>
     </section>
+
+	<section xml:id="components.embedded">
+		<title>Embedded Resources</title>
+
+		<para>
+            You can embed images in Vaadin UIs with the <classname>Image</classname>
+            component, Adobe Flash graphics with <classname>Flash</classname>, and other
+            web content with <classname>BrowserFrame</classname>. There is also a generic
+            <classname>Embedded</classname> component for embedding other object
+            types. The embedded content is referenced as <emphasis>resources</emphasis>,
+            as described in <xref linkend="application.resources"/>.
+		</para>
+
+		<para>
+			The following example displays an image as a class resource loaded with the
+			class loader:
+		</para>
+
+		<programlisting><![CDATA[Image image = new Image("Yes, logo:",
+    new ClassResource("vaadin-logo.png"));
+main.addComponent(image);]]></programlisting>
+
+        <para>
+            The caption can be given as null to disable it. An empty string displays an
+            empty caption which takes a bit space. The caption is managed by the
+            containing layout.
+        </para>
+
+        <para>
+            You can set an altenative text for an embedded resource with
+            <methodname>setAlternateText()</methodname>, which can be shown if images are
+            disabled in the browser for some reason. The text can be used for
+            accessibility purposes, such as for text-to-speech generation.
+        </para>
+
+		<section xml:id="components.embedded.image">
+			<title>Embedded <classname>Image</classname></title>
+
+            <para>
+                The <classname>Image</classname> component allows embedding an image
+                resource in a Vaadin UI.
+            </para>
+
+		<programlisting><![CDATA[// Serve the image from the theme
+Resource res = new ThemeResource("img/myimage.png");
+
+// Display the image without caption
+Image image = new Image(null, res);
+layout.addComponent(image);]]></programlisting>
+
+
+            <para>
+                The <classname>Image</classname> component has by default undefined size
+                in both directions, so it will automatically fit the size of the embedded
+                image.
+
+                <indexterm><primary>scroll bars</primary></indexterm>
+
+                If you want scrolling with scroll bars, you can put the image inside a
+                <classname>Panel</classname> that has a defined size to enable scrolling,
+                as described in <xref linkend="layout.panel.scrolling"/>. You can also put
+                it inside some other component container and set the <literal>overflow:
+                auto</literal> CSS property for the container element in a theme to enable
+                automatic scrollbars.  <indexterm>overflow CSS property</indexterm>
+            </para>
+
+            <book-example eid="component.embedded.scrolling-css"></book-example>
+
+            <section xml:id="components.embedded.image.generated">
+                <title>Generating and Reloading Images</title>
+
+                <para>
+                    You can also generate the image content dynamically using a
+                    <classname>StreamResource</classname>, as described in <xref
+                    linkend="application.resources.stream"/>, or with a
+                    <classname>RequestHandler</classname>.
+                </para>
+
+                <para>
+                    If the image changes, the browser needs to reload it. Simply updating
+                    the stream resource is not enough. Because of how caching is handled
+                    in some browsers, you can cause a reload easiest by renaming the
+                    filename of the resource with a unique name, such as one including a
+                    timestamp. You should set cache time to zero with
+                    <methodname>setCacheTime()</methodname> for the resource object when
+                    you create it.
+
+                    <!-- BUG #2470. -->
+                </para>
+
+                <programlisting><?pocket-size 65% ?><![CDATA[// Create the stream resource with some initial filename
+StreamResource imageResource =
+    new StreamResource(imageSource, "initial-filename.png");
+
+// Instruct browser not to cache the image
+imageResource.setCacheTime(0);
+
+// Display the image
+Image image = new Image(null, imageResource);]]></programlisting>
+
+                <para>
+                    When refreshing, you also need to call
+                    <methodname>markAsDirty()</methodname> for the
+                    <classname>Image</classname> object.
+                </para>
+
+                <programlisting><?pocket-size 65% ?><![CDATA[// This needs to be done, but is not sufficient
+image.markAsDirty();
+
+// Generate a filename with a timestamp
+SimpleDateFormat df = new SimpleDateFormat("yyyyMMddHHmmssSSS");
+String filename = "myfilename-" + df.format(new Date()) + ".png";
+
+// Replace the filename in the resource
+imageResource.setFilename(makeImageFilename());]]></programlisting>
+            </section>
+        </section>
+		
+		<section xml:id="components.embedded.flash">
+			<title>Adobe <classname>Flash</classname> Graphics</title>
+
+			<para>
+                The <classname>Flash</classname> component allows embedding Adobe Flash
+                animations in Vaadin UIs.
+			</para>
+
+			<programlisting><![CDATA[Flash flash = new Flash(null,
+    new ThemeResource("img/vaadin_spin.swf"));
+layout.addComponent(flash);]]></programlisting>
+
+			<para>
+				You can set Flash parameters with <methodname>setParameter()</methodname>,
+				which takes a parameter's name and value as strings. You can also set the
+				<parameter>codeBase</parameter>, <parameter>archive</parameter>, and
+				<parameter>standBy</parameter> attributes for the Flash object element in
+				HTML.
+			</para>
+		</section>
+		
+		<section xml:id="components.embedded.browserframe">
+			<title><classname>BrowserFrame</classname></title>
+
+			<para>
+				The <classname>BrowserFrame</classname> allows embedding web content
+				inside an HTML <tag>&lt;iframe&gt;</tag> element. You can refer to an
+				external URL with <classname>ExternalResource</classname>.
+			</para>
+
+            <para>
+                As the <classname>BrowserFrame</classname> has undefined size by default,
+                it is critical that you define a meaningful size for it, either fixed or
+                relative.
+            </para>
+
+			<programlisting><?pocket-size 65% ?><![CDATA[BrowserFrame browser = new BrowserFrame("Browser",
+    new ExternalResource("http://demo.vaadin.com/sampler/"));
+browser.setWidth("600px");
+browser.setHeight("400px");
+layout.addComponent(browser);]]></programlisting>
+
+            <para>
+                Notice that web pages can prevent embedding them in an <tag>&lt;iframe&gt;</tag>.
+            </para>
+		</section>
+
+		<section xml:id="components.embedded.embedded">
+			<title>Generic <classname>Embedded</classname> Objects</title>
+
+            <para>
+                The generic <classname>Embedded</classname> component allows embedding all
+                sorts of objects, such as SVG graphics, Java applets, and PDF documents,
+                in addition to the images, Flash graphics, and browser frames which you
+                can embed with the specialized components.
+            </para>
+
+            <para>
+                For example, to display a Flash animation:
+            </para>
+
+			<programlisting><![CDATA[// A resource reference to some object
+Resource res = new ThemeResource("img/vaadin_spin.swf");
+
+// Display the object
+Embedded object = new Embedded("My Object", res);
+layout.addComponent(object);]]></programlisting>
+
+            <para>
+                Or an SVG image:
+            </para>
+
+			<programlisting><![CDATA[// A resource reference to some object
+Resource res = new ThemeResource("img/reindeer.svg");
+
+// Display the object
+Embedded object = new Embedded("My SVG", res);
+object.setMimeType("image/svg+xml"); // Unnecessary
+layout.addComponent(object);]]></programlisting>
+
+            <para>
+                The MIME type of the objects is usually detected automatically from the
+                filename extension with the <classname>FileTypeResolver</classname>
+                utility in Vaadin. If not, you can set it explicitly with
+                <methodname>setMimeType()</methodname>, as was done in the example above
+                (where it was actually unnecessary).
+            </para>
+
+            <para>
+                Some embeddable object types may require special support in the
+                browser. You should make sure that there is a proper fallback mechanism if
+                the browser does not support the embedded type.
+            </para>
+        </section>
+	</section>
 </chapter>
 	
 <!-- Keep this comment at the end of the file
