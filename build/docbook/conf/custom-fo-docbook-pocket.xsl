@@ -28,7 +28,7 @@
   <!-- Indentation and spacing. -->
   <xsl:param name="body.start.indent" select="'0'"/>
 
-  <xsl:param name="toc.max.depth" select="'3'"/>
+  <xsl:param name="toc.max.depth" select="'2'"/>
 
   <!-- List indentation. -->
   <xsl:attribute-set name="list.block.spacing">
