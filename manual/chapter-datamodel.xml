@@ -1640,7 +1640,7 @@ void basic(VerticalLayout layout) {
                 </indexterm>
 
                 <para>
-                    If you have a nested bean with a 1:1 relationship inside a bean type
+                    If you have a nested bean with an 1:1 relationship inside a bean type
                     contained in a <classname>BeanContainer</classname> or
                     <classname>BeanItemContainer</classname>, you can add its properties
                     to the container by specifying them with
@@ -1651,31 +1651,32 @@ void basic(VerticalLayout layout) {
                 </para>
 
                 <para>
-                    As with a top-level bean in a bean container, also a nested bean must
-                    have public visibility or otherwise an access exception is
-                    thrown. The nested bean may be null.
+                    As with the bean in a bean container, also a nested bean must have
+                    public visibility or otherwise an access exception is thrown. An
+                    intermediate reference from a bean in the bean container to a nested
+                    bean may have a null value.
                 </para>
 
                 <para>
-                    For example, assume that we have the following two beans with the
-                    first one nested inside the second one.
+                    For example, let us assume that we have the following two beans with
+                    the first one nested inside the second one.
                 </para>
  
                 <book-example eid="datamodel.container.beanitemcontainer.nestedbean" style="float: right"></book-example>
-                <programlisting><?pocket-size 65% ?><![CDATA[/** Bean to be nested */
+                <programlisting><?pocket-size 75% ?><![CDATA[/** Bean to be nested */
 public class EqCoord implements Serializable {
     double rightAscension; /* In angle hours */
     double declination;    /* In degrees     */
 
-    ... constructor and setters and getters for the properties ...
+    ... setters and getters for the properties ...
 }
 
-/** Bean containing a nested bean */
+/** Bean referencing a nested bean */
 public class Star implements Serializable {
     String  name;
     EqCoord equatorial; /* Nested bean */
 
-    ... constructor and setters and getters for the properties ...
+    ... setters and getters for the properties ...
 }]]></programlisting>
 
                 <para>
@@ -1687,7 +1688,7 @@ public class Star implements Serializable {
 
                 <book-example eid="datamodel.container.beanitemcontainer.nestedbean" style="float: right"></book-example>
                 <programlisting><?pocket-size 65% ?><![CDATA[// Create a container for beans
-final BeanItemContainer<Star> stars =
+BeanItemContainer<Star> stars =
     new BeanItemContainer<Star>(Star.class);
 
 // Declare the nested properties to be used in the container
@@ -1698,7 +1699,7 @@ stars.addNestedContainerProperty("equatorial.declination");
 stars.addBean(new Star("Sirius",  new EqCoord(6.75, 16.71611)));
 stars.addBean(new Star("Polaris", new EqCoord(2.52, 89.26417)));
 
-// Here the nested bean is null
+// Here the nested bean reference is null
 stars.addBean(new Star("Vega", null));]]></programlisting>
 
                 <para>
@@ -1736,7 +1737,7 @@ table.setVisibleColumns(new Object[]{"name",
                             <imagedata align="center" fileref="img/datamodel/beanitemcontainer-nested-beans.png"/>
                         </imageobject>
                         <imageobject role="fo">
-                            <imagedata scale="100" smallscale="50%" align="center" fileref="img/datamodel/beanitemcontainer-nested-beans.png"/>
+                            <imagedata scale="100" smallscale="40%" align="center" fileref="img/datamodel/beanitemcontainer-nested-beans.png"/>
                         </imageobject>
                     </mediaobject>
                 </figure>
