@@ -519,8 +519,13 @@
           <xsl:when test="$element = 'toc'">1</xsl:when>
           <xsl:when test="$element = 'book'">1</xsl:when><!-- For single-volume numbering -->
           <xsl:when test="$element = 'preface'">auto-odd</xsl:when>
+
+          <!-- Start chapter page numbering from custom book element. -->
+          <!-- A hack to allow continuous page numbering over volumes -->
           <xsl:when test="generate-id($first.book.content) =
-                          generate-id(.)">1</xsl:when>
+                          generate-id(.)">
+            <xsl:value-of select="../@pagenum"/>
+          </xsl:when>
           <xsl:otherwise>auto-odd</xsl:otherwise>
         </xsl:choose>
       </xsl:when>
