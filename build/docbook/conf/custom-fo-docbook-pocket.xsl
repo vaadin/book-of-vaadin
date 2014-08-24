@@ -250,6 +250,7 @@
     reference toc,title
     section   nop
     set       nop
+    setindex  toc
   </xsl:param>
 
   <!-- From fo/division.xsl:                         -->
