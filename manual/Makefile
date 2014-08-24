@@ -178,6 +178,13 @@ viewbook: book.pdf FORCE
 book-pocket-grayscale.pdf: book-pocket.pdf
 	gs -sOutputFile=book-pocket-grayscale.pdf -sDEVICE=pdfwrite   -sColorConversionStrategy=Gray -dProcessColorModel=/DeviceGray -dCompatibilityLevel=1.4 book-pocket.pdf < /dev/null
 
+book-of-vaadin-vol1.pdf: book-pocket-grayscale.pdf
+	pdftk A=$< cat A1-288 output $@
+
+book-of-vaadin-vol2.pdf: book-pocket-grayscale.pdf
+	pdftk A=$< cat A289-end output $@
+
+volumes: book-of-vaadin-vol1.pdf book-of-vaadin-vol2.pdf
 
 ################################################################################
 # Internationalization
