@@ -974,28 +974,33 @@ public class HelloWorld extends UI {
                 <title>Compiling in Command-line</title>
 
                 <para>
-                    Sass style sheets can be compiled to CSS, with the
-                    <filename>styles.css</filename> of a custom theme as the compilation
-                    target. When compiled before deployment, the source files do not need to
-                    be in the theme folder.
+                    You can compile Sass style sheets to CSS either with the Vaadin Sass
+                    compiler or the standard one. The <filename>styles.css</filename> of a
+                    custom theme should be the compilation target. When compiled before
+                    deployment, the source files do not need to be in the theme folder.
+                </para>
+
+                <para>
+                    You can run the Vaadin Sass compiler in a theme folder as follows:
                 </para>
 
                 <screen><command>java</command> <parameter>-cp</parameter> <replaceable>'../../../WEB-INF/lib/*'</replaceable> com.vaadin.sass.SassCompiler styles.scss styles.css</screen>
 
                 <para>
                     The <parameter>-cp</parameter> parameter should point to the class
-                    path where the Vaadin JARs are located. In the above example, they are
-                    assumed to be locate in the <filename>WEB-INF/lib</filename> folder of
-                    the web application. If you have loaded the Vaadin libraries using
-                    Ivy, as is the case with projects created with the Vaadin Plugin for
-                    Eclipse, the Vaadin libraries are stored in Ivy's local
-                    repository. Its folder hierarchy is somewhat scattered, so we
-                    recommend that you retrieve the libraries to a single folder. We
-                    recommend using an Ant script as is described next.
+                    path where the Vaadin Sass Compiler and theme JARs are located. In the
+                    above example, they are assumed to be located in the
+                    <filename>WEB-INF/lib</filename> folder of the web application. If you
+                    have loaded the Vaadin libraries using Ivy, as is the case with
+                    projects created with the Vaadin Plugin for Eclipse, the Vaadin
+                    libraries are stored in Ivy's local repository. Its folder hierarchy
+                    is somewhat scattered, so we recommend that you retrieve the libraries
+                    to a single folder. We recommend using an Ant script as is described
+                    next.
                 </para>
             </section>
 
-            <section xml:id="themes.sass.compiling.ant" condition="web">
+            <section xml:id="themes.sass.compiling.ant">
                 <title>Compiling with Ant</title>
 
                 <para>
@@ -1212,7 +1217,7 @@ public class HelloWorld extends UI {
 }]]></programlisting>
         </section>
 
-        <section xml:id="themes.creating.standard-components" condition="web">
+        <section xml:id="themes.creating.standard-components">
 			<title>Styling Standard Components</title>
 
 			<para>
@@ -1519,25 +1524,15 @@ public class MyUI extends UI {
     <section xml:id="themes.valo">
         <title>Valo Theme</title>
 
-        <para condition="web">
-            <emphasis>Valo is the new built-in theme in Vaadin 7.3. It is included in
-            <link xlink:href="https://vaadin.com/releases">prerelease versions</link>. At
-            least 7.3.0.alpha1 still requires using the standard Sass compiler (version
-            3.2) on command-line, instead of the Vaadin Sass compiler.</emphasis>
-        </para>
-
         <para>
-            Valo is the word for light in Finnish. For mere geographical reasons, Finland
-            is obsessed with light, with long winters without much sunlight but plenty of
-            whiteness and long summer days bathed in light. Light is one of the
-            cornerstones of visual arts, perhaps the most important one. A visual design
-            begins from the use of light in an array of shades together with a color
-            theory, to create a unique color scheme that illustrates a unique idea. Valo
-            incorporates the use of light in its theoretical logic. It creates lines,
+            Valo is the word for light in Finnish. The Valo theme incorporates the use of
+            light in its logic, in how it handles shades and highlights. It creates lines,
             borders, highlights, and shadows adaptively according to a background color,
-            always with contrasts pleasant to human visual perception. A color theory is
-            used to determine auxiliary colors that blend gently with the background. The
-            static art is complemented with responsive animations.
+            always with contrasts pleasant to human visual perception. Auxiliary colors
+            are computed using an algorithmic color theory to blend gently with the
+            background. The static art is complemented with responsive
+            animations. Foremost, all of this is configurable with parameters and Sass
+            mixins.
         </para>
 
         <section xml:id="themes.valo.use">
@@ -1549,7 +1544,7 @@ public class MyUI extends UI {
             </para>
 
             <programlisting><?pocket-size 75% ?><![CDATA[// Modify the base color of the theme
-$v-app-background-color: hsl(200, 50%, 50%);
+$v-background-color: hsl(200, 50%, 50%);
 
 // Import valo after setting the parameters
 @import "../valo/valo";
@@ -1563,11 +1558,13 @@ $v-app-background-color: hsl(200, 50%, 50%);
             <para>
                 If you need to override mixins or function definitions in the valo theme,
                 you must do that after the import statement, but before including the valo
-                mixin.
+                mixin. Also, with some configuration parameters, you can use variables
+                defined in the theme. In this case, they need to be overridden after the
+                import statement.
             </para>
         </section>
 
-        <section xml:id="themes.valo.variables" condition="web">
+        <section xml:id="themes.valo.variables">
             <title>Common Settings</title>
 
             <para>
@@ -1582,33 +1579,59 @@ $v-app-background-color: hsl(200, 50%, 50%);
 
                 <variablelist>
                     <varlistentry>
+                        <term><varname>$v-background-color</varname> (default: <literal>hsl(210, 0%, 98%)</literal>)</term>
+                        <listitem>
+                            <para>
+                                The background color is the main control parameter for the
+                                Valo theme and it is used for computing all other colors
+                                in the theme. If the color is dark (has low luminance),
+                                light foreground colors that give high contrast with the
+                                background are automatically used.
+                            </para>
+
+                            <para>
+                                You can specify the color in any way allowed in CSS:
+                                hexadecimal RGB color code, RGB/A value specified with
+                                <methodname>rgb()</methodname> or
+                                <methodname>rgba()</methodname>, HSL/A value specified
+                                with <methodname>hsl()</methodname> or
+                                <methodname>hsla()</methodname>. You can also use color
+                                names, but it should be avoided, as not all CSS color
+                                names are currently supported.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><varname>$v-app-background-color</varname> (default: <varname>$v-background-color</varname>)</term>
+                        <listitem>
+                            <para>
+                                Background color of the UI's root element. You can specify
+                                the color in any way allowed in CSS.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
                         <term><varname>$v-app-loading-text</varname> (default: <literal>""</literal>)</term>
                         <listitem>
                             <para>
-                                A static text that is shown while the client-side engine is being
-                                loaded and started.
+                                A static text that is shown under the loading spinned
+                                while the client-side engine is being loaded and
+                                started. The text must be given in quotes. The text can
+                                not be localized currently.
                             </para>
+
+                            <programlisting><![CDATA[$v-app-loading-text: "Loading Resources...";]]></programlisting>
                         </listitem>
                     </varlistentry>
                     <varlistentry>
                         <term><varname>$v-line-height</varname> (default: <literal>1.55</literal>)</term>
                         <listitem>
                             <para>
-                                Base line height for all widgets.
+                                Base line height for all widgets. It must be given a
+                                unitless number.
                             </para>
-                        </listitem>
-                    </varlistentry>
-                    <varlistentry>
-                        <!-- TODO This will most likely change to $v-background-color -->
-                        <term><varname>$v-app-background-color</varname> (default: <literal>hsl(210, 0%, 98%)</literal>)</term>
-                        <listitem>
-                            <para>
-                                The background color in any way allowed in CSS:
-                                hexadesimal color code, RGB/A value, HSL/A value, or a
-                                color name. If the color is dark (has low luminance), a
-                                light foreground (text) color that gives high contrast
-                                with the background is automatically used.
-                            </para>
+
+                            <programlisting><![CDATA[$v-line-height: 1.6;]]></programlisting>
                         </listitem>
                     </varlistentry>
                 </variablelist>
@@ -1624,6 +1647,8 @@ $v-app-background-color: hsl(200, 50%, 50%);
                             <para>
                                 Base font size. It should be specified in pixels.
                             </para>
+
+                            <programlisting><![CDATA[$v-font-size: 18px;]]></programlisting>
                         </listitem>
                     </varlistentry>
                     <varlistentry>
@@ -1633,27 +1658,34 @@ $v-app-background-color: hsl(200, 50%, 50%);
                                 Font weight for normal fonts. It should be defined with a
                                 numeric value instead of symbolic.
                             </para>
+
+                            <programlisting><![CDATA[$v-font-size: 400;]]></programlisting>
                         </listitem>
                     </varlistentry>
                     <varlistentry>
                         <term><varname>$v-font-color</varname> (default: computed)</term>
                         <listitem>
                             <para>
-                                Foreground text color. The default is computed from the
-                                background color so that it gives a high contrast with the
-                                background.
+                                Foreground text color, specified as any CSS color
+                                value. The default is computed from the background color
+                                so that it gives a high contrast with the background.
                             </para>
                         </listitem>
+
+                        <programlisting><![CDATA[$v-font-color: green;]]></programlisting>
                     </varlistentry>
                     <varlistentry>
                         <term><varname>$v-font-family</varname> (default: <literal>"Open Sans", sans-serif</literal>)</term>
                         <listitem>
                             <para>
-                                Font family and fallback fonts. The default font Open Sans
-                                is a web font included in the Valo theme. Other used Valo
-                                fonts must be specified in the list to enable them. See
-                                <xref linkend="themes.valo.fonts"/>.
+                                Font family and fallback fonts as a comma-seperated
+                                list. Font names containing spaces must be quoted. The
+                                default font Open Sans is a web font included in the Valo
+                                theme. Other used Valo fonts must be specified in the list
+                                to enable them. See <xref linkend="themes.valo.fonts"/>.
                             </para>
+                            
+                            <programlisting><![CDATA[$v-font-family: "Source Sans Pro", sans-serif;]]></programlisting>
                         </listitem>
                     </varlistentry>
                     <varlistentry>
@@ -1685,9 +1717,14 @@ $v-app-background-color: hsl(200, 50%, 50%);
                         <term><varname>$v-unit-size</varname> (default: <literal>round(2.3 * $v-font-size)</literal>)</term>
                         <listitem>
                             <para>
-                                Unit size for various measures. The value must be specified in
-                                pixels, with a suitable range of 18-50.
+                                This is the base size for various layout measures. It is
+                                directly used in some measures, such as button height and
+                                layout margins, while other measures are derived from
+                                it. The value must be specified in pixels, with a suitable
+                                range of 18-50.
                             </para>
+
+                            <programlisting><![CDATA[$v-unit-size: 40px;]]></programlisting>
                         </listitem>
                     </varlistentry>
                     <varlistentry>
@@ -1697,9 +1734,10 @@ $v-app-background-color: hsl(200, 50%, 50%);
                         <term><varname>$v-layout-margin-left</varname> (default: <literal>$v-unit-size</literal>)</term>
                         <listitem>
                             <para>
-                                Layout margin sizes when the margin is enabled with
-                                <methodname>setMargin()</methodname>, as described in <xref
-                                    linkend="layout.settings.margins"/>.
+                                Layout margin sizes for all built-in layout components,
+                                when the margin is enabled with
+                                <methodname>setMargin()</methodname>, as described in
+                                <xref linkend="layout.settings.margins"/>.
                             </para>
                         </listitem>
                     </varlistentry>
@@ -1728,6 +1766,19 @@ $v-app-background-color: hsl(200, 50%, 50%);
 
                 <variablelist>
                     <varlistentry>
+                        <term><varname>$v-border</varname> (default: <literal>1px solid (v-shade 0.7)</literal>)</term>
+                        <listitem>
+                            <para>
+                                Border specification for the components that have a
+                                border. The thickness measure must be specified in
+                                pixels. For the border color, you can specify any CSS
+                                color or one of the <literal>v-tint</literal>,
+                                <literal>v-shade</literal>, and <literal>v-tone</literal>
+                                keywords described later in this section.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
                         <term><varname>$v-border-width</varname> (default: <literal>1px</literal>)</term>
                         <listitem>
                             <para>
@@ -1743,17 +1794,25 @@ $v-app-background-color: hsl(200, 50%, 50%);
                                 Corner radius for components that have a border. The measure
                                 must be specified in pixels.
                             </para>
+
+                            <programlisting><![CDATA[$v-border-radius: 8px;]]></programlisting>
                         </listitem>
                     </varlistentry>
                     <varlistentry>
-                        <term><varname>$v-gradient-style</varname> (default: <literal>v-linear</literal>)</term>
+                        <term><varname>$v-gradient</varname> (default: <literal>v-linear 8%</literal>)</term>
                         <listitem>
                             <para>
-                                Name of the color gradient style for components that have a
-                                gradient.
+                                Color gradient style for components that have a
+                                gradient. The gradient style may use the following
+                                keywords: <literal>v-linear</literal> and
+                                <literal>v-linear-reverse</literal>. The opacity must be
+                                given as percentage between 0% and 100%.
                             </para>
+
+                            <programlisting><![CDATA[$v-gradient: v-linear 20%;]]></programlisting>
                         </listitem>
                     </varlistentry>
+                    <!-- TODO Check if this still exists, it was in 7.3.0.alpha1
                     <varlistentry>
                         <term><varname>$v-gradient-depth</varname> (default: <literal>8%</literal>)</term>
                         <listitem>
@@ -1761,45 +1820,89 @@ $v-app-background-color: hsl(200, 50%, 50%);
                                 Gradient depth.
                             </para>
                         </listitem>
-                    </varlistentry>
+                    </varlistentry> -->
                     <varlistentry>
-                        <term><varname>$v-bevel-style</varname> (default: <literal>inset 0 1px 0 v-hilite, inset 0 -1px 0 v-shade</literal>)</term>
+                        <term><varname>$v-bevel</varname> (default: <literal>inset 0 1px 0 v-tint, inset 0 -1px 0 v-shade</literal>)</term>
                         <listitem>
                             <para>
-                                CSS shadow style to create bevels in some components. The
-                                value is a list of a highlight and shade insets.
+                                Inset shadow style to define how some components are
+                                "raised" from the background. The value follows the syntax
+                                of CSS box-shadow, and should be a list of insets. For the
+                                bevel color, you can specify any CSS color or one of the
+                                <literal>v-tint</literal>, <literal>v-shade</literal>, and
+                                <literal>v-tone</literal> keywords described later in this
+                                section.
+                            </para>
+                            <!-- TODO Check the meaning of v-tone -->
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><varname>$v-bevel-depth</varname> (default: <literal>30%</literal>)</term>
+                        <listitem>
+                            <para>
+                                Specifies the "depth" of the bevel shadow, as applied to
+                                one of the color keywords for the bevel style. The actual
+                                amount of tint, shade, or tone is computed from the depth.
                             </para>
                         </listitem>
                     </varlistentry>
                     <varlistentry>
-                        <term><varname>$v-bevel-depth</varname> (default: <literal>25%</literal>)</term>
+                        <term><varname>$v-shadow</varname> (default: <literal>0 2px 3px v-shade</literal>)</term>
                         <listitem>
                             <para>
-                                The "depth" of a bevel shadow in a component. The actual
-                                amount of highlight and shade is computed from the depth.
+                                Default shadow style for all components. As with
+                                <varname>$v-bevel</varname>, the value follows the syntax
+                                of CSS box-shadow, but without the
+                                <literal>inset</literal>. For the shadow color, you can
+                                specify any CSS color or one of the
+                                <literal>v-tint</literal>, <literal>v-shade</literal>, and
+                                <literal>v-tone</literal> keywords described later in this
+                                section.
                             </para>
                         </listitem>
                     </varlistentry>
                     <varlistentry>
-                        <term><varname>$v-focus-style</varname> (default: <literal>0 0 0 2px v-focus-color</literal>)</term>
+                        <term><varname>$v-shadow-opacity</varname> (default: <literal>5%</literal>)</term>
                         <listitem>
                             <para>
-                                Shadow specification for the field focus indicator:
-                                horizontal shadow position in pixels, vertical shadow
-                                position in pixels, blur distance in pixels, spread
-                                distance in pixels, and the color. The value
-                                <literal>v-focus-color</literal> is substituted with the
-                                value of <literal>$v-focus-color</literal>.
+                                Specifies the opacity of the shadow, as applied to one of
+                                the color keywords for the bevel style. The actual amount
+                                of tint, shade, or tone is computed from the depth.
                             </para>
                         </listitem>
                     </varlistentry>
                     <varlistentry>
-                        <term><varname>$v-focus-color</varname> (default: <literal>null</literal>)</term>
+                        <term><varname>$v-focus-style</varname> (default: <literal>0 0 0 2px rgba($v-focus-color, .5)</literal>)</term>
                         <listitem>
                             <para>
-                                Color for the field focus
-                                indicator. <literal>null</literal> value defaults to a
-                                high-contrast color computed from the background color.
+                                Box-shadow specification for the field focus
+                                indicator. The space-separated values are the horizontal
+                                shadow position in pixels, vertical shadow position in
+                                pixels, blur distance in pixels, spread distance in
+                                pixels, and the color. The color can be any CSS color. You
+                                can only specify the color, in which case defaults for the
+                                position are used. <methodname>rgba()</methodname> or
+                                <methodname>hsla()</methodname> can be used to enable
+                                transparency.
+                            </para>
+
+                            <para>
+                                For example, the following creates a 2 pixels wide orange
+                                outline around the field:
+                            </para>
+
+                            <programlisting><![CDATA[$v-focus-style: 0 0 0 2px orange;]]></programlisting>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><varname>$v-focus-color</varname> (default: <literal>valo-focus-color()</literal>)</term>
+                        <listitem>
+                            <para>
+                                Color for the field focus indicator. The
+                                <methodname>valo-focus-color()</methodname> function
+                                computes a high-contrast color from the context, which is
+                                usually the background color. The color can be any CSS
+                                color.
                             </para>
                         </listitem>
                     </varlistentry>
@@ -1816,27 +1919,25 @@ $v-app-background-color: hsl(200, 50%, 50%);
                         <listitem>
                             <para>
                                 Specifies whether various <literal>:hover</literal> styles
-                                are used.
+                                are used for indicating that mouse pointer hovers over an
+                                element.
                             </para>
                         </listitem>
                     </varlistentry>
                     <varlistentry>
-                        <term><varname>$v-disabled-opacity</varname> (default: <literal>0.7</literal>)</term>
+                        <term><varname>$v-disabled-opacity</varname> (default: <literal>0.5</literal>)</term>
                         <listitem>
                             <para>
-                                Opacity of disabled components, which are described in
-                                <xref linkend="components.features.enabled"/>.
+                                Opacity of disabled components, as described in <xref
+                                linkend="components.features.enabled"/>.
                             </para>
                         </listitem>
                     </varlistentry>
                     <varlistentry>
-                        <term><varname>$v-selection-color</varname> (default: <literal>null</literal>)</term>
+                        <term><varname>$v-selection-color</varname> (default: <literal>$v-focus-color</literal>)</term>
                         <listitem>
                             <para>
-                                Color of selection indicator in selection and various
-                                other components. The <literal>null</literal> value
-                                defaults to a high-contrast color computed from the
-                                background and foreground colors.
+                                Color for indicating selection in selection components.
                             </para>
                         </listitem>
                     </varlistentry>
@@ -1853,11 +1954,69 @@ $v-app-background-color: hsl(200, 50%, 50%);
                         <term><varname>$v-error-indicator-color</varname> (default: <literal>#ed473b</literal>)</term>
                         <listitem>
                             <para>
-                                Color of the component error indicator.
+                                Color of the component error indicator, as described in <xref linkend="application.errors.error-indicator"/>.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><varname>$v-required-field-indicator-color</varname> (default: <literal>$v-error-indicator-color</literal>)</term>
+                        <listitem>
+                            <para>
+                                Color of the required indicator in field components, as
+                                described in <xref
+                                linkend="components.fields.field"/>.
                             </para>
                         </listitem>
                     </varlistentry>
                 </variablelist>
+
+                <para>
+                    Color specifications for <varname>$v-border</varname>,
+                    <varname>$v-bevel</varname>, and <varname>$v-shadow</varname> may use,
+                    in addition to CSS colors, the following keywords:
+                </para>
+
+                <variablelist>
+                    <varlistentry>
+                        <term><varname>v-tint</varname></term>
+                        <listitem>
+                            <para>
+                                Lighter than the background color.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><varname>v-shade</varname></term>
+                        <listitem>
+                            <para>
+                                Darker than the background color.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><varname>v-tone</varname></term>
+                        <listitem>
+                            <para>
+                                Adaptive color specification: darker on light background
+                                and lighter on dark background.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                </variablelist>
+
+                <para>
+                    For example:
+                </para>
+
+                <programlisting><![CDATA[$v-border: 1px solid v-shade;]]></programlisting>
+
+                <para>
+                    You can fine-tune the contrast by giving a weight parameter in
+                    parentheses:
+                </para>
+
+                <programlisting><![CDATA[$v-border: 1px solid (v-tint 2);]]></programlisting>
+                <programlisting><![CDATA[$v-border: 1px solid (v-tone 0.5);]]></programlisting>
             </section>
 
             <section xml:id="themes.valo.variables.optimization">
@@ -1876,7 +2035,7 @@ $v-app-background-color: hsl(200, 50%, 50%);
                                 paths differently from the regular Sass compiler (Vaadin
                                 modifies relative URL paths). Use <literal>false</literal>
                                 for Ruby compiler and <literal>true</literal> for Vaadin
-                                compiler.
+                                Sass compiler.
                             </para>
                         </listitem>
                     </varlistentry>
@@ -1905,6 +2064,7 @@ $v-app-background-color: hsl(200, 50%, 50%);
                     </varlistentry>
                 </variablelist>
             </section>
+
         </section>
 
         <section xml:id="themes.valo.fonts">
@@ -1956,47 +2116,60 @@ $v-app-background-color: hsl(200, 50%, 50%);
             <title>Component Styles</title>
 
             <para>
-                Many components have component-specific styles, such as
-                "<literal>small</literal>", "<literal>large</literal>",
-                "<literal>light</literal>", etc. You can specify the component styles with
-                <methodname>addStyleName()</methodname>. The styles are documented in the
-                component sections elsewhere in the book.
+                Many components have component-specific styles to make them smaller,
+                bigger, and so forth. You can specify the component styles with
+                <methodname>addStyleName()</methodname> using the constants defined in the
+                <classname>ValoTheme</classname> enum.
             </para>
+
+            <programlisting><![CDATA[table.addStyleName(ValoTheme.TABLE_COMPACT);]]></programlisting>
 
             <para>
-                Component styles are optional, but enabled by default. They can be
-                disabled with the <varname>$v-valo-include-common-stylenames</varname>
-                parameter<phrase condition="web">, as described in <xref
-                linkend="themes.valo.variables"/></phrase>.
+                For a complete up-to-date list of component-specific styles, please refer
+                to Vaadin API documentation on the <classname>ValoTheme</classname>
+                enum. Some are also described in the component-specific styling sections.
             </para>
 
-            <para>
-                The following variables control some common component styles:
-            </para>
+            <section xml:id="themes.valo.component.disabling">
+                <title>Disabling Component Styles</title>
 
-            <variablelist>
-                <varlistentry>
-                    <term><varname>$v-scaling-factor--small</varname> (default: <literal>0.8</literal>)</term>
-                    <listitem>
-                        <para>
-                            A scaling multiplier for "<literal>small</literal>" component
-                            styles.
-                        </para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term><varname>$v-scaling-factor--large</varname> (default: <literal>1.2</literal>)</term>
-                    <listitem>
-                        <para>
-                            A scaling multiplier for "<literal>large</literal>" component
-                            styles.
-                        </para>
-                    </listitem>
-                </varlistentry>
-            </variablelist>
+                <para>
+                    Component styles are optional, but enabled by default. They can be
+                    disabled with the <varname>$v-valo-include-common-stylenames</varname>
+                    parameter, as described in <xref linkend="themes.valo.variables"/>.
+                </para>
+            </section>
+
+            <section xml:id="themes.valo.component.parameters">
+                <title>Configuration Parameters</title>
+
+                <para>
+                    The following variables control some common component styles:
+                </para>
+
+                <variablelist>
+                    <varlistentry>
+                        <term><varname>$v-scaling-factor--small</varname> (default: <literal>0.8</literal>)</term>
+                        <listitem>
+                            <para>
+                                A scaling multiplier for "small" component
+                                styles.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><varname>$v-scaling-factor--large</varname> (default: <literal>1.2</literal>)</term>
+                        <listitem>
+                            <para>
+                                A scaling multiplier for "large" component styles.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                </variablelist>
+            </section>
         </section>
 
-        <section xml:id="themes.valo.optimization" condition="web">
+        <section xml:id="themes.valo.optimization">
             <title>Theme Optimization</title>
 
             <para>
@@ -2020,6 +2193,24 @@ $v-app-background-color: hsl(200, 50%, 50%);
     textfield,
     button;]]></programlisting>
 
+            <para>
+                You can use the <methodname>remove()</methodname> function reversely to
+                remove just some component themes from the standard selection.
+            </para>
+
+            <para>
+                For example, with the following you can remove the theme definitions for
+                the <classname>Calendar</classname> component:
+            </para>
+
+            <programlisting><?pocket-size 75% ?><![CDATA[$v-included-components: remove($v-included-components, calendar);]]></programlisting>
+
+            <para>
+                Note that in this case, you need to give the statement
+                <emphasis>after</emphasis> the <literal>@import</literal> statement for
+                the Valo theme, because it overrides a variable by using its value that
+                is defined in the theme.
+            </para>
         </section>
     </section>
 
@@ -2047,10 +2238,10 @@ $v-app-background-color: hsl(200, 50%, 50%);
             <programlisting><?pocket-size 75% ?><![CDATA[@include fonticons;]]></programlisting>
 
             <para>
-                If you use other icon fonts, <phrase condition="web">as described in <xref
-                linkend="themes.fonticon.custom"/>, </phrase> and the font is not loaded
-                by a base theme, you need to load it with a <literal>font</literal> mixin
-                in Sass, as described in <xref linkend="themes.fonts.loading"/>.
+                If you use other icon fonts, as described in <xref
+                linkend="themes.fonticon.custom"/>, and the font is not loaded by a base
+                theme, you need to load it with a <literal>font</literal> mixin in Sass,
+                as described in <xref linkend="themes.fonts.loading"/>.
             </para>
         </section>
 
@@ -2181,7 +2372,7 @@ public String getHtml() {
 }]]></programlisting>
         </section>
         
-        <section xml:id="themes.fonticon.anywhere" condition="web">
+        <section xml:id="themes.fonticon.anywhere">
             <title>Using Font Icons in Other Text</title>
 
             <para>
@@ -2209,14 +2400,14 @@ layout.addComponent(amount);]]></programlisting>
 }]]></programlisting>
         </section>
 
-        <section xml:id="themes.fonticon.custom" condition="web">
+        <section xml:id="themes.fonticon.custom">
             <title>Custom Font Icons</title>
 
             <para>
                 You can easily use glyphs in existing fonts as icons, or create your own.
             </para>
 
-            <section xml:id="themes.fonticon.custom.creating" condition="web">
+            <section xml:id="themes.fonticon.custom.creating">
                 <title>Creating New Icon Fonts With IcoMoon</title>
 
                 <para>
@@ -2248,7 +2439,7 @@ layout.addComponent(amount);]]></programlisting>
                 </para>
             </section>
 
-            <section xml:id="themes.fonticon.custom.implementing" condition="web">
+            <section xml:id="themes.fonticon.custom.implementing">
                 <title>Implementing FontIcon</title>
 
                 <para>
