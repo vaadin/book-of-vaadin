@@ -75,7 +75,7 @@
 			The layout of the various components in a window is controlled,
 			logically, by layout components, just like in conventional Java UI
 			toolkits for desktop applications. In addition, with the <classname>CustomLayout</classname>
-			component, you can write a custom layout as an XHTML template that
+			component, you can write a custom layout as an HTML template that
 			includes the locations of any contained components. Looking at the
 			inheritance diagram, we can see that layout components inherit the
 			<classname>AbstractComponentContainer</classname> and the
@@ -313,7 +313,7 @@
             <para>
                 A caption is an explanatory textual label accompanying a user interface
                 component, usually shown above, left of, or inside the component. The
-                contents of a caption are automatically quoted, so no raw XHTML can be
+                contents of a caption are automatically quoted, so no raw HTML can be
                 rendered in a caption.
             </para>
 
@@ -370,7 +370,7 @@ layout.addComponent(name);]]></programlisting>
                 the caption, typically a <classname>Label</classname>, a
                 <classname>TextField</classname>, or a <classname>Panel</classname>. A
                 <classname>Label</classname>, for example, allows highlighting a shortcut
-                key with XHTML markup or to bind the caption to a data source. The
+                key with HTML markup or to bind the caption to a data source. The
                 <classname>Panel</classname> provides an easy way to add both a caption
                 and a border around a component.
             </para>
@@ -462,16 +462,17 @@ button.setDescription("This is the tooltip");]]></programlisting>
 			</para>
 
 			<para>
-				The description is actually not plain text, but you can use XHTML tags to
+				The description is actually not plain text, but you can use HTML tags to
 				format it. Such a rich text description can contain any HTML elements,
 				including images.
 			</para>
 
+            <book-example eid="component.features.description.richtext"></book-example>
 			<programlisting><?pocket-size 60% ?><![CDATA[button.setDescription(
     "<h2><img src=\"../VAADIN/themes/sampler/icons/comment_yellow.gif\"/>"+
     "A richtext tooltip</h2>"+
     "<ul>"+
-    "  <li>Use rich formatting with XHTML</li>"+
+    "  <li>Use rich formatting with HTML</li>"+
     "  <li>Include images from themes</li>"+
     "  <li>etc.</li>"+
     "</ul>");]]></programlisting>
@@ -2137,24 +2138,20 @@ for (int i=0; i<planets.length; i++)
                             container and use a property of the bean as the caption.
                         </para>
                             
-                        <programlisting><?pocket-size 65% ?><![CDATA[/* A bean with a "name" property. */
+                        <programlisting><?pocket-size 65% ?><![CDATA[/** A bean with a "name" property. */
 public class Planet implements Serializable {
+    int    id;
     String name;
-
-    public Planet(String name) {
+    
+    public Planet(int id, String name) {
+        this.id   = id;
         this.name = name;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getName() {
-        return name;
-    }
+    ... setters and getters ...    
 }
 
-void propertyModeExample(VerticalLayout layout) {
+public void captionproperty(VerticalLayout layout) {
     // Have a bean container to put the beans in
     BeanItemContainer<Planet> container =
         new BeanItemContainer<Planet>(Planet.class);
@@ -2553,7 +2550,7 @@ panel.setContent(
                             font. Preformatted text can contain line breaks, written in Java
                             with the <literal>\n</literal> escape sequence for a newline
                             character (ASCII 0x0a), or tabulator characters written with
-                            <literal>\t</literal> (ASCII 0x08).
+                            <literal>\t</literal> (ASCII 0x09).
                         </para>
                     </listitem>
                 </varlistentry>
@@ -2561,9 +2558,7 @@ panel.setContent(
                     <term><constant>HTML</constant></term>
                     <listitem>
                         <para>
-                            Content mode where the label contains (X)HTML. The content will
-                            be enclosed in a DIV element having the namespace
-                            "<uri>http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd</uri>".
+                            Content mode where the label contains HTML.
                         </para>
 
                         <para>
@@ -2604,17 +2599,17 @@ labelgrid.addComponent (new Label ("PREFORMATTED"));
 labelgrid.addComponent (
     new Label ("This is a preformatted label.\n"+
                "The newline character \\n breaks the line.",
-               Label.ContentMode.PREFORMATTED));
+               ContentMode.PREFORMATTED));
 
 labelgrid.addComponent (new Label ("TEXT"));
 labelgrid.addComponent (
     new Label ("This is a label in (plain) text mode",
-               Label.ContentMode.TEXT));
+               ContentMode.TEXT));
 
 labelgrid.addComponent (new Label ("HTML"));
 labelgrid.addComponent (
     new Label ("<i>This</i> is an <b>HTML</b> formatted label",
-               Label.ContentMode.HTML));
+               ContentMode.HTML));
 
 layout.addComponent(labelgrid);]]></programlisting>
 
@@ -2650,7 +2645,7 @@ layout.addComponent(labelgrid);]]></programlisting>
 main.addComponent(new Label("Here we have an image <img src=\"" +
                             this.getRelativeLocation(labelimage) +
                             "\"/> within text.",
-                            Label.ContentMode.XHTML));]]></programlisting>
+                            ContentMode.HTML));]]></programlisting>
 
             <para>
                 When you use a class loader resource, the image has to be included in
@@ -2689,10 +2684,10 @@ main.addComponent(new Label("Here we have an image <img src=\"" +
                 <literal>&amp;nbsp;</literal> or <literal>&amp;#160;</literal>:
             </para>
 
-            <programlisting><?pocket-size 65% ?><![CDATA[layout.addComponent(new Label("&nbsp;", Label.ContentMode.XHTML));]]></programlisting>
+            <programlisting><?pocket-size 65% ?><![CDATA[layout.addComponent(new Label("&nbsp;", ContentMode.HTML));]]></programlisting>
 
             <para>
-                Using the <parameter>Label.ContentMode.PREFORMATTED</parameter> mode has the
+                Using the <parameter>ContentMode.PREFORMATTED</parameter> mode has the
                 same effect; preformatted spaces do not collapse in a vertical layout. In
                 a <classname>HorizontalLayout</classname>, the width of a space character
                 may be unpredictable if the label font is proportional, so you can use the
@@ -2917,7 +2912,7 @@ link.setTargetWidth(400);]]></programlisting>
             component has a <parameter>Reindeer.BUTTON_LINK</parameter> style name that
             makes it look like a hyperlink, while handling clicks in a server-side click
             listener instead of in the browser. Also, you can make hyperlinks (or any
-            other HTML) in a <classname>Label</classname> in XHTML content mode.
+            other HTML) in a <classname>Label</classname> in HTML content mode.
 		</para>
 
 		<simplesect>
@@ -3609,7 +3604,7 @@ rtarea.setValue("<h1>Hello</h1>\n" +
 
 			<para>
 				The user input from a <classname>RichTextArea</classname> is transmitted
-				as XHTML from the browser to server-side and is not sanitized. As the
+				as HTML from the browser to server-side and is not sanitized. As the
 				entire purpose of the <classname>RichTextArea</classname> component is to
 				allow input of formatted text, you can not sanitize it just by removing
 				all HTML tags. Also many attributes, such as <parameter>style</parameter>,
@@ -4991,7 +4986,7 @@ table.addValueChangeListener(new Property.ValueChangeListener() {
 				</para>
 			</section>
 
-			<section>
+			<section xml:id="components.table.features.resizing">
 				<title>Resizing Columns</title>
 
                 <para>
@@ -5040,7 +5035,7 @@ table.setImmediate(true);]]></programlisting>
                 </figure>
 			</section>
 
-			<section>
+			<section xml:id="components.table.features.reordering">
 				<title>Reordering Columns</title>
 			
 				<para>
@@ -5050,7 +5045,7 @@ table.setImmediate(true);]]></programlisting>
 				</para>
 			</section>
 
-			<section xml:id="component.table.columncollapsing">
+			<section xml:id="components.table.features.collapsing">
                 <title>Collapsing Columns</title>
 
                 <para>
@@ -5107,7 +5102,7 @@ table.setWidth("250px");]]></programlisting>
                 </para>
             </section>
 
-			<section>
+			<section xml:id="components.table.features.components">
 				<title>Components Inside a Table</title>
 
 				<para>
@@ -5135,11 +5130,12 @@ table.setWidth("250px");]]></programlisting>
 
 				<para>
 					The example below includes table rows with a
-					<classname>Label</classname> in XHTML formatting mode, a multiline
+					<classname>Label</classname> in HTML content mode, a multiline
 					<classname>TextField</classname>, a <classname>CheckBox</classname>,
 					and a <classname>Button</classname> that shows as a link.
 				</para>
 
+                <book-example eid="component.table.components.components2"></book-example>
 				<programlisting><?pocket-size 65% ?><![CDATA[// Create a table and add a style to allow setting the row height in theme.
 final Table table = new Table();
 table.addStyleName("components-inside");
@@ -5157,7 +5153,7 @@ for (int i=0; i<100; i++) {
     Label sumField = new Label(String.format(
                    "Sum is <b>$%04.2f</b><br/><i>(VAT incl.)</i>",
                    new Object[] {new Double(Math.random()*1000)}),
-                               Label.CONTENT_XHTML);
+                               ContentMode.HTML);
     CheckBox transferredField = new CheckBox("is transferred");
     
     // Multiline text field. This required modifying the 
@@ -5217,7 +5213,7 @@ table.setPageLength(3);]]></programlisting>
 				</figure>
 			</section>
 
-			<section>
+			<section xml:id="components.table.features.iterating">
 				<title>Iterating Over a Table</title>
 
 				<para>
@@ -5234,7 +5230,7 @@ table.setPageLength(3);]]></programlisting>
 				</para>
 			</section>
 
-            <section>
+			<section xml:id="components.table.features.filtering">
                 <title>Filtering Table Contents</title>
 
                 <para>
@@ -5254,8 +5250,8 @@ table.setPageLength(3);]]></programlisting>
             <para>
                 Normally, a <classname>Table</classname> simply displays the items and
                 their fields as text. If you want to allow the user to edit the values,
-                you can either put them inside components as we did above, or you can
-                simply call <methodname>setEditable(true)</methodname> and the cells are
+                you can either put them inside components as we did earlier or simply call
+                <methodname>setEditable(true)</methodname>, in which case the cells are
                 automatically turned into editable fields.
             </para>
 
