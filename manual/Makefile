@@ -72,7 +72,7 @@ XMLFILES = $(POCKETBOOK_ROOT) book-info.xml book-preface.xml book-vol1.xml book-
 	chapter-introduction.xml	chapter-sqlcontainer.xml \
 	chapter-components.xml	chapter-jpacontainer.xml \
 	chapter-portal.xml \
-	chapter-clientside.xml chapter-clientsideapp.xml chapter-widgets.xml chapter-gwt.xml \
+	chapter-clientside.xml chapter-clientsideapp.xml chapter-clientsidewidgets.xml chapter-gwt.xml \
 	chapter-addons.xml chapter-charts.xml chapter-mobile.xml chapter-testbench.xml \
 	chapter-vaadin.xml 
 
