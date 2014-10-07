@@ -2451,10 +2451,17 @@ validator.extend(tf);]]></programlisting>
 		<title><classname>Label</classname></title>
 
 		<para>
-			<classname>Label</classname> is a text component that displays non-editable
-			text. In addition to regular text, you can also display preformatted text and
-			HTML, depending on the <emphasis>content mode</emphasis> of the label.
+			<classname>Label</classname> component displays non-editable text. This text
+			can be used for short simple labels or for displaying long text, such as
+			paragraphs. The text can be formatted in HTML or as preformatted text,
+			depending on the <emphasis>content mode</emphasis> of the label.
 		</para>
+
+        <para>
+            You can give the label text most conviniently in the constructor, as is done
+            in the following. Label has 100% default width, so the containing layout must
+            also have defined width.
+        </para>
 
 		<book-example eid="component.label.basic" style="float: right"></book-example>
         <programlisting><?pocket-size 75% ?><![CDATA[// A container that is 100% wide by default
@@ -2464,16 +2471,51 @@ Label label = new Label("Labeling can be dangerous");
 layout.addComponent(label);]]></programlisting>
 
         <para>
-            The text will wrap around and continue on the next line if it exceeds the
-            width of the <classname>Label</classname>. The default width is 100%, so the
-            containing layout must also have a defined width. Some layout components have
-            undefined width by default, such as <classname>HorizontalLayout</classname>,
-            so you need to pay special care with them.
+            <classname>Label</classname> implements the
+            <interfacename>Property</interfacename> interface to allow accessing the text
+            value, so you can get and set the text with
+            <methodname>getValue()</methodname> and <methodname>setValue()</methodname>.
         </para>
 
-		<book-example eid="component.label.wrap" style="float: right"></book-example>
-        <programlisting><?pocket-size 65% ?><![CDATA[// A container with a defined width. The default content layout
-// of Panel is VerticalLayout, which has 100% default width.
+		<book-example eid="component.label.basic" style="float: right"></book-example>
+        <programlisting><?pocket-size 75% ?><![CDATA[// Get the label's text to initialize a field
+TextField editor = new TextField(null, // No caption
+                                 label.getValue());
+        
+// Change the label's text
+editor.addValueChangeListener(event -> // Java 8
+    label.setValue(editor.getValue()));
+editor.setImmediate(true); // Send on Enter]]></programlisting>
+
+        <para>
+            Label also supports data binding to a property data source, as described later
+            in <xref linkend="components.label.databinding"/>. However, in that case the
+            value can not be set through the label, as <classname>Label</classname> is not
+            a <interfacename>Property.Editor</interfacename> and is not allowed to write
+            to a bound property.
+        </para>
+
+        <para>
+            Even though <classname>Label</classname> is text and is often used as a
+            caption, it is a normal component and therefore also has a caption that you
+            can set with <methodname>setCaption()</methodname>. As with most other
+            components, the caption is managed by the containing layout.
+        </para>
+
+        <section xml:id="components.label.wrap">
+            <title>Text Width and Wrapping</title>
+
+            <para>
+                <classname>Label</classname> has 100% default width, so the containing
+                layout must also have a defined width. If the width of the label's text
+                exceeds the width of the label, the text will wrap around and continue on
+                the next line. Some layout components have undefined width by default,
+                such as <classname>HorizontalLayout</classname>, so you need to pay
+                special care with them.
+            </para>
+
+            <book-example eid="component.label.wrap" style="float: right"></book-example>
+            <programlisting><?pocket-size 65% ?><![CDATA[// A container with a defined width.
 Panel panel = new Panel("Panel Containing a Label");
 panel.setWidth("300px");
 
@@ -2482,49 +2524,45 @@ panel.setContent(
               "enough text in the label to make the text " +
               "wrap when it exceeds the width of the panel."));]]></programlisting>
 
-        <para>
-            As the size of the <classname>Panel</classname> in the above example is fixed
-            and the width of <classname>Label</classname> is the default 100%, the text in
-            the <classname>Label</classname> will wrap to fit the panel, as shown in <xref
-            linkend="figure.components.label"/>.
-        </para>
+            <para>
+                As the size of the <classname>Panel</classname> in the above example is
+                fixed and the width of <classname>Label</classname> is the default 100%,
+                the text in the <classname>Label</classname> will wrap to fit the panel,
+                as shown in <xref linkend="figure.components.label"/>.
+            </para>
 
-		<figure xml:id="figure.components.label">
-			<title>The Label Component</title>
-			<mediaobject>
-				<imageobject role="html">
-					<imagedata align="center" fileref="img/components/label-example1.png"/>
-				</imageobject>
-				<imageobject role="fo">
-					<imagedata scale="80" smallscale="60%" align="center" fileref="img/components/label-example1.png"/>
-				</imageobject>
-			</mediaobject>
-		</figure>
+            <figure xml:id="figure.components.label">
+                <title>The Label Component</title>
+                <mediaobject>
+                    <imageobject role="html">
+                        <imagedata align="center" fileref="img/components/label-example1.png"/>
+                    </imageobject>
+                    <imageobject role="fo">
+                        <imagedata scale="80" smallscale="60%" align="center" fileref="img/components/label-example1.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
 
-        <para>
-            Setting <classname>Label</classname> to undefined width will cause it to not
-            wrap at the end of the line, as the width of the content defines the width. If
-            placed inside a layout with defined width, the <classname>Label</classname>
-            will overflow the layout horizontally and, normally, be truncated.
-        </para>
-
-        <para>
-            Even though <classname>Label</classname> is text and often used as a caption,
-            it also has a caption, just like any other component. As with other
-            components, the caption is managed by the containing layout.
-        </para>
+            <para>
+                Setting <classname>Label</classname> to undefined width will cause it to not
+                wrap at the end of the line, as the width of the content defines the width. If
+                placed inside a layout with defined width, the <classname>Label</classname>
+                will overflow the layout horizontally and, normally, be truncated.
+            </para>
+        </section>
 
         <section xml:id="components.label.content-mode">
             <title>Content Mode</title>
 
             <para>
-                The contents of a label are formatted depending on the content mode. By
-                default, the text is assumed to be plain text and any contained
-                XML-specific characters will be quoted appropriately to allow rendering
-                the contents of a label in HTML in a web browser. The content mode can be
-                set in the constructor or with <methodname>setContentMode()</methodname>,
-                and can have the values defined in the <classname>ContentMode</classname>
-                enumeration type in <package>com.vaadin.shared.ui.label</package> package:
+                The content of a label is formatted depending on a <emphasis>content
+                mode</emphasis>. By default, the text is assumed to be plain text and any
+                contained XML-specific characters will be quoted appropriately to allow
+                rendering the contents of a label in HTML in a web browser. The content
+                mode can be set in the constructor or with
+                <methodname>setContentMode()</methodname>, and can have the values defined
+                in the <classname>ContentMode</classname> enumeration type in
+                <package>com.vaadin.shared.ui.label</package> package:
             </para>
 
             <variablelist>
@@ -2593,32 +2631,37 @@ panel.setContent(
                 <classname>Label</classname> in different modes.
             </para>
 
-			<programlisting><?pocket-size 65% ?><![CDATA[GridLayout labelgrid = new GridLayout (2,1);
+            <book-example eid="component.label.content-modes.contentmodes" style="float: right"></book-example>
+			<programlisting><?pocket-size 70% ?><![CDATA[Label textLabel = new Label(
+    "Text where formatting characters, such as \\n, " +
+    "and HTML, such as <b>here</b>, are quoted.",
+    ContentMode.TEXT);
 
-labelgrid.addComponent (new Label ("PREFORMATTED"));
-labelgrid.addComponent (
-    new Label ("This is a preformatted label.\n"+
-               "The newline character \\n breaks the line.",
-               ContentMode.PREFORMATTED));
+Label preLabel = new Label(
+    "Preformatted text is shown in an HTML <pre> tag.\n" +
+    "Formatting such as\n" +
+    "  * newlines\n" + 
+    "  * whitespace\n" +
+    "and such are preserved. HTML tags, \n"+
+    "such as <b>bold</b>, are quoted.",
+    ContentMode.PREFORMATTED);
 
-labelgrid.addComponent (new Label ("TEXT"));
-labelgrid.addComponent (
-    new Label ("This is a label in (plain) text mode",
-               ContentMode.TEXT));
-
-labelgrid.addComponent (new Label ("HTML"));
-labelgrid.addComponent (
-    new Label ("<i>This</i> is an <b>HTML</b> formatted label",
-               ContentMode.HTML));
-
-layout.addComponent(labelgrid);]]></programlisting>
+Label htmlLabel = new Label(
+    "In HTML mode, all HTML formatting tags, such as \n" +
+    "<ul>"+
+    "  <li><b>bold</b></li>"+
+    "  <li>itemized lists</li>"+
+    "  <li>etc.</li>"+
+    "</ul> "+
+    "are preserved.",
+    ContentMode.HTML);]]></programlisting>
 
             <para>
-                The rendering will look as follows:
+                The rendering will look as shown in <xref linkend="figure.components.label.content-mode"/>.
             </para>
 
-            <figure>
-                <title>Label Modes Rendered on Screen</title>
+            <figure xml:id="figure.components.label.content-mode">
+                <title>Label Content Modes</title>
                 <mediaobject>
                     <imageobject role="html">
                         <imagedata align="center" fileref="img/components/label-modes.png"/>
@@ -2733,46 +2776,55 @@ horizontal.addComponent(button2);]]></programlisting>
 			<title>Data Binding</title>
 
             <para>
-                A <classname>Label</classname> can be bound to a property data source,
-                described in <xref linkend="datamodel.properties"/>. You can specify the
-                data source either in the constructor or by the
+                While <classname>Label</classname> is not a field component, it is a
+                <interfacename>Property.Viewer</interfacename> and can be bound to a
+                property data source, described in <xref
+                linkend="datamodel.properties"/>. You can specify the data source either
+                in the constructor or by the
                 <methodname>setPropertyDataSource()</methodname> method.
             </para>
 
-            <programlisting><![CDATA[// Some property data source
+            <book-example eid="component.label.binding" style="float: right"></book-example>
+            <programlisting><![CDATA[// Some property
 ObjectProperty<String> property =
-        new ObjectProperty<String>("Initial value");
-
+    new ObjectProperty<String>("some value");
+        
+// Label that is bound to the property
 Label label = new Label(property);]]></programlisting>
 
             <para>
-                <classname>Label</classname> implements the
-                <interfacename>Property</interfacename> interface and delegates operations
-                to the bound data source, so you can, for example, access the value by the
-                <methodname>getValue()</methodname> and
-                <methodname>setValue()</methodname> methods defined in the interface.
+                Further, as <classname>Label</classname> is a
+                <interfacename>Property</interfacename>, you can edit its value with a
+                property editor, such as a field:
             </para>
 
-            <programlisting><?pocket-size 75% ?><![CDATA[Button set = new Button("Set Value", event -> // Java 8
-    label.setValue("New value"));]]></programlisting>
+            <book-example eid="component.label.delegation" style="float: right"></book-example>
+            <programlisting><![CDATA[Label label = new Label("some value");
+TextField editor = new TextField();
+editor.setPropertyDataSource(label);
+editor.setImmediate(true);]]></programlisting>
 
+            <para>
+                However, <classname>Label</classname> is <emphasis>not</emphasis> a
+                <interfacename>Property.Editor</interfacename>, so it is read-only when
+                bound to a data source. Therefore, you can not use
+                <methodname>setValue()</methodname> to set the value of a connected data
+                source through a <classname>Label</classname> nor bind the label to an
+                editor field, in which case writes would be delegated through the label.
+            </para>
         </section>
 
 		<section xml:id="components.label.css">
 			<title>CSS Style Rules</title>
 
-            <para>
-                The <classname>Label</classname> component has a
-                <literal>v-label</literal> overall style.
-            </para>
+			<programlisting><?dbfo-need height="3cm" ?><![CDATA[.v-label { }
+  pre { } /* In PREFORMATTED content mode */]]></programlisting>
 
             <para>
-                The Reindeer theme includes a number of predefined styles for typical
-                formatting cases. These include "<literal>h1</literal>"
-                (<methodname>Reindeer.LABEL_H1</methodname>) and "<literal>h2</literal>"
-                (<methodname>Reindeer.LABEL_H2</methodname>) heading styles and
-                "<literal>light</literal>" (<methodname>Reindeer.LABEL_SMALL</methodname>)
-                style.
+                The <classname>Label</classname> component has a
+                <literal>v-label</literal> overall style. In the
+                <parameter>PREFORMATTED</parameter> content mode, the text is wrapped
+                inside a <literal>&lt;pre&gt;</literal> element.
             </para>
         </section>
 	</section>
