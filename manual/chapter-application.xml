@@ -1041,9 +1041,9 @@ button.setComponentError(new UserError("Bad click"));]]></programlisting>
 			<title>Customizing System Messages</title>
 
             <para>
-                System messages are notifications that indicate a major invalid state in
-                an application that usually requires restarting the application. Session
-                timeout is perhaps the most typical such state.
+                System messages are notifications that indicate a major invalid state that
+                usually requires restarting the application. Session timeout is perhaps
+                the most typical such state.
             </para>
 
             <para>
@@ -1890,6 +1890,29 @@ public class MyUI extends UI {]]></programlisting>
             </para>
         </section>
 
+        <section xml:id="application.lifecycle.ui-closing">
+            <title>Closing UIs Explicitly</title>
+
+            <para>
+                You can explicitly close a UI with
+                <methodname>close()</methodname>. Closing a UI detaches it from the
+                session at the end of current request. Detaching a UI does not terminate
+                processing the current request and the response is sent as usual.
+            </para>
+
+            <para>
+                Closing a UI does not close the page or browser window in which the UI is
+                running. If the page is a regular browser window or tab, browsers do not
+                generally allow closing them programmatically. For such windows, you
+                normally want to redirect the user to another page using
+                <methodname>setLocation()</methodname>, as is done in the examples in
+                <xref linkend="application.lifecycle.session-closing"/>. However, you can
+                close popup windows by calling JavaScript <methodname>close()</methodname>
+                for the windows, as described in <xref
+                linkend="advanced.windows.popup-closing"/>.
+            </para>
+		</section>
+
         <section xml:id="application.lifecycle.session-expiration">
             <title>Session Expiration</title>
 
@@ -1931,40 +1954,90 @@ public class MyUI extends UI {]]></programlisting>
             </para>
         </section>
 
-        <section xml:id="application.lifecycle.closing">
+        <section xml:id="application.lifecycle.session-closing">
             <title>Closing a Session</title>
 
             <para>
-                You can call the <methodname>close()</methodname> method in the
-				<classname>VaadinSession</classname> to shut down the session and clean up
-				any of the resources allocated for it. The session is closed immediately and
-				any objects related to it are not available after calling the method. The
-				UI that is still visible in the browser has no session to communicate with, but
-				will still receive the response from the final request. You typically want
-				to redirect the user to another URL at this point, using the
-				<methodname>setLocation()</methodname> method in
-				<classname>Page</classname>.
-			</para>
+                <indexterm><primary><methodname>close()</methodname></primary></indexterm>
+
+                You can close a session by calling <methodname>close()</methodname> on the
+                <classname>VaadinSession</classname>. It is typically used when logging a
+                user out and the session and all the UIs belonging to the session should
+                be closed. The session is closed immediately and any objects related to it
+                are not available after calling the method.
+            </para>
 
 			<para>
-				In the following example, we display a logout button, which closes the
-				user session.
+				When closing the session from a UI, you typically want to redirect the
+				user to another URL. You can do the redirect using the
+				<methodname>setLocation()</methodname> method in
+				<classname>Page</classname>. This needs to be done before closing the
+				session, as the UI or page are not available after that. In the following
+				example, we display a logout button, which closes the user session.
 			</para>
 
-		<book-example eid="application.lifecycle.closing" style="float: right"></book-example>
-			<programlisting><![CDATA[Button logout = new Button("Logout");
-logout.addClickListener(new Button.ClickListener() {
+            <book-example eid="application.lifecycle.closing" style="float: right"></book-example>
+			<programlisting><?pocket-size 65% ?><![CDATA[public static class MyUI extends UI {
     @Override
-    public void buttonClick(ClickEvent event) {
-        // Redirect from the page
-        getUI().getPage().setLocation(
-            "/myapp/logoutpage.html");
-        
-        // Close the VaadinSession
-        getSession().close();
+    protected void init(VaadinRequest request) {
+        setContent(new Button("Logout", event -> {// Java 8
+            // Redirect this page immediately
+            getPage().setLocation("/myapp/logout.html");
+            
+            // Close the session
+            getSession().close();
+        }));
+
+        // Notice quickly if other UIs are closed
+        setPollInterval(3000);
     }
-});]]></programlisting>
-		</section>
+}]]></programlisting>
+
+            <para>
+                This is not enough. When a session is closed from one UI, any other UIs
+                attached to it are left hanging. When the client-side engine notices that
+                a UI and the session are gone on the server-side, it displays a "Session
+                Expired" message and, by default, reloads the UI when the message is
+                clicked. You can customize the message and the redirect URL in the system
+                messages, as described in <xref
+                linkend="application.errors.systemmessages"/>. 
+            </para>
+
+            <para>
+                The client-side engine notices the expiration when user interaction causes
+                a server request to be made or when the keep-alive heartbeat occurs. To
+                make the UIs detect the situation faster, you need to make the heart beat
+                faster, as was done in the example above. You can also use server push to
+                close the other UIs immediately, as is done in the following
+                example. Access to the UIs must be synchronized as described in <xref
+                linkend="advanced.push"/>.
+            </para>
+
+            <book-example eid="application.lifecycle.closingall" style="float: right"></book-example>
+			<programlisting><?pocket-size 65% ?><![CDATA[@Push
+public static class MyPushyUI extends UI {
+    @Override
+    protected void init(VaadinRequest request) {
+        setContent(new Button("Logout", event -> {// Java 8
+            for (UI ui: VaadinSession.getCurrent().getUIs())
+                ui.access(() -> {
+                    // Redirect from the page
+                    ui.getPage().setLocation("/logout.html");
+                });
+
+            getSession().close();
+        }));
+    }
+}]]></programlisting>
+
+            <para>
+                In the above example, we assume that all UIs in the session have push
+                enabled and that they should be redirected; popups you might want to close
+                instead of redirecting. It is not necessary to call
+                <methodname>close()</methodname> for them individually, as we close the
+                entire session afterwards.
+            </para>
+        </section>
     </section>
         <!-- TODO: Update if #2752 is fixed. -->
 
