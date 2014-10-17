@@ -1056,6 +1056,15 @@ button.setComponentError(new UserError("Bad click"));]]></programlisting>
                     <term>sessionExpired</term>
                     <listitem>
                         <para>
+                            <indexterm>
+                                <primary>session</primary>
+                                <secondary>expiration</secondary>
+                            </indexterm>
+                            <indexterm>
+                                <primary>session</primary>
+                                <secondary>timeout</secondary>
+                            </indexterm>
+
                             Application servlet session expired. A session expires if no
                             server requests are made during the session timeout
                             period. The session timeout can be configured with the
@@ -1674,6 +1683,10 @@ notif.show(Page.getCurrent());]]></programlisting>
         <section xml:id="application.lifecycle.session">
             <title>User Session</title>
 
+            <indexterm zone="application.lifecycle.session">
+                <primary>session</primary>
+            </indexterm>
+
             <para>
                 A user session begins when a user first makes a request to a Vaadin
                 servlet or portlet by opening the URL for a particular
@@ -1705,14 +1718,28 @@ notif.show(Page.getCurrent());]]></programlisting>
             <section xml:id="application.lifecycle.session.init">
                 <title>Handling Session Initialization and Destruction</title>
 
+                <indexterm zone="application.lifecycle.session.init">
+                    <primary><classname>SessionInitListener</classname></primary>
+                </indexterm>
+                <indexterm zone="application.lifecycle.session.init">
+                    <primary><classname>SessionDestroyListener</classname></primary>
+                </indexterm>
+
                 <para>
+                    <indexterm><primary><classname>VaadinService</classname></primary></indexterm>
+
                     You can handle session initialization and destruction by implementing
                     a <interfacename>SessionInitListener</interfacename> or
                     <interfacename>SessionDestroyListener</interfacename>, respectively,
-                    to the <classname>VaadinService</classname>. You can do that best by
-                    extending <classname>VaadinServlet</classname> and overriding the
-                    <methodname>servletInitialized()</methodname> method, as outlined in
-                    <xref linkend="application.lifecycle.servlet-service"/>.
+                    to the <classname>VaadinService</classname>.
+
+                    <indexterm><primary><methodname>servletInitialized()</methodname></primary></indexterm>
+                    <indexterm><primary><classname>VaadinServlet</classname></primary></indexterm>
+
+                    You can do that best by extending <classname>VaadinServlet</classname>
+                    and overriding the <methodname>servletInitialized()</methodname>
+                    method, as outlined in <xref
+                    linkend="application.lifecycle.servlet-service"/>.
                 </para>
 
                 <programlisting><?pocket-size 65% ?><![CDATA[public class MyServlet extends VaadinServlet
@@ -1749,6 +1776,11 @@ notif.show(Page.getCurrent());]]></programlisting>
 
         <section xml:id="application.lifecycle.ui">
             <title>Loading a UI</title>
+
+            <indexterm zone="application.lifecycle.ui">
+                <primary>UI</primary>
+                <secondary>loading</secondary>
+            </indexterm>
 
             <para>
                 When a browser first accesses a URL mapped to the servlet of a particular
@@ -1814,6 +1846,11 @@ notif.show(Page.getCurrent());]]></programlisting>
             <simplesect xml:id="application.lifecycle.ui.uiprovider">
                 <title>Custom UI Providers</title>
 
+                <indexterm zone="application.lifecycle.ui.uiprovider">
+                    <primary><interfacename>UIProvider</interfacename></primary>
+                    <secondary>custom</secondary>
+                </indexterm>
+
                 <para>
                     You can create UI objects dynamically according to their request
                     parameters, such as the URL path, by defining a custom
@@ -1834,6 +1871,15 @@ notif.show(Page.getCurrent());]]></programlisting>
 
             <simplesect xml:id="application.lifecycle.ui.preserving">
                 <title>Preserving UI on Refresh</title>
+
+                <indexterm zone="application.lifecycle.ui.preserving">
+                    <primary>UI</primary>
+                    <secondary>preserving on refresh</secondary>
+                </indexterm>
+
+                <indexterm zone="application.lifecycle.ui.preserving">
+                    <primary><classname>@PreserveOnRefresh</classname></primary>
+                </indexterm>
 
                 <para>
                     Reloading a page in the browser normally spawns a new
@@ -1865,6 +1911,11 @@ public class MyUI extends UI {]]></programlisting>
         <section xml:id="application.lifecycle.ui-expiration">
             <title>UI Expiration</title>
 
+            <indexterm>
+                <primary>UI</primary>
+                <secondary>expiration</secondary>
+            </indexterm>
+
             <para>
                 <classname>UI</classname> instances are cleaned up if no communication is
                 received from them after some time. If no other server requests are made,
@@ -1893,28 +1944,52 @@ public class MyUI extends UI {]]></programlisting>
         <section xml:id="application.lifecycle.ui-closing">
             <title>Closing UIs Explicitly</title>
 
+            <indexterm>
+                <primary>UI</primary>
+                <secondary>closing</secondary>
+            </indexterm>
+
             <para>
-                You can explicitly close a UI with
-                <methodname>close()</methodname>. Closing a UI detaches it from the
-                session at the end of current request. Detaching a UI does not terminate
-                processing the current request and the response is sent as usual.
+                <indexterm>
+                    <primary><methodname>close()</methodname></primary>
+                    <secondary>UI</secondary>
+                </indexterm>
+
+                You can explicitly close a UI with <methodname>close()</methodname>. The
+                method marks the UI to be detached from the session after processing the
+                current request. Therefore, the method does not invalidate the UI instance
+                immediately and the response is sent as usual.
             </para>
 
             <para>
-                Closing a UI does not close the page or browser window in which the UI is
-                running. If the page is a regular browser window or tab, browsers do not
-                generally allow closing them programmatically. For such windows, you
-                normally want to redirect the user to another page using
+                Detaching a UI does not close the page or browser window in which the UI
+                is running and further server request will cause error. Typically, you
+                either want to close the window, reload it, or redirect it to another
+                URL. If the page is a regular browser window or tab, browsers generally do
+                not allow closing them programmatically, but redirection is possible. You
+                can redirect the window to another URL with
                 <methodname>setLocation()</methodname>, as is done in the examples in
-                <xref linkend="application.lifecycle.session-closing"/>. However, you can
-                close popup windows by calling JavaScript <methodname>close()</methodname>
-                for the windows, as described in <xref
+                <xref linkend="application.lifecycle.session-closing"/>. You can close
+                popup windows by making JavaScript <methodname>close()</methodname> call
+                for them, as described in <xref
                 linkend="advanced.windows.popup-closing"/>.
+            </para>
+
+            <para>
+                If you close other UI than the one associated with the current request,
+                they will not be detached at the end of the current request, but after
+                next request from the particular UI. You can make that occur quicker by
+                making the UI heartbeat faster or immediately by using server push.
             </para>
 		</section>
 
         <section xml:id="application.lifecycle.session-expiration">
             <title>Session Expiration</title>
+            
+            <indexterm zone="application.lifecycle.session-expiration">
+                <primary>session</primary>
+                <secondary>expiration</secondary>
+            </indexterm>
 
             <para>
                 A session is kept alive by server requests caused by user interaction
@@ -1929,15 +2004,26 @@ public class MyUI extends UI {]]></programlisting>
                 If there are active UIs in an application, their heartbeat keeps the
                 session alive indefinitely. You may want to have the sessions timeout if
                 the user is inactive long enough, which is the original purpose of the
-                session timeout setting. If the <parameter>closeIdleSessions</parameter>
+                session timeout setting.
+
+                <indexterm>
+                    <primary>session</primary>
+                    <secondary>timeout</secondary>
+                </indexterm>
+                <indexterm><primary>closeIdleSessions</primary></indexterm>
+
+                If the <parameter>closeIdleSessions</parameter>
                 parameter of the servlet is set to <literal>true</literal> in the
                 <filename>web.xml</filename>, as described in <xref
                 linkend="application.environment.web-xml"/>, the session and all of its
                 UIs are closed when the timeout specified by the
                 <parameter>session-timeout</parameter> parameter of the servlet expires
                 after the last non-heartbeat request. Once the session is gone, the
-                browser will show an Out Of Sync error on the next server request. To
-                avoid the ugly message, you may want to set a redirect URL for the
+                browser will show an Out Of Sync error on the next server request.
+
+                <indexterm><primary>redirection</primary></indexterm>
+                
+                To avoid the ugly message, you may want to set a redirect URL for the
                 UIs<phrase condition="web">, as described in <xref
                 linkend="application.errors.systemmessages"/></phrase>.
             </para>
@@ -1948,6 +2034,8 @@ public class MyUI extends UI {]]></programlisting>
             </para>
 
             <para>
+                <indexterm><primary><interfacename>SessionDestroyListener</interfacename></primary></indexterm>
+
                 You can handle session expiration on the server-side with a
                 <interfacename>SessionDestroyListener</interfacename>, as described in
                 <xref linkend="application.lifecycle.session"/>.
@@ -1956,6 +2044,11 @@ public class MyUI extends UI {]]></programlisting>
 
         <section xml:id="application.lifecycle.session-closing">
             <title>Closing a Session</title>
+
+            <indexterm zone="application.lifecycle.session-closing">
+                <primary>session</primary>
+                <secondary>closing</secondary>
+            </indexterm>
 
             <para>
                 <indexterm><primary><methodname>close()</methodname></primary></indexterm>
@@ -1969,15 +2062,23 @@ public class MyUI extends UI {]]></programlisting>
 
 			<para>
 				When closing the session from a UI, you typically want to redirect the
-				user to another URL. You can do the redirect using the
-				<methodname>setLocation()</methodname> method in
-				<classname>Page</classname>. This needs to be done before closing the
-				session, as the UI or page are not available after that. In the following
-				example, we display a logout button, which closes the user session.
+				user to another URL.
+
+                <indexterm><primary>redirection</primary></indexterm>
+                <indexterm><primary><methodname>setLocation()</methodname></primary></indexterm>
+                <indexterm><primary>Page</primary><secondary><methodname>setLocation()</methodname></secondary></indexterm>
+
+                You can do the redirect using the <methodname>setLocation()</methodname>
+                method in <classname>Page</classname>. This needs to be done before
+                closing the session, as the UI or page are not available after that. In
+                the following example, we display a logout button, which closes the user
+                session.
 			</para>
 
+            <indexterm><primary>logout</primary></indexterm>
+
             <book-example eid="application.lifecycle.closing" style="float: right"></book-example>
-			<programlisting><?pocket-size 65% ?><![CDATA[public static class MyUI extends UI {
+			<programlisting><?pocket-size 65% ?><![CDATA[public class MyUI extends UI {
     @Override
     protected void init(VaadinRequest request) {
         setContent(new Button("Logout", event -> {// Java 8
@@ -1998,12 +2099,26 @@ public class MyUI extends UI {]]></programlisting>
                 attached to it are left hanging. When the client-side engine notices that
                 a UI and the session are gone on the server-side, it displays a "Session
                 Expired" message and, by default, reloads the UI when the message is
-                clicked. You can customize the message and the redirect URL in the system
+                clicked.
+
+                <indexterm>
+                    <primary>session</primary>
+                    <secondary>expiration</secondary>
+                </indexterm>
+                <indexterm><primary>redirection</primary></indexterm>
+                <indexterm><primary>system messages</primary></indexterm>
+
+                You can customize the message and the redirect URL in the system
                 messages, as described in <xref
                 linkend="application.errors.systemmessages"/>. 
             </para>
 
             <para>
+                <indexterm><primary>heartbeat</primary></indexterm>
+                <indexterm><primary>UI</primary><secondary>heartbeat</secondary></indexterm>
+                <indexterm><primary>push</primary></indexterm>
+                <indexterm><primary>server push</primary></indexterm>
+
                 The client-side engine notices the expiration when user interaction causes
                 a server request to be made or when the keep-alive heartbeat occurs. To
                 make the UIs detect the situation faster, you need to make the heart beat
@@ -2015,7 +2130,7 @@ public class MyUI extends UI {]]></programlisting>
 
             <book-example eid="application.lifecycle.closingall" style="float: right"></book-example>
 			<programlisting><?pocket-size 65% ?><![CDATA[@Push
-public static class MyPushyUI extends UI {
+public class MyPushyUI extends UI {
     @Override
     protected void init(VaadinRequest request) {
         setContent(new Button("Logout", event -> {// Java 8
