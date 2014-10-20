@@ -14,34 +14,26 @@
         This chapter describes the installation and use of the Vaadin TestBench.
     </para>
 
-    <para>
-        <emphasis>This book edition covers TestBench 4, but is based on a prerelease
-        version available at the time of writing. The final release may have changes that
-        are not covered in the documentation given here.</emphasis>
-    </para>
-
     <section xml:id="testbench.overview">
         <title>Overview</title>
 
         <para>
-            Quality assurance is one of the cornerstones of modern software
-            development. Extending throughout the entire development process, quality
-            assurance is the thread that binds the end product to the requirements. In
-            iterative development processes, with ever shorter release cycles and
-            continuous integration, the role of regression testing is central. The special
-            nature of web applications creates many unique requirements for regression
-            testing.
+            Testing is one of the cornerstones of modern software development. Extending
+            throughout the entire development process, testing is the thread that binds
+            the product to the requirements. Conformance to user scenarios is validated by
+            end-to-end acceptance testing. In agile and other iterative development
+            processes, with ever shorter release cycles and continuous integration, the
+            automation of integration, regression, endurance, and acceptance testing is
+            paramount. Further, UI automation may be needed for integration purposes, such
+            as for assistive technologies. The special nature of web applications creates
+            many unique requirements for both testing and UI automation.
         </para>
 
         <para>
-            In a typical situation, you are developing a web application with Vaadin and
-            want to ensure that only intended changes occur in its behaviour after
-            modifying the code, without testing the application manually every time. There
-            are two basic ways of detecting such regressions. Screenshots are the
-            strictest way, but usually checking the displayed values in the HTML is better
-            if you are more interested in the content and want to allow some flexibility
-            for themeing, for example. You may also want to generate many different kinds
-            of inputs to the application and check that they produce the desired outputs.
+            Vaadin TestBench allows controlling the browser from Java code, as illustrated
+            in <xref linkend="figure.testbench.webdriver"/>. It can open a new browser
+            window to start the application, interact with the components, for example, by
+            clicking them, and then get the HTML element values.
         </para>
 
 		<figure xml:id="figure.testbench.webdriver">
@@ -57,63 +49,143 @@
 		</figure>
 
         <para>
-            Vaadin TestBench utilizes Selenium WebDriver to control the browser from
-            Java code, as illustrated in <xref linkend="figure.testbench.webdriver"/>. It
-            can open a new browser window to start the application, interact with the
-            components for example by clicking them, and then get the HTML element values.
+            Before going into details, you may want to try out Vaadin TestBench
+            yourself. You just need to create a new Vaadin project either with the Eclipse
+            plugin or the Maven archetype. Both create a simple application stub that
+            includes TestBench test cases for testing the UI. You also need to install an
+            evaluation license. For instructions, jump to <xref
+            linkend="testbench.quickstart"/> and, after trying it out, come back.
         </para>
 
-        <para>
-            You can develop such unit tests along with your application code, for example
-            with JUnit, which is a widely used Java unit testing framework. You can run
-            the tests as many times as you want in your workstation or in a distributed
-            grid setup.
-        </para>
+        <simplesect>
+            <title>The Role of Vaadin TestBench</title>
 
-		<figure xml:id="figure.testbench.workflow">
-			<title>TestBench Workflow</title>
-			<mediaobject>
-				<imageobject role="html">
-					<imagedata align="center" fileref="img/testbench/tt-workflow-lo.png"/>
-				</imageobject>
-				<imageobject role="fo">
-					<imagedata scale="130" smallscale="90%" align="center" fileref="img/testbench/tt-workflow-hi.png"/>
-				</imageobject>
-			</mediaobject>
-		</figure>
+            <para>
+                Vaadin TestBench can work as the centerpiece of the software development
+                process, for testing the application at all modular levels and in all the
+                phases of the development cycle:
+            </para>
 
-        <para>The main features of Vaadin TestBench are:</para>
+            <itemizedlist>
+                <listitem><para>Automated acceptance tests</para></listitem>
+                <listitem><para>Unit tests</para></listitem>
+                <listitem><para>End-to-end integration tests</para></listitem>
+                <listitem><para>Regression tests</para></listitem>
+            </itemizedlist>
 
-        <itemizedlist>
-            <listitem>
-                <para>Control a browser from Java</para>
-            </listitem>
-            <listitem>
-                <para>Generate component selectors in debug window</para>
-            </listitem>
-            <listitem>
-                <para>Validate UI state by assertions and screen capture comparison</para>
-            </listitem>
-            <listitem>
-                <para>Screen capture comparison with difference highlighting</para>
-            </listitem>
-            <listitem>
-                <para>Distributed test grid for running tests</para>
-            </listitem>
-            <listitem>
-                <para>Integration with unit testing</para>
-            </listitem>
-            <listitem>
-                <para>Test with browsers on mobile devices</para>
-            </listitem>
-        </itemizedlist>
+            <para>
+                Let us look at each of these topics separately.
+            </para>
 
-        <para>
-            Execution of tests can be distributed over a grid of test nodes, which speeds
-            up testing. The grid nodes can run different operating systems and have
-            different browsers installed. In a minimal setup, such as for developing the
-            tests, you can use Vaadin TestBench on just a single computer.
-        </para>
+            <para>
+                Any methodological software development, agile or not, is preceded by
+                specification of requirements, which define what the software should
+                actually do. <emphasis>Acceptance tests</emphasis> ensure that the product
+                conforms to the requirements. In agile development, their automation
+                allows continuous tracking of progress towards iteration goals, as well as
+                regressions, especially when. The importance of requirements is emphasized in
+                <emphasis>test-driven development</emphasis> (TDD), where tests are
+                written before actual code. In <xref linkend="testbench.bdd"/>, we show
+                how to use Vaadin TestBench for <emphasis>behavior-driven
+                development</emphasis> (BDD), a special form of TDD that concentrates on
+                the formal behavioral specification of requirements.
+            </para>
+
+            <para>
+                <emphasis>Unit testing</emphasis> is applied to the smallest scale of
+                software components; in Vaadin applications these are typically individual
+                UI components or view classes. For complex composites, such as views, you
+                can use the Page Object Pattern described in <xref
+                linkend="testbench.maintainable.pageobject"/>. The pattern simplifies and
+                modularizes testing by separating low-level details from the more abstract
+                UI logic. In addition to serving the purpose of unit tests, it creates an
+                abstraction layer for higher-level tests, such as acceptance and
+                end-to-end tests.
+            </para>
+
+            <para>
+                <emphasis>Integration tests</emphasis> ensure that software units work
+                together at different levels of modularization. At the broadest level,
+                <emphasis>end-to-end tests</emphasis> extend through the entire
+                application lifecycle from start to finish, going through many or all user
+                stories. The aim is not just to verify the functional requirements for
+                user interaction, but also that data integrity is maintained. For example,
+                in a messaging application, a user would log in, both send and receive
+                messages, and finally log out. Such test workflows could include
+                configuration, registration, interaction between users, administrative
+                tasks, deletion of user accounts, and so forth.
+            </para>
+
+            <para>
+                In regression testing, you want to ensure that only intended changes occur
+                in its behaviour after modifying the code, without testing the application
+                manually every time. There are two basic ways of detecting such
+                regressions. Screenshots are the strictest way, but usually checking the
+                displayed values in the HTML is better if you are more interested in the
+                content and want to allow some flexibility for themeing, for example. You
+                may also want to generate many different kinds of inputs to the
+                application and check that they produce the desired outputs.
+            </para>
+
+            <para>
+                You can develop such tests along with your application code, for example
+                with JUnit, which is a widely used Java unit testing framework. You can
+                run the tests as many times as you want in your workstation or in a
+                distributed grid setup.
+            </para>
+
+            <figure xml:id="figure.testbench.workflow">
+                <title>TestBench Workflow</title>
+                <mediaobject>
+                    <imageobject role="html">
+                        <imagedata align="center" fileref="img/testbench/tt-workflow-lo.png"/>
+                    </imageobject>
+                    <imageobject role="fo">
+                        <imagedata scale="130" smallscale="90%" align="center" fileref="img/testbench/tt-workflow-hi.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+        </simplesect>
+
+        <simplesect>
+            <title>Features</title>
+
+            <para>
+                The main features of Vaadin TestBench are:
+            </para>
+
+            <itemizedlist>
+                <listitem>
+                    <para>Control a browser from Java</para>
+                </listitem>
+                <listitem>
+                    <para>Generate component selectors in debug window</para>
+                </listitem>
+                <listitem>
+                    <para>Validate UI state by assertions and screen capture comparison</para>
+                </listitem>
+                <listitem>
+                    <para>Screen capture comparison with difference highlighting</para>
+                </listitem>
+                <listitem>
+                    <para>Distributed test grid for running tests</para>
+                </listitem>
+                <listitem>
+                    <para>Integration with unit testing</para>
+                </listitem>
+                <listitem>
+                    <para>Test with browsers on mobile devices</para>
+                </listitem>
+            </itemizedlist>
+
+            <para>
+                Execution of tests can be distributed over a grid of test nodes, which
+                speeds up testing. The grid nodes can run different operating systems and
+                have different browsers installed. In a minimal setup, such as for
+                developing the tests, you can use Vaadin TestBench on just a single
+                computer.
+            </para>
+        </simplesect>
 
         <simplesect>
             <title>Based on Selenium</title>
@@ -251,6 +323,78 @@
                 subscription.
             </para>
         </simplesect>
+    </section>
+
+    <section xml:id="testbench.quickstart">
+        <title>Quick Start</title>
+
+        <para>
+            With the Eclipse plugin, you need to create a new Vaadin 7 project with the
+            TestBench test enabled, as described in <xref
+            linkend="getting-started.first-project.creation"/>. The test case stub is
+            created under <filename>test</filename> source folder, so that it will not be
+            deployed with the application. The project and source folders are illustrated
+            in <xref linkend="figure.testbench.quickstart.eclipse-project"
+            xrefstyle="select:labelnumber"/>.
+        </para>
+
+        <figure xml:id="figure.testbench.quickstart.eclipse-project">
+            <title>Eclipse Project with a Test Case</title>
+            <mediaobject>
+                <imageobject>
+                    <imagedata scale="70" smallscale="100%" align="center" fileref="img/testbench/eclipse-project-annotated-hi.png"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
+
+        <para>
+            You can observe that the UI and the test case are much like in the
+            illustration in <xref linkend="figure.testbench.webdriver"/>.
+        </para>
+
+        <para>
+            Before running tests, you need to install a license key, as described in <xref
+            linkend="testbench.installation.license"/>. For trying out TestBench, you can
+            obtain an evaluation license key from the <link
+            xlink:href="https://vaadin.com/directory#addon/vaadin-testbench">Vaadin
+            TestBench download page</link> in Vaadin Directory.
+        </para>
+
+        <para>
+            To run the test, open the <filename>MyprojectTest.java</filename> file in the
+            editor and press <keycombo
+            action="press"><keycombo><keycap>Shift</keycap><keycap>Alt</keycap><keycap>X</keycap></keycombo><keycap>T</keycap></keycombo>. The
+            browser should open with the application UI and TestBench run the tests. The
+            results are displayed in the <guilabel>JUnit</guilabel> view in Eclipse, as
+            shown in <xref linkend="figure.testbench.quickstart.eclipse-junit"/>.
+        </para>
+
+        <figure xml:id="figure.testbench.quickstart.eclipse-junit">
+            <title>JUnit Test Results in Eclipse</title>
+            <mediaobject>
+                <imageobject>
+                    <imagedata scale="70" smallscale="100%" align="center" fileref="img/testbench/screenshots/eclipse-junit.png"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
+
+        <para>
+            With Maven, you need to create a new Vaadin project with the
+            <literal>vaadin-archetype-application</literal> archetype, as described in
+            <xref linkend="getting-started.maven"/>. The license needs to be installed as
+            mentioned above. Then, build the project with the
+            <literal>integration-test</literal> or a later phase in the build
+            lifecycle. For example, from the command-line:
+        </para>
+
+        <screen><prompt>$</prompt> <command>mvn</command> <parameter>integration-test</parameter></screen>
+
+        <para>
+            This will execute all required lifecycle phases, including compilation and
+            packaging the application, launch Jetty web server to host the application,
+            and run the TestBench tests. Results are reported on the console. A Maven GUI,
+            such as the one in Eclipse, will provide more visual results.
+        </para>
     </section>
 
     <section xml:id="testbench.installation">
@@ -441,6 +585,18 @@
                     </listitem>
                 </varlistentry>
             </variablelist>
+        </section>
+
+        <section xml:id="testbench.installation.license">
+            <title>Installing a License</title>
+
+            <para>
+                To install the license key most conveniently, copy and paste it verbatim
+                to a <filename>.vaadin.testbench.developer.license</filename> file in your
+                home directory or pass it to the JRE in a system property. See <link
+                xlink:href="https://vaadin.com/directory/help/installing-cval-license">the
+                AGPL license key installation instructions</link> for more details.
+            </para>
         </section>
 
         <section xml:id="testbench.installation.examples">
@@ -3308,6 +3464,14 @@ public void testRemoteWebDriver() throws MalformedURLException {
             <programlisting><?pocket-size 75% ?><![CDATA[setDriver(new RemoteWebDriver(
         DesiredCapabilities.phantomjs()));]]></programlisting>
         </section>
+    </section>
+
+    <section xml:id="testbench.bdd">
+        <title>Behavior-Driven Development</title>
+
+        <para>
+            
+        </para>
     </section>
 
     <section xml:id="testbench.known-issues">
