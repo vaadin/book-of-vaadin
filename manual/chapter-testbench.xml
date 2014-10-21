@@ -58,7 +58,7 @@
         </para>
 
         <simplesect>
-            <title>The Role of Vaadin TestBench</title>
+            <title>Vaadin TestBench in Software Development</title>
 
             <para>
                 Vaadin TestBench can work as the centerpiece of the software development
@@ -202,7 +202,7 @@
 
             <itemizedlist>
                 <listitem>Proper handling of Ajax-based communications of Vaadin</listitem>
-                <listitem>A high-level element query API for Vaadin components</listitem>
+                <listitem>A high-level, statically typed element query API for Vaadin components</listitem>
                 <listitem>Performance testing of Vaadin applications</listitem>
                 <listitem>Screen capture comparison</listitem>
                 <listitem>Finding HTML elements by a Vaadin selector</listitem>
@@ -303,12 +303,29 @@
                 first caused them to occur.
             </para>
 
+            <figure xml:id="figure.testbench.quickstart.license">
+                <title>Continuous Integration Workflow</title>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata scale="70" smallscale="100%" align="center" fileref="img/testbench/cis-workflow-hi.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+
             <para>
                 You can make unit tests with Vaadin TestBench just like you would do any
                 other Java unit tests, so they work seamlessly with continuous integration
                 systems. Vaadin TestBench is tested to work with at least TeamCity and
                 Hudson/Jenkins build management and continuous integration servers, which
                 all have special support for the JUnit unit testing framework.
+            </para>
+
+            <para>
+                <xref linkend="figure.testbench.quickstart.license"/> illustrates a
+                typical development setup. Both changes to application and test sources
+                are checked in into a source repository, from where the CIS server checks
+                them out, compiles, and deploys the web application to a server. Then, it
+                runs the tests and collects the results.
             </para>
         </simplesect>
 
@@ -329,72 +346,171 @@
         <title>Quick Start</title>
 
         <para>
-            With the Eclipse plugin, you need to create a new Vaadin 7 project with the
-            TestBench test enabled, as described in <xref
-            linkend="getting-started.first-project.creation"/>. The test case stub is
-            created under <filename>test</filename> source folder, so that it will not be
-            deployed with the application. The project and source folders are illustrated
-            in <xref linkend="figure.testbench.quickstart.eclipse-project"
-            xrefstyle="select:labelnumber"/>.
+            In the following, we give instructions for getting Vaadin TestBench running in
+            minutes. You can create either a new Eclipse project or a Maven project. Both
+            project types require installing a license key, so we cover that first.
         </para>
 
-        <figure xml:id="figure.testbench.quickstart.eclipse-project">
-            <title>Eclipse Project with a Test Case</title>
-            <mediaobject>
-                <imageobject>
-                    <imagedata scale="70" smallscale="100%" align="center" fileref="img/testbench/eclipse-project-annotated-hi.png"/>
-                </imageobject>
-            </mediaobject>
-        </figure>
+        <section xml:id="testbench.quickstart.license">
+            <title>Installing License Key</title>
+        
+            <para>
+                Before running tests, you need to install a license key. You can purchase
+                Vaadin TestBench or obtain a free trial key from the <link
+                xlink:href="https://vaadin.com/directory#addon/vaadin-testbench">Vaadin
+                TestBench download page</link> in Vaadin Directory. You need to register
+                in Vaadin Directory to obtain the key.
+            </para>
 
-        <para>
-            You can observe that the UI and the test case are much like in the
-            illustration in <xref linkend="figure.testbench.webdriver"/>.
-        </para>
+            <figure xml:id="figure.testbench.quickstart.license">
+                <title>Obtaining License Key from Vaadin Directory</title>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata scale="70" smallscale="70%" align="center" fileref="img/testbench/screenshots/directory-license-key.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
 
-        <para>
-            Before running tests, you need to install a license key, as described in <xref
-            linkend="testbench.installation.license"/>. For trying out TestBench, you can
-            obtain an evaluation license key from the <link
-            xlink:href="https://vaadin.com/directory#addon/vaadin-testbench">Vaadin
-            TestBench download page</link> in Vaadin Directory.
-        </para>
+            <para>
+                To install the license key, either copy and paste it verbatim to a
+                <filename>.vaadin.testbench.developer.license</filename> file in your home
+                directory or pass it to the web server's JRE in a system property.
+            </para>
 
-        <para>
-            To run the test, open the <filename>MyprojectTest.java</filename> file in the
-            editor and press <keycombo
-            action="press"><keycombo><keycap>Shift</keycap><keycap>Alt</keycap><keycap>X</keycap></keycombo><keycap>T</keycap></keycombo>. The
-            browser should open with the application UI and TestBench run the tests. The
-            results are displayed in the <guilabel>JUnit</guilabel> view in Eclipse, as
-            shown in <xref linkend="figure.testbench.quickstart.eclipse-junit"/>.
-        </para>
+            <screen><prompt>$</prompt> <command>java</command> <parameter>-Dvaadin.testbench.developer.license=</parameter>l1ce4ce-c0de</screen>
 
-        <figure xml:id="figure.testbench.quickstart.eclipse-junit">
-            <title>JUnit Test Results in Eclipse</title>
-            <mediaobject>
-                <imageobject>
-                    <imagedata scale="70" smallscale="100%" align="center" fileref="img/testbench/screenshots/eclipse-junit.png"/>
-                </imageobject>
-            </mediaobject>
-        </figure>
+            <para>
+                How you actually pass the parameter to your server depends on how it is
+                launched.
+            </para>
 
-        <para>
-            With Maven, you need to create a new Vaadin project with the
-            <literal>vaadin-archetype-application</literal> archetype, as described in
-            <xref linkend="getting-started.maven"/>. The license needs to be installed as
-            mentioned above. Then, build the project with the
-            <literal>integration-test</literal> or a later phase in the build
-            lifecycle. For example, from the command-line:
-        </para>
+            <variablelist>
+                <varlistentry>
+                    <term>Eclipse IDE</term>
+                    <listitem>
+                        <para>
+                            To install the license key for all projects, select
+                            <menuchoice><guimenu>Window</guimenu><guimenuitem>Preferences</guimenuitem></menuchoice>
+                            and navigate to the
+                            <menuchoice><guimenu>Java</guimenu><guimenuitem>Installed
+                            JREs</guimenuitem></menuchoice> section. Select the JRE
+                            version that you use for the application and click
+                            <guibutton>Edit</guibutton>. In the <guilabel>Default VM
+                            arguments</guilabel>, give the <parameter>-D</parameter>
+                            expression as shown above.
+                        </para>
 
-        <screen><prompt>$</prompt> <command>mvn</command> <parameter>integration-test</parameter></screen>
+                        <para>
+                            For a single project, create a new JUnit launch configuration
+                            in <menuchoice><guimenu>Run</guimenu><guimenuitem>Run
+                            configurations</guimenuitem></menuchoice>. Select
+                            <guilabel>JUnit</guilabel> and click <guibutton>New launch
+                            configuration</guibutton>. If you have already ran JUnit in
+                            the project, the launch configuration already exists. Select
+                            JUnit 4 if not selected automatically. Go to
+                            <guilabel>Arguments</guilabel> tab and give the
+                            <parameter>-D</parameter> expression in the <guilabel>VM
+                            arguments</guilabel> field. Click <guibutton>Run</guibutton>
+                            to run the tests immediately or <guibutton>Close</guibutton>
+                            to just save the settings.
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>Apache Tomcat (or TomEE)</term>
+                    <listitem>
+                        <para>
+                            In <filename>bin/setenv.sh</filename> under the Tomcat
+                            installation directory, define:
+                            
+                            <screen>export CATALING_OPTS=<parameter>-Dvaadin.testbench.developer.license=</parameter>l1ce4ce-c0de</screen>
+                        </para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>            
 
-        <para>
-            This will execute all required lifecycle phases, including compilation and
-            packaging the application, launch Jetty web server to host the application,
-            and run the TestBench tests. Results are reported on the console. A Maven GUI,
-            such as the one in Eclipse, will provide more visual results.
-        </para>
+            <para condition="web">
+                See <link
+                xlink:href="https://vaadin.com/directory/help/installing-cval-license">the
+                AGPL license key installation instructions</link> for more details.
+            </para>
+        </section>
+
+        <section xml:id="testbench.quickstart.eclipse">
+            <title>Quick Start with Eclipse</title>
+
+            <para>
+                Once you have installed the Vaadin Plugin for Eclipse, you can use it to
+                create a new Vaadin 7 project with the TestBench test enabled, as
+                described in <xref linkend="getting-started.first-project.creation"/>. In
+                the project settings, you need to have the <guilabel>Create TestBench
+                test</guilabel> setting enabled.
+            </para>
+
+            <para>
+                The test case stub is created under <filename>test</filename> source
+                folder, so that it will not be deployed with the application. The project
+                and source folders are illustrated in <xref
+                linkend="figure.testbench.quickstart.eclipse-project"
+                xrefstyle="select:labelnumber"/>.
+            </para>
+
+            <figure xml:id="figure.testbench.quickstart.eclipse-project">
+                <title>Eclipse Project with a Test Case</title>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata scale="70" smallscale="100%" align="center" fileref="img/testbench/eclipse-project-annotated-hi.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+
+            <para>
+                You can observe that the UI and the test case are much like in the
+                illustration in <xref linkend="figure.testbench.webdriver"/>.
+            </para>
+
+            <para>
+                To run the test, open the <filename>MyprojectTest.java</filename> file in
+                the editor and press <keycombo
+                action="press"><keycombo><keycap>Shift</keycap><keycap>Alt</keycap><keycap>X</keycap></keycombo><keycap>T</keycap></keycombo>. The
+                browser should open with the application UI and TestBench run the
+                tests. The results are displayed in the <guilabel>JUnit</guilabel> view in
+                Eclipse, as shown in <xref
+                linkend="figure.testbench.quickstart.eclipse-junit"/>.
+            </para>
+
+            <figure xml:id="figure.testbench.quickstart.eclipse-junit">
+                <title>JUnit Test Results in Eclipse</title>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata scale="70" smallscale="100%" align="center" fileref="img/testbench/screenshots/eclipse-junit.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+        </section>
+
+        <section xml:id="testbench.quickstart.maven">
+            <title>Quick Start with Maven</title>
+
+            <para>
+                With Maven, you need to create a new Vaadin project with the
+                <literal>vaadin-archetype-application</literal> archetype, as described in
+                <xref linkend="getting-started.maven"/>. The license needs to be installed
+                as mentioned earlier. Then, build the project with the
+                <literal>integration-test</literal> or a later phase in the build
+                lifecycle. For example, from the command-line:
+            </para>
+
+            <screen><prompt>$</prompt> <command>mvn</command> <parameter>integration-test</parameter></screen>
+
+            <para>
+                This will execute all required lifecycle phases, including compilation and
+                packaging the application, launch Jetty web server to host the
+                application, and run the TestBench tests. Results are reported on the
+                console. A Maven GUI, such as the one in Eclipse, will provide more visual
+                results.
+            </para>
+        </section>
     </section>
 
     <section xml:id="testbench.installation">
@@ -408,9 +524,9 @@
         </para>
 
         <para>
-            The component element classes are Vaadin-specific. At the time of the writing,
-            they are packaged with TestBench, but this will probably change in future.
-            <!-- TODO Update when needed -->
+            The component element classes are Vaadin version specific and they are
+            packaged in a <filename>vaadin-testbench-api</filename> library JAR,
+            separately from the TestBench core runtime library.
         </para>
 
         <para>
@@ -442,15 +558,15 @@
             </para>
 
             <programlisting><?pocket-size 75% ?>&lt;dependency org="com.vaadin" name="vaadin-testbench"
-   rev="<emphasis role="bold">4.x.x</emphasis>" conf="test-&lt;default"/&gt;</programlisting>
+   rev="<emphasis role="bold">4.x.x</emphasis>" conf="test-&gt;default"/&gt;</programlisting>
 
             <para>
-                The optional <literal>test-&lt;default</literal> configuration mapping
+                The optional <literal>test-&gt;default</literal> configuration mapping
                 requires a <literal>test</literal> configuration in the Ivy module. It is
                 useful especially when building and testing the application in an Ant
                 script, where you can use the configuration to define libraries for the
                 web application and testing separately. When developing tests in Eclipse,
-                it is meaningless, and you can use <literal>default-&lt;default</literal>.
+                it is meaningless, and you can use <literal>default-&gt;default</literal>.
             </para>
 
             <para>
@@ -566,7 +682,7 @@
                     <term><filename>maven</filename></term>
                     <listitem>
                         <para>
-                            The Maven folder contains version of the Vaadin TestBench
+                            The Maven folder contains a version of the Vaadin TestBench
                             libraries that you can install in your local Maven
                             repository. Please follow the instructions in <xref
                             linkend="testbench.execution.maven"/>.
@@ -585,18 +701,6 @@
                     </listitem>
                 </varlistentry>
             </variablelist>
-        </section>
-
-        <section xml:id="testbench.installation.license">
-            <title>Installing a License</title>
-
-            <para>
-                To install the license key most conveniently, copy and paste it verbatim
-                to a <filename>.vaadin.testbench.developer.license</filename> file in your
-                home directory or pass it to the JRE in a system property. See <link
-                xlink:href="https://vaadin.com/directory/help/installing-cval-license">the
-                AGPL license key installation instructions</link> for more details.
-            </para>
         </section>
 
         <section xml:id="testbench.installation.examples">
