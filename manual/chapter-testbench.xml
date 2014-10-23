@@ -292,7 +292,7 @@
             </para>
         </simplesect>
 
-        <simplesect>
+        <simplesect xml:id="testbench.overview.cis">
             <title>Continuous Integration Compatibility</title>
                 
             <para>
@@ -303,7 +303,7 @@
                 first caused them to occur.
             </para>
 
-            <figure xml:id="figure.testbench.quickstart.license">
+            <figure xml:id="figure.testbench.overview.cis">
                 <title>Continuous Integration Workflow</title>
                 <mediaobject>
                     <imageobject>
@@ -546,6 +546,7 @@
                 The Maven dependency would be as follows:
             </para>
 
+            <!-- TODO Update this to use vaadin-testbench-api -->
             <programlisting><?pocket-size 75% ?>&lt;dependency&gt;
     &lt;groupId&gt;com.vaadin&lt;/groupId&gt;
     &lt;artifactId&gt;vaadin-testbench&lt;/artifactId&gt;
@@ -554,19 +555,17 @@
 &lt;/dependency&gt;</programlisting>
 
             <para>
-                The Ivy dependency would be as follows:
+                The Ivy dependency, to be defined in <filename>ivy.xml</filename>, would
+                be as follows:
             </para>
 
-            <programlisting><?pocket-size 75% ?>&lt;dependency org="com.vaadin" name="vaadin-testbench"
-   rev="<emphasis role="bold">4.x.x</emphasis>" conf="test-&gt;default"/&gt;</programlisting>
+            <programlisting><?pocket-size 75% ?>&lt;dependency org="com.vaadin" name="vaadin-testbench-api"
+   rev="<emphasis role="bold">latest.release</emphasis>" conf="nodeploy-&gt;default"/&gt;</programlisting>
 
             <para>
-                The optional <literal>test-&gt;default</literal> configuration mapping
-                requires a <literal>test</literal> configuration in the Ivy module. It is
-                useful especially when building and testing the application in an Ant
-                script, where you can use the configuration to define libraries for the
-                web application and testing separately. When developing tests in Eclipse,
-                it is meaningless, and you can use <literal>default-&gt;default</literal>.
+                The optional <literal>nodeploy-&gt;default</literal> configuration mapping
+                requires a <literal>nodeploy</literal> configuration in the Ivy module; it
+                is automatically created for new Vaadin projects.
             </para>
 
             <para>
@@ -690,7 +689,7 @@
                     </listitem>
                 </varlistentry>
                 <varlistentry>
-                    <term><filename>vaadin-testbench-standalone-&version.testbench;.jar</filename></term>
+                    <term><filename>vaadin-testbench-core-&version.testbench;.jar</filename></term>
                     <listitem>
                         <para>
                             This is the Vaadin TestBench library. It is a standalone
@@ -726,8 +725,8 @@
                         <para>
                             Demonstrates the basic use of WebDriver. Interacts with the
                             buttons in the user interface by clicking them and checks the
-                            resulting value. Uses <methodname>By.id()</methodname> to
-                            access the elements.
+                            resulting value. Uses the ElementQuery API to access the
+                            elements.
                         </para>
                     </listitem>
                 </varlistentry>
@@ -769,13 +768,10 @@
                     <term><filename>SelectorExamplesITCase.java</filename></term>
                     <listitem>
                         <para>
-                            This example shows how to use different selectors:
+                            This example shows how to find elements in different ways; by
+                            using the high-level ElementQuery API as well as low-level
+                            <methodname>By.xpath()</methodname> selectors.
                         </para>
-
-                        <itemizedlist>
-                            <listitem><methodname>By.id()</methodname> - selecting by identifier</listitem>
-                            <listitem><methodname>By.xpath()</methodname> - selecting by an XPath expression</listitem>
-                        </itemizedlist>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -791,10 +787,11 @@
                     <term><filename>AdvancedCommandsITCase.java</filename></term>
                     <listitem>
                         <para>
-                            Demonstrates how to test tooltips (<xref
-                            linkend="testbench.special.tooltip"/>) and context
-                            menus. Uses component IDs, XPath expressions, as well as CSS
-                            selectors to find the elements to check.
+                            Demonstrates how to test context menus (see <xref
+                            linkend="testbench.special.contextmenu"/>) and tooltips (see
+                            <xref linkend="testbench.special.tooltip"/>). Also shows how
+                            to send keypresses to a component and how to read values of
+                            table cells.
                         </para>
                     </listitem>
                 </varlistentry>
@@ -852,30 +849,32 @@
                     <itemizedlist>
                         <listitem>
                             <para>
-                                Internet Explorer (Windows only) - install <filename>IEDriverServer.exe</filename> from:
+                                Internet Explorer (Windows only) - install
+                                <filename>IEDriverServer.exe</filename> from under the
+                                latest Selenium release:
                             </para>
                             <para>
                                 <link
-                                    xlink:href="http://code.google.com/p/selenium/downloads/list">http://code.google.com/p/selenium/downloads/list</link>
+                                    xlink:href="http://selenium-release.storage.googleapis.com/index.html">http://selenium-release.storage.googleapis.com/index.html</link>
                             </para>
                         </listitem>
                         <listitem>
                             <para>
                                 Chrome - install ChromeDriver (a part of the Chromium
-                                project) for your platform from:
+                                project) for your platform from under the latest release
+                                at:
                             </para>
                             <para>
                                 <link
-                                    xlink:href="http://code.google.com/p/chromedriver/downloads/list">http://code.google.com/p/chromedriver/downloads/list</link>
+                                    xlink:href="http://chromedriver.storage.googleapis.com/index.html">http://chromedriver.storage.googleapis.com/index.html</link>
                             </para>
                         </listitem>
                     </itemizedlist>
                 </listitem>
 
                 <listitem>
-                    Add the driver executable to PATH <emphasis>or</emphasis> define it as
-                    a system property in the application using WebDriver locally, or in
-                    distributed use give it as a command-line parameter to the grid node
+                    Add the driver executable to PATH. In a distributed testing
+                    environment, give it as a command-line parameter to the grid node
                     service, as described in <xref linkend="testbench.grid.node"/>.
                 </listitem>
             </orderedlist>
@@ -989,90 +988,6 @@
         </section>
     </section>
 
-    <section xml:id="testbench.preparing">
-        <title>Preparing an Application for Testing</title>
-
-        <para>
-            TestBench can usually be used for testing Vaadin applications as they are,
-            especially if just taking screenshots.
-        </para>
-
-        <para>
-            Depending on the selector type that you use later to select HTML elements,
-            they can be vulnerable to logically irrelevant changes in the HTML DOM or
-            component structure. The structure may change because of your layout or UI
-            logic, or if a new Vaadin version has significant changes.
-        </para>
-
-        <para>
-            To make UIs more robust for testing, you can set a unique <emphasis>component
-            ID</emphasis> for specific components with
-            <methodname>setId()</methodname>. You can then use it in element queries or
-            selectors.
-        </para>
-
-        <programlisting><?pocket-size 65% ?><![CDATA[public class UIToBeTested extends UI {
-    @Override
-    protected void init(VaadinRequest request) {
-        final VerticalLayout content = new VerticalLayout();
-        setContent(content);
-        
-        // Create a button
-        Button button = new Button("Push Me!");
-        
-        // Optional: give the button a unique ID
-        button.setId("main.button");
-        
-        // Set the tooltip
-        button.setDescription("This is a tip");
-
-        // Do something when the button is clicked
-        button.addClickListener(new ClickListener() {
-            @Override
-            public void buttonClick(ClickEvent event) {
-                // This label will not have a set ID
-                content.addComponent(new Label("Thanks!"));
-            }
-        });
-        content.addComponent(button);
-    }
-}]]></programlisting>
-
-        <para>
-            The application is shown in <xref
-            linkend="figure.testbench.preparing.application-to-be-tested"/>, with the
-            button already clicked.
-        </para>
-
-        <figure xml:id="figure.testbench.preparing.application-to-be-tested">
-            <title>A Simple Application To Be Tested</title>
-            <mediaobject>
-                <imageobject role="html">
-                    <imagedata align="center" fileref="img/testbench/screenshots/application-to-be-tested.png"/>
-                </imageobject>
-                <imageobject role="fo">
-                    <imagedata scale="120" smallscale="100%" align="center" fileref="img/testbench/screenshots/application-to-be-tested.png"/>
-                </imageobject>
-            </mediaobject>
-        </figure>
-
-        <para>
-            The button would be rendered as a HTML element: <literal>&lt;div
-            id="main.button" ...&gt;...&lt;/div&gt;</literal>. The DOM element would then
-            be accessible from the HTML page with a WebDriver call such as:
-            <literal>driver.findElement(By.id="main.button")</literal>. For the label,
-            which does not have an ID, the path would be from the page root.
-        </para>
-
-        <para>
-            As a similar method, you can add a unique CSS class name for a component to
-            enable using the CSS selector to select it. You can use the CSS class names
-            and IDs also in XPath selectors.
-        </para>
-
-        <!-- TODO: A description of different selectors would be needed (XPath, CSS, ...) -->
-    </section>
-
     <section xml:id="testbench.development">
         <title>Developing JUnit Tests</title>
 
@@ -1098,7 +1013,7 @@
             <para>
                 A JUnit test case is defined with annotations for methods in a test case
                 class. With TestBench, the test case class should extend the
-                <classname>TestBenchTestcase</classname> class, which provides the
+                <classname>TestBenchTestCase</classname> class, which provides the
                 WebDriver and ElementQuery APIs.
             </para>
 
@@ -1154,11 +1069,11 @@ public void setUp() throws Exception {
 
                         <programlisting><?pocket-size 70% ?><![CDATA[@Test
 public void basic() throws Exception {
-    driver.get("http://localhost:8080/tobetested");
+    getDriver().get("http://localhost:8080/tobetested");
     
     // Click the button
     ButtonElement button =
-        $(ButtonElement.class).id("content.button");
+        $(ButtonElement.class).id("mybutton");
     button.click();
 
     // Check that the label text is correct
@@ -1867,74 +1782,33 @@ LabelElement label = layout.$(LabelElement.class).first();]]></programlisting>
             list.
         </para>
 
-        <section xml:id="testbench.selectors.robustness">
-            <title>Selector Robustness</title>
-
-            <para>
-                Before we proceed, it is important to note that selectors have differences
-                in their robustness. Robustness is important for avoiding failed tests
-                when there are irrelevant changes in the HTML DOM tree.
-            </para>
-
-            <para>
-                The ElementQuery API and the Vaadin selector
-                (<methodname>By.vaadin()</methodname>) use the logical widget hierarchy to
-                find the HTML element to test, instead of the exact DOM structure. This
-                makes them rather robust, though still vulnerable to irrelevant changes in
-                the exact component hierarchy.
-            </para>
-
-            <para>
-                The XPath selector can be highly vulnerable to changes in the DOM path if
-                the path is given exactly from the body element of the page. It is,
-                however, very flexible, and can be used in robust ways, for example, by
-                selecting by HTML element and a CSS class name or an attribute value.
-            </para>
-
-            <para>
-                You can likewise use a CSS selector to select specific components by CSS
-                class in a robust way.
-            </para>
-        </section>
-
         <section xml:id="testbench.selectors.id">
             <title>Finding by ID</title>
 
             <para>
-                Selecting elements by their HTML element <literal>id</literal>
-                attribute is usually the easiest way to select elements. It requires
-                that you use component IDs, as described in <xref
-                    linkend="testbench.preparing"/>. The ID is used as is for the
-                <literal>id</literal> attribute of the top element of the
-                component. Selecting is done by the <methodname>By.id()</methodname>
-                selector.
+                Selecting elements by their HTML element <literal>id</literal> attribute
+                is a robust way to select elements, as noted in <xref
+                linkend="testbench.maintainable.robustness"/>. It requires that you
+                component IDs for the UI components with
+                <methodname>setId()</methodname>.
             </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[Button button = new Button("Push Me!");
+button.setId("pushmebutton");]]></programlisting>
+            
+            <para>
+                The button would be rendered as a HTML element: <literal>&lt;div
+                id="pushmebutton" ...&gt;...&lt;/div&gt;</literal>. The element would then
+                be accessible with a low-level WebDriver call:
+            </para>
+
+            <programlisting><?pocket-size 75% ?><![CDATA[findElement(By.id("pushmebutton")).click();]]></programlisting>
 
             <para>
-                For example, in the <filename>SimpleCalculatorITCase.java</filename>
-                example, we use the component ID as follows to click on the calculator
-                buttons:
+                The selector is equivalent to the statically typed element query
+                <literal>$(ButtonElement.class).id("pushmebutton")</literal>.
             </para>
-
-            <programlisting><?pocket-size 75% ?><![CDATA[@Test
-public void testOnePlusTwo() throws Exception {
-    openCalculator();
-
-    // Click the buttons in the user interface
-    getDriver().findElement(By.id("button_1")).click();
-    getDriver().findElement(By.id("button_+")).click();
-    getDriver().findElement(By.id("button_2")).click();
-    getDriver().findElement(By.id("button_=")).click();
-
-    // Get the result label value
-    assertEquals("3.0", getDriver().findElement(
-            By.id("display")).getText());
-}]]></programlisting>
-
-            <para>
-                The ID selectors are used extensively in the TestBench examples.
-            </para>
-        </section>
+            </section>
 
         <section xml:id="testbench.selectors.vaadin">
             <title>Finding by Vaadin Selector</title>
@@ -2016,7 +1890,7 @@ assertEquals("Thanks!", label.getText());]]></programlisting>
             </para>
 
             <programlisting><?pocket-size 75% ?><![CDATA[// Verify that the tooltip contains the expected text
-String tooltipText = driver.findElement(
+String tooltipText = findElement(
     By.className("v-tooltip")).getText();]]></programlisting>
 
             <para>
@@ -2027,7 +1901,7 @@ String tooltipText = driver.findElement(
     </section>
 
     <section xml:id="testbench.special">
-        <title>Special Test Features</title>
+        <title>Special Testing Topics</title>
 
         <para>
             In the following, we go through a number of TestBench features for handling
@@ -2196,9 +2070,20 @@ notification.closeNotification();]]></programlisting>
             </indexterm>
 
             <para>
-                Opening context menus require special handling. You need to create a
-                Selenium <classname>Actions</classname> object to perform a context click
-                on a <classname>WebElement</classname>.
+                Opening context menus requires special handling. First, to open a menu,
+                you need to "context-click" on a specific sub-element in a component that
+                supports context menus. You can do that with a
+                <methodname>contextClick()</methodname> action in a
+                <classname>Actions</classname> object.
+            </para>
+
+            <para>
+                A context menu is displayed as a floating element, which is under a
+                special overlays element in the HTML page, not under the component from
+                which it pops up. You can find it from the page by its CSS class
+                <literal>v-contextmenu</literal>. The menu items are represented as text,
+                and you can find the text with an XPath expression as shown in the example
+                below.
             </para>
 
             <para>
@@ -2207,22 +2092,22 @@ notification.closeNotification();]]></programlisting>
                 and click it.
             </para>
 
-            <programlisting><?pocket-size 70% ?><![CDATA[// Select the table body element
-WebElement e = getDriver().findElement(
-        By.className("v-table-body"));
+            <programlisting><?pocket-size 70% ?><![CDATA[// Get a table cell to work on
+TableElement table = inExample(TableElement.class).first();
+WebElement cell = table.getCell(3, 0); // A cell in the row
 
 // Perform context click action to open the context menu
-new Actions(getDriver()).moveToElement(e)
-        .contextClick(e).perform();
+new Actions(getDriver()).contextClick(cell).perform();
 
-// Select "Add Comment" from the opened menu
-getDriver().findElement(
-        By.xpath("//*[text() = 'Add Comment']")).click();]]></programlisting>
+// Find the opened menu
+WebElement menu = findElement(By.className("v-contextmenu"));
 
-            <para>
-                The complete example is given in the
-                <filename>AdvancedCommandsITCase.java</filename> example source file.
-            </para>
+// Find a specific menu item
+WebElement menuitem = menu.findElement(
+    By.xpath("//*[text() = 'Add Comment']"));
+
+// Select the menu item
+menuitem.click();]]></programlisting>
         </section>
 
         <section xml:id="testbench.special.timing">
@@ -2409,6 +2294,108 @@ public void verifyServerExecutionTime() throws Exception {
             integration server to run them at least once a day, or preferably on every
             commit.
         </para>
+
+        <section xml:id="testbench.maintainable.robustness">
+            <title>Increasing Selector Robustness</title>
+
+            <para>
+                Robustness of tests is important for avoiding failures because of
+                irrelevant changes in the HTML DOM tree.  Different selectors have
+                differences in their robustness and it depends on how they are used.
+            </para>
+
+            <para>
+                The ElementQuery API uses the logical widget hierarchy to find the HTML
+                elements, instead of the exact HTML DOM structure. This makes them
+                somewhat robust, although still vulnerable to irrelevant changes in the
+                exact component hierarchy of the UI. Also, if you internationalize the
+                application, selecting components by their caption is not viable.
+            </para>
+
+            <para>
+                The low-level XPath selector can be highly vulnerable to changes in the
+                DOM path, especially if the path is given down from the body element of
+                the page. The selector is, however, very flexible, and can be used in
+                robust ways, for example, by selecting by HTML element and a CSS class
+                name or an attribute value. You can likewise use a CSS selector to select
+                specific components by CSS class in a robust way.
+            </para>
+
+            <section xml:id="testbench.maintainable.robustness.id">
+                <title>Using Component IDs to Increase Robustness</title>
+
+                <para>
+                    To make UIs more robust for testing, you can set a unique
+                    <emphasis>component ID</emphasis> for specific components with
+                    <methodname>setId()</methodname>, as described in more detail in <xref
+                    linkend="testbench.selectors.id"/>.
+                </para>
+
+                <para>
+                    Let us consider the following application, in which we set the IDs
+                    using a hierarchical notation to ensure that they are unique; in a
+                    more modular case you could consider a different strategy.
+                </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[public class UIToBeTested extends UI {
+    @Override
+    protected void init(VaadinRequest request) {
+        setId("myui");
+        
+        final VerticalLayout content = new VerticalLayout();
+        content.setMargin(true);
+        content.setId("myui.content");
+        setContent(content);
+        
+        // Create a button
+        Button button = new Button("Push Me!");
+        
+        // Optional: give the button a unique ID
+        button.setId("myui.content.pushmebutton");
+
+        content.addComponent(button);
+    }
+}]]></programlisting>
+
+                <para>
+                    After preparing the application this way, you can find the element by
+                    the component ID with the <methodname>id()</methodname> query
+                    terminator.
+                </para>
+
+                <programlisting><?pocket-size 75% ?><![CDATA[// Click the button
+ButtonElement button =
+    $(ButtonElement.class).id("myui.content.pushmebutton");
+button.click();]]></programlisting>
+
+                <para>
+                    The IDs are HTML element <literal>id</literal> attributes and must be
+                    unique in the UI, as well as in the page in which the UI is running,
+                    in case the page has other content than the particular UI instance. In
+                    case there could be multiple UIs, you can include a UI part in the ID,
+                    as we did in the example above.
+                </para>
+            </section>
+
+            <section xml:id="testbench.maintainable.robustness.css">
+                <title>Using CSS Class Names to Increase Robustness</title>
+
+                <para>
+                    As a similar method to using component IDs, you can add CSS class
+                    names to components with <methodname>addStyleName()</methodname>. This
+                    enables matching them with the
+                    <methodname>findElement(By.className())</methodname> selector, as
+                    described in <xref linkend="testbench.selectors.css"/>.  You can use
+                    the selector in element queries. Unlike IDs, CSS class names do not
+                    need to be unique, so an HTML page can have many elements with the
+                    same CSS class.
+                </para>
+
+                <para>
+                    You can use CSS class names also in XPath selectors.
+                </para>
+            </section>
+        </section>
 
         <section xml:id="testbench.maintainable.pageobject">
             <title>The Page Object Pattern</title>
