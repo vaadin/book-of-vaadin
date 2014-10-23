@@ -14,6 +14,12 @@
         This chapter describes the installation and use of the Vaadin TestBench.
     </para>
 
+    <para>
+        <emphasis>This documentation is being revised to comply with Vaadin TestBench
+        version 4.0. It is mostly up-to-date, but the last details will be finished in a
+        short while.</emphasis>
+    </para>
+
     <section xml:id="testbench.overview">
         <title>Overview</title>
 
@@ -1326,7 +1332,7 @@ public class Testcase extends TestBenchTestCase {
                 <listitem>Open the URL</listitem>
                 <listitem>Navigate to desired state
                     <orderedlist>
-                        <listitem>Find a HTML element (<classname>WebElement</classname>) for navigation</listitem>
+                        <listitem>Find a HTML element (<classname>WebElement</classname>) for interaction</listitem>
                         <listitem>Use <methodname>click()</methodname> and other commands to interact with the element</listitem>
                         <listitem>Repeat with different elements until desired state is reached</listitem>
                     </orderedlist>
@@ -1346,28 +1352,20 @@ public class Testcase extends TestBenchTestCase {
                 These tasks are realized in the following test code:
             </para>
 
-            <programlisting><?pocket-size 65% ?><![CDATA[@Test
-public void testCase1() throws Exception {
-    driver.get(baseUrl + "/mycontext/myui");
-    
-    // Get the button's element.
-    // (Actually the caption element inside the button.)
-    // Use the component ID assigned with setId().
-    WebElement button = driver.findElement(By.xpath(
-        "id('main.button'])/span/span"));
-    
-    // Get the caption text
-    assertEquals("Push Me!", button.getText());
-    
-    // And click it. It's OK to click the caption element.
+            <programlisting><?pocket-size 65% ?><![CDATA[
+@Test
+public void basic() throws Exception {
+    getDriver().get("http://localhost:8080/tobetested");
+
+    // Find an element to interact upon    
+    ButtonElement button =
+        $(ButtonElement.class).id("mybutton");
+ 
+    // Click the button
     button.click();
 
-    // Get the Label's element by its widget path.
-    WebElement label = driver.findElement(By.vaadin(
-        "mycontextmyui::"+
-        "/VVerticalLayout[0]/Slot[1]/VLabel[0]"));
-
-    // Make the assertion
+    // Check that the label text is correct
+    LabelElement label = $(LabelElement.class).first();
     assertEquals("Thanks!", label.getText());
 }]]></programlisting>
 
@@ -1446,10 +1444,11 @@ public void testCase1() throws Exception {
             <para>
                 This creates the driver for each test you have in the test class, causing
                 a new browser instance to be opened and closed. If you want to keep the
-                browser open between the tests, you can use <literal>@BeforeClass</literal>
-                and <literal>@AfterClass</literal> methods to create and quit the
-                driver. In that case, the methods as well as the driver instance have to
-                be static.
+                browser open between the tests, you can use
+                <literal>@BeforeClass</literal> and <literal>@AfterClass</literal> methods
+                to create and quit the driver. In that case, the methods as well as the
+                driver instance have to be static and you need to set the driver in a
+                <literal>@Before</literal> method.
             </para>
 
             <programlisting><?pocket-size 65% ?><![CDATA[public class AdvancedTest extends TestBenchTestCase {
@@ -1458,6 +1457,11 @@ public void testCase1() throws Exception {
     @BeforeClass
     static public void createDriver() throws Exception {
         driver = TestBench.createDriver(new FirefoxDriver());
+    }
+
+    @Before
+    public void setUp() throws Exception {
+        setDriver(driver);
     }
     ...
     @AfterClass
@@ -1516,7 +1520,7 @@ driver = TestBench.createDriver(
             browser according to their component class type, hierarchy, caption, and other
             properties. Once one or more components are found, they can be interacted
             upon. The query API forms an domain-specific language (DSL), embedded in the
-            <classname>TestBenchTestcase</classname> class.
+            <classname>TestBenchTestCase</classname> class.
         </para>
 
         <para>
@@ -1751,7 +1755,7 @@ LabelElement label = layout.$(LabelElement.class).first();]]></programlisting>
             expression, an element ID, CSS style class, and so on. You can use such
             selectors together with the element queries. Like the ElementQuery API, it can
             be considered a domain-specific language (DSL) that is embedded in the
-            <classname>TestBenchTestcase</classname> class.
+            <classname>TestBenchTestCase</classname> class.
         </para>
 
         <para>
@@ -1808,72 +1812,6 @@ button.setId("pushmebutton");]]></programlisting>
                 The selector is equivalent to the statically typed element query
                 <literal>$(ButtonElement.class).id("pushmebutton")</literal>.
             </para>
-            </section>
-
-        <section xml:id="testbench.selectors.vaadin">
-            <title>Finding by Vaadin Selector</title>
-
-            <para>
-                In addition to the Selenium selectors, Vaadin TestBench provides a
-                <emphasis>Vaadin selector</emphasis>, which allows pointing to a Vaadin
-                component by its layout widget path. The element query API is in fact an
-                API to create Vaadin selectors.
-            </para>
-
-            <para>
-                You can create a Vaadin selector with the
-                <methodname>By.vaadin()</methodname> method. You need to use the
-                Vaadin <classname>By</classname>, defined in the
-                <package>com.vaadin.testbench</package> package, which extends the
-                Selenium <classname>By</classname>.
-            </para>
-
-            <para>
-                A Vaadin selector begins with a UI identifier. It is the
-                URL path of the UI, but without any slashes or other special
-                characters. For example, <literal>/book-examples/tobetested</literal>
-                would be <literal>bookexamplestobetested</literal>. After the
-                identifier, comes two colons "<literal>::</literal>", followed by a
-                slash-delimited component path to the component to be selected. The
-                elements in the component path are client-side classes of the Vaadin
-                user interfacer components. For example, the server-side
-                <classname>VerticalLayout</classname> component has
-                <classname>VVerticalLayout</classname> client-side counterpart. All
-                path elements except the leaves are component containers, usually
-                layouts. The exact contained component is identified by its index in
-                brackets.
-            </para>
-
-            <para>
-                A reference to a component ID is given with a <literal>PID_S</literal>
-                suffix to the ID.
-            </para>
-
-            <para>
-                For example, if the ID is <literal>main.button</literal>, as it was
-                set in the application example earlier, you could find and test it as
-                follows:
-            </para>
-
-            <programlisting><?pocket-size 75% ?><![CDATA[// Get the button's element.
-// Use the ID set with setId().
-WebElement button = driver.findElement(By.vaadin(
-    "bookexamplestobetested::PID_Smain.button"));
-
-// Get the caption text
-assertEquals("Push Me!", button.getText());
-
-// And click it
-button.click();
-
-// Get the Label's element by full path
-WebElement label = driver.findElement(By.vaadin(
-    "bookexamplestobetested::/VVerticalLayout[0]/"+
-    "ChildComponentContainer[1]/VLabel[0]"));
-
-// Make the assertion
-assertEquals("Thanks!", label.getText());]]></programlisting>
-
         </section>
 
         <section xml:id="testbench.selectors.css">
@@ -2998,10 +2936,10 @@ tooltip_firefox_12.0_2.png</screen>
             </para>
 
             <para>
-                A complete example of a Maven test setup is given in the
-                <filename>example/maven</filename> folder in the installation
-                package. Please see the <filename>README</filename> file in the folder for
-                further instructions.
+                A complete example of a Maven test setup is given in the TestBench demo
+                project available at <link
+                xref:href="https://github.com/vaadin/testbench-demo">github.com/vaadin/testbench-demo</link>. See
+                the <filename>README</filename> for further instructions.
             </para>
 
             <section xml:id="testbench.execution.maven.dependency">
@@ -3096,9 +3034,16 @@ Tests run: 6, Failures: 1, Errors: 0, Skipped: 1
                 <classname>DesiredCapabilities</classname> object.
             </para>
 
+            <!-- TODO TestBench 4.0 - check this -->
             <para>
-                For example, in the example tests given in the <filename>example</filename>
-                folder, we create and use a remote driver as follows:
+                An example of remote execution of tests is given in the TestBench demo
+                project available at <link
+                xref:href="https://github.com/vaadin/testbench-demo">github.com/vaadin/testbench-demo</link>. See
+                the <filename>README</filename> for further instructions.
+            </para>
+
+            <para>
+                In the example, we create and use a remote driver as follows:
             </para>
 
             <programlisting><?pocket-size 65% ?><![CDATA[@Test
@@ -3442,6 +3387,9 @@ public void testRemoteWebDriver() throws MalformedURLException {
                 an emulator/simulator.
             </para>
 
+            <!-- TODO TestBench 4.0 - check that this still makes sense - driver addresses
+                       were updated, but this is otherwise completely unverified. -->
+
             <para>
                 The actual testing is just like with any WebDriver, using either the
                 <classname>IPhoneDriver</classname> or the
@@ -3457,9 +3405,9 @@ public void testRemoteWebDriver() throws MalformedURLException {
             <para>
                 The mobile testing setup is covered in detail in the Selenium
                 documentation for both the <link
-                xlink:href="http://code.google.com/p/selenium/wiki/IPhoneDriver">IPhoneDriver</link>
+                xlink:href="http://ios-driver.github.io/ios-driver/">iOS driver</link>
                 and the <link
-                xlink:href="http://code.google.com/p/selenium/wiki/AndroidDriver">AndroidDriver</link>.
+                xlink:href="http://selendroid.io/mobileWeb.html">AndroidDriver</link>.
              </para>
         </section>
     </section>
@@ -3561,7 +3509,7 @@ public void testRemoteWebDriver() throws MalformedURLException {
         <title>Behavior-Driven Development</title>
 
         <para>
-            
+            <emphasis>This section is unfinished.</emphasis>
         </para>
     </section>
 
@@ -3572,44 +3520,6 @@ public void testRemoteWebDriver() throws MalformedURLException {
             This section provides information and instructions on a few features that are known
             to be difficult to use or need modification to work.
         </para>
-
-        <section xml:id="testbench.known-issues.loginform">
-            <title>Testing the LoginForm</title>
-
-            <para>
-                Please note that, as of Vaadin 7, <classname>LoginForm</classname> has
-                been deprecated and should no longer be used. This section is here to
-                inform those still using Vaadin 6.x and testing with Vaadin TestBench.
-            </para>
-
-            <para>
-                Replaying interactions in the <classname>LoginForm</classname> component
-                is somewhat tricky because the identifier of the <literal>iframe</literal>
-                element changes every time the application is restarted, so it can not be
-                used for selecting it. The use of an iframe element means that recordings
-                have to select the target frame before fields can be correctly identified.
-            </para>
-
-            <section xml:id="testbench.known-issues.loginform.junit">
-                <title>Selecting a Frame in JUnit Code</title>
-
-                <para>
-                    Selecting the correct frame in JUnit code by index number can be done
-                    as follows:
-                </para>
-
-                <programlisting><![CDATA[// Select frame by its 0-based index
-getDriver().switchTo().frame(2);]]></programlisting>
-
-                <para>
-                    Or by the XPath with:
-                </para>
-
-                <programlisting><![CDATA[WebElement frame = getDriver().
-    findElement(By.xpath("//id('login')//iframe"));
-getDriver().switchTo().frame(frame);]]></programlisting>
-            </section>
-        </section>
 
         <section xml:id="testbench.known-issues.firefox-mac">
             <title>Running Firefox Tests on Mac OS X</title>
