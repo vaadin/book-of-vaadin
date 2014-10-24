@@ -695,7 +695,7 @@
                     </listitem>
                 </varlistentry>
                 <varlistentry>
-                    <term><filename>vaadin-testbench-core-&version.testbench;.jar</filename></term>
+                    <term><filename>vaadin-testbench-standalone-&version.testbench;.jar</filename></term>
                     <listitem>
                         <para>
                             This is the Vaadin TestBench library. It is a standalone
@@ -879,11 +879,42 @@
                 </listitem>
 
                 <listitem>
-                    Add the driver executable to PATH. In a distributed testing
+                    Add the driver executable to user PATH. In a distributed testing
                     environment, give it as a command-line parameter to the grid node
                     service, as described in <xref linkend="testbench.grid.node"/>.
                 </listitem>
             </orderedlist>
+
+            <section xml:id="testbench.installation.browserdrivers.ubuntu" condition="disabled">
+                <title>Installing ChromeDriver for Ubuntu Chromium</title>
+
+                <para>
+                    While you can install Google Chrome in Ubuntu, it also has its own
+                    Chromium Browser, which is based on the Google Chrome. Chromium has
+                    its own version of ChromeDriver, which requires some additional
+                    installation steps to be usable.
+                </para>
+
+                <para>
+                    Install the ChromeDriver:
+                </para>
+
+                <screen><prompt>$</prompt> <command>sudo apt-get</command> install <parameter>chromium-chromedriver</parameter></screen>
+
+                <para>
+                    Add the driver executable to path, such as:
+                </para>
+
+                <screen><prompt>$</prompt> <command>sudo ln</command> -s <parameter>/usr/lib/chromium-browser/chromedriver</parameter> <parameter>/usr/local/bin/chromedriver</parameter></screen>
+
+                <para>
+                    The Chromium libraries need to be included in the system library path:
+                </para>
+
+                <screen><prompt>$</prompt> <command>sudo sh</command> -c 'echo "/usr/lib/chromium-browser/libs" > /etc/ld.so.conf.d/chrome_libs.conf'</screen>
+                <screen><prompt>$</prompt> <command>sudo ldconfig</command></screen>
+            </section>
+
         </section>
 
         <section xml:id="testbench.installation.testnode">
@@ -1194,14 +1225,27 @@ public class Testcase extends TestBenchTestCase {
             <title>Running JUnit Tests in Eclipse</title>
 
             <para>
-                The Eclipse IDE integrates JUnit with nice control features. To run
-                TestBench JUnit test cases in Eclipse, you need to do the following:
+                The Eclipse IDE integrates JUnit with nice control features, such as
+                running the tests in the current test source file. The test results are
+                reported visually in the JUnit view in Eclipse.
+            </para>
+
+            <para>
+                New Vaadin projects created with the Vaadin Plugin for Eclipse contain the
+                TestBench API dependency, as described in <xref
+                linkend="testbench.quickstart"/>, so you can run TestBench tests right
+                away.
+            </para>
+
+            <para>
+                To configure an existing project for TestBench testing, you need to do the
+                following:
             </para>
 
             <orderedlist>
                 <listitem>
                     <para>
-                        Install the TestBench standalone JAR.
+                        Include the TestBench API dependency in the project.
                     </para>
 
                     <orderedlist>
@@ -1212,23 +1256,36 @@ public class Testcase extends TestBenchTestCase {
                                 in <filename>ivy.xml</filename>. It should be as follows:
                             </para>
 
-                            <programlisting><?pocket-size 75% ?><![CDATA[<dependency org="com.vaadin"
-            name="vaadin-testbench"
-            rev="&version.testbench;"/>]]></programlisting>
+                            <programlisting><?pocket-size 75% ?>&lt;dependency org="com.vaadin"
+            name="vaadin-testbench-api"
+            rev="<emphasis role="bold">latest.release</emphasis>"
+            conf="nodeploy-&gt;default"/&gt;</programlisting>
 
                             <para>
-                                See <xref linkend="addons.eclipse"/> for more details.
+                                The TestBench API library provides element classes for
+                                Vaadin components, so its revision number follows the
+                                earliest supported Vaadin release. For old Vaadin
+                                versions, you can try using the
+                                <literal>latest.release</literal> as given above.
+                            </para>
+
+                            <para>
+                                The project should contain the <literal>nodeploy</literal>
+                                configuration, as created for new Vaadin projects. See
+                                <xref linkend="addons.eclipse"/> for more details.
                             </para>
                         </listitem>
 
                         <listitem>
                             <para>
-                                Otherwise, add the TestBench standalone JAR from the
-                                installation package to a library folder in the project,
-                                such as <filename>lib</filename>. You should not put the
-                                library in <filename>WEB-INF/lib</filename> as it is not
-                                used by the Vaadin web application. Refresh the project by
-                                selecting it and pressing <keycap>F5</keycap>.
+                                Otherwise, add the
+                                <filename>vaadin-testbench-standalone</filename> JAR from
+                                the installation package to a library folder in the
+                                project, such as <filename>lib</filename>. You should not
+                                put the library in <filename>WEB-INF/lib</filename> as it
+                                is not used by the deployed Vaadin web
+                                application. Refresh the project by selecting it and
+                                pressing <keycap>F5</keycap>.
                             </para>
                         </listitem>
                     </orderedlist>
@@ -1284,7 +1341,6 @@ public class Testcase extends TestBenchTestCase {
             </para>
         </section>
     </section>
-
 
     <section xml:id="testbench.testcase">
         <title>Creating a Test Case</title>
@@ -3026,12 +3082,17 @@ Tests run: 6, Failures: 1, Errors: 0, Skipped: 1
             <title>Running Tests Remotely</title>
 
             <para>
-                Remote tests are just like locally executed JUnit tests, except instead of
-                using a browser driver, you use a <classname>RemoteWebDriver</classname>
-                that can connect to the hub. The hub delegates the connection to a grid
-                node with the desired capabilities, that is, which browsers are installed
-                in a suitable node. The capabilities are described with a
-                <classname>DesiredCapabilities</classname> object.
+                Remote tests are just like locally executed tests, except instead of using
+                a browser driver, you use a remote web driver that can connect to the
+                hub. The hub delegates the connection to a grid node with the desired
+                capabilities, that is, which browsers are installed in the node.
+            </para>
+
+            <para>
+                Instead of creating and handling the remote driver explicitly, as
+                described in the following, you can use the
+                <classname>ParallelTest</classname> framework presented in <xref
+                linkend="testbench.parallel"/>.
             </para>
 
             <!-- TODO TestBench 4.0 - check this -->
@@ -3043,7 +3104,9 @@ Tests run: 6, Failures: 1, Errors: 0, Skipped: 1
             </para>
 
             <para>
-                In the example, we create and use a remote driver as follows:
+                In the example, we create and use a remote driver as follows.  The desired
+                capabilities of a test node are described with a
+                <classname>DesiredCapabilities</classname> object.
             </para>
 
             <programlisting><?pocket-size 65% ?><![CDATA[@Test
@@ -3409,6 +3472,101 @@ public void testRemoteWebDriver() throws MalformedURLException {
                 and the <link
                 xlink:href="http://selendroid.io/mobileWeb.html">AndroidDriver</link>.
              </para>
+        </section>
+    </section>
+
+    <section xml:id="testbench.parallel">
+        <title>Parallel Execution of Tests</title>
+
+        <para>
+            The <classname>ParallelTest</classname> class provides an easy way to run
+            tests in parallel locally, as well as remotely in a test grid.
+        </para>
+
+        <section xml:id="testbench.parallel.local">
+            <title>Local Parallel Execution</title>
+
+            <para>
+                To enable parallel execution of tests, usually during test development,
+                you need to extend the <classname>ParallelTest</classname> instead of
+                <classname>TestBenchTestCase</classname> and annotate the test case class
+                with <literal>@RunLocally</literal>.
+            </para>
+
+            <programlisting><![CDATA[@RunLocally
+public class MyTest extends ParallelTest {
+   @Test
+   ...
+}]]></programlisting>
+
+            <para>
+                When you run the tests, TestBench launches multiple browser windows to run
+                each test in parallel.
+            </para>
+
+            <para>
+                Parallel execution defaults to Firefox. You can give another browser as a
+                parameter for the annotation, as enumerated in the
+                <classname>Browser</classname> enumeration:
+            </para>
+
+            <programlisting><![CDATA[@RunLocally(Browser.CHROME)]]></programlisting>
+
+            <para>
+                For Chrome and IE, you need to have the browser driver installed, as
+                described in <xref linkend="testbench.installation.browserdrivers"/>.
+            </para>
+        </section>
+
+        <section xml:id="testbench.parallel.grid">
+            <title>Multi-Browser Execution in a Grid</title>
+
+            <para>
+                To run tests in multiple different browsers or remotely, you first need to
+                set up and launch a grid hub and one or more grid nodes, as described in
+                <xref linkend="testbench.grid"/>. This enables remote execution in a test
+                grid, although you can run the hub and a test node also in your
+                development workstation.
+            </para>
+
+            <para>
+                To run a test case class in a grid, you simply need to annotate the test
+                case classes with the <literal>@RunOnHub</literal> annotation. It takes
+                the host address of the hub as parameter, with
+                <literal>localhost</literal> as the default host. You need to define the
+                desired browser capabilities in a method annotated with
+                <literal>@BrowserConfiguration</literal>. It must return a list of
+                <classname>DesiredCapabilities</classname>.
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[@RunOnHub("hub.testgrid.mydomain.com")
+public class MyTest extends ParallelTest {
+   @Test
+   ...
+
+   @BrowserConfiguration
+   public List<DesiredCapabilities> getBrowserConfiguration() {
+       List<DesiredCapabilities> browsers =
+           new ArrayList<DesiredCapabilities>();
+        
+       // Add all the browsers you want to test
+       browsers.add(BrowserUtil.firefox());
+       browsers.add(BrowserUtil.chrome());
+       browsers.add(BrowserUtil.ie11());
+        
+       return browsers;
+   }
+}]]></programlisting>
+
+            <para>
+                The actual browsers tested depends on the browser capabilities of the test
+                node or nodes.
+            </para>
+
+            <para>
+                If you have more test classes, you can put the configuration in a common
+                base class that extends <classname>ParallelTest</classname>.
+            </para>
         </section>
     </section>
 
