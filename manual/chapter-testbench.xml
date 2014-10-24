@@ -673,17 +673,6 @@
                     </listitem>
                 </varlistentry>
                 <varlistentry>
-                    <term><filename>example</filename></term>
-                    <listitem>
-                        <para>
-                            The example folder provides TestBench examples. An example
-                            Maven configuration POM is given, as well as the JUnit test
-                            Java source files. For a description of the contents, see
-                            <xref linkend="testbench.installation.examples"/>.
-                        </para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
                     <term><filename>maven</filename></term>
                     <listitem>
                         <para>
@@ -709,24 +698,39 @@
         </section>
 
         <section xml:id="testbench.installation.examples">
-            <title>Example Contents</title>
+            <title>TestBench Demo</title>
 
             <para>
-                The <filename>example/maven</filename> folder provides a number of
-                examples for using Vaadin TestBench. The source code for the application
-                to be tested, a desktop calculator application, is given in the
-                <filename>src/main/java</filename> subfolder.
+                A TestBench demo is available at <link
+                xlink:href="https://github.com/vaadin/testbench-demo">https://github.com/vaadin/testbench-demo</link>. You
+                can browse the sources at the website and clone the repository with a Git
+                client; from command line with:
+            </para>
+
+            <screen><prompt>$</prompt> <command>git</command> clone <parameter>https://github.com/vaadin/testbench-demo</parameter></screen>
+
+            <para>
+                The tests can be run from the command line by issuing the following
+                command:
+            </para>
+
+            <screen><prompt>$</prompt> <command>mvn</command> verify</screen>
+
+            <para>
+                The source code for the application to be tested, a desktop calculator
+                application, is given in the <filename>src/main/java</filename> subfolder.
             </para>
 
             <para>
-                The tests examples given under the <filename>src/test/java</filename>
-                subfolder, in the <filename>com/vaadin/testbenchexample</filename> package
-                subfolder, are as follows:
+                The TestBench tests for the application are located under the
+                <filename>src/test/java</filename> subfolder, in the
+                <filename>com/vaadin/testbenchexample</filename> package subfolder. They
+                are as follows:
             </para>
 
             <variablelist>
                 <varlistentry>
-                    <term><filename>SimpleCalculatorITCase.java</filename></term>
+                    <term><filename><link xlink:href="https://github.com/vaadin/testbench-demo/blob/master/src/test/java/com/vaadin/testbenchexample/SimpleCalculatorITCase.java">SimpleCalculatorITCase.java</link></filename></term>
                     <listitem>
                         <para>
                             Demonstrates the basic use of WebDriver. Interacts with the
@@ -832,11 +836,6 @@
                     </listitem>
                 </varlistentry>
             </variablelist>
-
-            <para>
-                For information about running the examples with Maven, see <xref
-                linkend="testbench.execution.maven"/>.
-            </para>
         </section>
 
         <section xml:id="testbench.installation.browserdrivers">
@@ -1889,7 +1888,8 @@ String tooltipText = findElement(
 
             <para>
                 For a complete example, see the
-                <filename>AdvancedCommandsITCase.java</filename> file in the examples.
+                <filename>AdvancedCommandsITCase.java</filename> file in the TestBench
+                demo described in <xref linkend="testbench.installation.examples"/>.
             </para>
         </section>
     </section>
@@ -2223,15 +2223,13 @@ menuitem.click();]]></programlisting>
             </para>
             
             <para>
-                The following example is given in the
-                <filename>VerifyExecutionTimeITCase.java</filename> file under the
-                TestBench examples.
+                The following example is given in the <filename><link
+                xlink:href="https://github.com/vaadin/testbench-demo/blob/master/src/test/java/com/vaadin/testbenchexample/VerifyExecutionTimeITCase.java">VerifyExecutionTimeITCase.java</link></filename>
+                file in the TestBench demo.
             </para>
 
             <programlisting><?pocket-size 65% ?><![CDATA[@Test
 public void verifyServerExecutionTime() throws Exception {
-    openCalculator();
-
     // Get start time on the server-side
     long currentSessionTime = testBench(getDriver())
             .totalTimeSpentServicingRequests();
@@ -2241,7 +2239,7 @@ public void verifyServerExecutionTime() throws Exception {
 
     // Calculate the passed processing time on the serve-side
     long timeSpentByServerForSimpleCalculation = testBench()
-        .totalTimeSpentServicingRequests() - currentSessionTime;
+            .totalTimeSpentServicingRequests() - currentSessionTime;
 
     // Report the timing
     System.out.println("Calculating 1+2 took about "
@@ -2251,22 +2249,21 @@ public void verifyServerExecutionTime() throws Exception {
     // Fail if the processing time was critically long
     if (timeSpentByServerForSimpleCalculation > 30) {
         fail("Simple calculation shouldn't take "
-             + timeSpentByServerForSimpleCalculation + "ms!");
+                + timeSpentByServerForSimpleCalculation + "ms!");
     }
 
     // Do the same with rendering time
-    long totalTimeSpentRendering =
-            testBench().totalTimeSpentRendering();
-    System.out.println("Rendering UI took " +
-            totalTimeSpentRendering + "ms");
-    if (timeSpentByServerForSimpleCalculation > 400) {
-        fail("Rendering UI shouldn't take "
-             + timeSpentByServerForSimpleCalculation + "ms!");
+    long totalTimeSpentRendering = testBench().totalTimeSpentRendering();
+    System.out.println("Rendering UI took " + totalTimeSpentRendering
+            + "ms");
+    if (totalTimeSpentRendering > 400) {
+        fail("Rendering UI shouldn't take " + totalTimeSpentRendering
+               + "ms!");
     }
 
-    // A regular assertion on the UI state
-    assertEquals("3.0", getDriver().findElement(
-                        By.id("display")).getText());
+    // A normal assertion on the UI state
+    assertEquals("3.0",
+            $(TextFieldElement.class).first().getAttribute("value"));
 }]]></programlisting>
 
         </section>
@@ -2787,6 +2784,10 @@ Time: 18.222
 
 OK (1 test)</screen>
 
+                <!-- DISABLED This is currently not supported in TB4
+                     The functionality exists in classes extending TB in Vaadin,
+                     but it has not been moved to the core TB project (yet)
+
                 <para>
                     You can also supply multiple versions of the reference images by
                     appending an underscore and an index to the filenames. For example:
@@ -2800,6 +2801,7 @@ tooltip_firefox_12.0_2.png</screen>
                     This can be useful in certain situations when there actually are more
                     than one "correct" reference.
                 </para>
+                -->
             </section>
 
             <section xml:id="testbench.screenshots.comparison.masked">
@@ -2814,8 +2816,7 @@ tooltip_firefox_12.0_2.png</screen>
 
                 <para>
                     Please see the <filename>ScreenshotITCase.java</filename> example in
-                    the installation package for an example of using masked
-                    screenshots. The
+                    the TestBench Demo for an example of using masked screenshots. The
                     <filename>example/Screenshot_Comparison_Tests.pdf</filename> document
                     describes how to enable the example and how to create the screenshot
                     masks in an image editor.
@@ -3098,43 +3099,62 @@ Tests run: 6, Failures: 1, Errors: 0, Skipped: 1
             <!-- TODO TestBench 4.0 - check this -->
             <para>
                 An example of remote execution of tests is given in the TestBench demo
-                project available at <link
-                xlink:href="https://github.com/vaadin/testbench-demo">github.com/vaadin/testbench-demo</link>. See
-                the <filename>README</filename> for further instructions.
+                described in <xref linkend="testbench.installation.examples"/>. See the
+                <filename>README.md</filename> file for further instructions.
             </para>
 
             <para>
-                In the example, we create and use a remote driver as follows.  The desired
+                In the following example, we create and use a remote driver that runs
+                tests in a Selenium cloud at <url>testingbut.com</url>.  The desired
                 capabilities of a test node are described with a
                 <classname>DesiredCapabilities</classname> object.
             </para>
 
-            <programlisting><?pocket-size 65% ?><![CDATA[@Test
-public void testRemoteWebDriver() throws MalformedURLException {
-    // Require Firefox in the test node
-    DesiredCapabilities capability =
-        DesiredCapabilities.firefox();
+            <programlisting><?pocket-size 65% ?><![CDATA[public class UsingHubITCase extends TestBenchTestCase {
 
-    // Create a remote web driver that connects to a hub
-    // running in the local host
-    WebDriver driver = TestBench.createDriver(
-        new RemoteWebDriver(new URL(
-            "http://localhost:4444/wd/hub"), capability));
+    private String baseUrl;
+    private String clientKey = "INSERT-YOUR-CLIENT-KEY-HERE";
+    private String clientSecret = "INSERT-YOUR-CLIENT-KEY-HERE";
 
-    // Then use it to run a test as you would use any web driver
-    try {
-        driver.navigate().to(
-            "http://demo.vaadin.com/sampler#TreeActions");
-        WebElement e = driver.findElement(By.xpath(
-            "//div[@class='v-tree-node-caption']"+
-            "/div[span='Desktops']"));
-        new Actions(driver).moveToElement(e).contextClick(e)
-            .perform();
-    } finally {
-        driver.quit();
+    @Before
+    public void setUp() throws Exception {
+        // Create a RemoteDriver against the hub.
+        // In you local setup you don't need key and secret,
+        // but if you use service like testingbot.com, they
+        // can be used for authentication
+        URL testingbotdotcom = new URL("http://" +
+                clientKey + ":" + clientSecret +
+                "@hub.testingbot.com:4444/wd/hub");
+        setDriver(new RemoteWebDriver(testingbotdotcom,
+                DesiredCapabilities.iphone()));
+        baseUrl = "http://demo.vaadin.com/Calc/";
     }
-}
-]]></programlisting>
+
+    @Test
+    @Ignore("Requires testingbot.com credientials")
+    public void testOnePlusTwo() throws Exception {
+        // run the test just as with "local bots"
+        openCalculator();
+        $(ButtonElement.class).caption("1").first().click();
+        $(ButtonElement.class).caption("+").first().click();
+        $(ButtonElement.class).caption("2").first().click();
+        $(ButtonElement.class).caption("=").first().click();
+        assertEquals("3.0", $(TextFieldElement.class)
+                            .first().getAttribute("value"));
+
+        // Thats it. Services may provide also some other goodies
+        // like the video replay of your test in testingbot.com
+    }
+
+    private void openCalculator() {
+        getDriver().get(baseUrl);
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        getDriver().quit();
+    }
+}]]></programlisting>
 
             <para>
                 Please see the API documentation of the
@@ -3619,7 +3639,7 @@ public class MyTest extends ParallelTest {
                 </para>
                 
                 <programlisting><?pocket-size 65% ?><![CDATA[setDriver(TestBench.createDriver(
-    new PhantomJSDriver(DesiredCapabilities.phantomjs())));]]></programlisting>
+    new PhantomJSDriver()));]]></programlisting>
 
                 <para>
                     Some tests may fail because of the small default window size in
