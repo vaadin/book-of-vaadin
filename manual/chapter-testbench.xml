@@ -1999,16 +1999,18 @@ public void testTooltip() throws Exception {
 
             <para>
                 Some Vaadin components, such as <classname>Table</classname> and
-                <classname>Panel</classname> have a scrollbar. To get hold of the
-                scrollbar, you must first find the component element. Then, you need to
-                get hold of the <interfacename>TestBenchElementCommands</interfacename>
-                interface from the <classname>WebElement</classname> with
-                <methodname>testBenchElement(WebElement)</methodname>. The
-                <methodname>scroll()</methodname> method in the interface scrolls a
-                vertical scrollbar down the number of pixels given as the parameter. The
-                <methodname>scrollLeft()</methodname> scrolls a horizontal scrollbar by
-                the given number of pixels.
+                <classname>Panel</classname> have a scrollbar. Their corresponding element
+                classes have <methodname>scroll()</methodname> and
+                <methodname>scrollLeft()</methodname> methods, which you can use to scroll
+                to a vertical or horizontal position, respectively. The scroll position is
+                given in pixels.
             </para>
+
+            <programlisting><?pocket-size 75% ?><![CDATA[// Scroll to a vertical position
+PanelElement panel = $(PanelElement.class)
+        .caption("Scrolling Panel").first();
+panel.scroll(123);]]></programlisting>
+
         </section>
 
         <section xml:id="testbench.special.notifications">
@@ -2021,19 +2023,20 @@ public void testTooltip() throws Exception {
 
             <para>
                 You can find notification elements by the
-                <classname>NotificationElement</classname> class in the element query API.
+                <classname>NotificationElement</classname> class in the element query
+                API. The element class supports getting the caption with
+                <methodname>getCaption()</methodname>, description with
+                <methodname>getDescription()</methodname>, and notification type with
+                <methodname>getType()</methodname>.
             </para>
 
             <para>
                 Let us assume that you pop the notifcation up as follows:
             </para>
 
-            <programlisting><?pocket-size 75% ?><![CDATA[Button button = new Button("Click Me!");
-button.addClickListener(new Button.ClickListener() {
-    public void buttonClick(ClickEvent event) {
-        Notification.show("Thank You!");
-    }
-});]]></programlisting>
+            <programlisting><?pocket-size 75% ?><![CDATA[Button button = new Button("Pop It Up", e -> // Java 8
+    Notification.show("The caption", "The description",
+                      Notification.Type.WARNING_MESSAGE));]]></programlisting>
 
             <para>
                 You could then check for the notification as follows:
@@ -2041,18 +2044,20 @@ button.addClickListener(new Button.ClickListener() {
 
             <programlisting><?pocket-size 70% ?><![CDATA[// Click the button to open the notification
 ButtonElement button =
-    $(ButtonElement.class).caption("Click Me!").first();
+    $(ButtonElement.class).caption("Pop It Up").first();
 button.click();
 
 // Verify the notification
 NotificationElement notification =
         $(NotificationElement.class).first();
-assertEquals("Thank You!", notification.getText());
-notification.closeNotification();]]></programlisting>
+assertEquals("The caption", notification.getCaption());
+assertEquals("The description", notification.getDescription());
+assertEquals("warning", notification.getType());
+notification.close();]]></programlisting>
 
             <para>
                 You need to close the notification box with
-                <methodname>closeNotification()</methodname> to move forward.
+                <methodname>close()</methodname> to move forward.
             </para>
         </section>
 
