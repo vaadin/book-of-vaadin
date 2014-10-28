@@ -2931,33 +2931,39 @@ tooltip_firefox_12.0_2.png</screen>
             <title>Running Tests with Ant</title>
 
             <para>
-                Apache Ant has built-in support for executing JUnit tests. To enable the
-                support, you need to have the JUnit library <filename>junit.jar</filename>
-                and its Ant integration library <filename>ant-junit.jar</filename> in the
-                Ant classpath, as described in the Ant documentation.
+                Apache Ant has built-in support for executing JUnit tests; you can use the
+                <literal>&lt;junit&gt;</literal> task in an Ant script to execute JUnit
+                tests. Note that in earlier versions, you need to enable the support, you
+                need to have the JUnit library <filename>junit.jar</filename> and its Ant
+                integration library <filename>ant-junit.jar</filename> in the Ant
+                classpath, as described in the Ant documentation.
             </para>
 
             <para>
-                Once enabled, you can use the <literal>&lt;junit&gt;</literal> task in an
-                Ant script. The following example assumes that the source files are
-                located under a <filename>src</filename> directory under the current
+                The following Ant script allows testing a Vaadin application created with
+                the Vaadin Plugin for Eclipse. It assumes that the test source files are
+                located under a <filename>test</filename> directory under the current
                 directory and compiles them to the <filename>classes</filename>
                 directory. The the class path is defined with the
-                <literal>classpath</literal> reference ID and should include the TestBench
-                JAR and all relevant dependencies.
+                <literal>classpath</literal> reference ID and should contain TestBench
+                and other necessary libraries.
             </para>
 
-            <programlisting><?pocket-size 65% ?><![CDATA[<project default="run-tests">
+            <programlisting><?pocket-size 65% ?><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<project default="run-tests">
     <path id="classpath">
-        <fileset dir="lib"
-                 includes="vaadin-testbench-standalone-*.jar" />
+        <fileset dir="lib">
+            <include name="vaadin-testbench-*.jar"/>
+            <include name="junit-*.jar"/>
+        </fileset>
     </path>
-
+	
     <!-- This target compiles the JUnit tests. -->
     <target name="compile-tests">
         <mkdir dir="classes" />
-        <javac srcdir="src" destdir="classes"
-               debug="on" encoding="utf-8">
+        <javac srcdir="test" destdir="classes"
+               debug="on" encoding="utf-8"
+        	   includeantruntime="false">
             <classpath>
                 <path refid="classpath" />
             </classpath>
@@ -2975,7 +2981,7 @@ tooltip_firefox_12.0_2.png</screen>
             <formatter type="brief" usefile="false" />
                                 
             <batchtest>
-                <fileset dir="src">
+                <fileset dir="test">
                     <include name="**/**.java" />
                 </fileset>
             </batchtest>
@@ -2987,6 +2993,58 @@ tooltip_firefox_12.0_2.png</screen>
                 You also need to deploy the application to test, and possibly launch a
                 dedicated server for it.
             </para>
+
+            <section xml:id="testbench.execution.ant.ivy">
+                <title>Retrieving TestBench with Ivy</title>
+
+                <para>
+                    To retrieve TestBench and its dependencies with Ivy in the Ant script,
+                    first install Ivy to your Ant installation, if necessary. In the build
+                    script, you need to enable Ivy with the namespace declaration and
+                    include a target for retrieving the libraries, as follows:
+                </para>
+
+                <programlisting><?pocket-size 75% ?><![CDATA[<project xmlns:ivy="antlib:org.apache.ivy.ant"
+         default="run-tests">
+...
+    <!-- Retrieve dependencies with Ivy -->
+    <target name="resolve">
+        <ivy:retrieve conf="testing" type="jar,bundle"
+            pattern="lib/[artifact]-[revision].[ext]"/>
+    </target>
+
+    <!-- This target compiles the JUnit tests. -->
+    <target name="compile-tests" depends="resolve">
+        ...]]></programlisting>
+
+                <para>
+                    This requires that you have a "<literal>testing</literal>"
+                    configuration in your <filename>ivy.xml</filename> and that the
+                    TestBench dependency are enabled in the configuration.
+                </para>
+
+                <programlisting><?pocket-size 75% ?>
+&lt;ivy-module&gt;
+    ...
+    &lt;configurations&gt;
+        ...
+        <emphasis role="bold">&lt;conf name="testing" /&gt;</emphasis>
+    &lt;/configurations&gt;
+
+    &lt;dependencies&gt;
+        ...
+        &lt;!-- TestBench 4 --&gt;
+        &lt;dependency org="com.vaadin"
+                    name="vaadin-testbench-api"
+                    rev="latest.release"
+                    conf="nodeploy<emphasis role="bold">,testing</emphasis> -&gt; default" /&gt;
+        ...</programlisting>
+
+                <para>
+                    You also need to build and deploy the application to be tested to the
+                    server and install the TestBench license key.
+                </para>
+            </section>
         </section>
 
         <section xml:id="testbench.execution.maven">
@@ -3110,7 +3168,7 @@ Tests run: 6, Failures: 1, Errors: 0, Skipped: 1
 
             <para>
                 In the following example, we create and use a remote driver that runs
-                tests in a Selenium cloud at <url>testingbut.com</url>.  The desired
+                tests in a Selenium cloud at <uri>testingbot.com</uri>.  The desired
                 capabilities of a test node are described with a
                 <classname>DesiredCapabilities</classname> object.
             </para>
