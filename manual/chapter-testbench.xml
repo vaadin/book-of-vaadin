@@ -14,20 +14,13 @@
         This chapter describes the installation and use of the Vaadin TestBench.
     </para>
 
-    <para>
-        <emphasis>This documentation is being revised to comply with Vaadin TestBench
-        version 4.0. It is mostly up-to-date, but the last details will be finished in a
-        short while.</emphasis>
-    </para>
-
     <section xml:id="testbench.overview">
         <title>Overview</title>
-
+        
         <para>
             Testing is one of the cornerstones of modern software development. Extending
-            throughout the entire development process, testing is the thread that binds
-            the product to the requirements. Conformance to user scenarios is validated by
-            end-to-end acceptance testing. In agile and other iterative development
+            throughout the development process, testing is the thread that binds the
+            product to the requirements. In agile and other iterative development
             processes, with ever shorter release cycles and continuous integration, the
             automation of integration, regression, endurance, and acceptance testing is
             paramount. Further, UI automation may be needed for integration purposes, such
@@ -38,8 +31,8 @@
         <para>
             Vaadin TestBench allows controlling the browser from Java code, as illustrated
             in <xref linkend="figure.testbench.webdriver"/>. It can open a new browser
-            window to start the application, interact with the components, for example, by
-            clicking them, and then get the HTML element values.
+            window to start the application, interact with the UI components, for example,
+            by clicking them, and then get the HTML element values.
         </para>
 
 		<figure xml:id="figure.testbench.webdriver">
@@ -89,12 +82,12 @@
                 actually do. <emphasis>Acceptance tests</emphasis> ensure that the product
                 conforms to the requirements. In agile development, their automation
                 allows continuous tracking of progress towards iteration goals, as well as
-                regressions, especially when. The importance of requirements is emphasized in
+                detecting regressions. The importance of requirements is emphasized in
                 <emphasis>test-driven development</emphasis> (TDD), where tests are
                 written before actual code. In <xref linkend="testbench.bdd"/>, we show
-                how to use Vaadin TestBench for <emphasis>behavior-driven
-                development</emphasis> (BDD), a special form of TDD that concentrates on
-                the formal behavioral specification of requirements.
+                how to use Vaadin TestBench for <emphasis>behaviour-driven
+                development</emphasis> (BDD), a form of TDD that concentrates on the
+                formal behavioural specification of requirements.
             </para>
 
             <para>
@@ -309,15 +302,6 @@
                 first caused them to occur.
             </para>
 
-            <figure xml:id="figure.testbench.overview.cis">
-                <title>Continuous Integration Workflow</title>
-                <mediaobject>
-                    <imageobject>
-                        <imagedata scale="70" smallscale="100%" align="center" fileref="img/testbench/cis-workflow-hi.png"/>
-                    </imageobject>
-                </mediaobject>
-            </figure>
-
             <para>
                 You can make unit tests with Vaadin TestBench just like you would do any
                 other Java unit tests, so they work seamlessly with continuous integration
@@ -326,12 +310,21 @@
                 all have special support for the JUnit unit testing framework.
             </para>
 
+            <figure xml:id="figure.testbench.overview.cis">
+                <title>Continuous Integration Workflow</title>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata scale="130" smallscale="100%" align="center" fileref="img/testbench/cis-workflow-hi.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+
             <para>
-                <xref linkend="figure.testbench.quickstart.license"/> illustrates a
-                typical development setup. Both changes to application and test sources
-                are checked in into a source repository, from where the CIS server checks
-                them out, compiles, and deploys the web application to a server. Then, it
-                runs the tests and collects the results.
+                <xref linkend="figure.testbench.overview.cis"/> illustrates a typical
+                development setup. Both changes to application and test sources are
+                checked in into a source repository, from where the CIS server checks them
+                out, compiles, and deploys the web application to a server. Then, it runs
+                the tests and collects the results.
             </para>
         </simplesect>
 
@@ -372,22 +365,32 @@
                 <title>Obtaining License Key from Vaadin Directory</title>
                 <mediaobject>
                     <imageobject>
-                        <imagedata scale="70" smallscale="70%" align="center" fileref="img/testbench/screenshots/directory-license-key.png"/>
+                        <imagedata scale="50" smallscale="70%" align="center" fileref="img/testbench/screenshots/directory-license-key.png"/>
                     </imageobject>
                 </mediaobject>
             </figure>
 
             <para>
-                To install the license key, either copy and paste it verbatim to a
+                To install the license key on a development workstation, you can copy and
+                paste it verbatim to a
                 <filename>.vaadin.testbench.developer.license</filename> file in your home
-                directory or pass it to the web server's JRE in a system property.
+                directory. For example, in Linux and OS&nbsp;X:
             </para>
 
-            <screen><prompt>$</prompt> <command>java</command> <parameter>-Dvaadin.testbench.developer.license=</parameter>l1ce4ce-c0de</screen>
+            <screen><?pocket-size 75% ?><prompt>$</prompt> <command>echo</command> "<replaceable>L1cen5e-c0de</replaceable>" > <parameter>~/.vaadin.testbench.developer.license</parameter></screen>
 
             <para>
-                How you actually pass the parameter to your server depends on how it is
-                launched.
+                You can also pass the key as a system property to the Java application
+                running the tests, usually with a <literal>-D</literal> option on the
+                command-line:
+            </para>
+
+            <screen><?pocket-size 75% ?><prompt>$</prompt> <command>java</command> -D<parameter>vaadin.testbench.developer.license</parameter>=<replaceable>L1cen5e-c0de</replaceable> ...</screen>
+
+            <para>
+                How you actually pass the parameter to your test runner depends on the
+                actual test execution environment. Below are listed a few typical
+                environments:
             </para>
 
             <variablelist>
@@ -422,14 +425,61 @@
                         </para>
                     </listitem>
                 </varlistentry>
+
                 <varlistentry>
-                    <term>Apache Tomcat (or TomEE)</term>
+                    <term>Apache Ant</term>
                     <listitem>
                         <para>
-                            In <filename>bin/setenv.sh</filename> under the Tomcat
-                            installation directory, define:
-                            
-                            <screen>export CATALING_OPTS=<parameter>-Dvaadin.testbench.developer.license=</parameter>l1ce4ce-c0de</screen>
+                            If running tests with the <literal>&lt;junit&gt;</literal>
+                            task in Apache Ant, as described in <xref
+                            linkend="testbench.execution.ant"/>, you can pass the key as
+                            follows:
+                        </para>
+
+                        <programlisting><?pocket-size 70% ?>&lt;sysproperty key="vaadin.testbench.developer.license"
+             value="<emphasis role="bold">L1cen5e-c0de</emphasis>"/&gt;</programlisting>
+
+                        <para>
+                            However, you should never store license keys in a source
+                            repository, so if the Ant script is stored in a source
+                            repository, you should pass the license key to Ant as a
+                            property that you then use in the script for the value
+                            argument of the <literal>&lt;sysproperty&gt;</literal> as
+                            follows:
+                        </para>
+
+                        <programlisting><?pocket-size 70% ?>&lt;sysproperty key="vaadin.testbench.developer.license"
+    value="<emphasis role="bold">${vaadin.testbench.developer.license}</emphasis>"/&gt;</programlisting>
+
+                        <para>
+                            When invoking Ant from the command-line, you can pass the
+                            property with a <parameter>-D</parameter> parameter to Ant.
+                        </para>
+                    </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                    <term>Apache Maven</term>
+                    <listitem>
+                        <para>
+                            If running tests with Apache Maven, you can pass the license
+                            key with a <literal>-D</literal> parameter to Maven:
+                        </para>
+
+                        <screen><prompt>$</prompt> <command>mvn</command> -D<parameter>vaadin.testbench.developer.license</parameter>=<replaceable>L1cen5e-c0de</replaceable> verify</screen>
+                    </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                    <term>TeamCity</term>
+                    <listitem>
+                        <para>
+                            In TeamCity, you can pass the license key to build runners as
+                            a system property in the build configuration. However, this
+                            only passes it to a runner. As described above, Maven passes
+                            the parameter as is to JUnit, but Ant does not do so
+                            implicitly, so you need to forward it explicitly as described
+                            earlier.
                         </para>
                     </listitem>
                 </varlistentry>
@@ -502,9 +552,9 @@
                 With Maven, you need to create a new Vaadin project with the
                 <literal>vaadin-archetype-application</literal> archetype, as described in
                 <xref linkend="getting-started.maven"/>. The license needs to be installed
-                as mentioned earlier. Then, build the project with the
-                <literal>integration-test</literal> or a later phase in the build
-                lifecycle. For example, from the command-line:
+                or given as parameter for the following command, as mentioned
+                earlier. Build the project with the <literal>integration-test</literal> or
+                a later phase in the build lifecycle. For example, from the command-line:
             </para>
 
             <screen><prompt>$</prompt> <command>mvn</command> <parameter>integration-test</parameter></screen>
@@ -525,14 +575,15 @@
         <para>
             As with most Vaadin add-ons, you can install Vaadin TestBench as a Maven or
             Ivy dependency in your project, or from an installation package. The
-            installation package contains some extra material, such as demo code and
-            documentation.
+            installation package contains some extra material, such as documentation, as
+            well as the standalone library, which you use for testing in a grid.
         </para>
 
         <para>
             The component element classes are Vaadin version specific and they are
             packaged in a <filename>vaadin-testbench-api</filename> library JAR,
-            separately from the TestBench core runtime library.
+            separately from the <filename>vaadin-testbench-core</filename> runtime
+            library, which is needed for executing the tests.
         </para>
 
         <para>
@@ -549,52 +600,80 @@
             </para>
 
             <para>
-                The Maven dependency would be as follows:
-            </para>
-
-            <!-- TODO Update this to use vaadin-testbench-api -->
-            <programlisting><?pocket-size 75% ?>&lt;dependency&gt;
-    &lt;groupId&gt;com.vaadin&lt;/groupId&gt;
-    &lt;artifactId&gt;vaadin-testbench&lt;/artifactId&gt;
-    &lt;version&gt;<emphasis role="bold">4.x.x</emphasis>&lt;/version&gt;
-    &lt;scope&gt;test&lt;/scope&gt;
-&lt;/dependency&gt;</programlisting>
-
-            <para>
-                The Ivy dependency, to be defined in <filename>ivy.xml</filename>, would
-                be as follows:
-            </para>
-
-            <programlisting><?pocket-size 75% ?>&lt;dependency org="com.vaadin" name="vaadin-testbench-api"
-   rev="<emphasis role="bold">latest.release</emphasis>" conf="nodeploy-&gt;default"/&gt;</programlisting>
-
-            <para>
-                The optional <literal>nodeploy-&gt;default</literal> configuration mapping
-                requires a <literal>nodeploy</literal> configuration in the Ivy module; it
-                is automatically created for new Vaadin projects.
-            </para>
-
-            <para>
-                We generally recommend developing tests in a project or module separate
-                from the web application to be tested to avoid library problems. If the
-                tests are part of the same project, you may at least want to arrange the
-                source code and dependencies so that the test classes, the TestBench
-                library, and their dependencies would not be deployed unnecessarily with
-                the web application.
-            </para>
-
-            <para>
                 In a test development setup, you do not need a grid hub or nodes. However,
                 if you develop tests for a grid, you can run the tests, the grid hub, and
                 one node all in your development workstation. A distributed setup is
-                described in the following section.
+                described later.
             </para>
 
-            <para>
-                You may find it convenient to develop and execute tests under an IDE such
-                as Eclipse. The special support for running JUnit test cases in Eclipse is
-                described in <xref linkend="testbench.development.eclipse"/>.
-            </para>
+            <section xml:id="testbench.installation.development.maven">
+                <title>Maven Dependency</title>
+
+                <para>
+                    The Maven dependency for Vaadin TestBench is as follows:
+                </para>
+
+                <!-- TODO Update this to use vaadin-testbench-api -->
+                <programlisting><?pocket-size 75% ?>&lt;dependency&gt;
+    &lt;groupId&gt;com.vaadin&lt;/groupId&gt;
+    &lt;artifactId&gt;vaadin-testbench&lt;/artifactId&gt;
+    &lt;version&gt;<replaceable>&version.testbench;</replaceable>&lt;/version&gt;
+    &lt;scope&gt;test&lt;/scope&gt;
+&lt;/dependency&gt;</programlisting>
+
+                <para>
+                    You also need to define the Vaadin add-ons repository if not already
+                    defined:
+                </para>
+
+                <programlisting><?pocket-size 75% ?><![CDATA[<repository>
+   <id>vaadin-addons</id>
+   <url>http://maven.vaadin.com/vaadin-addons</url>
+</repository>]]></programlisting>
+
+                <para>
+                    The <literal>vaadin-archetype-application</literal> archetype, as
+                    mentioned in <xref linkend="testbench.quickstart.maven"/>, includes the
+                    declarations.
+                </para>
+            </section>
+
+            <section xml:id="testbench.installation.development.ivy">
+                <title>Ivy Dependency</title>
+
+                <para>
+                    The Ivy dependency, to be defined in <filename>ivy.xml</filename>, would
+                    be as follows:
+                </para>
+
+                <programlisting><?pocket-size 75% ?>&lt;dependency org="com.vaadin" name="vaadin-testbench-api"
+   rev="<emphasis role="bold">latest.release</emphasis>" conf="nodeploy-&gt;default"/&gt;</programlisting>
+
+                <para>
+                    The optional <literal>nodeploy-&gt;default</literal> configuration mapping
+                    requires a <literal>nodeploy</literal> configuration in the Ivy module; it
+                    is automatically created for new Vaadin projects.
+                </para>
+
+                <para>
+                    A new Vaadin project created with the Vaadin Plugin for Eclipse, as
+                    described in <xref linkend="testbench.quickstart.eclipse"/>, includes
+                    the dependency.
+                </para>
+            </section>
+
+            <section xml:id="testbench.installation.development.organization">
+                <title>Code Organization</title>
+
+                <para>
+                    We generally recommend developing tests in a project or module
+                    separate from the web application to be tested to avoid library
+                    problems. If the tests are part of the same project, you should at
+                    least arrange the source code and dependencies so that the test
+                    classes, the TestBench library, and their dependencies would not be
+                    deployed unnecessarily with the web application.
+                </para>
+            </section>
         </section>
             
         <section xml:id="testbench.installation.distributed">
@@ -666,9 +745,8 @@
                     <term><filename>documentation</filename></term>
                     <listitem>
                         <para>
-                            The documentation folder contains the TestBench library API documentation,
-                            a PDF excerpt of this chapter of Book of Vaadin, and the
-                            license.
+                            The documentation folder contains release notes, a PDF excerpt
+                            of this chapter of Book of Vaadin, and the license.
                         </para>
                     </listitem>
                 </varlistentry>
@@ -676,9 +754,10 @@
                     <term><filename>maven</filename></term>
                     <listitem>
                         <para>
-                            The Maven folder contains a version of the Vaadin TestBench
-                            libraries that you can install in your local Maven
-                            repository. Please follow the instructions in <xref
+                            The Maven folder contains the Vaadin TestBench library JARs
+                            (you can use them in non-Maven projects as well). The folder
+                            contains a POM file, so that you can install it in your local
+                            Maven repository. Please follow the instructions in <xref
                             linkend="testbench.execution.maven"/>.
                         </para>
                     </listitem>
@@ -687,10 +766,9 @@
                     <term><filename>vaadin-testbench-standalone-&version.testbench;.jar</filename></term>
                     <listitem>
                         <para>
-                            This is the Vaadin TestBench library. It is a standalone
-                            library that includes the Selenium WebDriver and many other
-                            required libraries. The library includes the sources and the
-                            JavaDoc.
+                            This is a standalone version of the Vaadin TestBench library
+                            that is mainly used for running the grid hub and node
+                            services, as described in <xref linkend="testbench.grid"/>.
                         </para>
                     </listitem>
                 </varlistentry>
@@ -820,18 +898,18 @@
                     </listitem>
                 </varlistentry>
                 <varlistentry>
-                    <term><filename>bdd/SimpleCalculation.java</filename></term>
+                    <term><filename>bdd/CalculatorSteps.java</filename>, <filename>bdd/SimpleCalculation.java</filename></term>
                     <listitem>
                         <para>
                             Shows how to develop tests following the
-                            <emphasis>behavior-driven development</emphasis> (BDD) model,
+                            <emphasis>behaviour-driven development</emphasis> (BDD) model,
                             by using the <link xlink:href="http://jbehave.org">JBehave
                             framework</link>. <filename>SimpleCalculation.java</filename>
                             defines a JUnit-based user story with one scenario, which is
                             defined in <filename>CalculatorSteps.java</filename>. The
                             scenario reuses the page objects defined in the page object
                             example (see above) for low-level application view access and
-                            control.
+                            control. The example is described in <xref linkend="testbench.bdd"/>.
                         </para>
                     </listitem>
                 </varlistentry>
@@ -1251,7 +1329,7 @@ public class Testcase extends TestBenchTestCase {
                         <listitem>
                             <para>
                                 If using a project created with the Vaadin Plugin for
-                                Eclipse, add the TestBench standalone library dependency
+                                Eclipse, add the TestBench API library dependency
                                 in <filename>ivy.xml</filename>. It should be as follows:
                             </para>
 
@@ -1278,13 +1356,13 @@ public class Testcase extends TestBenchTestCase {
                         <listitem>
                             <para>
                                 Otherwise, add the
-                                <filename>vaadin-testbench-standalone</filename> JAR from
-                                the installation package to a library folder in the
-                                project, such as <filename>lib</filename>. You should not
-                                put the library in <filename>WEB-INF/lib</filename> as it
-                                is not used by the deployed Vaadin web
-                                application. Refresh the project by selecting it and
-                                pressing <keycap>F5</keycap>.
+                                <filename>vaadin-testbench-api</filename> and
+                                <filename>vaadin-testbench-core</filename> JARs from the
+                                installation package to a library folder in the project,
+                                such as <filename>lib</filename>. You should not put the
+                                library in <filename>WEB-INF/lib</filename> as it is not
+                                used by the deployed Vaadin web application. Refresh the
+                                project by selecting it and pressing <keycap>F5</keycap>.
                             </para>
                         </listitem>
                     </orderedlist>
@@ -1999,11 +2077,14 @@ public void testTooltip() throws Exception {
 
             <para>
                 Some Vaadin components, such as <classname>Table</classname> and
-                <classname>Panel</classname> have a scrollbar. Their corresponding element
-                classes have <methodname>scroll()</methodname> and
-                <methodname>scrollLeft()</methodname> methods, which you can use to scroll
-                to a vertical or horizontal position, respectively. The scroll position is
-                given in pixels.
+                <classname>Panel</classname> have a scrollbar. Normally, when you interact
+                with an element within such a scrolling region, TestBench implicitly tries
+                to scroll to the element to make it visible. In some cases, you may wish
+                to scroll a scrollbar explicitly. You can accomplish that with the
+                <methodname>scroll()</methodname> (vertical) and
+                <methodname>scrollLeft()</methodname> (horizontal) methods in the
+                respective element classes for the scrollable components. The scroll
+                position is given in pixels.
             </para>
 
             <programlisting><?pocket-size 75% ?><![CDATA[// Scroll to a vertical position
@@ -2404,17 +2485,20 @@ button.click();]]></programlisting>
                 while hiding information irrelevant to other tests by encapsulation.
             </para>
 
-            <para>
-                A <emphasis>page object</emphasis> has methods to interact with a view or
-                a sub-view, and to retrieve values in the view. You also need a method to
-                open the page and navigate to the proper view.
-            </para>
+            <section xml:id="testbench.maintainable.pageobject.defining">
+                <title>Defining a Page Object</title>
 
-            <para>
-                For example:
-            </para>
+                <para>
+                    A <emphasis>page object</emphasis> has methods to interact with a view
+                    or a sub-view, and to retrieve values in the view. You also need a
+                    method to open the page and navigate to the proper view.
+                </para>
 
-            <programlisting><?pocket-size 70% ?><![CDATA[public class CalculatorPageObject
+                <para>
+                    For example:
+                </para>
+
+                <programlisting><?pocket-size 70% ?><![CDATA[public class CalculatorPageObject
        extends TestBenchTestCase {
     @FindBy(id = "button_=")
     private WebElement equals;
@@ -2464,18 +2548,21 @@ button.click();]]></programlisting>
 
     ...
 }]]></programlisting>
+            </section>
 
-            <para>
-                If you have <classname>WebElement</classname> members annotated with
-                <classname>@FindBy</classname>, they can be automatically filled with the
-                HTML element matching the given component ID, as if done with
-                <literal>driver.findElement(By.id(fieldname))</literal>. To do so, you
-                need to create the page object with <classname>PageFactory</classname> as
-                is done in the following test setup:
-            </para>
+            <section xml:id="testbench.maintainable.pageobject.findby">
+                <title>Finding Member Elements By ID</title>
 
-            <programlisting><?pocket-size 65% ?><![CDATA[
-public class PageObjectExampleITCase {
+                <para>
+                    If you have <classname>WebElement</classname> members annotated with
+                    <classname>@FindBy</classname>, they can be automatically filled with the
+                    HTML element matching the given component ID, as if done with
+                    <literal>driver.findElement(By.id(fieldname))</literal>. To do so, you
+                    need to create the page object with <classname>PageFactory</classname> as
+                    is done in the following test setup:
+                </para>
+
+                <programlisting><?pocket-size 65% ?><![CDATA[public class PageObjectExampleITCase {
     private CalculatorPageObject calculator;
 
     @Before
@@ -2488,14 +2575,26 @@ public class PageObjectExampleITCase {
     }
     ...]]></programlisting>
 
-            <para>
-                Test cases can use these methods at business logic level, without knowing
-                about the exact structure of the views.
-            </para>
+                <para>
+                    The members must be typed dynamically as
+                    <classname>WebElement</classname>, but you can wrap them to a typed
+                    element class with the <methodname>wrap()</methodname> method:
+                </para>
 
-            <para>
-                For example:
-            </para>
+                <programlisting><?pocket-size 65% ?><![CDATA[ButtonElement equals = equalsElement.wrap(ButtonElement.class);]]></programlisting>
+            </section>
+
+            <section xml:id="testbench.maintainable.pageobject.using">
+                <title>Using a Page Object</title>
+
+                <para>
+                    Test cases can use the page object methods at business logic level,
+                    without knowing about the exact structure of the views.
+                </para>
+
+                <para>
+                    For example:
+                </para>
             
             <programlisting><?pocket-size 75% ?><![CDATA[@Test
 public void testAddCommentRowToLog() throws Exception {
@@ -2509,35 +2608,41 @@ public void testAddCommentRowToLog() throws Exception {
 
     ...
 }]]></programlisting>
+            </section>
 
-            <para>
-                You can find the complete example of the Page Object Pattern in the
-                <filename>example/src/test/java/com/vaadin/testbenchexample/pageobjectexample/</filename>
-                folder in the TestBench installation package. The
-                <filename>PageObjectExampleITCase.java</filename> runs tests on the Calc
-                UI (also included in the example sources), using the page objects to
-                interact with the different parts of the UI and to check the results.
-            </para>
+            <section xml:id="testbench.maintainable.pageobject.example">
+                <title>The Page Object Example</title>
 
-            <para>
-                The page objects included in the <filename>pageobjects</filename>
-                subfolder are as follows:
-            </para>
+                <para>
+                    You can find the complete example of the Page Object Pattern in the
+                    <filename>src/test/java/com/vaadin/testbenchexample/pageobjectexample/</filename>
+                    folder in the TestBench Demo. The
+                    <filename>PageObjectExampleITCase.java</filename> runs tests on the
+                    Calc UI (also included in the example sources), using the page objects
+                    to interact with the different parts of the UI and to check the
+                    results.
+                </para>
 
-            <itemizedlist>
-                <listitem><para>The <classname>CalculatorPageObject</classname> (as
-                outlined in the example code above) has methods to click the buttons in
-                the calculator and the retrieve the result shown in the
-                "display".</para></listitem>
+                <para>
+                    The page objects included in the <filename>pageobjects</filename>
+                    subfolder are as follows:
+                </para>
 
-                <listitem><para>The <classname>LogPageObject</classname> can retrieve the
-                content of the log entries in the log table, and right-click them to open
-                the comment sub-window.</para></listitem>
+                <itemizedlist>
+                    <listitem><para>The <classname>CalculatorPageObject</classname> (as
+                    outlined in the example code above) has methods to click the buttons
+                    in the calculator and the retrieve the result shown in the
+                    "display".</para></listitem>
 
-                <listitem><para>The <classname>AddComment</classname> can enter a comment
-                string in the comment editor sub-window and submit it (click the
-                <guilabel>Add</guilabel> button).</para></listitem>
-            </itemizedlist>
+                    <listitem><para>The <classname>LogPageObject</classname> can retrieve
+                    the content of the log entries in the log table, and right-click them
+                    to open the comment sub-window.</para></listitem>
+
+                    <listitem><para>The <classname>AddComment</classname> can enter a
+                    comment string in the comment editor sub-window and submit it (click
+                    the <guilabel>Add</guilabel> button).</para></listitem>
+                </itemizedlist>
+            </section>
         </section>
     </section>
 
@@ -3475,15 +3580,16 @@ Tests run: 6, Failures: 1, Errors: 0, Skipped: 1
                 <title>Browser Capabilities</title>
 
                 <para>
-                    The browsers installed in the node can be defined either with a
-                    command-line parameter or with a configuration file in JSON format, as
+                    The browsers installed in the node can be defined either with
+                    command-line parameters or with a configuration file in JSON format, as
                     described in <xref linkend="testbench.grid.node-configuration"/>.
                 </para>
 
                 <para>
-                    On command-line, you can issue a <parameter>-browser</parameter> option to
-                    define the browser capabilities. It must be followed by a comma-separated
-                    list of property-value definitions, such as the following:
+                    On command-line, you can issue one or more
+                    <parameter>-browser</parameter> options to define the browser
+                    capabilities. It must be followed by a comma-separated list of
+                    property-value definitions, such as the following:
                 </para>
 
                 <screen>-browser "browserName=firefox,version=10,firefox_binary=/path/to/firefox10" \
@@ -3747,10 +3853,92 @@ public class MyTest extends ParallelTest {
     </section>
 
     <section xml:id="testbench.bdd">
-        <title>Behavior-Driven Development</title>
+        <title>Behaviour-Driven Development</title>
 
         <para>
-            <emphasis>This section is unfinished.</emphasis>
+            Behaviour-driven development (BDD) is a development methodology based on
+            test-driven development, where development starts from writing tests for the
+            software-to-be. BDD involves using a <emphasis>ubiquitous language</emphasis>
+            to communicate between business goals - the desired behaviour - and tests to
+            ensure that the software fulfills those goals.
+        </para>
+
+        <para>
+            The BDD process starts by collection of business requirements expressed as
+            <emphasis>user stories</emphasis>, as is typical in agile methodologies. A
+            user with a <emphasis>role</emphasis> requests a <emphasis>feature</emphasis>
+            to gain a <emphasis>benefit</emphasis>.
+        </para>
+
+        <para>
+            Stories can be expressed as number of <emphasis>scenarios</emphasis> that
+            describe different cases of the desired behaviour. Such a scenario can be
+            formalized with the following three phases:
+        </para>
+
+        <itemizedlist>
+            <listitem><para><emphasis>Given</emphasis> that I have calculator open</para></listitem>
+            <listitem><para><emphasis>When</emphasis> I push calculator buttons</para></listitem>
+            <listitem><para><emphasis>Then</emphasis> the display should show the result</para></listitem>
+        </itemizedlist>
+
+        <para>
+            This kind of formalization is realized in the JBehave BDD framework for Java.
+            The TestBench Demo includes a JBehave example, where the above scenario is
+            written as the <link
+            xlink:href="https://github.com/vaadin/testbench-demo/blob/master/src/test/java/com/vaadin/testbenchexample/bdd/CalculatorSteps.java">following
+            test class</link>:
+        </para>
+
+        <programlisting><?pocket-size 65% ?><![CDATA[public class CalculatorSteps extends TestBenchTestCase {
+    private WebDriver driver;
+    private CalculatorPageObject calculator;
+
+    @BeforeScenario
+    public void setUpWebDriver() {
+        driver = TestBench.createDriver(new FirefoxDriver());
+        calculator = PageFactory.initElements(driver,
+                CalculatorPageObject.class);
+    }
+
+    @AfterScenario
+    public void tearDownWebDriver() {
+        driver.quit();
+    }
+
+    @Given("I have the calculator open")
+    public void theCalculatorIsOpen() {
+        calculator.open();
+    }
+
+    @When("I push $buttons")
+    public void enter(String buttons) {
+        calculator.enter(buttons);
+    }
+
+    @Then("the display should show $result")
+    public void displayShows(String result) {
+        assertEquals(result, calculator.getResult());
+    }
+}]]></programlisting>
+
+        <para>
+            The demo employs the page object defined for the application UI, as described
+            in <xref linkend="testbench.maintainable.pageobject"/>.
+        </para>
+
+        <para>
+            Such scenarios are included in one or more stories, which need to be
+            configured in a class extending <classname>JUnitStory</classname> or
+            <classname>JUnitStories</classname>. In the example, this is done in the <link
+            xlink:href="https://github.com/vaadin/testbench-demo/blob/master/src/test/java/com/vaadin/testbenchexample/bdd/SimpleCalculation.java"><classname>SimpleCalculation</classname></link>
+            class. It defines how story classes can be found dynamically by the class
+            loader and how stories are reported.
+        </para>
+
+        <para>
+            For further documentation, please see JBehave website at <link
+            xlink:href="http://jbehave.org/">jbehave.org</link>.
         </para>
     </section>
 
