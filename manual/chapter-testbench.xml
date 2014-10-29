@@ -48,11 +48,11 @@
 		</figure>
 
         <para>
-            Before going into details, you may want to try out Vaadin TestBench
-            yourself. You just need to create a new Vaadin project either with the Eclipse
-            plugin or the Maven archetype. Both create a simple application stub that
-            includes TestBench test cases for testing the UI. You also need to install an
-            evaluation license. For instructions, jump to <xref
+            Before going further into feature details, you may want to try out Vaadin
+            TestBench yourself. You just need to create a new Vaadin project either with
+            the Eclipse plugin or the Maven archetype. Both create a simple application
+            stub that includes TestBench test cases for testing the UI. You also need to
+            install an evaluation license. For instructions, jump to <xref
             linkend="testbench.quickstart"/> and, after trying it out, come back.
         </para>
 
@@ -93,8 +93,10 @@
             <para>
                 <emphasis>Unit testing</emphasis> is applied to the smallest scale of
                 software components; in Vaadin applications these are typically individual
-                UI components or view classes. For complex composites, such as views, you
-                can use the Page Object Pattern described in <xref
+                UI components or view classes. You may also want to generate many
+                different kinds of inputs for the application and check that they produce
+                the desired outputs. For complex composites, such as views, you can use
+                the Page Object Pattern described in <xref
                 linkend="testbench.maintainable.pageobject"/>. The pattern simplifies and
                 modularizes testing by separating low-level details from the more abstract
                 UI logic. In addition to serving the purpose of unit tests, it creates an
@@ -116,14 +118,21 @@
             </para>
 
             <para>
-                In regression testing, you want to ensure that only intended changes occur
-                in its behaviour after modifying the code, without testing the application
-                manually every time. There are two basic ways of detecting such
-                regressions. Screenshots are the strictest way, but usually checking the
-                displayed values in the HTML is better if you are more interested in the
-                content and want to allow some flexibility for themeing, for example. You
-                may also want to generate many different kinds of inputs to the
-                application and check that they produce the desired outputs.
+                In <emphasis>regression testing</emphasis>, you want to ensure that only
+                intended changes occur in the behaviour after modifying the code. There
+                are two lines of defence against such regressions. The primary source of
+                regression tests are the acceptance, unit, and integration tests that
+                validate that the displayed values in the UI's HTML representation are
+                logically correct. Yet, they are not sufficient for detecting visual
+                regressions, for example, because of invalid UI rendering or theme
+                problems. Comparing screenshots to reference images forms a more sensitive
+                layer to detect regressions, at the expense of losing robustness for
+                changes in layout and themeing. The costs of the tradeoff can be minimized
+                by careful application of screenshot comparison only at critical points
+                and by making the analysis of such regressions as easy as possible. As
+                described in <xref linkend="testbench.screenshots"/>, Vaadin TestBench
+                automatically highlights differences in screenshots and allows masking
+                irrelevant areas from image comparison.
             </para>
 
             <para>
@@ -522,7 +531,9 @@
 
             <para>
                 You can observe that the UI and the test case are much like in the
-                illustration in <xref linkend="figure.testbench.webdriver"/>.
+                illustration in <xref linkend="figure.testbench.webdriver"/>. The
+                resulting test case stub is described in detail in <xref
+                linkend="testbench.development.basic"/>.
             </para>
 
             <para>
@@ -551,10 +562,21 @@
             <para>
                 With Maven, you need to create a new Vaadin project with the
                 <literal>vaadin-archetype-application</literal> archetype, as described in
-                <xref linkend="getting-started.maven"/>. The license needs to be installed
-                or given as parameter for the following command, as mentioned
-                earlier. Build the project with the <literal>integration-test</literal> or
-                a later phase in the build lifecycle. For example, from the command-line:
+                <xref linkend="getting-started.maven"/>.
+            </para>
+
+            <para>
+                The <filename>src</filename> folder under the project contains both the
+                sources for the application and the tests. The test case stub in the
+                <filename>src/test</filename> folder is described in detail in <xref
+                linkend="testbench.development.basic"/>.
+            </para>
+
+            <para>
+                The license needs to be installed or given as parameter for the following
+                command, as mentioned earlier. Build the project with the
+                <literal>integration-test</literal> or a later phase in the build
+                lifecycle. For example, from the command-line:
             </para>
 
             <screen><prompt>$</prompt> <command>mvn</command> <parameter>integration-test</parameter></screen>
@@ -1131,13 +1153,43 @@
                 WebDriver and ElementQuery APIs.
             </para>
 
-            <programlisting><?pocket-size 75% ?><![CDATA[public class Testcase extends TestBenchTestCase {]]></programlisting>
+            <programlisting><?pocket-size 75% ?><![CDATA[public class MyTestcase extends TestBenchTestCase {]]></programlisting>
 
             <para>
-                The available annotations are:
+                The basic JUnit annotations used in TestBench testing are the following:
             </para>
 
             <variablelist>
+
+                <varlistentry>
+                    <term><literal>@Rule</literal></term>
+                    <listitem>
+                        <para>
+                            You can define certain TestBench parameters and other JUnit
+                            rules with the <literal>@Rule</literal> annotation.
+                        </para>
+
+                        <para>
+                            For example, to enable taking screenshots on test failures, as
+                            described in <xref linkend="testbench.screenshots.failure"/>,
+                            you would define:
+                        </para>
+
+                        <programlisting><?pocket-size 65% ?><![CDATA[@Rule
+public ScreenshotOnFailureRule screenshotOnFailureRule =
+        new ScreenshotOnFailureRule(this, true);]]></programlisting>
+
+                        <para>
+                            Note that if you use this rule, you must
+                            <emphasis>not</emphasis> call
+                            <methodname>driver.quit()</methodname> in your
+                            <literal>@After</literal> method, as the method is executed
+                            before the screenshot is taken, but the driver must be open to
+                            take it.
+                        </para>
+                    </listitem>
+                </varlistentry>
+
                 <varlistentry>
                     <term><literal>@Before</literal></term>
                     <listitem>
@@ -1147,9 +1199,9 @@
                             the driver here.
                         </para>
 
-                        <programlisting><?pocket-size 65% ?><![CDATA[@Before
+                        <programlisting><?pocket-size 75% ?><![CDATA[@Before
 public void setUp() throws Exception {
-    setDriver(TestBench.createDriver(new FirefoxDriver()));
+    setDriver(new FirefoxDriver());
 }]]></programlisting>
 
                         <para>
@@ -1173,6 +1225,7 @@ public void setUp() throws Exception {
                         </para>
                     </listitem>
                 </varlistentry>
+
                 <varlistentry>
                     <term><literal>@Test</literal></term>
                     <listitem>
@@ -1182,12 +1235,12 @@ public void setUp() throws Exception {
                         </para>
 
                         <programlisting><?pocket-size 70% ?><![CDATA[@Test
-public void basic() throws Exception {
-    getDriver().get("http://localhost:8080/tobetested");
+public void testClickButton() throws Exception {
+    getDriver().get("http://localhost:8080/myproject");
     
     // Click the button
-    ButtonElement button =
-        $(ButtonElement.class).id("mybutton");
+    ButtonElement button = $(ButtonElement.class).
+            caption("Click Me").first();
     button.click();
 
     // Check that the label text is correct
@@ -1237,65 +1290,77 @@ public void tearDown() throws Exception {
                 A complete test case could be as follows:
             </para>
 
-            <programlisting><?pocket-size 65% ?><![CDATA[import static org.junit.Assert.assertEquals;
+            <programlisting><?pocket-size 65% ?><![CDATA[import com.vaadin.testbench.ScreenshotOnFailureRule;
+import com.vaadin.testbench.TestBenchTestCase;
+import com.vaadin.testbench.elements.ButtonElement;
+import com.vaadin.testbench.elements.LabelElement;
 
-import java.util.List;
-
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.openqa.selenium.firefox.FirefoxDriver;
 
-import com.vaadin.testbench.ScreenshotOnFailureRule;
-import com.vaadin.testbench.TestBench;
-import com.vaadin.testbench.TestBenchTestCase;
-import com.vaadin.testbench.elements.ButtonElement;
-import com.vaadin.testbench.elements.LabelElement;
-import com.vaadin.testbench.elements.VerticalLayoutElement;
+import java.util.List;
 
-public class Testcase extends TestBenchTestCase {
-	@Before
-	public void setUp() throws Exception {
-		setDriver(TestBench.createDriver(new FirefoxDriver()));
-	}
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+
+public class MyprojectTest extends TestBenchTestCase {
+    @Rule
+    public ScreenshotOnFailureRule screenshotOnFailureRule =
+            new ScreenshotOnFailureRule(this, true);
+
+    @Before
+    public void setUp() throws Exception {
+        setDriver(new FirefoxDriver()); // Firefox
+    }
+
+    /**
+     * Opens the URL where the application is deployed.
+     */
+    private void openTestUrl() {
+        getDriver().get("http://localhost:8080/myproject");
+    }
 
     @Test
-    public void basic() throws Exception {
-        driver.get("http://localhost:8080/tobetested");
-        
+    public void testClickButton() throws Exception {
+        openTestUrl();
+
+        // At first there should be no labels
+        assertFalse($(LabelElement.class).exists());
+
         // Click the button
-        ButtonElement button =
-            $(ButtonElement.class).id("content.button");
-        button.click();
+        ButtonElement clickMeButton = $(ButtonElement.class).
+                caption("Click Me").first();
+        clickMeButton.click();
 
-        // Check that the label text is correct
-        LabelElement label = $(LabelElement.class).first();
-        assertEquals("Thanks!", label.getText());
+        // There should now be one label
+        assertEquals(1, $(LabelElement.class).all().size());
+
+        // ... with the specified text
+        assertEquals("Thank you for clicking",
+                $(LabelElement.class).first().getText());
+
+        // Click the button again
+        clickMeButton.click();
+
+        // There should now be two labels
+        List<LabelElement> allLabels =
+            $(LabelElement.class).all();
+        assertEquals(2, allLabels.size());
+
+        // ... and the last label should have the correct text
+        LabelElement lastLabel = allLabels.get(1);
+        assertEquals("Thank you for clicking",
+                     lastLabel.getText());
     }
-    
-    @Test
-    public void advanced() throws Exception {
-        driver.get("http://localhost:8080/tobetested");
-        
-        // Click all the buttons in the UI
-        List<ButtonElement> buttons = $(ButtonElement.class).all();
-        for (ButtonElement b: buttons)
-            b.click();
-
-        // Check that the label text is correct
-        LabelElement label =
-            $(VerticalLayoutElement.class).id("content")
-            .$(LabelElement.class).first();
-        assertEquals("Thanks!", label.getText());
-    }
-
-	@After
-	public void tearDown() throws Exception {
-	    driver.quit();
-	}
 }]]></programlisting>
 
+            <para>
+                This test case stub is created by the Vaadin project wizard in Eclipse and
+                by the Maven archetype, as described in <xref
+                linkend="testbench.quickstart"/>.
+            </para>
         </section>
 
         <section xml:id="testbench.development.eclipse">
@@ -2324,8 +2389,9 @@ public void verifyServerExecutionTime() throws Exception {
     calculateOnePlusTwo();
 
     // Calculate the passed processing time on the serve-side
-    long timeSpentByServerForSimpleCalculation = testBench()
-            .totalTimeSpentServicingRequests() - currentSessionTime;
+    long timeSpentByServerForSimpleCalculation =
+            testBench().totalTimeSpentServicingRequests() -
+            currentSessionTime;
 
     // Report the timing
     System.out.println("Calculating 1+2 took about "
@@ -2334,22 +2400,24 @@ public void verifyServerExecutionTime() throws Exception {
 
     // Fail if the processing time was critically long
     if (timeSpentByServerForSimpleCalculation > 30) {
-        fail("Simple calculation shouldn't take "
-                + timeSpentByServerForSimpleCalculation + "ms!");
+        fail("Simple calculation shouldn't take " +
+             timeSpentByServerForSimpleCalculation + "ms!");
     }
 
     // Do the same with rendering time
-    long totalTimeSpentRendering = testBench().totalTimeSpentRendering();
-    System.out.println("Rendering UI took " + totalTimeSpentRendering
-            + "ms");
+    long totalTimeSpentRendering =
+            testBench().totalTimeSpentRendering();
+    System.out.println("Rendering UI took "
+            + totalTimeSpentRendering + "ms");
     if (totalTimeSpentRendering > 400) {
-        fail("Rendering UI shouldn't take " + totalTimeSpentRendering
-               + "ms!");
+        fail("Rendering UI shouldn't take "
+               + totalTimeSpentRendering + "ms!");
     }
 
     // A normal assertion on the UI state
     assertEquals("3.0",
-            $(TextFieldElement.class).first().getAttribute("value"));
+        $(TextFieldElement.class).first()
+        .getAttribute("value"));
 }]]></programlisting>
 
         </section>
