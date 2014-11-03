@@ -1,5 +1,8 @@
 <?xml version='1.0'?>
-<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
+<xsl:stylesheet
+  xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0"
+  xmlns:fo="http://www.w3.org/1999/XSL/Format">
+
   <!-- ==================================================================== -->
   <!-- This is the common HTML stylesheet for all HTML-based manuals:       -->
   <!--   - Regular HTML manual                                              -->
@@ -122,6 +125,8 @@
   <!-- Custom title page.                                                   -->
   <!-- ==================================================================== -->
 
+  <xsl:include href="custom-html-titlepage.xsl"/>
+
   <!-- Use the version number given as command-line parameter. -->
   <xsl:param name="manual.version">x.x.x</xsl:param>
   <xsl:template match="releasenumber">
@@ -154,6 +159,33 @@
 
   <!-- Custom header data elements. Not processed - skip. -->
   <xsl:template match="headerdata|headericon">
+  </xsl:template>
+
+  <!-- Translator info on recto title page -->
+  <xsl:template match="authorgroup[@role='translators']" mode="book.titlepage.recto.mode">
+    <!-- Include translators only if translated -->
+    <xsl:if test="othercredit[1]/contrib != 'Translation'">
+      <!-- Get translation of "Translated by" from the first translator -->
+      <fo:block>
+        <xsl:value-of select="othercredit[1]/contrib"/>
+      </fo:block>
+
+      <xsl:apply-templates mode="book.titlepage.recto.mode"/>
+    </xsl:if>
+  </xsl:template>
+
+  <!-- Format translator name and email -->
+  <xsl:template match="othercredit[@class='translator']" mode="book.titlepage.recto.mode">
+    <xsl:if test="personname/firstname">
+      <xsl:value-of select="personname/firstname"/>
+      <xsl:text> </xsl:text>
+      <xsl:value-of select="personname/lastname"/>
+    </xsl:if>
+    <xsl:if test="email">
+      <xsl:text> (</xsl:text>
+      <xsl:value-of select="email"/>
+      <xsl:text>)</xsl:text>
+    </xsl:if>
   </xsl:template>
 
   <!-- ==================================================================== -->

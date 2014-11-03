@@ -1039,6 +1039,46 @@
     </fo:block>
   </xsl:template>
 
+  <xsl:template match="author" mode="book.titlepage.recto.mode">
+    <fo:block>
+      <xsl:apply-templates select="firstname" mode="book.titlepage.recto.mode"/>
+      <xsl:text> </xsl:text>
+      <xsl:apply-templates select="surname" mode="book.titlepage.recto.mode"/>
+    </fo:block>
+  </xsl:template>
+
+  <xsl:template match="othercredit" mode="book.titlepage.verso.mode"/>
+
+  <!-- Translator info on recto title page -->
+  <xsl:template match="authorgroup[@role='translators']" mode="book.titlepage.recto.mode">
+    <!-- Include translators only if translated -->
+    <xsl:if test="othercredit[1]/contrib != 'Translation'">
+      <!-- Get translation of "Translated by" from the first translator -->
+      <fo:block>
+        <xsl:value-of select="othercredit[1]/contrib"/>
+      </fo:block>
+
+      <xsl:apply-templates mode="book.titlepage.recto.mode"/>
+    </xsl:if>
+  </xsl:template>
+
+  <!-- Format translator name and email -->
+  <xsl:template match="othercredit[@class='translator']" mode="book.titlepage.recto.mode">
+    <xsl:if test="personname/firstname">
+      <xsl:value-of select="personname/firstname"/>
+      <xsl:text> </xsl:text>
+      <xsl:value-of select="personname/lastname"/>
+    </xsl:if>
+    <xsl:if test="email">
+      <xsl:text> (</xsl:text>
+      <xsl:value-of select="email"/>
+      <xsl:text>)</xsl:text>
+    </xsl:if>
+  </xsl:template>
+
+  <!-- No translator info on verso info page -->
+  <xsl:template match="authorgroup[@role='translators']" mode="book.titlepage.verso.mode"/>
+
   <xsl:template match="corpauthor" mode="book.titlepage.recto.mode">
     <fo:block>
       <xsl:value-of select="orgname"/>

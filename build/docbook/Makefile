@@ -3,7 +3,7 @@
 
 CLASSPATH = ../lib/XEP/lib/saxon.jar
 
-TARGETS = conf/custom-fo-titlepage.xsl conf/custom-fo-titlepage-pocket.xsl
+TARGETS = conf/custom-fo-titlepage.xsl conf/custom-fo-titlepage-pocket.xsl conf/custom-html-titlepage.xsl
 
 all: titlepage
 
@@ -13,6 +13,9 @@ conf/custom-fo-titlepage.xsl: conf/custom-fo-titlepage.xml xsl/template/titlepag
 	java -classpath $(CLASSPATH) com.icl.saxon.StyleSheet $^ > $@
 
 conf/custom-fo-titlepage-pocket.xsl: conf/custom-fo-titlepage-pocket.xml xsl/template/titlepage.xsl
+	java -classpath $(CLASSPATH) com.icl.saxon.StyleSheet $^ > $@
+
+conf/custom-html-titlepage.xsl: conf/custom-html-titlepage.xml xsl/template/titlepage.xsl
 	java -classpath $(CLASSPATH) com.icl.saxon.StyleSheet $^ > $@
 
 clean: FORCE

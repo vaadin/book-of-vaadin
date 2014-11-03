@@ -30,6 +30,14 @@
 
   <xsl:apply-templates mode="book.titlepage.recto.auto.mode" select="bookinfo/mediaobject"/>
   <xsl:apply-templates mode="book.titlepage.recto.auto.mode" select="info/mediaobject"/>
+  <xsl:apply-templates mode="book.titlepage.recto.auto.mode" select="bookinfo/author"/>
+  <xsl:apply-templates mode="book.titlepage.recto.auto.mode" select="info/author"/>
+  <xsl:apply-templates mode="book.titlepage.recto.auto.mode" select="bookinfo/pubdate"/>
+  <xsl:apply-templates mode="book.titlepage.recto.auto.mode" select="info/pubdate"/>
+  <xsl:apply-templates mode="book.titlepage.recto.auto.mode" select="bookinfo/corpauthor"/>
+  <xsl:apply-templates mode="book.titlepage.recto.auto.mode" select="info/corpauthor"/>
+  <xsl:apply-templates mode="book.titlepage.recto.auto.mode" select="bookinfo/authorgroup"/>
+  <xsl:apply-templates mode="book.titlepage.recto.auto.mode" select="info/authorgroup"/>
 </xsl:template>
 
 <xsl:template name="book.titlepage.verso">
@@ -47,8 +55,6 @@
 
   <xsl:apply-templates mode="book.titlepage.verso.auto.mode" select="bookinfo/corpauthor"/>
   <xsl:apply-templates mode="book.titlepage.verso.auto.mode" select="info/corpauthor"/>
-  <xsl:apply-templates mode="book.titlepage.verso.auto.mode" select="bookinfo/authorgroup"/>
-  <xsl:apply-templates mode="book.titlepage.verso.auto.mode" select="info/authorgroup"/>
   <xsl:apply-templates mode="book.titlepage.verso.auto.mode" select="bookinfo/author"/>
   <xsl:apply-templates mode="book.titlepage.verso.auto.mode" select="info/author"/>
   <xsl:apply-templates mode="book.titlepage.verso.auto.mode" select="bookinfo/othercredit"/>
@@ -139,7 +145,31 @@
 </xsl:template>
 
 <xsl:template match="mediaobject" mode="book.titlepage.recto.auto.mode">
-<fo:block xmlns:fo="http://www.w3.org/1999/XSL/Format" xsl:use-attribute-sets="book.titlepage.recto.style" space-before="5cm">
+<fo:block xmlns:fo="http://www.w3.org/1999/XSL/Format" xsl:use-attribute-sets="book.titlepage.recto.style" space-before="3cm">
+<xsl:apply-templates select="." mode="book.titlepage.recto.mode"/>
+</fo:block>
+</xsl:template>
+
+<xsl:template match="author" mode="book.titlepage.recto.auto.mode">
+<fo:block xmlns:fo="http://www.w3.org/1999/XSL/Format" xsl:use-attribute-sets="book.titlepage.recto.style" space-before="3cm" font-size="16pt" font-weight="normal">
+<xsl:apply-templates select="." mode="book.titlepage.recto.mode"/>
+</fo:block>
+</xsl:template>
+
+<xsl:template match="pubdate" mode="book.titlepage.recto.auto.mode">
+<fo:block xmlns:fo="http://www.w3.org/1999/XSL/Format" xsl:use-attribute-sets="book.titlepage.recto.style" space-before="1cm" font-size="16pt" font-weight="normal">
+<xsl:apply-templates select="." mode="book.titlepage.recto.mode"/>
+</fo:block>
+</xsl:template>
+
+<xsl:template match="corpauthor" mode="book.titlepage.recto.auto.mode">
+<fo:block xmlns:fo="http://www.w3.org/1999/XSL/Format" xsl:use-attribute-sets="book.titlepage.recto.style" font-size="16pt" font-weight="normal">
+<xsl:apply-templates select="." mode="book.titlepage.recto.mode"/>
+</fo:block>
+</xsl:template>
+
+<xsl:template match="authorgroup" mode="book.titlepage.recto.auto.mode">
+<fo:block xmlns:fo="http://www.w3.org/1999/XSL/Format" xsl:use-attribute-sets="book.titlepage.recto.style" text-align="center" space-before="2cm" font-size="14pt" font-weight="normal">
 <xsl:apply-templates select="." mode="book.titlepage.recto.mode"/>
 </fo:block>
 </xsl:template>
@@ -154,13 +184,6 @@
 <xsl:template match="corpauthor" mode="book.titlepage.verso.auto.mode">
 <fo:block xmlns:fo="http://www.w3.org/1999/XSL/Format" xsl:use-attribute-sets="book.titlepage.verso.style">
 <xsl:apply-templates select="." mode="book.titlepage.verso.mode"/>
-</fo:block>
-</xsl:template>
-
-<xsl:template match="authorgroup" mode="book.titlepage.verso.auto.mode">
-<fo:block xmlns:fo="http://www.w3.org/1999/XSL/Format" xsl:use-attribute-sets="book.titlepage.verso.style">
-<xsl:call-template name="verso.authorgroup">
-</xsl:call-template>
 </fo:block>
 </xsl:template>
 
