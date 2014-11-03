@@ -176,11 +176,16 @@
 
   <!-- Format translator name and email -->
   <xsl:template match="othercredit[@class='translator']" mode="book.titlepage.recto.mode">
-    <xsl:if test="personname/firstname">
-      <xsl:value-of select="personname/firstname"/>
-      <xsl:text> </xsl:text>
-      <xsl:value-of select="personname/lastname"/>
-    </xsl:if>
+    <xsl:choose>
+      <xsl:when test="personname/firstname">
+        <xsl:apply-templates select="personname/firstname" mode="book.titlepage.recto.mode"/>
+        <xsl:text> </xsl:text>
+        <xsl:apply-templates select="personname/surname" mode="book.titlepage.recto.mode"/>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:apply-templates select="personname" mode="book.titlepage.recto.mode"/>
+      </xsl:otherwise>
+    </xsl:choose>
     <xsl:if test="email">
       <xsl:text> (</xsl:text>
       <xsl:value-of select="email"/>
