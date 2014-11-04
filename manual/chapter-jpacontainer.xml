@@ -862,23 +862,24 @@ private Country country;]]></programlisting>
                     collection. You can do so yourself as well in a custom field factory.
                     Doing so you need to pay notice not to confuse the container between
                     the referenced entity and its ID, which could even result in insertion
-                    of false entities in the database in some cases. You can translate
-                    between an entity and the entity ID using the
-                    <classname>SingleSelectTranslator</classname> as follows:
+                    of false entities in the database in some cases. You can handle
+                    conversion between an entity and the entity ID using the
+                    <classname>SingleSelectConverter</classname> as follows:
                 </para>
 
-                <programlisting><?pocket-size 75% ?><![CDATA[@Override
-public Field createField(Item item, Object propertyId,
-                         Component uiContext) {
-    if (propertyId.equals("station")) {
-        ComboBox box = new ComboBox("Station");
-
-        // Translate between referenced entity and its ID
-        box.setPropertyDataSource(
-                new SingleSelectTranslator(box));
-        
-        box.setContainerDataSource(stationContainer);
-        ...]]></programlisting>
+                <programlisting><?pocket-size 65% ?><![CDATA[
+@Override
+public <T extends Field> T createField(Class<?> dataType,
+                                       Class<T> fieldType) {
+    if (dataType == Country.class) {
+       JPAContainer<Country> countries =
+           JPAContainerFactory.make(Country.class, "mypunit");
+       ComboBox cb = new ComboBox(null, countries);
+       cb.setConverter(new SingleSelectConverter<Country>(cb));
+       return (T) cb;
+    }
+    return super.createField(dataType, fieldType);
+}]]></programlisting>
 
                 <para>
                     The JPAContainer <classname>FieldFactory</classname> uses the
