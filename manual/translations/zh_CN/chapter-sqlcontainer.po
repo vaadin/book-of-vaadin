@@ -1,0 +1,1616 @@
+# SOME DESCRIPTIVE TITLE.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: http://bugs.kde.org\n"
+"POT-Creation-Date: 2014-11-05 02:53+0000\n"
+"PO-Revision-Date: 2014-11-05 11:54+0900\n"
+"Last-Translator: \n"
+"Language-Team: LANGUAGE <kde-i18n-doc@kde.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: zh_CN\n"
+"X-Generator: Poedit 1.6.5\n"
+
+#. Tag: title
+#: chapter-sqlcontainer.xml:11
+#, no-c-format
+msgid "Vaadin SQLContainer"
+msgstr ""
+
+#. Tag: para
+#: chapter-sqlcontainer.xml:13
+#, no-c-format
+msgid ""
+"Vaadin SQLContainer is a container implementation that allows easy and "
+"customizable access to data stored in various SQL-speaking databases."
+msgstr ""
+"Vaadin SQLContainer 是一个容器实现类, 可以便利地存取各种 SQL 数据库中的数据, "
+"也可以自由定制."
+
+#. Tag: para
+#: chapter-sqlcontainer.xml:18
+#, no-c-format
+msgid ""
+"SQLContainer supports two types of database access. Using "
+"<classname>TableQuery</classname>, the pre-made query generators will enable "
+"fetching, updating, and inserting data directly from the container into a "
+"database table - automatically, whereas <classname>FreeformQuery</classname> "
+"allows the developer to use their own, probably more complex query for "
+"fetching data and their own optional implementations for writing, filtering "
+"and sorting support - item and property handling as well as lazy loading "
+"will still be handled automatically."
+msgstr ""
+"SQLContainer 支持两种类型的数据库存储. <classname>TableQuery</classname> 是预"
+"定义的查询产生器, 可以读取, 更新, 以及直接从容器向数据库表自动地插入数据, 而 "
+"<classname>FreeformQuery</classname> 允许开发者使用自己决定的查询, 可以是用于"
+"读取数据的更加复杂的查询, 也可以使用自定义的数据库写入语句, 自定义的过滤和排"
+"序 - 但项目和属性管理, 以及 lazy load 管理仍然是自动进行的."
+
+#. Tag: para
+#: chapter-sqlcontainer.xml:29
+#, no-c-format
+msgid ""
+"In addition to the customizable database connection options, SQLContainer "
+"also extends the Vaadin <classname>Container</classname> interface to "
+"implement more advanced and more database-oriented filtering rules. Finally, "
+"the add-on also offers connection pool implementations for JDBC connection "
+"pooling and JEE connection pooling, as well as integrated transaction "
+"support; auto-commit mode is also provided."
+msgstr ""
+"除了自定义的数据库连接选项外, SQLContainer 还扩展了 Vaadin "
+"<classname>Container</classname> 接口, 实现更复杂, 更面向数据库的过滤规则. 最"
+"后, 这个 add-on 还提供了连接池的实现, 包括 JDBC 连接池和 JEE 连接池, 以及集成"
+"的事务支持; 另外还提供了自动 commit 模式."
+
+#. Tag: para
+#: chapter-sqlcontainer.xml:38
+#, no-c-format
+msgid ""
+"The purpose of this section is to briefly explain the architecture and some "
+"of the inner workings of SQLContainer. It will also give the readers some "
+"examples on how to use SQLContainer in their own applications. The "
+"requirements, limitations and further development ideas are also discussed."
+msgstr ""
+"本节的目的是简要介绍 SQLContainer 的整体架构以及它的部分内部工作原理. 本节还"
+"会向读者解释如何在自己的应用程序中使用 SQLContainer. 此外还讨论了 "
+"SQLContainer 的要求, 限制以及将来的开发思路."
+
+#. Tag: para
+#: chapter-sqlcontainer.xml:45
+#, no-c-format
+msgid ""
+"SQLContainer is available from the Vaadin Directory under the same "
+"unrestrictive Apache License 2.0 as the Vaadin Framework itself."
+msgstr ""
+"SQLContainer 可以从 Vaadin Directory 得到, 使用的许可协议与 Vaadin Framework "
+"一样, 是无限制的 Apache License 2.0 协议."
+
+#. Tag: title
+#: chapter-sqlcontainer.xml:51
+#, no-c-format
+msgid "Architecture"
+msgstr "架构"
+
+#. Tag: para
+#: chapter-sqlcontainer.xml:53
+#, no-c-format
+msgid ""
+"The architecture of SQLContainer is relatively simple. "
+"<classname>SQLContainer</classname> is the class implementing the Vaadin "
+"<classname>Container</classname> interfaces and providing access to most of "
+"the functionality of this add-on. The standard Vaadin <classname>Property</"
+"classname> and <classname>Item</classname> interfaces have been implementd "
+"as the <classname>ColumnProperty</classname> and <classname>RowItem</"
+"classname> classes. Item IDs are represented by <classname>RowId</classname> "
+"and <classname>TemporaryRowId</classname> classes. The <classname>RowId</"
+"classname> class is built based on the primary key columns of the connected "
+"database table or query result."
+msgstr ""
+"SQLContainer 的架构相对简单. <classname>SQLContainer</classname> 是 Vaadin "
+"<classname>Container</classname> 接口的实现类, 这个 add-on 的主要功能都由这个"
+"类提供. 标准的 Vaadin <classname>Property</classname> 和 <classname>Item</"
+"classname> 接口由 <classname>ColumnProperty</classname> 和 "
+"<classname>RowItem</classname> 类实现. 项目 ID 由 <classname>RowId</"
+"classname> 和 <classname>TemporaryRowId</classname> 类实现. "
+"<classname>RowId</classname> 类根据数据库表或查询接口中的主键字段来构建."
+
+#. Tag: para
+#: chapter-sqlcontainer.xml:66
+#, no-c-format
+msgid ""
+"In the <package>connection</package> package, the "
+"<classname>JDBCConnectionPool</classname> interface defines the requirements "
+"for a connection pool implementation. Two implementations of this interface "
+"are provided: <classname>SimpleJDBCConnectionPool</classname> provides a "
+"simple yet very usable implementation to pool and access JDBC connections. "
+"<classname>J2EEConnectionPool</classname> provides means to access J2EE "
+"DataSources."
+msgstr ""
+"在 <package>connection</package> 包中, <classname>JDBCConnectionPool</"
+"classname> 接口定义了数据库连接池需要实现的功能. 本 add-on 提供了两种实现: "
+"<classname>SimpleJDBCConnectionPool</classname> 是一个简单但有用的 JDBC 连接"
+"池实现. <classname>J2EEConnectionPool</classname> 是 J2EE DataSource 的连接池"
+"实现."
+
+#. Tag: para
+#: chapter-sqlcontainer.xml:76
+#, no-c-format
+msgid ""
+"The <package>query</package> package contains the <classname>QueryDelegate</"
+"classname> interface, which defines everything the SQLContainer needs to "
+"enable reading and writing data to and from a database. As discussed "
+"earlier, two implementations of this interface are provided: "
+"<classname>TableQuery</classname> for automatic read-write support for a "
+"database table, and <classname>FreeformQuery</classname> for customizing the "
+"query, sorting, filtering and writing; this is done by implementing relevant "
+"methods of the <classname>FreeformStatementDelegate</classname> interface."
+msgstr ""
+"<package>query</package> 包中包含 <classname>QueryDelegate</classname> 接口, "
+"定义了 SQLContainer 应该实现的数据库读写功能. 如前文所说, 本 add-on 提供了这"
+"个接口的两个实现: <classname>TableQuery</classname> 可用于自动读写数据库表, "
+"<classname>FreeformQuery</classname> 可以定制查询, 排序, 过滤以及更新的各种语"
+"句; 这些都是通过实现 <classname>FreeformStatementDelegate</classname> 接口的"
+"相关方法来实现的."
+
+#. Tag: para
+#: chapter-sqlcontainer.xml:88
+#, no-c-format
+msgid ""
+"The <package>query</package> package also contains <classname>Filter</"
+"classname> and <classname>OrderBy</classname> classes which have been "
+"written to provide an alternative to the standard Vaadin container filtering "
+"and make sorting non-String properties a bit more user friendly."
+msgstr ""
+"<package>query</package> 包中也包含 <classname>Filter</classname>  "
+"<classname>OrderBy</classname> 类, 用于代替标准的 Vaadin 容器过滤器, 并使得非"
+"字符串属性的排序功能更易用一些."
+
+#. Tag: para
+#: chapter-sqlcontainer.xml:95
+#, no-c-format
+msgid ""
+"Finally, the <package>generator</package> package contains a "
+"<classname>SQLGenerator</classname> interface, which defines the kind of "
+"queries that are required by the <classname>TableQuery</classname> class. "
+"The provided implementations include support for HSQLDB, MySQL, PostgreSQL "
+"(<classname>DefaultSQLGenerator</classname>), Oracle "
+"(<classname>OracleGenerator</classname>) and Microsoft SQL Server "
+"(<classname>MSSQLGenerator</classname>). A new or modified implementations "
+"may be provided to gain compatibility with older versions or other database "
+"servers."
+msgstr ""
+"最后, <package>generator</package> 包中包含 <classname>SQLGenerator</"
+"classname> 接口, 其中定义了 <classname>TableQuery</classname> 所要求的查询类"
+"型. 本 add-on 中提供的实现类支持 HSQLDB, MySQL, PostgreSQL "
+"(<classname>DefaultSQLGenerator</classname>), Oracle "
+"(<classname>OracleGenerator</classname>) 以及 Microsoft SQL Server "
+"(<classname>MSSQLGenerator</classname>). 将来可能会提供新的或修改过的实现以便"
+"实现对旧版本数据库或其他类型数据库的支持."
+
+#. Tag: para
+#: chapter-sqlcontainer.xml:116
+#, no-c-format
+msgid ""
+"For further details, please refer to the SQLContainer API documentation."
+msgstr "更多细节, 请参照 SQLContainer 的 API 文档."
+
+#. Tag: title
+#: chapter-sqlcontainer.xml:122
+#, no-c-format
+msgid "Getting Started with SQLContainer"
+msgstr "SQLContainer 入门"
+
+#. Tag: para
+#: chapter-sqlcontainer.xml:124
+#, no-c-format
+msgid ""
+"Getting development going with the SQLContainer is easy and quite straight-"
+"forward. The purpose of this section is to describe how to create the "
+"required resources and how to fetch data from and write data to a database "
+"table attached to the container."
+msgstr ""
+"使用 SQLContainer 进行开发是很简单直接的. 本节的目的是介绍如何创建需要的资"
+"源, 以及如何从绑定到容器的数据库表来读写数据."
+
+#. Tag: title
+#: chapter-sqlcontainer.xml:132
+#, no-c-format
+msgid "Creating a connection pool"
+msgstr "创建连接池"
+
+#. Tag: para
+#: chapter-sqlcontainer.xml:134
+#, no-c-format
+msgid ""
+"First, we need to create a connection pool to allow the SQLContainer to "
+"connect to a database. Here we will use the "
+"<classname>SimpleJDBCConnectionPool</classname>, which is a basic "
+"implementation of connection pooling with JDBC data sources. In the "
+"following code, we create a connection pool that uses the HSQLDB driver "
+"together with an in-memory database. The initial amount of connections is 2 "
+"and the maximum amount is set at 5. Note that the database driver, "
+"connection url, username, and password parameters will vary depending on the "
+"database you are using."
+msgstr ""
+"首先, 我们需要创建连接池, 供 SQLContainer 连接到数据库. 这里我们使用 "
+"<classname>SimpleJDBCConnectionPool</classname>, 它是连接池的一个基本实现, 使"
+"用 JDBC 数据源. 下面的代码中, 我们创建一个连接池, 使用 HSQLDB 驱动, 以及一个 "
+"HSQLDB 内存数据库. 连接数的初期值是 2, 最大数设置为 5. 注意, 数据库驱动, 连"
+"接 URL, 用户名, 密码等参数, 在你的实际环境中可能是不同的."
+
+#. Tag: programlisting
+#: chapter-sqlcontainer.xml:146
+#, no-c-format
+msgid ""
+"<?pocket-size 75% ?><![CDATA[JDBCConnectionPool pool = new "
+"SimpleJDBCConnectionPool(\n"
+"        \"org.hsqldb.jdbc.JDBCDriver\",\n"
+"        \"jdbc:hsqldb:mem:sqlcontainer\", \"SA\", \"\", 2, 5);]]>"
+msgstr ""
+
+#. Tag: title
+#: chapter-sqlcontainer.xml:150
+#, no-c-format
+msgid "Creating the <classname>TableQuery</classname> Query Delegate"
+msgstr "创建查询代理 <classname>TableQuery</classname>"
+
+#. Tag: para
+#: chapter-sqlcontainer.xml:152
+#, no-c-format
+msgid ""
+"After the connection pool is created, we'll need a query delegate for the "
+"SQLContainer. The simplest way to create one is by using the built-in "
+"<classname>TableQuery</classname> class. The <classname>TableQuery</"
+"classname> delegate provides access to a defined database table and supports "
+"reading and writing data out-of-the-box. The primary key(s) of the table may "
+"be anything that the database engine supports, and are found automatically "
+"by querying the database when a new <classname>TableQuery</classname> is "
+"instantiated. We create the <classname>TableQuery</classname> with the "
+"following statement:"
+msgstr ""
+"连接池创建之后, 我们需要为 SQLContainer 创建查询代理. 最简便的方法是使用内建"
+"的 <classname>TableQuery</classname> 类. <classname>TableQuery</classname> 代"
+"理, 可访问数据库中的一个固定的表, 可直接用来读写数据, 不需要太多的定制工作. "
+"表的主键可以是数据库引擎支持的任何类型, 而且会在创建 <classname>TableQuery</"
+"classname> 实例来查询数据库时自动发现主键信息. 我们使用以下语句来创建 "
+"<classname>TableQuery</classname>:"
+
+#. Tag: programlisting
+#: chapter-sqlcontainer.xml:164
+#, no-c-format
+msgid ""
+"<?pocket-size 70% ?><![CDATA[TableQuery tq = new TableQuery(\"tablename\", "
+"connectionPool);]]>"
+msgstr ""
+
+#. Tag: para
+#: chapter-sqlcontainer.xml:166
+#, no-c-format
+msgid ""
+"In order to allow writes from several user sessions concurrently, we must "
+"set a version column to the <classname>TableQuery</classname> as well. The "
+"version column is an integer- or timestamp-typed column which will either be "
+"incremented or set to the current time on each modification of the row. "
+"<classname>TableQuery</classname> assumes that the database will take care "
+"of updating the version column; it just makes sure the column value is "
+"correct before updating a row. If another user has changed the row and the "
+"version number in the database does not match the version number in memory, "
+"an <classname>OptimisticLockException</classname> is thrown and you can "
+"recover by refreshing the container and allow the user to merge the data. "
+"The following code will set the version column:"
+msgstr ""
+"为了支持多个用户 session 的并发写入, 我们还必须为 <classname>TableQuery</"
+"classname> 设置版本控制列(version column). 版本控制列是整数型, 或时间戳"
+"(timestamp)型的列, 每次变更这行数据时, 版本控制列的值会自动增长(整数型)或被设"
+"置为现在时刻(时间戳型). <classname>TableQuery</classname> 假定数据库负责更新"
+"版本控制列; 它只会在自己更新数据之前检验版本控制列的值是否正确. 如果另一个用"
+"户已经修改过这行数据, 数据库中的版本控制列值与内存中记录的原始值不符, 会抛出 "
+"<classname>OptimisticLockException</classname> 异常, 这时你可以刷新容器来恢复"
+"数据, 然后让用户合并数据. 以下代码设置版本控制列:"
+
+#. Tag: programlisting
+#: chapter-sqlcontainer.xml:180 chapter-sqlcontainer.xml:353
+#, no-c-format
+msgid "<![CDATA[tq.setVersionColumn(\"OPTLOCK\");]]>"
+msgstr ""
+
+#. Tag: title
+#: chapter-sqlcontainer.xml:184
+#, no-c-format
+msgid "Creating the Container"
+msgstr "创建容器"
+
+#. Tag: para
+#: chapter-sqlcontainer.xml:186
+#, no-c-format
+msgid ""
+"Finally, we may create the container itself. This is as simple as stating:"
+msgstr "最后, 我们可以创建容器本身了. 代码很简单:"
+
+#. Tag: programlisting
+#: chapter-sqlcontainer.xml:190
+#, no-c-format
+msgid "<![CDATA[SQLContainer container = new SQLContainer(tq);]]>"
+msgstr ""
+
+#. Tag: para
+#: chapter-sqlcontainer.xml:192
+#, no-c-format
+msgid ""
+"After this statement, the <classname>SQLContainer</classname> is connected "
+"to the table tablename and is ready to use for example as a data source for "
+"a Vaadin <classname>Table</classname> or a Vaadin <classname>Form</"
+"classname>."
+msgstr ""
+"使用以上代码, <classname>SQLContainer</classname> 连接到数据库表 \"tablename"
+"\" 上, 可以用作 Vaadin 组件的数据源了, 比如 <classname>Table</classname> 或 "
+"<classname>Form</classname>."
+
+#. Tag: title
+#: chapter-sqlcontainer.xml:202
+#, no-c-format
+msgid "Filtering and Sorting"
+msgstr "过滤与排序"
+
+#. Tag: para
+#: chapter-sqlcontainer.xml:204
+#, no-c-format
+msgid ""
+"Filtering and sorting the items contained in an SQLContainer is, by design, "
+"always performed in the database. In practice this means that whenever the "
+"filtering or sorting rules are modified, at least some amount of database "
+"communication will take place (the minimum is to fetch the updated row count "
+"using the new filtering/sorting rules)."
+msgstr ""
+"SQLContainer 中项目的过滤和排序, 按照 SQLContainer 的设计意图, 永远是在数据库"
+"内实现的. 实际运用中, 这意味着无论何时, 只要过滤或排序规则发生变化, 就一定会"
+"发生一定量的数据库通信(最少需要使用新的过滤/排序规则取得新的数据行数)."
+
+#. Tag: title
+#: chapter-sqlcontainer.xml:213
+#, no-c-format
+msgid "Filtering"
+msgstr "过滤"
+
+#. Tag: para
+#: chapter-sqlcontainer.xml:215
+#, no-c-format
+msgid ""
+"Filtering is performed using the filtering API in Vaadin, which allows for "
+"very complex filtering to be easily applied. More information about the "
+"filtering API can be found in <xref linkend=\"datamodel.container.filtered\"/"
+">."
+msgstr ""
+"过滤使用 Vaadin 的过滤 API 实现, 这个 API 可以用简单的方式实现非常复杂的过"
+"滤. 关于过滤 API, 详情请参见 <xref linkend=\"datamodel.container.filtered\"/"
+">."
+
+#. Tag: para
+#: chapter-sqlcontainer.xml:222
+#, no-c-format
+msgid ""
+"In addition to the filters provided by Vaadin, SQLContainer also implements "
+"the <classname>Like</classname> filter as well as the <classname>Between</"
+"classname> filter. Both of these map to the equally named WHERE-operators in "
+"SQL. The filters can also be applied on items that reside in memory, for "
+"example, new items that have not yet been stored in the database or rows "
+"that have been loaded and updated, but not yet stored."
+msgstr ""
+"除 Vaadin 提供的过滤器外, SQLContainer 还实现了 <classname>Like</classname> "
+"和 <classname>Between</classname> 过滤器. 这两个过滤器都对应到 SQL 语句中的同"
+"名 WHERE 操作. 过滤器也可以应用于内存中的项目, 比如, 还未写入数据库的新项目, "
+"或者被装载入内存后被修改过但还未保存的行."
+
+#. Tag: para
+#: chapter-sqlcontainer.xml:232
+#, no-c-format
+msgid ""
+"The following is an example of the types of complex filtering that are "
+"possible with the new filtering API. We want to find all people named Paul "
+"Johnson that are either younger than 18 years or older than 65 years and all "
+"Johnsons whose first name starts with the letter \"A\":"
+msgstr ""
+"下例演示新的过滤 API 中, 可以使用的各种复杂过滤. 我们希望找出所有全名为 "
+"\"Paul Johnson\", 并且年龄在 18 岁以下, 或 65 岁以上的人, 以及所有姓 "
+"\"Johnsons\", 并且名以字母 \"A\" 开头的人:"
+
+#. Tag: programlisting
+#: chapter-sqlcontainer.xml:239
+#, no-c-format
+msgid ""
+"<?pocket-size 75% ?><![CDATA[mySQLContainer.addContainerFilter(\n"
+"    new Or(new And(new Equal(\"NAME\", \"Paul\"),\n"
+"                   new Or(new Less(\"AGE\", 18),\n"
+"                          new Greater(\"AGE\", 65))),\n"
+"           new Like(\"NAME\", \"A%\")));\n"
+"mySQLContainer.addContainerFilter(\n"
+"    new Equal(\"LASTNAME\", \"Johnson\"));]]>"
+msgstr ""
+
+#. Tag: para
+#: chapter-sqlcontainer.xml:241
+#, no-c-format
+msgid "This will produce the following WHERE clause:"
+msgstr "以上代码产生的 WHERE 查询条件为:"
+
+#. Tag: programlisting
+#: chapter-sqlcontainer.xml:245
+#, no-c-format
+msgid ""
+"<?pocket-size 75% ?><![CDATA[WHERE ((\"NAME\" = \"Paul\" AND (\"AGE\" < 18 "
+"OR \"AGE\" > 65)) OR \"NAME\" LIKE \"A%\") AND \"LASTNAME\" = \"Johnson\"]]>"
+msgstr ""
+
+#. Tag: title
+#: chapter-sqlcontainer.xml:249
+#, no-c-format
+msgid "<title>Sorting</title>"
+msgstr "<title>排序</title>"
+
+#. Tag: para
+#: chapter-sqlcontainer.xml:251
+#, no-c-format
+msgid ""
+"Sorting can be performed using standard Vaadin, that is, using the sort "
+"method from the <classname>Container.Sortable</classname> interface. The "
+"<parameter>propertyId</parameter> parameter refers to column names."
+msgstr ""
+"排序可以使用标准的 Vaadin API 实现, 也就是使用 <classname>Container."
+"Sortable</classname> 接口的 sort 方法. 其中的 <parameter>propertyId</"
+"parameter> 参数指定排序的列名."
+
+#. Tag: programlisting
+#: chapter-sqlcontainer.xml:257
+#, no-c-format
+msgid ""
+"<?pocket-size 75% ?><![CDATA[public void sort(Object[] propertyId, boolean[] "
+"ascending)]]>"
+msgstr ""
+
+#. Tag: para
+#: chapter-sqlcontainer.xml:259
+#, no-c-format
+msgid ""
+"In addition to the standard method, it is also possible to directly add an "
+"<classname>OrderBy</classname> to the container via the "
+"<methodname>addOrderBy()</methodname> method. This enables the developer to "
+"insert sorters one by one without providing the whole array of them at once."
+msgstr ""
+"除上面的标准方法外, 还可以使用 <methodname>addOrderBy()</methodname> 方法, 直"
+"接向容器添加一个 <classname>OrderBy</classname>. 这个方法允许开发者逐个添加排"
+"序列, 而不必以数组的方式一次性指定全部排序列."
+
+#. Tag: para
+#: chapter-sqlcontainer.xml:267
+#, no-c-format
+msgid ""
+"All sorting rules can be cleared by calling the sort method with null or an "
+"empty array as the first argument."
+msgstr ""
+"使用 null 或空数组作为第一个参数来调用 sort 方法, 可以清除所有的排序规则."
+
+#. Tag: title
+#: chapter-sqlcontainer.xml:275
+#, no-c-format
+msgid "Editing"
+msgstr "编辑"
+
+#. Tag: para
+#: chapter-sqlcontainer.xml:277
+#, no-c-format
+msgid ""
+"Editing the items (<classname>RowItem</classname>s) of SQLContainer can be "
+"done similarly to editing the items of any Vaadin container. "
+"<classname>ColumnProperties</classname> of a <classname>RowItem</classname> "
+"will automatically notify SQLContainer to make sure that changes to the "
+"items are recorded and will be applied to the database immediately or on "
+"commit, depending on the state of the auto-commit mode."
+msgstr ""
+"编辑 SQLContainer 中的项目(<classname>RowItem</classname>s) 与编辑其他 "
+"Vaadin 容器的项目类似. <classname>RowItem</classname> 的 "
+"<classname>ColumnProperties</classname> 会自动通知 SQLContainer, 以确保项目的"
+"变更被正确记录下来, 并被保存到数据库中. 向数据库的保存可以是立即的, 也可能只"
+"在 commit 时保存, 具体如何由自动 commit 模式的设置决定."
+
+#. Tag: title
+#: chapter-sqlcontainer.xml:288
+#, no-c-format
+msgid "Adding items"
+msgstr "添加项目"
+
+#. Tag: para
+#: chapter-sqlcontainer.xml:290
+#, no-c-format
+msgid ""
+"Adding items to an <classname>SQLContainer</classname> object can only be "
+"done via the <methodname>addItem()</methodname> method. This method will "
+"create a new <classname>Item</classname> based on the connected database "
+"table column properties. The new item will either be buffered by the "
+"container or committed to the database through the query delegate depending "
+"on whether the auto commit mode (see the next section) has been enabled."
+msgstr ""
+"向 <classname>SQLContainer</classname> 添加项目只能使用 "
+"<methodname>addItem()</methodname> 方法. 这个方法将创建一个新的 "
+"<classname>Item</classname> 对象, 其中的属性由数据库表的列属性决定. 新项目可"
+"能缓存在容器中, 也可能立即通过查询代理提交到数据库, 具体如何, 由自动 commit "
+"模式(详情请见下节)是否打开来决定."
+
+#. Tag: para
+#: chapter-sqlcontainer.xml:300
+#, no-c-format
+msgid ""
+"When an item is added to the container it is impossible to precisely know "
+"what the primary keys of the row will be, or will the row insertion succeed "
+"at all. This is why the SQLContainer will assign an instance of "
+"<classname>TemporaryRowId</classname> as a <classname>RowId</classname> for "
+"the new item. We will later describe how to fetch the actual key after the "
+"row insertion has succeeded."
+msgstr ""
+"向容器添加项目时, 不可能精确地预知这一行的主键值是什么, 甚至无法预知这一行的"
+"插入是否成功. 所以 SQLContainer 会为新项目自动赋予一个 "
+"<classname>TemporaryRowId</classname> 作为 <classname>RowId</classname>. 我们"
+"后面会介绍, 当行插入成功后如何获取真实的主键值."
+
+#. Tag: para
+#: chapter-sqlcontainer.xml:309
+#, no-c-format
+msgid ""
+"If auto-commit mode is enabled in the <classname>SQLContainer</classname>, "
+"the <methodname>addItem()</methodname> method will return the final "
+"<classname>RowId</classname> of the new item."
+msgstr ""
+"如果 <classname>SQLContainer</classname> 的自动 commit 模式有效, "
+"<methodname>addItem()</methodname> 方法会返回新项目最终的 <classname>RowId</"
+"classname>."
+
+#. Tag: title
+#: chapter-sqlcontainer.xml:317
+#, no-c-format
+msgid "Fetching generated row keys"
+msgstr "取得数据库生成的row key"
+
+#. Tag: para
+#: chapter-sqlcontainer.xml:319
+#, no-c-format
+msgid ""
+"Since it is a common need to fetch the generated key of a row right after "
+"insertion, a listener/notifier has been added into the "
+"<classname>QueryDelegate</classname> interface. Currently only the "
+"<classname>TableQuery</classname> class implements the "
+"<classname>RowIdChangeNotifier</classname> interface, and thus can notify "
+"interested objects of changed row IDs. The events fill be fired after "
+"<methodname>commit()</methodname> in <classname>TableQuery</classname> has "
+"finished; this method is called by <classname>SQLContainer</classname> when "
+"necessary."
+msgstr ""
+"获取一个新插入的行的自动生成主键值, 这是一种常见的需求, 因此 "
+"<classname>QueryDelegate</classname> 接口为解决这个问题键入了一组监听器/通知"
+"器. 目前只有 <classname>TableQuery</classname> 类实现了 "
+"<classname>RowIdChangeNotifier</classname> 接口, 因此它可以发送行 ID 的变化通"
+"知. 在 <classname>TableQuery</classname> 的 <methodname>commit()</"
+"methodname> 方法完成后会激发这个事件; commit 方法会在必要的时候由 "
+"<classname>SQLContainer</classname> 调用."
+
+#. Tag: para
+#: chapter-sqlcontainer.xml:331
+#, no-c-format
+msgid ""
+"To receive updates on the row IDs, you might use the following code "
+"(assuming container is an instance of <classname>SQLContainer</classname>). "
+"Note that these events are not fired if auto commit mode is enabled."
+msgstr ""
+"要接收 row ID 的更新事件, 你可以使用以下代码(假定容器是 "
+"<classname>SQLContainer</classname> 的实例). 注意, 在自动 commit 模式下不会激"
+"发这些事件."
+
+#. Tag: programlisting
+#: chapter-sqlcontainer.xml:338
+#, no-c-format
+msgid ""
+"<?pocket-size 65% ?><![CDATA[app.getDbHelp().getCityContainer()."
+"addListener(\n"
+"    new QueryDelegate.RowIdChangeListener() {\n"
+"        public void rowIdChange(RowIdChangeEvent event) {\n"
+"            System.err.println(\"Old ID: \" + event.getOldRowId());\n"
+"            System.err.println(\"New ID: \" + event.getNewRowId());\n"
+"        }\n"
+"    });]]>"
+msgstr ""
+
+#. Tag: title
+#: chapter-sqlcontainer.xml:342
+#, no-c-format
+msgid "Version column requirement"
+msgstr "对版本控制列的要求"
+
+#. Tag: para
+#: chapter-sqlcontainer.xml:344
+#, no-c-format
+msgid ""
+"If you are using the <classname>TableQuery</classname> class as the query "
+"delegate to the <classname>SQLContainer</classname> and need to enable write "
+"support, there is an enforced requirement of specifying a version column "
+"name to the <classname>TableQuery</classname> instance. The column name can "
+"be set to the <classname>TableQuery</classname> using the following "
+"statement:"
+msgstr ""
+"如果你使用 <classname>TableQuery</classname> 类作为 <classname>SQLContainer</"
+"classname> 的查询代理, 而且希望支持数据写入功能, 这种情况下有一个强制要求, 必"
+"须为 <classname>TableQuery</classname> 指定版本控制列的名称. 为 "
+"<classname>TableQuery</classname> 指定版本控制列名称的代码如下:"
+
+#. Tag: para
+#: chapter-sqlcontainer.xml:355
+#, no-c-format
+msgid ""
+"The version column is preferrably an integer or timestamp typed column in "
+"the table that is attached to the <classname>TableQuery</classname>. This "
+"column will be used for optimistic locking; before a row modification the "
+"<classname>TableQuery</classname> will check before that the version column "
+"value is the same as it was when the data was read into the container. This "
+"should ensure that no one has modified the row inbetween the current user's "
+"reads and writes."
+msgstr ""
+"版本控制列最好是<classname>TableQuery</classname> 连接的表中的整数型或时间戳"
+"型列. 这个列会被用做乐观锁; 修改某个行之前, <classname>TableQuery</"
+"classname> 会检查版本控制列的值与数据读入容器时的值是否一致. 这样可以保证, 在"
+"当前用户的读操作和写操作之间, 没有其他用户修改过同一行数据."
+
+#. Tag: para
+#: chapter-sqlcontainer.xml:365
+#, no-c-format
+msgid ""
+"Note! <classname>TableQuery</classname> assumes that the database will take "
+"care of updating the version column by either using an actual "
+"<literal>VERSION</literal> column (if supported by the database in question) "
+"or by a trigger or a similar mechanism."
+msgstr ""
+"注意! <classname>TableQuery</classname> 假定数据库会负责更新版本控制列的值, "
+"方法可以是使用一个真实的 <literal>VERSION</literal> 列(前提是数据库支持这个功"
+"能), 也可以是使用触发器或者类似机制."
+
+#. Tag: para
+#: chapter-sqlcontainer.xml:372
+#, no-c-format
+msgid ""
+"If you are certain that you do not need optimistic locking, but do want to "
+"enable write support, you may point the version column to, for example, a "
+"primary key column of the table."
+msgstr ""
+"如果你很确定不需要乐观锁, 但是又希望支持数据写入功能, 你可以将版本控制列指定"
+"为, 举例来说, 表的主键列."
+
+#. Tag: title
+#: chapter-sqlcontainer.xml:380
+#, no-c-format
+msgid "<title>Auto-commit mode</title>"
+msgstr "<title>自动 Commit 模式</title>"
+
+#. Tag: para
+#: chapter-sqlcontainer.xml:382
+#, no-c-format
+msgid ""
+"<classname>SQLContainer</classname> is by default in transaction mode, which "
+"means that actions that edit, add or remove items are recorded internally by "
+"the container. These actions can be either committed to the database by "
+"calling <methodname>commit()</methodname> or discarded by calling "
+"<methodname>rollback()</methodname>."
+msgstr ""
+"<classname>SQLContainer</classname> 默认使用事务模式, 也就是说编辑, 添加或删"
+"除操作会被记录在容器内部. 可以调用 <methodname>commit()</methodname> 方法将这"
+"些操作提交到数据库中, 也可以调用 <methodname>rollback()</methodname> 方法废弃"
+"这些操作."
+
+#. Tag: para
+#: chapter-sqlcontainer.xml:390
+#, no-c-format
+msgid ""
+"The container can also be set to auto-commit mode. When this mode is "
+"enabled, all changes will be committed to the database immediately. To "
+"enable or disable the auto-commit mode, call the following method:"
+msgstr ""
+"容器也可以设置为自动 commit 模式. 这种模式下, 一切变更都会被立即自动提交到数"
+"据库. 要打开或关闭自动 commit 模式, 请调用以下方法:"
+
+#. Tag: programlisting
+#: chapter-sqlcontainer.xml:396
+#, no-c-format
+msgid ""
+"<?pocket-size 65% ?><![CDATA[public void setAutoCommit(boolean "
+"autoCommitEnabled)]]>"
+msgstr ""
+
+#. Tag: para
+#: chapter-sqlcontainer.xml:398
+#, no-c-format
+msgid ""
+"It is recommended to leave the auto-commit mode disabled, as it ensures that "
+"the changes can be rolled back if any problems are noticed within the "
+"container items. Using the auto-commit mode will also lead to failure in "
+"item addition if the database table contains non-nullable columns."
+msgstr ""
+"我们建议关闭自动 commit 模式, 因为这样可以保证, 如果发现容器中的项目有任何问"
+"题, 都可以随时取消对数据的修改. 如果数据库表中包含非 NULL 列, 使用自动 "
+"commit 模式还会导致增加项目失败."
+
+#. Tag: title
+#: chapter-sqlcontainer.xml:407
+#, no-c-format
+msgid "Modified state"
+msgstr "更新状态"
+
+#. Tag: para
+#: chapter-sqlcontainer.xml:409
+#, no-c-format
+msgid ""
+"When used in the transaction mode it may be useful to determine whether the "
+"contents of the <classname>SQLContainer</classname> have been modified or "
+"not. For this purpose the container provides an <methodname>isModified()</"
+"methodname> method, which will tell the state of the container to the "
+"developer. This method will return true if any items have been added to or "
+"removed from the container, as well as if any value of an existing item has "
+"been modified."
+msgstr ""
+"在事务模式下使用时, 可能需要判断 <classname>SQLContainer</classname> 的内容是"
+"否有变化. 为了实现这个目的, 容器提供了 <methodname>isModified()</methodname> "
+"方法, 它可以向开发者报告容器的状态. 如果有新项目添加到容器中, 或有项目从容器"
+"中删除, 或某个已有的项目的值有任何变化, 这个方法都将返回 true."
+
+#. Tag: para
+#: chapter-sqlcontainer.xml:419
+#, no-c-format
+msgid ""
+"Additionally, each <classname>RowItem</classname> and each "
+"<classname>ColumnProperty</classname> have <methodname>isModified()</"
+"methodname> methods to allow for a more detailed view over the modification "
+"status. Do note that the modification statuses of <classname>RowItem</"
+"classname> and <classname>ColumnProperty</classname> objects only depend on "
+"whether or not the actual <classname>Property</classname> values have been "
+"modified. That is, they do not reflect situations where the whole "
+"<classname>RowItem</classname> has been marked for removal or has just been "
+"added to the container."
+msgstr ""
+"此外, 每个 <classname>RowItem</classname> 和每个 <classname>ColumnProperty</"
+"classname> 也有 <methodname>isModified()</methodname> 方法, 可用来判断更细节"
+"的变更状态. 注意, <classname>RowItem</classname> 和 "
+"<classname>ColumnProperty</classname> 对象的变更状态只取决于实际的 "
+"<classname>Property</classname> 值有没有变更. 也就是说, 它们不会反映整个 "
+"<classname>RowItem</classname> 是已被删除的行, 或者是新插入容器的行."
+
+#. Tag: title
+#: chapter-sqlcontainer.xml:435
+#, no-c-format
+msgid "Caching, Paging and Refreshing"
+msgstr "缓存, 分页和刷新"
+
+#. Tag: para
+#: chapter-sqlcontainer.xml:437
+#, no-c-format
+msgid ""
+"To decrease the amount of queries made to the database, SQLContainer uses "
+"internal caching for database contents. The caching is implemented with a "
+"size-limited <classname>LinkedHashMap</classname> containing a mapping from "
+"<classname>RowId</classname>s to <classname>RowItem</classname>s. Typically "
+"developers do not need to modify caching options, although some fine-tuning "
+"can be done if required."
+msgstr ""
+"为了减少向数据库发起的查询次数, SQLContainer 使用内部缓存来保存数据库内容. 缓"
+"存使用有限尺寸的 <classname>LinkedHashMap</classname> 来实现, 其中包含一个从 "
+"<classname>RowId</classname> 到 <classname>RowItem</classname> 的映射. 开发者"
+"一般不必修改缓存选项, 但如果有必要, 也可以做一些性能调整."
+
+#. Tag: title
+#: chapter-sqlcontainer.xml:447
+#, no-c-format
+msgid "Container Size"
+msgstr "容器大小"
+
+#. Tag: para
+#: chapter-sqlcontainer.xml:449
+#, no-c-format
+msgid ""
+"The <classname>SQLContainer</classname> keeps continuously checking the "
+"amount of rows in the connected database table in order to detect external "
+"addition or removal of rows. By default, the table row count is assumed to "
+"remain valid for 10 seconds. This value can be altered from code; with "
+"<methodname>setSizeValidMilliSeconds()</methodname> in "
+"<classname>SQLContainer</classname>."
+msgstr ""
+"<classname>SQLContainer</classname> 会不断检查它所连接的数据表内的行数, 以便"
+"判断行的增加和删除. 默认情况下, 表行数的有效时间假定为 10 秒. 这个值可以通过 "
+"<classname>SQLContainer</classname> 的 "
+"<methodname>setSizeValidMilliSeconds()</methodname>  方法来修改."
+
+#. Tag: para
+#: chapter-sqlcontainer.xml:458
+#, no-c-format
+msgid ""
+"If the size validity time has expired, the row count will be automatically "
+"updated on:"
+msgstr "如果大小的有效时间到期后, 会在以下几个时刻自动更新行数:"
+
+#. Tag: para
+#: chapter-sqlcontainer.xml:464
+#, no-c-format
+msgid "A call to <methodname>getItemIds()</methodname> method"
+msgstr "调用 <methodname>getItemIds()</methodname> 方法时"
+
+#. Tag: para
+#: chapter-sqlcontainer.xml:465
+#, no-c-format
+msgid "A call to <methodname>size()</methodname> method"
+msgstr "调用 <methodname>size()</methodname> 方法时"
+
+#. Tag: para
+#: chapter-sqlcontainer.xml:466
+#, no-c-format
+msgid "Some calls to <methodname>indexOfId(Object itemId)</methodname> method"
+msgstr ""
+"调用 <methodname>indexOfId(Object itemId)</methodname> 方法时(某些情况下)"
+
+#. Tag: para
+#: chapter-sqlcontainer.xml:467
+#, no-c-format
+msgid "A call to <methodname>firstItemId()</methodname> method"
+msgstr "调用 <methodname>firstItemId()</methodname> 方法时"
+
+#. Tag: para
+#: chapter-sqlcontainer.xml:468
+#, no-c-format
+msgid ""
+"When the container is fetching a set of rows to the item cache (lazy loading)"
+msgstr "当容器读取一系列的行进入项目缓存(lazy loading)时"
+
+#. Tag: title
+#: chapter-sqlcontainer.xml:473
+#, no-c-format
+msgid "Page Length and Cache Size"
+msgstr "分页长度与缓存大小"
+
+#. Tag: para
+#: chapter-sqlcontainer.xml:475
+#, no-c-format
+msgid ""
+"The page length of the <classname>SQLContainer</classname> dictates the "
+"amount of rows fetched from the database in one query. The default value is "
+"100, and it can be modified with the <methodname>setPageLength()</"
+"methodname> method. To avoid constant queries it is recommended to set the "
+"page length value to at least 5 times the amount of rows displayed in a "
+"Vaadin <classname>Table</classname>; obviously, this is also dependent on "
+"the cache ratio set for the <classname>Table</classname> component."
+msgstr ""
+"<classname>SQLContainer</classname> 的分页长度 决定每次查询数据库时读取的数据"
+"行数. 默认值是 100, 这个值可以使用 <methodname>setPageLength()</methodname> "
+"方法修改. 为了避免发生大量查询, 建议将分页长度设置为 Vaadin "
+"<classname>Table</classname> 组件中显示行数的至少 5 倍; 显然, 这个设置也取决"
+"于 <classname>Table</classname> 组件的缓存比例设置."
+
+#. Tag: para
+#: chapter-sqlcontainer.xml:486
+#, no-c-format
+msgid ""
+"The size of the internal item cache of the <classname>SQLContainer</"
+"classname> is calculated by multiplying the page length with the cache ratio "
+"set for the container. The cache ratio can only be set from the code, and "
+"the default value for it is 2. Hence with the default page length of 100 the "
+"internal cache size becomes 200 items. This should be enough even for larger "
+"<classname>Table</classname>s while ensuring that no huge amounts of memory "
+"will be used on the cache."
+msgstr ""
+"<classname>SQLContainer</classname> 内部项目缓存的大小的计算方法如下: 分页"
+"长度 × 容器设置的缓存比率. 缓存比率只能通过代码来设置, 默认值为 2. 因此, 对于"
+"默认的分页长度 100, 内部缓存大小为 200 个项目. 这个值即使对于更大的 "
+"<classname>Table</classname>恶意足够了, 同时还可以保证缓存不会消耗掉过多的内"
+"存."
+
+#. Tag: title
+#: chapter-sqlcontainer.xml:498
+#, no-c-format
+msgid "Refreshing the Container"
+msgstr "刷新容器"
+
+#. Tag: para
+#: chapter-sqlcontainer.xml:500
+#, no-c-format
+msgid ""
+"Normally, the <classname>SQLContainer</classname> will handle refreshing "
+"automatically when required. However, there may be situations where an "
+"implicit refresh is needed, for example, to make sure that the version "
+"column is up-to-date prior to opening the item for editing in a form. For "
+"this purpose a <methodname>refresh()</methodname> method is provided. This "
+"method simply clears all caches, resets the current item fetching offset and "
+"sets the container size dirty. Any item-related call after this will "
+"inevitably result into row count and item cache update."
+msgstr ""
+"通常, <classname>SQLContainer</classname> 会在需要的时候自动处理刷新工作. 但"
+"是, 某些情况下会需要手动刷新, 比如, 在 Form 中打开项目进行编辑之前, 为了确保"
+"版本控制列的值保持同步, 可能就需要刷新容器数据. 对于这里目标, 容器提供了 "
+"<methodname>refresh()</methodname> 方法. 这个方法简单地清空所有缓存, 重置项目"
+"取得位置的偏移量, 然后将容器大小为无效. 此后一切与项目相关的调用都会不可避免"
+"地导致更新行件数和更新项目缓存."
+
+#. Tag: emphasis
+#: chapter-sqlcontainer.xml:512
+#, no-c-format
+msgid ""
+"Note that a call to the refresh method will not affect or reset the "
+"following properties of the container:"
+msgstr "注意, 调用 refresh 方法不会影响或重置容器的以下属性:"
+
+#. Tag: listitem
+#: chapter-sqlcontainer.xml:517
+#, no-c-format
+msgid "The <classname>QueryDelegate</classname> of the container"
+msgstr "容器的 <classname>QueryDelegate</classname>"
+
+#. Tag: listitem
+#: chapter-sqlcontainer.xml:518
+#, no-c-format
+msgid "<listitem>Auto-commit mode</listitem>"
+msgstr "<listitem>自动 commit 模式</listitem>"
+
+#. Tag: listitem
+#: chapter-sqlcontainer.xml:519
+#, no-c-format
+msgid "Page length"
+msgstr "分页长度"
+
+#. Tag: listitem
+#: chapter-sqlcontainer.xml:520
+#, no-c-format
+msgid "Filters"
+msgstr "过滤器"
+
+#. Tag: listitem
+#: chapter-sqlcontainer.xml:521
+#, no-c-format
+msgid "<listitem>Sorting</listitem>"
+msgstr "<listitem>排序</listitem>"
+
+#. Tag: title
+#: chapter-sqlcontainer.xml:526
+#, no-c-format
+msgid "Cache Flush Notification Mechanism"
+msgstr "缓存 Flush 通知机制"
+
+#. Tag: para
+#: chapter-sqlcontainer.xml:528
+#, no-c-format
+msgid ""
+"Cache usage with databases in multiuser applications always results in some "
+"kind of a compromise between the amount of queries we want to execute on the "
+"database and the amount of memory we want to use on caching the data; and "
+"most importantly, risking the cached data becoming stale."
+msgstr ""
+"在多用户应用程序中使用缓存, 总是会导致某种矛盾, 我们希望在数据库上执行的查询"
+"次数要少, 我们又希望用来缓存数据的内存消耗要少; 还有最重要的问题, 就是缓存中"
+"的数据过期的风险要小."
+
+#. Tag: para
+#: chapter-sqlcontainer.xml:535
+#, no-c-format
+msgid ""
+"SQLContainer provides an experimental remedy to this problem by implementing "
+"a simple cache flush notification mechanism. Due to its nature these "
+"notifications are disabled by default but can be easily enabled for a "
+"container instance by calling <methodname>enableCacheFlushNotifications()</"
+"methodname> at any time during the lifetime of the container."
+msgstr ""
+"SQLContainer 为这个问题提供了一种实验性的补救方法, 它实现了一个简单的缓存 "
+"Flush 通知机制. 由于这些通知的性质, 它们默认是关闭的, 但在容器生命周期的任何"
+"时刻, 都可以通过 <methodname>enableCacheFlushNotifications()</methodname> 方"
+"法启用这些事件."
+
+#. Tag: para
+#: chapter-sqlcontainer.xml:544
+#, no-c-format
+msgid ""
+"The notification mechanism functions by storing a weak reference to all "
+"registered containers in a static list structure. To minimize the risk of "
+"memory leaks and to avoid unlimited growing of the reference list, dead weak "
+"references are collected to a reference queue and removed from the list "
+"every time a <classname>SQLContainer</classname> is added to the "
+"notification reference list or a container calls the notification method."
+msgstr ""
+"通知机制在一个 static 的 List 结构中对所有注册的容器保存一个弱引用. 为了将内"
+"存泄露的风险降到最低, 也为了避免引用 List 的无限增长, 已消亡的弱引用会被收集"
+"到一个引用队列中, 然后在新的 <classname>SQLContainer</classname> 加入通知列表"
+"时, 或者在某个容器调用通知方法时, 将已消亡的引用从列表中删除."
+
+#. Tag: para
+#: chapter-sqlcontainer.xml:553
+#, no-c-format
+msgid ""
+"When a <classname>SQLContainer</classname> has its cache notifications set "
+"enabled, it will call the static <methodname>notifyOfCacheFlush()</"
+"methodname> method giving itself as a parameter. This method will compare "
+"the notifier-container to all the others present in the reference list. To "
+"fire a cache flush event, the target container must have the same type of "
+"<classname>QueryDelegate</classname> (either <classname>TableQuery</"
+"classname> or <classname>FreeformQuery</classname>) and the table name or "
+"query string must match with the container that fired the notification. If a "
+"match is found the <methodname>refresh()</methodname> method of the matching "
+"container is called, resulting in cache flushing in the target container."
+msgstr ""
+"当 <classname>SQLContainer</classname> 的缓存通知被设置为有效, 它会调用静态方"
+"法 <methodname>notifyOfCacheFlush()</methodname>, 并把自己作为这个方法的参"
+"数. 这个方法会比较发起通知的容器, 以及引用列表中所有其他容器. 为了激发一个缓"
+"存 Flush 事件, 目标容器的 <classname>QueryDelegate</classname> 类型必须相同"
+"(可以是 <classname>TableQuery</classname> 或 <classname>FreeformQuery</"
+"classname>), 而且表名或查询语句必须与发起通知的容器一致. 如果发现了一致的容"
+"器, 对象容器的 <methodname>refresh()</methodname> 方法会被调用, 于是导致源容"
+"器的更新被刷新到目标容器中."
+
+#. Tag: emphasis
+#: chapter-sqlcontainer.xml:569
+#, no-c-format
+msgid ""
+"Note: Standard Vaadin issues apply; even if the <classname>SQLContainer</"
+"classname> is refreshed on the server side, the changes will not be "
+"reflected to the UI until a server round-trip is performed, or unless a push "
+"mechanism is used."
+msgstr ""
+"注意: Vaadin 的常见问题也适用于这个容器: 即使在服务器端刷新了 "
+"<classname>SQLContainer</classname>, 变化也不会反映到 UI 部分, 除非发生了一次"
+"与服务器的同步, 或者使用了某种服务器 PUSH 机制."
+
+#. Tag: title
+#: chapter-sqlcontainer.xml:578
+#, no-c-format
+msgid "Referencing Another SQLContainer"
+msgstr "刷新其他 SQLContainer"
+
+#. Tag: para
+#: chapter-sqlcontainer.xml:580
+#, no-c-format
+msgid ""
+"When developing a database-connected application, there is usually a need to "
+"retrieve data related to one table from one or more other tables. In most "
+"cases, this relation is achieved with a foreign key reference, where a "
+"column of the first table contains a primary key or candidate key of a row "
+"in another table."
+msgstr ""
+"开发数据库应用程序时, 有一种常见需求是从一个或多个其他表中取得一个表的相关数"
+"据. 大多数情况下, 这种关系通过外键引用来实现, 也就是, 一个表的列中包含另一个"
+"表主键, 或候选键(candidate key, 译注: 不是主键, 但也是唯一键, 因此也可以被其"
+"他表的外键来引用)."
+
+#. Tag: para
+#: chapter-sqlcontainer.xml:588
+#, no-c-format
+msgid ""
+"SQLContainer offers limited support for this kind of referencing relation, "
+"although all referencing is currently done on the Java side so no "
+"constraints need to be made in the database. A new reference can be created "
+"by calling the following method:"
+msgstr ""
+"对于这样的引用关系, SQLContainer 提供了有限的支持, 虽然所有的引用目前都是在 "
+"Java 端完成的, 因此数据库端不必创建约束. 创建引用关系可以使用以下方法:"
+
+#. Tag: programlisting
+#: chapter-sqlcontainer.xml:595
+#, no-c-format
+msgid ""
+"<?pocket-size 70% ?><![CDATA[public void addReference(SQLContainer "
+"refdCont,\n"
+"                         String refingCol, String refdCol);]]>"
+msgstr ""
+
+#. Tag: para
+#: chapter-sqlcontainer.xml:597
+#, no-c-format
+msgid ""
+"This method should be called on the source container of the reference. The "
+"target container should be given as the first parameter. The "
+"<parameter>refingCol</parameter> is the name of the 'foreign key' column in "
+"the source container, and the <parameter>refdCol</parameter> is the name of "
+"the referenced key column in the target container."
+msgstr ""
+"这个方法应该在引用关系的源容器端调用. 目标容器作为第一个参数给出. "
+"<parameter>refingCol</parameter> 参数是源容器中\"外键\"列的名称, "
+"<parameter>refdCol</parameter> 参数是目标容器中被引用的主键或候选键的列名称."
+
+#. Tag: emphasis
+#: chapter-sqlcontainer.xml:606
+#, no-c-format
+msgid ""
+"Note: For any <classname>SQLContainer</classname>, all the referenced target "
+"containers must be different. You can not reference the same container from "
+"the same source twice."
+msgstr ""
+"注意: 对于任何的 <classname>SQLContainer</classname>, 它所引用的目标容器必须"
+"是不同的. 不允许从同一个源容器两次引用同一个目标容器."
+
+#. Tag: para
+#: chapter-sqlcontainer.xml:611
+#, no-c-format
+msgid ""
+"Handling the referenced item can be done through the three provided set/get "
+"methods, and the reference can be completely removed with the "
+"<methodname>removeReference()</methodname> method. Signatures of these "
+"methods are listed below:"
+msgstr ""
+"管理被引用的项目可以通过三个 set/get 方法, 完全删除引用关系可以使用 "
+"<methodname>removeReference()</methodname> 方法. 这些方法如下:"
+
+#. Tag: programlisting
+#: chapter-sqlcontainer.xml:618
+#, no-c-format
+msgid ""
+"<?pocket-size 70% ?><![CDATA[public boolean setReferencedItem(Object "
+"itemId,\n"
+"        Object refdItemId, SQLContainer refdCont)\n"
+"public Object getReferencedItemId(Object itemId,\n"
+"                                  SQLContainer refdCont)\n"
+"public Item getReferencedItem(Object itemId,\n"
+"                              SQLContainer refdCont)\n"
+"public boolean removeReference(SQLContainer refdCont)]]>"
+msgstr ""
+
+#. Tag: para
+#: chapter-sqlcontainer.xml:620
+#, no-c-format
+msgid ""
+"The setter method should be given three parameters: <parameter>itemId</"
+"parameter> is the ID of the referencing item (from the source container), "
+"<parameter>refdItemId</parameter> is the referenced <parameter>itemID</"
+"parameter> (from the target container) and <parameter>refdCont</parameter> "
+"is a reference to the target container that identifies the reference. This "
+"method returns true if the setting of the referenced item was successful. "
+"After setting the referenced item you must normally call "
+"<methodname>commit()</methodname> on the source container to persist the "
+"changes to the database."
+msgstr ""
+"set 方法需要三个参数: <parameter>itemId</parameter> 是(源容器中)引用项目的 "
+"ID, <parameter>refdItemId</parameter> 是(目标容器中的)被引用 <parameter>项目 "
+"ID</parameter>, <parameter>refdCont</parameter> 是目标容器. 如果引用关系的设"
+"置成功, 这个方法将返回 true. 设置过引用关系后, 你必须象通常的数据变更一样, 在"
+"源容器上调用 <methodname>commit()</methodname> 方法, 将数据写入数据库中."
+
+#. Tag: para
+#: chapter-sqlcontainer.xml:632
+#, no-c-format
+msgid ""
+"The <methodname>getReferencedItemId()</methodname> method will return the "
+"item ID of the referenced item. As parameters this method needs the item ID "
+"of the referencing item and a reference to the target container as an "
+"identifier. <classname>SQLContainer</classname> also provides a convenience "
+"method <methodname>getReferencedItem()</methodname>, which directly returns "
+"the referenced item from the target container."
+msgstr ""
+"<methodname>getReferencedItemId()</methodname> 方法返回被引用项目的 ID . 这个"
+"方法的参数需要指定引用源项目的 ID, 以及被引用的目标容器. "
+"<classname>SQLContainer</classname> 还提供了一个简易方法 "
+"<methodname>getReferencedItem()</methodname>, 直接返回目标容器中的被引用项"
+"目, 而不是被引用项目的 ID."
+
+#. Tag: para
+#: chapter-sqlcontainer.xml:641
+#, no-c-format
+msgid ""
+"Finally, the referencing can be removed from the source container by calling "
+"the <methodname>removeReference()</methodname> method with the target "
+"container as parameter. Note that this does not actually change anything in "
+"the database; it merely removes the logical relation that exists only on the "
+"Java-side."
+msgstr ""
+"最后, 在源容器上调用 <methodname>removeReference()</methodname> 方法, 以目标"
+"容器为参数, 可以删除它们之间的引用关系. 注意这个方法不会在数据库端造成任何改"
+"变; 它只是在 Java 端删除容器间的逻辑关系."
+
+#. Tag: title
+#: chapter-sqlcontainer.xml:651
+#, no-c-format
+msgid "Making Freeform Queries"
+msgstr "使用任意查询"
+
+#. Tag: para
+#: chapter-sqlcontainer.xml:653
+#, no-c-format
+msgid ""
+"In most cases, the provided <classname>TableQuery</classname> will be enough "
+"to allow a developer to gain effortless access to an SQL data source. "
+"However there may arise situations when a more complex query with, for "
+"example, join expressions is needed. Or perhaps you need to redefine how the "
+"writing or filtering should be done. The <classname>FreeformQuery</"
+"classname> query delegate is provided for this exact purpose. Out of the box "
+"the <classname>FreeformQuery</classname> supports read-only access to a "
+"database, but it can be extended to allow writing also."
+msgstr ""
+"大多数情况下, 内建的 <classname>TableQuery</classname> 已经足够开发者便利地实"
+"现对 SQL 数据源的访问. 但是, 还存在很多情况下可能需要使用更复杂的查询, 比如, "
+"需要使用 join 查询. 或者你可能会需要自行实现如何写入数据, 如何过滤数据. 查询"
+"代理类 <classname>FreeformQuery</classname> 就被用来实现这样的需求. 未经复杂"
+"配置的 <classname>FreeformQuery</classname> 可以实现对数据库的只读访问, 但经"
+"过一些扩展后, 也可以实现数据写入功能."
+
+#. Tag: title
+#: chapter-sqlcontainer.xml:665
+#, no-c-format
+msgid "Getting started"
+msgstr "入门"
+
+#. Tag: para
+#: chapter-sqlcontainer.xml:667
+#, no-c-format
+msgid ""
+"Getting started with the <classname>FreeformQuery</classname> may be done as "
+"shown in the following. The connection pool initialization is similar to the "
+"<classname>TableQuery</classname> example so it is omitted here. Note that "
+"the name(s) of the primary key column(s) must be provided to the "
+"<classname>FreeformQuery</classname> manually. This is required because "
+"depending on the query the result set may or may not contain data about "
+"primary key columns. In this example, there is one primary key column with a "
+"name 'ID'."
+msgstr ""
+"<classname>FreeformQuery</classname> 的简单实用见下例. 数据库连接池的初始化处"
+"理与 <classname>TableQuery</classname> 中的示例程序类似, 因此此处省略. 注意, "
+"主键的列名必须使用手工指定给 <classname>FreeformQuery</classname>. 这个要求是"
+"因为, 由于查询语句的不同, 查询结果集中可能包含主键列, 也可能不包含. 下例中, "
+"查询结果中包含主键列, 名为 'ID'."
+
+#. Tag: programlisting
+#: chapter-sqlcontainer.xml:678
+#, no-c-format
+msgid ""
+"<![CDATA[FreeformQuery query = new FreeformQuery(\n"
+"        \"SELECT * FROM SAMPLE\", pool, \"ID\");\n"
+"SQLContainer container = new SQLContainer(query);]]>"
+msgstr ""
+
+#. Tag: title
+#: chapter-sqlcontainer.xml:682
+#, no-c-format
+msgid "Limitations"
+msgstr "限制"
+
+#. Tag: para
+#: chapter-sqlcontainer.xml:684
+#, no-c-format
+msgid ""
+"While this looks just as easy as with the <classname>TableQuery</classname>, "
+"do note that there are some important caveats here. Using "
+"<classname>FreeformQuery</classname> like this (without providing "
+"<classname>FreeformQueryDelegate</classname> or "
+"<classname>FreeformStatementDelegate</classname> implementation) it can only "
+"be used as a read-only window to the resultset of the query. Additionally "
+"filtering, sorting and lazy loading features will not be supported, and the "
+"row count will be fetched in quite an inefficient manner. Bearing these "
+"limitations in mind, it becomes quite obvious that the developer is in "
+"reality meant to implement the <classname>FreeformQueryDelegate</classname> "
+"or <classname>FreeformStatementDelegate</classname> interface."
+msgstr ""
+"虽然上例看起来和 <classname>TableQuery</classname> 一样简单, 但这里有几个重要"
+"的问题需要注意. 以这种方式使用 <classname>FreeformQuery</classname> (不指定 "
+"<classname>FreeformQueryDelegate</classname> 或 "
+"<classname>FreeformStatementDelegate</classname>), 只能将查询结果用于只读窗"
+"口. 这之外的过滤, 排序, lazy loading 功能都将不可用, 而且行数的取得会使用一种"
+"非常低效的方式. 理解这些限制之后, 我们可以很明显地看出, 开发者需要实现 "
+"<classname>FreeformQueryDelegate</classname> or "
+"<classname>FreeformStatementDelegate</classname> 接口."
+
+#. Tag: para
+#: chapter-sqlcontainer.xml:699
+#, no-c-format
+msgid ""
+"The <classname>FreeformStatementDelegate</classname> interface is an "
+"extension of the <classname>FreeformQueryDelegate</classname> interface, "
+"which returns <classname>StatementHelper</classname> objects instead of pure "
+"query <classname>String</classname>s. This enables the developer to use "
+"prepared statetemens instead of regular statements. It is highly recommended "
+"to use the <classname>FreeformStatementDelegate</classname> in all "
+"implementations. From this chapter onwards, we will only refer to the "
+"<classname>FreeformStatementDelegate</classname> in cases where "
+"<classname>FreeformQueryDelegate</classname> could also be applied."
+msgstr ""
+"<classname>FreeformStatementDelegate</classname> 接口继承自 "
+"<classname>FreeformQueryDelegate</classname> 接口, 它返回 "
+"<classname>StatementHelper</classname> 对象, 而不是单纯的查询语句 <classname>"
+"字符串</classname>. 因此开发者可以使用 PreparedStatement(译注: 此处原文有拼写"
+"错误) 而不是通常的 Statement. 强烈建议在所有的实现中都使用 "
+"<classname>FreeformStatementDelegate</classname>. 从本章开始, 凡是可以使用 "
+"<classname>FreeformQueryDelegate</classname> 的场合, 我们都使用 "
+"<classname>FreeformStatementDelegate</classname>."
+
+#. Tag: title
+#: chapter-sqlcontainer.xml:713
+#, no-c-format
+msgid "Creating your own <classname>FreeformStatementDelegate</classname>"
+msgstr "创建自己的 <classname>FreeformStatementDelegate</classname>"
+
+#. Tag: para
+#: chapter-sqlcontainer.xml:715
+#, no-c-format
+msgid ""
+"To create your own delegate for <classname>FreeformQuery</classname> you "
+"must implement some or all of the methods from the "
+"<classname>FreeformStatementDelegate</classname> interface, depending on "
+"which ones your use case requires. The interface contains eight methods "
+"which are shown below. For more detailed requirements, see the JavaDoc "
+"documentation of the interface."
+msgstr ""
+"为了给 <classname>FreeformQuery</classname> 创建自己的代理, 你必须实现 "
+"<classname>FreeformStatementDelegate</classname> 接口的一部分或全部方法, 具体"
+"如何取决于你的使用场景. 这个接口包含以下八个方法. 更详细的信息, 请参阅这个接"
+"口的 JavaDoc 文档."
+
+#. Tag: programlisting
+#: chapter-sqlcontainer.xml:724
+#, no-c-format
+msgid ""
+"<?pocket-size 65% ?><![CDATA[// Read-only queries\n"
+"public StatementHelper getCountStatement()\n"
+"public StatementHelper getQueryStatement(int offset, int limit)\n"
+"public StatementHelper getContainsRowQueryStatement(Object... keys)\n"
+"\n"
+"// Filtering and sorting\n"
+"public void setFilters(List<Filter> filters)\n"
+"public void setFilters(List<Filter> filters,\n"
+"                       FilteringMode filteringMode)\n"
+"public void setOrderBy(List<OrderBy> orderBys)\n"
+"\n"
+"// Write support\n"
+"public int storeRow(Connection conn, RowItem row)\n"
+"public boolean removeRow(Connection conn, RowItem row)]]>"
+msgstr ""
+
+#. Tag: para
+#: chapter-sqlcontainer.xml:726
+#, no-c-format
+msgid ""
+"A simple demo implementation of this interface can be found in the "
+"SQLContainer package, more specifically in the class <classname>com.vaadin."
+"addon.sqlcontainer.demo.DemoFreeformQueryDelegate</classname>."
+msgstr ""
+"作为这个接口的一个简单的样例实现, 可以参考 SQLContainer 包中的 "
+"<classname>com.vaadin.addon.sqlcontainer.demo.DemoFreeformQueryDelegate</"
+"classname> 类."
+
+#. Tag: title
+#: chapter-sqlcontainer.xml:735
+#, no-c-format
+msgid "Non-Implemented Methods"
+msgstr "未实现的方法"
+
+#. Tag: para
+#: chapter-sqlcontainer.xml:737
+#, no-c-format
+msgid ""
+"Due to the database connection inherent to the SQLContainer, some of the "
+"methods from the container interfaces of Vaadin can not (or would not make "
+"sense to) be implemented. These methods are listed below, and they will "
+"throw an <classname>UnsupportedOperationException</classname> on invocation."
+msgstr ""
+"由于 SQLContainer 连接到数据库,  Vaadin 容器接口中的某些方法是无法实现的(或者"
+"说在数据库概念中是没有意义的). 这些方法列举如下, 如果调用它们, 会抛出 "
+"<classname>UnsupportedOperationException</classname>异常."
+
+#. Tag: programlisting
+#: chapter-sqlcontainer.xml:744
+#, no-c-format
+msgid ""
+"<?pocket-size 65% ?><![CDATA[public boolean addContainerProperty(Object "
+"propertyId,\n"
+"                                    Class<?> type,\n"
+"                                    Object defaultValue)\n"
+"public boolean removeContainerProperty(Object propertyId)\n"
+"public Item addItem(Object itemId)\n"
+"public Object addItemAt(int index)\n"
+"public Item addItemAt(int index, Object newItemId)\n"
+"public Object addItemAfter(Object previousItemId)\n"
+"public Item addItemAfter(Object previousItemId, Object newItemId)]]>"
+msgstr ""
+
+#. Tag: para
+#: chapter-sqlcontainer.xml:746
+#, no-c-format
+msgid ""
+"Additionally, the following methods of the <classname>Item</classname> "
+"interface are not supported in the <classname>RowItem</classname> class:"
+msgstr ""
+"此外, <classname>Item</classname> 接口的以下方法, 在 <classname>RowItem</"
+"classname> 类中也是不支持的:"
+
+#. Tag: programlisting
+#: chapter-sqlcontainer.xml:751
+#, no-c-format
+msgid ""
+"<?pocket-size 65% ?><![CDATA[public boolean addItemProperty(Object id, "
+"Property property)\n"
+"public boolean removeItemProperty(Object id)]]>"
+msgstr ""
+
+#. Tag: title
+#: chapter-sqlcontainer.xml:754
+#, no-c-format
+msgid "About the getItemIds() method"
+msgstr "关于 getItemIds() 方法"
+
+#. Tag: para
+#: chapter-sqlcontainer.xml:756
+#, no-c-format
+msgid ""
+"To properly implement the Vaadin <classname>Container</classname> interface, "
+"a <methodname>getItemIds()</methodname> method has been implented in the "
+"<classname>SQLContainer</classname>. By definition, this method returns a "
+"collection of all the item IDs present in the container. What this means in "
+"the <classname>SQLContainer</classname> case is that the container has to "
+"query the database for the primary key columns of all the rows present in "
+"the connected database table."
+msgstr ""
+"为了正确地实现 Vaadin <classname>Container</classname> 接口,  在 "
+"<classname>SQLContainer</classname> 中必须实现 <methodname>getItemIds()</"
+"methodname> 方法. 按照定义, 这个方法应该返回容器中所有项目的 ID. 对 "
+"<classname>SQLContainer</classname> 来说, 容器必须查询数据, 取得当前关连的表"
+"中所有行的主键数据."
+
+#. Tag: para
+#: chapter-sqlcontainer.xml:766
+#, no-c-format
+msgid ""
+"It is obvious that this could potentially lead to fetching tens or even "
+"hundreds of thousands of rows in an effort to satisfy the method caller. "
+"This will effectively kill the lazy loading properties of "
+"<classname>SQLContainer</classname> and therefore the following warning is "
+"expressed here:"
+msgstr ""
+"为了实现这样的方法, 显然有可能装载几万甚至几十万行数据. 于是导致 "
+"<classname>SQLContainer</classname> 的 lazy loading 完全失去意义, 所以我们提"
+"出以下警告:"
+
+#. Tag: para
+#: chapter-sqlcontainer.xml:775
+#, no-c-format
+msgid ""
+"It is highly recommended not to call the <methodname>getitemIds()</"
+"methodname> method, unless it is known that in the use case in question the "
+"item ID set will always be of reasonable size."
+msgstr ""
+"强烈建议不要调用 <methodname>getitemIds()</methodname> 方法, 除非明确地知道这"
+"个方法载入的项目 ID 数量不会太多."
+
+#. Tag: title
+#: chapter-sqlcontainer.xml:786
+#, no-c-format
+msgid "Known Issues and Limitations"
+msgstr "已知的问题与限制事项"
+
+#. Tag: para
+#: chapter-sqlcontainer.xml:788
+#, no-c-format
+msgid ""
+"At this point, there are still some known issues and limitations affecting "
+"the use of SQLContainer in certain situations. The known issues and brief "
+"explanations are listed below:"
+msgstr ""
+"目前, 对于 SQLContainer 的某些使用场景, 仍然还存在着一些已知的问题和限制事"
+"项. 已知问题及简要的解释列举如下:"
+
+#. Tag: listitem
+#: chapter-sqlcontainer.xml:795
+#, no-c-format
+msgid "Some SQL data types do not have write support when using TableQuery:"
+msgstr "使用 TableQuery 时某些 SQL 数据类型没有写入能力:"
+
+#. Tag: listitem
+#: chapter-sqlcontainer.xml:798
+#, no-c-format
+msgid "All binary types"
+msgstr "所有的 binary 类型"
+
+#. Tag: listitem
+#: chapter-sqlcontainer.xml:799
+#, no-c-format
+msgid "All custom types"
+msgstr "所有的 custom 类型"
+
+#. Tag: listitem
+#: chapter-sqlcontainer.xml:801
+#, no-c-format
+msgid ""
+"CLOB (if not converted automatically to a <classname>String</classname> by "
+"the JDBC driver in use)"
+msgstr ""
+"CLOB (如果没有被目前使用的 JDBC 驱动程序自动转换为 <classname>String</"
+"classname>)"
+
+#. Tag: listitem
+#: chapter-sqlcontainer.xml:806
+#, no-c-format
+msgid ""
+"See <classname>com.vaadin.addon.sqlcontainer.query.generator."
+"StatementHelper</classname> for details."
+msgstr ""
+"详情请参见 <classname>com.vaadin.addon.sqlcontainer.query.generator."
+"StatementHelper</classname>."
+
+#. Tag: para
+#: chapter-sqlcontainer.xml:815
+#, no-c-format
+msgid ""
+"When using Oracle or MS SQL database, the column name \"<parameter>rownum</"
+"parameter>\" can not be used as a column name in a table connected to "
+"<classname>SQLContainer</classname>."
+msgstr ""
+"使用 Oracle 或 MS SQL 数据库时, 在 <classname>SQLContainer</classname> 连接的"
+"表中, \"<parameter>rownum</parameter>\" 不可以用作列的名称."
+
+#. Tag: para
+#: chapter-sqlcontainer.xml:820
+#, no-c-format
+msgid ""
+"This limitation exists because the databases in question do not support "
+"limit/offset clauses required for paging. Instead, a generated column named "
+"'rownum' is used to implement paging support."
+msgstr ""
+"出现这个限制的原因是, 数据的分页存取需要依靠 limit/offset 语句来实现. 如果数"
+"据库不支持 limit/offset 语句, 为了实现分页存取, 会使用一个动态生成的列 "
+"'rownum' 来计算行的位置, 相应的, 在真实的列中, 就不能出现这个名称."
+
+#. Tag: para
+#: chapter-sqlcontainer.xml:828
+#, no-c-format
+msgid ""
+"The permanent limitations are listed below. These can not or most probably "
+"will not be fixed in future versions of SQLContainer."
+msgstr ""
+"永久存在的限制事项列举如下. 在 SQLContainer 的未来版本中, 这些限制事项不会解"
+"决, 或者很可能不会解决."
+
+#. Tag: listitem
+#: chapter-sqlcontainer.xml:834
+#, no-c-format
+msgid ""
+"The <methodname>getItemIds()</methodname> method is very inefficient - avoid "
+"calling it unless absolutely required!"
+msgstr ""
+"<methodname>getItemIds()</methodname> 方法有严重的效率问题 - 除非绝对必要, 否"
+"则尽量不要调用这个方法!"
+
+#. Tag: listitem
+#: chapter-sqlcontainer.xml:839
+#, no-c-format
+msgid ""
+"When using <classname>FreeformQuery</classname> without providing a "
+"<classname>FreeformStatementDelegate</classname>, the row count query is "
+"very inefficient - avoid using <classname>FreeformQuery</classname> without "
+"implementing at least the count query properly."
+msgstr ""
+"使用 <classname>FreeformQuery</classname> 时如果不指定 "
+"<classname>FreeformStatementDelegate</classname>, 行数的查询会有严重的效率问"
+"题 - 使用 <classname>FreeformQuery</classname> 时至少应该正确地实现行数查询功"
+"能."
+
+#. Tag: listitem
+#: chapter-sqlcontainer.xml:846
+#, no-c-format
+msgid ""
+"When using <classname>FreeformQuery</classname> without providing a "
+"<classname>FreeformStatementDelegate</classname>, writing, sorting and "
+"filtering will not be supported."
+msgstr ""
+"使用 <classname>FreeformQuery</classname> 时如果不指定 "
+"<classname>FreeformStatementDelegate</classname>, 数据写入, 排序和过滤功能将"
+"不可用."
+
+#. Tag: para
+#: chapter-sqlcontainer.xml:853
+#, no-c-format
+msgid ""
+"When using Oracle database most or all of the numeric types are converted to "
+"<classname>java.math.BigDecimal</classname> by the Oracle JDBC Driver."
+msgstr ""
+"使用 Oracle 数据库时, 大多数 numeric 类型会被 Oracle JDBC 驱动程序转换为 "
+"<classname>java.math.BigDecimal</classname>."
+
+#. Tag: para
+#: chapter-sqlcontainer.xml:858
+#, no-c-format
+msgid ""
+"This is a feature of how Oracle DB and the Oracle JDBC Driver handles data "
+"types."
+msgstr "这是 Oracle DB 和 Oracle JDBC 驱动程序处理数据的特性."
