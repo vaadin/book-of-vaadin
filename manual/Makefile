@@ -14,7 +14,7 @@ JAVAPARS = -Xms256M -Xmx512M
 DBLANGUAGE = en
 DBEXTRAPARS = l10n.gentext.language=$(DBLANGUAGE)
 
-PROFILE = profile.condition=print
+PROFILE = profile.condition=web
 
 POCKETBOOK_ROOT = book-pocket.xml
 
@@ -56,7 +56,6 @@ IMAGES =	intro/architecture intro/architecture-vaadin7 intro/toolchain \
 			testbench/debugwindow-select-annotated \
 			testbench/tt-workflow testbench/tt-architecture-simple \
 			testbench/tt-junit-workflow \
-			testbench/recorder-export-testcase \
 			jpacontainer/detailed-architecture jpacontainer/three-layer-architecture jpacontainer/jpa-mapping-graphic \
 			jpacontainer/domain-model \
 			portal/liferay-display \
