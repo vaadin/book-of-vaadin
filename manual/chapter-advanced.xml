@@ -5006,6 +5006,860 @@ send.addClickListener(new ClickListener() {
             </section>
         </section>
     </section>
+
+    <section xml:id="advanced.cdi">
+        <title>Vaadin CDI Add-on</title>
+
+        <indexterm xml:id="term.advanced.cdi.cdilong" class="startofrange">
+            <primary>Contexts and Dependency Injection</primary>
+        </indexterm>
+        <indexterm xml:id="term.advanced.cdi.cdi" class="startofrange">
+            <primary>CDI</primary>
+        </indexterm>
+        <indexterm xml:id="term.advanced.cdi.cdiaddon" class="startofrange">
+            <primary>Vaadin CDI Add-on</primary>
+        </indexterm>
+
+        <para>
+            Vaadin CDI add-on makes it easier to use contexts and dependency injection
+            (CDI) in Vaadin applications. CDI is a Java EE feature especially targeted for
+            web applications, which have well-defined contextual scopes, such as sessions,
+            views, requests, and so forth. The lifecycle of objects, such as beans, can be
+            managed by binding their lifecycles to such contexts. Vaadin CDI enables these
+            features with two additional kinds of Vaadin-specific contextual scopes: UIs
+            and navigation views.
+        </para>
+
+        <para>
+            To learn more about Vaadin CDI, the <link xlink:href="">Vaadin CDI
+            Tutorial</link> gives a hands-on introduction. The source code of the CDI
+            Tutorial demo is available for browsing or cloning at <link
+            xlink:href="https://github.com/vaadin-samples/cdi-tutorial">https://github.com/vaadin-samples/cdi-tutorial</link>.
+        </para>
+
+        <section xml:id="advanced.cdi.cdi">
+            <title>CDI Overview</title>
+
+            <para>
+                Contexts and dependency injection, defined in the JSR-299 standard, is a
+                Java EE feature that, through a set of services, helps in improving
+                application architecture by decoupling the management of service object
+                lifecycles from client objects using them. The lifecycle of objects stored
+                in a CDI container is defined by a context. The managed objects or beans
+                are accessed using dependency injection.
+            </para>
+
+            <para>
+                CDI builds on the Java concept of beans, but with somewhat different
+                definition and requirements.
+            </para>
+
+            <para>
+                Regarding general CDI topics, such as use of qualifiers, interceptors,
+                decorators, event notifications, and other CDI features, we refer you to
+                CDI documentation.
+            </para>
+
+            <itemizedlist condition="web">
+                <listitem>
+                    <para>
+                        <link xlink:href="http://jaxenter.com/tutorial-introduction-to-cdi-contexts-and-dependency-injection-for-java-ee-jsr-299-104536.html">Introduction to CDI</link>. Pete Muir and Mark Struberg, JAXenter.
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        <link xlink:href="http://docs.jboss.org/weld/reference/latest/en-US/html_single/">Weld - CDI Reference Implementation</link>
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        <link xlink:href="http://cdi-spec.org/">CDI Specification</link>
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        <link xlink:href="https://vaadin.com/wiki?p_p_id=36&amp;p_p_lifecycle=0&amp;p_p_state=normal&amp;p_p_mode=view&amp;p_p_col_id=row-1&amp;p_p_col_pos=1&amp;p_p_col_count=3&amp;p_r_p_185834411_title=Vaadin+CDI&amp;p_r_p_185834411_nodeName=vaadin.com+wiki&amp;_36_struts_action=%2Fwiki%2Fview">Vaadin CDI Tutorial</link>
+                    </para>
+                        </listitem>
+            </itemizedlist>
+
+<!-- TODO
+            <section xml:id="advanced.cdi.cdi.beans">
+                <title>CDI Beans</title>
+
+                <para>
+                    CDI allows almost any bean or POJO to be injected.
+                </para>
+
+                <itemizedlist>
+                    <listitem>
+                        <para>
+                        </para>
+                    </listitem>
+
+                    <listitem>
+                        <para>
+                        </para>
+                    </listitem>
+
+                    <listitem>
+                        <para>
+                        </para>
+                    </listitem>
+
+                    <listitem>
+                        <para>
+                            Methods may not be final.
+                        </para>
+                    </listitem>
+                </itemizedlist>
+                
+                <para>
+                    CDI beans are managed by and stored in a CDI container, which provides
+                    services to query for them and produce them on demand.
+                </para>
+            </section>
+-->
+
+            <section xml:id="advanced.cdi.cdi.injection">
+                <title>Dependency Injection</title>
+
+                <para>
+                    <emphasis>Dependency injection</emphasis> is a way to pass
+                    dependencies (service objects) to dependent objects (clients) by
+                    injecting them in member variables or initializer parameters, instead
+                    of managing the lifecycle in the clients or passing them explicitly as
+                    parameters. In CDI, injection of a service object to a client is
+                    specified by the <classname>@Inject</classname> annotation.
+                </para>
+
+                <para>
+                    For example, if we have a UI view that depends on user data, we could
+                    inject the data in the client as follows:
+                </para>
+
+                <programlisting><?pocket-size 65% ?><![CDATA[public class MainView extends CustomComponent implements View {
+    @Inject
+    User user;
+
+    ...
+    @Override
+    public void enter(ViewChangeEvent event) {
+        greeting.setValue("Hello, " + user.getName());
+    }
+}]]></programlisting>
+
+                <para>
+                    In addition to injecting managed beans with the annotation, you can
+                    query for them from the bean manager.
+                </para>
+            </section>
+
+            <section xml:id="advanced.cdi.cdi.contexts">
+                <title>Contexts and Scopes</title>
+
+                <para>
+                    <emphasis>Contexts</emphasis> in CDI are services that manage the
+                    lifecycle of objects and handle their injection. Generally speaking, a
+                    context is a situation in which an instance is used with a unique
+                    identity. Such objects are essentially "singletons" in the
+                    context. While conventional singletons are application-wide, objects
+                    managed by a CDI container can be "singletons" in a more narrow
+                    <emphasis>scope</emphasis>: a user session, a particular UI instance
+                    associated with the session, a view within the UI, or even just a
+                    single request. Such a context defines the lifecycle of the object:
+                    its creation, use, and finally its destruction.
+                </para>
+
+                <para>
+                    As a very typical example in a web application, you would have a user data
+                    object associated with a user session.
+                </para>
+
+                <programlisting><?pocket-size 75% ?><![CDATA[@SessionScoped
+public class User {
+    private String name;
+
+    public void setName(String name) {this.name = name;}
+    public String getName() {return name;}
+}]]></programlisting>
+
+                <para>
+                    Now, when you need to refer to the user, you can use CDI injection to
+                    inject the session-scoped "singleton" to a member variable or a
+                    constructor parameter.
+                </para>
+
+                <programlisting><?pocket-size 65% ?><![CDATA[public class MainView extends CustomComponent implements View {
+    @Inject
+    User user;
+
+    ...
+
+    @Override
+    public void enter(ViewChangeEvent event) {
+        greeting.setValue("Hello, " + user.getName());
+    }
+}]]></programlisting>
+            </section>
+
+        </section>
+
+        <section xml:id="advanced.cdi.installation">
+            <title>Installing Vaadin CDI Add-on</title>
+
+            <para>
+                Vaadin CDI requires a Java EE 7 compatible servlet container, such as
+                Glassfish, Apache TomEE, etc., as mentioned for the reference toolchain in
+                <xref linkend="getting-started.environment"/>.
+            </para>
+
+            <para>
+                To install the Vaadin CDI add-on, either define it as an Ivy or Maven
+                dependency or download it from the Vaadin Directory add-on page at <link
+                xlink="https://vaadin.com/directory#addon/vaadin-cdi:vaadin">vaadin.com/directory#addon/vaadin-cdi</link>. See
+                <xref linkend="addons"/> for general instructions for installing and using
+                Vaadin add-ons.
+            </para>
+
+            <para>
+                The Ivy dependency is as follows:
+            </para>
+
+            <programlisting>    &lt;dependency org="com.vaadin" name="vaadin-cdi"
+                rev="<replaceable>latest.release</replaceable>"/&gt;</programlisting>
+
+            <para>
+                The Maven dependency is as follows:
+            </para>
+
+            <programlisting>    &lt;dependency&gt;
+        &lt;groupId&gt;com.vaadin&lt;/groupId&gt;
+        &lt;artifactId&gt;vaadin-cdi&lt;/artifactId&gt;
+        &lt;version&gt;<replaceable>LATEST</replaceable>&lt;/version&gt;
+    &lt;/dependency&gt;</programlisting>
+        </section>
+
+        <section xml:id="advanced.cdi.peparing">
+            <title>Preparing Application for CDI</title>
+
+            <para>
+                A Vaadin application that uses CDI must have a file named
+                <filename>beans.xml</filename> in the <filename>WEB-INF</filename>
+                directory. The file can be completely empty (it has content only in
+                certain limited situations), but it must be present.
+            </para>
+        </section>
+
+        <section xml:id="advanced.cdi.cdiui">
+            <title>Injecting a UI with <classname>@CDIUI</classname></title>
+
+            <indexterm xml:id="term.advanced.cdi.cdiui" class="startofrange">
+                <primary><classname>@CDIUI</classname></primary>
+            </indexterm>
+
+            <para>
+                Vaadin CDI offers an easier way to instantiate UIs and to define the URL
+                mapping for them than the usual ways described in <xref
+                linkend="application.environment"/>. To define a UI class that should be
+                instantiated for a given URL, you simply need to annotate the class with
+                <classname>@CDIUI</classname>. It takes an optional URL path as parameter.
+            </para>
+
+            <programlisting><?pocket-size 75% ?><![CDATA[@CDIUI("myniceui")
+@Theme("valo")
+public class MyNiceUI extends UI {
+    ...]]></programlisting>
+
+            <para>
+                Giving empty UI path maps the UI to the root of the application context.
+            </para>
+
+            <programlisting><?pocket-size 75% ?><![CDATA[@CDIUI("")]]></programlisting>
+
+            <para>
+                If the optional UI path is not given, the path is determined automatically
+                from the class name by removing a possible "-UI" suffix in the class name,
+                making it lower-case, and for capitalized letters, a hyphen is added. For
+                example, a UI with class name <classname>MyNiceUI</classname> would have
+                path <literal>my-nice</literal>. The URL consists of the server address,
+                application context, and the UI path. For example, when running a Vaadin
+                application in a development workstation, you would have URL such as
+                <uri>http://localhost:8080/myproject/my-nice</uri>.
+            </para>
+
+            <para>
+                UI path mappings are reported in the server log during deployment.
+            </para>
+
+            <para>
+                See <xref linkend="advanced.cdi.deployment"/> for how to handle servlet
+                URL mapping of CDI UIs when working with multiple servlets in the same web
+                application.
+            </para>
+        </section>
+
+        <section xml:id="advanced.cdi.scopes">
+            <title>Scopes</title>
+
+            <indexterm xml:id="term.advanced.cdi.scopes" class="startofrange">
+                <primary>CDI</primary>
+                <secondary>scopes</secondary>
+            </indexterm>
+
+            <para>
+                As in programming languages, where a variable name refers to a unique
+                object within the scope of the variable, a CDI scope is a context in which
+                an object has unique identity. In CDI, objects to be injected are
+                identified by their type and any qualifiers they may have. The scope can
+                be defined as an annotation to the service class as follows:
+            </para>
+
+            <programlisting><?pocket-size 75% ?><![CDATA[@SessionScoped
+public class User {
+    ...]]></programlisting>
+
+            <para>
+                CDI defines a number of scopes. Note that the standard CDI scopes are
+                defined under the <package>javax.enterprise.context</package> package and
+                Vaadin CDI scopes under <package>com.vaadin.cdi</package>, while JSF
+                scopes are defined in <package>javax.faces.bean</package>.
+            </para>
+
+            <section xml:id="advanced.cdi.scopes.ui">
+                <title>UI Scope</title>
+
+                <para>
+                    UI-scoped beans are uniquely identified within a UI instance, that is,
+                    a browser window or tab.
+                </para>
+
+                <para>
+                    Vaadin CDI provides two annotations for the UI scope, differing in how
+                    they enable proxies, as explained later.
+                </para>
+
+                <variablelist>
+                    <varlistentry>
+                        <term><classname>@UIScoped</classname> (<package>com.vaadin.cdi</package>)</term>
+                        <listitem>
+                            <indexterm xml:id="term.advanced.cdi.scopes.uiscoped" class="startofrange">
+                                <primary><classname>@UIScoped</classname></primary>
+                            </indexterm>
+
+                            <para>
+                                Injection with this annotation will create a direct
+                                reference to the bean rather than a proxy. There are some
+                                limitations when not using proxies. Circular references
+                                (injecting A to B and B to A) will not work, and neither
+                                do CDI interceptors and decorators.
+                            </para>
+
+                            <indexterm startref="term.advanced.cdi.scopes.uiscoped" class="endofrange"/>
+                        </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                        <term><classname>@NormalUIScoped</classname> (<package>com.vaadin.cdi</package>)</term>
+
+                        <listitem>
+                            <para>
+                                As <classname>@UIScoped</classname>, but injecting with this
+                                annotation creates a proxy for the contextual instance rather
+                                than provides the contextual instance itself.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                </variablelist>
+
+                <para>
+                    Defining a CDI view (annotated with <classname>@CDIView</classname> as
+                    described later) as <classname>@UIScoped</classname> makes the view
+                    retain the same instance when the user navigates away and back to the
+                    view.
+                </para>
+            </section>
+
+            <section xml:id="advanced.cdi.scopes.view">
+                <title>View Scopes</title>
+
+                <para>
+                    The lifecycle of a view-scoped bean starts when the user navigates to
+                    a view referring to the object and ends when the user navigates out of
+                    the view (or when the UI is closed or expires).
+                </para>
+
+                <para>
+                    Vaadin CDI provides two annotations for the view scope, differing in
+                    how they enable proxies, as explained later.
+                </para>
+
+                <variablelist>
+                    <varlistentry>
+                        <term><classname>@ViewScoped</classname> (<package>com.vaadin.cdi</package>)</term>
+
+                        <listitem>
+                            <para>
+                                Injection with this annotation will create a direct
+                                reference to the bean rather than a proxy. There are some
+                                limitations when not using proxies. Circular references
+                                (injecting A to B and B to A) will not work, and neither
+                                do CDI interceptors and decorators.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                        <term><classname>@NormalViewScoped</classname> (<package>com.vaadin.cdi</package>)</term>
+                        <listitem>
+                            <para>
+                                As <classname>@NormalScoped</classname>, except that
+                                injecting with this annotation will create a proxy for the
+                                contextual instance rather than provide the contextual
+                                instance itself. See the explanation of proxies below.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                </variablelist>
+            </section>
+
+            <section xml:id="advanced.cdi.scopes.cdi">
+                <title>Standard CDI Scopes</title>
+
+                <variablelist>
+                    <varlistentry>
+                        <term><classname>@ApplicationScoped</classname></term>
+                        <listitem>
+                            <indexterm xml:id="term.advanced.cdi.scopes.applicationscoped" class="startofrange">
+                                <primary><classname>@ApplicationScoped</classname></primary>
+                            </indexterm>
+
+                            <para>
+                                Application-scoped beans are shared by all servlets in the web
+                                application, and are essentially equal to singletons.
+                                
+                                <!-- TODO This is just a guess - is it true? -->
+
+                                Note that referencing application-scoped beans is not
+                                thread-safe and access must be synchronized.
+                            </para>
+
+                            <indexterm startref="term.advanced.cdi.scopes.applicationscoped" class="endofrange"/>
+                        </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                        <term><classname>@SessionScoped</classname></term>
+                        <listitem>
+                            <indexterm xml:id="term.advanced.cdi.scopes.sessionscoped" class="startofrange">
+                                <primary><classname>@SessionScoped</classname></primary>
+                            </indexterm>
+
+                            <para>
+                                The lifecycle and visibility of session-scoped beans is
+                                bound to a HTTP or user session, which in Vaadin
+                                applications is associated with the
+                                <classname>VaadinSession</classname> (see <xref
+                                linkend="application.lifecycle.session"/>). This is a very
+                                typical scope to store user data, as is done in many
+                                examples in this section, or database connections. The
+                                lifecycle of session-scoped beans starts when a user opens
+                                the page for a UI in the browser, and ends when the
+                                session expires after the last UI in the session is
+                                closed.
+                            </para>
+
+                            <indexterm startref="term.advanced.cdi.scopes.sessionscoped" class="endofrange"/>
+                        </listitem>
+                    </varlistentry>
+
+                    <!--
+                    <varlistentry>
+                        <term><classname>@RequestScoped</classname></term>
+                        <listitem>
+                            <para>
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    -->
+                </variablelist>
+            </section>
+
+            <section xml:id="advanced.cdi.scopes.proxies">
+                <title>Proxies vs Direct Access</title>
+
+                <para>
+                    CDI uses proxy objects to enable many of the CDI features, by hooking
+                    into message-passing from client to service beans. Under the hood, a
+                    proxy is an instance of an automatically generated class that extends
+                    the proxied bean type, so communicating through a proxy occurs
+                    transparently, as it has the same polymorphic type as the actual
+                    bean. Whether proxying is enabled or not is defined in the scope: CDI
+                    scopes are either <emphasis>normal scopes</emphasis>, which can be
+                    proxied, or <emphasis>pseudoscopes</emphasis>, which use direct
+                    references to injected beans. The proxying mechanism creates a few
+                    requirements for injecting objects in normal scope:
+                </para>
+
+                <itemizedlist>
+                    <listitem>
+                        <para>
+                            The objects may not be primitive types or arrays
+                        </para>
+                    </listitem>
+
+                    <listitem>
+                        <para>
+                            The bean class must not be final
+                        </para>
+                    </listitem>
+
+                    <listitem>
+                        <para>
+                            The bean class must not have final methods
+                        </para>
+                    </listitem>
+                </itemizedlist>
+
+                <para>
+                    Beans annotated with <classname>@UIScoped</classname> or
+                    <classname>@ViewScoped</classname> use a pseudoscope, and are
+                    therefore injected with direct references to the bean instances, while
+                    <classname>@NormalUIScoped</classname> and
+                    <classname>@NormalViewScoped</classname> beans will use a proxy for
+                    communicating with the beans.
+                </para>
+
+                <para>
+                    When using proxies, be aware that it is not guaranteed that the
+                    <methodname>hashCode()</methodname> or
+                    <methodname>equals()</methodname> will match when comparing a proxy to
+                    its underlying instance. It is imperative to be aware of this when,
+                    for example, adding proxies to a
+                    <interfacename>Collection</interfacename>.
+                </para>
+
+                <para>
+                    You should avoid using normal scopes with Vaadin components, as
+                    proxies may not work correctly within the Vaadin framework. If Vaadin
+                    CDI plugin detects such use, it displays a warning such as the
+                    following:
+                </para>
+
+                <programlisting><?pocket-size 75% ?><![CDATA[INFO: The following Vaadin components are injected
+into normal scoped contexts:
+   @NormalUIScoped       org.example.User
+This approach uses proxy objects and has not been
+extensively tested with the framework. Please report
+any unexpected behavior. Switching to a pseudo-scoped
+context may also resolve potential issues.]]></programlisting>
+
+                <para>
+                    Both proxied and direct scopes have the same underlying scope, so it
+                    is possible to get both a proxy and a direct reference to the same
+                    object by using the two annotations.
+                </para>
+            </section>
+
+            <indexterm startref="term.advanced.cdi.scopes" class="endofrange"/>
+        </section>
+
+        <section xml:id="advanced.cdi.navigation">
+            <title>View Navigation</title>
+
+            <para>
+                Vaadin CDI extends the navigation framework in Vaadin, described in <xref
+                linkend="advanced.navigator"/>. It manages CDI views with a special view
+                provider and enables view scoping.
+            </para>
+
+            <section xml:id="advanced.cdi.navigation.ui">
+                <title>Preparing the UI</title>
+
+                <para>
+                    You can define navigation for any single-component container, as
+                    described in <xref linkend="advanced.navigator.navigating"/>, but
+                    typically you set up navigation for the entire UI content. To use
+                    Vaadin CDI views, you need to inject a
+                    <classname>CDIViewProvider</classname> in the UI and add it as a
+                    provider for the navigator.
+                </para>
+
+                <programlisting><?pocket-size 75% ?><![CDATA[@CDIUI("mycdiui")
+public class MyCDIUI extends UI {
+    @Inject
+    CDIViewProvider viewProvider;
+    
+    @Override
+    protected void init(VaadinRequest request) {
+        Navigator navigator = new Navigator(this, this);
+        navigator.addProvider(viewProvider);
+
+        // Navigate to start view
+        navigator.navigateTo("");
+    }
+}]]></programlisting>
+
+            </section>
+
+            <section xml:id="advanced.cdi.navigation.view">
+                <title>The View</title>
+
+                <para>
+                    A view managed by Vaadin CDI only needs to have the
+                    <classname>@CDIView</classname> annotation.
+                </para>
+
+                <programlisting><?pocket-size 65% ?><![CDATA[@CDIView("main")
+public class MainView extends CustomComponent implements View {
+    ...]]></programlisting>
+
+
+                <para>
+                    The annotation can have the following optional paramers:
+                </para>
+
+                <variablelist>
+                    <varlistentry>
+                        <term>value (optional)</term>
+                        <listitem>
+                            <para>
+                                Specifies the view name by which it can be accessed
+                                programmatically and by the URI fragment.
+                            </para>
+
+                            <programlisting><?pocket-size 75% ?><![CDATA[@CDIView("main")]]></programlisting>
+
+                            <para>
+                                If other optional parameters are given, the value must be
+                                given by the named <parameter>value</parameter> parameter.
+                            </para>
+
+                            <para>
+                                If the view name is not given, it is derived from the
+                                class name by removing a possible "View" suffix, making it
+                                lower case, and using a dash ("-") to separate words
+                                originally denoted by capital letters. Thereby, a view
+                                class such as <classname>MyFunnyView</classname> would
+                                have name "<literal>my-funny</literal>".
+                            </para>
+                        </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                        <term>supportsParameters</term>
+                        <listitem>
+                            <para>
+                                Specifies whether view parameters can be passed to the
+                                view as a suffix to the name in the navigation state, that
+                                is, in the form of
+                                <literal>viewname+viewparameters</literal>. The view name
+                                is merely a prefix and there is no separator nor format
+                                for the parameters, but those are left for the view to
+                                handle. The parameter support mode is disabled by default.
+                            </para>
+
+                            <programlisting><?pocket-size 75% ?><![CDATA[@CDIView(value="myview", supportsParameters=true)]]></programlisting>
+
+                            <para>
+                                You could then navigate to the state with a URI fragment
+                                such as <literal>#!myview/someparameter</literal> or programmatically with:
+                            </para>
+
+                            <programlisting><?pocket-size 70% ?><![CDATA[getUI().getNavigator().navigateTo("myview/someparameter");]]></programlisting>
+
+                            <para>
+                                The <methodname>enter()</methodname> method of the view
+                                gets the URI fragment as parameter as is and can interpret
+                                it in any application-defined way.
+                            </para>
+                            
+                            <para>
+                                Note that in this mode, matching a navigation state to a
+                                view is done by the prefix of the fragment! Thereby, no
+                                other views may start with the name of the view as
+                                prefix. For example, if the view name is
+                                "<literal>main</literal>", you must not have a view named
+                                "<literal>maintenance</literal>".
+                            </para>
+                        </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                        <term>uis</term>
+                        <listitem>
+                            <para>
+                                If the application has multiple UIs that use
+                                <classname>CDIViewProvider</classname>, you can use this
+                                parameter to specify which UIs can show the view.
+                            </para>
+
+                            <programlisting><?pocket-size 75% ?><![CDATA[@CDIView(value="myview", uis={MyCDIUI.class})]]></programlisting>
+
+                            <para>
+                                If the list contains <parameter>UI.class</parameter>, the
+                                view is available to all UIs.
+                            </para>
+
+                            <programlisting><?pocket-size 75% ?><![CDATA[@CDIView(value="myview", uis={UI.class})]]></programlisting>
+                        </listitem>
+                    </varlistentry>
+                </variablelist>
+
+                <para>
+                    In the following, we have a login view that accesses a session-scoped
+                    user object. Here, we use a constant to define the view name, so that
+                    we can use the constant when navigating to it.
+                </para>
+
+                <programlisting><?pocket-size 75% ?><![CDATA[@CDIView(LoginView.VIEWNAME)
+public class LoginView extends CustomComponent
+                       implements View {
+    public final static String VIEWNAME = "";
+    
+    // Here we inject to the constructor and actually do
+    // not store the injected object to use it later
+    @Inject
+    public LoginView(User user) {
+        VerticalLayout layout = new VerticalLayout();
+        
+        // An input field for editing injected data
+        BeanItem<User> item = new BeanItem<User>(user);
+        TextField username = new TextField("User name",
+                item.getItemProperty("name"));
+        username.setNullRepresentation("");
+        layout.addComponent(username);
+
+        // Login button (authentication omitted) / Java 8
+        layout.addComponent(new Button("Login", e ->
+            getUI().getNavigator().
+                navigateTo(MainView.VIEWNAME)));
+        
+        setCompositionRoot(layout);
+    }
+    
+    @Override
+    public void enter(ViewChangeEvent event) {}
+}]]></programlisting>
+
+                <para>
+                    You could now navigate to the view from any other view in the UI with:
+                </para>
+
+                <programlisting><?pocket-size 75% ?><![CDATA[getUI().getNavigator().navigateTo(LoginView.VIEWNAME);]]></programlisting>
+            </section>
+        </section>
+
+        <section xml:id="advanced.cdi.deployment">
+            <title>Deploying CDI UIs and Servlets</title>
+
+            <para>
+                Vaadin CDI hooks into Vaadin framework by using a special
+                <classname>VaadinCDIServlet</classname>. As described earlier, you do not
+                need to map an URL path to a UI, as it is handled by Vaadin CDI. However,
+                in the following, we go through some cases where you need to customize the
+                servlet or use CDI with non-CDI servlets and UIs in a web application.
+            </para>
+
+
+            <section xml:id="advanced.cdi.deployment.urlmapping">
+                <title>Defining Servlet Root with <classname>@URLMapping</classname></title>
+
+                <para>
+                    CDI UIs are managed by a CDI servlet
+                    (<classname>VaadinCDIServlet</classname>), which is by default mapped
+                    to the root of the application context. For example, if the name of a
+                    CDI UI is "<literal>my-cdi</literal>" and application context is
+                    <literal>/myproject</literal>, the UI would by default have URL
+                    "<literal>/myproject/my-cdi</literal>". If you do not want to have the
+                    servlet mapped to context root, you can use the
+                    <classname>@URLMapping</classname> annotation to map all CDI UIs to a
+                    sub-path. The annotation must be given to only one CDI UI, usually the
+                    one with the default ("") path.
+                </para>
+
+                <para>
+                    For example, if we have a root UI and another:
+                </para>
+
+            <programlisting><?pocket-size 75% ?><![CDATA[@CDIUI("") // At CDI servlet root
+@URLMapping("mycdiuis") // Define CDI Servlet root
+public class MyCDIRootUI extends UI {...}
+
+@CDIUI("another")
+public class AnotherUI extends UI {...}]]></programlisting>
+
+                <para>
+                    These two UIs would have URLs <uri>/myproject/mycdiuis</uri> and
+                    <uri>/myproject/mycdiuis/another</uri>, respectively.
+                </para>
+
+                <para>
+                    You can also map the CDI servlet to another URL in servlet definition
+                    in <filename>web.xml</filename>, as described the following.
+                </para>
+            </section>
+
+            <section xml:id="advanced.cdi.servlets.mixing">
+                <title>Mixing With Other Servlets</title>
+
+                <para>
+                    The <classname>VaadinCDIServlet</classname> is normally used as the
+                    default servlet, but if you have other servlets in the application,
+                    such as for non-CDI UIs, you need to define the CDI servlet explicitly
+                    in the <filename>web.xml</filename>. You can map the servlet to any
+                    URL path, but perhaps typically, you define it as the default servlet
+                    as follows, and map the other servlets to other URL paths:
+                </para>
+
+                <programlisting><?pocket-size 75% ?><![CDATA[<web-app>
+  ...
+
+  <servlet>
+    <servlet-name>Default</servlet-name>
+    <servlet-class>
+      com.vaadin.cdi.internal.VaadinCDIServlet
+    </servlet-class>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>Default</servlet-name>
+    <url-pattern>/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>Default</servlet-name>
+    <url-pattern>/VAADIN/*</url-pattern>
+  </servlet-mapping>
+</web-app>]]></programlisting>
+
+            </section>
+
+            <section xml:id="advanced.cdi.servlets.custom">
+                <title>Custom Servlets</title>
+
+                <para>
+                    When customizing the Vaadin servlet, as outlined in <xref
+                    linkend="application.lifecycle.servlet-service"/>, you simply need to
+                    extend <classname>com.vaadin.cdi.internal.VaadinCDIServlet</classname>
+                    instead of <classname>com.vaadin.servlet.VaadinServlet</classname>.
+                </para>
+
+                <para>
+                    The custom servlet must not have <classname>@WebServlet</classname>
+                    annotation or <classname>@VaadinServletConfiguration</classname>, as
+                    you would normally with a Vaadin servlet, as described in <xref
+                    linkend="application.environment"/>.
+                </para>
+            </section>
+
+            <indexterm startref="term.advanced.cdi.cdiui" class="endofrange"/>
+        </section>
+
+        <indexterm startref="term.advanced.cdi.cdilong" class="endofrange"/>
+        <indexterm startref="term.advanced.cdi.cdi" class="endofrange"/>
+        <indexterm startref="term.advanced.cdi.cdiaddon" class="endofrange"/>
+    </section>
 </chapter>
 
 <!-- Keep this comment at the end of the file
