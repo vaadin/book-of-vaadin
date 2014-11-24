@@ -5210,8 +5210,8 @@ public class User {
 
             <para>
                 Vaadin CDI requires a Java EE 7 compatible servlet container, such as
-                Glassfish, Apache TomEE, etc., as mentioned for the reference toolchain in
-                <xref linkend="getting-started.environment"/>.
+                Glassfish or Apache TomEE Web Profile, as mentioned for the reference
+                toolchain in <xref linkend="getting-started.environment"/>.
             </para>
 
             <para>
@@ -5248,6 +5248,14 @@ public class User {
                 <filename>beans.xml</filename> in the <filename>WEB-INF</filename>
                 directory. The file can be completely empty (it has content only in
                 certain limited situations), but it must be present.
+            </para>
+
+            <para>
+                The application should not have a servlet extending
+                <classname>VaadinServlet</classname>, as Vaadin servlet has its own
+                <classname>VaadinCDIServlet</classname> that is deployed automatically.
+                If you need multiple servlets or need to customize the Vaadin CDI servlet,
+                see <xref linkend="advanced.cdi.deployment"/>.
             </para>
         </section>
 
@@ -5564,6 +5572,112 @@ context may also resolve potential issues.]]></programlisting>
             <indexterm startref="term.advanced.cdi.scopes" class="endofrange"/>
         </section>
 
+        <section xml:id="advanced.cdi.deployment">
+            <title>Deploying CDI UIs and Servlets</title>
+
+            <para>
+                Vaadin CDI hooks into Vaadin framework by using a special
+                <classname>VaadinCDIServlet</classname>. As described earlier, you do not
+                need to map an URL path to a UI, as it is handled by Vaadin CDI. However,
+                in the following, we go through some cases where you need to customize the
+                servlet or use CDI with non-CDI servlets and UIs in a web application.
+            </para>
+
+
+            <section xml:id="advanced.cdi.deployment.urlmapping">
+                <title>Defining Servlet Root with <classname>@URLMapping</classname></title>
+
+                <para>
+                    CDI UIs are managed by a CDI servlet
+                    (<classname>VaadinCDIServlet</classname>), which is by default mapped
+                    to the root of the application context. For example, if the name of a
+                    CDI UI is "<literal>my-cdi</literal>" and application context is
+                    <literal>/myproject</literal>, the UI would by default have URL
+                    "<literal>/myproject/my-cdi</literal>". If you do not want to have the
+                    servlet mapped to context root, you can use the
+                    <classname>@URLMapping</classname> annotation to map all CDI UIs to a
+                    sub-path. The annotation must be given to only one CDI UI, usually the
+                    one with the default ("") path.
+                </para>
+
+                <para>
+                    For example, if we have a root UI and another:
+                </para>
+
+            <programlisting><?pocket-size 75% ?><![CDATA[@CDIUI("") // At CDI servlet root
+@URLMapping("mycdiuis") // Define CDI Servlet root
+public class MyCDIRootUI extends UI {...}
+
+@CDIUI("another")
+public class AnotherUI extends UI {...}]]></programlisting>
+
+                <para>
+                    These two UIs would have URLs <uri>/myproject/mycdiuis</uri> and
+                    <uri>/myproject/mycdiuis/another</uri>, respectively.
+                </para>
+
+                <para>
+                    You can also map the CDI servlet to another URL in servlet definition
+                    in <filename>web.xml</filename>, as described the following.
+                </para>
+            </section>
+
+            <section xml:id="advanced.cdi.servlets.mixing">
+                <title>Mixing With Other Servlets</title>
+
+                <para>
+                    The <classname>VaadinCDIServlet</classname> is normally used as the
+                    default servlet, but if you have other servlets in the application,
+                    such as for non-CDI UIs, you need to define the CDI servlet explicitly
+                    in the <filename>web.xml</filename>. You can map the servlet to any
+                    URL path, but perhaps typically, you define it as the default servlet
+                    as follows, and map the other servlets to other URL paths:
+                </para>
+
+                <programlisting><?pocket-size 75% ?><![CDATA[<web-app>
+  ...
+
+  <servlet>
+    <servlet-name>Default</servlet-name>
+    <servlet-class>
+      com.vaadin.cdi.internal.VaadinCDIServlet
+    </servlet-class>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>Default</servlet-name>
+    <url-pattern>/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>Default</servlet-name>
+    <url-pattern>/VAADIN/*</url-pattern>
+  </servlet-mapping>
+</web-app>]]></programlisting>
+
+            </section>
+
+            <section xml:id="advanced.cdi.servlets.custom">
+                <title>Custom Servlets</title>
+
+                <para>
+                    When customizing the Vaadin servlet, as outlined in <xref
+                    linkend="application.lifecycle.servlet-service"/>, you simply need to
+                    extend <classname>com.vaadin.cdi.internal.VaadinCDIServlet</classname>
+                    instead of <classname>com.vaadin.servlet.VaadinServlet</classname>.
+                </para>
+
+                <para>
+                    The custom servlet must not have <classname>@WebServlet</classname>
+                    annotation or <classname>@VaadinServletConfiguration</classname>, as
+                    you would normally with a Vaadin servlet, as described in <xref
+                    linkend="application.environment"/>.
+                </para>
+            </section>
+
+            <indexterm startref="term.advanced.cdi.cdiui" class="endofrange"/>
+        </section>
+
         <section xml:id="advanced.cdi.navigation">
             <title>View Navigation</title>
 
@@ -5750,110 +5864,165 @@ public class LoginView extends CustomComponent
             </section>
         </section>
 
-        <section xml:id="advanced.cdi.deployment">
-            <title>Deploying CDI UIs and Servlets</title>
+        <section xml:id="advanced.cdi.events">
+            <title>CDI Events</title>
 
             <para>
-                Vaadin CDI hooks into Vaadin framework by using a special
-                <classname>VaadinCDIServlet</classname>. As described earlier, you do not
-                need to map an URL path to a UI, as it is handled by Vaadin CDI. However,
-                in the following, we go through some cases where you need to customize the
-                servlet or use CDI with non-CDI servlets and UIs in a web application.
+                CDI events can be used for many purposes in Vaadin applications, such as
+                passing messages between different parts of a view, between views, or
+                between UIs. Some cases require special consideration, such as when
+                communicating between UIs.
             </para>
 
-
-            <section xml:id="advanced.cdi.deployment.urlmapping">
-                <title>Defining Servlet Root with <classname>@URLMapping</classname></title>
+            <section xml:id="advanced.cdi.events.intro">
+                <title>Observing Events</title>
 
                 <para>
-                    CDI UIs are managed by a CDI servlet
-                    (<classname>VaadinCDIServlet</classname>), which is by default mapped
-                    to the root of the application context. For example, if the name of a
-                    CDI UI is "<literal>my-cdi</literal>" and application context is
-                    <literal>/myproject</literal>, the UI would by default have URL
-                    "<literal>/myproject/my-cdi</literal>". If you do not want to have the
-                    servlet mapped to context root, you can use the
-                    <classname>@URLMapping</classname> annotation to map all CDI UIs to a
-                    sub-path. The annotation must be given to only one CDI UI, usually the
-                    one with the default ("") path.
+                    Let us consider a case where changes in one part of the UI (or view)
+                    require updating other parts of the UI. This is typical in
+                    master-detail views, for updating the master view after editing
+                    details, or when handling input from a sub-window. While you can
+                    handle such a situation with a custom call-back listener, CDI event
+                    mechanism simplifies the task.
                 </para>
 
                 <para>
-                    For example, if we have a root UI and another:
+                    Let us consider the following simple UI containing two panels. The
+                    input panel will send events, which are received by other parts of the
+                    UI, in this case a display panel. The panels need to be injected to
+                    enable CDI event passing in them.
                 </para>
 
-            <programlisting><?pocket-size 75% ?><![CDATA[@CDIUI("") // At CDI servlet root
-@URLMapping("mycdiuis") // Define CDI Servlet root
-public class MyCDIRootUI extends UI {...}
+                <programlisting><?pocket-size 70% ?><![CDATA[@CDIUI("cdievents")
+@Theme("valo")
+public class CDIEventUI extends UI {
+    @Inject
+    InputPanel inputPanel;
 
-@CDIUI("another")
-public class AnotherUI extends UI {...}]]></programlisting>
+    @Inject
+    DisplayPanel displayPanel;
+
+    @Override
+    protected void init(VaadinRequest request) {
+        Layout content =
+            new HorizontalLayout(inputPanel, displayPanel);
+        content.setSizeFull();
+        setContent(content);
+    }
+}]]></programlisting>
 
                 <para>
-                    These two UIs would have URLs <uri>/myproject/mycdiuis</uri> and
-                    <uri>/myproject/mycdiuis/another</uri>, respectively.
+                    Now, let us look closer at the sending panel. To send messages, it
+                    needs to inject a <classname>javax.enterprise.event.Event</classname>
+                    object. As we are injecting the event to a component class, we need to
+                    specify the full package name to avoid confusion with Vaadin
+                    <classname>Component.Event</classname>.
+                </para>
+
+                <programlisting><?pocket-size 75% ?><![CDATA[class InputPanel extends Panel {
+    @Inject
+    private javax.enterprise.event.Event<MyEvent> event;
+
+    public InputPanel() {
+        super("Input");
+
+        TextField editor = new TextField();
+        Button save = new Button("Save", e -> // Java 8
+            event.fire(new MyEvent(editor.getValue())));
+
+        setContent(new VerticalLayout(editor, save));
+        setSizeFull();
+    }
+}]]></programlisting>
+
+                <para>
+                    Firing an event is done with the <methodname>fire()</methodname>
+                    method on the injected event object. In our example, the event is as
+                    follows:
+                </para>
+
+                <programlisting><?pocket-size 75% ?><![CDATA[public class MyEvent implements Serializable {
+    private String text;
+    
+    public MyEvent(String text) {
+        this.text = text;
+    }
+    
+    public String getName() {
+        return text;
+    }
+}]]></programlisting>
+
+                <para>
+                    The event is received by any method (in an injected object) marked by
+                    <classname>@Observes</classname> annotation for the event parameter to
+                    observe the event type.
+                </para>
+
+                <programlisting><?pocket-size 75% ?><![CDATA[@UIScoped
+class DisplayPanel extends Panel {
+    Label display = new Label("-nothing to display-");
+
+    public DisplayPanel() {
+        super("Display");
+        setContent(display);
+        setSizeFull();
+    }
+    
+    void myEventObserver(@Observes MyEvent event) {
+        display.setValue("Observed: " + event.getName());
+    }
+}]]></programlisting>
+
+                <para>
+                    Such a component that observes events from other components needs to
+                    be scoped to the UI or view, as otherwise it will be scoped to the
+                    HTTP request, and messages from other components will not reach it.
                 </para>
 
                 <para>
-                    You can also map the CDI servlet to another URL in servlet definition
-                    in <filename>web.xml</filename>, as described the following.
+                    The UI with interaction is shown in <xref linkend="figure.advanced.cdi.events.intro"/>.
+                </para>
+                
+                <figure xml:id="figure.advanced.cdi.events.intro">
+                    <title>Observing CDI Events</title>
+
+                    <mediaobject>
+                        <imageobject>
+                            <imagedata scale="100" smallscale="100%" align="center" fileref="img/advanced/cdi-events-observing.png"/>
+                        </imageobject>
+                    </mediaobject>
+                </figure>
+
+
+                <para>
+                    Any injection qualifiers defined for the event object in the sender
+                    are matched in the observers, which feature we will use later to avoid
+                    receiving unwanted events.
                 </para>
             </section>
 
-            <section xml:id="advanced.cdi.servlets.mixing">
-                <title>Mixing With Other Servlets</title>
+<!-- TODO
+            <section xml:id="advanced.cdi.events.broadcasting">
+                <title>Communicating Between UIs</title>
 
                 <para>
-                    The <classname>VaadinCDIServlet</classname> is normally used as the
-                    default servlet, but if you have other servlets in the application,
-                    such as for non-CDI UIs, you need to define the CDI servlet explicitly
-                    in the <filename>web.xml</filename>. You can map the servlet to any
-                    URL path, but perhaps typically, you define it as the default servlet
-                    as follows, and map the other servlets to other URL paths:
-                </para>
-
-                <programlisting><?pocket-size 75% ?><![CDATA[<web-app>
-  ...
-
-  <servlet>
-    <servlet-name>Default</servlet-name>
-    <servlet-class>
-      com.vaadin.cdi.internal.VaadinCDIServlet
-    </servlet-class>
-  </servlet>
-
-  <servlet-mapping>
-    <servlet-name>Default</servlet-name>
-    <url-pattern>/*</url-pattern>
-  </servlet-mapping>
-
-  <servlet-mapping>
-    <servlet-name>Default</servlet-name>
-    <url-pattern>/VAADIN/*</url-pattern>
-  </servlet-mapping>
-</web-app>]]></programlisting>
-
-            </section>
-
-            <section xml:id="advanced.cdi.servlets.custom">
-                <title>Custom Servlets</title>
-
-                <para>
-                    When customizing the Vaadin servlet, as outlined in <xref
-                    linkend="application.lifecycle.servlet-service"/>, you simply need to
-                    extend <classname>com.vaadin.cdi.internal.VaadinCDIServlet</classname>
-                    instead of <classname>com.vaadin.servlet.VaadinServlet</classname>.
+                    CDI events are not propagated to inactive contexts, and only the
+                    currently processed UI is active. To circumvent this problem, you need
+                    to use an application-scoped message-passing service. As explained in
+                    <xref linkend="advanced.push.running"/>, when accessing other UIs, you
+                    need to lock the session by using the
+                    <methodname>access()</methodname> method.
                 </para>
 
                 <para>
-                    The custom servlet must not have <classname>@WebServlet</classname>
-                    annotation or <classname>@VaadinServletConfiguration</classname>, as
-                    you would normally with a Vaadin servlet, as described in <xref
-                    linkend="application.environment"/>.
+                    In <xref linkend="advanced.push.pusharound"/> we looked into how to
+                    pass messages to other UIs using a <classname>Broadcaster</classname>
+                    service. In that example, we used static variables and methods to
+                    store references and access the service. With CDI, we can access the
+                    broadcast service by injection and pass messages by events.
                 </para>
-            </section>
-
-            <indexterm startref="term.advanced.cdi.cdiui" class="endofrange"/>
+            </section> -->
         </section>
 
         <indexterm startref="term.advanced.cdi.cdilong" class="endofrange"/>
