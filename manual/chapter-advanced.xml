@@ -5305,6 +5305,8 @@ public class MyNiceUI extends UI {
                 URL mapping of CDI UIs when working with multiple servlets in the same web
                 application.
             </para>
+
+            <indexterm startref="term.advanced.cdi.cdiui" class="endofrange"/>
         </section>
 
         <section xml:id="advanced.cdi.scopes">
@@ -5674,11 +5676,9 @@ public class AnotherUI extends UI {...}]]></programlisting>
                     linkend="application.environment"/>.
                 </para>
             </section>
-
-            <indexterm startref="term.advanced.cdi.cdiui" class="endofrange"/>
         </section>
 
-        <section xml:id="advanced.cdi.navigation">
+        <section xml:id="advanced.cdi.navigation" condition="web">
             <title>View Navigation</title>
 
             <para>
@@ -5864,14 +5864,20 @@ public class LoginView extends CustomComponent
             </section>
         </section>
 
-        <section xml:id="advanced.cdi.events">
+        <section xml:id="advanced.cdi.events" condition="web">
             <title>CDI Events</title>
+
+            <indexterm xml:id="term.advanced.cdi.events" class="startofrange">
+                <primary>CDI</primary>
+                <secondary>events</secondary>
+            </indexterm>
 
             <para>
                 CDI events can be used for many purposes in Vaadin applications, such as
-                passing messages between different parts of a view, between views, or
-                between UIs. Some cases require special consideration, such as when
-                communicating between UIs.
+                passing messages between different parts of a view, between views, between
+                UIs, or between users. Some cases require special consideration, such as
+                when communicating between UIs and how injected components should be
+                scoped.
             </para>
 
             <section xml:id="advanced.cdi.events.intro">
@@ -5906,7 +5912,6 @@ public class CDIEventUI extends UI {
     protected void init(VaadinRequest request) {
         Layout content =
             new HorizontalLayout(inputPanel, displayPanel);
-        content.setSizeFull();
         setContent(content);
     }
 }]]></programlisting>
@@ -5931,7 +5936,6 @@ public class CDIEventUI extends UI {
             event.fire(new MyEvent(editor.getValue())));
 
         setContent(new VerticalLayout(editor, save));
-        setSizeFull();
     }
 }]]></programlisting>
 
@@ -5966,7 +5970,6 @@ class DisplayPanel extends Panel {
     public DisplayPanel() {
         super("Display");
         setContent(display);
-        setSizeFull();
     }
     
     void myEventObserver(@Observes MyEvent event) {
@@ -5975,9 +5978,9 @@ class DisplayPanel extends Panel {
 }]]></programlisting>
 
                 <para>
-                    Such a component that observes events from other components needs to
-                    be scoped to the UI or view, as otherwise it will be scoped to the
-                    HTTP request, and messages from other components will not reach it.
+                    Such a component that observes events from other components must be
+                    scoped to the UI or view, as otherwise it will be request-scoped and a
+                    new instance is created for receiving each event.
                 </para>
 
                 <para>
@@ -6002,9 +6005,12 @@ class DisplayPanel extends Panel {
                 </para>
             </section>
 
-<!-- TODO
             <section xml:id="advanced.cdi.events.broadcasting">
                 <title>Communicating Between UIs</title>
+
+                <indexterm xml:id="term.advanced.cdi.events.broadcasting" class="startofrange">
+                    <primary>broadcasting</primary>
+                </indexterm>
 
                 <para>
                     CDI events are not propagated to inactive contexts, and only the
@@ -6017,12 +6023,180 @@ class DisplayPanel extends Panel {
 
                 <para>
                     In <xref linkend="advanced.push.pusharound"/> we looked into how to
-                    pass messages to other UIs using a <classname>Broadcaster</classname>
-                    service. In that example, we used static variables and methods to
-                    store references and access the service. With CDI, we can access the
-                    broadcast service by injection and pass messages by events.
+                    pass messages to all other UIs using a broadcasting service. In that
+                    example, we used static variables and methods to store references and
+                    to access the service. With CDI, we can access the messaging service
+                    by injection and pass messages by events. By scoping the messaging
+                    service to application, we essentially make it a singleton.
                 </para>
-            </section> -->
+
+                <programlisting><?pocket-size 75% ?><![CDATA[@ApplicationScoped
+public class CDIBroadcaster implements Serializable {]]></programlisting>
+
+                <para>
+                    As we can not let CDI deliver the messages, the messaging service
+                    needs to keep book of the messaging clients (UIs) waiting to receive
+                    messages.
+                </para>
+
+                <programlisting><?pocket-size 75% ?><![CDATA[    private Collection<UI> uis = new HashSet<UI>();
+    
+    public synchronized void register(UI listener) {
+        uis.add(listener);
+    }
+    
+    public synchronized void unregister(UI listener) {
+        uis.remove(listener);
+    }]]></programlisting>
+
+                <para>
+                    The main logic of the messaging service is to observe messages and
+                    fire them in the recipient UIs. As we are broadcasting to all UIs
+                    here, we again use an executor service to execute the code. To lock on
+                    the session when accessing the UIs, we use the
+                    <methodname>access()</methodname> method.
+                </para>
+
+                <programlisting><?pocket-size 70% ?><![CDATA[    // Inject event to be fired
+    @Inject
+    private javax.enterprise.event.Event<BroadcastMessage>
+            messageEvent;
+
+    ExecutorService executorService =
+        Executors.newSingleThreadExecutor();
+
+    // Observe messages (only from clients)
+    @SuppressWarnings("unused")
+    private synchronized void observeMessage(
+            @Observes @OriginalSender
+            final BroadcastMessage message) {
+        for (final UI listener: uis)
+            executorService.execute(() ->
+                listener.access(()->
+                    messageEvent.fire(message)));
+    }
+}]]></programlisting>
+
+                <para>
+                    Here we use a <classname>@OriginalSender</classname> qualifier to
+                    receive events only from a client (original sender), not from the
+                    messaging service itself, which would cause an infinite event
+                    loop. The qualifier is defined as follows:
+                </para>
+
+                <indexterm><primary>CDI</primary><secondary>qualifiers</secondary></indexterm>
+                <programlisting><?pocket-size 75% ?><![CDATA[@Qualifier
+@Retention(RUNTIME)
+@Target({PARAMETER, FIELD})
+public @interface OriginalSender {}]]></programlisting>
+
+                <para>
+                    The message type is a simple POJO as follows:
+                </para>
+
+                <programlisting><?pocket-size 75% ?><![CDATA[public class BroadcastMessage {
+    private String text;
+    private Object sender; // For checking if sent by self
+
+    ... constructor, getters, and setters ...
+}]]></programlisting>
+
+                <para>
+                    Let us take a look at the UI class, which manages both the messaging
+                    service and the client components. The UI just needs to register
+                    itself in the messaging service and build the UI, including the UI
+                    components doing messaging. We could, of course, do that also at view
+                    level.
+                </para>
+
+                <indexterm><primary><classname>@Push</classname></primary></indexterm>
+                <programlisting><?pocket-size 75% ?><![CDATA[@CDIUI("cdichat")
+@Push
+public class CDIChatUI extends UI {
+    @Inject
+    CDIBroadcaster broadcaster;
+    
+    @Inject
+    ChatBox chatbox;
+
+    @Override
+    protected void init(VaadinRequest request) {
+        setContent(chatbox);
+        
+        // Register to receive broadcasts
+        broadcaster.register(this);
+    }
+
+    // Must also unregister when the UI expires or is closed    
+    @Override
+    public void detach() {
+        broadcaster.unregister(this);
+        super.detach();
+    }
+}]]></programlisting>
+
+                <para>
+                    Now for an actual messaging client, we look at the chat box
+                    component. Most of the UI code is omitted from the example. As noted
+                    earlier, the component receiving events must be scoped to the UI, to
+                    avoid creation of invalid instances.
+                </para>
+
+                <indexterm><primary><classname>@UIScoped</classname></primary></indexterm>
+                <programlisting><?pocket-size 65% ?><![CDATA[@UIScoped
+class ChatBox extends CustomComponent {
+    VerticalLayout messages = new VerticalLayout();
+    
+    public ChatBox(CDIChatUI cdiChatUI) {
+        ... build the composite ...
+
+        TextField input = new TextField();
+
+        Button send = new Button("Send", e -> { // Java 8
+            // Broadcast the input
+            broadcast(input.getValue());
+            addMessage(input.getValue()); // Add to self
+        });
+        ...
+    }
+    
+    @Inject
+    @OriginalSender
+    private javax.enterprise.event.Event<BroadcastMessage>
+        messageEvent;
+    
+    // Sends a message
+    private void broadcast(String msg) {
+        messageEvent.fire(new BroadcastMessage(msg, this));
+    }
+
+    // Receives messages
+    @SuppressWarnings("unused")
+    private void observeMessage(
+            @Observes BroadcastMessage event) {
+        if (event.getSender() != this)
+            addMessage(event.getText());
+    }
+
+    private void addMessage(String msg) {
+        messages.addComponent(new Label(msg));
+    }
+}]]></programlisting>
+
+                <indexterm><primary>CDI</primary><secondary>qualifiers</secondary></indexterm>
+
+                <para>
+                    Note that the client object is completely unaware of the fact that the
+                    messages are delivered through a messaging service; we have
+                    successfully decoupled the messaging logic required by Vaadin UIs from
+                    the component. Only the requirement for using the event qualifier
+                    remains (notice that its use is not checked at compile time).
+                </para>
+
+                <indexterm startref="term.advanced.cdi.events.broadcasting" class="endofrange"/>
+            </section>
+
+            <indexterm startref="term.advanced.cdi.events" class="endofrange"/>
         </section>
 
         <indexterm startref="term.advanced.cdi.cdilong" class="endofrange"/>
