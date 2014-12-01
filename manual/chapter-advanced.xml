@@ -5496,7 +5496,7 @@ public class User {
             </section>
 
             <section xml:id="advanced.cdi.scopes.proxies">
-                <title>Proxies vs Direct Access</title>
+                <title>Proxies vs Direct References</title>
 
                 <para>
                     CDI uses proxy objects to enable many of the CDI features, by hooking
@@ -5507,8 +5507,12 @@ public class User {
                     bean. Whether proxying is enabled or not is defined in the scope: CDI
                     scopes are either <emphasis>normal scopes</emphasis>, which can be
                     proxied, or <emphasis>pseudoscopes</emphasis>, which use direct
-                    references to injected beans. The proxying mechanism creates a few
-                    requirements for injecting objects in normal scope:
+                    references to injected beans.
+                </para>
+
+                <para>
+                    The proxying mechanism creates some requirements for injecting objects
+                    in normal scope:
                 </para>
 
                 <itemizedlist>
@@ -6014,10 +6018,12 @@ class DisplayPanel extends Panel {
 
                 <para>
                     CDI events are not propagated to inactive contexts, and only the
-                    currently processed UI is active. To circumvent this problem, you need
-                    to use an application-scoped message-passing service. As explained in
-                    <xref linkend="advanced.push.running"/>, when accessing other UIs, you
-                    need to lock the session by using the
+                    context of the currently processed UI is active. Further, as explained
+                    in <xref linkend="advanced.push.running"/>, other Vaadin UIs may not
+                    be accessed without proper synchronization, as their requests are
+                    processed concurrently in different server threads. Therefore, you
+                    need to pass the events through an application-scoped messaging
+                    service and synchronize the access to other UIs by using the
                     <methodname>access()</methodname> method.
                 </para>
 
@@ -6025,9 +6031,10 @@ class DisplayPanel extends Panel {
                     In <xref linkend="advanced.push.pusharound"/> we looked into how to
                     pass messages to all other UIs using a broadcasting service. In that
                     example, we used static variables and methods to store references and
-                    to access the service. With CDI, we can access the messaging service
-                    by injection and pass messages by events. By scoping the messaging
-                    service to application, we essentially make it a singleton.
+                    to access the service. With CDI, we can let the context manage its
+                    lifecycle, access it by injection, and pass messages by CDI events. By
+                    scoping the messaging service to application, we essentially make it a
+                    singleton.
                 </para>
 
                 <programlisting><?pocket-size 75% ?><![CDATA[@ApplicationScoped
