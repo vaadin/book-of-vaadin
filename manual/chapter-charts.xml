@@ -128,16 +128,195 @@ layout.addComponent(chart);]]></programlisting>
         <title>Installing Vaadin Charts</title>
 
         <para>
-            Vaadin Charts is available for both Vaadin 7 and Vaadin 6. It can be installed
-            from an installation package, which you can download from the Vaadin
-            Directory, or as a Maven or Ivy dependency. For detailed instructions, please
-            see <xref linkend="addons"/>.
+            As with most Vaadin add-ons, you can install Vaadin Charts as a Maven or Ivy
+            dependency in your project, or from an installation package. For general
+            instructions on installing add-ons, please see <xref linkend="addons"/>.
         </para>
 
         <para>
-            Once you have installed the library in your project, you need to compile the
-            widget set.
+            Vaadin Charts requires Vaadin 7.3 or later.
         </para>
+
+        <para>
+            Using Vaadin Charts requires a license key, which you must install before
+            compiling the widget set. The widget set must be compiled after setting up the
+            dependency or library JARs.
+        </para>
+
+        <section xml:id="charts.installing.maven">
+            <title>Maven Dependency</title>
+
+            <para>
+                The Maven dependency for Vaadin TestBench is as follows:
+            </para>
+
+            <programlisting><?pocket-size 75% ?>&lt;dependency&gt;
+    &lt;groupId&gt;com.vaadin.addon&lt;/groupId&gt;
+    &lt;artifactId&gt;vaadin-charts&lt;/artifactId&gt;
+    &lt;version&gt;<replaceable>2.0.0</replaceable>&lt;/version&gt;
+&lt;/dependency&gt;</programlisting>
+
+            <para>
+                You also need to define the Vaadin add-ons repository if not already
+                defined:
+            </para>
+
+            <programlisting><?pocket-size 75% ?><![CDATA[<repository>
+   <id>vaadin-addons</id>
+   <url>http://maven.vaadin.com/vaadin-addons</url>
+</repository>]]></programlisting>
+        </section>
+
+        <section xml:id="charts.installing.ivy">
+            <title>Ivy Dependency</title>
+
+            <para>
+                The Ivy dependency, to be defined in <filename>ivy.xml</filename>, would
+                be as follows:
+            </para>
+
+            <programlisting><?pocket-size 75% ?>&lt;dependency org="com.vaadin" name="vaadin-charts"
+            rev="<emphasis role="bold">2.0</emphasis>" /&gt;</programlisting>
+
+            <para>
+                It is generally recommended to use a fixed version number, but you can
+                also use <literal>latest.release</literal> to get the latest release.
+            </para>
+        </section>
+
+        <section xml:id="charts.installing.license">
+            <title>Installing License Key</title>
+        
+            <para>
+                You need to install a license key before compiling the widget set. The
+                license key is checked during widget set compilation, so you do not need
+                it when deploying the application.
+            </para>
+
+            <para>
+                You can purchase Vaadin Charts or obtain a free trial key from the <link
+                xlink:href="https://vaadin.com/directory#addon/vaadin-charts">Vaadin
+                Charts download page</link> in Vaadin Directory. You need to register in
+                Vaadin Directory to obtain the key.
+            </para>
+
+            <figure xml:id="figure.charts.installing.license">
+                <title>Obtaining License Key from Vaadin Directory</title>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata scale="50" smallscale="70%" align="center" fileref="img/testbench/screenshots/directory-license-key.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+
+            <para>
+                To install the license key in a development workstation, you can copy and
+                paste it verbatim to a
+                <filename>.vaadin.charts.developer.license</filename> file in your home
+                directory. For example, in Linux and OS&nbsp;X:
+            </para>
+
+            <screen><?pocket-size 75% ?><prompt>$</prompt> <command>echo</command> "<replaceable>L1cen5e-c0de</replaceable>" > <parameter>~/.vaadin.charts.developer.license</parameter></screen>
+
+            <para>
+                You can also pass the key as a system property to the widget set compiler,
+                usually with a <literal>-D</literal> option. For example, on the
+                command-line:
+            </para>
+
+            <screen><?pocket-size 75% ?><prompt>$</prompt> <command>java</command> -D<parameter>vaadin.charts.developer.license</parameter>=<replaceable>L1cen5e-c0de</replaceable> ...</screen>
+
+            <para condition="web">
+                See <link
+                xlink:href="https://vaadin.com/directory/help/installing-cval-license">the
+                AGPL license key installation instructions</link> for more details.
+            </para>
+
+            <section xml:id="charts.installing.license.environments">
+                <title>Passing License Key in Different Environments</title>
+
+                <para>
+                    How you actually pass the parameter to the widget set compiler depends
+                    on the development environment and the build system that you use to
+                    compile the widget set. Below are listed a few typical environments:
+                </para>
+                
+                <variablelist>
+                    <varlistentry>
+                        <term>Eclipse IDE</term>
+                        <listitem>
+                            <para>
+                                To install the license key for all projects, select
+                                <menuchoice><guimenu>Window</guimenu><guimenuitem>Preferences</guimenuitem></menuchoice>
+                                and navigate to the
+                                <menuchoice><guimenu>Java</guimenu><guimenuitem>Installed
+                                JREs</guimenuitem></menuchoice> section. Select the JRE
+                                version that you use for the application and click
+                                <guibutton>Edit</guibutton>. In the <guilabel>Default VM
+                                arguments</guilabel>, give the <parameter>-D</parameter>
+                                expression as shown above.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                        <term>Apache Ant</term>
+                        <listitem>
+                            <para>
+                                If compiling the project with Apache Ant, you could set the key
+                                in the Ant script as follows:
+                            </para>
+
+                            <programlisting><?pocket-size 70% ?>&lt;sysproperty key="vaadin.charts.developer.license"
+             value="<emphasis role="bold">L1cen5e-c0de</emphasis>"/&gt;</programlisting>
+
+                            <para>
+                                However, you should never store license keys in a source
+                                repository, so if the Ant script is stored in a source
+                                repository, you should pass the license key to Ant as a
+                                property that you then use in the script for the value
+                                argument of the <literal>&lt;sysproperty&gt;</literal> as
+                                follows:
+                            </para>
+
+                            <programlisting><?pocket-size 70% ?>&lt;sysproperty key="vaadin.charts.developer.license"
+    value="<emphasis role="bold">${vaadin.charts.developer.license}</emphasis>"/&gt;</programlisting>
+
+                            <para>
+                                When invoking Ant from the command-line, you can pass the
+                                property with a <parameter>-D</parameter> parameter to Ant.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                        <term>Apache Maven</term>
+                        <listitem>
+                            <para>
+                                If building the project with Apache Maven, you can pass the
+                                license key with a <literal>-D</literal> parameter to Maven:
+                            </para>
+
+                            <screen><prompt>$</prompt> <command>mvn</command> -D<parameter>vaadin.charts.developer.license</parameter>=<replaceable>L1cen5e-c0de</replaceable> package</screen>
+                        </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                        <term>Continuous Integration Systems</term>
+                        <listitem>
+                            <para>
+                                In CIS systems, you can pass the license key to build
+                                runners as a system property in the build
+                                configuration. However, this only passes it to a
+                                runner. As described above, Ant does not pass it to
+                                sub-processes implicitly, so you need to forward it
+                                explicitly as described earlier.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                </variablelist>
+            </section>
+        </section>
     </section>
 
     <section xml:id="charts.basic-use">
@@ -152,14 +331,36 @@ layout.addComponent(chart);]]></programlisting>
 
         <programlisting><![CDATA[Chart chart = new Chart(ChartType.COLUMN);
 chart.setWidth("400px");  // 100% by default
-chart.setHeight("300px"); // 400px by default]]></programlisting>
+chart.setHeight("300px"); // 400px by default
+...
+layout.addComponent(chart);]]></programlisting>
 
         <para>
             The chart types are described in <xref linkend="charts.charttypes"/>.
         </para>
 
-        <simplesect xml:id="charts.basic-use.configuration">
-            <title>Configuration</title>
+        <para>
+            To actually display something in a chart, you typically need to configure the
+            following aspects:
+        </para>
+
+        <itemizedlist>
+            <listitem>Basic chart configuration</listitem>
+
+            <listitem>Configure <emphasis>plot options</emphasis> for the chart type</listitem>
+
+            <listitem>Configure one or more <emphasis>data series</emphasis> to display</listitem>
+
+            <listitem>Configure <emphasis>axes</emphasis></listitem>
+        </itemizedlist>
+
+        <para>
+            The plot options can be configured for each data series individually, or for
+            different chart types in mixed-type charts.
+        </para>
+
+        <section xml:id="charts.basic-use.configuration">
+            <title>Basic Chart Configuration</title>
 
             <para>
                 After creating a chart, you need to configure it further. At the least,
@@ -181,9 +382,9 @@ conf.setSubTitle("Kills Grouped by Counties");]]></programlisting>
                 The configuration properties are described in more detail in <xref
                 linkend="charts.configuration"/>.
             </para>
-        </simplesect>
+        </section>
 
-        <simplesect xml:id="charts.basic-use.plotoptions">
+        <section xml:id="charts.basic-use.plotoptions">
             <title>Plot Options</title>
 
             <para>
@@ -213,10 +414,10 @@ conf.setPlotOptions(plotOptions);]]></programlisting>
                 The shared plot options are described in <xref
                 linkend="charts.configuration.plotoptions"/>.
             </para>
-        </simplesect>
+        </section>
 
-        <simplesect xml:id="charts.basic-use.data">
-            <title>Chart Data</title>
+        <section xml:id="charts.basic-use.data">
+            <title>Chart Data Series</title>
 
             <para>
                 The data displayed in a chart is stored in the chart configuration as a list
@@ -237,9 +438,9 @@ conf.addSeries(series);]]></programlisting>
                 The data configuration is described in more detail in <xref
                     linkend="charts.data"/>.
             </para>
-        </simplesect>
+        </section>
 
-        <simplesect xml:id="charts.basic-use.axis">
+        <section xml:id="charts.basic-use.axis">
             <title>Axis Configuration</title>
 
             <para>
@@ -273,7 +474,7 @@ yaxis.getLabels().setFormatter(
   "function() {return Math.floor(this.value/1000) + \'Mm\';}");
 yaxis.getLabels().setStep(2);
 conf.addyAxis(yaxis);]]></programlisting>
-        </simplesect>
+        </section>
 
         <section xml:id="charts.basic-use.two-dimensional">
             <title>Displaying Multiple Series</title>
@@ -367,6 +568,66 @@ conf.addSeries(series2);]]></programlisting>
 
         </section>
 
+        <section xml:id="charts.basic-use.3d">
+            <title>3D Charts</title>
+
+            <para>
+                Most chart types can be made 3-dimensional by adding 3D options to the
+                chart. You can rotate the charts, set up the view distance, and define the
+                thickness of the chart features, among other things. You can also set up a
+                3D axis frame around a chart.
+            </para>
+
+            <figure xml:id="figure.charts.basic-use.3d.pie">
+                <title>3D Charts</title>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata scale="60" smallscale="80%" align="center" fileref="img/charts/charts-3d-pie.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+
+            <para>
+                Let us consider a basic chart, such as a pie. The basic configuration for
+                pies is described elsewhere, but let us look how to make it 3D. You first
+                need to have <classname>Options3d</classname> for it, and make it
+                enabled. To have some 3D effect, you need to rotate the chart according to
+                the <emphasis>alpha</emphasis> and <emphasis>beta</emphasis> parameters,
+                given in degrees.
+            </para>
+
+            <programlisting><?pocket-size 75% ?><![CDATA[Chart chart = new Chart(ChartType.PIE);
+Configuration conf = chart.getConfiguration();
+... other chart configuration ...
+
+// Pie in 3D!
+Options3d options3d = new Options3d();
+options3d.setEnabled(true);
+options3d.setAlpha(60);
+conf.getChart().setOptions3d(options3d);           
+]]></programlisting>
+
+            <para>
+                See the API documentation for other 3D options.
+            </para>
+
+            <para>
+                The above sets up the viewpoint, but you also need to configure the 3D
+                properties of the actual chart type. The 3D plot options are chart type
+                specific. For example, a pie has <emphasis>depth</emphasis> (or
+                thickness), which you can configure as follows:
+            </para>
+
+            <programlisting><?pocket-size 75% ?><![CDATA[// Set some plot options
+PlotOptionsPie options = new PlotOptionsPie();
+... Usual plot options for the chart ...
+
+options.setDepth(45); // Give it some depth.
+
+conf.setPlotOptions(options);]]></programlisting>
+
+        </section>
+
         <section xml:id="charts.basic-use.themes">
             <title>Chart Themes</title>
 
@@ -378,23 +639,13 @@ conf.addSeries(series2);]]></programlisting>
             </para>
 
             <para>
-                In Vaadin 7, the <classname>ChartOptions</classname> is a
-                <classname>UI</classname> extension that is created and referenced by
-                calling the <methodname>get()</methodname> as follows:
+                The <classname>ChartOptions</classname> is a <classname>UI</classname>
+                extension that is created and referenced by calling the
+                <methodname>get()</methodname> as follows:
             </para>
 
             <programlisting><![CDATA[// Set Charts theme for the current UI
 ChartOptions.get().setTheme(new SkiesTheme());]]></programlisting>
-
-            <para>
-                In Vaadin 6, it is an invisible component that you need to create and add
-                to the window. There may be only one such component in the window and it
-                must be before any <classname>Chart</classname> component.
-            </para>
-
-            <programlisting><![CDATA[ChartOptions options = new ChartOptions();
-options.setTheme(new SkiesTheme());
-content.addComponent(options);]]></programlisting>
 
             <para>
                 The <classname>VaadinTheme</classname> is the default chart theme in
@@ -1270,6 +1521,13 @@ outerSeries.setPlotOptions(outerSeriesOptions);
             </para>
 
             <para>
+                A <emphasis>solid gauge</emphasis> is otherwise like a regular gauge,
+                except that a solid color arc is used to indicate current value instead of
+                a pointer. The color of the indicator arc can be configured to change
+                according to color stops.
+            </para>
+
+            <para>
                 Let us consider the following gauge:
             </para>
 
@@ -1348,6 +1606,176 @@ conf.addyAxis(yaxis);]]></programlisting>
                 </para>
 
                 <programlisting><![CDATA[ListSeries series = new ListSeries("Speed", 80);
+conf.addSeries(series);]]></programlisting>
+
+                <para>
+                    Gauges are especially meaningful for displaying changing values. You
+                    can use the <methodname>updatePoint()</methodname> method in the data
+                    series to update the single value.
+                </para>
+
+                <programlisting><?pocket-size 65% ?><![CDATA[final TextField tf = new TextField("Enter a new value");
+layout.addComponent(tf);
+
+Button update = new Button("Update", new ClickListener() {
+    @Override
+    public void buttonClick(ClickEvent event) {
+        Integer newValue = new Integer((String)tf.getValue());
+        series.updatePoint(0, newValue);
+    }
+}); 
+layout.addComponent(update);]]></programlisting>
+            </section>
+        </section>
+
+        <section xml:id="charts.charttypes.solidgauge">
+            <title>Solid Gauges</title>
+
+            <para>
+                A solid gauge is much like a regular gauge described previously; a
+                one-dimensional chart with a circular Y-axis. However, instead of a
+                rotating pointer, the value is indicated by a rotating arc with solid
+                color. The color of the indicator arc can be configured to change
+                according to the value using color stops.
+            </para>
+
+            <para>
+                Let us consider the following gauge:
+            </para>
+
+            <programlisting><![CDATA[Chart chart = new Chart(ChartType.SOLIDGAUGE);
+chart.setWidth("400px");
+chart.setHeight("400px");]]></programlisting>
+
+            <para>
+                After the settings done in the subsequent sections, it will show as in
+                <xref linkend="figure.charts.charttypes.solidgauge"/>.
+            </para>
+
+            <figure xml:id="figure.charts.charttypes.solidgauge">
+                <title>A Solid Gauge</title>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata scale="70" smallscale="60%" align="center" fileref="img/charts/charts-solidgauge.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+
+            <para>
+                While solid gauge is much like a regular gauge, the configuration differs 
+            </para>
+
+            <section xml:id="charts.charttypes.solidgauge.conf">
+                <title>Configuration</title>
+
+                <para>
+                    The solid gauge must be configured in the drawing
+                    <classname>Pane</classname> of the chart configuration. The gauge arc
+                    spans an angle, which is specified as -360 to 360 degrees, with 0
+                    degrees at the top of the arc. Typically, a semi-arc is used, where
+                    you use -90 and 90 for the angles, and move the center lower than you
+                    would have with a full circle. You can also adjust the size of the
+                    gauge pane; enlargening it allows positioning tick labels better.
+                </para>
+
+                <programlisting><?pocket-size 65% ?><![CDATA[Configuration conf = chart.getConfiguration();
+conf.setTitle("Solid Gauge");
+
+Pane pane = conf.getPane();
+pane.setSize("125%");           // For positioning tick labels
+pane.setCenterXY("50%", "70%"); // Move center lower
+pane.setStartAngle(-90);        // Make semi-circle
+pane.setEndAngle(90);           // Make semi-circle]]></programlisting>
+
+                <para>
+                    The shape of the gauge display is defined as the background of the
+                    pane. You at least need to set the shape as either
+                    "<literal>arc</literal>" or "<literal>solid</literal>". You typically
+                    also want to set background color and inner and outer radius.
+                </para>
+
+                <programlisting><?pocket-size 65% ?><![CDATA[Background bkg = new Background();
+bkg.setBackgroundColor(new SolidColor("#eeeeee")); // Gray
+bkg.setInnerRadius("60%");  // To make it an arc and not circle
+bkg.setOuterRadius("100%"); // Default - not necessary
+bkg.setShape("arc");        // solid or arc
+pane.setBackground(bkg);]]></programlisting>
+
+            </section>
+
+            <section xml:id="charts.charttypes.solidgauge.axis">
+                <title>Axis Configuration</title>
+
+                <para>
+                    A gauge only has an Y-axis. You must define the value range
+                    (<emphasis>min</emphasis> and <emphasis>max</emphasis>).
+                </para>
+
+                <programlisting><?pocket-size 65% ?><![CDATA[YAxis yaxis = new YAxis();
+yaxis.setTitle("Pressure GPa");
+yaxis.getTitle().setY(-70); // Move 70 px upwards from center
+
+// The limits are mandatory
+yaxis.setMin(0);
+yaxis.setMax(200);
+
+// Configure ticks and labels
+yaxis.setTickInterval(100);  // At 0, 100, and 200
+yaxis.getLabels().setY(-16); // Move 16 px upwards]]></programlisting>
+
+                <para>
+                    You can configure color stops for the indicator arc. The stops are
+                    defined with <classname>Stop</classname> objects having stop points
+                    from 0.0 to 1.0 and color values.
+                </para>
+
+                <programlisting><?pocket-size 65% ?><![CDATA[yaxis.setStops(new Stop(0.1f, SolidColor.GREEN),
+               new Stop(0.5f, SolidColor.YELLOW),
+               new Stop(0.9f, SolidColor.RED));
+
+conf.addyAxis(yaxis);]]></programlisting>
+
+                <para>
+                    Setting
+                    <methodname>yaxis.getLabels().setRotationPerpendicular()</methodname>
+                    makes gauge labels rotate perpendicular to the center.
+                </para>
+
+                <para>
+                    You can do all kinds of other configuration to the axis - please see
+                    the API documentation for all the available parameters.
+                </para>
+            </section>
+
+
+            <section xml:id="charts.charttypes.solidgauge.plotoptions">
+                <title>Plot Options</title>
+
+                <para>
+                    Solid gauges do not currently have any chart type specific plot
+                    options. See <xref linkend="charts.configuration.plotoptions"/> for
+                    common options.
+                </para>
+
+                <programlisting><?pocket-size 75% ?><![CDATA[PlotOptionsSolidGauge options = new PlotOptionsSolidGauge();
+
+// Move the value display box at the center a bit higher
+Labels dataLabels = new Labels();
+dataLabels.setY(-20);
+options.setDataLabels(dataLabels);
+
+conf.setPlotOptions(options);]]></programlisting>
+            </section>
+
+            <section xml:id="charts.charttypes.solidgauge.data">
+                <title>Setting and Updating Gauge Data</title>
+
+                <para>
+                    A gauge only displays a single value, which you can define as a data
+                    series of length one, such as as follows:
+                </para>
+
+                <programlisting><![CDATA[ListSeries series = new ListSeries("Pressure MPa", 80);
 conf.addSeries(series);]]></programlisting>
 
                 <para>
@@ -1525,28 +1953,31 @@ conf.addyAxis(yaxis);]]></programlisting>
         </section>
 
         <section xml:id="charts.charttypes.funnel">
-            <title>Funnel Charts</title>
+            <title>Funnel and Pyramid Charts</title>
 
             <para>
-                Funnel charts are typically used to visualize stages in a sales processes,
-                and for other purposes to visualize subsets of diminishing size. A funnel
-                chart has layers much like a stacked column, but has a funnel shape. The
-                top of the funnel has width of the drawing area of the chart, and
-                dinimishes in size down to a neck, and then continues as a column to the
-                bottom.
+                Funnel and pyramid charts are typically used to visualize stages in a
+                sales processes, and for other purposes to visualize subsets of
+                diminishing size. A funnel or pyramid chart has layers much like a stacked
+                column: in funnel from top-to-bottom and in pyramid from
+                bottom-to-top. The top of the funnel has width of the drawing area of the
+                chart, and dinimishes in size down to a funnel "neck" that continues as a
+                column to the bottom. A pyramid diminishes from bottom to top and does not
+                have a neck.
             </para>
 
             <figure xml:id="figure.charts.charttypes.funnel">
-                <title>Funnel Charts</title>
+                <title>Funnel and Pyramid Charts</title>
                 <mediaobject>
                     <imageobject>
-                        <imagedata scale="80" smallscale="75%" align="center" fileref="img/charts/charts-funnel.png"/>
+                        <imagedata scale="80" smallscale="100%" align="center" fileref="img/charts/charts-funnel.png"/>
                     </imageobject>
                 </mediaobject>
             </figure>
 
             <para>
-                Funnel charts have chart type <parameter>FUNNEL</parameter>.
+                Funnels have chart type <parameter>FUNNEL</parameter>, pyramids have
+                <parameter>PYRAMID</parameter>.
             </para>
 
             <para>
@@ -1594,25 +2025,54 @@ conf.addSeries(series);]]></programlisting>
                 <title>Plot Options</title>
 
                 <para>
-                    The chart-specific options of a funnel chart are configured with a
-                    <classname>PlotOptionsFunnel</classname>. It extends the generic
-                    <classname>AbstractLinePlotOptions</classname> and has the following
-                    chart type specific properties:
+                    The funnel and pyramid options are configured with
+                    <classname>PlotOptionsFunnel</classname> or
+                    <classname>PlotOptionsFunnel</classname>, respectively. 
+                </para>
+
+                <para>
+                    In addition to common chart options, the chart types support the
+                    following shared options: <parameter>width</parameter>,
+                    <parameter>height</parameter>, <parameter>depth</parameter>,
+                    <parameter>allowPointSelect</parameter>,
+                    <parameter>borderColor</parameter>,
+                    <parameter>borderWidth</parameter>, <parameter>center</parameter>,
+                    <parameter>slicedOffset</parameter>, and
+                    <parameter>visible</parameter>. See <xref
+                    linkend="charts.configuration.plotoptions"/> for detailed
+                    descriptions.
+                </para>
+
+                <para>
+                    They have the following chart type specific properties:
                 </para>
 
                 <variablelist>
                     <varlistentry>
-                        <term><parameter>neckHeight</parameter> or <parameter>neckHeightPercentage</parameter></term>
+                        <term><parameter>neckHeight</parameter> or <parameter>neckHeightPercentage</parameter> (only funnel)</term>
+
                         <listitem>
                             Height of the neck part of the funnel either as pixels or as
                             percentage of the entire funnel height.
                         </listitem>
                     </varlistentry>
                     <varlistentry>
-                        <term><parameter>neckWidth</parameter> or <parameter>neckWidthPercentage</parameter></term>
+                        <term><parameter>neckWidth</parameter> or <parameter>neckWidthPercentage</parameter> (only funnel)</term>
+
                         <listitem>
                             Width of the neck part of the funnel either as pixels or as
                             percentage of the top of the funnel.
+                        </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                        <term><parameter>reversed</parameter></term>
+
+                        <listitem>
+                            Whether the chart is reversed upside down from the normal
+                            direction from diminishing from the top to bottom. The default
+                            is <emphasis>false</emphasis> for funnel and
+                            <emphasis>true</emphasis> for pyramid.
                         </listitem>
                     </varlistentry>
                 </variablelist>
@@ -1754,6 +2214,110 @@ series.add(end);
 conf.addSeries(series);]]></programlisting>
             </section>
         </section>
+
+        <section xml:id="charts.charttypes.heatmap">
+            <title>Heat Maps</title>
+
+            <para>
+                A heat map is a two-dimensional grid, where the color of a grid cell
+                indicates a value.
+            </para>
+
+            <figure xml:id="figure.charts.charttypes.heatmap">
+                <title>Heat Maps</title>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata scale="80" smallscale="100%" align="center" fileref="img/charts/charts-heatmap.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+
+            <para>
+                Heat maps have chart type <literal>HEATMAP</literal>. <phrase
+                condition="web">For example:</phrase>
+            </para>
+
+            <programlisting condition="web"><?pocket-size 75% ?><![CDATA[
+Chart chart = new Chart(ChartType.HEATMAP);
+chart.setWidth("600px");
+chart.setHeight("300px");
+
+Configuration conf = chart.getConfiguration();
+conf.setTitle("Heat Data");
+
+// Set colors for the extremes
+conf.getColorAxis().setMinColor(SolidColor.AQUA);
+conf.getColorAxis().setMaxColor(SolidColor.RED);
+
+// Set up border and data labels
+PlotOptionsHeatMap plotOptions = new PlotOptionsHeatMap();
+plotOptions.setBorderColor(SolidColor.WHITE);
+plotOptions.setBorderWidth(2);
+plotOptions.setDataLabels(new Labels(true));
+conf.setPlotOptions(plotOptions);
+
+// Create some data
+HeatSeries series = new HeatSeries();
+series.addHeatPoint( 0, 0,  10.9); // Jan High
+series.addHeatPoint( 0, 1, -51.5); // Jan Low
+series.addHeatPoint( 1, 0,  11.8); // Feb High
+...
+series.addHeatPoint(11, 1, -47.0); // Dec Low
+conf.addSeries(series);
+
+// Set the category labels on the X axis
+XAxis xaxis = new XAxis();
+xaxis.setTitle("Month");
+xaxis.setCategories("Jan", "Feb", "Mar",
+    "Apr", "May", "Jun", "Jul", "Aug", "Sep",
+    "Oct", "Nov", "Dec");
+conf.addxAxis(xaxis);
+
+// Set the category labels on the Y axis
+YAxis yaxis = new YAxis();
+yaxis.setTitle("");
+yaxis.setCategories("High C", "Low C");
+conf.addyAxis(yaxis);]]></programlisting>
+
+            <!-- TODO
+            <section xml:id="charts.charttypes.heatmap.plotoptions" condition="web">
+                <title>Plot Options</title>
+            </section>
+            -->
+
+            <section xml:id="charts.charttypes.heatmap.dataseries" condition="web">
+                <title>Heat Map Data Series</title>
+
+                <para>
+                    Heat maps require two-dimensional tabular data. The easiest way is to
+                    use <classname>HeatSeries</classname>, as was done in the example
+                    earlier. You can add data points with the
+                    <methodname>addHeatPoint()</methodname> method, or give all the data
+                    at once in an array with <methodname>setData()</methodname> or in the
+                    constructor.
+                </para>
+
+                <para>
+                    If you need to use other data series type for a heat map, notice that
+                    the semantics of the heat map data points are currently not supported
+                    by the general-purpose series types, such as
+                    <classname>DataSeries</classname>. You can work around this semantic
+                    limitation by specifying the <methodname>X</methodname> (column),
+                    <methodname>Y</methodname> (row), and
+                    <methodname>heatScore</methodname> by using the respective
+                    <methodname>X</methodname>, <methodname>low</methodname>, and
+                    <methodname>high</methodname> properties of the general-purpose data
+                    series.
+                </para>
+
+                <para>
+                    Also note that while some other data series types allow updating the
+                    values one by one, updating all the values in a heat map is very
+                    inefficient; it is faster to simply replace the data series and then
+                    call <methodname>chart.drawChart()</methodname>.
+                </para>
+            </section>
+        </section>
     </section>
 
     <section xml:id="charts.configuration">
@@ -1843,17 +2407,102 @@ conf.setPlotOptions(plotOptions);]]></programlisting>
                 <classname>AbstractPlotOptions</classname> for the shared plot options.
             </para>
 
+            <section xml:id="charts.configuration.plotoptions.other">
+                <title>Other Options</title>
+
+                <para>
+                    The following options are supported by some chart types.
+                </para>
+
+                <variablelist>
+                    <varlistentry>
+                        <term><parameter>width</parameter> and <parameter>widthPercentage</parameter></term>
+                        <listitem>
+                            Defines the width of the chart either by pixels or as a
+                            percentual proportion of the drawing area.
+                        </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                        <term><parameter>height</parameter> and <parameter>heightPercentage</parameter></term>
+                        <listitem>
+                            Defines the height of the chart either by pixels or as a
+                            percentual proportion of the drawing area.
+                        </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                        <term><parameter>depth</parameter></term>
+                        <listitem>
+                            Specifies the thickness of the chart in 3D mode.
+                        </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                        <term><parameter>allowPointSelect</parameter></term>
+                        <listitem>
+                            Specifies whether data points, in whatever way they are
+                            visualized in the particular chart type, can be selected by
+                            clicking on them. Defaults to <emphasis>false</emphasis>.
+                        </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                        <term><parameter>borderColor</parameter></term>
+                        <listitem>
+                            Defines the border color of the chart elements.
+                        </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                        <term><parameter>borderWidth</parameter></term>
+                        <listitem>
+                            Defines the width of the border in pixels.
+                        </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                        <term><parameter>center</parameter></term>
+                        <listitem>
+                            Defines the center of the chart within the chart area by left
+                            and top coordinates, which can be specified either as pixels
+                            or as a percentage (as string) of the drawing area. The
+                            default is top 50% and left 50%.
+                        </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                        <term><parameter>slicedOffset</parameter></term>
+                        <listitem>
+                            In chart types that support slices, such as pie and pyramid
+                            charts, specifies the offset for how far a slice is detached
+                            from other items. The amount is given in pixels and defaults
+                            to 10 pixels.
+                        </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                        <term><parameter>visible</parameter></term>
+                        <listitem>
+                            Specifies whether or not a chart is visible. Defaults to
+                            <emphasis>true</emphasis>.
+                        </listitem>
+                    </varlistentry>
+                </variablelist>
+            </section>
         </section>
 
         <section xml:id="charts.configuration.axes">
             <title>Axes</title>
 
             <para>
-                Many chart types have two axes, X and Y, which are represented by
-                <classname>XAxis</classname> and <classname>YAxis</classname> classes. The
-                X axis is usually horizontal, representing the iteration over the data
-                series, and Y vertical, representing the values in the data series. Some
-                chart types invert the axes and they can be explicitly inverted with
+                Different chart types may have one, two, or three axes; in addition to X
+                and Y, there is a color axis. These are represented by
+                <classname>XAxis</classname>, <classname>YAxis</classname>, and
+                <classname>ColorAxis</classname>. The X axis is usually horizontal,
+                representing the iteration over the data series, and Y vertical,
+                representing the values in the data series. Some chart types invert the
+                axes and they can be explicitly inverted with
                 <methodname>getChart().setInverted()</methodname> in the chart
                 configuration. An axis has a caption and tick marks at intervals
                 indicating either numeric values or symbolic categories. Some chart types,
@@ -2366,7 +3015,7 @@ exporting.setPrintButton(printButton);]]></programlisting>
                     <link xlink:href="http://itextpdf.com/">iText</link> libraries to
                     generate documents. For a complete example, you can check out the
                     Charts Export Demo from the Subversion repository at
-                    <uri>http://dev.vaadin.com/svn/addons/vaadin-charts/chart-export-demo</uri>.
+                    <uri>https://github.com/vaadin/charts/tree/master/chart-export-demo</uri>.
                 </para>
             </section>
         </section>
