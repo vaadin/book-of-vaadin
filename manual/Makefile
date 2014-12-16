@@ -60,7 +60,8 @@ IMAGES =	intro/architecture intro/architecture-vaadin7 intro/toolchain \
 			jpacontainer/domain-model \
 			portal/liferay-display \
 			portal/liferay-ipc-architecture portal/liferay-ipc-demo-annotated \
-			portal/wsrp-architecture
+			portal/wsrp-architecture \
+			charts/charts-elements charts/charts-axes
 
 # List of source XML files
 XMLFILES = $(POCKETBOOK_ROOT) book-info.xml book-preface.xml book-vol1.xml book-vol2.xml \

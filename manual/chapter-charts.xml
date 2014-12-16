@@ -337,7 +337,18 @@ layout.addComponent(chart);]]></programlisting>
 
         <para>
             The chart types are described in <xref linkend="charts.charttypes"/>.
+            The main parts of a chart are illustrated in <xref
+            linkend="figure.charts.overview.elements"/>.
         </para>
+
+		<figure xml:id="figure.charts.overview.elements" float="center" floatstyle="before">
+			<title>Chart Elements</title>
+			<mediaobject>
+				<imageobject>
+					<imagedata scale="70" smallscale="100%" align="center" fileref="img/charts/charts-elements-hi.png"/>
+				</imageobject>
+			</mediaobject>
+		</figure>
 
         <para>
             To actually display something in a chart, you typically need to configure the
@@ -2497,18 +2508,32 @@ conf.setPlotOptions(plotOptions);]]></programlisting>
 
             <para>
                 Different chart types may have one, two, or three axes; in addition to X
-                and Y, there is a color axis. These are represented by
-                <classname>XAxis</classname>, <classname>YAxis</classname>, and
-                <classname>ColorAxis</classname>. The X axis is usually horizontal,
-                representing the iteration over the data series, and Y vertical,
-                representing the values in the data series. Some chart types invert the
-                axes and they can be explicitly inverted with
+                and Y axes, some chart types may have a color axis. These are represented
+                by <classname>XAxis</classname>, <classname>YAxis</classname>, and
+                <classname>ColorAxis</classname>, respectively. The X axis is usually
+                horizontal, representing the iteration over the data series, and Y
+                vertical, representing the values in the data series. Some chart types
+                invert the axes and they can be explicitly inverted with
                 <methodname>getChart().setInverted()</methodname> in the chart
                 configuration. An axis has a caption and tick marks at intervals
                 indicating either numeric values or symbolic categories. Some chart types,
                 such as gauge, have only Y-axis, which is circular in the gauge, and some
                 such as a pie chart have none.
             </para>
+
+            <para>
+                The basic elements of X and Y axes are illustrated in <xref
+                linkend="figure.charts.configuration.axes.elements"/>.
+            </para>
+
+            <figure xml:id="figure.charts.configuration.axes.elements">
+                <title>Chart Axis Elements</title>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata scale="70" smallscale="100%" align="center" fileref="img/charts/charts-axes-hi.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
 
             <para>
                 Axis objects are created and added to the configuration object with
@@ -2532,12 +2557,71 @@ conf.addxAxis(xaxis);]]></programlisting>
                 axes, please refer to the JavaDoc API documentation of Vaadin Charts.
             </para>
 
+            <section xml:id="charts.configuration.axes.type">
+                <title>Axis Type</title>
+
+                <para>
+                    Axes can be one of the following types, which you can set with
+                    <methodname>setType()</methodname>. The axis types are enumerated
+                    under <classname>AxisType</classname>. <parameter>LINEAR</parameter>
+                    is the default.
+                </para>
+
+                <variablelist>
+                    <varlistentry>
+                        <term><parameter>LINEAR</parameter> (default)</term>
+
+                        <listitem>
+                            For numeric values in linear scale.
+                        </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                        <term><parameter>LOGARITHMIC</parameter></term>
+
+                        <listitem>
+                            For numerical values, as in the linear axis, but the axis will
+                            be scaled in the logarithmic scale. The minimum for the axis
+                            <emphasis>must</emphasis> be a positive non-zero value
+                            (<methodname>log(0)</methodname> is not defined, as it has
+                            limit at negative infinity when the parameter approaches
+                            zero).
+                        </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                        <term><parameter>DATETIME</parameter></term>
+
+                        <listitem>
+                            Enables date/time mode in the axis. The date/time values are
+                            expected to be given either as a <classname>Date</classname>
+                            object or in milliseconds since the Java (or Unix) date epoch
+                            on January 1st 1970 at 00:00:00 GMT. You can get the
+                            millisecond representation of Java <classname>Date</classname>
+                            with <methodname>getTime()</methodname>.
+                        </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                        <term><parameter>CATEGORY</parameter></term>
+                        
+                        <listitem>
+                            Enables using categorical data for the axis, as described in
+                            more detail later. With this axis type, the category labels
+                            are determined from the labels of the data points in the data
+                            series, without need to set them explicitly with
+                            <methodname>setCategories()</methodname>.
+                        </listitem>
+                    </varlistentry>
+                </variablelist>
+            </section>
+
             <section xml:id="charts.configuration.axes.categories">
                 <title>Categories</title>
 
                 <para>
-                    The X axis displays, in most chart types, tick marks and labels at
-                    some numeric interval by default. If the items in a data series have a
+                    The axes display, in most chart types, tick marks and labels at some
+                    numeric interval by default. If the items in a data series have a
                     symbolic meaning rather than numeric, you can associate
                     <emphasis>categories</emphasis> with the data items. The category
                     label is displayed between two axis tick marks and aligned with the
@@ -2553,6 +2637,12 @@ conf.addxAxis(xaxis);]]></programlisting>
 xaxis.setCategories("Mercury", "Venus", "Earth",
                     "Mars", "Jupiter", "Saturn",
                     "Uranus", "Neptune");]]></programlisting>
+
+                <para>
+                    You can only set the category labels from the data point labels by
+                    setting the axis type to <parameter>CATEGORY</parameter>, as described
+                    earlier.
+                </para>
             </section>
 
             <section xml:id="charts.configuration.axes.labels">
@@ -2563,6 +2653,191 @@ xaxis.setCategories("Mercury", "Venus", "Earth",
                     numeric interval by default. The format and style of labels in an axis
                     is defined in a <classname>Labels</classname> object, which you can
                     get with <methodname>getLabels()</methodname> from the axis.
+                </para>
+
+                <programlisting><![CDATA[XAxis xaxis = new XAxis();
+...
+Labels xlabels = xaxis.getLabels();
+xlabels.setAlign(HorizontalAlign.CENTER); // Default
+xlabels.setBackgroundColor(SolidColor.PALEGREEN);
+xlabels.setBorderWidth(3);
+xlabels.setColor(SolidColor.GREEN);
+xlabels.setRotation(-45);
+xlabels.setStep(2); // Every 2 major tick]]></programlisting>
+
+                <para>
+                    Axis labels have the following configuration properties:
+                </para>
+
+                <!-- TODO Add gauge, pie, and polar properties -->
+                <variablelist>
+                    <varlistentry>
+                        <term><parameter>align</parameter></term>
+
+                        <listitem>
+                            Defines the alignment of the labels relative to the centers of
+                            the ticks. On left alignment, the left edges of labels are
+                            aligned at the tickmarks, and correspondingly the right side
+                            on right alignment. The default is determined automatically
+                            based on the direction of the axis and rotation of the labels.
+                        </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                        <term><parameter>distance</parameter> (only in polar charts)</term>
+
+                        <listitem>
+                            Distance of labels from the perimeter of the plot area, in
+                            pixels.
+                        </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                        <term><parameter>enabled</parameter></term>
+
+                        <listitem>
+                            Whether labels are enabled or not. Defaults to
+                            <parameter>true</parameter>.
+                        </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                        <term><parameter>format</parameter></term>
+
+                        <listitem>
+                            Formatting string for labels, as described in <xref
+                            linkend="charts.configuration.format"/>. Defaults to
+                            "<literal>{value}</literal>".
+                        </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                        <term><parameter>formatter</parameter></term>
+
+                        <listitem>
+                            <para>
+                                A JavaScript formatter for the labels, as described in
+                                <xref linkend="charts.configuration.format"/>. The value
+                                is available in the <literal>this.value</literal>
+                                property. The <literal>this</literal> object also has
+                                <literal>axis</literal>, <literal>chart</literal>,
+                                <literal>isFirst</literal>, and <literal>isLast</literal>
+                                properties. Defaults to:
+                            </para>
+
+                            <programlisting><![CDATA[function() {return this.value;}]]></programlisting>
+                        </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                        <term><parameter>maxStaggerLines</parameter> (only horizontal axis)</term>
+
+                        <listitem>
+                            When labels on the horizontal (usually X) axis are displayed
+                            so densely that they would overlap, they are automatically
+                            placed on alternating lines in "staggered" fashion. When
+                            number of lines is not set manually with
+                            <parameter>staggerLines</parameter>, this parameter defines
+                            the maximum number of such lines; value 1 disables automatic
+                            staggering. Default is 5 lines.
+                        </listitem>
+                    </varlistentry>
+
+                    <!-- TODO API doesn't have this.
+                    <varlistentry>
+                        <term><parameter>overflow</parameter></term>
+
+                        <listitem>
+                            Defines how labels on horizontal (usually X) axis that would
+                            overflow the chart area should be handled. If undefined, the
+                            default behaviour is to align labels inside the chart area. If "justify"
+                        </listitem>
+                    </varlistentry> -->
+
+                    <varlistentry>
+                        <term><parameter>rotation</parameter></term>
+
+                        <listitem>
+                            <para>
+                                Defines rotation of labels in degrees. A positive value
+                                indicates rotation in clockwise direction. Labels are
+                                rotated at their alignment point. Defaults to 0.
+                            </para>
+
+                            <programlisting><![CDATA[Labels xlabels = xaxis.getLabels();
+xlabels.setAlign(HorizontalAlign.RIGHT);
+xlabels.setRotation(-45); // Tilt 45 degrees CCW]]></programlisting>
+
+                        </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                        <term><parameter>staggerLines</parameter></term>
+
+                        <listitem>
+                            Defines number of lines for placing the labels to avoid
+                            overlapping. By default undefined, and the number of lines is
+                            automatically determined up to
+                            <parameter>maxStaggerLines</parameter>.
+                        </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                        <term><parameter>step</parameter></term>
+
+                        <listitem>
+                            <para>
+                                Defines tick interval for showing labels, so that labels
+                                are shown at every <emphasis>n</emphasis>th tick. The
+                                default step is automatically determined, along with
+                                staggering, to avoid overlap.
+                            </para>
+
+                            <programlisting><![CDATA[Labels xlabels = xaxis.getLabels();
+xlabels.setStep(2); // Every 2 major tick]]></programlisting>
+                        </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                        <term><parameter>style</parameter></term>
+
+                        <listitem>
+                            <para>
+                                Defines style for labels. The property is a
+                                <classname>Style</classname> object, which has to be
+                                created and set.
+                            </para>
+
+                            <programlisting><![CDATA[Labels xlabels = xaxis.getLabels();
+Style xlabelsstyle = new Style();
+xlabelsstyle.setColor(SolidColor.GREEN);
+xlabels.setStyle(xlabelsstyle);]]></programlisting>
+                        </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                        <term><parameter>useHTML</parameter></term>
+
+                        <listitem>
+                            Allows using HTML in custom label formats. Otherwise, HTML is
+                            quoted. Defaults to <literal>false</literal>.
+                        </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                        <term><parameter>x</parameter>, <parameter>y</parameter></term>
+
+                        <listitem>
+                            Offsets for the label's position, relative to the tick
+                            position. X offset defaults to 0, but Y to
+                            <literal>null</literal>, which enables automatic positioning
+                            based on font size.
+                        </listitem>
+                    </varlistentry>
+                </variablelist>
+
+                <para>
+                    Gauge, pie, and polar charts allow additional properties.
                 </para>
 
                 <para>
@@ -2598,6 +2873,94 @@ xaxis.setCategories("Mercury", "Venus", "Earth",
                 data series as defined in the series objects, and the corresponding color
                 symbol of the series.
             </para>
+        </section>
+
+        <section xml:id="charts.configuration.format">
+            <title>Formatting Labels</title>
+
+            <para>
+                Data point values, tooltips, and tick labels are formatted according to
+                formatting configuration for the elements, with configuration properties
+                described earlier for each element. Formatting can be set up in the
+                overall configuration, for a data series, or for individual data
+                points. The format can be defined either by a format string or by
+                JavaScript formatter, which are described in the following.
+            </para>
+
+            <section xml:id="charts.configuration.format.string">
+                <title>Using Format Strings</title>
+
+                <para>
+                    A formatting string contain free-form text mixed with
+                    variables. Variables are enclosed in brackets, such as "<literal>Here
+                    {point.y} is a value at {point.x}</literal>". In different contexts,
+                    you have at least the following variables available:
+                </para>
+
+                <itemizedlist>
+                    <listitem>
+                        <parameter>value</parameter> in axis labels
+                    </listitem>
+                    <listitem>
+                        <parameter>point.x</parameter>, <parameter>point.x</parameter> in data points and tooltips
+                    </listitem>
+                    <listitem>
+                        <parameter>series.name</parameter> in data points and tooltips
+                    </listitem>
+                    <listitem>
+                        <parameter>series.color</parameter> in data points and tooltips
+                    </listitem>
+                </itemizedlist>
+
+                <para>
+                    Values can be formatted according to a formatting string, separated from
+                    the variable name by a colon.
+                </para>
+
+                <para>
+                    For numeric values, a subset of C printf formatting specifiers is
+                    supported. For example, "<literal>{point.y:%02.2f}</literal> would
+                    display a floating-point value with two decimals and two leading
+                    zeroes, such as <literal>02.30</literal>.
+                </para>
+
+                <para>
+                    For dates, you can use a subset of PHP
+                    <methodname>strftime()</methodname> formatting specifiers. For
+                    example, "<literal>{value:%Y-%m-%d %H:%M:%S}</literal>" would format a
+                    date and time in the ISO 8601 format.
+                </para>
+            </section>
+
+            <section xml:id="charts.configuration.format.formatter">
+                <title>Using a JavaScript Formatter</title>
+                
+                <para>
+                    A JavaScript formatter is given in a string that defines a JavaScript
+                    function that returns the formatted string. The value to be formatted
+                    is available in <parameter>this.value</parameter> for axis labels, or
+                    <parameter>this.x</parameter>, <parameter>this.y</parameter> for
+                    data points.
+                </para>
+
+                <para>
+                    For example, to format tick labels on a chart axis, you could have:
+                </para>
+
+                <programlisting><![CDATA[YAxis yaxis = new YAxis();
+Labels ylabels = yaxis.getLabels();
+ ylabels.setFormatter("function() {return this.value + ' km';}");]]></programlisting>
+            </section>
+
+            <section xml:id="charts.configuration.format.simplified">
+                <title>Simplified Formatting</title>
+
+                <para>
+                    Some contexts that display labels allow defining simple formatting for
+                    the labels. For example, data point tooltips allow defining prefix,
+                    suffix, and floating-point precision for the values.
+                </para>
+            </section>
         </section>
     </section>
 
