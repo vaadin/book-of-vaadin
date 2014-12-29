@@ -6271,7 +6271,7 @@ main.addComponent(tree);]]></programlisting>
 			example in a practical situation.
 		</para>
 
-		<figure xml:id="figure.components.tree" float="center" floatstyle="before">
+		<figure xml:id="figure.components.tree">
 			<title>A <classname>Tree</classname> Component as a Menu</title>
 			<mediaobject>
 				<imageobject role="html">
@@ -6305,6 +6305,567 @@ main.addComponent(tree);]]></programlisting>
 			string value is used as the item ID.
 		</para>
 	</section>
+
+	<section xml:id="components.grid">
+        <title><classname>Grid</classname></title>
+
+        <para>
+            <emphasis>This section is a stub. It currently under work and will be
+            expanded soon.</emphasis>
+        </para>
+
+        <para>
+            <classname>Grid</classname> is many things, and perhaps the most versatile and
+            powerful component in Vaadin. Like <classname>Table</classname>, it allows
+            presenting and editing tabular data, also hierarchical as
+            <classname>TreeTable</classname> does, but escapes table's many
+            limitations. Efficient lazy loading of data while scrolling improves
+            performance. Grid is scalable, mobile friendly, and extensible.
+        </para>
+
+		<figure xml:id="figure.components.grid.features">
+			<title>A <classname>Grid</classname> Component</title>
+			<mediaobject>
+				<imageobject>
+					<imagedata smallscale="100%" align="center" fileref="img/components/grid-features.png"/>
+				</imageobject>
+			</mediaobject>
+		</figure>
+
+        <section xml:id="components.grid.overview">
+            <title>Overview</title>
+
+            <para>
+                <emphasis>This section is a stub. It currently under work and will be
+                expanded soon.</emphasis>
+            </para>
+
+            <!--
+            <itemizedlist>
+                <listitem>
+                    Column grouping
+                </listitem>
+            
+                <listitem>
+                    Generated header and footer rows
+                </listitem>
+                
+                <listitem>
+                    Frozen rows and columns
+                </listitem>
+
+                <listitem>
+                    Row-based editing
+                </listitem>
+
+                <listitem>
+                    Cell style generators
+                </listitem>
+
+                <listitem>
+                    Support for millions of rows
+                </listitem>
+            </itemizedlist>
+            -->
+
+            <para>
+                <classname>Grid</classname> is designed to be extensible and used just as
+                well for client-side development - its GWT API is nearly identical to the
+                server-side API.
+            </para>
+
+            <section xml:id="components.grid.overview.table">
+                <title>Differences to Table</title>
+
+                <para>
+                    In addition to core features listed above, <classname>Grid</classname>
+                    has the following API-level differences to
+                    <classname>Table</classname>:
+                </para>
+
+                <itemizedlist>
+                    <listitem>
+                        Grid is not a <interfacename>Container</interfacename> itself,
+                        even though it can be bound to a container data
+                        source. Consequently, columns are defined differently, and so
+                        forth.
+                    </listitem>
+
+                    <listitem>
+                        Rows can be added with <methodname>addRow()</methodname> (during
+                        initialization) instead of <methodname>addItem()</methodname>.
+                    </listitem>
+                    
+                    <listitem>
+                        Use <methodname>setHeightByRows()</methodname> and
+                        <methodname>setHeightMode()</methodname> instead of
+                        <methodname>setPageLength()</methodname> to set the height in
+                        number of rows.
+                    </listitem>
+
+                    <!--
+                    <listitem>
+                    </listitem>
+
+                    <listitem>
+                    </listitem>
+
+                    <listitem>
+                    </listitem>-->
+                </itemizedlist>
+            </section>
+        </section>
+
+        <section xml:id="components.grid.basic">
+            <title>Basic Use</title>
+
+            <para>
+                <classname>Grid</classname> is used to display (and edit) data in a
+                <interfacename>Container</interfacename> data source, described in <xref
+                linkend="datamodel.container"/>.
+            </para>
+
+            <para>
+                For example, if you have a collection of beans, you could wrap them in a
+                Vaadin <classname>BeanItemContainer</classname>, and bind to a
+                <classname>Grid</classname> as follows
+            </para>
+
+            <programlisting><?pocket-size 75% ?><![CDATA[// Have some data
+Collection<Person> people = Lists.newArrayList(
+    new Person("Nicolaus Copernicus", 1543),
+    new Person("Galileo Galilei", 1564),
+    new Person("Johannes Kepler", 1571));
+
+// Have a container of some type to contain the data
+BeanItemContainer<Person> container =
+    new BeanItemContainer<Person>(Person.class, people);
+
+// Create a grid bound to the container
+Grid grid = new Grid(container);
+grid.setColumnOrder("name", "born");
+layout.addComponent(grid);]]></programlisting>
+
+            <section xml:id="components.grid.basic.manual">
+                <title>Default Data Source and Shorthands</title>
+
+                <para>
+                    Sometimes, when you have just a few fixed items that you want to
+                    display, you can define the grid columns and add data rows
+                    manually. <classname>Grid</classname> is by default bound to a
+                    <classname>IndexedContainer</classname>. You can define new columns
+                    (container properties) with <methodname>addColumn()</methodname> and
+                    then add rows (items) with <methodname>addRow()</methodname>. The
+                    types in the row data must match the defined column types.
+                </para>
+
+                <para>
+                    For example:
+                </para>
+
+                <programlisting><?pocket-size 75% ?><![CDATA[// Create a grid
+Grid grid = new Grid();
+
+// Define some columns
+grid.addColumn("name", String.class);
+grid.addColumn("born", Integer.class);
+
+// Add some data rows
+grid.addRow("Nicolaus Copernicus", 1543);
+grid.addRow("Galileo Galilei", 1564);
+grid.addRow("Johannes Kepler", 1571);
+
+layout.addComponent(grid);]]></programlisting>
+
+                <para>
+                    Or, if you have the data in an array:
+                </para>
+
+                <programlisting><?pocket-size 75% ?><![CDATA[// Have some data
+Object[][] people = {{"Nicolaus Copernicus", 1543},
+                     {"Galileo Galilei", 1564},
+                     {"Johannes Kepler", 1571}};
+for (Object[] person: people)
+    grid.addRow(person);]]></programlisting>
+
+                <para>
+                    Note that you can not use <methodname>addRow()</methodname> to add
+                    items if the container is read-only or has read-only columns, such as
+                    generated columns.
+                </para>
+            </section>
+
+            <section xml:id="components.grid.basic.selection">
+                <title>Handling Selection</title>
+
+                <para>
+                    A <classname>Grid</classname> can be set to be in
+                    <literal>SINGLE</literal> (default), <literal>MULTI</literal>, or
+                    <literal>NONE</literal> selection mode. When selection is enabled,
+                    changes in the selection can be handled with a
+                    <interfacename>SelectionListener</interfacename>.
+                </para>
+
+                <para>
+                    The current selection can be accessed through the
+                    <classname>Grid</classname> object by
+                    <methodname>getSelectedRow()</methodname> or
+                    <methodname>getSelectedRows()</methodname>, which return one (in
+                    single-selection mode) or all (in multi-selection mode) selected
+                    items.
+                </para>
+
+                <para>
+                    For example, assuming that you have bound the grid to a
+                    <interfacename>BeanItemContainer</interfacename> as we did in the
+                    example earlier, you can do as follows:
+                </para>
+
+                <programlisting><?pocket-size 75% ?><![CDATA[// Use single-selection mode (default)
+grid.setSelectionMode(SelectionMode.SINGLE);
+
+// Handle selection changes
+grid.addSelectionListener(e -> { // Java 8
+    // Get the item of the selected row
+    BeanItem<Person> item =
+        container.getItem(grid.getSelectedRow());
+
+    // Use the item somehow
+    Notification.show("Selected " +
+                      item.getBean().getName());
+});]]></programlisting>
+
+                <para>
+                    For more detailed information regarding selection, see <xref
+                    linkend="components.grid.selection"/>.
+                </para>
+
+            </section>
+        </section>
+
+        <section xml:id="components.grid.data">
+            <title>Binding to Data</title>
+
+            <para>
+                Grid can be bound to a container data source that implements
+                <interfacename>Container.Indexed</interfacename> interface. By default, it
+                is bound to an <classname>IndexedContainer</classname>.
+            </para>
+
+            <para>
+                <emphasis>This section is a stub. It currently under work and will be
+                expanded soon.</emphasis>
+            </para>
+
+        </section>
+
+        <section xml:id="components.grid.selection">
+            <title>Handling Selection Changes</title>
+
+            <para>
+                Grid supports both single and multiple selection, as defined in the
+                selection mode. Selection is handled with a
+                <interfacename>SelectionListener</interfacename>.
+            </para>
+
+            <para>
+                <emphasis>This section is a stub. It currently under work and will be
+                expanded soon.</emphasis>
+            </para>
+        </section>
+
+        <section xml:id="components.grid.columns">
+            <title>Configuring Columns</title>
+
+            <para>
+                Columns are normally defined in the container data source. The
+                <methodname>addColumn()</methodname> method can be used to add columns to
+                a container.
+            </para>
+
+            <para>
+                <emphasis>This section is a stub. It currently under work and will be
+                expanded soon.</emphasis>
+            </para>
+
+            <section xml:id="components.grid.columns.order">
+                <title>Column Order and Visibility</title>
+
+                <para>
+                    You can set column order and visibility with
+                    <methodname>setColumnOrder()</methodname>.
+                </para>
+            </section>
+
+            <section xml:id="components.grid.columns.captions">
+                <title>Column Captions</title>
+
+                <para>
+                    Column captions are displayed in the grid header, which is described
+                    in detail later.
+                </para>
+            </section>
+
+            <section xml:id="components.grid.columns.width">
+                <title>Column Width</title>
+
+                <para>
+                    You can set column widths by absolute pixel value or relatively with
+                    expand ratios.
+                </para>
+            </section>
+
+            <section xml:id="components.grid.columns.frozen">
+                <title>Frozen Columns</title>
+
+                <para>
+                    You can define a number of columns to be frozen, so that they are not
+                    scrolled off when scrolling horizontally.
+                </para>
+            </section>
+        </section>
+
+        <section xml:id="components.grid.generatedcolumns">
+            <title>Generating Columns</title>
+
+            <para>
+                Columns with values computed from other columns or in some other way can
+                be generated with a container or data model that generates the property
+                values. The <classname>GeneratedPropertyContainer</classname> can be used
+                for this purpose. It wraps around any indexed container to extend its
+                properties with read-only generated properties.
+            </para>
+
+            <para>
+                For example, let us consider the following container with some regular
+                columns:
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[IndexedContainer container = new IndexedContainer();
+container.addContainerProperty("firstname", String.class, null);
+container.addContainerProperty("lastname", String.class, null);
+container.addContainerProperty("born", Integer.class, null);
+container.addContainerProperty("died", Integer.class, null);]]></programlisting>
+
+            <para>
+                To enable generated properties, we can wrap it in
+                <classname>GeneratedPropertyContainer</classname>:
+            </para>
+
+            <programlisting><?pocket-size 75% ?><![CDATA[GeneratedPropertyContainer gpcontainer =
+    new GeneratedPropertyContainer(container);]]></programlisting>
+
+            <para>
+                Now, you can add generated properties in the container with
+                <methodname>addGeneratedProperty()</methodname> by specifying a property
+                ID and a <interfacename>PropertyValueGenerator</interfacename>.
+            </para>
+
+            <para>
+                You need to implement <methodname>getType()</methodname>, which must
+                return the class object of the value type of the property, and
+                <methodname>getValue()</methodname>, which returns the property value for
+                the given item. The item ID and the property ID of the generated property
+                are also given in case they are needed. You can access other properties of
+                the item to compute the property value.
+            </para>
+
+            <programlisting><?pocket-size 70% ?><![CDATA[gpcontainer.addGeneratedProperty("lived",
+    new PropertyValueGenerator<Integer>() {
+    @Override
+    public Integer getValue(Item item, Object itemId,
+                            Object propertyId) {
+        int born = (Integer)
+                   item.getItemProperty("born").getValue();
+        int died = (Integer)
+                   item.getItemProperty("died").getValue();
+        return Integer.valueOf(died - born);
+    }
+
+    @Override
+    public Class<Integer> getType() {
+        return Integer.class;
+    }
+});]]></programlisting>
+
+            <para>
+                You can access other items in the container, also their generated
+                properties, although you should beware of accidental recursion.
+            </para>
+            
+            <para>
+                Finally, you need to bind the
+                <classname>GeneratedPropertyContainer</classname> to
+                <classname>Grid</classname> instead of the wrapped container.
+            </para>
+
+            <programlisting><?pocket-size 75% ?><![CDATA[Grid grid = new Grid(gpcontainer);]]></programlisting>
+
+            <para>
+                Generated columns are read-only, so you can not add grid rows with
+                <methodname>addRow()</methodname>. In editable mode, editor fields are not
+                generated for generated columns.
+            </para>
+        </section>
+
+        <section xml:id="components.grid.headerfooter">
+            <title>Header and Footer</title>
+
+            <para>
+                <emphasis>This section is a stub. It currently under work and will be
+                expanded soon.</emphasis>
+            </para>
+
+            <section xml:id="components.grid.headerfooter.adding">
+                <title>Adding and Removing Header and Footer Rows</title>
+
+                <para>
+                    A new header row is added with
+                    <methodname>prependHeaderRow()</methodname>, which adds it at the top
+                    of the header, <methodname>appendHeaderRow()</methodname>, which adds
+                    it at the bottom of the header, or with
+                    <methodname>addHeaderRowAt()</methodname>, which inserts it at the
+                    specified 0-base index. All of the methods return a
+                    <classname>HeaderRow</classname> object, which you can use to work on
+                    the header further.
+                </para>
+
+                <para>
+                    Similarly, you can add footer rows with
+                    <methodname>appendFooterRow()</methodname>,
+                    <methodname>prependFooterRow()</methodname>, and
+                    <methodname>addFooterRowAt()</methodname>.
+                </para>
+            </section>
+
+            <section xml:id="components.grid.headerfooter.joining">
+                <title>Joining Header and Footer Cells</title>
+
+                <para>
+                    You can join two or more header or footer cells with the
+                    <methodname>join()</methodname> method. For header cells, the
+                    intention is usually to create column grouping, while for footer
+                    cells, you typically calculate sums or averates.
+                </para>
+            </section>
+
+            <section xml:id="components.grid.headerfooter.content">
+                <title>Text and HTML Content</title>
+
+                <para>
+                    You can set the header caption with
+                    <methodname>setText()</methodname>, in which case any HTML formatting
+                    characters are quoted to ensure security. To use raw HTML in the
+                    captions, you can use <methodname>setHTML()</methodname>.
+                </para>
+            </section>
+
+            <section xml:id="components.grid.headerfooter.components">
+                <title>Components in Header or Footer</title>
+                
+                <para>
+                    You can set a component in a header or footer cell with
+                    <methodname>setComponent()</methodname>. Typically, this feature is
+                    used to allow filtering.
+                </para>
+            </section>
+        </section>
+
+        <section xml:id="components.grid.sorting">
+            <title>Sorting</title>
+
+            <para>
+                Sorting a grid is set up with the various alternatives of the
+                <methodname>sort()</methodname> method.  You can sort by a specific column
+                with <methodname>sort(Object propertyId)</methodname>. To sort on multiple
+                columns, you need to use the fluid sorting API with
+                <methodname>sort(Sort)</methodname>, which allows chaining sorting rules.
+            </para>
+
+            <para>
+                <emphasis>This section is a stub. It currently under work and will be
+                expanded soon.</emphasis>
+            </para>
+        </section>
+
+        <section xml:id="components.grid.editing">
+            <title>Editing</title>
+
+            <para>
+                Grid supports line-based editing, so that when the user double-clicks on a
+                row, the row enters editing mode. To enable editing, you need to call
+                <methodname>setEditorEnabled(true)</methodname> for the grid. Data binding
+                to the item under editing is handled with a
+                <classname>FieldGroup</classname>, which you need to set with
+                <methodname>setEditorFieldGroup</methodname>. The fields are generated by
+                a <classname>FieldFactory</classname> of the field group; you can also set
+                it with <methodname>setEditorFieldFactory()</methodname>. Alternatively,
+                you can create the editor fields explicitly with
+                <methodname>setEditorField()</methodname>.
+            </para>
+
+            <para>
+                <emphasis>This section is a stub. It currently under work and will be
+                expanded soon.</emphasis>
+            </para>
+        </section>
+
+        <section xml:id="components.grid.scrolling">
+            <title>Programmatic Scrolling</title>
+
+            <para>
+                You can scroll to first item with
+                <methodname>scrollToStart()</methodname>, to end with
+                <methodname>scrollToEnd()</methodname>, or to a specific row with
+                <methodname>scrollTo()</methodname>.
+            </para>
+
+            <para>
+                <emphasis>This section is a stub. It currently under work and will be
+                expanded soon.</emphasis>
+            </para>
+        </section>
+
+        <section xml:id="components.grid.stylegeneration">
+            <title>Row and Cell Style Generation</title>
+
+            <para>
+                You can style entire rows with a
+                <interfacename>RowStyleGenerator</interfacename> or individual cells with
+                a <interfacename>CellStyleGenerator</interfacename>.
+            </para>
+
+            <para>
+                <emphasis>This section is a stub. It currently under work and will be
+                expanded soon.</emphasis>
+            </para>
+        </section>
+
+        <section xml:id="components.grid.css">
+            <title>Styling with CSS</title>
+
+			<programlisting><![CDATA[.v-grid { }
+  .v-grid-scroller, .v-grid-scroller-horizontal { }
+  .v-grid-tablewrapper { }
+    .v-grid-header { }
+      .v-grid-row { }
+        .v-grid-cell, .frozen, .focused { }
+    .v-grid-body { }
+      .v-grid-row,
+      .v-grid-row-stripe,
+      .v-grid-row-has-data { }
+        .v-grid-cell, .frozen, .focused { }
+    .v-grid-footer { }
+      .v-grid-row { }
+        .v-grid-cell, .frozen, .focused { }
+  .v-grid-horizontal-scrollbar-deco { }]]></programlisting>
+
+            <para>
+                <emphasis>This section is a stub. It currently under work and will be
+                expanded soon.</emphasis>
+            </para>
+        </section>
+    </section>
 
 	<section xml:id="components.menubar">
 		<title><classname>MenuBar</classname></title>
