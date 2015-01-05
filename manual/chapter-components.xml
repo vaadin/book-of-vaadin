@@ -6310,11 +6310,6 @@ main.addComponent(tree);]]></programlisting>
         <title><classname>Grid</classname></title>
 
         <para>
-            <emphasis>This section is a stub. It currently under work and will be
-            expanded soon.</emphasis>
-        </para>
-
-        <para>
             <classname>Grid</classname> is many things, and perhaps the most versatile and
             powerful component in Vaadin. Like <classname>Table</classname>, it allows
             presenting and editing tabular data, also hierarchical as
@@ -6323,55 +6318,53 @@ main.addComponent(tree);]]></programlisting>
             performance. Grid is scalable, mobile friendly, and extensible.
         </para>
 
-		<figure xml:id="figure.components.grid.features">
-			<title>A <classname>Grid</classname> Component</title>
-			<mediaobject>
-				<imageobject>
-					<imagedata smallscale="100%" align="center" fileref="img/components/grid-features.png"/>
-				</imageobject>
-			</mediaobject>
-		</figure>
-
         <section xml:id="components.grid.overview">
             <title>Overview</title>
 
             <para>
-                <emphasis>This section is a stub. It currently under work and will be
-                expanded soon.</emphasis>
+                <classname>Grid</classname> is for displaying and editing tabular data
+                laid out in rows and columns. At the top, a <emphasis>header</emphasis>
+                can be shown, and a <emphasis>footer</emphasis> at the bottom. In addition
+                to plain text, the header and footer can contain HTML and Vaadin
+                components. Having components in the header allows implementing filtering
+                easily. The grid data can be sorted by clicking on a column header;
+                shift-clicking a column header enables secondary sorting criteria.
             </para>
 
-            <!--
-            <itemizedlist>
-                <listitem>
-                    Column grouping
-                </listitem>
-            
-                <listitem>
-                    Generated header and footer rows
-                </listitem>
-                
-                <listitem>
-                    Frozen rows and columns
-                </listitem>
-
-                <listitem>
-                    Row-based editing
-                </listitem>
-
-                <listitem>
-                    Cell style generators
-                </listitem>
-
-                <listitem>
-                    Support for millions of rows
-                </listitem>
-            </itemizedlist>
-            -->
+            <figure xml:id="figure.components.grid.features">
+                <title>A <classname>Grid</classname> Component</title>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata smallscale="100%" align="center" fileref="img/components/grid-features.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
 
             <para>
-                <classname>Grid</classname> is designed to be extensible and used just as
-                well for client-side development - its GWT API is nearly identical to the
-                server-side API.
+                The data area can be scrolled both vertically and horizontally. The
+                topmost rows and leftmost columns can be frozen, so that they are never
+                scrolled out of the view. The data is loaded lazily from the server, so
+                that only the visible data is loaded. The smart lazy loading functionality
+                gives excellent user experience even with low bandwidth, such as mobile
+                devices.
+            </para>
+
+            <para>
+                The grid data can be edited with a row-based editor after double-clicking
+                a row. The fields are generated with a field factory and bound to data
+                with a field group.
+            </para>
+
+            <para>
+                Grid is fully themeable with CSS and style names can be set for all grid
+                elements. For data rows and cells, the styles can be generated with a row
+                or cell style generator.
+            </para>
+
+            <para>
+                Finally, <classname>Grid</classname> is designed to be extensible and used
+                just as well for client-side development - its GWT API is nearly identical
+                to the server-side API, including data binding.
             </para>
 
             <section xml:id="components.grid.overview.table">
@@ -6392,8 +6385,9 @@ main.addComponent(tree);]]></programlisting>
                     </listitem>
 
                     <listitem>
-                        Rows can be added with <methodname>addRow()</methodname> (during
-                        initialization) instead of <methodname>addItem()</methodname>.
+                        Rows can be added with <methodname>addRow()</methodname> shorthand
+                        (during initialization) instead of
+                        <methodname>addItem()</methodname>.
                     </listitem>
                     
                     <listitem>
@@ -6403,26 +6397,64 @@ main.addComponent(tree);]]></programlisting>
                         number of rows.
                     </listitem>
 
-                    <!--
                     <listitem>
+                        Grid does not extend <classname>AbstractSelect</classname> and is
+                        not a field, but has its own selection
+                        API. <methodname>addSelectionListener()</methodname> is called to
+                        define a <interfacename>SelectionListener</interfacename>. The
+                        listener also receives a collection of deselected items.
                     </listitem>
 
                     <listitem>
+                        Grid does not support having all cells in editable mode, it only
+                        supports row-based editing, with a row mini-editor that allows
+                        saving or discarding the changes.
                     </listitem>
 
                     <listitem>
-                    </listitem>-->
+                        Grid has no generated columns. Instead, the container data source
+                        can be wrapped around a
+                        <classname>GeneratedPropertyContainer</classname>.
+                    </listitem>
+
+                    <listitem>
+                        No column icons; you can implement them in a column with an
+                        <classname>ImageRenderer</classname>.
+                    </listitem>
+
+                    <listitem>
+                        Components can not be shown in Grid cells; instead the much more
+                        efficient renderers can be used for the most common cases, and row
+                        editor for editing values.
+                    </listitem>
+
+                    <listitem>
+                        No support for drag and drop currently.
+                    </listitem>
+                </itemizedlist>
+
+                <para>
+                    In addition, Grid has the following visual changes:
+                </para>
+
+                <itemizedlist>
+                    <para>
+                        Multiple selection is indicated with check boxes in addition to
+                        highlighting.
+                    </para>
                 </itemizedlist>
             </section>
         </section>
 
-        <section xml:id="components.grid.basic">
-            <title>Basic Use</title>
+        <section xml:id="components.grid.data">
+            <title>Binding to Data</title>
 
             <para>
-                <classname>Grid</classname> is used to display (and edit) data in a
-                <interfacename>Container</interfacename> data source, described in <xref
-                linkend="datamodel.container"/>.
+                A <classname>Grid</classname> can be bound to a container data source,
+                described in <xref linkend="datamodel.container"/>. The container must
+                implement <interfacename>Container.Indexed</interfacename> interface. By
+                default, it is bound to an <classname>IndexedContainer</classname>. Grid
+                offers some shorthand methods to operate on the default container type.
             </para>
 
             <para>
@@ -6445,6 +6477,7 @@ BeanItemContainer<Person> container =
 Grid grid = new Grid(container);
 grid.setColumnOrder("name", "born");
 layout.addComponent(grid);]]></programlisting>
+
 
             <section xml:id="components.grid.basic.manual">
                 <title>Default Data Source and Shorthands</title>
@@ -6494,25 +6527,48 @@ for (Object[] person: people)
                     generated columns.
                 </para>
             </section>
+        </section>
 
-            <section xml:id="components.grid.basic.selection">
-                <title>Handling Selection</title>
+        <section xml:id="components.grid.selection">
+            <title>Handling Selection Changes</title>
+
+            <para>
+                Selection in <classname>Grid</classname> is handled a bit differently from
+                other selection components, as it is not an
+                <classname>AbstractSelect</classname>.  Grid supports both single and
+                multiple selection, defined by the <emphasis>selection
+                mode</emphasis>. Selection events can be handled with a
+                <interfacename>SelectionListener</interfacename>.
+            </para>
+
+            <para>
+                A <classname>Grid</classname> can be set to be in
+                <literal>SINGLE</literal> (default), <literal>MULTI</literal>, or
+                <literal>NONE</literal> selection mode, defined in the
+                <classname>Grid.SelectionMode</classname> enum.
+            </para>
+
+            <programlisting><?pocket-size 75% ?><![CDATA[// Use single-selection mode (default)
+grid.setSelectionMode(SelectionMode.SINGLE);]]></programlisting>
+
+            <para>
+                Empty (null) selection is allowed in multi-selection mode, but not in
+                single selection.
+            </para>
+
+            <section xml:id="components.grid.selection.listener">
+                <title>Handling Selection Changes</title>
 
                 <para>
-                    A <classname>Grid</classname> can be set to be in
-                    <literal>SINGLE</literal> (default), <literal>MULTI</literal>, or
-                    <literal>NONE</literal> selection mode. When selection is enabled,
-                    changes in the selection can be handled with a
-                    <interfacename>SelectionListener</interfacename>.
+                    Once selection is enabled, changes in the selection can be handled
+                    with a <interfacename>SelectionListener</interfacename>. You need to
+                    implement the <methodname>select()</methodname> method, which gets a
+                    <classname>SelectionEvent</classname> as parameter.
                 </para>
 
                 <para>
-                    The current selection can be accessed through the
-                    <classname>Grid</classname> object by
-                    <methodname>getSelectedRow()</methodname> or
-                    <methodname>getSelectedRows()</methodname>, which return one (in
-                    single-selection mode) or all (in multi-selection mode) selected
-                    items.
+                    You can get the new selection either from the selection event or the
+                    grid itself.
                 </para>
 
                 <para>
@@ -6521,14 +6577,9 @@ for (Object[] person: people)
                     example earlier, you can do as follows:
                 </para>
 
-                <programlisting><?pocket-size 75% ?><![CDATA[// Use single-selection mode (default)
-grid.setSelectionMode(SelectionMode.SINGLE);
-
-// Handle selection changes
-grid.addSelectionListener(e -> { // Java 8
-    // Get the item of the selected row
-    BeanItem<Person> item =
-        container.getItem(grid.getSelectedRow());
+                <programlisting><?pocket-size 75% ?><![CDATA[// Handle selection changes
+                grid.addSelectionListener(e -> { // Java 8 // Get the item of the selected
+                row BeanItem<Person> item = container.getItem(grid.getSelectedRow());
 
     // Use the item somehow
     Notification.show("Selected " +
@@ -6536,42 +6587,14 @@ grid.addSelectionListener(e -> { // Java 8
 });]]></programlisting>
 
                 <para>
-                    For more detailed information regarding selection, see <xref
-                    linkend="components.grid.selection"/>.
+                    The current selection can be obtained from the
+                    <classname>Grid</classname> object by
+                    <methodname>getSelectedRow()</methodname> or
+                    <methodname>getSelectedRows()</methodname>, which return one (in
+                    single-selection mode) or all (in multi-selection mode) selected
+                    items.
                 </para>
-
             </section>
-        </section>
-
-        <section xml:id="components.grid.data">
-            <title>Binding to Data</title>
-
-            <para>
-                Grid can be bound to a container data source that implements
-                <interfacename>Container.Indexed</interfacename> interface. By default, it
-                is bound to an <classname>IndexedContainer</classname>.
-            </para>
-
-            <para>
-                <emphasis>This section is a stub. It currently under work and will be
-                expanded soon.</emphasis>
-            </para>
-
-        </section>
-
-        <section xml:id="components.grid.selection">
-            <title>Handling Selection Changes</title>
-
-            <para>
-                Grid supports both single and multiple selection, as defined in the
-                selection mode. Selection is handled with a
-                <interfacename>SelectionListener</interfacename>.
-            </para>
-
-            <para>
-                <emphasis>This section is a stub. It currently under work and will be
-                expanded soon.</emphasis>
-            </para>
         </section>
 
         <section xml:id="components.grid.columns">
@@ -6706,6 +6729,317 @@ container.addContainerProperty("died", Integer.class, null);]]></programlisting>
                 <methodname>addRow()</methodname>. In editable mode, editor fields are not
                 generated for generated columns.
             </para>
+        </section>
+
+        <section xml:id="components.grid.renderer">
+            <title>Column Renderers</title>
+
+            <para>
+                A <emphasis>renderer</emphasis> is a feature that draws the client-side
+                representation of a data value. This allows having images, HTML, and
+                buttons in grid cells.
+            </para>
+
+            <para>
+                Renderers implement the <interfacename>Renderer</interfacename>
+                interface. You set the column renderer in the
+                <classname>Grid.Column</classname> object as follows:
+            </para>
+
+            <programlisting><?pocket-size 70% ?><![CDATA[Grid.Column bornColumn = grid.getColumn("born");
+bornColumn.setRenderer(new NumberRenderer("born in %d AD"));]]></programlisting>
+
+            <para>
+                The following renderers are available:
+            </para>
+
+            <variablelist>
+                <varlistentry>
+                    <term><classname>ButtonRenderer</classname></term>
+                    <listitem>
+                        <para>
+                            Renders the data value as the caption of a button. A
+                            <interfacename>RendererClickListener</interfacename> can be
+                            given to handle the button clicks.
+                        </para>
+
+                        <para>
+                            Typically, a button renderer is used to display buttons for
+                            operating on a data item, such as edit, view, delete, etc. It
+                            is not meaningful to store the button captions in the data
+                            source, rather you want to generate them, and they are usually
+                            all identical.
+                        </para>
+
+                        <programlisting><?pocket-size 65% ?><![CDATA[BeanItemContainer<Person> people =
+    new BeanItemContainer<>(Person.class);
+
+people.addBean(new Person("Nicolaus Copernicus", 1473));
+people.addBean(new Person("Galileo Galilei", 1564));
+people.addBean(new Person("Johannes Kepler", 1571));
+
+// Generate button caption column
+GeneratedPropertyContainer gpc =
+    new GeneratedPropertyContainer(people);
+gpc.addGeneratedProperty("delete",
+    new PropertyValueGenerator<String>() {
+
+    @Override
+    public String getValue(Item item, Object itemId,
+                           Object propertyId) {
+        return "Delete"; // The caption
+    }
+
+    @Override
+    public Class<String> getType() {
+        return String.class;
+    }
+});
+
+// Create a grid
+Grid grid = new Grid(gpc);
+
+// Render a button that deletes the data row (item)
+grid.getColumn("delete")
+    .setRenderer(new ButtonRenderer(e -> // Java 8
+    grid.getContainerDataSource()
+        .removeItem(e.getItemId())));]]></programlisting>
+
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><classname>ImageRenderer</classname></term>
+                    <listitem>
+                        <para>
+                            Renders the cell as an image. The column type must be a
+                            <interfacename>Resource</interfacename>, as described in <xref
+                            linkend="application.resources"/>; only
+                            <classname>ThemeResource</classname> and
+                            <classname>ExternalResource</classname> are currently
+                            supported for images in <classname>Grid</classname>.
+                        </para>
+
+                        <programlisting><?pocket-size 65% ?><![CDATA[grid.addColumn("picture", Resource.class)
+    .setRenderer(new ImageRenderer());
+...
+// Add some data rows
+grid.addRow(new ThemeResource("img/copernicus-128px.jpg"),
+            "Nicolaus Copernicus", 1543);
+grid.addRow(new ThemeResource("img/galileo-128px.jpg"),
+            "Galileo Galilei", 1564);]]></programlisting>
+
+                        <para>
+                            Instead of creating the resource objects explicitly, as was
+                            done above, you could generate them dynamically from file name
+                            strings using a <interfacename>Converter</interfacename> for
+                            the column.
+                        </para>
+
+                        <programlisting><?pocket-size 65% ?><![CDATA[// Define some columns
+grid.addColumn("picture", String.class); // Filename
+grid.addColumn("name", String.class);
+
+// Set the image renderer
+grid.getColumn("picture").setRenderer(new ImageRenderer(),
+    new Converter<Resource, String>() {
+        @Override
+        public String convertToModel(Resource value,
+            Class<? extends String> targetType, Locale l)
+            throws Converter.ConversionException {
+            return "not needed";
+        }
+
+        @Override
+        public Resource convertToPresentation(String value,
+            Class<? extends Resource> targetType, Locale l)
+            throws Converter.ConversionException {
+            return new ThemeResource("img/" + value);
+        }
+
+        @Override
+        public Class<String> getModelType() {
+            return String.class;
+        }
+
+        @Override
+        public Class<Resource> getPresentationType() {
+            return Resource.class;
+        }
+});
+
+// Add some data rows
+grid.addRow("copernicus-128px.jpg", "Nicolaus Copernicus");
+grid.addRow("galileo-128px.jpg", "Galileo Galilei");
+grid.addRow("kepler-128px.jpg", "Johannes Kepler");]]></programlisting>
+
+                        <para>
+                            You also need to define the row heights so that the images fit
+                            there. You can set it in the theme for all data cells or for
+                            the column containing the images.
+                        </para>
+
+                        <para>
+                            For the latter way, first define a CSS style name for grid and
+                            the column:
+                        </para>
+
+                        <programlisting><?pocket-size 75% ?><![CDATA[grid.setStyleName("gridwithpics128px");
+grid.setCellStyleGenerator(cell ->
+    "picture".equals(cell.getPropertyId())?
+        "imagecol" : null);]]></programlisting>
+
+                        <para>
+                            Then, define the style in CSS (Sass):
+                        </para>
+
+                        <programlisting><?pocket-size 75% ?><![CDATA[.gridwithpics128px .imagecol {
+    height: 128px;
+    background: black;
+    text-align: center;
+}]]></programlisting>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><classname>DateRenderer</classname></term>
+                    <listitem>
+                        <para>
+                            Formats a column with a <classname>Date</classname> type using
+                            string formatter. The format string is same as for
+                            <methodname>String.format()</methodname> in Java API. The date
+                            is passed in the parameter index 1, which can be omitted if
+                            there is only one format specifier, such as "<literal>%tF</literal>".
+                        </para>
+
+                        <programlisting><?pocket-size 75% ?><![CDATA[Grid.Column bornColumn = grid.getColumn("born");
+bornColumn.setRenderer(
+    new DateRenderer("%1$tB %1$te, %1$tY",
+                     Locale.ENGLISH));]]></programlisting>
+
+                        <para>
+                            Optionally, a locale can be given. Otherwise, the default
+                            locale (in the component tree) is used.
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><classname>HTMLRenderer</classname></term>
+                    <listitem>
+                        <para>
+                            Renders the cell as HTML. This allows formatting cell content,
+                            as well as using HTML features such as hyperlinks. 
+                        </para>
+
+                        <para>
+                            First, set the renderer in the
+                            <classname>Grid.Column</classname> object:
+                        </para>
+
+                        <programlisting><?pocket-size 75% ?><![CDATA[grid.addColumn("link", String.class)
+    .setRenderer(new HtmlRenderer());]]></programlisting>
+
+                        <para>
+                            Then, in the grid data, give the cell content:
+                        </para>
+
+                        <programlisting><?pocket-size 65% ?><![CDATA[grid.addRow("Nicolaus Copernicus", 1543,
+            "<a href='http://en.wikipedia.org/wiki/" +
+            "Nicolaus_Copernicus' target='_top'>info</a>");]]></programlisting>
+
+                        <para>
+                            You could also use a
+                            <interfacename>PropertyFormatter</interfacename> or a
+                            generated column to generate the HTML for the links.
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><classname>NumberRenderer</classname></term>
+                    <listitem>
+                        <para>
+                            Formats column values with a numeric type extending
+                            <classname>Number</classname>: <classname>Integer</classname>,
+                            <classname>Double</classname>, etc. The format can be
+                            specified either as
+                            <classname>java.text.NumberFormat</classname> or for
+                            <methodname>String.format()</methodname>.
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><classname>ProgressBarRenderer</classname></term>
+                    <listitem>
+                        <para>
+                            Renders a progress bar in a column with a
+                            <classname>Double</classname> type. The value must be between
+                            0.0 and 1.0.
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><classname>TextRenderer</classname></term>
+                    <listitem>
+                        <para>
+                            Displays plain text as is. Any HTML markup is quoted.
+                        </para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+
+            <section xml:id="components.grid.renderer.converter">
+                <title>Converting for Rendering</title>
+
+                <para>
+                    Optionally, you can give a <interfacename>Converter</interfacename> in
+                    the <methodname>setRenderer()</methodname>, or define it for the
+                    column, to convert the data value to an intermediary representation
+                    that is rendered by the renderer. For example, when using an
+                    <classname>ImageRenderer</classname>, you could the image file name in
+                    the data column, which the converter would convert to a resource,
+                    which would then be rendered by the renderer.
+                </para>
+
+                <para>
+                    In the following example, we use a converter to format URL paths
+                    to complete HTML hyperlinks with <classname>HTMLRenderer</classname>:
+                </para>            
+                
+                <programlisting><?pocket-size 70% ?><![CDATA[// Have a column for hyperlink paths to Wikipedia
+grid.addColumn("link", String.class);
+
+Grid.Column linkColumn = grid.getColumn("link");
+linkColumn.setRenderer(new HtmlRenderer(),
+                       new Converter<String,String>(){
+    @Override
+    public String convertToModel(String value,
+        Class<? extends String> targetType, Locale locale)
+        throws Converter.ConversionException {
+        return "not implemented";
+    }
+
+    @Override
+    public String convertToPresentation(String value,
+        Class<? extends String> targetType, Locale locale)
+        throws Converter.ConversionException {
+        return "<a href='http://en.wikipedia.org/wiki/" +
+                value + "' target='_top'>more info</a>";
+    }
+
+    @Override
+    public Class<String> getModelType() {
+        return String.class;
+    }
+
+    @Override
+    public Class<String> getPresentationType() {
+        return String.class;
+    }
+});
+
+// Data with a hyperlink path in the third column
+grid.addRow("Nicolaus Copernicus", 1473,
+            "Nicolaus_Copernicus");
+...]]></programlisting>
+            </section>
         </section>
 
         <section xml:id="components.grid.headerfooter">
