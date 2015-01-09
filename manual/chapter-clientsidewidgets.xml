@@ -105,6 +105,83 @@
     }
 }]]></programlisting>        
     </section>
+
+    <section xml:id="clientsidewidgets.grid">
+        <title>Grid</title>
+
+        <para>
+            The <classname>Grid</classname> widget is the client-side counterpart for the
+            server-side <classname>Grid</classname> component described in <xref
+            linkend="components.grid"/>.
+        </para>
+
+        <para>
+            The client-side API is almost identical to the server-side API, so its
+            documentation is currently omitted here and we refer you to the API
+            documentation. In the following, we go through some customization features of
+            <classname>Grid</classname>.
+        </para>
+
+        <section xml:id="clientsidewidgets.grid.renderers">
+            <title>Renderers</title>
+
+            <para>
+                As described in <xref linkend="components.grid.renderer"/>, renderers draw
+                the visual representation of data values on the client-side. They
+                implement <interfacename>Renderer</interfacename> interface and its
+                <methodname>render()</methodname> method. The method gets a reference to
+                the element of the grid cell, as well as the data value to be rendered. An
+                implementation needs to modify the element as needed.
+            </para>
+
+            <para>
+                For example, <classname>TextRenderer</classname> is implemented simply as
+                follows:
+            </para>
+
+            <programlisting><?pocket-size 75% ?><![CDATA[public class TextRenderer implements Renderer<String> {
+    @Override
+    public void render(RendererCellReference cell,
+                       String text) {
+        cell.getElement().setInnerText(text);
+    }
+}]]></programlisting>
+
+            <para>
+                The server-side renderer API should extend
+                <classname>AbstractRenderer</classname> or
+                <classname>ClickableRenderer</classname> with the data type accepted by
+                the renderer. The data type also must be given for the superclass
+                constructor.
+            </para>
+
+            <programlisting><?pocket-size 75% ?><![CDATA[public class TextRenderer extends AbstractRenderer<String> {
+    public TextRenderer() {
+        super(String.class);
+    }
+}]]></programlisting>
+
+            <para>
+                The client-side and server-side renderer need to be connected with a
+                connector extending from <classname>AbstractRendererConnector</classname>.
+            </para>
+
+            <programlisting><?pocket-size 75% ?><![CDATA[@Connect(com.vaadin.ui.renderer.TextRenderer.class)
+public class TextRendererConnector
+       extends AbstractRendererConnector<String> {
+    @Override
+    public TextRenderer getRenderer() {
+        return (TextRenderer) super.getRenderer();
+    }
+}]]></programlisting>
+
+            <para>
+                Renderers can have parameters, for which normal client-side communication
+                of extension parameters can be used. Please see the implementations of
+                different renderers for examples.
+            </para>
+        </section>
+    </section>
 </chapter>
 
 <!-- Keep this comment at the end of the file

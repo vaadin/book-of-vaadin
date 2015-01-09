@@ -6603,20 +6603,29 @@ grid.setSelectionMode(SelectionMode.SINGLE);]]></programlisting>
             <para>
                 Columns are normally defined in the container data source. The
                 <methodname>addColumn()</methodname> method can be used to add columns to
-                a container.
+                a container that supports it, such as the default
+                <classname>IndexedContainer</classname>.
             </para>
 
             <para>
-                <emphasis>This section is a stub. It currently under work and will be
-                expanded soon.</emphasis>
+                Column configuration is defined in <classname>Grid.Column</classname>
+                objects, which can be obtained from the grid with
+                <methodname>getColumn()</methodname> by the column (property) ID.
+            </para>
+
+            <programlisting><?pocket-size 75% ?><![CDATA[Grid.Column bornColumn = grid.getColumn("born");
+bornColumn.setHeaderCaption("Born");]]></programlisting>
+
+            <para>
+                In the following, we describe the basic column configuration.
             </para>
 
             <section xml:id="components.grid.columns.order">
                 <title>Column Order and Visibility</title>
 
                 <para>
-                    You can set column order and visibility with
-                    <methodname>setColumnOrder()</methodname>.
+                    You can set the order and visibility of columns with
+                    <methodname>setColumnOrder()</methodname> for the grid.
                 </para>
             </section>
 
@@ -6624,17 +6633,45 @@ grid.setSelectionMode(SelectionMode.SINGLE);]]></programlisting>
                 <title>Column Captions</title>
 
                 <para>
-                    Column captions are displayed in the grid header, which is described
-                    in detail later.
+                    Column captions are displayed in the grid header. The default captions
+                    are generated automatically from the property ID. You can set the
+                    header caption explicitly through the column object with
+                    <methodname>setHeaderCaption()</methodname>.
+                </para>
+
+                <programlisting><?pocket-size 75% ?><![CDATA[Grid.Column bornColumn = grid.getColumn("born");
+bornColumn.setHeaderCaption("Born");]]></programlisting>
+
+                <para>
+                    This is equivalent to setting it with
+                    <methodname>setText()</methodname> for the header cell; the
+                    <classname>HeaderCell</classname> also allows setting the caption in
+                    HTML or as a component, as well as styling it, as described later in
+                    <xref linkend="components.grid.headerfooter"/>.
                 </para>
             </section>
 
             <section xml:id="components.grid.columns.width">
-                <title>Column Width</title>
+                <title>Column Widths</title>
 
                 <para>
-                    You can set column widths by absolute pixel value or relatively with
-                    expand ratios.
+                    Columns have by default undefined width, which causes automatic sizing
+                    based on the widths of the displayed data.  You can set column widths
+                    explicitly by pixel value with <methodname>setWidth()</methodname>, or
+                    relatively using expand ratios with
+                    <methodname>setExpandRatio()</methodname>.
+                </para>
+
+                <para>
+                    When using expand ratios, the columns with a non-zero expand ratio use
+                    the extra space remaining from other columns, in proportion to the
+                    defined ratios.
+                </para>
+
+                <para>
+                    You can specify minimum and maximum widths for the expanding columns
+                    with <methodname>setMinimumWidth()</methodname> and
+                    <methodname>setMaximumWidth()</methodname>, respectively.
                 </para>
             </section>
 
@@ -6643,8 +6680,13 @@ grid.setSelectionMode(SelectionMode.SINGLE);]]></programlisting>
 
                 <para>
                     You can define a number of columns to be frozen, so that they are not
-                    scrolled off when scrolling horizontally.
+                    scrolled off when scrolling horizontally. You need to call
+                    <methodname>setLastFrozenColumn()</methodname> for the last column to be frozen.
                 </para>
+
+                <programlisting><?pocket-size 65% ?><![CDATA[Grid.Column lastnameColumn = grid.getColumn("lastname");
+lastnameColumn.setLastFrozenColumn();]]></programlisting>
+
             </section>
         </section>
 
@@ -6750,7 +6792,8 @@ container.addContainerProperty("died", Integer.class, null);]]></programlisting>
 bornColumn.setRenderer(new NumberRenderer("born in %d AD"));]]></programlisting>
 
             <para>
-                The following renderers are available:
+                The following renderers are available, as defined in the server-side
+                <package>com.vaadin.ui.renderer</package> package:
             </para>
 
             <variablelist>
@@ -6762,7 +6805,9 @@ bornColumn.setRenderer(new NumberRenderer("born in %d AD"));]]></programlisting>
                             <interfacename>RendererClickListener</interfacename> can be
                             given to handle the button clicks.
                         </para>
+                    </listitem>
 
+                    <listitem condition="web">
                         <para>
                             Typically, a button renderer is used to display buttons for
                             operating on a data item, such as edit, view, delete, etc. It
@@ -6807,6 +6852,7 @@ grid.getColumn("delete")
 
                     </listitem>
                 </varlistentry>
+
                 <varlistentry>
                     <term><classname>ImageRenderer</classname></term>
                     <listitem>
@@ -6818,7 +6864,8 @@ grid.getColumn("delete")
                             <classname>ExternalResource</classname> are currently
                             supported for images in <classname>Grid</classname>.
                         </para>
-
+                    </listitem>
+                    <listitem condition="web">
                         <programlisting><?pocket-size 65% ?><![CDATA[grid.addColumn("picture", Resource.class)
     .setRenderer(new ImageRenderer());
 ...
@@ -6888,7 +6935,7 @@ grid.setCellStyleGenerator(cell ->
     "picture".equals(cell.getPropertyId())?
         "imagecol" : null);]]></programlisting>
 
-                        <para>
+                        <para condition="web">
                             Then, define the style in CSS (Sass):
                         </para>
 
@@ -6899,6 +6946,7 @@ grid.setCellStyleGenerator(cell ->
 }]]></programlisting>
                     </listitem>
                 </varlistentry>
+
                 <varlistentry>
                     <term><classname>DateRenderer</classname></term>
                     <listitem>
@@ -6909,7 +6957,9 @@ grid.setCellStyleGenerator(cell ->
                             is passed in the parameter index 1, which can be omitted if
                             there is only one format specifier, such as "<literal>%tF</literal>".
                         </para>
+                    </listitem>
 
+                    <listitem condition="web">
                         <programlisting><?pocket-size 75% ?><![CDATA[Grid.Column bornColumn = grid.getColumn("born");
 bornColumn.setRenderer(
     new DateRenderer("%1$tB %1$te, %1$tY",
@@ -6921,6 +6971,7 @@ bornColumn.setRenderer(
                         </para>
                     </listitem>
                 </varlistentry>
+
                 <varlistentry>
                     <term><classname>HTMLRenderer</classname></term>
                     <listitem>
@@ -6928,7 +6979,9 @@ bornColumn.setRenderer(
                             Renders the cell as HTML. This allows formatting cell content,
                             as well as using HTML features such as hyperlinks. 
                         </para>
+                    </listitem>
 
+                    <listitem condition="web">
                         <para>
                             First, set the renderer in the
                             <classname>Grid.Column</classname> object:
@@ -6937,7 +6990,7 @@ bornColumn.setRenderer(
                         <programlisting><?pocket-size 75% ?><![CDATA[grid.addColumn("link", String.class)
     .setRenderer(new HtmlRenderer());]]></programlisting>
 
-                        <para>
+                        <para condition="web">
                             Then, in the grid data, give the cell content:
                         </para>
 
@@ -6952,19 +7005,53 @@ bornColumn.setRenderer(
                         </para>
                     </listitem>
                 </varlistentry>
+
                 <varlistentry>
                     <term><classname>NumberRenderer</classname></term>
+
                     <listitem>
                         <para>
                             Formats column values with a numeric type extending
                             <classname>Number</classname>: <classname>Integer</classname>,
                             <classname>Double</classname>, etc. The format can be
-                            specified either as
-                            <classname>java.text.NumberFormat</classname> or for
+                            specified either by the subclasses of
+                            <classname>java.text.NumberFormat</classname>, namely
+                            <classname>DecimalFormat</classname> and
+                            <classname>ChoiceFormat</classname>, or by
                             <methodname>String.format()</methodname>.
                         </para>
                     </listitem>
+
+                    <listitem condition="web">
+                        <para>
+                            For example:
+                        </para>
+
+                        <programlisting><?pocket-size 65% ?><![CDATA[// Define some columns
+grid.addColumn("name", String.class);
+grid.addColumn("born", Integer.class);
+grid.addColumn("sletters", Integer.class);
+grid.addColumn("rating", Double.class);
+
+// Use decimal format
+grid.getColumn("born").setRenderer(new NumberRenderer(
+    new DecimalFormat("in #### AD")));
+
+// Use textual formatting on numeric ranges
+grid.getColumn("sletters").setRenderer(new NumberRenderer(
+    new ChoiceFormat("0#none|1#one|2#multiple")));
+
+// Use String.format() formatting
+grid.getColumn("rating").setRenderer(new NumberRenderer(
+    "%02.4f", Locale.ENGLISH));
+
+// Add some data rows
+grid.addRow("Nicolaus Copernicus", 1473, 2, 0.4);
+grid.addRow("Galileo Galilei",     1564, 0, 4.2);
+grid.addRow("Johannes Kepler",     1571, 1, 2.3);]]></programlisting>
+                    </listitem>
                 </varlistentry>
+
                 <varlistentry>
                     <term><classname>ProgressBarRenderer</classname></term>
                     <listitem>
@@ -6974,7 +7061,25 @@ bornColumn.setRenderer(
                             0.0 and 1.0.
                         </para>
                     </listitem>
+
+                    <listitem condition="web">
+                        <para>
+                            For example:
+                        </para>
+
+                        <programlisting><?pocket-size 65% ?><![CDATA[// Define some columns
+grid.addColumn("name", String.class);
+grid.addColumn("rating", Double.class)
+    .setRenderer(new ProgressBarRenderer());
+
+// Add some data rows
+grid.addRow("Nicolaus Copernicus", 0.1);
+grid.addRow("Galileo Galilei",     0.42);
+grid.addRow("Johannes Kepler",     1.0);]]></programlisting>
+
+                    </listitem>
                 </varlistentry>
+
                 <varlistentry>
                     <term><classname>TextRenderer</classname></term>
                     <listitem>
@@ -6984,6 +7089,16 @@ bornColumn.setRenderer(
                     </listitem>
                 </varlistentry>
             </variablelist>
+
+            <section xml:id="components.grid.renderer.custom">
+                <title>Custom Renderers</title>
+
+                <para>
+                    Renderers are component extensions that require a client-side
+                    counterpart. See <xref linkend="clientsidewidgets.grid.renderers"/>
+                    for information on implementing custom renderers.
+                </para>
+            </section>
 
             <section xml:id="components.grid.renderer.converter">
                 <title>Converting for Rendering</title>
@@ -7021,7 +7136,7 @@ linkColumn.setRenderer(new HtmlRenderer(),
         Class<? extends String> targetType, Locale locale)
         throws Converter.ConversionException {
         return "<a href='http://en.wikipedia.org/wiki/" +
-                value + "' target='_top'>more info</a>";
+                value + "' target='_blank'>more info</a>";
     }
 
     @Override
@@ -7046,8 +7161,9 @@ grid.addRow("Nicolaus Copernicus", 1473,
             <title>Header and Footer</title>
 
             <para>
-                <emphasis>This section is a stub. It currently under work and will be
-                expanded soon.</emphasis>
+                A grid by default has a header, which displays column names, and can have
+                a footer. Both can have multiple rows and neighbouring header row cells
+                can be joined to feature column groups.
             </para>
 
             <section xml:id="components.grid.headerfooter.adding">
