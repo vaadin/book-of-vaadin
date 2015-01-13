@@ -6312,10 +6312,10 @@ main.addComponent(tree);]]></programlisting>
         <para>
             <classname>Grid</classname> is many things, and perhaps the most versatile and
             powerful component in Vaadin. Like <classname>Table</classname>, it allows
-            presenting and editing tabular data, also hierarchical as
-            <classname>TreeTable</classname> does, but escapes table's many
-            limitations. Efficient lazy loading of data while scrolling improves
-            performance. Grid is scalable, mobile friendly, and extensible.
+            presenting and editing tabular data, but escapes many of
+            <classname>Table</classname>'s limitations. Efficient lazy loading of data
+            while scrolling greatly improves performance. Grid is scalable, mobile
+            friendly, and extensible.
         </para>
 
         <section xml:id="components.grid.overview">
@@ -6438,10 +6438,10 @@ main.addComponent(tree);]]></programlisting>
                 </para>
 
                 <itemizedlist>
-                    <para>
+                    <listitem>
                         Multiple selection is indicated with check boxes in addition to
                         highlighting.
-                    </para>
+                    </listitem>
                 </itemizedlist>
             </section>
         </section>
@@ -6450,11 +6450,17 @@ main.addComponent(tree);]]></programlisting>
             <title>Binding to Data</title>
 
             <para>
-                A <classname>Grid</classname> can be bound to a container data source,
-                described in <xref linkend="datamodel.container"/>. The container must
-                implement <interfacename>Container.Indexed</interfacename> interface. By
-                default, it is bound to an <classname>IndexedContainer</classname>. Grid
-                offers some shorthand methods to operate on the default container type.
+                <classname>Grid</classname> is normally used by binding it to a container
+                data source, described in <xref linkend="datamodel.container"/>. The
+                container must implement <interfacename>Container.Indexed</interfacename>
+                interface. By default, it is bound to an
+                <classname>IndexedContainer</classname>; Grid offers some shorthand
+                methods to operate on the default container, as described later.
+            </para>
+
+            <para>
+                You can set the container in the constructor or with
+                <methodname>setContainerDataSource()</methodname>.
             </para>
 
             <para>
@@ -6477,7 +6483,6 @@ BeanItemContainer<Person> container =
 Grid grid = new Grid(container);
 grid.setColumnOrder("name", "born");
 layout.addComponent(grid);]]></programlisting>
-
 
             <section xml:id="components.grid.basic.manual">
                 <title>Default Data Source and Shorthands</title>
@@ -6541,27 +6546,31 @@ for (Object[] person: people)
                 <interfacename>SelectionListener</interfacename>.
             </para>
 
-            <para>
-                A <classname>Grid</classname> can be set to be in
-                <literal>SINGLE</literal> (default), <literal>MULTI</literal>, or
-                <literal>NONE</literal> selection mode, defined in the
-                <classname>Grid.SelectionMode</classname> enum.
-            </para>
-
-            <programlisting><?pocket-size 75% ?><![CDATA[// Use single-selection mode (default)
-grid.setSelectionMode(SelectionMode.SINGLE);]]></programlisting>
-
-            <para>
-                Empty (null) selection is allowed in multi-selection mode, but not in
-                single selection.
-            </para>
-
-            <section xml:id="components.grid.selection.listener">
-                <title>Handling Selection Changes</title>
+            <section xml:id="components.grid.selection.mode">
+                <title>Selection Mode</title>
 
                 <para>
-                    Once selection is enabled, changes in the selection can be handled
-                    with a <interfacename>SelectionListener</interfacename>. You need to
+                    A <classname>Grid</classname> can be set to be in
+                    <literal>SINGLE</literal> (default), <literal>MULTI</literal>, or
+                    <literal>NONE</literal> selection mode, defined in the
+                    <classname>Grid.SelectionMode</classname> enum.
+                </para>
+
+                <programlisting><?pocket-size 75% ?><![CDATA[// Use single-selection mode (default)
+grid.setSelectionMode(SelectionMode.SINGLE);]]></programlisting>
+
+                <para>
+                    Empty (null) selection is allowed in multi-selection mode, but not in
+                    single selection.
+                </para>
+            </section>
+
+            <section xml:id="components.grid.selection.single">
+                <title>Handling Selection</title>
+
+                <para>
+                    Changes in the selection can be handled with a
+                    <interfacename>SelectionListener</interfacename>. You need to
                     implement the <methodname>select()</methodname> method, which gets a
                     <classname>SelectionEvent</classname> as parameter.
                 </para>
@@ -6573,13 +6582,14 @@ grid.setSelectionMode(SelectionMode.SINGLE);]]></programlisting>
 
                 <para>
                     For example, assuming that you have bound the grid to a
-                    <interfacename>BeanItemContainer</interfacename> as we did in the
-                    example earlier, you can do as follows:
+                    <interfacename>BeanItemContainer</interfacename>, as we did in the data
+                    binding example earlier, you can do as follows:
                 </para>
 
-                <programlisting><?pocket-size 75% ?><![CDATA[// Handle selection changes
-                grid.addSelectionListener(e -> { // Java 8 // Get the item of the selected
-                row BeanItem<Person> item = container.getItem(grid.getSelectedRow());
+                <programlisting><?pocket-size 75% ?><![CDATA[grid.addSelectionListener(e -> { // Java 8
+    // Get the item of the selected row
+    BeanItem<Person> item =
+        container.getItem(grid.getSelectedRow());
 
     // Use the item somehow
     Notification.show("Selected " +
@@ -6621,11 +6631,26 @@ bornColumn.setHeaderCaption("Born");]]></programlisting>
             </para>
 
             <section xml:id="components.grid.columns.order">
-                <title>Column Order and Visibility</title>
+                <title>Column Order</title>
 
                 <para>
-                    You can set the order and visibility of columns with
-                    <methodname>setColumnOrder()</methodname> for the grid.
+                    You can set the order of columns with
+                    <methodname>setColumnOrder()</methodname> for the grid. Columns that
+                    are not given for the method are placed after the specified columns in
+                    their natural order.
+                </para>
+
+                <programlisting><?pocket-size 75% ?><![CDATA[grid.setColumnOrder("firstname", "lastname", "born",
+                    "birthplace", "died");]]></programlisting>
+
+                <para>
+                    Note that the method can not be used for hiding columns. As noted in
+                    <xref linkend="components.grid.generatedcolumns"/>,
+                    <classname>Grid</classname> does not currently support hiding
+                    them. Instead, you need to remove or hide columns in the container; at
+                    least <classname>GeneratedPropertyContainer</classname> allows hiding
+                    columns with <methodname>removeContainerProperty()</methodname>, as
+                    described in <xref linkend="datamodel.container.gpc"/>.
                 </para>
             </section>
 
@@ -6679,97 +6704,43 @@ bornColumn.setHeaderCaption("Born");]]></programlisting>
                 <title>Frozen Columns</title>
 
                 <para>
-                    You can define a number of columns to be frozen, so that they are not
-                    scrolled off when scrolling horizontally. You need to call
-                    <methodname>setLastFrozenColumn()</methodname> for the last column to be frozen.
+                    You can set the number of columns to be frozen with
+                    <methodname>setFrozenColumnCount()</methodname>, so that they are not
+                    scrolled off when scrolling horizontally.
                 </para>
 
-                <programlisting><?pocket-size 65% ?><![CDATA[Grid.Column lastnameColumn = grid.getColumn("lastname");
-lastnameColumn.setLastFrozenColumn();]]></programlisting>
+                <programlisting><?pocket-size 65% ?><![CDATA[grid.setFrozenColumnCount(2);]]></programlisting>
 
+                <para>
+                    Setting the count to <parameter>0</parameter> disables frozen data
+                    columns; setting it to <parameter>-1</parameter> also disables the
+                    selection column in multi-selection mode.
+                </para>
             </section>
         </section>
 
         <section xml:id="components.grid.generatedcolumns">
-            <title>Generating Columns</title>
+            <title>Generating and Hiding Columns</title>
 
             <para>
                 Columns with values computed from other columns or in some other way can
                 be generated with a container or data model that generates the property
                 values. The <classname>GeneratedPropertyContainer</classname> can be used
                 for this purpose. It wraps around any indexed container to extend its
-                properties with read-only generated properties.
+                properties with read-only generated properties. See <xref
+                linkend="datamodel.container.gpc"/> for a detailed description of using
+                it.
             </para>
-
-            <para>
-                For example, let us consider the following container with some regular
-                columns:
-            </para>
-
-            <programlisting><?pocket-size 65% ?><![CDATA[IndexedContainer container = new IndexedContainer();
-container.addContainerProperty("firstname", String.class, null);
-container.addContainerProperty("lastname", String.class, null);
-container.addContainerProperty("born", Integer.class, null);
-container.addContainerProperty("died", Integer.class, null);]]></programlisting>
-
-            <para>
-                To enable generated properties, we can wrap it in
-                <classname>GeneratedPropertyContainer</classname>:
-            </para>
-
-            <programlisting><?pocket-size 75% ?><![CDATA[GeneratedPropertyContainer gpcontainer =
-    new GeneratedPropertyContainer(container);]]></programlisting>
-
-            <para>
-                Now, you can add generated properties in the container with
-                <methodname>addGeneratedProperty()</methodname> by specifying a property
-                ID and a <interfacename>PropertyValueGenerator</interfacename>.
-            </para>
-
-            <para>
-                You need to implement <methodname>getType()</methodname>, which must
-                return the class object of the value type of the property, and
-                <methodname>getValue()</methodname>, which returns the property value for
-                the given item. The item ID and the property ID of the generated property
-                are also given in case they are needed. You can access other properties of
-                the item to compute the property value.
-            </para>
-
-            <programlisting><?pocket-size 70% ?><![CDATA[gpcontainer.addGeneratedProperty("lived",
-    new PropertyValueGenerator<Integer>() {
-    @Override
-    public Integer getValue(Item item, Object itemId,
-                            Object propertyId) {
-        int born = (Integer)
-                   item.getItemProperty("born").getValue();
-        int died = (Integer)
-                   item.getItemProperty("died").getValue();
-        return Integer.valueOf(died - born);
-    }
-
-    @Override
-    public Class<Integer> getType() {
-        return Integer.class;
-    }
-});]]></programlisting>
-
-            <para>
-                You can access other items in the container, also their generated
-                properties, although you should beware of accidental recursion.
-            </para>
-            
-            <para>
-                Finally, you need to bind the
-                <classname>GeneratedPropertyContainer</classname> to
-                <classname>Grid</classname> instead of the wrapped container.
-            </para>
-
-            <programlisting><?pocket-size 75% ?><![CDATA[Grid grid = new Grid(gpcontainer);]]></programlisting>
 
             <para>
                 Generated columns are read-only, so you can not add grid rows with
                 <methodname>addRow()</methodname>. In editable mode, editor fields are not
                 generated for generated columns.
+            </para>
+
+            <para>
+                <classname>GeneratedPropertyContainer</classname> also allows hiding
+                columns with <methodname>removeContainerProperty()</methodname>.
             </para>
         </section>
 
@@ -7216,9 +7187,72 @@ grid.addRow("Nicolaus Copernicus", 1473,
                 <para>
                     You can set a component in a header or footer cell with
                     <methodname>setComponent()</methodname>. Typically, this feature is
-                    used to allow filtering.
+                    used to allow filtering, as described in <xref
+                    linkend="components.grid.filtering"/>.
                 </para>
             </section>
+        </section>
+
+        <section xml:id="components.grid.filtering">
+            <title>Filtering</title>
+
+            <para>
+                The ability to include components in the grid header can be used to create
+                filters for the grid data. Filtering is done in the container data source,
+                so the container must be of type that implements
+                <interfacename>Container.Filterable</interfacename>.
+            </para>
+
+            <figure xml:id="figure.components.grid.filtering">
+                <title>Filtering Grid</title>
+
+                <mediaobject>
+                    <imageobject>
+                        <imagedata scale="85" smallscale="80%" align="center" fileref="img/components/grid-filtering.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+
+            <para>
+                The filtering illustrated in <xref
+                linkend="figure.components.grid.filtering"/> can be created as follows:
+            </para>
+
+            <programlisting><?pocket-size 75% ?><![CDATA[// Have a filterable container
+IndexedContainer container = exampleDataSource();
+
+// Create a grid bound to it
+Grid grid = new Grid(container);
+grid.setSelectionMode(SelectionMode.NONE);
+grid.setWidth("500px");
+grid.setHeight("300px");
+
+// Create a header row to hold column filters
+HeaderRow filterRow = grid.appendHeaderRow();
+
+// Set up a filter for all columns
+for (Object pid: grid.getContainerDataSource()
+                     .getContainerPropertyIds()) {
+    HeaderCell cell = filterRow.getCell(pid);
+    
+    // Have an input field to use for filter
+    TextField filterField = new TextField();
+    filterField.setColumns(8);
+    
+    // Update filter When the filter input is changed
+    filterField.addTextChangeListener(change -> {
+        // Can't modify filters so need to replace
+        container.removeContainerFilters(pid);
+        
+        // (Re)create the filter if necessary
+        if (! change.getText().isEmpty())
+            container.addContainerFilter(
+                new SimpleStringFilter(pid,
+                    change.getText(), true, false));
+    });
+    cell.setComponent(filterField);
+}]]></programlisting>
+
         </section>
 
         <section xml:id="components.grid.sorting">
