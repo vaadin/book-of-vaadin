@@ -1899,47 +1899,66 @@ layout.addComponent (new Label("Selected items: " + items));]]></programlisting>
 
             <para>
                 <classname>GeneratedPropertyContainer</classname> is a container wrapper
-                that allows defining generated values for properties (columns). It is
-                especially useful with <classname>Grid</classname>, which does not support
-                generated columns or hiding columns like <classname>Table</classname>
-                does.
+                that allows defining generated values for properties (columns). The
+                generated properties can shadow properties with the same IDs in the
+                wrapped container. Removing a property from the wrapper hides it.
             </para>
 
             <para>
-                For example, let us consider the following container with some regular
-                columns:
+                The container is especially useful with <classname>Grid</classname>, which
+                does not support generated columns or hiding columns like
+                <classname>Table</classname> does.
             </para>
 
-            <programlisting><?pocket-size 65% ?><![CDATA[IndexedContainer container = new IndexedContainer();
+            <section xml:id="datamodel.container.gpc.wrapping">
+                <title>Wrapping a Container</title>
+                
+                <para>
+                    A container to be wrapped must be a
+                    <interfacename>Container.Indexed</interfacename>. It can optionally
+                    also implement <interfacename>Container.Sortable</interfacename> or
+                    <interfacename>Container.Filterable</interfacename> to enable sorting
+                    and filtering the container, respectively.
+                </para>
+
+                <para>
+                    For example, let us consider the following container with some regular
+                    columns:
+                </para>
+
+                <programlisting><?pocket-size 65% ?><![CDATA[IndexedContainer container = new IndexedContainer();
 container.addContainerProperty("firstname", String.class, null);
 container.addContainerProperty("lastname", String.class, null);
 container.addContainerProperty("born", Integer.class, null);
-container.addContainerProperty("died", Integer.class, null);]]></programlisting>
+container.addContainerProperty("died", Integer.class, null);
 
-            <para>
-                To enable generated properties, we can wrap it in
-                <classname>GeneratedPropertyContainer</classname>:
-            </para>
-
-            <programlisting><?pocket-size 75% ?><![CDATA[GeneratedPropertyContainer gpcontainer =
+// Wrap it
+GeneratedPropertyContainer gpcontainer =
     new GeneratedPropertyContainer(container);]]></programlisting>
+            </section>
 
-            <para>
-                Now, you can add generated properties in the container with
-                <methodname>addGeneratedProperty()</methodname> by specifying a property
-                ID and a <interfacename>PropertyValueGenerator</interfacename>.
-            </para>
+            <section xml:id="datamodel.container.gpc.properties">
+                <title><classname>GeneratedPropertyContainer</classname></title>
 
-            <para>
-                You need to implement <methodname>getType()</methodname>, which must
-                return the class object of the value type of the property, and
-                <methodname>getValue()</methodname>, which returns the property value for
-                the given item. The item ID and the property ID of the generated property
-                are also given in case they are needed. You can access other properties of
-                the item to compute the property value.
-            </para>
+                <para>
+                    Now, you can add generated properties in the container with
+                    <methodname>addGeneratedProperty()</methodname> by specifying a
+                    property ID and a
+                    <interfacename>PropertyValueGenerator</interfacename>. The method
+                    takes the ID of the generated property as first parameter; you can use
+                    a same ID as in the wrapped container to shadow its properties.
+                </para>
 
-            <programlisting><?pocket-size 70% ?><![CDATA[gpcontainer.addGeneratedProperty("lived",
+                <para>
+                    You need to implement <methodname>getType()</methodname>, which must
+                    return the class object of the value type of the property, and
+                    <methodname>getValue()</methodname>, which returns the property value
+                    for the given item. The item ID and the property ID of the generated
+                    property are also given in case they are needed. You can access other
+                    properties of the item to compute the property value.
+                </para>
+
+                <programlisting><?pocket-size 70% ?><![CDATA[gpcontainer.addGeneratedProperty("lived",
     new PropertyValueGenerator<Integer>() {
     @Override
     public Integer getValue(Item item, Object itemId,
@@ -1957,24 +1976,31 @@ container.addContainerProperty("died", Integer.class, null);]]></programlisting>
     }
 });]]></programlisting>
 
-            <para>
-                You can access other items in the container, also their generated
-                properties, although you should beware of accidental recursion.
-            </para>
-            
-            <para>
-                Finally, you need to bind the
-                <classname>GeneratedPropertyContainer</classname> to
-                <classname>Grid</classname> instead of the wrapped container.
-            </para>
+                <para>
+                    You can access other items in the container, also their generated
+                    properties, although you should beware of accidental recursion.
+                </para>
+            </section>
 
-            <programlisting><?pocket-size 75% ?><![CDATA[Grid grid = new Grid(gpcontainer);]]></programlisting>
+            <section xml:id="datamodel.container.gpc.using">
+                <title>Using <classname>GeneratedPropertyContainer</classname></title>
 
-            <para>
-                Generated columns are read-only, so you can not add grid rows with
-                <methodname>addRow()</methodname>. In editable mode, editor fields are not
-                generated for generated columns.
-            </para>
+                <para>
+                    Finally, you need to bind the
+                    <classname>GeneratedPropertyContainer</classname> to the component
+                    instead of the wrapped container.
+                </para>
+
+                <programlisting><?pocket-size 75% ?><![CDATA[Grid grid = new Grid(gpcontainer);]]></programlisting>
+
+                <para>
+                    When using <classname>GeneratedPropertyContainer</classname> in
+                    <classname>Grid</classname>, notice that generated columns are
+                    read-only, so you can not add grid rows with
+                    <methodname>addRow()</methodname>. In editable mode, editor fields are
+                    not generated for generated columns.
+                </para>
+            </section>
         </section>
 
         <section xml:id="datamodel.container.filtered">

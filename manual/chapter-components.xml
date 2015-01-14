@@ -6325,7 +6325,7 @@ main.addComponent(tree);]]></programlisting>
                 <classname>Grid</classname> is for displaying and editing tabular data
                 laid out in rows and columns. At the top, a <emphasis>header</emphasis>
                 can be shown, and a <emphasis>footer</emphasis> at the bottom. In addition
-                to plain text, the header and footer can contain HTML and Vaadin
+                to plain text, the header and footer can contain HTML and
                 components. Having components in the header allows implementing filtering
                 easily. The grid data can be sorted by clicking on a column header;
                 shift-clicking a column header enables secondary sorting criteria.
@@ -6605,6 +6605,67 @@ grid.setSelectionMode(SelectionMode.SINGLE);]]></programlisting>
                     items.
                 </para>
             </section>
+
+            <section xml:id="components.grid.selection.multi">
+                <title>Multiple Selection</title>
+
+                <para>
+                    In the multiple selection mode, a user can select multiple items by
+                    clicking on the checkboxes in the leftmost column.
+                </para>
+
+                <figure xml:id="figure.components.grid.selection.multi">
+                    <title>Multiple Selection in  <classname>Grid</classname></title>
+                    <mediaobject>
+                        <imageobject>
+                            <imagedata smallscale="90%" align="center" fileref="img/components/grid-selection-multi.png"/>
+                        </imageobject>
+                    </mediaobject>
+                </figure>
+
+                <para>
+                    The currently selected rows can be set with
+                    <methodname>setSelectedRows()</methodname> by a collection of item
+                    IDs, and read with <methodname>getSelectedRows()</methodname>.
+                </para>
+
+                <programlisting><?pocket-size 70% ?><![CDATA[// Grid in multi-selection mode
+Grid grid = new Grid(exampleDataSource());
+grid.setSelectionMode(SelectionMode.MULTI);
+
+// Allow deleting the selected items
+Button deleteSelected = new Button("Delete Selected", e -> {
+    // Delete all selected data items
+    for (Object itemId: grid.getSelectedRows())
+        grid.getContainerDataSource().removeItem(itemId);
+    
+    // Disable after deleting
+    e.getButton().setEnabled(false);
+});
+deleteSelected.setEnabled(false); // Enable later]]></programlisting>
+                
+                <para>
+                    Changes in the selection can be handled with a
+                    <interfacename>SelectionListener</interfacename>. The selection event
+                    object provides <methodname>getAdded()</methodname> and
+                    <methodname>getRemove()</methodname> to allow determining the
+                    differences in the selection change. When <classname>Grid</classname>
+                    is in immediate mode, the difference is one item, but in non-immediate
+                    mode can be more.
+                </para>
+
+                <programlisting><?pocket-size 75% ?><![CDATA[// Handle selection changes
+grid.addSelectionListener(selection -> { // Java 8
+    Notification.show(selection.getAdded().size() +
+                      " items added, " +
+                      selection.getRemoved().size() +
+                      " removed.");
+
+    // Allow deleting only if there's any selected
+    deleteSelected.setEnabled(
+         grid.getSelectedRows().size() > 0);
+});]]></programlisting>
+            </section>
         </section>
 
         <section xml:id="components.grid.columns">
@@ -6727,20 +6788,22 @@ bornColumn.setHeaderCaption("Born");]]></programlisting>
                 be generated with a container or data model that generates the property
                 values. The <classname>GeneratedPropertyContainer</classname> can be used
                 for this purpose. It wraps around any indexed container to extend its
-                properties with read-only generated properties. See <xref
+                properties with read-only generated properties. The generated properties
+                can have same IDs as the original ones, thereby replacing them with
+                formatted or converted values. See <xref
                 linkend="datamodel.container.gpc"/> for a detailed description of using
                 it.
+            </para>
+
+            <para>
+                <classname>GeneratedPropertyContainer</classname> also allows hiding
+                columns with <methodname>removeContainerProperty()</methodname>.
             </para>
 
             <para>
                 Generated columns are read-only, so you can not add grid rows with
                 <methodname>addRow()</methodname>. In editable mode, editor fields are not
                 generated for generated columns.
-            </para>
-
-            <para>
-                <classname>GeneratedPropertyContainer</classname> also allows hiding
-                columns with <methodname>removeContainerProperty()</methodname>.
             </para>
         </section>
 
@@ -6753,14 +6816,35 @@ bornColumn.setHeaderCaption("Born");]]></programlisting>
                 buttons in grid cells.
             </para>
 
+            <figure xml:id="figure.components.grid.renderer">
+                <title>Column Renderers: Image, Date, HTML, and Button</title>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata smallscale="100%" align="center" fileref="img/components/grid-renderers.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+
             <para>
                 Renderers implement the <interfacename>Renderer</interfacename>
                 interface. You set the column renderer in the
                 <classname>Grid.Column</classname> object as follows:
             </para>
 
-            <programlisting><?pocket-size 70% ?><![CDATA[Grid.Column bornColumn = grid.getColumn("born");
+            <programlisting><?pocket-size 70% ?><![CDATA[grid.addColumn("born", Integer.class);
+...
+Grid.Column bornColumn = grid.getColumn("born");
 bornColumn.setRenderer(new NumberRenderer("born in %d AD"));]]></programlisting>
+
+            <para>
+                Renderers require a specific data type for the column. To convert to a
+                property type to a type required by a renderer, you can pass an optional
+                <interfacename>Converter</interfacename> to
+                <methodname>setRenderer()</methodname>, as described later in this
+                section. A converter can also be used to (pre)format the property
+                values. The converter is run on the server-side, before sending the values
+                to the client-side to be rendered with the renderer.
+            </para>
 
             <para>
                 The following renderers are available, as defined in the server-side
@@ -7125,6 +7209,11 @@ linkColumn.setRenderer(new HtmlRenderer(),
 grid.addRow("Nicolaus Copernicus", 1473,
             "Nicolaus_Copernicus");
 ...]]></programlisting>
+
+                <para>
+                     A <classname>GeneratedPropertyContainer</classname> could be used for
+                     much the same purpose.
+                </para>
             </section>
         </section>
 
