@@ -6805,6 +6805,14 @@ bornColumn.setHeaderCaption("Born");]]></programlisting>
                 <methodname>addRow()</methodname>. In editable mode, editor fields are not
                 generated for generated columns.
             </para>
+
+            <para>
+                Note that, while <classname>GeneratedPropertyContainer</classname>
+                implements <interfacename>Container.Sortable</interfacename>, the wrapped
+                container might not, and also sorting on the generated properties requires
+                special handling. In such cases, generated properties or the entire
+                container might not actually be sortable.
+            </para>
         </section>
 
         <section xml:id="components.grid.renderer">
@@ -7348,16 +7356,55 @@ for (Object pid: grid.getContainerDataSource()
             <title>Sorting</title>
 
             <para>
-                Sorting a grid is set up with the various alternatives of the
-                <methodname>sort()</methodname> method.  You can sort by a specific column
-                with <methodname>sort(Object propertyId)</methodname>. To sort on multiple
-                columns, you need to use the fluid sorting API with
-                <methodname>sort(Sort)</methodname>, which allows chaining sorting rules.
+                A user can sort the data in a grid on a column by clicking the column
+                header. Clicking another time on the current sort column reverses the sort
+                direction. Clicking on other column headers while keeping the
+                <keycap>Shift</keycap> key pressed adds a secondary or more sort criteria.
             </para>
 
+            <figure xml:id="figure.components.grid.sorting">
+                <title>Sorting Grid on Multiple Columns</title>
+
+                <mediaobject>
+                    <imageobject>
+                        <imagedata scale="85" smallscale="80%" align="center" fileref="img/components/grid-sorting.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+
             <para>
-                <emphasis>This section is a stub. It currently under work and will be
-                expanded soon.</emphasis>
+                Defining sort criteria programmatically can be done with the various
+                alternatives of the <methodname>sort()</methodname> method.  You can sort
+                on a specific column with <methodname>sort(Object
+                propertyId)</methodname>, which defaults to ascending sorting order, or
+                <methodname>sort(Object propertyId, SortDirection direction)</methodname>,
+                which allows specifying the sort direction.
+            </para>
+
+            <programlisting><![CDATA[grid.sort("name", SortDirection.DESCENDING);]]></programlisting>
+
+            <para>
+                To sort on multiple columns, you need to use the fluid sort API with
+                <methodname>sort(Sort)</methodname>, which allows chaining sorting
+                rules. Sorting rules are created with the static
+                <methodname>by()</methodname> method, which defines the primary sort
+                column, and <methodname>then()</methodname>, which can be used to specify
+                any secondary sort columns. They default to ascending sort order, but the
+                sort direction can be given with an optional parameter.
+            </para>
+
+            <programlisting><?pocket-size 75% ?><![CDATA[// Sort first by city and then by name 
+grid.sort(Sort.by("city", SortDirection.ASCENDING)
+              .then("name", SortDirection.DESCENDING));]]></programlisting>
+
+            <para>
+                The container data source must support sorting. At least, it must
+                implement <interfacename>Container.Sortable</interfacename>. Note that
+                when using <classname>GeneratedPropertyContainer</classname>, as described
+                in <xref linkend="components.grid.generatedcolumns"/>, even though the
+                container implements the interface, the wrapped container must also
+                support it. Also, the generated properties are not normally sortable, but
+                require special handling to enable sorting.
             </para>
         </section>
 
@@ -7400,7 +7447,7 @@ for (Object pid: grid.getContainerDataSource()
         </section>
 
         <section xml:id="components.grid.stylegeneration">
-            <title>Row and Cell Style Generation</title>
+            <title>Generating Row or Cell Styles</title>
 
             <para>
                 You can style entire rows with a
@@ -7408,10 +7455,72 @@ for (Object pid: grid.getContainerDataSource()
                 a <interfacename>CellStyleGenerator</interfacename>.
             </para>
 
-            <para>
-                <emphasis>This section is a stub. It currently under work and will be
-                expanded soon.</emphasis>
-            </para>
+            <section xml:id="components.grid.stylegeneration.row">
+                <title>Generating Row Styles</title>
+
+                <para>
+                    You set a <interfacename>RowStyleGenerator</interfacename> to a grid
+                    with <methodname>setRowStyleGenerator()</methodname>. The
+                    <methodname>getStyle()</methodname> method gets a
+                    <classname>RowReference</classname>, which contains various
+                    information about the row and a reference to the grid, and should
+                    return a style name or <parameter>null</parameter> if no style is
+                    generated.
+                </para>
+
+                <para>
+                    For example, to add a style names to rows having certain values in one
+                    column, you can style them as follows:
+                </para>
+
+                <programlisting><?pocket-size 75% ?><![CDATA[grid.setRowStyleGenerator(rowRef -> {// Java 8
+    if (! ((Boolean) rowRef.getItem()
+                           .getItemProperty("alive")
+                           .getValue()).booleanValue())
+        return "grayed";
+    else
+        return null;
+});]]></programlisting>
+
+                <para>
+                    You could then style the rows with CSS as follows:
+                </para>
+
+                <programlisting><?pocket-size 75% ?><![CDATA[.v-grid-row.grayed {
+    color: gray;
+}]]></programlisting>
+            </section>
+
+            <section xml:id="components.grid.stylegeneration.cell">
+                <title>Generating Cell Styles</title>
+
+                <para>
+                    You set a <interfacename>CellStyleGenerator</interfacename> to a grid
+                    with <methodname>setCellStyleGenerator()</methodname>. The
+                    <methodname>getStyle()</methodname> method gets a
+                    <classname>CellReference</classname>, which contains various
+                    information about the cell and a reference to the grid, and should
+                    return a style name or <parameter>null</parameter> if no style is
+                    generated.
+                </para>
+
+                <para>
+                    For example, to add a style name to a specific column, you can match
+                    on the property ID of the column as follows:
+                </para>
+
+                <programlisting><?pocket-size 75% ?><![CDATA[grid.setCellStyleGenerator(cellRef -> // Java 8
+    "born".equals(cellRef.getPropertyId())?
+        "rightalign" : null);]]></programlisting>
+
+                <para>
+                    You could then style the cells with a CSS rule as follows:
+                </para>
+
+                <programlisting><?pocket-size 75% ?><![CDATA[.v-grid-cell.rightalign {
+    text-align: right;
+}]]></programlisting>
+            </section>
         </section>
 
         <section xml:id="components.grid.css">
