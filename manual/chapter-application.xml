@@ -27,7 +27,7 @@
             interface components that make up the user interface. User input is handled
             with event listeners, although it is also possible to bind the user interface
             components directly to data. The visual style of the application is defined in
-            themes as CSS and SCSS files. Icons, other images, and downloadable files are
+            themes as CSS or Sass. Icons, other images, and downloadable files are
             handled as <emphasis>resources</emphasis>, which can be external or served by
             the application server or the application itself.
 		</para>
@@ -313,10 +313,16 @@ public class HelloWorld extends UI {
         </figure>
 
         <para>
+            Instead of building the layout in Java, you can also use a declarative design,
+            as described later in <xref linkend="application.declarative"/>. The examples
+            given for the declarative layouts give exactly the same UI layout as built
+            from the components above.
+        </para>
+
+        <para>
             The built-in components are described in <xref linkend="components"/> and the
             layout components in <xref linkend="layout"/>.
         </para>
-
 
         <para>
             The example application described above just is, it does not do anything. User
@@ -510,6 +516,251 @@ File baseDir = VaadinService.getCurrent().getBaseDirectory();]]></programlisting
                 The static methods use the built-in ThreadLocal support in the
                 classes.<phrase condition="web"> The pattern is described in <xref
                 linkend="advanced.global.threadlocal"/>.</phrase>
+            </para>
+        </section>
+    </section>
+
+
+    <section xml:id="application.declarative">
+        <title>Designing UIs Declaratively</title>
+
+        <para>
+            Declarative definition of composites and even entire UIs makes it easy for
+            developers and especially graphical designers to work on visual designs
+            without any coding. Designs can be modified even while the application is
+            running, as can the associated themes. A design is a representation of a
+            component hierarcy, which can be accessed from Java code to implement dynamic
+            UI logic, as well as data binding.
+        </para>
+
+        <section xml:id="application.declarative.syntax">
+            <title>Declarative Syntax</title>
+
+            <para>
+                A design is a document having an HTML-like nested syntax. A design has a
+                single root component as the root element of the file. No enclosing
+                <literal>&lt;html&gt;</literal>, <literal>&lt;body&gt;</literal>, or other
+                regular HTML elements are allowed, except in HTML content for components.
+            </para>
+
+            <programlisting><?pocket-size 75% ?><![CDATA[<v-vertical-layout size-full>
+  <v-label>Hello!</v-label>
+
+  <v-horizontal-layout size-full :expand>
+    <v-tree _id="mytree" caption="My Tree"
+            width-auto height-full/>
+    <v-table _id="mytable" caption="My Table"
+            size-full :expand/>
+  </v-horizontal-layout>
+</v-vertical-layout>]]></programlisting>
+
+            <para>
+                The above design defines the same UI layout as done earlier with Java
+                code, and illustrated in <xref
+                linkend="figure.application.architecture.example"/>.
+            </para>
+
+            <section xml:id="application.declarative.elements">
+                <title>Elements</title>
+
+                <para>
+                    Elements in the declarative syntax are directly mapped to Vaadin
+                    components. Vaadin core components start with <literal>v-</literal>
+                    prefix. Word breaks in component names are indicated with dashes
+                    (<literal>-</literal>) instead of the upper-case letters in the Java
+                    class names. For example, <classname>ComboBox</classname> component
+                    has declarative element name <literal>v-combo-box</literal>.
+                </para>
+
+                <para>
+                    Depending on the component, the element content can be used for
+                    default attributes, such as a caption. In such case, HTML can be used
+                    in the value if it is allowed by the component. For example, to define
+                    the caption of a button:
+                </para>
+
+                <programlisting><?pocket-size 75% ?><![CDATA[<v-button><b>OK</b></v-button>]]></programlisting>
+
+                <para>
+                    Some components, such as selection components, allow defining inline
+                    options or data within the element. For example:
+                </para>
+
+                <programlisting><?pocket-size 75% ?><![CDATA[<v-native-select>
+  <option>Mercury</option>
+  <option>Venus</option>
+  <option>Earth</option>
+</v-native-select>]]></programlisting>
+
+                <para>
+                    The declarative syntax of each component type is described later in
+                    the chapters giving documentation for the components.
+                </para>
+            </section>
+
+            <section xml:id="application.declarative.attributes">
+                <title>Attributes</title>
+
+                <para>
+                    Component properties are mapped to element attributes by the names of
+                    the properties. For example, the <emphasis>caption</emphasis>
+                    property, which you can set with
+                    <methodname>setCaption()</methodname>, is represented as
+                    <literal>caption</literal> attribute.
+                </para>
+
+                <programlisting><?pocket-size 75% ?><![CDATA[<v-text-field caption="Name" input-prompt="Enter Name"/>]]></programlisting>
+
+                <para>
+                    Again, dash is used for word separation instead of upper-case letters
+                    in the Java API, so that <literal>input-prompt</literal> is equivalent to
+                    <methodname>setInputPrompt()</methodname>.
+                </para>
+
+                <para>
+                    Attribute values must be enclosed in quotes and the value given as a
+                    string must be convertible to the type of the property (string,
+                    integer, boolean, or enumeration). Boolean values must be either
+                    "<literal>true</literal>" or "<literal>false</literal>". Object types
+                    are not supported. For certain attributes, the value can be omitted,
+                    in which case a default is used. For boolean values,
+                    <literal>true</literal> value is the default. For example, the
+                    <literal>enabled</literal> attribute is boolean and has default value
+                    "<literal>true</literal>", so <literal>enabled="true"</literal> and
+                    <literal>enabled</literal> and equivalent.
+                </para>
+
+                <para>
+                    Some attribute names are given by a shorthand. For example,
+                    <parameter>expandRatio</parameter> property, which you would set with
+                    <methodname>setExpandRatio()</methodname>, can be given by
+                    <literal>expand</literal> attribute.
+                </para>
+
+                <para>
+                    Attributes marked with colon <literal>:</literal> prefix are passed to
+                    the containing component. For example, <literal>:expand="1"</literal>
+                    given for a component <parameter>c</parameter> is equivalent to
+                    calling <methodname>setExpandRatio(c, 1)</methodname> for the
+                    containing layout.
+                </para>
+
+                <programlisting><?pocket-size 70% ?><![CDATA[<v-vertical-layout size-full>
+  <!-- Automatic height - shrinks vertically -->
+  <v-label>Hello!</v-label>
+
+  <!-- Expands to take up all remaining vertical space -->
+  <v-horizontal-layout size-full :expand>
+    <!-- Automatic width - shrinks horizontally -->
+    <v-tree width-auto height-full/>
+
+    <!-- Expands horizontally to take remaining space -->
+    <v-table size-full :expand/>
+  </v-horizontal-layout>
+</v-vertical-layout>]]></programlisting>
+
+                <para>
+                    Again, compare the above declaration to the Java code given in <xref
+                    linkend="application.architecture"/>.
+                </para>
+            </section>
+
+            <section xml:id="application.declarative.identifiers">
+                <title>Identifiers</title>
+
+                <para>
+                    Components can be identified by either an identifier or a
+                    caption. There are two types of identifiers: page-global and
+                    local. This allows accessing them from Java code and binding them to
+                    components, as described later in <xref
+                    linkend="application.declarative.composite"/>.
+                </para>
+
+                <para>
+                    The <literal>id</literal> attribute can be used to define a
+                    page-global identifier, which must be unique within the page. Another
+                    design or UI shown simultaneously in the same page may not have
+                    components sharing the same ID. Using global identifiers is therefore
+                    not recommended, except in special cases where uniqueness is ensured.
+                </para>
+
+                <para>
+                    The <literal>_id</literal> attribute defines a local identifier used
+                    only within the design. This is the recommended way to identifying
+                    components.
+                </para>
+
+                <programlisting><?pocket-size 75% ?><![CDATA[<v-tree _id="mytree" caption="My Tree"/>]]></programlisting>
+            </section>
+        </section>
+
+        <section xml:id="application.declarative.reading">
+            <title>Reading a Design</title>
+
+            <para>
+                A design is read from a file or a stream with
+                <methodname>Design.read()</methodname>. It loads a composite component
+                tree and optionally binds its root to a component, the <emphasis>design
+                root</emphasis>. The <emphasis>design context</emphasis> associated with a
+                design allows obtaining references to components in a design.
+            </para>
+
+            <section xml:id="application.declarative.ui.context">
+                <title>Design Context</title>
+
+                <para>
+                    The above <methodname>Design.read()</methodname> call only loads the
+                    design, but you normally want to bind the components to some data and
+                    define user interaction for them. To do so, you must obtain a
+                    reference to the <classname>DesignContext</classname>. You can do that
+                    by the alternatives of the <methodname>read()</methodname> method that
+                    return the <classname>DesignContext</classname>
+                </para>
+            </section>
+        </section>
+
+        <section xml:id="application.declarative.ui">
+            <title>Fully Declarative UIs</title>
+
+            <para>
+                For simple UIs, you can set the layout of the entire UI declaratively by
+                reading the design from an HTML file and setting it as the content of the
+                UI. You can query the components from the design context, bind them to
+                data, and enable dynamic UI logic by defining event handlers.
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[public class MyDeclarativeUI extends UI {
+    Tree mytree;
+    Table mytable;
+
+    @Override
+    protected void init(VaadinRequest request) {
+        DesignContext design = Design.read(getClass().
+            getResourceAsStream("MyDeclarativeUI.html"),
+            null);
+        setContent(design.getRootComponent());
+        
+        // Get the components from the design
+        mytree = (Tree) design.getComponentByLocalId("mytree");
+        mytable = (Table) design.getComponentByLocalId("mytable");
+
+        // Bind the data display components to (example) data
+        mytree.setContainerDataSource(
+            TreeExample.createTreeContent());
+        mytable.setContainerDataSource(
+            TableExample.generateContent());
+    }
+}]]></programlisting>
+        </section>
+
+        <section xml:id="application.declarative.composite">
+            <title>Declarative Composite Designs</title>
+
+            <para>
+                Applications are normally built of views, sub-views, dialogs, and
+                forms. The layout of any such composites can be defined declaratively. You
+                can bind any component container as the root component of a design using
+                the <classname>@DesignRoot</classname> annotation.
             </para>
         </section>
     </section>
