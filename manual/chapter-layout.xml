@@ -138,6 +138,19 @@ bottom.addComponent(new Tree("Major Planets and Their Moons"));
 bottom.addComponent(new Panel());
 ...]]></programlisting>
 
+        <para>
+            Or in the declarative format:
+        </para>
+
+        <programlisting><?pocket-size 70% ?><![CDATA[<v-vertical-layout>
+  <v-label>The Ultimate Cat Finder</v-label>
+
+  <v-horizontal-layout>
+    <v-tree caption="Major Planets and Their Moons"/>
+    <v-panel/>
+  </v-horizontal-layout>
+</v-vertical-layout>]]></programlisting>
+
 		<para>
 			You will usually need to tune the layout components a bit by setting sizes,
 			expansion ratios, alignments, spacings, and so on. The general settings are
@@ -147,7 +160,7 @@ bottom.addComponent(new Panel());
 		<para>
 			Layouts are coupled with themes that specify various layout features, such as
 			backgrounds, borders, text alignment, and so on. Definition and use of themes
-			is described in <xref linkend="themes"/>
+			is described in <xref linkend="themes"/>.
 		</para>
 
 		<para>
@@ -166,40 +179,16 @@ bottom.addComponent(new Panel());
 				</imageobject>
 			</mediaobject>
 		</figure>
-
-		<para>
-			The alternative for using layout components is to use the special
-			<classname>CustomLayout</classname> that allows using HTML templates. This
-			way, you can let the web page designers take responsibility of component
-			layouting using their own set of tools. What you lose is the ability to manage
-			the layout dynamically.
-		</para>
-
-     	<note>
-			<title>The Visual Editor</title>
-
-			<para>
-				While you can always program the layout by hand, the Vaadin plugin for the
-				Eclipse IDE includes a visual (WYSIWYG) editor that you can use to create
-				user interfaces visually. The editor generates the code that creates the
-				user interface and is useful for rapid application development and
-				prototyping.  It is especially helpful when you are still learning the
-				framework, as the generated code, which is designed to be as reusable as
-				possible, also works as an example of how you create user interfaces with
-				Vaadin. You can find more about the editor in <xref linkend="eclipse"/>.
-			</para>
-		</note>
-
     </section>
 
     <section xml:id="layout.root-layout">
         <title>UI, Window, and Panel Content</title>
 
         <para>
-            The <classname>UI</classname>, <classname>Window</classname>, and its
-            superclass <classname>Panel</classname> all have a single content component,
-            which you need to set with <methodname>setContent()</methodname>. The content
-            is usually a layout component, although any component is allowed.
+            The <classname>UI</classname>, <classname>Window</classname>, and
+            <classname>Panel</classname> all have a single content component, which you
+            need to set with <methodname>setContent()</methodname>. The content is usually
+            a layout component, although any component is allowed.
         </para>
 
         <programlisting><?pocket-size 70% ?><![CDATA[Panel panel = new Panel("This is a Panel");
@@ -254,10 +243,9 @@ content.addComponent(menuview);]]></programlisting>
             <classname>HorizontalLayout</classname> are ordered layouts for laying
             components out either vertically or horizontally, respectively. They both
             extend from <classname>AbstractOrderedLayout</classname>, together with the
-            <classname>FormLayout</classname>. These are the two most important
-            layout components in Vaadin, and typically you have a
-            <classname>VerticalLayout</classname> as the root content component of the
-            <classname>UI</classname>.
+            <classname>FormLayout</classname>. These are the two most important layout
+            components in Vaadin, and typically you have a
+            <classname>VerticalLayout</classname> as the root content of a UI.
         </para>
 
         <para>
@@ -277,6 +265,16 @@ vertical.addComponent(new TextField("Name"));
 vertical.addComponent(new TextField("Street address"));
 vertical.addComponent(new TextField("Postal code"));
 layout.addComponent(vertical);]]></programlisting>
+
+        <para>
+            Or in declarative format:
+        </para>
+
+        <programlisting><![CDATA[<v-vertical-layout>
+  <v-text-field caption="Name"/>
+  <v-text-field caption="Street address"/>
+  <v-text-field caption="Postal code"/>
+</v-vertical-layout>]]></programlisting>
 
         <para>
             The component captions are placed above the component, so the layout will look
@@ -306,13 +304,56 @@ layout.addComponent(vertical);]]></programlisting>
             </mediaobject>
         </screenshot>
 
+        <section xml:id="layout.orderedlayout.properties">
+            <title>Properties or Attributes</title>
+
+            <para>
+                Ordered layouts have the following properties:
+            </para>
+
+			<table xml:id="layout.orderedlayout.properties.table">
+				<title>Properties and Declarative Attributes</title>
+
+				<tgroup cols="2" align="left">
+					<tbody>
+						<row valign="top">
+							<entry>Property</entry>
+							<entry>Declarative Attribute</entry>
+                        </row>
+                    </tbody>
+					<tbody>
+						<row valign="top">
+							<entry><parameter>componentAlignment</parameter></entry>
+							<entry>In child components: <literal>:left</literal> (default), <literal>:center</literal>, <literal>:right</literal>, <literal>:top</literal> (default), <literal>:middle</literal>, <literal>:bottom</literal></entry>
+						</row>
+
+						<row valign="top">
+							<entry><parameter>spacing</parameter></entry>
+							<entry><parameter>spacing</parameter><replaceable>[=&lt;boolean&gt;]</replaceable></entry>
+						</row>
+
+						<row valign="top">
+							<entry><parameter>margin</parameter></entry>
+							<entry><parameter>margin</parameter><replaceable>[=&lt;boolean&gt;]</replaceable></entry>
+						</row>
+
+						<row valign="top">
+							<entry><parameter>expandRatio</parameter></entry>
+							<entry>In child components: <parameter>:expand</parameter>=<replaceable>&lt;integer&gt;</replaceable> or <parameter>:expand</parameter> (implies ratio 1)</entry>
+						</row>
+                    </tbody>
+                </tgroup>
+            </table>
+        </section>
+
         <section xml:id="layout.orderedlayout.spacing">
             <title>Spacing in Ordered Layouts</title>
 
             <para>
                 The ordered layouts can have spacing between the horizontal or vertical
                 cells. The spacing can be enabled with
-                <methodname>setSpacing(true)</methodname>.
+                <methodname>setSpacing(true)</methodname> or declaratively with the
+                <literal>spacing</literal> attribute.
             </para>
 
             <para>
@@ -536,6 +577,12 @@ layout.setExpandRatio(expandButton, 1.0f);
 
 parentLayout.addComponent(layout);]]></programlisting>
 
+                <para>
+                    In the declarative format, you need to specify the
+                    <literal>:expand</literal> attribute in the child components. The
+                    attribute defaults to expand ratio 1.
+                </para>
+
                 <mediaobject>
                     <imageobject>
                         <imagedata smallscale="100%" align="center" fileref="img/layout/horizontallayout_width_expanding.png"/>
@@ -543,10 +590,9 @@ parentLayout.addComponent(layout);]]></programlisting>
                 </mediaobject>
                 
                 <para>
-                    Notice that you must call <methodname>setExpandRatio()</methodname>
-                    <emphasis>after</emphasis> <methodname>addComponent()</methodname>,
-                    because the layout can not operate on an component that it doesn't
-                    (yet) include.
+                    Notice that you can not call <methodname>setExpandRatio()</methodname>
+                    before you have added the component to the layout, because it can not
+                    operate on an component that it doesn't yet have.
                 </para>
             </simplesect>
 
