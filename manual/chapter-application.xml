@@ -580,8 +580,8 @@ layout.addComponent(vertical);]]></programlisting>
 
             <para>
                 In a design, each nested element corresponds to a Vaadin component in a
-                component tree. Components can have an explicitly given ID to enable
-                binding them to variables in the Java API, as well as optional attributes.
+                component tree. Components can have explicitly given IDs to enable binding
+                them to variables in the Java code, as well as optional attributes.
             </para>
 
             <programlisting><?pocket-size 75% ?><![CDATA[<!DOCTYPE html>
@@ -619,13 +619,15 @@ layout.addComponent(vertical);]]></programlisting>
 
             <para>
                 HTML elements of the declarative syntax are directly mapped to Vaadin
-                components according to their Java class names. A component element has a
-                namespace prefix separated by a dash. Vaadin core components, which are
-                defined in the <package>com.vaadin.ui</package> package, have
-                <literal>v-</literal> prefix. Word breaks in Java component classes,
-                indicated with upper-case letters, are replaced with dashes
-                (<literal>-</literal>). For example, <classname>ComboBox</classname>
-                component has declarative element name <literal>v-combo-box</literal>.
+                components according to their Java class names. The tag of a component
+                element has a namespace prefix separated by a dash. Vaadin core
+                components, which are defined in the <package>com.vaadin.ui</package>
+                package, have <literal>v-</literal> prefix. The rest of an element tag is
+                determined from the Java class name of the component, by making it
+                lower-case, while adding a dash (<literal>-</literal>) before every
+                previously upper-case letter as a word separator. For example,
+                <classname>ComboBox</classname> component has declarative element tag
+                <literal>&lt;v-combo-box&gt;</literal>.
             </para>
 
             <section xml:id="application.declarative.elements.prefix">
@@ -691,14 +693,14 @@ public class ExampleComponent extends CustomComponent {
                     as a button caption. For example:
                 </para>
 
-                <programlisting><?pocket-size 75% ?><![CDATA[<v-button><b>OK</b></v-button>]]></programlisting>
+                <programlisting><![CDATA[<v-button><b>OK</b></v-button>]]></programlisting>
 
                 <para>
                     Some components, such as selection components, allow defining inline
                     data within the element. For example:
                 </para>
 
-                <programlisting><?pocket-size 75% ?><![CDATA[<v-native-select>
+                <programlisting><![CDATA[<v-native-select>
   <option>Mercury</option>
   <option>Venus</option>
   <option>Earth</option>
@@ -719,8 +721,9 @@ public class ExampleComponent extends CustomComponent {
 
                 <para>
                     Component properties are directly mapped to the attributes of the HTML
-                    elements according to the names of the properties. Dash is used for
-                    word separation instead of upper-case letters in the Java API, so that
+                    elements according to the names of the properties. Attributes are
+                    written in lower-case letters and dash is used for word separation
+                    instead of upper-case letters in the Java methods, so that
                     <literal>input-prompt</literal> attribute is equivalent to
                     <methodname>setInputPrompt()</methodname>.
                 </para>
@@ -728,8 +731,8 @@ public class ExampleComponent extends CustomComponent {
                 <para>
                     For example, the <emphasis>caption</emphasis> property, which you can
                     set with <methodname>setCaption()</methodname>, is represented as
-                    <literal>caption</literal> attribute. You can find a complete list of
-                    component properties in the <link
+                    <literal>caption</literal> attribute. You can find the component
+                    properties by the setter methods in the <link
                     xlink:href="https://vaadin.com/api/">JavaDoc API documentation</link>
                     of the component classes.
                 </para>
@@ -749,9 +752,10 @@ public class ExampleComponent extends CustomComponent {
 
                 <para>
                     Some attribute names are given by a shorthand. For example,
-                    <parameter>expandRatio</parameter> property, which you would set with
-                    <methodname>setExpandRatio()</methodname>, is given as the
-                    <literal>expand</literal> attribute.
+                    <parameter>alternateText</parameter> property of the
+                    <classname>Image</classname> component, which you would set with
+                    <methodname>setAlternateText()</methodname>, is given as the
+                    <literal>alt</literal> attribute.
                 </para>
 
                 <para>
@@ -763,7 +767,7 @@ public class ExampleComponent extends CustomComponent {
                     <literal>enabled</literal> and equivalent.
                 </para>
 
-                <programlisting><?pocket-size 75% ?><![CDATA[<v-button caption="OK" enabled="false"/>]]></programlisting>
+                <programlisting><![CDATA[<v-button caption="OK" enabled="false"/>]]></programlisting>
             </section>
 
             <section xml:id="application.declarative.attributes.parent">
@@ -825,11 +829,11 @@ public class ExampleComponent extends CustomComponent {
                 components.
             </para>
 
-            <programlisting><?pocket-size 75% ?><![CDATA[<v-tree _id="mytree" caption="My Tree"/>]]></programlisting>
+            <programlisting><![CDATA[<v-tree _id="mytree" caption="My Tree"/>]]></programlisting>
         </section>
 
         <section xml:id="application.declarative.composite">
-            <title>Declarative Composite Designs</title>
+            <title>Using Designs in Code</title>
 
             <para>
                 The main use of declarative designs is in building application views,
@@ -882,9 +886,9 @@ public class MyViewDesign extends VerticalLayout {
 }]]></programlisting>
 
                 <para>
-                    The class of the design root must match the root element of the
-                    design. For example above, we had
-                    <literal>&lt;vertical-layout&gt;</literal> element in the HTML file,
+                    The design root class must match or extend the root element class of
+                    the design. For example, earlier we had
+                    <literal>&lt;v-vertical-layout&gt;</literal> element in the HTML file,
                     which can be bound to a class extending
                     <classname>VerticalLayout</classname>.
                 </para>
@@ -938,80 +942,6 @@ navigator.addView(MAINVIEW, new MainView());]]></programlisting>
                 <para>
                     See <xref linkend="advanced.navigator.urifragment"/> for a
                     complete example.
-                </para>
-            </section>
-        </section>
-
-        <section xml:id="application.declarative.managing">
-            <title>Managing a Design</title>
-
-            <para>
-                A design is read from a file or a stream with one of the alternatives of
-                <methodname>Design.read()</methodname>. It loads a composite component
-                tree and optionally binds its root to a component, the design root, as
-                described previously. A <emphasis>design context</emphasis> associated
-                with a design allows obtaining references to components in the design.
-            </para>
-
-            <para>
-                The main use of declarative designs is binding them to a <emphasis>design
-                root</emphasis> component. We look into that in detail in <xref
-                linkend="application.declarative.composite"/>.
-            </para>
-
-            <section xml:id="application.declarative.managing.context">
-                <title>Design Context</title>
-
-                <para>
-                    The above <methodname>Design.read()</methodname> call only loads the
-                    design, but you normally want to bind the components to some data and
-                    define user interaction for them. To do so, you must obtain a
-                    reference to the <classname>DesignContext</classname>. You can do that
-                    by the alternatives of the <methodname>read()</methodname> method that
-                    return the <classname>DesignContext</classname>
-                </para>
-            </section>
-
-            <section xml:id="application.declarative.managing.ui">
-                <title>Fully Declarative UIs</title>
-
-                <para>
-                    For simple UIs, you can set the layout of the entire UI declaratively
-                    by reading the design from an HTML file and setting it as the content
-                    of the UI. You can query the components from the design context, bind
-                    them to data, and enable dynamic UI logic by defining event handlers.
-                </para>
-
-                <programlisting><?pocket-size 65% ?><![CDATA[public class MyDeclarativeUI extends UI {
-    Tree mytree;
-    Table mytable;
-
-    @Override
-    protected void init(VaadinRequest request) {
-        DesignContext design = Design.read(getClass().
-            getResourceAsStream("MyDeclarativeUI.html"),
-            null);
-        setContent(design.getRootComponent());
-        
-        // Get the components from the design
-        mytree = (Tree) design.getComponentByLocalId("mytree");
-        mytable = (Table) design.getComponentByLocalId("mytable");
-
-        // Bind the data display components to (example) data
-        mytree.setContainerDataSource(
-            TreeExample.createTreeContent());
-        mytable.setContainerDataSource(
-            TableExample.generateContent());
-    }
-}]]></programlisting>
-            </section>
-
-            <section xml:id="application.declarative.managing.writing">
-                <title>Writing Designs</title>
-
-                <para>
-                    You can write any component tree as an HTML design file by using the
-                    <methodname>Design.write()</methodname> method.
                 </para>
             </section>
         </section>

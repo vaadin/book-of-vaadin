@@ -2179,17 +2179,32 @@ public class StartView extends VerticalLayout implements View {
             </para>
 
             <para>
-                In the following example, we implement within-view navigation.
+                In the following example, we implement within-view navigation. Here we use
+                the following declarative design for the view:
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[<v-vertical-layout size-full>
+  <v-horizontal-layout size-full :expand>
+    <v-panel caption="List of Equals" height-full width-auto>
+      <v-vertical-layout _id="menuContent" width-auto margin/>
+    </v-panel>
+
+    <v-panel _id="equalPanel" caption="An Equal" size-full :expand/>
+  </v-horizontal-layout>
+
+  <v-button _id="logout">Logout</v-button>
+</v-vertical-layout>]]></programlisting>
+
+            <para>
+                The view's logic code would be as follows:
             </para>
 
             <book-example eid="advanced.navigator.basic" style="float: right"/>
-            <programlisting><?pocket-size 65% ?><![CDATA[/** Main view with a menu */
+            <programlisting><?pocket-size 65% ?><![CDATA[/** Main view with a menu (with declarative layout design) */
+@DesignRoot
 public class MainView extends VerticalLayout implements View {
-    Panel panel;
-
     // Menu navigation button listener
     class ButtonListener implements Button.ClickListener {
-
         String menuitem;
         public ButtonListener(String menuitem) {
             this.menuitem = menuitem;
@@ -2201,19 +2216,14 @@ public class MainView extends VerticalLayout implements View {
             navigator.navigateTo(MAINVIEW + "/" + menuitem);
         }
     }
+    
+    VerticalLayout menuContent;
+    Panel equalPanel;
+    Button logout;
 
     public MainView() {
-        setSizeFull();
-        
-        // Layout with menu on left and view area on right
-        HorizontalLayout hLayout = new HorizontalLayout();
-        hLayout.setSizeFull();
+        Design.read(this);
 
-        // Have a menu on the left side of the screen
-        Panel menu = new Panel("List of Equals");
-        menu.setHeight("100%");
-        menu.setWidth(null);
-        VerticalLayout menuContent = new VerticalLayout();
         menuContent.addComponent(new Button("Pig",
                   new ButtonListener("pig")));
         menuContent.addComponent(new Button("Cat",
@@ -2226,72 +2236,53 @@ public class MainView extends VerticalLayout implements View {
                   new ButtonListener("penguin")));
         menuContent.addComponent(new Button("Sheep",
                   new ButtonListener("sheep")));
-        menuContent.setWidth(null);
-        menuContent.setMargin(true);
-        menu.setContent(menuContent);
-        hLayout.addComponent(menu);
 
-        // A panel that contains a content area on right
-        panel = new Panel("An Equal");
-        panel.setSizeFull();
-        hLayout.addComponent(panel);
-        hLayout.setExpandRatio(panel, 1.0f);
-
-        addComponent(hLayout);
-        setExpandRatio(hLayout, 1.0f);
-        
         // Allow going back to the start
-        Button logout = new Button("Logout",
-                   new Button.ClickListener() {
-            @Override
-            public void buttonClick(ClickEvent event) {
-                navigator.navigateTo("");
-            }
-        });
-        addComponent(logout);
+        logout.addClickListener(event -> // Java 8
+            navigator.navigateTo(""));
     }        
     
+    @DesignRoot
+    class AnimalViewer extends VerticalLayout {
+        Label watching;
+        Embedded pic;
+        Label back;
+        
+        public AnimalViewer(String animal) {
+            Design.read(this);
+            
+            watching.setValue("You are currently watching a " +
+                              animal);
+            pic.setSource(new ThemeResource(
+                "img/" + animal + "-128px.png"));
+            back.setValue("and " + animal +
+                " is watching you back");
+        }
+    }
+
     @Override
     public void enter(ViewChangeEvent event) {
-        VerticalLayout panelContent = new VerticalLayout();
-        panelContent.setSizeFull();
-        panelContent.setMargin(true);
-        panel.setContent(panelContent); // Also clears
-
         if (event.getParameters() == null
             || event.getParameters().isEmpty()) {
-            panelContent.addComponent(
+            equalPanel.setContent(
                 new Label("Nothing to see here, " +
                           "just pass along."));
             return;
-        }
-
-        // Display the fragment parameters
-        Label watching = new Label(
-            "You are currently watching a " +
-            event.getParameters());
-        watching.setSizeUndefined();
-        panelContent.addComponent(watching);
-        panelContent.setComponentAlignment(watching,
-            Alignment.MIDDLE_CENTER);
-        
-        // Some other content
-        Embedded pic = new Embedded(null,
-            new ThemeResource("img/" + event.getParameters() +
-                              "-128px.png"));
-        panelContent.addComponent(pic);
-        panelContent.setExpandRatio(pic, 1.0f);
-        panelContent.setComponentAlignment(pic,
-                Alignment.MIDDLE_CENTER);
-
-        Label back = new Label("And the " +
-            event.getParameters() + " is watching you");
-        back.setSizeUndefined();
-        panelContent.addComponent(back);
-        panelContent.setComponentAlignment(back,
-            Alignment.MIDDLE_CENTER);
+        } else
+            equalPanel.setContent(new AnimalViewer(
+                event.getParameters()));
     }
 }]]></programlisting>
+
+            <para>
+                The animal sub-view would have the following declarative design:
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[<v-vertical-layout size-full>
+  <v-label _id="watching" size-auto :middle :center/>
+  <v-embedded _id="pic" :middle :center :expand/>
+  <v-label _id="back" size-auto :middle :center/>
+</v-vertical-layout>]]></programlisting>
 
             <para>
                 The main view is shown in <xref
@@ -2337,13 +2328,13 @@ public class MainView extends VerticalLayout implements View {
             <para>
                 Such an architecture starts from a <emphasis>domain model</emphasis>,
                 which defines the data model and the "business logic" of the application,
-                typically as POJOs. A user interface is built on top of the domain model,
-                in our context with the Vaadin Framework. The Vaadin user interface could
-                be bound directly to the data model through the Vaadin Data Model,
-                described in <xref linkend="datamodel"/>. Beneath the domain model lies a
-                data store, such as a relational database. The dependencies between the
-                layers are restricted so that a higher layer may depend on a lower one,
-                but never the other way around.
+                typically as beans or POJOs. A user interface is built on top of the
+                domain model, in our context with the Vaadin Framework. The Vaadin user
+                interface could be bound directly to the data model through the Vaadin
+                Data Model, described in <xref linkend="datamodel"/>. Beneath the domain
+                model lies a data store, such as a relational database. The dependencies
+                between the layers are restricted so that a higher layer may depend on a
+                lower one, but never the other way around.
             </para>
 
             <figure xml:id="figure.advanced.architecture.layering">
