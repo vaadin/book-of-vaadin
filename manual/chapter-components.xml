@@ -15,13 +15,6 @@
 		non-layout components in Vaadin.
 	</para>
 	
-    <para>
-        <emphasis>Because of pressing release schedules to get this edition to your hands,
-        some topics still require revision for Vaadin 7, especially the data binding of
-        the <classname>Table</classname> component. Please consult the web version once it
-        is updated, or the next print edition.</emphasis>
-    </para>
-
 	<section xml:id="components.overview">
 		<title>Overview</title>
 
@@ -4181,7 +4174,7 @@ button.addClickListener(new Button.ClickListener() {
         </para>
 
 		<figure xml:id="figure.component.button.basic">
-			<title>An Example of a Button</title>
+			<title>Button in Different Styles of Valo Theme</title>
 			<mediaobject>
 				<imageobject>
 					<imagedata smallscale="60%" align="center" fileref="img/components/button-example1.png"/>
@@ -6309,6 +6302,10 @@ main.addComponent(tree);]]></programlisting>
 	<section xml:id="components.grid">
         <title><classname>Grid</classname></title>
 
+        <indexterm xml:id="term.components.grid" class="startofterm">
+            <primary><classname>Grid</classname></primary>
+        </indexterm>
+
         <para>
             <classname>Grid</classname> is many things, and perhaps the most versatile and
             powerful component in Vaadin. Like <classname>Table</classname>, it allows
@@ -6342,17 +6339,16 @@ main.addComponent(tree);]]></programlisting>
 
             <para>
                 The data area can be scrolled both vertically and horizontally. The
-                topmost rows and leftmost columns can be frozen, so that they are never
-                scrolled out of the view. The data is loaded lazily from the server, so
-                that only the visible data is loaded. The smart lazy loading functionality
-                gives excellent user experience even with low bandwidth, such as mobile
-                devices.
+                leftmost columns can be frozen, so that they are never scrolled out of the
+                view. The data is loaded lazily from the server, so that only the visible
+                data is loaded. The smart lazy loading functionality gives excellent user
+                experience even with low bandwidth, such as mobile devices.
             </para>
 
             <para>
                 The grid data can be edited with a row-based editor after double-clicking
-                a row. The fields are generated with a field factory and bound to data
-                with a field group.
+                a row. The fields are generated with a field factory, or set explicitly,
+                and bound to data with a field group.
             </para>
 
             <para>
@@ -6469,7 +6465,7 @@ main.addComponent(tree);]]></programlisting>
                 <classname>Grid</classname> as follows
             </para>
 
-            <programlisting><?pocket-size 75% ?><![CDATA[// Have some data
+            <programlisting language="java"><?pocket-size 75% ?><![CDATA[// Have some data
 Collection<Person> people = Lists.newArrayList(
     new Person("Nicolaus Copernicus", 1543),
     new Person("Galileo Galilei", 1564),
@@ -6501,7 +6497,7 @@ layout.addComponent(grid);]]></programlisting>
                     For example:
                 </para>
 
-                <programlisting><?pocket-size 75% ?><![CDATA[// Create a grid
+                <programlisting language="java"><?pocket-size 75% ?><![CDATA[// Create a grid
 Grid grid = new Grid();
 
 // Define some columns
@@ -6519,7 +6515,7 @@ layout.addComponent(grid);]]></programlisting>
                     Or, if you have the data in an array:
                 </para>
 
-                <programlisting><?pocket-size 75% ?><![CDATA[// Have some data
+                <programlisting language="java"><?pocket-size 75% ?><![CDATA[// Have some data
 Object[][] people = {{"Nicolaus Copernicus", 1543},
                      {"Galileo Galilei", 1564},
                      {"Johannes Kepler", 1571}};
@@ -6556,7 +6552,7 @@ for (Object[] person: people)
                     <classname>Grid.SelectionMode</classname> enum.
                 </para>
 
-                <programlisting><?pocket-size 75% ?><![CDATA[// Use single-selection mode (default)
+                <programlisting language="java"><?pocket-size 75% ?><![CDATA[// Use single-selection mode (default)
 grid.setSelectionMode(SelectionMode.SINGLE);]]></programlisting>
 
                 <para>
@@ -6572,7 +6568,9 @@ grid.setSelectionMode(SelectionMode.SINGLE);]]></programlisting>
                     Changes in the selection can be handled with a
                     <interfacename>SelectionListener</interfacename>. You need to
                     implement the <methodname>select()</methodname> method, which gets a
-                    <classname>SelectionEvent</classname> as parameter.
+                    <classname>SelectionEvent</classname> as parameter. In addition to
+                    selection, you can handle clicks on rows or cells with a
+                    <interfacename>ItemClickListener</interfacename>.
                 </para>
 
                 <para>
@@ -6586,7 +6584,7 @@ grid.setSelectionMode(SelectionMode.SINGLE);]]></programlisting>
                     binding example earlier, you can do as follows:
                 </para>
 
-                <programlisting><?pocket-size 75% ?><![CDATA[grid.addSelectionListener(e -> { // Java 8
+                <programlisting language="java"><?pocket-size 75% ?><![CDATA[grid.addSelectionListener(e -> { // Java 8
     // Get the item of the selected row
     BeanItem<Person> item =
         container.getItem(grid.getSelectedRow());
@@ -6629,7 +6627,7 @@ grid.setSelectionMode(SelectionMode.SINGLE);]]></programlisting>
                     IDs, and read with <methodname>getSelectedRows()</methodname>.
                 </para>
 
-                <programlisting><?pocket-size 70% ?><![CDATA[// Grid in multi-selection mode
+                <programlisting language="java"><?pocket-size 70% ?><![CDATA[// Grid in multi-selection mode
 Grid grid = new Grid(exampleDataSource());
 grid.setSelectionMode(SelectionMode.MULTI);
 
@@ -6654,7 +6652,7 @@ deleteSelected.setEnabled(false); // Enable later]]></programlisting>
                     mode can be more.
                 </para>
 
-                <programlisting><?pocket-size 75% ?><![CDATA[// Handle selection changes
+                <programlisting language="java"><?pocket-size 75% ?><![CDATA[// Handle selection changes
 grid.addSelectionListener(selection -> { // Java 8
     Notification.show(selection.getAdded().size() +
                       " items added, " +
@@ -6665,6 +6663,42 @@ grid.addSelectionListener(selection -> { // Java 8
     deleteSelected.setEnabled(
          grid.getSelectedRows().size() > 0);
 });]]></programlisting>
+            </section>
+
+            <section xml:id="components.grid.selection.clicks">
+                <title>Focus and Clicks</title>
+
+                <para>
+                    In addition to selecting rows, you can focus individual cells. The
+                    focus can be moved with arrow keys and, if editing is enabled,
+                    pressing <keycap>Enter</keycap> opens the editor. Pressing
+                    <keycap>Tab</keycap> or
+                    <keycombo><keycap>Shift</keycap><keycap>Tab</keycap></keycombo> moves
+                    the focus to another component, as usual.
+                </para>
+
+                <para>
+                    With mouse, you can focus a cell by clicking on it. The clicks can be
+                    handled with an <interfacename>ItemClickListener</interfacename>. The
+                    <classname>ItemClickEvent</classname> object contains various
+                    information, most importantly the ID of the clicked row and column.
+                </para>
+
+                <programlisting language="java"><?pocket-size 70% ?><![CDATA[grid.addItemClickListener(event -> // Java 8
+    Notification.show("Value: " +
+        container.getContainerProperty(event.getItemId(),
+            event.getPropertyId()).getValue().toString()));]]></programlisting>
+
+                <para>
+                    The clicked grid cell is also automatically focused.
+                </para>
+
+                <para>
+                    The focus indication is themed so that the focused cell has a visible
+                    focus indicator style by default, while the row doesn't. You can
+                    enable row focus, as well as disable cell focus, in a custom
+                    theme. See <xref linkend="components.grid.css"/>.
+                </para>
             </section>
         </section>
 
@@ -7248,6 +7282,14 @@ grid.addRow("Nicolaus Copernicus", 1473,
                     the header further.
                 </para>
 
+                <programlisting><?pocket-size 75% ?><![CDATA[// Group headers by joining the cells
+HeaderRow groupingHeader = grid.prependHeaderRow();
+...
+
+// Create a header row to hold column filters
+HeaderRow filterRow = grid.appendHeaderRow();
+...]]></programlisting>
+
                 <para>
                     Similarly, you can add footer rows with
                     <methodname>appendFooterRow()</methodname>,
@@ -7265,6 +7307,17 @@ grid.addRow("Nicolaus Copernicus", 1473,
                     intention is usually to create column grouping, while for footer
                     cells, you typically calculate sums or averates.
                 </para>
+
+                <programlisting><![CDATA[// Group headers by joining the cells
+HeaderRow groupingHeader = grid.prependHeaderRow();
+HeaderCell namesCell = groupingHeader.join(
+    groupingHeader.getCell("firstname"),
+    groupingHeader.getCell("lastname"));
+HeaderCell yearsCell = groupingHeader.join(
+    groupingHeader.getCell("born"),
+    groupingHeader.getCell("died"),
+    groupingHeader.getCell("lived"));]]></programlisting>
+
             </section>
 
             <section xml:id="components.grid.headerfooter.content">
@@ -7273,9 +7326,23 @@ grid.addRow("Nicolaus Copernicus", 1473,
                 <para>
                     You can set the header caption with
                     <methodname>setText()</methodname>, in which case any HTML formatting
-                    characters are quoted to ensure security. To use raw HTML in the
-                    captions, you can use <methodname>setHTML()</methodname>.
+                    characters are quoted to ensure security.
                 </para>
+
+                <programlisting><![CDATA[HeaderRow mainHeader = grid.getDefaultHeaderRow();
+mainHeader.getCell("firstname").setText("First Name");
+mainHeader.getCell("lastname").setText("Last Name");
+mainHeader.getCell("born").setText("Born In");
+mainHeader.getCell("died").setText("Died In");
+mainHeader.getCell("lived").setText("Lived For");]]></programlisting>
+
+                <para>
+                    To use raw HTML in the captions, you can use
+                    <methodname>setHTML()</methodname>.
+                </para>
+
+                <programlisting><![CDATA[namesCell.setHtml("<b>Names</b>");
+yearsCell.setHtml("<b>Years</b>");]]></programlisting>
             </section>
 
             <section xml:id="components.grid.headerfooter.components">
@@ -7283,9 +7350,10 @@ grid.addRow("Nicolaus Copernicus", 1473,
                 
                 <para>
                     You can set a component in a header or footer cell with
-                    <methodname>setComponent()</methodname>. Typically, this feature is
-                    used to allow filtering, as described in <xref
-                    linkend="components.grid.filtering"/>.
+                    <methodname>setComponent()</methodname>. Often, this feature is used
+                    to allow filtering, as described in <xref
+                    linkend="components.grid.filtering"/>, which also gives an example of
+                    the use.
                 </para>
             </section>
         </section>
@@ -7412,8 +7480,19 @@ grid.sort(Sort.by("city", SortDirection.ASCENDING)
             <title>Editing</title>
 
             <para>
-                Grid supports line-based editing, so that when the user double-clicks on a
-                row, the row enters editing mode. To enable editing, you need to call
+                Grid supports line-based editing, where double-clicking a row opens the
+                row editor. In the editor, the input fields can be edited, as well as
+                navigated with <keycap>Tab</keycap> and
+                <keycombo><keycap>Shift</keycap><keycap>Tab</keycap></keycombo> keys. The
+                editor has a <guibutton>Save</guibutton> button that commits the data item
+                to the container data source and closes the editor. If validation fails,
+                an error is displayed and the user can correct the inputs. A
+                <guibutton>Cancel</guibutton> button discards the changes and exits the
+                editor.
+            </para>
+
+            <para>
+                To enable editing, you need to call
                 <methodname>setEditorEnabled(true)</methodname> for the grid.
             </para>
 
@@ -7422,11 +7501,7 @@ grid.setEditorEnabled(true);]]></programlisting>
 
             <para>
                 A row under editing is illustrated in <xref
-                linkend="figure.components.grid.editing"/>. The
-                <guibutton>Save</guibutton> button commits the data item to the container
-                data source. If input validation fails, the editor is not closed. The
-                <guibutton>Cancel</guibutton> button discards the edit and exits the
-                editor.
+                linkend="figure.components.grid.editing"/>.
             </para>
 
             <figure xml:id="figure.components.grid.editing">
@@ -7441,9 +7516,9 @@ grid.setEditorEnabled(true);]]></programlisting>
 
             <para>
                 The editor fields are by default generated with a
-                <interfacename>FieldFactory</interfacename> and bound to the data with a
-                <classname>FieldGroup</classname>, which also handles tasks such as
-                validation, as explained later.
+                <interfacename>FieldFactory</interfacename> and bound to the container
+                data source with a <classname>FieldGroup</classname>, which also handles
+                tasks such as validation, as explained later.
             </para>
 
             <section xml:id="components.grid.editing.editorfields">
@@ -7454,7 +7529,8 @@ grid.setEditorEnabled(true);]]></programlisting>
                     editor's field group, which creates the fields according to the data
                     types of their respective columns. To customize the editor fields of
                     specific properties, such as to style them or to set up validation,
-                    you can provide them with <methodname>setEditorField()</methodname>.
+                    you can provide them with <methodname>setEditorField()</methodname> in
+                    the respective columns.
                 </para>
 
                 <para>
@@ -7477,8 +7553,35 @@ nameEditor.addValidator(new RegexpValidator(
     "^\\p{Alpha}+ \\p{Alpha}+$",
     "Need first and last name"));
 
-grid.setEditorField("name", nameEditor);]]></programlisting>
+grid.getColumn("name").setEditorField(nameEditor);]]></programlisting>
 
+            </section>
+
+            <section xml:id="components.grid.editing.captions" condition="web">
+                <title>Customizing Editor Buttons</title>
+
+                <para>
+                    The editor has two buttons: <guibutton>Save</guibutton> and
+                    <guibutton>Cancel</guibutton>. You can set their captions with
+                    <methodname>setEditorSaveCaption()</methodname> and
+                    <methodname>setEditorCancelCaption()</methodname>, respectively.
+                </para>
+
+                <para>
+                    In the following example, we demonstrate one way to translate the
+                    captions:
+                </para>
+
+                <programlisting><![CDATA[// Captions are stored in a resource bundle
+ResourceBundle bundle = ResourceBundle.getBundle(
+    MyAppCaptions.class.getName(),
+    Locale.forLanguageTag("fi")); // Finnish
+
+// Localize the editor button captions
+grid.setEditorSaveCaption(
+    bundle.getString(MyAppCaptions.SaveKey));
+grid.setEditorCancelCaption(
+    bundle.getString(MyAppCaptions.CancelKey));]]></programlisting>
             </section>
 
             <section xml:id="components.grid.editing.fieldgroup">
@@ -7538,65 +7641,25 @@ grid.setEditorField("name", nameEditor);]]></programlisting>
                 <title>Handling Validation Errors</title>
 
                 <para>
-                    <emphasis>The Grid editor API is subject to change and may support
-                    handling of editor validation better.</emphasis>
+                    The input fields are validated when the save button is clicked. The
+                    default error handler displays error indicators in the invalid fields,
+                    as well as the first error in the editor.
                 </para>
 
-                <para>
-                    If validation in the editor fails, component error of
-                    <classname>Grid</classname> is set with an
-                    <classname>InvalidValueException</classname>. This is not a good way
-                    to give feedback. You can handle the component errors in an
-                    <interfacename>ErrorHandler</interfacename>, which you can set with
-                    <methodname>setErrorHandler()</methodname>. It is normally best to
-                    override <classname>DefaultErrorHandler</classname>, handle just the
-                    <classname>CommitException</classname>s, and pass others to the
-                    default handler.
-                </para>
+                <figure xml:id="figure.components.grid.editing">
+                    <title>Editing a Grid Row</title>
 
-                <programlisting><?pocket-size 63% ?><![CDATA[grid.setErrorHandler(new DefaultErrorHandler() {
-    @Override
-    public void error(com.vaadin.server.ErrorEvent event) {
-        if (event.getThrowable() instanceof CommitException) {
-            CommitException e =
-                    (CommitException) event.getThrowable();
-            if (e.getCause() instanceof InvalidValueException) {
-                InvalidValueException ives =
-                    (InvalidValueException) e.getCause();
-                String description = "";
-                
-                // The exceptions could be in multiple levels,
-                // so have to search recursively
-                Stack<InvalidValueException> stack =
-                    new Stack<InvalidValueException>();
-                stack.push(ives);
-                while (!stack.isEmpty()) {
-                    InvalidValueException c = stack.pop();
-                    if (c.getCause() != null)
-                        stack.add((InvalidValueException)
-                                  c.getCause());
-                    for (InvalidValueException i: c.getCauses())
-                        stack.add(i);
-                    if (c.getMessage() != null)
-                        description += c.getMessage() + "<br/>";
-                }
-
-                new Notification(
-                    "Invalid input<br/>", description,
-                    Notification.Type.WARNING_MESSAGE, true).
-                    show(Page.getCurrent());
-            } else 
-                Notification.show("Commit failed",
-                    event.getThrowable().getLocalizedMessage(),
-                    Notification.Type.ERROR_MESSAGE);
-        } else
-            super.error(event);
-    }
-});]]></programlisting>
+                    <mediaobject>
+                        <imageobject>
+                            <imagedata scale="85" smallscale="80%" align="center" fileref="img/components/grid-editor-errors.png"/>
+                        </imageobject>
+                    </mediaobject>
+                </figure>
 
                 <para>
-                    <emphasis>As noted above, a better API will be provided in the final
-                    release of Grid.</emphasis>
+                    You can modify the error handling by implementing a custom
+                    <interfacename>EditorErrorHandler</interfacename> or by extending the
+                    <classname>DefaultEditorErrorHandler</classname>.
                 </para>
             </section>
 
@@ -7702,22 +7765,76 @@ grid.setEditorField("name", nameEditor);]]></programlisting>
         <section xml:id="components.grid.css">
             <title>Styling with CSS</title>
 
-			<programlisting><![CDATA[.v-grid { }
+			<programlisting><?pocket-size 75% ?><![CDATA[.v-grid {
   .v-grid-scroller, .v-grid-scroller-horizontal { }
-  .v-grid-tablewrapper { }
-    .v-grid-header { }
-      .v-grid-row { }
-        .v-grid-cell, .frozen, .focused { }
-    .v-grid-body { }
+  .v-grid-tablewrapper {
+    .v-grid-header {
+      .v-grid-row {
+        .v-grid-cell, .frozen, .v-grid-cell-focused { }
+      }
+    }
+    .v-grid-body {
       .v-grid-row,
       .v-grid-row-stripe,
-      .v-grid-row-has-data { }
-        .v-grid-cell, .frozen, .focused { }
-    .v-grid-footer { }
-      .v-grid-row { }
-        .v-grid-cell, .frozen, .focused { }
-  .v-grid-horizontal-scrollbar-deco { }]]></programlisting>
+      .v-grid-row-has-data {
+        .v-grid-cell, .frozen, .v-grid-cell-focused { }
+      }
+    }
+    .v-grid-footer {
+      .v-grid-row {
+        .v-grid-cell, .frozen, .v-grid-cell-focused { }
+      }
+    }
+  }
+  .v-grid-header-deco { }
+  .v-grid-footer-deco { }
+  .v-grid-horizontal-scrollbar-deco { }
+  .v-grid-editor {
+    .v-grid-editor-cells { }
+    .v-grid-editor-footer {
+      .v-grid-editor-message { }
+      .v-grid-editor-buttons {
+        .v-grid-editor-save { }
+        .v-grid-editor-cancel { }
+      }
+    }
+  }
+}]]></programlisting>
+
+            <para>
+                A <classname>Grid</classname> has an overall
+                <literal>v-grid</literal> style. The actual grid has three parts:
+                a header, a body, and a footer. The scrollbar is a custom element with
+                <literal>v-grid-scroller</literal> style. In addition, there are some
+                decoration elements.
+            </para>
+
+            <para>
+                Grid cells, whether thay are in the header, body, or footer, have a basic
+                <literal>v-grid-cell</literal> style. Cells in a frozen column
+                additionally have a <literal>frozen</literal> style. Rows have
+                <literal>v-grid-row</literal> style, and every other row has additionally
+                a <literal>v-grid-row-stripe</literal> style.
+            </para>
+
+            <para>
+                The focused row has additionally <literal>v-grid-row-focused</literal>
+                style and focused cell <literal>v-grid-cell-focused</literal>. By default,
+                cell focus is visible, with the border stylable with
+                <parameter>$v-grid-cell-focused-border</parameter> parameter in Sass. Row
+                focus has no visible styling, but can be made visible with the
+                <parameter>$v-grid-row-focused-background-color</parameter> parameter or
+                with a custom style rule.
+            </para>
+
+            <para>
+                In editing mode, a <literal>v-grid-editor</literal> overlay is placed on
+                the row under editing. In addition to the editor field cells, it has an
+                error message element, as well as the buttons.
+            </para>
         </section>
+
+        <indexterm startref="term.components.grid" class="endofterm"/>
     </section>
 
 	<section xml:id="components.menubar">
