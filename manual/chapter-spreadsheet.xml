@@ -1,0 +1,551 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ====================================================================== -->
+<!-- Copyright 2000-2012 Vaadin Ltd                                         -->
+<!-- All Rights Reserved                                                    -->
+<!-- This work is licensed under a Creative Commons Attribution-NoDerivs    -->
+<!-- License (CC-BY-ND) Version 3.0. Full license text is available at:     -->
+<!-- http://creativecommons.org/licenses/by-nd/3.0/legalcode                -->
+<!-- ====================================================================== -->
+
+<chapter xml:id="spreadsheet">
+	<title>Vaadin Spreadsheet</title>
+
+    <indexterm xml:id="term.spreadsheet" class="startofrange">
+        <primary>Spreadsheet</primary>
+    </indexterm>
+
+    <para>
+        This chapter describes how to use Vaadin Spreadsheet, a Vaadin add-on component
+        for displaying and editing Excel spreadsheets within any Vaadin application.
+    </para>
+
+    <section xml:id="spreadsheet.overview">
+        <title>Overview</title>
+
+        <para>
+            Spreadsheet applications have been the sonic screwdriver of business
+            computation and data collection for decades. In recent years, spreadsheet web
+            services have become popular with cloud-based services that offer better
+            collaboration, require no installation, and some are even free to
+            use. However, both desktop and third-party cloud-based services are difficult
+            to integrate well with web applications. Being a Vaadin UI component, Vaadin
+            Spreadsheet allows complete integration with Vaadin applications and further
+            with the overall system. The ability to work on Excel spreadsheets allows
+            desktop interoperability and integration with document management.
+        </para>
+
+        <para>
+            By eliminating the dependency on third-party cloud-based services, Vaadin
+            Spreadsheet also gives control over the privacy of documents. Growing security
+            concerns over cloud-based information storage have increased privacy
+            requirements, with lowering trust in global third-party providers. Vaadin
+            applications can run on private application servers, and also in the cloud if
+            necessary, allowing you to prioritize between security and local and global
+            availability.
+        </para>
+
+        <figure xml:id="figure.spreadsheet.overview.demo">
+            <title>Demo for Vaadin Spreadsheet</title>
+			<mediaobject>
+				<imageobject role="fo">
+					<imagedata scale="80" smallscale="80%" align="center" fileref="img/spreadsheet/spreadsheet-demo.png"/>
+				</imageobject>
+			</mediaobject>
+        </figure>
+
+        <para>
+            Vaadin Spreadsheet is a UI component that you use much like any other
+            component. It has full size by default, to use all the available space in the
+            containing layout. You can directly modify the cell data in the active
+            worksheet by entering textual and numerical values, as well as using Excel
+            formulas for spreadsheet calculations.
+        </para>
+
+        <programlisting lang="java"><![CDATA[Spreadsheet sheet = new Spreadsheet();
+sheet.setWidth("400px"); // Full size by default
+sheet.setHeight("250px");
+
+// Put customary greeting in a cell
+sheet.createCell(0, 0, "Hello, world");
+
+// Have some numerical data
+sheet.createCell(1, 0, 6);
+sheet.createCell(1, 1, 7);
+
+// Perform a spreadsheet calculation
+sheet.createCell(1, 2, ""); // Set a dummy value
+sheet.getCell(1, 2).setCellFormula("A2*B2");
+
+// Resize a column to fit the cell data
+sheet.autofitColumn(0);
+
+layout.addComponent(sheet);
+layout.setSizeFull(); // Typically]]></programlisting>
+
+        <para>
+            The result is shown in <xref linkend="figure.spreadsheet.overview.example"/>.
+        </para>
+
+        <figure xml:id="figure.spreadsheet.overview.example">
+            <title>Simple Spreadsheet</title>
+            <mediaobject>
+                <imageobject>
+                    <imagedata smallscale="100%" scale="35" align="center" fileref="img/spreadsheet/spreadsheet-basic.png"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
+
+        <para>
+            Cell values and formulas can be set, read, and styled through the server-side
+            API, so you can easily implement custom editing features through menus or
+            toolbars.
+        </para>
+
+        <para>
+            Full integration with a Vaadin application is reached through the server-side
+            access to the spreadsheet data as well as visual styling. Changes in cell
+            values can be handled in the Vaadin application and you can use almost any
+            Vaadin components within a spreadsheet.
+        </para>
+
+        <para>
+            Vaadin Spreadsheet uses Apache POI to work on Microsoft Excel documents. You
+            can access the Apache POI data model to perform low-level tasks, although you
+            should note that if you make modifications to the data model, you have the
+            responsibility to notify the spreadsheet to update itself.
+        </para>
+
+        <simplesect xml:id="spreadsheet.overview.features">
+            <title>Features</title>
+
+            <para>
+                The basic features of Vaadin Spreadsheet are as follows:
+            </para>
+
+            <itemizedlist>
+                <listitem>Support for touch devices</listitem>
+
+                <listitem>Excel XLSX files, limited support for XLS files</listitem>
+
+                <listitem>Support for Excel formulas</listitem>
+
+                <listitem>Excel-like editing with keyboard support</listitem>
+
+                <listitem>Lazy loading of cell data from server to browser in large spreadsheets</listitem>
+
+                <listitem>Protected cells and sheets</listitem>
+            </itemizedlist>
+
+            <para>
+                The following features support integration with Vaadin Framework and
+                add-ons:
+            </para>
+
+            <itemizedlist>
+                <listitem>Handle changes in cell data</listitem>
+
+                <listitem>Vaadin components in spreadsheet cells</listitem>
+
+                <listitem>Support for Vaadin declarative format</listitem>
+
+                <listitem>Vaadin TestBench element API for UI testing</listitem>
+            </itemizedlist>
+        </simplesect>
+
+        <simplesect xml:id="spreadsheet.overview.demo">
+            <title>Spreadsheet Demo</title>
+
+            <para>
+                The Vaadin Spreadsheet Demo showcases the most important Spreadsheet
+                features. You can try it out at <link
+                xlink:href="http://demo.vaadin.com/spreadsheet">http://demo.vaadin.com/spreadsheet</link>. See
+                <xref linkend="spreadsheet.installation.demo"/> for instructions for
+                importing the project in Eclipse.
+
+                <phrase condition="web">The <link
+                xlink:href="https://github.com/vaadin/spreadsheet-demo">source code is
+                available and browseable at Github</link>.</phrase>
+            </para>
+        </simplesect>
+
+        <simplesect xml:id="spreadsheet.overview.limitations">
+            <title>Requirements</title>
+            <itemizedlist>
+                <listitem>Vaadin 7.4 or later</listitem>
+
+                <listitem>Same browser requirements as Vaadin Framework, except Internet
+                Explorer 9 or later is required</listitem>
+            </itemizedlist>
+        </simplesect>
+
+        <simplesect xml:id="spreadsheet.overview.limitations">
+            <title>Limitations</title>
+
+            <para>
+                Vaadin Spreadsheet 1.0 has the following limitations:
+            </para>
+
+            <itemizedlist>
+                <listitem>
+                    Vaadin Charts component can not be used inside a spreadsheet
+                </listitem>
+
+                <listitem>
+                    No provided toolbars for formatting cells
+                </listitem>
+
+                <listitem>
+                    Limited support for older XSL format
+                </listitem>
+            </itemizedlist>
+        </simplesect>
+
+        <simplesect xml:id="spreadsheet.overview.license">
+            <title>Licensing</title>
+
+            <para>
+                Vaadin Spreadsheet is a commercial product licensed under a dual-licensing
+                scheme. The AGPL license allows open-source development, while the CVAL
+                license needs to be purchased for closed-source use, including web
+                deployments and internal use. Commercial licenses can be purchased from
+                Vaadin Directory, where you can also find the license details and
+                download Vaadin Spreadsheet.
+            </para>
+        </simplesect>
+    </section>
+
+    <section xml:id="spreadsheet.installation" condition="web">
+        <title>Installing Vaadin Spreadsheet</title>
+
+        <para>
+            You can download and install Spreadsheet from Vaadin Directory at <link
+            xlink:href="https://vaadin.com/addon/vaadin-spreadsheet">vaadin.com/addon/vaadin-spreadsheet</link>
+            as an installation package, or get it with Maven or Ivy. You can purchase the
+            required CVAL license from Vaadin Directory or subscribe to the Pro Tools
+            package at <link xlink:href="https://vaadin.com/pro">vaadin.com/pro</link>.
+        </para>
+
+        <para>
+            Add-on installation is described in detail in <xref linkend="addons"/>. The
+            add-on includes both a widget set and a theme, so you need to compile the
+            widget sets and themes in your project.
+        </para>
+
+        <section xml:id="spreadsheet.installation.ivy" condition="web">
+            <title>Installing as Ivy Dependency</title>
+
+            <para>
+                If you use the add-on in an Eclipse project created with the Vaadin Plugin
+                for Eclipse, you can define an Ivy dependency to automatically download
+                the library. Include the following declaration inside the
+                <literal>dependencies</literal> section in the
+                <filename>ivy.xml</filename>:
+            </para>
+
+            <programlisting>&lt;dependency org="com.vaadin.addon"
+            name="vaadin-spreadsheet"
+            rev="<emphasis role="bold">latest.release</emphasis>"
+            conf="default->default" /&gt;</programlisting>
+
+            <para>
+                You can use <literal>latest.release</literal> revision tag to always use
+                the latest release or (preferably) specify a version by its version
+                number. IvyDE should resolve the dependency immediately as you save the
+                file. See <xref linkend="addons.eclipse"/> for further details.
+            </para>
+        </section>
+
+        <section xml:id="spreadsheet.installation.maven" condition="web">
+            <title>Defining the Maven Dependency</title>
+
+            <para>
+                You can install Vaadin Spreadsheet in a Maven project by adding it as a
+                dependency, you need to include the following dependency in the POM. The
+                <literal>artifactId</literal> should be
+                <literal>vaadin-spreadsheet</literal>.
+            </para>
+
+            <programlisting>&lt;dependency&gt;
+    &lt;groupId&gt;com.vaadin.addon&lt;/groupId&gt;
+    &lt;artifactId&gt;vaadin-spreadsheet&lt;/artifactId&gt;
+    &lt;version&gt;<emphasis role="bold">LATEST</emphasis>&lt;/version&gt;
+&lt;/dependency&gt;</programlisting>
+
+            <para>
+                You can use the <parameter>LATEST</parameter> version as shown above or
+                (preferably) a specific version by its version number.
+            </para>
+
+            <para>
+                You also need to define the repository for the Vaadin add-ons under the
+                <literal>&lt;repositories&gt;</literal> element:
+            </para>
+
+            <programlisting><![CDATA[<repository>
+    <id>vaadin-addons</id>
+    <url>http://maven.vaadin.com/vaadin-addons</url>
+</repository>]]></programlisting>
+
+            <para>
+                Finally, you need to enable the widget set compilation in the POM, as
+                described in <xref linkend="addons.maven.widgetset"/>, and compile it.
+            </para>
+        </section>
+
+        <section xml:id="spreadsheet.installation.downloading" condition="web">
+            <title>Installing the Zip Package</title>
+
+            <para>
+                Vaadin Spreadsheet is distributed as a Zip package that contains the
+                Spreadsheet JAR, a JavaDoc JAR, license texts, and other documentation.
+                You can download the Zip package from Vaadin Directory.
+            </para>
+
+            <para>
+                The <filename>vaadin-spreadsheet-&lt;version&gt;.jar</filename>,
+                as well as all the dependency libraries in the <filename>lib</filename>
+                folder, should be put in the <filename>WEB-INF/lib</filename> folder of
+                the web application.
+            </para>
+
+            <para>
+                The <filename>vaadin-spreadsheet-&lt;version&gt;-sources.jar</filename>
+                and <filename>vaadin-spreadsheet-&lt;version&gt;-javadoc.jar</filename>
+                are development libraries that should not normally be deployed with the web
+                application, so you should put them to a separate non-deployment
+                folder. In Eclipse projects, this is usually a <filename>lib</filename>
+                sub-folder in the project folder.
+            </para>
+
+            <para>
+                If you intend to use Vaadin TestBench for testing your Spreadsheet, you
+                will benefit from the Vaadin Spreadsheet TestBench API libraries included
+                in the <filename>testbench-api</filename> folder. They should be copied to
+                a non-deployment library folder in the project.
+            </para>
+
+            <para>
+                Please see the <filename>README.html</filename> for more information about
+                the package contents.
+            </para>
+        </section>
+
+        <section xml:id="spreadsheet.installation.widgetset">
+            <title>Compiling Widget Set</title>
+
+            <para>
+                Compile the widget set as instructed in <xref
+                linkend="addons.maven.compiling"/>. Your project widget set should be
+                automatically updated to include the Spreadsheet widget set:
+            </para>
+
+            <programlisting><?pocket-size 70% ?><![CDATA[<inherits name="com.vaadin.addon.spreadsheet.Widgetset"/>]]></programlisting>
+
+            <para>
+                If you set the widget set to be manually edited, you need to add the
+                element yourself.
+            </para>
+        </section>
+
+        <section xml:id="spreadsheet.installation.theme">
+            <title>Compiling Theme</title>
+
+            <para>
+                Compile the theme as instructed in <xref linkend="themes.compiling"/>. If
+                you compile in Eclipse or with Maven, the <filename>addons.scss</filename>
+                file in your theme should be automatically updated to include the
+                Spreadsheet theme:
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[@import "../../../VAADIN/addons/spreadsheet/spreadsheet.scss";
+@mixin addons {
+	 @include spreadsheet;
+}]]></programlisting>
+
+            <para>
+                If you are compiling the theme otherwise, or the theme addons are not
+                automatically updated for some reason, you need to add the statements
+                yourself.
+            </para>
+        </section>
+
+        <section xml:id="spreadsheet.installation.demo">
+            <title>Importing the Demo</title>
+
+            <para>
+                The Demo, illustrated in <xref
+                linkend="figure.spreadsheet.overview.demo"/> in the overview, showcases
+                most of the functionality in Vaadin Spreadsheet. You can try out the demo
+                online at <link
+                xlink:href="http://demo.vaadin.com/spreadsheet">demo.vaadin.com/spreadsheet</link>.
+            </para>
+
+            <para>
+                You can browse the sources on-line or, more conveniently, import the
+                project in Eclipse (or other IDE). As the project is Maven-based, Eclipse
+                users need to install the m2e plugin to be able to import Maven projects,
+                as well as EGit to be able to import Git repositories. Once they are
+                installed, you should be able to import demo as follows.
+            </para>
+
+            <orderedlist>
+                <listitem>Select <menuchoice><guimenu>File</guimenu><guimenuitem>Import</guimenuitem></menuchoice></listitem>
+                <listitem>Select <menuchoice><guimenu>Maven</guimenu><guimenuitem>Check out Maven Project from SCM</guimenuitem></menuchoice>, and click <guibutton>Next</guibutton>.</listitem>
+                
+                <listitem>
+                    <para>
+                        You may need to install the EGit SCM connector if you have not
+                        done so previously. If Git is not available in the SCM list, click
+                        <guibutton>m2e marketplace</guibutton>, select the EGit connector,
+                        and click <guibutton>Finish</guibutton>. You need to restart
+                        Eclipse and redo the earlier steps above.
+                    </para>
+
+                    <para>
+                        Instead of using m2e EGit connector, you can also check out the
+                        project with another Git tool and then import it in Eclipse as a
+                        Maven project.
+                    </para>
+                </listitem>
+
+                <listitem>
+                    In <guilabel>SCM URL</guilabel>, select <guilabel>git</guilabel> and enter
+                    the repository URL <uri>https://github.com/vaadin/spreadsheet-demo</uri>.
+                </listitem>
+
+                <listitem>Click <guibutton>Finish</guibutton>.</listitem>
+
+                <listitem>
+                    Compile the widget set either by clicking <guibutton>Compile
+                    Widgetset</guibutton> in the Eclipse toolbar or by running the
+                    <literal>vaadin:compile</literal> goal with Maven.
+                </listitem>
+
+                <listitem>
+                    Deploy the application to a server. See <xref
+                    linkend="getting-started.first-project.server"/> for instructions for
+                    deploying in Eclipse.
+                </listitem>
+
+                <listitem>
+                    Open the URL <uri>http://localhost:8080/spreadsheet</uri> with a
+                    browser.
+                </listitem>
+            </orderedlist>
+        </section>
+    </section>
+
+    <section xml:id="spreadsheet.using">
+        <title>Basic Use</title>
+
+        <para>
+            <classname>Spreadsheet</classname> is a Vaadin component, which you can use as
+            you would any component. You can create it, or load from an Excel file, create
+            cells and new sheets, define formulas, and so forth. In the following, we go
+            through these basic steps.
+        </para>
+
+        <section xml:id="spreadsheet.using.creating">
+            <title>Creating a Spreadsheet</title>
+
+            <para>
+                The default constructor for <classname>Spreadsheet</classname> creates an
+                empty spreadsheet with a default sheet. The spreadsheet component has full
+                size by default, so the containing layout must have defined size in both
+                dimensions; a spreadsheet may not have undefined size.
+            </para>
+
+            <para>
+                In the following example, we create an empty spreadsheet with a fixed
+                size and add it to a layout.
+            </para>
+
+            <programlisting lang="java"><![CDATA[Spreadsheet sheet = new Spreadsheet();
+sheet.setWidth("400px");
+sheet.setHeight("300px");
+
+layout.addComponent(sheet);]]></programlisting>
+
+            <para>
+                An empty spreadsheet automatically gets an initial worksheet with some
+                default size and settings.
+            </para>
+
+            <section xml:id="spreadsheet.using.creating.loading">
+                <title>Loading an Excel Spreadsheet</title>
+
+                <para>
+                    You can load an Excel file from the local filesystem with a
+                    <classname>File</classname> reference or from memory or other source
+                    with an <classname>InputStream</classname>.
+                </para>
+            </section>
+
+            <section xml:id="spreadsheet.using.creating.poi">
+                <title>Working with an Apache POI Workbook</title>
+
+                <para>
+                    If you have an Apache POI workbook created otherwise, you can wrap it
+                    to <classname>Spreadsheet</classname> with the respective constructor.
+                </para>
+
+                <para>
+                    You can access the underlying workbook with
+                    <methodname>getWorkbook()</methodname>. However, if you make
+                    modifications to the workbook, you must allow the spreadsheet update
+                    itself by calling appropriate update methods for the modified element
+                    or elements.
+                </para>
+            </section>
+        </section>
+
+        <section xml:id="spreadsheet.using.sheets">
+            <title>Working with Sheets</title>
+
+            <para>
+                A "spreadsheet" in reality works on a <emphasis>workbook</emphasis>, which
+                contains one or more <emphasis>worksheets</emphasis>. You can create new
+                sheets and delete existing ones with
+                <methodname>createNewSheet()</methodname> and
+                <methodname>deleteSheet()</methodname>, respectively.
+            </para>
+
+            <programlisting lang="java"><![CDATA[// Recreate the initial sheet to configure it
+Spreadsheet sheet = new Spreadsheet();
+sheet.createNewSheet("New Sheet", 10, 5);
+sheet.deleteSheet(0);]]></programlisting>
+
+            <para>
+                When a sheet is deleted, the index of the sheets with a higher index is
+                decremented by one.  When the active worksheet is deleted, the next one by
+                index is set as active, or if there are none, the previous one.
+            </para>
+
+            <para>
+                All operations on the spreadsheet content are done through the currently
+                active worksheet. You can set an existing sheet as active with
+                <methodname>setActiveSheetIndex()</methodname>.
+            </para>
+        </section>
+    </section>
+
+    <indexterm startref="term.spreadsheet" class="endofrange"/>
+</chapter>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: xml
+sgml-omittag:nil
+sgml-shorttag:nil
+sgml-namecase-general:nil
+sgml-general-insert-case:lower
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:4
+sgml-indent-data:t
+sgml-parent-document:nil
+sgml-exposed-tags:nil
+sgml-local-catalogs:("/etc/sgml/catalog" "/usr/share/xemacs21/xemacs-packages/etc/psgml-dtds/CATALOG")
+sgml-local-ecat-files:("ECAT" "~/sgml/ECAT" "/usr/share/sgml/ECAT" "/usr/local/share/sgml/ECAT" "/usr/local/lib/sgml/ECAT")
+End:
+-->
