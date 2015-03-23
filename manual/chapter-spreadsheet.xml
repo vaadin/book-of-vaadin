@@ -39,8 +39,8 @@
             Spreadsheet also gives control over the privacy of documents. Growing security
             concerns over cloud-based information storage have increased privacy
             requirements, with lowering trust in global third-party providers. Vaadin
-            applications can run on private application servers, and also in the cloud if
-            necessary, allowing you to prioritize between security and local and global
+            applications can run on private application servers, and also in a cloud if
+            necessary, allowing you to prioritize between privacy and local and global
             availability.
         </para>
 
@@ -569,32 +569,404 @@ sheet.deleteSheet(0);]]></programlisting>
         </section>
     </section>
 
-    <section xml:id="spreadsheet.components">
-        <title>Components in Cells</title>
+    <section xml:id="spreadsheet.configuration">
+        <title>Spreadsheet Configuration</title>
 
         <para>
-            You can have Vaadin components in spreadsheet cells and bind field components
-            to the cell data. The components can be shown all the time or work as editors
-            that appear when a cell is activated for editing.
+            Spreadsheet has a number of configuration parameters and sections that affect
+            the overall appearance and function of the entire spreadsheet. The most
+            important ones are mentioned in the following and further configuration is
+            provided through the Apache POI API.
         </para>
 
+        <section xml:id="spreadsheet.configuration.elements">
+            <title>Spreadsheet Elements</title>
+
+            <para>
+                The <classname>Spreadsheet</classname> object provides the following
+                configuration of various UI elements:
+            </para>
+
+            <variablelist>
+                <varlistentry>
+                    <term>Grid lines</term>
+                    <listitem>
+                        <para>
+                            Cells are by default separated by grid lines. You can control
+                            their visibility with
+                            <methodname>setGridlinesVisible()</methodname>.
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>Column and row headings</term>
+                    <listitem>
+                        <para>
+                            Headings for rows and columns display the row and column indexes,
+                            and allow selecting and resizing the rows and columns. You can
+                            control their visibility with
+                            <methodname>setRowColHeadingsVisible()</methodname>.
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>Top bar</term>
+                    <listitem>
+                        <para>
+                            The top bar displays the address of the currently selected cell
+                            and an editor for cell content. You can control its visibility
+                            with <methodname>setFunctionBarVisible()</methodname>.
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>Bottom bar</term>
+                    <listitem>
+                        <para>
+                            The bottom bar displays the address of the currently selected cell
+                            and an editor for cell content. You can control its visibility
+                            with <methodname>setSheetSelectionBarVisible()</methodname>.
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>Report mode</term>
+                    <listitem>
+                        <para>
+                            In the report mode, both the top and bottom bars are
+                            hidden. You can enable the mode with
+                            <methodname>setReportStyle()</methodname>.
+                        </para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+
+        <section xml:id="spreadsheet.configuration.frozen">
+            <title>Frozen Row and Column Panes</title>
+
+            <para>
+                You can define panes of rows and columns that are frozen in respect to
+                scrolling. You can create the pane for the current worksheet with
+                <methodname>createFreezePane()</methodname>, which takes the number of
+                frozen rows and columns as parameters.
+            </para>
+
+            <programlisting lang="java"><![CDATA[sheet.createFreezePane(1, 2);]]></programlisting>
+
+            <para>
+                The result is shown in <xref
+                linkend="figure.spreadsheet.configuration.frozen"/>.
+            </para>
+
+            <figure xml:id="figure.spreadsheet.configuration.frozen">
+                <title>Frozen Row and Column Panes</title>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata smallscale="80%" scale="35" align="center" fileref="img/spreadsheet/spreadsheet-config-frozenpane.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+        </section>
+    </section>
+
+    <section xml:id="spreadsheet.cells">
+        <title>Cell Content and Formatting</title>
+
         <para>
-            Components in a spreadsheet must be generated by a
-            <interfacename>SpreadsheetComponentFactory</interfacename>, which you need to
-            implement.
+            In the following, we go through various user interface features in the table
+            cells.
         </para>
+
+        <section xml:id="spreadsheet.cells.formatting">
+            <title>Cell Formatting</title>
+
+            <para>
+                Formatting cell values can be accomplished by using cell styles. A cell
+                style must be created in the workbook by using
+                <methodname>createCellStyle()</methodname>. Cell data format is set for
+                the style with <methodname>setDataFormat()</methodname>.
+            </para>
+
+            <programlisting language="java"><?pocket-size 65% ?><![CDATA[// Define a cell style for dates
+CellStyle dateStyle = sheet.getWorkbook().createCellStyle();
+DataFormat format = sheet.getWorkbook().createDataFormat();
+dateStyle.setDataFormat(format.getFormat("yyyy-mm-dd"));
+
+// Add some data rows
+sheet.createCell(1, 0, "Nicolaus");
+sheet.createCell(1, 1, "Copernicus");
+sheet.createCell(1, 2,
+    new GregorianCalendar(1999,2,19).getTime());
+
+// Style the date cell
+sheet.getCell(1,2).setCellStyle(dateStyle);]]></programlisting>
+
+        </section>
+
+        <section xml:id="spreadsheet.cells.font">
+            <title>Cell Font Style</title>
+
+            <para>
+                Cells can be styled by different fonts. A font definition not only
+                includes a particular typeface, but also weight (bold or normal),
+                emphasis, underlining, and other such font attributes.
+            </para>
+
+            <para>
+                A font definition is managed by <classname>Font</classname> class in the
+                Apache POI API. A new font can be created with
+                <methodname>createFont()</methodname> in the workbook.
+            </para>
+
+            <para>
+                For example, in the following we make a header row in a spreadsheet bold:
+            </para>
+
+            <programlisting language="java"><![CDATA[// Create some column captions in the first row
+sheet.createCell(0, 0, "First Name");
+sheet.createCell(0, 1, "Last Name");
+sheet.createCell(0, 2, "Born");
+
+// Set the cells in the first row as bold
+Font bold = sheet.getWorkbook().createFont();
+bold.setBold(true);
+for (int col=0; col <= 2; col++)
+    sheet.getCell(0, col).getCellStyle().setFont(bold);]]></programlisting>
+        </section>
+
+        <!-- TODO: Example -->
+        <section xml:id="spreadsheet.cells.comments">
+            <title>Cell Comments</title>
+
+            <para>
+                Cells may have comments that are indicated by ticks in the corner of the
+                cells, and the comment is shown when mouse is hovered on the cells. The
+                <classname>SpreadsheetDefaultActionHandler</classname> described in <xref
+                linkend="spreadsheet.contextmenu.default"/> enables adding comments from
+                the context menu.
+            </para>
+
+            <para>
+                A new comment can be added through the POI API of a cell, with
+                <methodname>addComment()</methodname>. For a detailed example for managing
+                cell comments, we refer to the
+                <classname>InsertDeleteCellCommentAction</classname> and
+                <classname>EditCellCommentAction</classname> classes employed by the
+                default action handler.
+            </para>
+        </section>
+
+        <!-- TODO: Example -->
+        <section xml:id="spreadsheet.cells.merging">
+            <title>Merging Cells</title>
+
+            <para>
+                You can merge spreadsheet cells with any variant of the
+                <methodname>addMergedRegion()</methodname> method in
+                <classname>Spreadsheet</classname>.
+            </para>
+
+            <para>
+                The <classname>SpreadsheetDefaultActionHandler</classname> described in
+                <xref linkend="spreadsheet.contextmenu.default"/> enables merging selected
+                cells from the context menu.
+            </para>
+
+            <para>
+                Previously merged cells can be unmerged with
+                <methodname>removeMergedRegion()</methodname>. The method takes as its
+                parameter a region index. You can search for a particular region through
+                the POI <classname>Sheet</classname> API for the active sheet, which you
+                can obtain with <methodname>getActiveSheet()</methodname>. The
+                <methodname>getMergedRegion()</methodname> returns a merged region by
+                index and you can iterate through them by knowing the number of regions,
+                which you can find out with
+                <methodname>getNumMergedRegions()</methodname>.
+            </para>
+        </section>
+
+        <!-- TODO: Example -->
+        <section xml:id="spreadsheet.cells.components">
+            <title>Components in Cells</title>
+
+            <para>
+                You can have Vaadin components in spreadsheet cells and bind field
+                components to the cell data. The components can be shown all the time or
+                work as editors that appear when a cell is activated for editing.
+            </para>
+
+            <para>
+                Components in a spreadsheet must be generated by a
+                <interfacename>SpreadsheetComponentFactory</interfacename>, which you need
+                to implement.
+            </para>
+        </section>
+
+        <!-- TODO: Example -->
+        <section xml:id="spreadsheet.cells.hyperlinks">
+            <title>Hyperlinks</title>
+
+            <para>
+                Hyperlinks in cells can point to other worksheets in the current workbook,
+                or to external URLs. Links must be added through the POI API. Spreadsheet
+                provides default handling for hyperlink clicks, which can be overridden
+                with a custom <interfacename>HyperlinkCellClickHandler</interfacename>,
+                which you assign with
+                <methodname>setHyperlinkCellClickHandler()</methodname>.
+            </para>
+        </section>
+
+        <!-- TODO: Example -->
+        <section xml:id="spreadsheet.cells.popup">
+            <title>Popup Buttons in Cells</title>
+
+            <para>
+                You can add a popup button in a cell, clicking which opens a drop-down
+                popup overlay, which can contain any Vaadin components. You can add a
+                popup button with any of the <methodname>setPopup()</methodname> methods
+                for different cell addressing forms. A popup button is a
+                <classname>PopupButton</classname> object, which is a regular Vaadin
+                component container, so you can add any components to it by
+                <methodname>addComponent()</methodname>.
+            </para>
+
+            <para>
+                You can create popup buttons for a row of cells in a cell range by
+                defining a <emphasis>table</emphasis>, as described in <xref
+                linkend="spreadsheet.table"/>.
+            </para>
+        </section>
+    </section>
+
+    <!--
+    <section xml:id="spreadsheet.charts">
+        <title>Graphing with Charts</title>
+    </section>
+    -->
+
+    <section xml:id="spreadsheet.contextmenu">
+        <title>Context Menus</title>
+
+        <para>
+            A context menu can be added to Grid using the standard Vaadin action handler
+            mechanism.
+        </para>
+
+        <section xml:id="spreadsheet.contextmenu.default">
+            <title>Default Context Menu</title>
+
+            <para>
+                 The <classname>SpreadsheetDefaultActionHandler</classname> provides a
+                 ready set of common spreadsheet editing operations.
+            </para>
+
+            <itemizedlist>
+                <listitem>Add, delete, hide, and show rows and columns</listitem>
+                <listitem>Insert, edit, and delete cell comments</listitem>
+                <listitem>Merge and unmerge cells</listitem>
+                <listitem>Add filter table to selected range</listitem>
+            </itemizedlist>
+
+            <para>
+                The default context menu is not enabled by default; to enable it, you need
+                to create and set it as the action handler explicitly.
+            </para>
+
+            <programlisting lang="java"><?pocket-size 65% ?><![CDATA[sheet.addActionHandler(new SpreadsheetDefaultActionHandler());]]></programlisting>
+        </section>        
+
+        <section xml:id="spreadsheet.contextmenu.custom">
+            <title>Custom Context Menus</title>
+
+            <para>
+                You can implement custom context menus either by implementing an
+                <interfacename>ActionHandler</interfacename> or extending the
+                <classname>SpreadsheetDefaultActionHandler</classname>. The source code of
+                the default handler should serve as a good example of implementing context
+                menu items for different purposes.
+            </para>
+        </section>
     </section>
 
     <section xml:id="spreadsheet.table">
         <title>Tables Within Spreadsheets</title>
 
         <para>
-            A worksheet may contain a number of <emphasis>tables</emphasis>, which provide
-            features such as headers and filtering for a region in a spreadsheet. Such a
-            table is a defined region of cells, managed through a
-            <classname>SpreadsheetTable</classname> or
+            A cell range in a worksheet can be configured as a <emphasis>table</emphasis>,
+            which adds popup menu buttons in the header row of the range. The popup menus
+            contain Vaadin components, which you can use to implement various
+            functionalities in the table, such as sorting or filtering. Vaadin Spreadsheet
+            does not include any implementations of such features, merely the UI elements
+            to enable them.
+        </para>
+
+        <para>
+            Such a table is defined by a <classname>SpreadsheetTable</classname> or a
             <classname>SpreadsheetFilterTable</classname> added to the spreadsheet.
         </para>
+
+        <section xml:id="spreadsheet.table.creating">
+            <title>Creating a Table</title>
+
+            <para>
+                For example, let us assume that you have a sheet with some data in a cell
+                region. The first row of the region should contain column captions for the
+                region.
+            </para>
+
+            <programlisting lang="java"><![CDATA[Spreadsheet sheet = new Spreadsheet();
+
+// Have a header row in a region of the sheet
+sheet.createCell(1, 1, "First Name");
+sheet.createCell(1, 2, "Last Name");
+sheet.createCell(1, 3, "Born");
+sheet.createCell(1, 4, "Died");
+
+... insert the data ...
+
+// Define the range
+CellRangeAddress range =
+    new CellRangeAddress(1, 7, 1, 4);]]></programlisting>
+
+            <para>
+                A table is created for a cell range and then registered in the spreadsheet
+                with <methodname>registerTable()</methodname>; you can unregister it with
+                <methodname>unregisterTable()</methodname>. The first row of the cell range
+                should contain the table captions.
+            </para>
+
+            <programlisting lang="java"><?pocket-size 65% ?><![CDATA[// Create a table in the range
+SpreadsheetTable table = new SpreadsheetTable(sheet, range);
+sheet.registerTable(table);
+
+// Enable hiding each column in the popup
+for (int col = range.getFirstColumn();
+         col <= range.getLastColumn(); col++) {
+    final int c = col; // For access in the lambda
+    table.getPopupButton(col).addComponent(
+        new Button("Hide Column", e -> { // Java 8
+            sheet.setColumnHidden(c, true);
+            table.getPopupButton(c).closePopup();
+        }));
+}]]></programlisting>
+
+            <para>
+                The popup buttons are typically used for performing operations on columns,
+                such as sorting.
+            </para>
+        </section>
+
+        <section xml:id="spreadsheet.table.filtering">
+            <title>Filtering With a Table</title>
+
+            <para>
+                <classname>SpreadsheetFilterTable</classname> is a spreadsheet table that
+                allows filtering the rows in the table in the popup menus. The menu is
+                filled with checkboxes for each unique value in the column. Deselecting
+                the items causes hiding the respective rows in the spreadsheet.
+            </para>
+        </section>
     </section>
 
     <indexterm startref="term.spreadsheet" class="endofrange"/>
