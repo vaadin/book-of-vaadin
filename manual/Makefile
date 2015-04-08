@@ -49,7 +49,6 @@ IMAGES =	intro/architecture intro/architecture-vaadin7 intro/toolchain \
 			gwt/gwt-custom-architecture \
 			gwt/widget-integration gwt/simplified-integration \
 			vaadin-logo book-example \
-			eclipse/editor-design-2-crop eclipse/widgetset-compiling-toolbar \
 			datamodel/datamodel-interfaces datamodel/beanitem-doublebinding \
 			mobile/mobile-overview mobile/parking-tabs mobile/navigationview mobile/navigationpanel \
 			testbench/webdriver-use \
@@ -66,7 +65,7 @@ IMAGES =	intro/architecture intro/architecture-vaadin7 intro/toolchain \
 # List of source XML files
 XMLFILES = $(POCKETBOOK_ROOT) book-info.xml book-preface.xml book-vol1.xml book-vol2.xml \
 	chapter-addons.xml	chapter-datamodel.xml	chapter-layout.xml	chapter-themes.xml \
-	chapter-advanced.xml	chapter-eclipse.xml	\
+	chapter-advanced.xml \
 	chapter-application.xml	chapter-getting-started.xml	\
 	chapter-architecture.xml	\
 	chapter-introduction.xml	chapter-sqlcontainer.xml \
