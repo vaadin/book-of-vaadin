@@ -2545,6 +2545,182 @@ conf.addyAxis(yaxis);]]></programlisting>
                 </para>
             </section>
         </section>
+
+        <section xml:id="charts.charttypes.treemap">
+            <title>Tree Maps</title>
+
+            <para>
+                A tree map is used to display hierarchical data. It consists of a group
+                of rectangles that contains other rectangles, where the size of a
+                rectangle indicates the item value.
+            </para>
+
+            <figure xml:id="figure.charts.charttypes.treemap">
+                <title>Tree Maps</title>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata scale="80" smallscale="100%" align="center" fileref="img/charts/charts-treemap.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+
+            <para>
+                Tree maps have chart type <literal>TREEMAP</literal>. <phrase
+                condition="web">For example:</phrase>
+            </para>
+
+            <programlisting condition="web"><?pocket-size 65% ?><![CDATA[Chart chart = new Chart();
+
+PlotOptionsTreeMap plotOptions = new PlotOptionsTreeMap();
+plotOptions.setLayoutAlgorithm(TreeMapLayoutAlgorithm.STRIPES);
+plotOptions.setAlternateStartingDirection(true);
+
+List<TreeMapLevel> levels = new ArrayList<TreeMapLevel>();
+TreeMapLevel level1 = new TreeMapLevel();
+level1.setLevel(1);
+level1.setLayoutAlgorithm(TreeMapLayoutAlgorithm.SLICEANDDICE);
+
+Labels dataLabels = new Labels();
+dataLabels.setEnabled(true);
+dataLabels.setAlign(HorizontalAlign.LEFT);
+dataLabels.setVerticalAlign(VerticalAlign.TOP);
+
+Style style = new Style();
+style.setFontSize("15px");
+style.setFontWeight(FontWeight.BOLD);
+
+dataLabels.setStyle(style);
+level1.setDataLabels(dataLabels);
+levels.add(level1);
+plotOptions.setLevels(levels);
+
+TreeSeries series = new TreeSeries();
+
+TreeSeriesItem apples = new TreeSeriesItem("A", "Apples");
+apples.setColor(new SolidColor("#EC2500"));
+
+TreeSeriesItem bananas = new TreeSeriesItem("B", "Bananas");
+bananas.setColor(new SolidColor("#ECE100"));
+
+TreeSeriesItem oranges = new TreeSeriesItem("O", "Oranges");
+oranges.setColor(new SolidColor("#EC9800"));
+
+TreeSeriesItem anneA = new TreeSeriesItem("Anne", apples, 5);
+TreeSeriesItem rickA = new TreeSeriesItem("Rick", apples, 3);
+TreeSeriesItem paulA = new TreeSeriesItem("Paul", apples, 4);
+
+TreeSeriesItem anneB = new TreeSeriesItem("Anne", bananas, 4);
+TreeSeriesItem rickB = new TreeSeriesItem("Rick", bananas, 10);
+TreeSeriesItem paulB = new TreeSeriesItem("Paul", bananas, 1);
+
+TreeSeriesItem anneO = new TreeSeriesItem("Anne", oranges, 1);
+TreeSeriesItem rickO = new TreeSeriesItem("Rick", oranges, 3);
+TreeSeriesItem paulO = new TreeSeriesItem("Paul", oranges, 3);
+
+TreeSeriesItem susanne = new TreeSeriesItem("Susanne", 2);
+susanne.setParent("Kiwi");
+susanne.setColor(new SolidColor("#9EDE00"));
+
+series.addAll(apples, bananas, oranges, anneA, rickA, paulA,
+        anneB, rickB, paulB, anneO, rickO, paulO, susanne);
+
+series.setPlotOptions(plotOptions);
+
+chart.getConfiguration().addSeries(series);
+
+chart.getConfiguration().setTitle("Fruit consumption");]]></programlisting>
+
+            <section xml:id="charts.charttypes.treemap.plotoptions" condition="web">
+                <title>Plot Options</title>
+                <para>
+                    Tree map charts have plot options type
+                    <classname>PlotOptionsTreeMap</classname>, which extends the more
+                    general options defined in
+                    <classname>AbstractCommonOptionsColumn</classname>. It has the
+                    following chart type specific properties:
+                </para>
+
+                <variablelist>
+                    <varlistentry>
+                        <term><parameter>allowDrillToNode</parameter></term>
+                        <listitem>
+                            When enabled the user can click on a point which is a parent and zoom
+                            in on its children. Defaults to false.
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><parameter>alternateStartingDirection</parameter></term>
+                        <listitem>
+                            Enabling this option will make the treemap alternate the drawing
+                            direction between vertical and horizontal. The next levels starting
+                            direction will always be the opposite of the previous. Defaults value
+                            is <literal>false</literal>.
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><parameter>layoutAlgorithm</parameter></term>
+                        <listitem>
+                            This option decides which algorithm is used for setting position and
+                            dimensions of the points. Available algorithms are defined in
+                            <classname>TreeMapLayoutAlgorithm</classname> enum:
+                            <literal>SLICEANDDICE</literal>, <literal>STRIPES</literal>,
+                            <literal>SQUARIFIED</literal> and <literal>STRIP</literal>.
+                            Default value is <literal>SLICEANDDICE</literal>.
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><parameter>layoutStartingDirection</parameter></term>
+                        <listitem>
+                            Defines which direction the layout algorithm will start drawing.
+                             Possible values are defined in
+                            <classname>TreeMapLayoutStartingDirection</classname> enum:
+                            <literal>HORIZONTAL</literal> and <literal>VERTICAL</literal>.
+                            Default value is <literal>VERTICAL</literal>.
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><parameter>levelIsConstant</parameter></term>
+                        <listitem>
+                            Used together with the <methodname>setLevels()</methodname> and
+                            <methodname>setAllowDrillToNode()</methodname> options. When set to
+                            <literal>false</literal> the first level visible when drilling is
+                            considered to be level one. Otherwise the level will be the same as the
+                            tree structure. Defaults value is <literal>true</literal>.
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><parameter>levels</parameter></term>
+                        <listitem>
+                            Set options on specific levels. Takes precedence over series options,
+                            but not point options.
+                        </listitem>
+                    </varlistentry>
+                </variablelist>
+            </section>
+
+            <section xml:id="charts.charttypes.treemap.dataseries" condition="web">
+                <title>Tree Map Data Series</title>
+
+                <para>
+                    Tree maps require hierarchical data. The easiest way is to use
+                    <classname>TreeSeries</classname> and <classname>TreeSeriesItem</classname>,
+                    as was done in the example earlier. You can add data points with the
+                    <methodname>add()</methodname> method, or give all the data at once in a
+                    <classname>Collection</classname> with <methodname>setData()</methodname>
+                    or in the constructor.
+                </para>
+
+                <para>
+                    The item hierarchy is defined with the <methodname>setParent()</methodname>
+                    method in the <classname>TreeSeriesItem</classname> instance or in
+                    the constructor. Parent argument can be either a
+                    <classname>String</classname> identifier or a
+                    <classname>TreeSeriesItem</classname> with a non-null ID. If no
+                    <classname>TreeSeriesItem</classname> with matching ID is found or if value
+                    is null then the parent will be rendered as a root item.
+                </para>
+            </section>
+        </section>
     </section>
 
     <section xml:id="charts.configuration">
