@@ -2584,10 +2584,11 @@ layout.addComponent(name);]]></programlisting>
         </para>
 
         <section xml:id="themes.fonts.loading">
-            <title>Loading Fonts</title>
+            <title>Loading Local Fonts</title>
 
             <para>
-                You can load web fonts with the <literal>font</literal> mixin as follows:
+                You can load locally served web fonts with the <literal>font</literal>
+                mixin as follows:
             </para>
 
             <programlisting><?pocket-size 75% ?><![CDATA[@include font(MyFontFamily,
@@ -2617,6 +2618,34 @@ layout.addComponent(name);]]></programlisting>
                 appended with <filename>.ttf</filename>, <filename>.eot</filename>,
                 <filename>.woff</filename>, or <filename>.svg</filename> suffix for the
                 font file suitable for a user's browser.
+            </para>
+        </section>
+
+        <section xml:id="themes.fonts.webfonts">
+            <title>Loading Web Fonts</title>
+
+            <para>
+                You can load externally served web fonts such as Google Fonts simply by
+                specifying the loading stylesheet for the UI with the
+                <classname>@StyleSheet</classname> annotation.
+            </para>
+
+            <para>
+                For example, to load the "Cabin Sketch" font from Google Fonts:
+            </para>
+
+            <programlisting><?pocket-size 75% ?>@StyleSheet({"<replaceable>http://fonts.googleapis.com/css?family=Cabin+Sketch</replaceable>"})
+public class MyUI extends UI {
+    ...</programlisting>
+
+            <!-- Ticket #16249 -->
+            <para condition="web">
+                Note that such web fonts served from a domain different from the Vaadin
+                application currently <link
+                xlink:href="https://dev.vaadin.com/ticket/16249">do not work together
+                with</link> responsive themes, as described in <xref
+                linkend="themes.responsive"/>.  The problem occurs only in Firefox. A
+                SecurityError is shown in the debug window.
             </para>
         </section>
 
@@ -2710,6 +2739,18 @@ Responsive.makeResponsive(c);]]></programlisting>
         <para>
             You can have overlapping size ranges, in which case all the selectors matching
             the current size are enabled.
+        </para>
+
+        <!-- Ticket #16249 -->
+        <para condition="web">
+            Note that responsive themes currently <link
+            xlink:href="https://dev.vaadin.com/ticket/16249">do not work together
+            with</link> stylesheets or widget sets loaded from a different domain than the
+            Vaadin application. Such resources must be loaded from the same domain as the
+            application. The problem occurs only in Firefox. A SecurityError is shown in
+            the debug window. The limitation concerns stylesheets such as for web fonts
+            served from external sites, as described in <xref
+            linkend="themes.fonts.webfonts"/>.
         </para>
 
         <simplesect xml:id="themes.responsive.wrap" condition="web">
