@@ -1201,7 +1201,7 @@ opener.extend(button);]]></programlisting>
 
             <para>
                 The <guilabel>Communication</guilabel> tab displays all server
-                requests. You can unfold the requests to view defails, such as the
+                requests. You can unfold the requests to view details, such as the
                 connectors involved. Clicking on a connector highlights the corresponding
                 element in the UI.
             </para>
@@ -1303,7 +1303,7 @@ dataInput.addValueChangeListener(event ->
         event.getProperty().getValue()));
 dataInput.setValue("Here's some");
 
-// Determine the base bath for the servlet
+// Determine the base path for the servlet
 String servletPath = VaadinServlet.getCurrent()
         .getServletContext().getContextPath()
         + "/book"; // Servlet
@@ -5249,6 +5249,11 @@ public class User {
         &lt;groupId&gt;com.vaadin&lt;/groupId&gt;
         &lt;artifactId&gt;vaadin-cdi&lt;/artifactId&gt;
         &lt;version&gt;<replaceable>LATEST</replaceable>&lt;/version&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;javax.enterprise&lt;/groupId&gt;
+        &lt;artifactId&gt;cdi-api&lt;/artifactId&gt;
+        &lt;version&gt;<replaceable>1.2</replaceable>&lt;/version&gt;
     &lt;/dependency&gt;</programlisting>
         </section>
 
@@ -6221,6 +6226,783 @@ class ChatBox extends CustomComponent {
         <indexterm startref="term.advanced.cdi.cdilong" class="endofrange"/>
         <indexterm startref="term.advanced.cdi.cdi" class="endofrange"/>
         <indexterm startref="term.advanced.cdi.cdiaddon" class="endofrange"/>
+    </section>
+
+    <section xml:id="advanced.spring">
+        <title>Vaadin Spring Add-on</title>
+
+        <indexterm xml:id="term.advanced.spring.springlong" class="startofrange">
+            <primary>Vaadin Spring</primary>
+        </indexterm>
+        <indexterm xml:id="term.advanced.spring.spring" class="startofrange">
+            <primary>Spring</primary>
+        </indexterm>
+
+        <para>
+            Vaadin Spring and Vaadin Spring Boot add-ons make it easier to use Spring in
+            Vaadin applications. Vaadin Spring enables Spring dependency injection with
+            custom UI and view providers, and provides three custom scopes:
+            <classname>UIScope</classname>, <classname>ViewScope</classname>, and
+            <classname>VaadinSessionScope</classname>.
+        </para>
+
+        <para>
+            To learn more about Vaadin Spring, the <link
+            xlink:href="https://vaadin.com/wiki/-/wiki/Main/Vaadin+Spring">Vaadin Spring
+            Tutorial</link> gives a hands-on introduction. The source code of the Spring
+            Tutorial demo is available for browsing or cloning at <link
+            xlink:href="https://github.com/Vaadin/spring-tutorial">https://github.com/Vaadin/spring-tutorial</link>.
+        </para>
+
+        <section xml:id="advanced.spring.spring">
+            <title>Spring Overview</title>
+
+            <para>
+                <emphasis>Spring Framework</emphasis> is a Java application framework that
+                provides many useful services for building applications, such as
+                authentication, authorization, data access, messaging, testing, and so
+                forth. In the Spring core, one of the central features is dependency
+                injection, which accomplishes inversion of control for dependency
+                management in managed beans. Other Spring features rely on it
+                extensively. As such, Spring offers capabilities similar to CDI, but with
+                integration with other Spring services. Spring is well-suited for
+                applications where Vaadin provides the UI layer and Spring is used for
+                other aspects of the application logic.
+            </para>
+
+            <para>
+                <emphasis>Spring Boot</emphasis> is a Spring application development tool
+                that allows creating Spring applications easily. <emphasis>Vaadin Spring
+                Boot</emphasis> builds on Spring Boot to allow creating Vaadin Spring
+                applications easily. It starts up a servlet, handles the configuration of
+                the application context, registers a UI provider, and so forth.
+            </para>
+
+            <para>
+                Regarding general Spring topics, we recommend the following Spring
+                documentation:
+            </para>
+
+            <itemizedlist condition="web">
+                <listitem>
+                    <para>
+                        <link xlink:href="http://docs.spring.io/spring/docs/current/spring-framework-reference/htmlsingle/">Spring Framework Reference Documentation</link>.
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        <link xlink:href="http://projects.spring.io/spring-framework/">Spring Project</link>
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        <link xlink:href="https://vaadin.com/wiki/-/wiki/Main/Vaadin+Spring">Vaadin Spring Tutorial</link>
+                    </para>
+                </listitem>
+            </itemizedlist>
+
+            <section xml:id="advanced.spring.spring.injection">
+                <title>Dependency Injection</title>
+
+                <para>
+                    <emphasis>Dependency injection</emphasis> is a way to pass
+                    dependencies (service objects) to dependent objects (clients) by
+                    injecting them in member variables or initializer parameters, instead
+                    of managing the lifecycle in the clients or passing them explicitly as
+                    parameters. In Spring, injection of a service object to a client is
+                    configured with the <classname>@Autowired</classname> annotation.
+                </para>
+
+                <para>
+                    For a very typical example in a web application, you could have a user
+                    data object associated with a user session:
+                </para>
+
+                <programlisting><?pocket-size 75% ?><![CDATA[@SpringComponent
+@VaadinSessionScope
+public class User implements Serializable {
+    private String name;
+
+    public void setName(String name) {this.name = name;}
+    public String getName() {return name;}
+}]]></programlisting>
+
+                <para>
+                    The <classname>@SpringComponent</classname> annotation allows for
+                    automatic detection of managed beans by Spring. (The annotation is
+                    exactly the same as the regular Spring
+                    <classname>@Component</classname>, but has been given an alias,
+                    because Vaadin has a <interfacename>Component</interfacename>
+                    interface, which can cause trouble.)
+                </para>
+
+                <para>
+                    Now, if we have a UI view that depends on user data, we could inject
+                    the data in the client as follows:
+                </para>
+
+                <programlisting><?pocket-size 65% ?><![CDATA[public class MainView extends CustomComponent implements View {
+    @Autowired
+    User user;
+
+    ...
+    @Override
+    public void enter(ViewChangeEvent event) {
+        // Then you can use the injected data
+        // for some purpose
+        greeting.setValue("Hello, " + user.getName());
+    }
+}]]></programlisting>
+
+                <para>
+                    The user object would be injected automatically when the view is
+                    created, with all such references referring to the same shared
+                    instance in the scope of the Vaadin user session.
+                </para>
+
+                <!-- TODO Is this true for Spring?
+                <para>
+                    In addition to injecting managed beans with the annotation, you can
+                    query for them from the bean manager.
+                </para>
+                -->
+            </section>
+
+            <section xml:id="advanced.spring.spring.contexts">
+                <title>Contexts and Scopes</title>
+
+                <para>
+                    <emphasis>Contexts</emphasis> in Spring are services that manage the
+                    lifecycle of objects and handle their injection. Generally speaking, a
+                    context is a situation in which an instance is used with a unique
+                    identity. Such objects are essentially "singletons" in the
+                    context. While conventional singletons are application-wide, objects
+                    managed by a Spring container can be "singletons" in a more narrow
+                    <emphasis>scope</emphasis>: a user session, a particular UI instance
+                    associated with the session, a view within the UI, or even just a
+                    single request. Such a context defines the lifecycle of the object:
+                    its creation, use, and finally its destruction.
+                </para>
+
+                <para>
+                    Earlier, we introduced a user class defined as session-scoped:
+                </para>
+
+                <programlisting><?pocket-size 75% ?><![CDATA[@SpringComponent
+@VaadinSessionScope
+public class User {]]></programlisting>
+
+                <para>
+                    Now, when you need to refer to the user, you can use Spring injection
+                    to inject the session-scoped "singleton" to a member variable or a
+                    constructor parameter.
+                </para>
+
+                <programlisting><?pocket-size 65% ?><![CDATA[public class MainView extends CustomComponent implements View {
+    @Inject
+    User user;
+
+    ...
+
+    @Override
+    public void enter(ViewChangeEvent event) {
+        greeting.setValue("Hello, " + user.getName());
+    }
+}]]></programlisting>
+            </section>
+
+        </section>
+
+        <section xml:id="advanced.spring.boot">
+            <title>Quick Start with Vaadin Spring Boot</title>
+
+            <para>
+                The Vaadin Spring Boot is an add-on that allows for easily creating a
+                project that uses Vaadin Spring. It is meant to be used together with
+                Spring Boot, which enables general Spring functionalities in a web
+                application.
+            </para>
+
+            <para>
+                You can use the Spring Initializr at <link
+                xlink:href="https://start.spring.io/">start.spring.io</link> website to
+                generate a project, which you can then download as a package and import in
+                your IDE. The generated project is a Spring application stub; you
+                need to add at least Vaadin dependencies
+                (<literal>vaadin-spring-boot</literal>, <literal>vaadin-themes</literal>,
+                and <literal>vaadin-client-compiled</literal>) and a UI class to the
+                generated project, as well as a theme, and so forth.
+            </para>
+
+            <para>
+                See the <link
+                xlink:href="https://vaadin.com/wiki/-/wiki/Main/Vaadin+Spring">Vaadin
+                Spring Tutorial</link> for detailed instructions for using Spring Boot.
+            </para>
+        </section>
+
+        <section xml:id="advanced.spring.installation">
+            <title>Installing Vaadin Spring Add-on</title>
+
+            <para>
+                Vaadin Spring requires a Java EE 7 compatible servlet container, such as
+                Glassfish or Apache TomEE Web Profile, as mentioned for the reference
+                toolchain in <xref linkend="getting-started.environment"/>.
+            </para>
+
+            <para>
+                To install the Vaadin Spring and/or Vaadin Spring Boot add-ons, either
+                define them as an Ivy or Maven dependency or download from the Vaadin
+                Directory add-on page at <link
+                xlink="https://vaadin.com/directory#addon/vaadin-spring:vaadin">vaadin.com/directory#addon/vaadin-spring</link>
+                or <link
+                xlink="https://vaadin.com/directory#addon/vaadin-spring-boot:vaadin">vaadin.com/directory#addon/vaadin-spring-boot</link>. See
+                <xref linkend="addons"/> for general instructions for installing and using
+                Vaadin add-ons.
+            </para>
+
+            <para>
+                The Ivy dependency is as follows:
+            </para>
+
+            <programlisting>    &lt;dependency org="com.vaadin" name="vaadin-spring"
+                rev="<replaceable>latest.release</replaceable>"/&gt;</programlisting>
+
+            <para>
+                The Maven dependency is as follows:
+            </para>
+
+            <programlisting>    &lt;dependency&gt;
+        &lt;groupId&gt;com.vaadin&lt;/groupId&gt;
+        &lt;artifactId&gt;vaadin-spring&lt;/artifactId&gt;
+        &lt;version&gt;<replaceable>LATEST</replaceable>&lt;/version&gt;
+    &lt;/dependency&gt;</programlisting>
+        </section>
+
+        <section xml:id="advanced.spring.peparing">
+            <title>Preparing Application for Spring</title>
+
+            <para>
+                A Vaadin application that uses Spring must have a file named
+                <filename>applicationContext.xml</filename> in the
+                <filename>WEB-INF</filename> directory.
+            </para>
+
+            <programlisting><?pocket-size 65% ?>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;beans xmlns="http://www.springframework.org/schema/beans"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:context="http://www.springframework.org/schema/context"
+  xsi:schemaLocation="
+    http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans.xsd
+    http://www.springframework.org/schema/context
+    http://www.springframework.org/schema/context/spring-context-4.1.xsd"&gt;
+
+  <!-- Configuration object -->
+  &lt;bean class="<replaceable>com.example.myapp.MySpringUI.MyConfiguration</replaceable>" /&gt;
+
+  <!-- Location for automatically scanned beans -->
+  &lt;context:component-scan
+      base-package="<replaceable>com.example.myapp.domain</replaceable>" /&gt;
+&lt;/beans&gt;</programlisting>
+
+            <para>
+                The application should not have a servlet extending
+                <classname>VaadinServlet</classname>, as Vaadin servlet has its own
+                <classname>VaadinSpringServlet</classname> that is deployed automatically.
+                If you need multiple servlets or need to customize the Vaadin Spring servlet,
+                see <xref linkend="advanced.spring.deployment"/>.
+            </para>
+
+            <para>
+                You can configure managed beans explicitly in the file, or configure them
+                to be scanned using the annotations, which is the preferred way described
+                in this section.
+            </para>
+        </section>
+
+        <section xml:id="advanced.spring.springui">
+            <title>Injecting a UI with <classname>@SpringUI</classname></title>
+
+            <indexterm xml:id="term.advanced.spring.springui" class="startofrange">
+                <primary><classname>@SpringUI</classname></primary>
+            </indexterm>
+
+            <para>
+                Vaadin Spring offers an easier way to instantiate UIs and to define the
+                URL mapping for them than the usual ways described in <xref
+                linkend="application.environment"/>. It is also needed for enabling Spring
+                features in the UI. To define a UI class that should be instantiated for a
+                given URL, you simply need to annotate the class with
+                <classname>@SpringUI</classname>. It takes an optional path as parameter.
+            </para>
+
+            <programlisting><?pocket-size 75% ?><![CDATA[@SpringUI("myniceui")
+@Theme("valo")
+public class MyNiceUI extends UI {
+    ...]]></programlisting>
+
+            <para>
+                The path in the URL for accessing the UI consists of the context path of
+                the application and the UI path, for example,
+                <literal>/myapp/myniceui</literal>.  Giving empty UI path maps the UI to
+                the root of the application context, for example,
+                <literal>/myapp</literal>.
+            </para>
+
+            <programlisting><?pocket-size 75% ?><![CDATA[@SpringUI]]></programlisting>
+
+            <para>
+                See <xref linkend="advanced.spring.deployment"/> for how to handle servlet
+                URL mapping of Spring UIs when working with multiple servlets in the same web
+                application.
+            </para>
+
+            <indexterm startref="term.advanced.spring.springui" class="endofrange"/>
+        </section>
+
+        <section xml:id="advanced.spring.scopes">
+            <title>Scopes</title>
+
+            <indexterm xml:id="term.advanced.spring.scopes" class="startofrange">
+                <primary>Spring</primary>
+                <secondary>scopes</secondary>
+            </indexterm>
+
+            <para>
+                As in programming languages, where a variable name refers to a unique
+                object within the scope of the variable, an object has unique identity
+                within a scope in Spring. However, instead of identifying the objects by
+                variable names, they are identified by their type (object class) and any
+                qualifiers they may have.
+            </para>
+
+            <para>
+                The scope of an object can be defined with an annotation to the class as
+                follows:
+            </para>
+
+            <programlisting><?pocket-size 75% ?><![CDATA[@VaadinSessionScope
+public class User {
+    ...]]></programlisting>
+
+            <para>
+                Defining a scope in Spring is normally done with the
+                <classname>@Scope</classname> annotation. For example,
+                <literal>@Scope("prototype")</literal> creates a new instance every time
+                one is requested/auto-wired. Such standard scopes can be used with some
+                limitations. For example, Spring session and request scopes do not work in
+                background threads and with certain push transport modes.
+            </para>
+
+            <para>
+                Vaadin Spring provides three scopes useful in Vaadin applications: a
+                session scope, a UI scope, a view scope, all defined in the
+                <package>com.vaadin.spring.annotation</package> package.
+            </para>
+
+            <section xml:id="advanced.spring.scopes.session">
+                <title><classname>@VaadinSessionScope</classname></title>
+
+                <para>
+                    The session scope is the broadest of the custom scopes defined in
+                    Vaadin Spring. Objects in the Vaadin session scope are unique in a
+                    user session, and shared between all UIs open in the session. This is
+                    the most basic scope in Vaadin applications, useful for accessing data
+                    for the user associated with the session.
+                </para>
+            </section>
+
+            <section xml:id="advanced.spring.scopes.ui">
+                <title><classname>@UIScope</classname></title>
+
+                <para>
+                    UI-scoped beans are uniquely identified within a UI instance, that is,
+                    a browser window or tab. The lifecycle of UI-scoped beans is bound
+                    between to the initialization and closing of a UI. Whenever you inject
+                    a bean, as long as you are within the same UI, you will get the same
+                    instance.
+                </para>
+
+                <para>
+                    Annotating a Spring view (annotated with
+                    <classname>@SpringView</classname> as described later) also as
+                    <classname>@UIScoped</classname> makes the view retain the same
+                    instance when the user navigates away and back to the view.
+                </para>
+            </section>
+
+            <section xml:id="advanced.spring.scopes.view">
+                <title><classname>@ViewScope</classname></title>
+
+                <para>
+                    The annotation enables the view scope in a bean. The lifecycle of such
+                    a bean starts when the user navigates to a view referring to the
+                    object and ends when the user navigates out of the view (or when the
+                    UI is closed or expires).
+                </para>
+
+                <para>
+                    Views themselves are by default view-scoped, so a new instance is
+                    created every time the user navigates to the view.
+                </para>
+            </section>
+
+            <indexterm startref="term.advanced.spring.scopes" class="endofrange"/>
+        </section>
+
+
+        <section xml:id="advanced.spring.navigation" condition="web">
+            <title>View Navigation</title>
+
+            <para>
+                Vaadin Spring extends the navigation framework in Vaadin, described in
+                <xref linkend="advanced.navigator"/>. It manages Spring views with a
+                special view provider and enables view scoping.
+            </para>
+
+            <section xml:id="advanced.spring.navigation.ui">
+                <title>Preparing the UI</title>
+
+                <para>
+                    You can define navigation for any single-component container, as
+                    described in <xref linkend="advanced.navigator.navigating"/>, but
+                    typically you set up navigation for the entire UI content. To use
+                    Vaadin Spring views, you need to inject a
+                    <classname>SpringViewProvider</classname> in the UI and add it as a
+                    provider for the navigator.
+                </para>
+
+                <programlisting><?pocket-size 75% ?><![CDATA[@SpringUI(path="myspringui")
+public class MySpringUI extends UI {
+    @Autowired
+    SpringViewProvider viewProvider;
+    
+    @Override
+    protected void init(VaadinRequest request) {
+        Navigator navigator = new Navigator(this, this);
+        navigator.addProvider(viewProvider);
+
+        // Navigate to start view
+        navigator.navigateTo("");
+    }
+}]]></programlisting>
+
+            </section>
+
+            <section xml:id="advanced.spring.navigation.view">
+                <title>The View</title>
+
+                <para>
+                    A view managed by Vaadin Spring only needs to have the
+                    <classname>@SpringView</classname> annotation, which registers the
+                    view in the <classname>SpringViewProvider</classname>. The annotation
+                    is also necessary to enable Spring features in the view, such as
+                    injection.
+                </para>
+
+                <programlisting><?pocket-size 65% ?><![CDATA[@SpringView(name=MainView.NAME)
+public class MainView extends CustomComponent implements View {
+    public static final String NAME = "main";
+    ...]]></programlisting>
+
+                <para>
+                    The annotation can have the following optional paramers:
+                </para>
+
+                <variablelist>
+                    <varlistentry>
+                        <term>name (optional)</term>
+                        <listitem>
+                            <para>
+                                Specifies the path by which the view can be accessed
+                                programmatically and by the URI fragment.
+                            </para>
+
+                            <programlisting><?pocket-size 75% ?><![CDATA[@SpringView(name="main")]]></programlisting>
+
+                            <para>
+                                If the view name is not given, it is derived from the
+                                class name by removing a possible "View" suffix, making it
+                                lower case, and using a dash ("-") to separate words
+                                originally denoted by capital letters. Thereby, a view
+                                class such as <classname>MyFunnyView</classname> would
+                                have name "<literal>my-funny</literal>".
+                            </para>
+
+                            <para>
+                                It is a recommended pattern to have the view name in a
+                                static member constant in the view class, as was done in
+                                the example previously, so that the name can be referred
+                                to safely.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                        <term>supportsParameters</term>
+                        <listitem>
+                            <para>
+                                Specifies whether view parameters can be passed to the
+                                view as a suffix to the name in the navigation state, that
+                                is, in the form of
+                                <literal>viewname+viewparameters</literal>. The view name
+                                is merely a prefix and there is no separator nor format
+                                for the parameters, but those are left for the view to
+                                handle. The parameter support mode is disabled by default.
+                            </para>
+
+                            <programlisting><?pocket-size 75% ?><![CDATA[@SpringView(name="myview", supportsParameters=true)]]></programlisting>
+
+                            <para>
+                                You could then navigate to the state with a URI fragment
+                                such as <literal>#!myview/someparameter</literal> or programmatically with:
+                            </para>
+
+                            <programlisting><?pocket-size 70% ?><![CDATA[getUI().getNavigator().navigateTo("myview/someparameter");]]></programlisting>
+
+                            <para>
+                                The <methodname>enter()</methodname> method of the view
+                                gets the URI fragment as parameter as is and can interpret
+                                it in any application-defined way.
+                            </para>
+                            
+                            <para>
+                                Note that in this mode, matching a navigation state to a
+                                view is done by the prefix of the fragment! Thereby, no
+                                other views may start with the name of the view as
+                                prefix. For example, if the view name is
+                                "<literal>main</literal>", you must not have a view named
+                                "<literal>maintenance</literal>".
+                            </para>
+                        </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                        <term>uis</term>
+                        <listitem>
+                            <para>
+                                If the application has multiple UIs that use
+                                <classname>SpringViewProvider</classname>, you can use this
+                                parameter to specify which UIs can show the view.
+                            </para>
+
+                            <programlisting><?pocket-size 75% ?><![CDATA[@SpringView(name="myview", uis={MySpringUI.class})]]></programlisting>
+
+                            <para>
+                                If the list contains <parameter>UI.class</parameter>, the
+                                view is available to all UIs.
+                            </para>
+
+                            <programlisting><?pocket-size 75% ?><![CDATA[@SpringView(name="myview", uis={UI.class})]]></programlisting>
+                        </listitem>
+                    </varlistentry>
+                </variablelist>
+
+                <para>
+                    In the following, we have a login view that accesses a session-scoped
+                    user object. Here, we use a constant to define the view name, so that
+                    we can use the constant when navigating to it.
+                </para>
+
+                <programlisting><?pocket-size 75% ?><![CDATA[@SpringView(LoginView.NAME)
+public class LoginView extends CustomComponent
+                       implements View {
+    public final static String NAME = "";
+    
+    // Here we inject to the constructor and actually do
+    // not store the injected object to use it later
+    @Inject
+    public LoginView(User user) {
+        VerticalLayout layout = new VerticalLayout();
+        
+        // An input field for editing injected data
+        BeanItem<User> item = new BeanItem<User>(user);
+        TextField username = new TextField("User name",
+                item.getItemProperty("name"));
+        username.setNullRepresentation("");
+        layout.addComponent(username);
+
+        // Login button (authentication omitted) / Java 8
+        layout.addComponent(new Button("Login", e ->
+            getUI().getNavigator().
+                navigateTo(MainView.VIEWNAME)));
+        
+        setCompositionRoot(layout);
+    }
+    
+    @Override
+    public void enter(ViewChangeEvent event) {}
+}]]></programlisting>
+
+                <para>
+                    You could now navigate to the view from any other view in the UI with:
+                </para>
+
+                <programlisting><?pocket-size 75% ?><![CDATA[getUI().getNavigator().navigateTo(LoginView.VIEWNAME);]]></programlisting>
+            </section>
+        </section>
+
+        <section xml:id="advanced.spring.accesscontrol">
+            <title>Access Control</title>
+
+            <para>
+                Access control for views can be implemented by registering beans
+                implementing <interfacename>ViewAccessControl</interfacename> or
+                <interfacename>ViewInstanceAccessControl</interfacename>, which can
+                restrict access to the view either before or after a view instance is
+                created.
+            </para>
+
+            <para>
+                Integration with authorization solutions, such as Spring Security, is
+                provided by additional unofficial add-ons on top of Vaadin Spring.
+            </para>
+
+            <section xml:id="advanced.spring.accesscontrol.accessdenied">
+                <title>Access Denied View</title>
+
+                <para>
+                    By default, the view provider acts as if a denied view didn't
+                    exist. You can set up an "Access Denied" view that is shown if the
+                    access is denied with <methodname>setAccessDeniedView()</methodname>
+                    in <classname>SpringViewProvider</classname>.
+                </para>
+
+                <programlisting><?pocket-size 75% ?><![CDATA[@Autowired
+SpringViewProvider viewProvider;
+
+@Override
+protected void init(VaadinRequest request) {
+    Navigator navigator = new Navigator(this, this);
+    navigator.addProvider(viewProvider);
+
+    // Set up access denied view
+    viewProvider.setAccessDeniedViewClass(
+        MyAccessDeniedView.class);]]></programlisting>
+            </section>
+        </section>
+
+        <section xml:id="advanced.spring.deployment">
+            <title>Deploying Spring UIs and Servlets</title>
+
+            <para>
+                Vaadin Spring hooks into Vaadin framework by using a special
+                <classname>VaadinSpringServlet</classname>. As described earlier, you do
+                not need to map an URL path to a UI, as it is handled by Vaadin
+                Spring. However, in the following, we go through some cases where you need
+                to customize the servlet or use Spring with non-Spring servlets and UIs in
+                a web application.
+            </para>
+
+            <section xml:id="advanced.spring.servlets.custom">
+                <title>Custom Servlets</title>
+
+                <para>
+                    When customizing the Vaadin servlet, as outlined in <xref
+                    linkend="application.lifecycle.servlet-service"/>, you simply need to
+                    extend <classname>com.vaadin.spring.internal.VaadinSpringServlet</classname>
+                    instead of <classname>com.vaadin.servlet.VaadinServlet</classname>.
+                </para>
+
+                <programlisting><?pocket-size 75% ?>@WebServlet(value = "<replaceable>/*</replaceable>", asyncSupported = true)
+public class <replaceable>MySpringServlet</replaceable> extends SpringVaadinServlet {
+}</programlisting>
+
+                <!-- TODO It's like this for CDI, but is it true for Spring as well? -->
+                <para>
+                    The custom servlet must not have
+                    <classname>@VaadinServletConfiguration</classname>, as you would
+                    normally with a Vaadin servlet, as described in <xref
+                    linkend="application.environment"/>.
+                </para>
+            </section>
+
+            <section xml:id="advanced.spring.deployment.urlmapping">
+                <title>Defining Servlet Root</title>
+
+                <para>
+                    Spring UIs are managed by a Spring servlet
+                    (<classname>VaadinSpringServlet</classname>), which is by default
+                    mapped to the root of the application context. For example, if the
+                    name of a Spring UI is "<literal>my-spring-ui</literal>" and
+                    application context is <literal>/myproject</literal>, the UI would by
+                    default have URL "<literal>/myproject/my-spring-ui</literal>". If you
+                    do not want to have the servlet mapped to context root, you can use a
+                    <classname>@WebServlet</classname> annotation for the servlet or a
+                    <filename>web.xml</filename> definition to map all Spring UIs to a
+                    sub-path.
+                </para>
+
+                <para>
+                    For example, if we have a root UI and another:
+                </para>
+
+                <programlisting><?pocket-size 75% ?>@SpringUI(path=<replaceable>""</replaceable>) // At Spring servlet root
+public class <replaceable>MySpringRootUI</replaceable> extends UI {...}
+
+@SpringUI("<replaceable>another</replaceable>")
+public class <replaceable>AnotherUI</replaceable> extends UI {...}</programlisting>
+
+                <para>
+                    Then define a path for the servlet by defining a custom servlet:
+                </para>
+
+                <programlisting><?pocket-size 75% ?>@WebServlet(value = "<replaceable>/myspringuis/*</replaceable>", asyncSupported = true)
+public class <replaceable>MySpringServlet</replaceable> extends SpringVaadinServlet {
+}</programlisting>
+
+                <para>
+                    These two UIs would have URLs <uri>/myproject/myspringuis</uri> and
+                    <uri>/myproject/myspringuis/another</uri>, respectively.
+                </para>
+
+                <para>
+                    You can also map the Spring servlet to another URL in servlet definition
+                    in <filename>web.xml</filename>, as described the following.
+                </para>
+            </section>
+
+            <section xml:id="advanced.spring.servlets.mixing">
+                <title>Mixing With Other Servlets</title>
+
+                <para>
+                    The <classname>VaadinSpringServlet</classname> is normally used as the
+                    default servlet, but if you have other servlets in the application,
+                    such as for non-Spring UIs, you need to define the Spring servlet
+                    explicitly in the <filename>web.xml</filename>. You can map the
+                    servlet to any URL path, but perhaps typically, you define it as the
+                    default servlet as follows, and map the other servlets to other URL
+                    paths:
+                </para>
+
+                <programlisting><?pocket-size 75% ?><![CDATA[<web-app>
+  ...
+
+  <servlet>
+    <servlet-name>Default</servlet-name>
+    <servlet-class>
+      com.vaadin.spring.internal.VaadinSpringServlet
+    </servlet-class>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>Default</servlet-name>
+    <url-pattern>/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>Default</servlet-name>
+    <url-pattern>/VAADIN/*</url-pattern>
+  </servlet-mapping>
+</web-app>]]></programlisting>
+
+            </section>
+
+        </section>
+
+        <indexterm startref="term.advanced.spring.springlong" class="endofrange"/>
+        <indexterm startref="term.advanced.spring.spring" class="endofrange"/>
     </section>
 </chapter>
 
