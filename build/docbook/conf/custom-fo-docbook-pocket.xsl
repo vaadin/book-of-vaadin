@@ -1035,7 +1035,7 @@
 
   <xsl:template match="pubdate" mode="book.titlepage.recto.mode">
     <fo:block>
-      <xsl:text>2014</xsl:text>
+      <xsl:text>2015</xsl:text>
     </fo:block>
   </xsl:template>
 
@@ -1176,7 +1176,7 @@
       <xsl:value-of select="address/city"/>
       <xsl:text>, </xsl:text>
       <xsl:value-of select="address/country"/>
-      <xsl:text>, 2014.</xsl:text>
+      <xsl:text>, 2015.</xsl:text>
     </fo:block>
   </xsl:template>
 
