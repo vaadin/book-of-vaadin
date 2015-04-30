@@ -1,0 +1,991 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ====================================================================== -->
+<!-- Copyright 2000-2012 Vaadin Ltd                                         -->
+<!-- All Rights Reserved                                                    -->
+<!-- This work is licensed under a Creative Commons Attribution-NoDerivs    -->
+<!-- License (CC-BY-ND) Version 3.0. Full license text is available at:     -->
+<!-- http://creativecommons.org/licenses/by-nd/3.0/legalcode                -->
+<!-- ====================================================================== -->
+
+<chapter xml:id="designer">
+	<title>Vaadin Designer</title>
+
+    <indexterm xml:id="term.designer" class="startofrange">
+        <primary>Vaadin Designer</primary>
+    </indexterm>
+
+    <para>
+        This chapter describes how to create designs using the Vaadin Designer.
+    </para>
+
+    <section xml:id="designer.overview">
+        <title>Overview</title>
+
+        <para>
+            Vaadin Designer is a visual WYSIWYG tool for creating UIs using drag&amp;drop
+            and direct manipulation. With features like live external preview, and a
+            strong connection between the clean declarative format and Java code, it
+            allows you to design and layout your UIs with speed and confidence.
+        </para>
+
+        <para>
+            Vaadin Designer is intended for use in projects using the Vaadin
+            Framework. You can learn more about using the framework from <link
+            xlink:href="https://vaadin.com/learn">https://vaadin.com/learn</link> and
+            <link xlink:href="https://vaadin.com/book">https://vaadin.com/book</link> in
+            particular.
+        </para>
+
+        <para>
+            Vaadin Designer is used to create two things:
+        </para>
+
+        <orderedlist>
+            <listitem>
+                A declarative file defining a UI (or part of a UI), also known as a
+                <emphasis>design</emphasis> and
+            </listitem>
+            <listitem>
+                A <emphasis>companion</emphasis> Java file used to bind the UI
+                components to Java logic.
+            </listitem>
+        </orderedlist>
+
+        <para>
+            The declarative format used is a feature of the Vaadin Framework, and can be
+            also used and edited without Vaadin Designer. See <xref
+            linkend="application.declarative"/> for a description of the format.
+        </para>
+
+        <para>
+            Vaadin Designer also automatically creates (and updates) a Java file which
+            exposes the components you choose as Java fields, using the field names
+            you specify. This file provides the magic that creates a static binding
+            between your design and your Java logic - if you remove a component from
+            the design that your code needs, you will get a compile-time error
+            (immediate feedback in Eclipse).
+        </para>
+
+        <para>
+            A design can be the whole UI ("page") as presented in the browser, or it
+            can (more commonly) be a smaller part of a bigger UI. A view in your UI
+            can contain many designs.
+        </para>
+    </section>
+
+    <section xml:id="designer.installing">
+        <title>Installation</title>
+
+        <section xml:id="designer.installing.eclipse">
+            <title>Installing Eclipse and Plug-Ins</title>
+
+            <para>
+                You need to install the following to use Vaadin Designer:
+            </para>
+
+            <orderedlist>
+                <listitem>
+                    <para>
+                        Eclipse Luna SR2+ as described in <xref linkend="getting-started.environment.eclipse"/>
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        Vaadin Plug-in for Eclipse as described in <xref linkend="getting-started.eclipse"/>
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        Vaadin Designer from <link xlink:href="http://vaadin.com/eclipse">vaadin.com/eclipse</link>
+                    </para>
+                </listitem>
+            </orderedlist>
+
+            <para>
+                Vaadin Designer is compatible with Eclipse Luna (and later) available from
+                <link
+                xlink:href="http://www.eclipse.org/downloads">www.eclipse.org/downloads</link>. We
+                recommend choosing <emphasis>Eclipse IDE for Java EE
+                Developers</emphasis>.
+            </para>
+
+            <para>
+                If you're using an existing install of Eclipse Luna, please make sure it
+                is up-to-date. Eclipse Luna versions prior to the SR2 version had a nasty
+                bug that will cause problems for several plug-ins.
+            </para>
+
+            <para>
+                Vaadin Designer is installed together with the Vaadin Plug-in for Eclipse,
+                from the same Eclipse update-site. In Eclipse, do
+                <menuchoice><guimenu>Help</guimenu><guimenuitem>Install New
+                Software</guimenuitem></menuchoice>, press <guibutton>Add...</guibutton>
+                next to the <guilabel>Work with select</guilabel>, enter
+                <literal>Vaadin</literal> as name and <url>http://vaadin.com/eclipse</url>
+                as location.
+            </para>
+
+            <para>
+                If you already have the Vaadin plug-in installed, just choose to Work with
+                the Vaadin update site.  Make sure the whole Vaadin category is selected
+                (or at least Vaadin Designer), then click <guibutton>Next</guibutton> to
+                review licensing information and finalize the install. Please restart
+                Eclipse when prompted.
+            </para>
+
+            <para>
+                Once installed, Vaadin Designer can be kept up-to-date by periodically
+                running <menuchoice><guimenu>Help</guimenu><guimenuitem>Check for
+                Updates</guimenuitem></menuchoice>.
+            </para>
+        </section>
+
+        <section xml:id="designer.installing.uninstalling">
+            <title>Uninstalling</title>
+
+            <para>
+                If you want to remove Vaadin Designer from your Eclipse installation, go
+                to <menuchoice><guimenu>Help</guimenu><guimenuitem>Installation
+                Details</guimenuitem></menuchoice>, select <guilabel>Vaadin
+                Designer</guilabel> from the list, then click <guibutton>Uninstall</guibutton>.
+            </para>
+        </section>
+
+        <section xml:id="designer.installing.license">
+            <title>License</title>
+
+            <para>
+                The first time you start the Vaadin Designer, it will ask for a license
+                key. You can obtain a free trial-license, purchase a stand-alone perpetual
+                license, or use the license included with your Pro Tools subscription. See
+                <xref linkend="addons.cval"/> for instructions for installing the license.
+            </para>
+
+            <para>
+                Please note that a separate license key is required for each developer. If
+                you choose not input any license (even trial), you will be unable to save
+                your work.
+            </para>
+
+            <para>
+                If you for any reason need to remove or change a valid license, it is
+                located in <filename>~/.vaadin.designer.developer.license</filename>.
+            </para>
+        </section>
+    </section>
+        
+    <section xml:id="designer.getting-started">
+        <title>Getting Started</title>
+
+        <para>
+            Vaadin Designer works projects using Vaadin 7.5 or later. In short, create a
+            new project with
+            <menuchoice><guimenu>File</guimenu><guisubmenu>New</guisubmenu><guimenuitem>Vaadin
+            7 Project</guimenuitem></menuchoice>, and choose 7.5 or later as Vaadin
+            version, as described in <xref linkend="getting-started.first-project"/>.
+        </para>
+
+        <section xml:id="designer.getting-started.design">
+            <title>Creating a Design</title>
+
+            <para>
+                With your project selected, select
+                <menuchoice><guimenu>File</guimenu><guisubmenu>New</guisubmenu><guimenuitem>Other</guimenuitem></menuchoice>
+                (or press <keycombo><keycap>Ctrl</keycap><keycap>N</keycap></keycombo>),
+                choose <guilabel>Vaadin Design</guilabel> from the list, and click
+                <guibutton>Next</guibutton>.
+            </para>
+
+            <figure xml:id="figure.designer.getting-started.design.new">
+                <title>Creating a New Vaadin Design</title>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata smallscale="80%" align="center" fileref="img/designer/designer-new-design.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+
+            <para>
+                In the design parameters step, make sure the locations are correct (if you
+                are using Maven they might point to different folders, otherwise probably
+                not). You can put the design(s) in a specific package if you wish.
+            </para>
+
+            <figure xml:id="figure.designer.getting-started.design.parameters">
+                <title>New Design Parameters</title>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata smallscale="100%" align="center" fileref="img/designer/designer-new-parameters.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+
+            <para>
+                Give your design a descriptive name. Using a naming convention to separate
+                the design's companion Java file from the classes using it will make
+                things easier for you later.
+            </para>
+
+            <para>
+                For example, the name <classname>UserEditorDesign</classname> will result
+                in <filename>UserEditorDesign.html</filename> and
+                <filename>UserEditorDesign.java</filename>. You could then create a
+                <classname>UserEditor</classname> component that extends the
+                <classname>UserEditorDesign</classname>, and perhaps a
+                <classname>UserEditorView</classname> to place the editor component in a
+                bigger context.
+            </para>
+
+            <para>
+                In another case, you could make a <classname>LoginDesign</classname> that
+                is used in a <classname>LoginWindow</classname> (but not extended).
+            </para>
+
+            <para>
+                Finally, you can choose a template as starting point, or start from
+                scratch (Blank).
+            </para>
+
+            <para>
+                Choose <guibutton>Finish</guibutton> to create the design and open Vaadin
+                Designer.
+            </para>
+        </section>
+
+        <section xml:id="designer.getting-started.gui">
+            <title>Vaadin Designer GUI Overview</title>
+            <!-- TODO Move to actual overview? -->
+
+            <para>
+                Vaadin Designer is fully integrated with Eclipse and its views can
+                therefore be freely moved and arranged as you wish. However, it is best to
+                first try the Designer in its default setup by choosing <guibutton>Show
+                perspective</guibutton> from the dialog that is presented when a new
+                design is created.
+            </para>
+
+            <para>
+                To be able to successfully use the Designer, you will need the Outline,
+                Palette and Properties views, in addition to the main editor. If you
+                accidentally close a view, it can be opened from
+                <menuchoice><guimenu>Window</guimenu><guimenuitem>Show
+                view</guimenuitem></menuchoice>.
+            </para>
+
+            <figure xml:id="figure.designer.getting-started.gui">
+                <title>Panels in Vaadin Perspective</title>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata smallscale="100%" align="center" fileref="img/designer/designer-view-annotated-hi.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+
+            <para>
+                The elements of the perspective illustrated in <xref
+                linkend="figure.designer.getting-started.gui"/> are as follows:
+            </para>
+
+            <orderedlist>
+                <listitem>Design files</listitem>
+                <listitem>Editor (see below for close-up)</listitem>
+                <listitem>Component palette</listitem>
+                <listitem>Outline - component hierarchy</listitem>
+                <listitem>Properties for the selected component</listitem>
+            </orderedlist>
+
+            <para>
+                In the editor view, illustrated in <xref
+                linkend="figure.designer.getting-started.editor"/>, you have a number of
+                controls in the toolbar.
+            </para>
+
+            <figure xml:id="figure.designer.getting-started.editor">
+                <title>Component Editor</title>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata smallscale="100%" align="center" fileref="img/designer/designer-editor-annotated-hi.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+
+            <orderedlist>
+                <listitem>Center viewport</listitem>
+                <listitem>Viewport size and presets</listitem>
+                <listitem>Rotate viewport (portrait / landscape)</listitem>
+                <listitem>Configure canvas; rulers, grids, snapping</listitem>
+                <listitem>Theme selector</listitem>
+                <listitem>Design / Code / Quick preview -modes</listitem>
+                <listitem>External preview</listitem>
+            </orderedlist>
+
+            <!--
+            <orderedlist>
+                <listitem>Component name; icon and field name if exported to Java</listitem>
+                <listitem>Component type</listitem>
+                <listitem>List / tile view modes for palette</listitem>
+                <listitem>Resizable viewport, quickly preview design resize behaviour</listitem>
+                <listitem>Info-bar for selected component; toggle expand, set alignment, size info</listitem>
+            </orderedlist>
+            -->
+        </section>
+    </section>
+
+    <section xml:id="designer.designing">
+        <title>Designing</title>
+
+        <para>
+            To add a component to your design, drag it from the component
+            <guilabel>Palette</guilabel>, and drop it in the desired location - either in
+            the canvas area, or in the hierarchical <guilabel>Outline</guilabel>. Dropping
+            in the desired location on the canvas is the most common approach, but in some
+            situations (especially with complex, deeply nested component hierarchies)
+            dropping on the <guilabel>Outline</guilabel> might give more control.
+        </para>
+
+        <section xml:id="designer.designing.layouts">
+            <title>About Layouts</title>
+
+            <para>
+                Your designs should usually start with some sort of layout as the root
+                component, or otherwise you are limited to a one-component design. You can
+                also use a component that is not strictly a layout, but can still contain
+                one (or several) components (or layouts) - this includes
+                <classname>TabSheet</classname>, <classname>Accordion</classname>,
+                <classname>Panel</classname>, etc.
+            </para>
+
+            <para>
+                There are three main types of layouts: ordered, absolute, and CSS.
+            </para>
+
+            <variablelist>
+                <varlistentry>
+                    <term>Ordered layouts</term>
+                    <listitem>
+                        <para>
+                            Ordered layouts arrange the contained components in some
+                            ordered fashion, for instance vertically or horizontally with
+                            uniform spacing. This makes it easy to align components, and
+                            achieve a consistent look.
+                        </para>
+
+                        <para>
+                            <classname>VerticalLayout</classname>,
+                            <classname>HorizontalLayout</classname>, and
+                            <classname>FormLayout</classname> fall into this category.
+                        </para>
+
+                        <para>
+                            When you drop a component on a ordered layout, it will end up
+                            in a position determined by the layout, not exactly where you
+                            dropped it. Drop indicators help you estimate where the
+                            component will end up.
+                        </para>
+                    </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                    <term><classname>AbsoluteLayout</classname></term>
+                    <listitem>
+                        <para>
+                            AbsoluteLayout allows free positioning of components, and
+                            supports anchoring freely in all directions. It is a powerful
+                            layout, but can be more challenging to use. You can use
+                            rulers, grids, guides and snapping to aid your work.
+                        </para>
+
+                        <para>
+                            AbsoluteLayout allows you to position components freely - the
+                            component ends up where you drop it. However if you anchor the
+                            component elsewhere than to top/left, or use relative
+                            positioning, if might move when you change the size of the
+                            layout.
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><classname>CssLayout</classname></term>
+                    <listitem>
+                        <para>
+                            As the name indicates, <classname>CssLayout</classname> uses
+                            CSS to position components. It is very flexible, and with
+                            appropriate CSS, it can be used to achieve responsive layouts
+                            and a consistent look and feel. However, it requires CSS -
+                            either pre-made and copied to your theme, or hand-crafted by
+                            you.
+                        </para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+
+        <section xml:id="designer.designing.starting">
+            <title>Starting from Blank</title>
+
+            <para>
+                When you add the first layout to your blank canvas, it will be sized 100%
+                x 100%, filling the whole viewport. Whether or not this is a good idea
+                depends on your design. For many UIs having a
+                <classname>VerticalLayout</classname> as root, it makes sense to have the
+                layout 100% wide, but <emphasis>auto</emphasis> high. This will make the
+                layout grow vertically as you add components, instead of splitting the
+                available vertical space evenly between components.
+            </para>
+
+            <!-- NOTE Meaningless screenshot omitted here. -->
+
+            <para>
+                Most UIs will not look good without margin and spacing. You can enable
+                them for ordered layouts in <guilabel>Properties</guilabel>. <xref
+                linkend="figure.designer.designing.starting.spacing"/> illustrates the
+                same layout without margin or spacing, with margin, and with spacing.
+            </para>
+
+            <figure xml:id="figure.designer.designing.starting.spacing">
+                <title>Effects of Margin and Spacing</title>
+
+                <mediaobject>
+                    <imageobject>
+                        <imagedata smallscale="100%" align="center" fileref="img/designer/designer-marginspacing.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+
+            <para>
+                The <emphasis>info bar</emphasis>, illustrated in <xref
+                linkend="figure.designer.designing.starting.infobar"/>, lets you quickly
+                toggle between <emphasis>auto</emphasis> sizing and 100%. You can try out
+                the effect of these changes by grabbing just outside the viewport (canvas)
+                corner and resizing it (add a few components to your layout first).
+            </para>
+
+            <figure xml:id="figure.designer.designing.starting.infobar">
+                <title>Info Bar for Quick Adjustments</title>
+
+                <mediaobject>
+                    <imageobject>
+                        <imagedata smallscale="75%" align="center" fileref="img/designer/designer-infobar.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+        </section>
+
+        <section xml:id="designer.designing.templates">
+            <title>Using Templates</title>
+
+            <para>
+                Templates provide a starting-point for your design - add, remove and
+                modify the created design as you see fit.
+            </para>
+
+            <para>
+                A template might come with some pre-made CSS - to find out, switch to
+                <guibutton>Code</guibutton> mode, and see if there is a
+                <literal>&lt;styles&gt;</literal> block. Currently, you need to manually
+                copy the CSS to your application theme. Please refer to the theming
+                section for more information.
+            </para>
+
+            <para>
+                You can also create templates of your own; just design a suitable starting
+                point, then place the resulting HTML in
+                <filename>~/.vaadin/designer/templates</filename>. It will show up in the
+                <guilabel>New Design</guilabel> wizard as a template (without the
+                <filename>.html</filename> extension).
+            </para>
+        </section>
+
+        <section xml:id="designer.designing.adding">
+            <title>Adding Components</title>
+
+            <para>
+                Components can be added by dragging from the palette, either to the
+                canvas, or to the Outline view.
+            </para>
+
+            <figure xml:id="figure.designer.designing.palette">
+                <title>Component Palette (Alternate Layouts)</title>
+
+                <mediaobject>
+                    <imageobject>
+                        <imagedata smallscale="100%" align="center" fileref="img/designer/designer-palette.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+
+            <para>
+                The component palette has a search field, and also two modes: list and
+                tile. In the list mode you can see the component name next to the icon,
+                which is convenient at first . The tile mode lets you see all components
+                at once, which will speed up your work quite a bit. It requires a little
+                patience, but is really worth your while in the long run. The component
+                name can also be seen when hovering the icon.
+            </para>
+
+            <para>
+                The component you add will be selected in the editor view, and you can
+                immediately edit its properties, such as the caption.
+            </para>
+
+            <section xml:id="designer.designing.adding.properties">
+                <title>Editing Properties</title>
+
+                <para>
+                    You can edit component properties in the
+                    <guilabel>Properties</guilabel> panel. It is a good idea to give
+                    components at least a <guilabel>name</guilabel> if they are to be used
+                    from Java code to add logic (such as click listeners for
+                    buttons). Generally, this is needed for most controls, but not for
+                    most layouts.
+                </para>
+
+                <figure xml:id="figure.designer.designing.adding.properties">
+                    <title>Property Panel</title>
+                
+                    <mediaobject>
+                        <imageobject>
+                            <imagedata smallscale="100%" align="center" fileref="img/designer/designer-properties.png"/>
+                        </imageobject>
+                    </mediaobject>
+                </figure>
+
+                <para>
+                    In addition to exporting the named components to Java, you will end up
+                    with things like <literal>saveButton</literal> and
+                    <literal>emailField</literal> in your outline, which will help you keep
+                    track of your components.
+                </para>
+
+                <para>
+                     Note the ellipsis (<guibutton>...</guibutton>) button next to most
+                     properties - in many cases a more helpful editor is presented when
+                     you click it.
+                </para>
+
+                <figure xml:id="figure.designer.designing.adding.properties.editor">
+                    <title>A Property Editor</title>
+                
+                    <mediaobject>
+                        <imageobject>
+                            <imagedata smallscale="100%" align="center" fileref="img/designer/designer-propertyeditor.png"/>
+                        </imageobject>
+                    </mediaobject>
+                </figure>
+
+            </section>
+
+            <section xml:id="designer.designing.wrapping">
+                <title>Wrapping a Component</title>
+
+                <para>
+                    Once in a while, you may need to wrap a component with a layout, in
+                    order to achieve the desired result (quite often injecting a
+                    <classname>HorizontalLayout</classname> into a
+                    <classname>VerticalLayout</classname>, or vice versa). You can achieve
+                    this by right-clicking the component in the
+                    <guilabel>Outline</guilabel>, and choosing
+                    <menuchoice><guimenuitem>Wrap with</guimenuitem></menuchoice> in the
+                    context menu.
+                </para>
+
+                <figure xml:id="figure.designer.designing.wrapping">
+                    <title>Wrapping a Component</title>
+                
+                    <mediaobject>
+                        <imageobject>
+                            <imagedata smallscale="100%" align="center" fileref="img/designer/designer-wrapping.png"/>
+                        </imageobject>
+                    </mediaobject>
+                </figure>
+            </section>
+        </section>
+
+        <section xml:id="designer.designing.previewing">
+            <title>Previewing</title>
+
+            <para>
+                While creating a design, it is convenient to preview how the UI will
+                behave in different sizes and on different devices. There are a number of
+                features geared for this.
+            </para>
+
+            <section xml:id="designer.designing.previewing.resize">
+                <title>Resizing Viewport and Presets</title>
+
+                <para>
+                    The WYSIWYG canvas area also doubles as viewport. By resizing it, you
+                    can preview how your design will behave in different sizes, just as if
+                    it was displayed in a browser window that is being resized, or dropped
+                    in a Panel of a specific size.
+                </para>
+
+                <para>
+                    You can manually resize the viewport by grabbing just outside of an
+                    edge or corner of the viewport, and dragging to the desired size. When
+                    you resize the viewport, you can see that the viewport control on the
+                    toolbar changes to indicate the current size.
+                </para>
+
+                <para>
+                    By typing in the viewport control, you can also input a specific size
+                    (such as "<literal>200 x 200</literal>"), or open it up to reveal size
+                    presets. Choose a preset, such as <guilabel>Phone</guilabel> to
+                    instantly preview the design on that size.
+                </para>
+
+                <figure xml:id="figure.designer.designing.previewing.resize">
+                    <title>Viewport Preset Sizes</title>
+                
+                    <mediaobject>
+                        <imageobject>
+                            <imagedata smallscale="50%" align="center" fileref="img/designer/designer-resizing.png"/>
+                        </imageobject>
+                    </mediaobject>
+                </figure>
+
+                <para>
+                    You can also add your own presets - for instance known portlet or
+                    dashboard tile sizes, or other specific sizes you want to target.
+                </para>
+
+                <para>
+                    To preview the design in the other orientation (portrait
+                    vs. landscape), press the icon right of the viewport size control.
+                </para>
+            </section>
+
+            <section xml:id="designer.designing.previewing.quick">
+                <title>Quick preview</title>
+
+                <para>
+                    The <guilabel>Quick preview</guilabel> is one of the edit-modes
+                    available to the right in the toolbar (the other modes being
+                    <guilabel>Design</guilabel> and <guilabel>Code</guilabel>). In this
+                    mode, all designing tools and indicators are removed from the UI, and
+                    you can interact with components - type text, open dropdowns, check
+                    boxes, tab between fields, and so on. It allows you to quickly get a
+                    feel for (for instance) how a form will work when filling it in. Logic
+                    is still not run (hence "quick"), so no real data is shown and, for
+                    example, buttons do nothing.
+                </para>
+            </section>
+
+            <section xml:id="designer.designing.previewing.external">
+                <title>External Preview</title>
+
+                <para>
+                    The external preview popup shows a QR code and its associated URL. By
+                    browsing to the URL with and browser or device that can access your
+                    computer (that is, on the same LAN), you can instantly see the design and
+                    interact with it. This view has no extra designer-specific controls or
+                    viewports added, instead it just shows the design as-is; the browser
+                    is the viewport.
+                </para>
+
+                <figure xml:id="figure.designer.designing.previewing.external">
+                    <title>External Preview</title>
+                
+                    <mediaobject>
+                        <imageobject>
+                            <imagedata smallscale="100%" align="center" fileref="img/designer/designer-preview-external.png"/>
+                        </imageobject>
+                    </mediaobject>
+                </figure>
+
+                <para>
+                    External preview allows multiple browsers and devices to be connected
+                    at once, and they are all updated live as you change the design in
+                    Eclipse. There is an indicator in the toolbar when the design is
+                    viewed externally.
+                </para>
+
+                <figure xml:id="figure.designer.designing.previewing.external.indicator">
+                    <title>Indicator for External Preview</title>
+                
+                    <mediaobject>
+                        <imageobject>
+                            <imagedata smallscale="40%" align="center" fileref="img/designer/designer-preview-external-indicator.png"/>
+                        </imageobject>
+                    </mediaobject>
+                </figure>
+
+                <para>
+                    This is an awesome way to instantly preview results on multiple
+                    devices and browsers, or to show off a design and collaborate on it -
+                    for instance in a meeting setting.
+                </para>
+            </section>
+        </section>
+    </section>
+
+    <section xml:id="designer.theme">
+        <title>Theming and Styling</title>
+
+        <para>
+            By default, Vaadin Designer shows your design using your application theme, so
+            usually what you see is really what you get. You can also use the theme
+            dropdown to apply a specific theme.
+        </para>
+
+        <section xml:id="designer.theme.valo">
+            <title>Theme Based on Valo</title>
+
+            <para>
+                If your theme is based on the Valo theme (the default), you can make use
+                of the built-in Valo features. For example, if you can apply the built-in
+                component styles by adding the appropriate stylename. You will see the
+                result instantly.
+            </para>
+
+            <figure xml:id="figure.designer.theme.valo.stylenames">
+                <title>Adding Style Names</title>
+                
+                <mediaobject>
+                    <imageobject>
+                        <imagedata smallscale="100%" align="center" fileref="img/designer/designer-theme-stylenames.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+
+            <para>
+                You can also modify the Valo settings by changing the parameters in your
+                theme file (see below for more information about the theme file). See
+                <xref linkend="themes.valo"/> for information about Valo theme.
+            </para>
+
+            <para condition="web">
+                A Valo example that you can copy into your theme can be found at <link
+                xlink:href="https://vaadin.com/wiki/-/wiki/Main/Valo+Examples">vaadin.com/wiki/-/wiki/Main/Valo+Examples</link>.
+            </para>
+        </section>
+
+        <section xml:id="designer.theme.file">
+            <title>Theme File</title>
+
+            <para>
+                In a regular Vaadin application, you theme will be located in the
+                <filename>VAADIN/themes/&lt;projectname&gt;</filename> folder, in the
+                <filename>&lt;projectname&gt;.scss</filename> file. This is where you can
+                modify Valo settings, and add you own styles.
+            </para>
+
+            <para>
+                When you make changes to this file (and save it), Vaadin Designer will
+                notice and update the design, which is very convenient when styling your
+                design, or generally when learning to make an application theme.
+            </para>
+
+            <para>
+                You can apply global styles (such as to style all buttons), or scoped as
+                you wish. You can "scope" styles by specifying one or more space-separated
+                style names in the StyleName property, then matching to that in CSS/Sass.
+            </para>
+
+            <programlisting><?pocket-size 65% ?><![CDATA[/* Applies to all buttons */
+.v-button { ... }
+
+/* Applies to components having the stylename "mybutton" */
+.mybutton { ... } 
+
+/* Applies to all "mybutton" components within a "mydialog" layout */
+.mydialog .mybutton { ... }]]></programlisting>
+
+            <para>
+                If you use the same stylenames in multiple designs, the same styles will
+                be applied, allowing you to create a consistent look.
+            </para>
+
+            <para>
+                If you do not want some styles to apply to other designs, you should give
+                your root layout a unique stylename (for instance matching the design
+                name), and prefix all styles with that.
+            </para>
+
+            <programlisting><![CDATA[.usereditordesign .mybutton { ... }]]></programlisting>
+        </section>
+    </section>
+
+    <section xml:id="designer.wiring">
+        <title>Wiring It Up</title>
+
+        <para>
+            Connecting Java logic to your design is made easy by splitting the UI
+            definition and code into several layers, laying the foundation for a good
+            separation of concerns.
+        </para>
+
+        <para>
+            From a coding perspective, a designs will have three separate parts:
+        </para>
+
+        <orderedlist>
+            <listitem>A declarative definition of the UI</listitem>
+            <listitem>A "companion" class exposing select components a Java fields</listitem>
+            <listitem>Custom Java code connected to the components exposed to Java</listitem>
+        </orderedlist>
+
+        <para>
+            The declarative file (1) is normally created by Vaadin Designer, but can
+            be created and edited by hand as well, and changes you make will be
+            reflected in the Designer.
+        </para>
+
+        <para>
+            The companion class (2) is auto-generated based on the declarative file by
+            Vaadin Designer, and you should not edit this file - it will be overwritten
+            and any changes you make will not be reflected in the design.
+        </para>
+
+        <para>
+            Finally, the custom Java code (3) is completely created and maintained by you
+            (or some other programmer). As long as the companion class (2) is used to
+            connect logic to components, you will notice if, for example, some component
+            goes missing. In effect, you can safely edit the design with Vaadin Designer,
+            because you will notice if you break the logic.
+        </para>
+
+        <section xml:id="designer.wiring.declarative">
+            <title>Declarative Code</title>
+
+            <para>
+                The declarative format is based on HTML/WebComponents files, and is
+                supported directly by the Vaadin Framework. The design files have the
+                <filename>.html</filename> suffix.
+            </para>
+
+            <para>
+                Note that the format does still not support arbitrary HTML at the
+                moment. See <xref linkend="application.declarative"/> for more information
+                regarding the declarative format.
+            </para>
+
+            <para>
+                You can edit the declarative file with any text or HTML editor, but the
+                Vaadin Designer is needed to automatically create and update the
+                connection between declarative and Java.
+            </para>
+
+            <para>
+                Any changes you make to the declarative file are also reflected in the Designer.
+            </para>
+
+            <section xml:id="designer.wiring.declarative.splitview">
+                <title>Split View</title>
+
+                <para>
+                    In fact, you can keep the Designer open next to the code editor, and
+                    see the changes you make visually reflected. This can be a powerful
+                    mode of operation.
+                </para>
+            </section>
+        </section>
+
+        <section xml:id="designer.wiring.java">
+            <title>Java Code</title>
+
+            <para>
+                Vaadin Designer automatically creates a "companion" Java class, with all
+                the components you choose to export from your design exposed as Java
+                fields, all wired up and laid out according to your design.
+            </para>
+
+            <para>
+                The file will be overwritten by the Designer, and should not be edited.
+            </para>
+
+            <para>
+                This provides the compile-time connection between the design and Java
+                code, as long as you are using Vaadin Designer to edit your UI. For
+                instance, if you remove a component from the design that your code is
+                using, you will immediately notice the error in Eclipse.
+            </para>
+
+            <section xml:id="designer.wiring.java.exporting">
+                <title>Exporting Components</title>
+
+                <para>
+                    Components are "exported" to Java by setting the "name" property in
+                    Vaadin Designer. The name is represented as a "<literal>_id</literal>"
+                    attribute in the declarative format (where it can also be manually
+                    set) and the corresponding field will be added to the Java companion
+                    class.
+                </para>
+
+                <para>
+                    Note that the name is used as Java field name, so Java naming
+                    conventions are recommended.
+                </para>
+
+                <para>
+                    If you change the name, the declarative file and the companion Java
+                    class will be updated, but custom code referencing the field will
+                    currently not.
+                </para>
+            </section>
+
+            <section xml:id="designer.wiring.java.extending">
+                <title>Extending or Referencing</title>
+
+                <para>
+                    The companion Java class is overwritten and should not be edited. This
+                    is intentional, to create a clear and predictable separation of
+                    concerns. The declarative format configures the components, the
+                    companion class exposes the components to Java, and the logic goes in
+                    a separate file - either just referencing the companion class (in a
+                    composition) or by extending it.
+                </para>
+
+                <para>
+                    In many cases, it is best to encapsulate the logic pertaining to a
+                    design by extending the companion class, and only exposing the API and
+                    events as needed. It might even make sense to place the designs in
+                    package(s) of their own.
+                </para>
+            </section>
+        </section>
+    </section>
+
+    <section xml:id="designer.limitations">
+        <title>Limitations</title>
+
+        <para>
+            Vaadin Designer 1.0 has a few limitations that we hope to address as soon as possible.
+        </para>
+
+        <itemizedlist>
+            <listitem>Multi-select</listitem>
+            <listitem>Designs can not be nested</listitem>
+            <listitem>Custom components and add-ons are rendered as place-holders</listitem>
+            <listitem>Custom widget-sets are not used</listitem>
+            <listitem>Data components, such as Table and Grid, all get the same dummy content</listitem>
+            <listitem>You can not dynamically enter real or mock data</listitem>
+            <listitem>Advanced components, which can not be properly configured with simple properties, are lacking features</listitem>
+            <listitem>Component-specific edit mode is missing</listitem>
+            <listitem>GridLayout column and rowspan can not be adjusted</listitem>
+            <listitem>There is no fluid/relative grid for responsive design</listitem>
+            <listitem>Styles from templates must be manually included in the theme</listitem>
+            <listitem>No easy way to swap a layout, keeping content (can be done in code)</listitem>
+        </itemizedlist>
+    </section>
+
+    <indexterm startref="term.designer" class="endofrange"/>
+</chapter>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: xml
+sgml-omittag:nil
+sgml-shorttag:nil
+sgml-namecase-general:nil
+sgml-general-insert-case:lower
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:4
+sgml-indent-data:t
+sgml-parent-document:nil
+sgml-exposed-tags:nil
+sgml-local-catalogs:("/etc/sgml/catalog" "/usr/share/xemacs21/xemacs-packages/etc/psgml-dtds/CATALOG")
+sgml-local-ecat-files:("ECAT" "~/sgml/ECAT" "/usr/share/sgml/ECAT" "/usr/local/share/sgml/ECAT" "/usr/local/lib/sgml/ECAT")
+End:
+-->
