@@ -3736,6 +3736,96 @@ conf.addxAxis(xaxis);]]></programlisting>
             </figure>
 
         </section>
+
+        <section xml:id="charts.data.drilldown">
+            <title>Drill-Down</title>
+            
+            <para>
+                Vaadin Charts allows drilling down from a chart to a more detailed view by clicking an item in the top-level view. To enable the feature, you need to provide a separate data series for each of the detailed views by calling the 
+                <methodname>addItemWithDrilldown()</methodname> method. When the user
+                clicks on a drill-down item, the current series is animated into the the linked drill-down series. A customizable back button is provided to navigate back to the main series, as shown in 
+                <xref linkend="figure.charts.data.drilldown.drilldown-details"/>.
+            </para>
+
+            <figure xml:id="figure.charts.data.drilldown.drilldown-details">
+            <title>Detailed series after a drill-down</title>
+            <mediaobject>
+                <imageobject>
+                    <imagedata scale="70" smallscale="100%" align="center" fileref="img/charts/charts-drilldown-details.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+
+            <para>
+                There are two ways to use drill-down: synchronous and asynchronous.
+            </para>
+
+            <section xml:id="charts.data.drilldown.sync">
+                <title>Synchronous</title>
+
+                <para>
+                    When using synchronous drill-down, you provide the top-level series
+                    and all the series below it beforehand. The data is transferred to the 
+                    client-side at the same time and no client-server communication needs to 
+                    happen for the drill-down. The drill-down series must have an identifier, 
+                    set with <methodname>setId()</methodname>, as shown below.
+                </para>
+                
+                <programlisting><![CDATA[DataSeries series = new DataSeries();
+
+DataSeriesItem mainItem = new DataSeriesItem("MSIE", 55.11);
+
+DataSeries drillDownSeries = new DataSeries("MSIE versions");
+drillDownSeries.setId("MSIE");
+
+drillDownSeries.add(new DataSeriesItem("MSIE 6.0", 10.85));
+drillDownSeries.add(new DataSeriesItem("MSIE 7.0", 7.35));
+drillDownSeries.add(new DataSeriesItem("MSIE 8.0", 33.06));
+drillDownSeries.add(new DataSeriesItem("MSIE 9.0", 2.81));
+
+series.addItemWithDrilldown(mainItem, drillDownSeries);]]></programlisting>
+
+            </section>
+
+            <section xml:id="charts.data.drilldown.async">
+                <title>Asynchronous</title>
+
+                <para>
+                    When using asynchronous drill-down, you omit the drill-down series parameter. Instead, you provide a callback method with
+                    <methodname>Chart.setDrillDownCallback()</methodname>. When the user 
+                    clicks an item in the series, the callback is called to provide a
+                    drill-down series.
+                </para>
+
+                <programlisting><?pocket-size 65% ?><![CDATA[DataSeries series = new DataSeries();
+
+DataSeriesItem mainItem = new DataSeriesItem("MSIE", 55.11);
+
+series.addItemWithDrilldown(mainItem);
+
+chart.setDrilldownCallback(new DrilldownCallback() {
+    @Override
+    public Series handleDrilldown(DrilldownEvent event) {
+        DataSeries drillDownSeries = new DataSeries("MSIE versions");
+
+        drillDownSeries.add(new DataSeriesItem("MSIE 6.0", 10.85));
+        drillDownSeries.add(new DataSeriesItem("MSIE 7.0", 7.35));
+        drillDownSeries.add(new DataSeriesItem("MSIE 8.0", 33.06));
+        drillDownSeries.add(new DataSeriesItem("MSIE 9.0", 2.81));
+
+        return drillDownSeries;
+    }
+});]]></programlisting>
+
+                <para>
+                    You can use the event to decide what kind of series you want to return. 
+                    The event contains, for example, a reference to the item that was clicked.
+                    Note that the same callback is used for all items. The callback can also
+                    return null. Returning null will not trigger a drilldown.
+                </para>
+
+            </section>
+        </section>
     </section>
 
     <section xml:id="charts.advanced">
