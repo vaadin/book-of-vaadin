@@ -9794,33 +9794,49 @@ protected void createEvent(CalendarTargetDetails details,
 
             <para>
                 By default, clicking a date either in month or week view switches to
-                single-day view. The date click event is handled by a
+                single-day view, while clicking on the date header in the day view has no
+                effect. The date click event is handled by a
                 <interfacename>DateClickHandler</interfacename>.
             </para>
 
             <para>
-                The following example handles click events so that when the user clicks
-                the date header in the weekly view, it will switch to single-day view, and
-                in the single-day view switch back to the weekly view.
+                The following example handles click events on the date header in the day
+                view to zoom out to the week view. For other clicks it applies the default
+                behavior; in the week view clicking on a day switches to the day view.
             </para>
 
-            <programlisting><?pocket-size 65% ?><![CDATA[cal.setHandler(new BasicDateClickHandler() {
-  public void dateClick(DateClickEvent event) {
-    Calendar cal = event.getComponent();
-    long currentCalDateRange = cal.getEndDate().getTime()
-                               - cal.getStartDate().getTime();
-    
-    if (currentCalDateRange < VCalendar.DAYINMILLIS) {
-      // Change the date range to the current week
-      cal.setStartDate(cal.getFirstDateForWeek(event.getDate()));
-      cal.setEndDate(cal.getLastDateForWeek(event.getDate()));
+            <programlisting><?pocket-size 65% ?><![CDATA[calendar.setHandler(new BasicDateClickHandler() {
+    public void dateClick(DateClickEvent event) {
+      Calendar cal = event.getComponent();
+      
+      // Check if the current range is already one day long
+      long currentCalDateRange = cal.getEndDate().getTime() -
+                                 cal.getStartDate().getTime();
 
-    } else {
-      // Default behaviour, change date range to one day
-      super.dateClick(event);
+      // From one-day view, zoom out to week view
+      if (currentCalDateRange <= DateConstants.DAYINMILLIS) {
+          // Change the date range to the current week
+          GregorianCalendar weekstart = new GregorianCalendar();
+          GregorianCalendar weekend   = new GregorianCalendar();
+          weekstart.setTime(event.getDate());
+          weekend.setTime(event.getDate());
+          weekstart.setFirstDayOfWeek(java.util.Calendar.SUNDAY);
+          weekstart.set(java.util.Calendar.HOUR_OF_DAY, 0);
+          weekstart.set(java.util.Calendar.DAY_OF_WEEK,
+                       java.util.Calendar.SUNDAY);
+          weekend.set(java.util.Calendar.HOUR_OF_DAY, 23);
+          weekend.set(java.util.Calendar.DAY_OF_WEEK,
+                       java.util.Calendar.SATURDAY);
+          cal.setStartDate(weekstart.getTime());
+          cal.setEndDate(weekend.getTime());
+
+          Notification.show("Custom zoom to week");
+      } else {
+        // Default behavior, change date range to one day
+        super.dateClick(event);
+      }
     }
-  }
-});]]></programlisting>
+  });]]></programlisting>
         </section>
 
         <section xml:id="components.calendar.weekclick" condition="web">
