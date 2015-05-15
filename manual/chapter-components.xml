@@ -4129,6 +4129,28 @@ date.setValue(new java.util.Date());]]></programlisting>
 				supported.
 			</para>
 		</section>
+
+		<section xml:id="components.datefield.weeknumbers" condition="web">
+			<title>Week Numbers</title>
+
+            <para>
+                You can enable week numbers in a date field with
+                <methodname>setShowISOWeekNumbers()</methodname>. The numbers are shown in
+                a column on the left side of the field.
+            </para>
+
+            <programlisting><![CDATA[df.setShowISOWeekNumbers(true);]]></programlisting>
+
+            <para>
+                The supported numbering is defined in the ISO 8601 standard. Note that the
+                ISO standard applies only to calendar locales where the week starts on
+                Monday. This is not the case in many countries, such as Americas (North
+                and South), many East-Asian countries, and some African countries, where
+                the week starts on Sunday, nor in some North African and Middle-Eastern
+                countries, where the week begins on Saturday. In such locales, the week
+                numbers are not displayed.
+            </para>
+        </section>
 	</section>
 
 	<section xml:id="components.button">
@@ -5644,7 +5666,7 @@ table.setPageLength(table.size());]]></programlisting>
 				</figure>
             </section>
 
-            <section>
+            <section xml:id="components.table.headersfooters.clicks">
                 <title>Handling Mouse Clicks on Headers and Footers</title>
 
                 <para>
@@ -5718,67 +5740,39 @@ table.setSortDisabled(true);]]></programlisting>
 			<title>Generated Table Columns</title>
 
 			<para>
-				You might want to have a column that has values calculated from other
-				columns. Or you might want to format table columns in some way, for
-				example if you have columns that display currencies. The
-				<classname>ColumnGenerator</classname> interface allows defining custom
-				generators for such columns.
+				A table can have generated columns which values can be calculated based on
+				the values in other columns. The columns are generated with a class
+				implementing the <interfacename>Table.ColumnGenerator</interfacename>
+				interface.
+            </para>
+
+            <para>
+                The <classname>GeneratedPropertyContainer</classname> described in <xref
+                linkend="datamodel.container.gpc"/> is another way to accomplish the same
+                task at container level. In addition to generating values, you can also
+                use the feature for formatting or styling columns.
 			</para>
 
-			<para>
-				You add new generated columns to a <classname>Table</classname> with
-				<methodname>addGeneratedColumn()</methodname>. It takes the column
-				identifier as its parameters. Usually you want to have a more
-				user-friendly and possibly internationalized column header. You can set
-				the header and a possible icon by calling
-				<methodname>addContainerProperty()</methodname>
-				<emphasis>before</emphasis> adding the generated column.
-			</para>
+            <section xml:id="components.table.columngenerator.generator" condition="web">
+                <title>Defining a Column Generator</title>
 
-			<programlisting><?pocket-size 65% ?><![CDATA[// Define table columns. 
-table.addContainerProperty(
-    "date",     Date.class,   null, "Date",         null, null);
-table.addContainerProperty(
-    "quantity", Double.class, null, "Quantity (l)", null, null);
-table.addContainerProperty(
-    "price",    Double.class, null, "Price (e/l)",  null, null);
-table.addContainerProperty(
-    "total",    Double.class, null, "Total (e)",    null, null);
+                <para>
+                    Column generators are objects that implement the
+                    <classname>Table.ColumnGenerator</classname> interface and its
+                    <methodname>generateCell()</methodname> method. The method gets the
+                    identity of the item and column as its parameters, in addition to the
+                    table object, and has to return a component. The interface is
+                    functional, so you can also define it by a lambda expression or a
+                    method reference in Java 8.
+				</para>
 
-// Define the generated columns and their generators.
-table.addGeneratedColumn("date",
-                         new DateColumnGenerator());
-table.addGeneratedColumn("quantity",
-                         new ValueColumnGenerator("%.2f l"));
-table.addGeneratedColumn("price",
-                         new PriceColumnGenerator());
-table.addGeneratedColumn("total",
-                         new ValueColumnGenerator("%.2f e"));]]></programlisting>
+                <para>
+                    The following example defines a generator for formatting
+                    <classname>Double</classname> valued fields according to a format string
+                    (as in <classname>java.util.Formatter</classname>).
+                </para>
 
-			<para>
-				Notice that the <methodname>addGeneratedColumn()</methodname> always
-				places the generated columns as the last column, even if you defined some
-				other order previously. You will have to set the proper order with
-				<methodname>setVisibleColumns()</methodname>.
-			</para>
-
-			<programlisting><?pocket-size 65% ?><![CDATA[table.setVisibleColumns("date", "quantity", "price", "total");]]></programlisting>
-
-			<para>
-				The generators are objects that implement the
-				<classname>Table.ColumnGenerator</classname> interface and its
-				<methodname>generateCell()</methodname> method. The method gets the
-				identity of the item and column as its parameters, in addition to the
-				table object. It has to return a component object.
-			</para>
-				
-			<para>
-				The following example defines a generator for formatting
-				<classname>Double</classname> valued fields according to a format string
-				(as in <classname>java.util.Formatter</classname>).
-			</para>
-
-			<programlisting><?pocket-size 65% ?><![CDATA[/** Formats the value in a column containing Double objects. */
+                <programlisting><?pocket-size 65% ?><![CDATA[/** Formats the value in a column containing Double objects. */
 class ValueColumnGenerator implements Table.ColumnGenerator {
     String format; /* Format string for the Double values. */
 
@@ -5815,34 +5809,73 @@ class ValueColumnGenerator implements Table.ColumnGenerator {
     }
 }]]></programlisting>
 
-            <!-- TODO: The following was removed because it's probably false (#3189). -->
-			<!-- para>
-				If you wish to have a custom style for the cells, you have to set it in
-				the generator. A <classname>CellStyleGenerator</classname> defined for a
-				table will not be called for the cells of generated columns.
-			</para -->
+                <para>
+                    The column generator is called for all the visible (or more accurately
+                    cached) items in a table. If the user scrolls the table to another
+                    position in the table, the columns of the new visible rows are
+                    generated dynamically.
+                </para>
 
-			<para>
-				The generator is called for all the visible (or more accurately cached)
-				items in a table. If the user scrolls the table to another position in the
-				table, the columns of the new visible rows are generated dynamically. The
-				columns in the visible (cached) rows are also generated always when an
-				item has a value change. It is therefore usually safe to calculate the
-				value of generated cells from the values of different rows (items).
-			</para>
+                <para>
+                    Generated column cells are automatically updated when a property value
+                    in the table row changes. It should be noted that if a generated
+                    column cell depends on values in other rows, changes in the other rows
+                    do not trigger automatic update. You can get notified of such value
+                    changes by listening for them with a
+                    <interfacename>ValueChangeListener</interfacename> in the generated
+                    components. If you do so, you must remove such listeners when the
+                    generated components are detached from the UI or otherwise the
+                    listeners will accumulate in the container when the table is scrolled
+                    back and forth, causing possibly severe memory leak.
+                </para>
+            </section>
 
-			<para>
-				When you set a table as <parameter>editable</parameter>, regular fields
-				will change to editing fields. When the user changes the values in the
-				fields, the generated columns will be updated automatically. Putting a
-				table with generated columns in editable mode has a few quirks. The
-				editable mode of <classname>Table</classname> does not affect generated
-				columns. You have two alternatives: either you generate the editing fields
-				in the generator or, in case of formatter generators, remove the generator
-				in the editable mode. The example below uses the latter approach.
-			</para>
+            <section xml:id="components.table.columngenerator.adding" condition="web">
+                <title>Adding Generated Columns</title>
 
-			<programlisting><?pocket-size 65% ?><![CDATA[// Have a check box that allows the user
+                <para>
+                    You add new generated columns to a <classname>Table</classname> with
+                    <methodname>addGeneratedColumn()</methodname>. It takes a property ID
+                    of the generated column as the first parameter and the generator as
+                    the second.
+                </para>
+
+                <programlisting><?pocket-size 65% ?><![CDATA[// Define the generated columns and their generators
+table.addGeneratedColumn("date", // Java 8:
+                         this::generateNonEditableCell);
+table.addGeneratedColumn("price",
+                         new PriceColumnGenerator());
+table.addGeneratedColumn("consumption",
+                         new ConsumptionColumnGenerator());
+table.addGeneratedColumn("dailycost",
+                         new DailyCostColumnGenerator());]]></programlisting>
+
+                <para>
+                    Notice that the <methodname>addGeneratedColumn()</methodname> always
+                    places the generated columns as the last column, even if you defined
+                    some other order previously. You will have to set the proper order
+                    with <methodname>setVisibleColumns()</methodname>.
+                </para>
+
+                <programlisting><?pocket-size 65% ?><![CDATA[table.setVisibleColumns("date", "quantity", "price", "total");]]></programlisting>
+            </section>
+
+            <section xml:id="components.table.columngenerator.editable" condition="web">
+                <title>Generators in Editable Table</title>
+
+                <para>
+                    When you set a table as <parameter>editable</parameter>, table cells
+                    change to editable fields. When the user changes the values in the
+                    fields, the generated cells in the same row are updated
+                    automatically. However, putting a table with generated columns in
+                    editable mode has a few quirks. One is that the editable mode does not
+                    affect generated columns. You have two alternatives: either you
+                    generate the editing fields in the generator or, in case of formatter
+                    generators, remove the generators in the editable mode to allow
+                    editing the values. The following example uses the latter approach.
+                </para>
+
+                <programlisting><?pocket-size 65% ?><![CDATA[// Have a check box that allows the user
 // to make the quantity and total columns editable.
 final CheckBox editable = new CheckBox(
     "Edit the input values - calculated columns are regenerated");
@@ -5872,16 +5905,16 @@ editable.addClickListener(new ClickListener() {
     }
 });]]></programlisting>
 
-            <para>
-                You will also have to set the editing fields in
-                <parameter>immediate</parameter> mode to have the update occur immediately
-                when an edit field loses the focus. You can set the fields in
-                <parameter>immediate</parameter> mode with the a custom
-                <classname>TableFieldFactory</classname>, such as the one given below,
-                that just extends the default implementation to set the mode:
-            </para>
+                <para>
+                    You will also have to set the editing fields in
+                    <parameter>immediate</parameter> mode to have the update occur immediately
+                    when an edit field loses the focus. You can set the fields in
+                    <parameter>immediate</parameter> mode with the a custom
+                    <classname>TableFieldFactory</classname>, such as the one given below,
+                    that just extends the default implementation to set the mode:
+                </para>
 
-			<programlisting><?pocket-size 65% ?><![CDATA[public class ImmediateFieldFactory extends DefaultFieldFactory {
+                <programlisting><?pocket-size 65% ?><![CDATA[public class ImmediateFieldFactory extends DefaultFieldFactory {
     public Field createField(Container container,
                              Object itemId,
                              Object propertyId,
@@ -5899,31 +5932,31 @@ editable.addClickListener(new ClickListener() {
 ...
 table.setTableFieldFactory(new ImmediateFieldFactory());]]></programlisting>
 
-			<para>
-				If you generate the editing fields with the column generator, you avoid
-				having to use such a field factory, but of course have to generate the
-				fields for both normal and editable modes.
-			</para>
+                <para>
+                    If you generate the editing fields with the column generator, you
+                    avoid having to use such a field factory, but of course have to
+                    generate the fields for both normal and editable modes.
+                </para>
 
-			<para>
-				<xref linkend="figure.ui.table.generated"/> shows a table with
-				columns calculated (blue) and simply formatted (black) with column
-				generators.
-			</para>
+                <para>
+                    <xref linkend="figure.ui.table.generated"/> shows a table with columns
+                    calculated (blue) and simply formatted (black) with column generators.
+                </para>
 
-			<figure xml:id="figure.ui.table.generated">
-				<title>Table with Generated Columns in Normal and Editable Mode</title>
-				<mediaobject>
-					<imageobject>
-						<imagedata smallscale="100%" align="center" fileref="img/components/table-generatedcolumns1.png"/>
-					</imageobject>
-				</mediaobject>
-				<mediaobject>
-					<imageobject>
-						<imagedata smallscale="100%" align="center" fileref="img/components/table-generatedcolumns2.png"/>
-					</imageobject>
-				</mediaobject>
-			</figure>
+                <figure xml:id="figure.ui.table.generated">
+                    <title>Table with Generated Columns in Normal and Editable Mode</title>
+                    <mediaobject>
+                        <imageobject>
+                            <imagedata smallscale="100%" align="center" fileref="img/components/table-generatedcolumns1.png"/>
+                        </imageobject>
+                    </mediaobject>
+                    <mediaobject>
+                        <imageobject>
+                            <imagedata smallscale="100%" align="center" fileref="img/components/table-generatedcolumns2.png"/>
+                        </imageobject>
+                    </mediaobject>
+                </figure>
+            </section>
 		</section>
 
         <section xml:id="components.table.columnformatting">
@@ -5932,7 +5965,8 @@ table.setTableFieldFactory(new ImmediateFieldFactory());]]></programlisting>
             <para>
                 The displayed values of properties shown in a table are normally formatted
                 using the <methodname>toString()</methodname> method of each
-                property. Customizing the format of a column can be done in several ways:
+                property. Customizing the format in a table column can be done in several
+                ways:
             </para>
 
             <itemizedlist>
@@ -5941,9 +5975,11 @@ table.setTableFieldFactory(new ImmediateFieldFactory());]]></programlisting>
                 invisible. See <xref
                 linkend="components.table.columngenerator"/>.</listitem>
 
-                <listitem>Using a <classname>PropertyFormatter</classname> as a proxy
-                between the table and the data property. This also normally requires using
-                an mediate container in the table.</listitem>
+                <listitem>Using a <classname>Converter</classname> to convert between the
+                property data model and its representation in the table.</listitem>
+
+                <listitem>Using a <classname>GeneratedPropertyContainer</classname> as a
+                wrapper around the actual container to provide formatting.</listitem>
 
                 <listitem>Overriding the default
                 <methodname>formatPropertyValue()</methodname> in
