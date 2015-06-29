@@ -163,8 +163,8 @@ XEPPARS = -Dcom.renderx.xep.CONFIG=build/lib/XEP/xep-vaadinfonts.xml -quiet
 # Run XEP FO processor to convert FO to PDF.
 book.pdf: book.fo
 	cd $(DOCROOT) ; /opt/RenderX/XEP/xep $(XEPPARS) <$(MANUALPATH)/book.fo >$(MANUALPATH)/book.pdf
-	cp book.pdf /var/www/book.pdf
 	rm book.fo
+#	cp book.pdf /var/www/book.pdf
 
 book-pocket.pdf: book-pocket.fo
 	cd $(DOCROOT) ; /opt/RenderX/XEP/xep $(XEPPARS) <manual/book-pocket.fo >manual/book-pocket.pdf
@@ -252,6 +252,40 @@ vaadin-charts.pdf: book.pdf
 publish-charts: vaadin-charts.pdf
 	scp vaadin-charts.pdf vaadin@vaadin.com:download/book-of-vaadin/vaadin-charts/pdf/
 	scp book.pdf vaadin@vaadin.com:download/book-of-vaadin/vaadin-charts/pdf/book-of-vaadin.pdf
+
+################################################################################
+# Conversion to AsciiDoc
+################################################################################
+
+ASCIIDOC_REPO = ../../vaadin-doc
+
+# This uses docbookrx, a Ruby converter. It doesn't chunk, and has other issues.
+docbookrx:
+	ruby ../work/docbookrx/docbookrx.rb book-print.xml > ../work/asciidoc/book-print.ad
+	asciidoctor ../work/asciidoc/book-print.ad
+
+# Where the d2a was cloned to
+DOCBOOK2ASCIIDOC = ../work/docbook2asciidoc
+
+d2a:
+	java -jar saxon9he.jar \
+         -s:book.xml -o:$(ASCIIDOC_REPO)/book.asc \
+         $(DOCBOOK2ASCIIDOC)/bov-to-asciidoc-d2a.xsl chunk-output=true chunk-sections=true
+
+asciidoc:
+	cp -r -p img $(ASCIIDOC_REPO)/
+	cd $(ASCIIDOC_REPO) ; make chunked
+#cd $(ASCIIDOC_REPO) ; asciidoctor book-of-vaadin.asc
+
+# Build book generated from the AsciiDoc
+book-ad.fo: book-of-vaadin.xml $(XMLFILES)
+	@echo $(VERSION)
+	java $(JAVAPARS) -classpath $(JAVACLASSPATH) $(HIGHLIGHTER_CONFIG) com.icl.saxon.StyleSheet -o book-ad.fo \
+		 book-of-vaadin.xml $(DOCBOOK_POCKET) $(DBPARS)
+
+book-ad.pdf: book-ad.fo
+	cd $(DOCROOT) ; /opt/RenderX/XEP/xep $(XEPPARS) <manual/book-ad.fo >manual/book-ad.pdf
+	rm book-ad.fo
 
 ################################################################################
 # Misc
