@@ -575,18 +575,26 @@
             <para>
                 The license needs to be installed or given as parameter for the following
                 command, as mentioned earlier. Build the project with the
-                <literal>integration-test</literal> or a later phase in the build
+                <literal>verify</literal> or a later phase in the build
                 lifecycle. For example, from the command-line:
             </para>
 
-            <screen><prompt>$</prompt> <command>mvn</command> <parameter>integration-test</parameter></screen>
+            <screen><prompt>$</prompt> <command>mvn</command> <parameter>verify</parameter></screen>
 
             <para>
                 This will execute all required lifecycle phases, including compilation and
                 packaging the application, launch Jetty web server to host the
-                application, and run the TestBench tests. Results are reported on the
+                application, and run the TestBench tests. The TestBench tests are run in
+                the <literal>integration-test</literal> phase, but the web server is
+                stopped in the <literal>post-integration-test</literal> phase, hence we
+                call the <literal>verify</literal> phase. The results are reported on the
                 console. A Maven GUI, such as the one in Eclipse, will provide more visual
                 results.
+            </para>
+
+            <para>
+                For more details on the Maven POM configuration for Vaadin TestBench, see
+                <xref linkend="testbench.maven"/>.
             </para>
         </section>
     </section>
@@ -643,6 +651,22 @@
     &lt;version&gt;<replaceable>&version.vaadin;</replaceable>&lt;/version&gt;
     &lt;scope&gt;test&lt;/scope&gt;
 &lt;/dependency&gt;</programlisting>
+
+                <note>
+                    <title>TestBench 4.0.2 has a problem with Firefox</title>
+
+                    <para>
+                        To make it work with latest Firefox versions, you need to use a
+                        newer version of Selenium. For example:
+                    </para>
+
+                    <programlisting><?pocket-size 75% ?>&lt;dependency&gt;
+    &lt;groupId&gt;org.seleniumhq.selenium&lt;/groupId&gt;
+    &lt;artifactId&gt;selenium-java&lt;/artifactId&gt;
+    &lt;version&gt;2.45.0&lt;/version&gt;
+    &lt;scope&gt;test&lt;/scope&gt;
+&lt;/dependency&gt;</programlisting>
+                </note>
 
                 <para>
                     You also need to define the Vaadin add-ons repository if not already
@@ -4003,6 +4027,172 @@ public class MyTest extends ParallelTest {
             For further documentation, please see JBehave website at <link
             xlink:href="http://jbehave.org/">jbehave.org</link>.
         </para>
+    </section>
+
+    <section xml:id="testbench.maven" condition="web">
+        <title>Integration Testing with Maven</title>
+
+        <para>
+            TestBench is often used in Maven projects, where you want to run tests as part
+            of the build lifecycle. While ordinary Java unit tests are usually executed in
+            the <literal>test</literal> phase, TestBench tests are usually executed in
+            the <literal>integration-test</literal> phase (to run the phase properly you
+            need to invoke <literal>verify</literal> phase as explained later).
+        </para>
+
+        <para>
+            <xref linkend="testbench.quickstart.maven"/> describes how to use the Vaadin
+            application archetype for Maven provides a TestBench setup. In this section,
+            we largely go through that and also describe how to make such a setup also in
+            Vaadin add-on projects.
+        </para>
+
+        <section xml:id="testbench.maven.project">
+            <title>Project Structure</title>
+
+            <section xml:id="testbench.maven.project.application">
+                <title>In Vaadin Applications</title>
+
+                <para>
+                    In a typical Vaadin application, such as in the one created by the
+                    archetype, you only have one module and you run tests there. The
+                    application sources would normally be in <filename>src/main</filename>
+                    and test code, together with TestBench tests, in
+                    <filename>src/test</filename>.
+                </para>
+            </section>
+
+            <section xml:id="testbench.maven.project.application">
+                <title>In Libraries and Add-ons</title>
+
+                <para>
+                    In multi-module projects, you may have libraries in other modules, and the
+                    actual web application in another. Here you could do library unit tests in
+                    the library modules, and integration tests in the web application module.
+                </para>
+
+                <para>
+                    The multi-module project structure is recommended for Vaadin add-ons,
+                    where you have the add-on library in one module and a demo in another.
+                </para>
+            </section>
+        </section>
+
+        <section xml:id="testbench.maven.lifecycle">
+            <title>Overview of Lifecycle</title>
+
+            <para>
+                The Maven lifecycle phases relevant to TestBench execution are as follows:
+            </para>
+
+            <orderedlist>
+                <listitem>
+                    <para><literal>compile</literal></para>
+
+                    <itemizedlist>
+                        <listitem>Compile server-side</listitem>
+                        <listitem>Compile widget set</listitem>
+                        <listitem>Compile theme</listitem>
+                    </itemizedlist>
+                </listitem>
+
+                <listitem>
+                    <para><literal>test-compile</literal></para>
+
+                    <itemizedlist>
+                        <listitem>Compile test classes (both unit and integration tests)</listitem>
+                    </itemizedlist>
+                </listitem>
+
+                <listitem>
+                    <para><literal>pre-integration-test</literal></para>
+
+                    <itemizedlist>
+                        <listitem>Start web server (Jetty or other)</listitem>
+                    </itemizedlist>
+                </listitem>
+
+                <listitem>
+                    <para><literal>integration-test</literal></para>
+
+                    <itemizedlist>
+                        <listitem>Execute TestBench tests</listitem>
+                    </itemizedlist>
+                </listitem>
+
+                <listitem>
+                    <para><literal>post-integration-test</literal></para>
+
+                    <itemizedlist>
+                        <listitem>Stop web server</listitem>
+                    </itemizedlist>
+                </listitem>
+            </orderedlist>
+        </section>
+
+        <section xml:id="testbench.maven.server">
+            <title>Configuring Test Server</title>
+
+            <para>
+                We use Jetty as our reference test server, as it is a light-weight server
+                that is easy to configure with a Maven plugin.
+            </para>
+
+            <para>
+                The dependency for Jetty goes as follows:
+            </para>
+
+            <programlisting><?pocket-size 65% ?>&lt;dependency&gt;
+    &lt;groupId&gt;org.eclipse.jetty&lt;/groupId&gt;
+    &lt;artifactId&gt;jetty-webapp&lt;/artifactId&gt;
+    &lt;version&gt;<replaceable>9.2.10.v20150310</replaceable>&lt;/version&gt;
+    &lt;scope&gt;test&lt;/scope&gt;
+&lt;/dependency&gt;</programlisting>
+
+            <para>
+                The plugin configuration for running Jetty goes as follows:
+            </para>
+
+            <programlisting><?pocket-size 65% ?>&lt;plugin&gt;
+    &lt;groupId&gt;org.mortbay.jetty&lt;/groupId&gt;
+    &lt;artifactId&gt;jetty-maven-plugin&lt;/artifactId&gt;
+    &lt;version&gt;<replaceable>8.1.16.v20140903</replaceable>&lt;/version&gt;
+    
+    &lt;configuration&gt;
+        &lt;webApp&gt;
+            &lt;contextPath&gt;<replaceable>/myapp</replaceable>&lt;/contextPath&gt;
+        &lt;/webApp&gt;
+        &lt;stopKey&gt;STOP&lt;/stopKey&gt;
+        &lt;stopPort&gt;8005&lt;/stopPort&gt;
+    &lt;/configuration&gt;
+
+    &lt;executions&gt;
+        &lt;execution&gt;
+            &lt;id&gt;start-jetty&lt;/id&gt;
+            &lt;phase&gt;pre-integration-test&lt;/phase&gt;
+                &lt;goals&gt;
+                &lt;goal&gt;start&lt;/goal&gt;
+            &lt;/goals&gt;
+            &lt;configuration&gt;
+                &lt;daemon&gt;true&lt;/daemon&gt;
+                &lt;scanIntervalSeconds&gt;0&lt;/scanIntervalSeconds&gt;
+            &lt;/configuration&gt;
+        &lt;/execution&gt;
+        &lt;execution&gt;
+            &lt;id&gt;stop-jetty&lt;/id&gt;
+            &lt;phase&gt;post-integration-test&lt;/phase&gt;
+            &lt;goals&gt;
+                 &lt;goal&gt;stop&lt;/goal&gt;
+            &lt;/goals&gt;
+        &lt;/execution&gt;
+    &lt;/executions&gt;
+&lt;/plugin&gt;</programlisting>
+
+            <!-- TODO -->
+            <para>
+                <emphasis>To Be Done - this section is unfinished.</emphasis>
+            </para>
+        </section>
     </section>
 
     <section xml:id="testbench.known-issues">
