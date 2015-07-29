@@ -31,8 +31,9 @@ DBPARS =	section.autolabel=1 \
 			$(DBEXTRAPARS)
 
 # List of images to be converted from SVG to PNG
-IMAGES =	intro/architecture intro/architecture-vaadin7 intro/toolchain \
+IMAGES =	intro/architecture intro/architecture-vaadin7 \
 			intro/intro-themes-faded \
+			getting-started/toolchain \
 			arch/architecture-detailed arch/clientside-arch arch/events-classdiagram arch/java-servlet \
 			components/component-diagram components/component-abstractions \
 			components/tooltip-plain-withpointer components/tooltip-richtext-withpointer \
@@ -40,11 +41,12 @@ IMAGES =	intro/architecture intro/architecture-vaadin7 intro/toolchain \
 			components/slider-example1 \
 			components/textfield-diagram \
 			application/application-architecture application/resource_classdiagram \
-			application/mvp-pattern application/view-navigation \
+			application/view-navigation \
+			advanced/mvp-pattern \
 			advanced/threadlocal-sequentiality advanced/threadlocal-concurrency \
 			themes/theme-contents themes/eclipse-theme-created-annotated \
 			clientsideapp/clientsideapp-architecture \
-			debug/debug-window-annotated debug/debug-log \
+			advanced/debug-window-annotated advanced/debug-log \
 			designer/designer-view-annotated \
 			designer/designer-editor-annotated \
 			gwt/gwt-widgets gwt/gwt-widget-files gwt/gwt-hostedmode-project-annotated\
