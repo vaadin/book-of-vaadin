@@ -31,7 +31,7 @@ DBPARS =	section.autolabel=1 \
 			$(DBEXTRAPARS)
 
 # List of images to be converted from SVG to PNG
-IMAGES =	intro/architecture intro/architecture-vaadin7 \
+IMAGES =	intro/architecture-vaadin7 \
 			intro/intro-themes-faded \
 			getting-started/toolchain \
 			arch/architecture-detailed arch/clientside-arch arch/events-classdiagram arch/java-servlet \
@@ -49,22 +49,25 @@ IMAGES =	intro/architecture intro/architecture-vaadin7 \
 			advanced/debug-window-annotated advanced/debug-log \
 			designer/designer-view-annotated \
 			designer/designer-editor-annotated \
-			gwt/gwt-widgets gwt/gwt-widget-files gwt/gwt-hostedmode-project-annotated\
-			gwt/gwt-custom-architecture \
-			gwt/widget-integration gwt/simplified-integration \
-			vaadin-logo book-example \
-			datamodel/datamodel-interfaces datamodel/beanitem-doublebinding \
+			gwt/gwt-widgets gwt/gwt-widget-files \
+			gwt/widget-integration \
+			datamodel/datamodel-interfaces \
 			mobile/mobile-overview mobile/parking-tabs mobile/navigationview mobile/navigationpanel \
 			testbench/webdriver-use \
 			testbench/debugwindow-select-annotated \
 			testbench/tt-workflow testbench/tt-architecture-simple \
-			testbench/tt-junit-workflow \
 			jpacontainer/detailed-architecture jpacontainer/three-layer-architecture jpacontainer/jpa-mapping-graphic \
 			jpacontainer/domain-model \
 			portal/liferay-display \
 			portal/liferay-ipc-architecture portal/liferay-ipc-demo-annotated \
 			portal/wsrp-architecture \
-			charts/charts-elements charts/charts-axes
+			charts/charts-elements charts/charts-axes \
+			addons/widgetset-compiling-toolbar
+
+# Currently unused diagrams:
+# intro/architecture book-example datamodel/beanitem-doublebinding
+# gwt/gwt-custom-architecture gwt/gwt-hostedmode-project-annotated gwt/simplified-integration
+# testbench/tt-junit-workflow vaadin-logo
 
 # List of source XML files
 XMLFILES = $(POCKETBOOK_ROOT) book-info.xml book-preface.xml book-vol1.xml book-vol2.xml \
