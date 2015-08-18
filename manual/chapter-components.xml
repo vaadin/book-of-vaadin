@@ -1566,6 +1566,8 @@ mycomponent.setHeight("400px");]]></programlisting>
 field.addValidator(new StringLengthValidator(
     "The name must be 1-10 letters (was {0})",
     1, 10, true));
+field.setNullRepresentation("");
+field.setNullSettingAllowed(true);
 layout.addComponent(field);]]></programlisting>
 
             <para>
@@ -1664,6 +1666,25 @@ layout.addComponent(field);]]></programlisting>
                             <para>
                                 Checks that the value is or is not a null value.
                             </para>
+
+                            <para>
+                                For the validator to be meaningful, the component must
+                                support inputting null values. For example, for selection
+                                components and <classname>TextField</classname>, inputting
+                                null values can be enabled with
+                                <methodname>setNullSettingAllowed()</methodname>. You also
+                                need to set the representation of null values: in
+                                selection components with
+                                <methodname>setNullSelectionItemId()</methodname> and in
+                                <classname>TextField</classname> with
+                                <methodname>setNullRepresentation()</methodname>.
+                            </para>
+
+                            <para condition="web">
+                                Setting field as <emphasis>required</emphasis> can be used
+                                for similar effect, and it also enables an indicator to
+                                indicate that a value is required.
+                            </para>
                         </listitem>
                     </varlistentry>
                     <varlistentry>
@@ -1680,6 +1701,23 @@ layout.addComponent(field);]]></programlisting>
                             <para>
                                 Checks that the length of the input string is at or
                                 between two given lengths.
+                            </para>
+
+                            <para condition="web">
+                                The <parameter>allowNull</parameter> parameter determines
+                                whether null values should be allowed for the string,
+                                regardless of the string length. A null value has zero
+                                length, so it will be invalid if the minimum length is
+                                greater than zero. Allowing null value is meaningful only
+                                if inputting null values is enabled with
+                                <methodname>setNullSettingAllowed(true)</methodname>, and
+                                typically in such case, you want to set the null
+                                representation to empty string with
+                                <methodname>setNullRepresentation("")</methodname>. Note
+                                that <emphasis>this parameter is deprecated</emphasis> and
+                                should normally be <parameter>true</parameter>; then you
+                                can use <methodname>setRequired()</methodname> (for the
+                                false case) or <classname>NullValidator</classname>.
                             </para>
                         </listitem>
                     </varlistentry>
@@ -1707,6 +1745,8 @@ field.addValidator(new StringLengthValidator(
     "The name must be 1-10 letters (was {0})",
     1, 10, true));
 field.setImmediate(true);
+field.setNullRepresentation("");
+field.setNullSettingAllowed(true);
 layout.addComponent(field);]]></programlisting>
             </section>
 
@@ -1722,6 +1762,8 @@ layout.addComponent(field);]]></programlisting>
                 <book-example eid="component.field.validation.explicit" style="float: right"></book-example>
                 <programlisting language="java"><![CDATA[// A field with automatic validation disabled
 final TextField field = new TextField("Name");
+field.setNullRepresentation("");
+field.setNullSettingAllowed(true);
 layout.addComponent(field);
         
 // Define validation as usual
