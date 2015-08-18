@@ -547,7 +547,7 @@ export PATH=$PATH:$HOME/bin:$JAVA_HOME/bin</screen>
     </section>
 
 	<section xml:id="getting-started.eclipse">
-        <title>Installing Vaadin Plugin for Eclipse</title>
+        <title>Vaadin Plugin for Eclipse</title>
 
         <para>
             If you are using the Eclipse IDE, using the Vaadin Plugin for Eclipse helps
@@ -555,92 +555,6 @@ export PATH=$PATH:$HOME/bin:$JAVA_HOME/bin</screen>
             themes, and client-side widgets and widget sets. Notice that you can also
             create Vaadin projects as Maven projects in Eclipse.
         </para>
-
-        <section xml:id="getting-started.eclipse.ivyde">
-            <title>Installing the IvyDE Plugin</title>
-
-            <para>
-                The Vaadin Plugin for Eclipse requires the Apache IvyDE plugin, which
-                needs to be installed manually in Eclipse before the Vaadin plugin.
-            </para>
-
-            <orderedlist>
-                <listitem>
-                    <para>Select <menuchoice><guimenu>Help</guimenu><guimenuitem>Install New Software...</guimenuitem></menuchoice>.</para>
-                </listitem>
-
-                <listitem>
-                    <para>Add the IvyDE update site by clicking the
-                    <guibutton>Add...</guibutton> button.</para>
-                    
-                    <para>
-                        Enter a name such as "Apache Ivy Update Site" and the URL of the update
-                        site:
-                    </para>
-
-                    <screen>http://www.apache.org/dist/ant/ivyde/updatesite</screen>
-
-                    <para>
-                        Then click <guibutton>OK</guibutton>. The update site should now
-                        appear in the <guilabel>Available Software</guilabel> window.
-                    </para>
-                </listitem>
-
-                <listitem>
-                    <para>
-                        Select the new "Apache Ivy Update Site" from the <guilabel>Work
-                        with</guilabel> list.
-                    </para>
-                </listitem>                
-            
-                <listitem>
-                    <para>Select the <guilabel>Apache Ivy</guilabel>, <guilabel>Apache Ivy
-                    Ant Tasks</guilabel>, and <guilabel>Apache IvyDE</guilabel>
-                    plugins.</para>
-                
-                    <screenshot>
-                        <mediaobject>
-                            <imageobject>
-                                <imagedata scale="70" smallscale="100%" align="center" fileref="img/getting-started/ivyde-install-available.png"/>
-                            </imageobject>
-                        </mediaobject>
-                    </screenshot>
-
-                    <para>
-                        The <guilabel>Apache IvyDE Resolve Visualizer</guilabel> is
-                        optional, and would require additional dependency plugins to be
-                        installed.
-                    </para>
-                
-                    <para>Then, click <guibutton>Next</guibutton>.</para>
-                </listitem>
-                
-                <listitem>
-                    <para>Review the installation details and click <guibutton>Next</guibutton>.</para>
-                </listitem>
-
-                <listitem>
-                    <para>Accept or unaccept the license. Finally, click
-                    <guibutton>Finish</guibutton>.</para>
-                </listitem>
-
-                <listitem>
-                    <para>
-                        Eclipse may warn about unsigned content. If you feel safe, click
-                        <guibutton>OK</guibutton>.
-                    </para>
-                </listitem>
-
-                <listitem>
-                    <para>
-                        After the plugin is installed, Eclipse will ask to restart
-                        itself. You can proceed to install the Vaadin plugin before the
-                        restart, as described in the following section, so you can answer
-                        <guibutton>Apply Changes Now</guibutton>.
-                    </para>
-                </listitem>
-            </orderedlist>
-        </section>
 
         <section xml:id="getting-started.eclipse.vaadin-plugin">
             <title>Installing the Vaadin Plugin</title>
@@ -785,7 +699,7 @@ export PATH=$PATH:$HOME/bin:$JAVA_HOME/bin</screen>
                         Vaadin version.
                     </para>
 
-                    <programlisting language="xml">&lt;!ENTITY vaadin.version "<emphasis role="bold">7.3.1</emphasis>"&gt;</programlisting>
+                    <programlisting language="xml">&lt;!ENTITY vaadin.version "<emphasis role="bold">&version.vaadin;</emphasis>"&gt;</programlisting>
 
                     <para>
                         You can specify either a fixed version number, as shown in the
@@ -1601,7 +1515,7 @@ public class MyprojectUI extends UI {
                             Version of the archetype to use. This should be
                             <literal>LATEST</literal> for normal Vaadin releases. For
                             prerelease versions it should be the exact version number,
-                            such as <literal>7.3.1</literal>.
+                            such as <literal>7.5.3</literal>.
                         </para>
                     </listitem>
                 </varlistentry>
@@ -2493,34 +2407,39 @@ class MyScalaUI extends UI {
             for Java UIs.
         </para>
 
-        <para>
-            Scala does not support use of lambda expressions for calling functional
-            interfaces, like Java 8 does. Hence, we can't just use a lambda expression for
-            the <interfacename>ClickListener</interfacename> in the example above. You
-            can, however, define implicit conversions from lambda expressions to such
-            interface implementations. For example, for click listeners:
+        <para condition="web">
+            The <link xlink:href="https://github.com/henrikerola/scaladin">Scaladin
+                add-on</link> offers a more Scala-like API for Vaadin. A Vaadin 7 compatible
+            version is under development.
         </para>
 
-        <programlisting language="scala"><?pocket-size 75% ?><![CDATA[implicit def clickListener(f: ClickEvent => Unit) =
+        <section xml:id="getting-started.scala.lambdas" condition="web">
+            <title>Defining Listeners with Lambda Expressions</title>
+
+            <para>
+                Scala does not support use of lambda expressions for calling functional
+                interfaces, like Java 8 does. Hence, we can't just use a lambda expression
+                for the <interfacename>ClickListener</interfacename> in the example
+                above. You can, however, define implicit conversions from lambda
+                expressions to such interface implementations. For example, for click
+                listeners:
+            </para>
+
+            <programlisting language="scala"><?pocket-size 75% ?><![CDATA[implicit def clickListener(f: ClickEvent => Unit) =
   new ClickListener {
     override def buttonClick(event: ClickEvent) {
       f(event)
     }
   }]]></programlisting>
 
-        <para>
-            You could then use a lambda expression as follows:
-        </para>
+            <para>
+                You could then use a lambda expression as follows:
+            </para>
 
-        <programlisting language="scala"><?pocket-size 75% ?><![CDATA[content addComponent new Button("Click Me!",
+            <programlisting language="scala"><?pocket-size 75% ?><![CDATA[content addComponent new Button("Click Me!",
   (event: ClickEvent) =>
       Notification.show("The time is " + new Date))]]></programlisting>
-
-        <para condition="web">
-            The <link xlink:href="https://github.com/henrikerola/scaladin">Scaladin
-            add-on</link> offers a more Scala-like API for Vaadin. A Vaadin 7 compatible
-            version is under development.
-        </para>
+        </section>
     </section>
 </chapter>
 
