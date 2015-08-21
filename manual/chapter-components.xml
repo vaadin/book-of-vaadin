@@ -6726,6 +6726,22 @@ grid.setSelectionMode(SelectionMode.SINGLE);]]></programlisting>
                     Empty (null) selection is allowed in multi-selection mode, but not in
                     single selection.
                 </para>
+
+                <para>
+                    The selection is handled with a different selection model object in
+                    each respective selection mode:
+                    <classname>SingleSelectionModel</classname>,
+                    <classname>MultiSelectionModel</classname>, and
+                    <classname>NoSelectionModel</classname> (in which selection is always
+                    empty).
+                </para>
+
+                <programlisting language="java"><?pocket-size 75% ?><![CDATA[// Pre-select an item
+SingleSelectionModel selection =
+    (SingleSelectionModel) grid.getSelectionModel();
+selection.select( // Select 3rd item
+    grid.getContainerDataSource().getIdByIndex(2));]]></programlisting>
+
             </section>
 
             <section xml:id="components.grid.selection.single">
@@ -6741,24 +6757,25 @@ grid.setSelectionMode(SelectionMode.SINGLE);]]></programlisting>
                 </para>
 
                 <para>
-                    You can get the new selection either from the selection event or the
-                    grid itself.
+                    You can get the new selection from the selection event with
+                    <methodname>getSelected()</methodname>, which returns a set of item
+                    IDs, or more simply from the grid or the selection model with
+                    <methodname>getSelectedRow()</methodname>, which returns the single
+                    selected item ID.
                 </para>
 
                 <para>
-                    For example, assuming that you have bound the grid to a
-                    <interfacename>BeanItemContainer</interfacename>, as we did in the data
-                    binding example earlier, you can do as follows:
+                    For example:
                 </para>
 
-                <programlisting language="java"><?pocket-size 75% ?><![CDATA[grid.addSelectionListener(e -> { // Java 8
-    // Get the item of the selected row
-    BeanItem<Person> item =
-        container.getItem(grid.getSelectedRow());
+                <programlisting language="java"><?pocket-size 75% ?><![CDATA[grid.addSelectionListener(selectionEvent -> { // Java 8
+    // Get selection from the selection model
+    Object selectedId = ((SingleSelectionModel)
+        grid.getSelectionModel()).getSelectedRow();
 
-    // Use the item somehow
     Notification.show("Selected " +
-                      item.getBean().getName());
+        grid.getContainerDataSource().getItem(selectedId)
+            .getItemProperty("name"));
 });]]></programlisting>
 
                 <para>
@@ -6769,6 +6786,18 @@ grid.setSelectionMode(SelectionMode.SINGLE);]]></programlisting>
                     single-selection mode) or all (in multi-selection mode) selected
                     items.
                 </para>
+
+                <warning>
+                    <para>
+                        Note that changes to the item set of the container data source are
+                        not automatically reflected in the selection model and may cause
+                        the selection model to refer to stale item IDs. This always
+                        occurs, for example, when you delete the selected item or
+                        items. So, if you modify the item set of the container, you should
+                        synchronize or reset the selection with the container, such as by
+                        calling <methodname>reset()</methodname> on the selection model.
+                    </para>
+                </warning>
             </section>
 
             <section xml:id="components.grid.selection.multi">
