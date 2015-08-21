@@ -6789,25 +6789,45 @@ grid.setSelectionMode(SelectionMode.SINGLE);]]></programlisting>
                 </figure>
 
                 <para>
-                    The currently selected rows can be set with
-                    <methodname>setSelectedRows()</methodname> by a collection of item
-                    IDs, and read with <methodname>getSelectedRows()</methodname>.
+                    The selection is managed through the
+                    <classname>MultiSelectionMode</classname> class.  The currently
+                    selected rows can be set with
+                    <methodname>setSelected()</methodname> by a collection of item
+                    IDs, or you can use <methodname>select()</methodname> to add items to
+                    the selection.
                 </para>
 
-                <programlisting language="java"><?pocket-size 70% ?><![CDATA[// Grid in multi-selection mode
+                <programlisting language="java"><?pocket-size 75% ?><![CDATA[// Grid in multi-selection mode
 Grid grid = new Grid(exampleDataSource());
 grid.setSelectionMode(SelectionMode.MULTI);
 
-// Allow deleting the selected items
-Button deleteSelected = new Button("Delete Selected", e -> {
+// Pre-select some items
+MultiSelectionModel selection =
+    (MultiSelectionModel) grid.getSelectionModel();
+selection.setSelected( // Items 2-4
+    grid.getContainerDataSource().getItemIds(2, 3));
+]]></programlisting>
+
+                <para>
+                    The current selection can be read with
+                    <methodname>getSelectedRows()</methodname>; either in the
+                    <classname>MultiSelectionMode</classname> object or in the
+                    <classname>Grid</classname>.
+                </para>
+
+                <programlisting language="java"><?pocket-size 75% ?><![CDATA[// Allow deleting the selected items
+Button delSelected = new Button("Delete Selected", e -> {
     // Delete all selected data items
-    for (Object itemId: grid.getSelectedRows())
+    for (Object itemId: selection.getSelectedRows())
         grid.getContainerDataSource().removeItem(itemId);
     
+    // Otherwise out of sync with container
+    grid.getSelectionModel().reset();
+
     // Disable after deleting
     e.getButton().setEnabled(false);
 });
-deleteSelected.setEnabled(false); // Enable later]]></programlisting>
+delSelected.setEnabled(grid.getSelectedRows().size() > 0);]]></programlisting>
                 
                 <para>
                     Changes in the selection can be handled with a
