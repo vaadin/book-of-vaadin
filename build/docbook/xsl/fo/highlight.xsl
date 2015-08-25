@@ -22,11 +22,11 @@
 </xsl:template>
 
 <xsl:template match='xslthl:string' mode="xslthl">
-  <fo:inline font-weight="bold" font-style="italic"><xsl:apply-templates mode="xslthl"/></fo:inline>
+  <fo:inline font-style="italic" color="red"><xsl:apply-templates mode="xslthl"/></fo:inline>
 </xsl:template>
 
 <xsl:template match='xslthl:comment' mode="xslthl">
-  <fo:inline font-style="italic"><xsl:apply-templates mode="xslthl"/></fo:inline>
+  <fo:inline font-style="italic" color="gray"><xsl:apply-templates mode="xslthl"/></fo:inline>
 </xsl:template>
 
 <xsl:template match='xslthl:tag' mode="xslthl">

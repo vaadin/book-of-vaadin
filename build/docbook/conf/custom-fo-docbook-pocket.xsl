@@ -5,7 +5,9 @@
 <xsl:stylesheet
   xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0"
   xmlns:fo="http://www.w3.org/1999/XSL/Format"
-  xmlns:rx="http://www.renderx.com/XSL/Extensions">
+  xmlns:rx="http://www.renderx.com/XSL/Extensions"
+  xmlns:xslthl="http://xslthl.sf.net"
+  exclude-result-prefixes="xslthl">
 
   <xsl:import href="custom-fo-docbook.xsl"/>
 
@@ -1441,6 +1443,54 @@
     </xsl:if>
   </fo:external-graphic>
 </xsl:template>
+
+  <!-- ==================================================================== -->
+  <!-- Highlighting                                                         -->
+  <!-- ==================================================================== -->
+
+  <xsl:template match='xslthl:keyword' mode="xslthl">
+    <fo:inline font-weight="bold" color="red"><xsl:apply-templates mode="xslthl"/></fo:inline>
+  </xsl:template>
+
+  <xsl:template match='xslthl:string' mode="xslthl">
+    <fo:inline color="blue"><xsl:apply-templates mode="xslthl"/></fo:inline>
+  </xsl:template>
+
+  <xsl:template match='xslthl:comment' mode="xslthl">
+    <fo:inline font-style="italic" color="green"><xsl:apply-templates mode="xslthl"/></fo:inline>
+  </xsl:template>
+
+  <xsl:template match='xslthl:tag' mode="xslthl">
+    <fo:inline font-weight="bold"><xsl:apply-templates mode="xslthl"/></fo:inline>
+  </xsl:template>
+
+  <xsl:template match='xslthl:attribute' mode="xslthl">
+    <fo:inline font-weight="bold"><xsl:apply-templates mode="xslthl"/></fo:inline>
+  </xsl:template>
+
+  <xsl:template match='xslthl:value' mode="xslthl">
+    <fo:inline font-weight="bold"><xsl:apply-templates mode="xslthl"/></fo:inline>
+  </xsl:template>
+
+  <xsl:template match='xslthl:directive' mode="xslthl">
+    <fo:inline font-weight="bold"><xsl:apply-templates mode="xslthl"/></fo:inline>
+  </xsl:template>
+
+  <xsl:template match='xslthl:word' mode="xslthl">
+    <fo:inline font-weight="bold"><xsl:apply-templates mode="xslthl"/></fo:inline>
+  </xsl:template>
+
+  <xsl:template match='xslthl:selector' mode="xslthl">
+    <fo:inline font-weight="bold" font-style="italic" color="gray"><xsl:apply-templates mode="xslthl"/></fo:inline>
+  </xsl:template>
+
+  <xsl:template match='xslthl:variable' mode="xslthl">
+    <fo:inline color="darkblue"><xsl:apply-templates mode="xslthl"/></fo:inline>
+  </xsl:template>
+
+  <xsl:template match='xslthl:property' mode="xslthl">
+    <fo:inline font-weight="bold" color="darkred"><xsl:apply-templates mode="xslthl"/></fo:inline>
+  </xsl:template>
 
   <!-- ==================================================================== -->
   <!-- Dummy custom elements not visible in PDF book                        -->
