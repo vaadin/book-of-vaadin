@@ -1449,7 +1449,7 @@
   <!-- ==================================================================== -->
 
   <xsl:template match='xslthl:keyword' mode="xslthl">
-    <fo:inline font-weight="bold" color="red"><xsl:apply-templates mode="xslthl"/></fo:inline>
+    <fo:inline font-weight="bold"><xsl:apply-templates mode="xslthl"/></fo:inline>
   </xsl:template>
 
   <xsl:template match='xslthl:string' mode="xslthl">
