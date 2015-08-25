@@ -14,7 +14,7 @@ JAVAPARS = -Xms256M -Xmx512M
 DBLANGUAGE = en
 DBEXTRAPARS = l10n.gentext.language=$(DBLANGUAGE)
 
-PROFILE = profile.condition=web
+PROFILE = profile.condition=print
 
 POCKETBOOK_ROOT = book-pocket.xml
 
@@ -184,11 +184,11 @@ viewbook: book.pdf FORCE
 book-pocket-grayscale.pdf: book-pocket.pdf
 	gs -sOutputFile=book-pocket-grayscale.pdf -sDEVICE=pdfwrite   -sColorConversionStrategy=Gray -dProcessColorModel=/DeviceGray -dCompatibilityLevel=1.4 book-pocket.pdf < /dev/null
 
-book-of-vaadin-vol1.pdf: book-pocket-grayscale.pdf
-	pdftk A=$< cat A1-320 output $@
+book-of-vaadin-vol1.pdf: book-pocket.pdf
+	pdftk A=$< cat A1-336 output $@
 
 book-of-vaadin-vol2.pdf: book-pocket-grayscale.pdf
-	pdftk A=$< cat A321-end output $@
+	pdftk A=$< cat A337-end output $@
 
 volumes: book-of-vaadin-vol1.pdf book-of-vaadin-vol2.pdf
 
