@@ -1492,6 +1492,11 @@
     <fo:inline font-weight="bold" color="darkred"><xsl:apply-templates mode="xslthl"/></fo:inline>
   </xsl:template>
 
+  <xsl:template match='xslthl:annotation' mode="xslthl">
+    <fo:inline font-weight="bold" color="darkgray"><xsl:apply-templates mode="xslthl"/></fo:inline>
+  </xsl:template>
+
+
   <!-- ==================================================================== -->
   <!-- Dummy custom elements not visible in PDF book                        -->
   <!-- ==================================================================== -->
