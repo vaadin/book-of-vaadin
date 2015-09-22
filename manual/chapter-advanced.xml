@@ -5662,28 +5662,35 @@ public class AnotherUI extends UI {...}]]></programlisting>
                     as follows, and map the other servlets to other URL paths:
                 </para>
 
-                <programlisting language="xml"><?pocket-size 75% ?><![CDATA[<web-app>
+                <programlisting><?pocket-size 75% ?>&lt;web-app&gt;
   ...
 
-  <servlet>
-    <servlet-name>Default</servlet-name>
-    <servlet-class>
+  &lt;servlet&gt;
+    &lt;servlet-name&gt;Default&lt;/servlet-name&gt;
+    &lt;servlet-class&gt;
       com.vaadin.cdi.internal.VaadinCDIServlet
-    </servlet-class>
-  </servlet>
+    &lt;/servlet-class&gt;
+  &lt;/servlet&gt;
 
-  <servlet-mapping>
-    <servlet-name>Default</servlet-name>
-    <url-pattern>/*</url-pattern>
-  </servlet-mapping>
+  &lt;servlet-mapping&gt;
+    &lt;servlet-name&gt;Default&lt;/servlet-name&gt;
+    &lt;url-pattern&gt;<replaceable>/mycdiuis/*</replaceable>&lt;/url-pattern&gt;
+  &lt;/servlet-mapping&gt;
 
-  <servlet-mapping>
-    <servlet-name>Default</servlet-name>
-    <url-pattern>/VAADIN/*</url-pattern>
-  </servlet-mapping>
-</web-app>]]></programlisting>
+  &lt;servlet-mapping&gt;
+    &lt;servlet-name&gt;Default&lt;/servlet-name&gt;
+    &lt;url-pattern&gt;/VAADIN/*&lt;/url-pattern&gt;
+  &lt;/servlet-mapping&gt;
+&lt;/web-app&gt;</programlisting>
             <!-- */ -->
 
+                <para>
+                    With such a setting, paths to CDI UIs would have base path
+                    <filename>/myapp/mycdiuis</filename>, to which the (optional) UI path
+                    would be appended. The <filename>/VAADIN/*</filename> <!-- */ --> only
+                    needs to be mapped to the servlet if there are no other Vaadin
+                    servlets.
+                </para>
             </section>
 
             <section xml:id="advanced.cdi.servlets.custom">
@@ -6360,8 +6367,14 @@ public class User implements Serializable {
                 </para>
 
                 <programlisting language="java"><?pocket-size 65% ?><![CDATA[public class MainView extends CustomComponent implements View {
-    @Autowired
     User user;
+    Label greeting = new Label();
+
+    @Autowired
+    public MainView(User user) {
+        this.user = user;
+        ...
+    }
 
     ...
     @Override
@@ -6373,9 +6386,10 @@ public class User implements Serializable {
 }]]></programlisting>
 
                 <para>
-                    The user object would be injected automatically when the view is
-                    created, with all such references referring to the same shared
-                    instance in the scope of the Vaadin user session.
+                    Here, we injected the user object in the constructor. The user object
+                    would be created automatically when the view is created, with all
+                    such references referring to the same shared instance in the scope of
+                    the Vaadin user session.
                 </para>
 
                 <!-- TODO Is this true for Spring?
@@ -6413,13 +6427,14 @@ public class User {]]></programlisting>
                 <para>
                     Now, when you need to refer to the user, you can use Spring injection
                     to inject the session-scoped "singleton" to a member variable or a
-                    constructor parameter.
+                    constructor parameter; the former in the following:
                 </para>
 
                 <programlisting language="java"><?pocket-size 65% ?><![CDATA[public class MainView extends CustomComponent implements View {
-    @Inject
+    @Autowired
     User user;
 
+    Label greeting = new Label();
     ...
 
     @Override
@@ -6490,7 +6505,7 @@ public class User {]]></programlisting>
                 The Maven dependency is as follows:
             </para>
 
-            <programlisting language="xml">    &lt;dependency&gt;
+            <programlisting>    &lt;dependency&gt;
         &lt;groupId&gt;com.vaadin&lt;/groupId&gt;
         &lt;artifactId&gt;vaadin-spring&lt;/artifactId&gt;
         &lt;version&gt;<replaceable>LATEST</replaceable>&lt;/version&gt;
@@ -6506,7 +6521,7 @@ public class User {]]></programlisting>
                 <filename>WEB-INF</filename> directory.
             </para>
 
-            <programlisting language="xml"><?pocket-size 65% ?>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+            <programlisting><?pocket-size 65% ?>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;beans xmlns="http://www.springframework.org/schema/beans"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xmlns:context="http://www.springframework.org/schema/context"
@@ -6555,7 +6570,7 @@ public class User {]]></programlisting>
                 <classname>@SpringUI</classname>. It takes an optional path as parameter.
             </para>
 
-            <programlisting language="java"><?pocket-size 75% ?><![CDATA[@SpringUI("myniceui")
+            <programlisting language="java"><?pocket-size 75% ?><![CDATA[@SpringUI(path="/myniceui")
 @Theme("valo")
 public class MyNiceUI extends UI {
     ...]]></programlisting>
@@ -6693,7 +6708,7 @@ public class User {
                     provider for the navigator.
                 </para>
 
-                <programlisting language="java"><?pocket-size 75% ?><![CDATA[@SpringUI(path="myspringui")
+                <programlisting language="java"><?pocket-size 75% ?><![CDATA[@SpringUI(path="/myspringui")
 public class MySpringUI extends UI {
     @Autowired
     SpringViewProvider viewProvider;
@@ -6825,14 +6840,14 @@ public class MainView extends CustomComponent implements View {
                     we can use the constant when navigating to it.
                 </para>
 
-                <programlisting language="java"><?pocket-size 75% ?><![CDATA[@SpringView(LoginView.NAME)
+                <programlisting language="java"><?pocket-size 75% ?><![CDATA[@SpringView(name=LoginView.NAME)
 public class LoginView extends CustomComponent
                        implements View {
     public final static String NAME = "";
     
     // Here we inject to the constructor and actually do
     // not store the injected object to use it later
-    @Inject
+    @Autowired
     public LoginView(User user) {
         VerticalLayout layout = new VerticalLayout();
         
@@ -6999,29 +7014,36 @@ public class <replaceable>MySpringServlet</replaceable> extends SpringVaadinServ
                     paths:
                 </para>
 
-                <programlisting language="xml"><?pocket-size 75% ?><![CDATA[<web-app>
+                <programlisting><?pocket-size 75% ?>&lt;web-app&gt;
   ...
 
-  <servlet>
-    <servlet-name>Default</servlet-name>
-    <servlet-class>
+  &lt;servlet&gt;
+    &lt;servlet-name&gt;Default&lt;/servlet-name&gt;
+    &lt;servlet-class&gt;
       com.vaadin.spring.internal.VaadinSpringServlet
-    </servlet-class>
-  </servlet>
+    &lt;/servlet-class&gt;
+  &lt;/servlet&gt;
 
-  <servlet-mapping>
-    <servlet-name>Default</servlet-name>
-    <url-pattern>/*</url-pattern>
-  </servlet-mapping>
+  &lt;servlet-mapping&gt;
+    &lt;servlet-name&gt;Default&lt;/servlet-name&gt;
+    &lt;url-pattern&gt;<replaceable>/myspringuis/*</replaceable>&lt;/url-pattern&gt;
+  &lt;/servlet-mapping&gt;
 
-  <servlet-mapping>
-    <servlet-name>Default</servlet-name>
-    <url-pattern>/VAADIN/*</url-pattern>
-  </servlet-mapping>
-</web-app>]]></programlisting>
+  &lt;servlet-mapping&gt;
+    &lt;servlet-name&gt;Default&lt;/servlet-name&gt;
+    &lt;url-pattern&gt;/VAADIN/*&lt;/url-pattern&gt;
+  &lt;/servlet-mapping&gt;
+&lt;/web-app&gt;</programlisting>
+                <!-- */ -->
 
+                <para>
+                    With such a setting, paths to Spring UIs would have base path
+                    <filename>/myapp/myspringuis</filename>, to which the (optional) UI
+                    path would be appended. The <filename>/VAADIN/*</filename> <!-- */ -->
+                    only needs to be mapped to the servlet if there are no other Vaadin
+                    servlets.
+                </para>
             </section>
-
         </section>
 
         <indexterm startref="term.advanced.spring.springlong" class="endofrange"/>
