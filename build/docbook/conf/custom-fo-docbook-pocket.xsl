@@ -60,6 +60,12 @@
   <xsl:attribute-set name="monospace.verbatim.properties">
     <xsl:attribute name="font-size">
       <xsl:choose>
+        <!-- The dbscaling attribute allows length scaling. -->
+        <xsl:when test="@dbscaling">
+          <xsl:value-of select="@dbscaling"/>
+          <xsl:text>%</xsl:text>
+        </xsl:when>
+
         <!-- The ?pocket-size xx% ? instructions allows further scaling. -->
         <xsl:when test="processing-instruction('pocket-size') and not($manual.fonts.custom)">
           <xsl:value-of select="processing-instruction('pocket-size')"/>
@@ -82,11 +88,12 @@
 
         <xsl:otherwise>
           <!-- 0.8 for 9pt master font. -->
-          <xsl:value-of select="$body.font.master * 0.8"/>
+          <!-- 0.65 when manual scaling is not used -->
+          <xsl:value-of select="$body.font.master * 0.65"/>
           <xsl:text>pt</xsl:text>
         </xsl:otherwise>
       </xsl:choose>
-    </xsl:attribute>  
+    </xsl:attribute>
 
     <xsl:attribute name="wrap-option">wrap</xsl:attribute>
     <xsl:attribute name="font-weight">normal</xsl:attribute>
@@ -131,15 +138,15 @@
   <!-- Have chapter titles in bold (from autotoc.xsl) -->
   <xsl:template name="toc.line">
     <xsl:param name="toc-context" select="NOTANODE"/>
-    
+
     <xsl:variable name="id">
       <xsl:call-template name="object.id"/>
     </xsl:variable>
-    
+
     <xsl:variable name="label">
       <xsl:apply-templates select="." mode="label.markup"/>
     </xsl:variable>
-    
+
     <fo:block xsl:use-attribute-sets="toc.line.properties"
       end-indent="{$toc.indent.width}pt"
       last-line-end-indent="-{$toc.indent.width}pt">
@@ -238,7 +245,7 @@
       </xsl:choose>
     </fo:block>
   </xsl:template>
-  
+
   <!-- Only generate ToC title of chapters/sections. -->
   <xsl:param name="generate.toc">
     appendix  nop
@@ -282,7 +289,7 @@
             <!-- Configure which sort of ToC to create.                    -->
             <!-- 'division' for single-volume ToC, 'set' for multi-volume. -->
             <xsl:call-template name="set.toc">
-              <xsl:with-param name="toc.title.p" 
+              <xsl:with-param name="toc.title.p"
                 select="contains($toc.params, 'title')"/>
             </xsl:call-template>
           </xsl:with-param>
@@ -302,7 +309,7 @@
             <!-- Configure which sort of ToC to create                    -->
             <!-- 'division' for single-volume ToC, 'set' for multi-volume -->
             <xsl:call-template name="division.toc">
-              <xsl:with-param name="toc.title.p" 
+              <xsl:with-param name="toc.title.p"
                 select="contains($toc.params, 'title')"/>
             </xsl:call-template>
           </xsl:with-param>
@@ -391,7 +398,7 @@
         <xsl:with-param name="toc-context" select="$toc-context"/>
       </xsl:call-template>
 
-      <xsl:if test="$toc.section.depth > $depth 
+      <xsl:if test="$toc.section.depth > $depth
                      and $toc.max.depth > $depth.from.context
                     and section">
         <fo:block id="toc.{$cid}.{$id}">
@@ -400,8 +407,8 @@
               <xsl:with-param name="reldepth" select="$reldepth"/>
             </xsl:call-template>
           </xsl:attribute>
-                
-          <xsl:apply-templates select="section|qandaset[$qanda.in.toc != 0]" 
+
+          <xsl:apply-templates select="section|qandaset[$qanda.in.toc != 0]"
                                mode="toc">
             <xsl:with-param name="toc-context" select="$toc-context"/>
           </xsl:apply-templates>
@@ -465,7 +472,7 @@
             </rx:bookmark-label>
           </rx:bookmark>
         </xsl:if>
-        
+
         <xsl:variable name="toc.params">
           <xsl:call-template name="find.path.params">
             <xsl:with-param name="table" select="normalize-space($generate.toc)"/>
@@ -627,12 +634,12 @@
         <xsl:if test="$component.label.includes.part.label != 0 and
                       ancestor::part">
           <xsl:variable name="part.label">
-            <xsl:apply-templates select="ancestor::part" 
+            <xsl:apply-templates select="ancestor::part"
                                  mode="label.markup"/>
           </xsl:variable>
           <xsl:if test="$part.label != ''">
             <xsl:value-of select="$part.label"/>
-            <xsl:apply-templates select="ancestor::part" 
+            <xsl:apply-templates select="ancestor::part"
                                  mode="intralabel.punctuation"/>
           </xsl:if>
         </xsl:if>
@@ -702,7 +709,7 @@
   </xsl:attribute-set>
 
   <!-- Figure and other titles. -->
-  <xsl:attribute-set name="formal.title.properties" 
+  <xsl:attribute-set name="formal.title.properties"
     use-attribute-sets="normal.para.spacing">
     <xsl:attribute name="font-weight">bold</xsl:attribute>
     <xsl:attribute name="font-size">
@@ -735,12 +742,12 @@
   </xsl:template>
 
   <!-- Custom Part title -->
-  <xsl:template match="title" mode="part.titlepage.recto.auto.mode">  
-    <fo:block xmlns:fo="http://www.w3.org/1999/XSL/Format" 
-      xsl:use-attribute-sets="part.titlepage.recto.style" 
-      margin-left="{$title.margin.left}" 
-      font-size="16.0pt" 
-      font-weight="bold" 
+  <xsl:template match="title" mode="part.titlepage.recto.auto.mode">
+    <fo:block xmlns:fo="http://www.w3.org/1999/XSL/Format"
+      xsl:use-attribute-sets="part.titlepage.recto.style"
+      margin-left="{$title.margin.left}"
+      font-size="16.0pt"
+      font-weight="bold"
       font-family="{$title.font.family}">
       <xsl:call-template name="vaadinpart.title">
         <xsl:with-param name="node" select="ancestor-or-self::part[1]"/>
@@ -756,7 +763,7 @@
         <xsl:with-param name="object" select="$node"/>
       </xsl:call-template>
     </xsl:variable>
-    
+
     <fo:block id="{$id}"
       xsl:use-attribute-sets="part.label.properties">
       <xsl:call-template name="gentext">
@@ -794,17 +801,17 @@
     <xsl:attribute name="space-after.maximum">2cm</xsl:attribute>
     <xsl:attribute name="hyphenate">false</xsl:attribute>
   </xsl:attribute-set>
-  
+
   <!-- ==================================================================== -->
   <!-- Custom chapter title.                                                -->
   <!-- ==================================================================== -->
 
-  <xsl:template match="title" mode="chapter.titlepage.recto.auto.mode">  
-    <fo:block xmlns:fo="http://www.w3.org/1999/XSL/Format" 
-      xsl:use-attribute-sets="chapter.titlepage.recto.style" 
-      margin-left="{$title.margin.left}" 
-      font-size="16.0pt" 
-      font-weight="bold" 
+  <xsl:template match="title" mode="chapter.titlepage.recto.auto.mode">
+    <fo:block xmlns:fo="http://www.w3.org/1999/XSL/Format"
+      xsl:use-attribute-sets="chapter.titlepage.recto.style"
+      margin-left="{$title.margin.left}"
+      font-size="16.0pt"
+      font-weight="bold"
       font-family="{$title.font.family}">
       <xsl:call-template name="vaadinchapter.title">
         <xsl:with-param name="node" select="ancestor-or-self::chapter[1]"/>
@@ -813,12 +820,12 @@
   </xsl:template>
 
   <!-- Use the same style for the appendices. -->
-  <xsl:template match="title" mode="appendix.titlepage.recto.auto.mode">  
-    <fo:block xmlns:fo="http://www.w3.org/1999/XSL/Format" 
-      xsl:use-attribute-sets="chapter.titlepage.recto.style" 
-      margin-left="{$title.margin.left}" 
-      font-size="16.0pt" 
-      font-weight="bold" 
+  <xsl:template match="title" mode="appendix.titlepage.recto.auto.mode">
+    <fo:block xmlns:fo="http://www.w3.org/1999/XSL/Format"
+      xsl:use-attribute-sets="chapter.titlepage.recto.style"
+      margin-left="{$title.margin.left}"
+      font-size="16.0pt"
+      font-weight="bold"
       font-family="{$title.font.family}">
       <xsl:call-template name="vaadinchapter.title">
         <xsl:with-param name="node" select="ancestor-or-self::appendix[1]"/>
@@ -833,7 +840,7 @@
         <xsl:with-param name="object" select="$node"/>
       </xsl:call-template>
     </xsl:variable>
-    
+
     <fo:block id="{$id}"
       xsl:use-attribute-sets="chap.label.properties">
       <xsl:call-template name="gentext">
@@ -876,7 +883,7 @@
     <xsl:attribute name="space-after.maximum">2cm</xsl:attribute>
     <xsl:attribute name="hyphenate">false</xsl:attribute>
   </xsl:attribute-set>
-  
+
   <!-- ==================================================================== -->
   <!-- Custom headers.                                                      -->
   <!-- ==================================================================== -->
@@ -927,7 +934,7 @@
     <xsl:param name="sequence" select="''"/>
     <xsl:param name="position" select="''"/>
     <xsl:param name="gentext-key" select="''"/>
-    
+
     <fo:block>
       <!-- pageclass can be front, body, back -->
       <!-- sequence can be odd, even, first, blank -->
@@ -971,7 +978,7 @@
         <xsl:when test="$double.sided = 0 and $position='center'">
           <xsl:text>Vaadin Reference Manual</xsl:text>
         </xsl:when>
-        
+
         <xsl:when test="$sequence='blank'">
           <xsl:choose>
             <xsl:when test="$double.sided != 0 and $position = 'left'">
@@ -985,7 +992,7 @@
             </xsl:otherwise>
           </xsl:choose>
         </xsl:when>
-        
+
 
         <xsl:otherwise>
           <!-- nop -->
@@ -1141,7 +1148,7 @@
   <xsl:param name="manual.pubdate">xxxx-xx-xx</xsl:param>
   <xsl:template match="pubdate" mode="titlepage.mode">
     <fo:block>
-      <xsl:text>Published: </xsl:text> 
+      <xsl:text>Published: </xsl:text>
       <xsl:value-of select="$manual.pubdate"/>
     </fo:block>
   </xsl:template>
@@ -1203,7 +1210,7 @@
     <xsl:if test="title">
       <xsl:apply-templates select="title" mode="list.title.mode"/>
     </xsl:if>
-    
+
     <xsl:apply-templates
       select="*[not(self::varlistentry
               or self::title
@@ -1217,7 +1224,7 @@
                 |comment()[preceding-sibling::varlistentry]
                 |processing-instruction()[preceding-sibling::varlistentry]"/>
     </xsl:variable>
-    
+
     <xsl:choose>
       <xsl:when test="ancestor::listitem">
         <fo:block id="{$id}">
